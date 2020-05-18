@@ -602,7 +602,7 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'State change request failed'
     result.results[0].exception instanceof IOException
-    result.results[0].interactionId == '1234'
+    result.interactionId == '1234'
   }
 
   def 'verifyInteraction returns an error result if any matcher paths are invalid'() {
@@ -662,7 +662,7 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'Request to provider failed with an exception'
     result.results[0].exception instanceof IOException
-    result.results[0].interactionId == '12345678'
+    result.interactionId == '12345678'
   }
 
   def 'verifyResponseByInvokingProviderMethods returns an error result if the method fails with an exception'() {
@@ -683,6 +683,6 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'Request to provider method failed with an exception'
     result.results[0].exception instanceof Exception
-    result.results[0].interactionId == 'abc123'
+    result.interactionId == 'abc123'
   }
 }

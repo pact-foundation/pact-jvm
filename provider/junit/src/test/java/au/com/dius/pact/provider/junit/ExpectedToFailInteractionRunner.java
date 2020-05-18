@@ -27,7 +27,6 @@ public class ExpectedToFailInteractionRunner extends Runner {
   @Override
   public void run(final RunNotifier notifier) {
     RunNotifier testNotifier = new RunNotifier();
-    final OrderedMap<Description, Boolean> failed = ListOrderedMap.listOrderedMap(new HashMap<>());
     testNotifier.addListener(new RunListener() {
       @Override
       public void testRunStarted(Description description) throws Exception {
@@ -41,21 +40,22 @@ public class ExpectedToFailInteractionRunner extends Runner {
 
       @Override
       public void testStarted(Description description) throws Exception {
-        failed.put(description, false);
         notifier.fireTestStarted(description);
       }
 
       @Override
       public void testFailure(Failure failure) throws Exception {
-        failed.put(failed.lastKey(), true);
+        notifier.fireTestFinished(failure.getDescription());
+      }
+
+      @Override
+      public void testIgnored(Description description) throws Exception {
+        notifier.fireTestFailure(new Failure(description, new Exception("Expected the test to fail but it did not")));
       }
 
       @Override
       public void testFinished(Description description) throws Exception {
-        if (!failed.get(description)) {
-          notifier.fireTestFailure(new Failure(description, new Exception("Expected the test to fail but it did not")));
-        }
-        notifier.fireTestFinished(description);
+        notifier.fireTestFailure(new Failure(description, new Exception("Expected the test to fail but it did not")));
       }
     });
     baseRunner.run(testNotifier);
