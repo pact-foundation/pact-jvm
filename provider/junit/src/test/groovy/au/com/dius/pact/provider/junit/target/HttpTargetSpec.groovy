@@ -25,15 +25,15 @@ class HttpTargetSpec extends Specification {
     httpTarget.setValueResolver(resolver)
   }
 
-  def 'by default does not enable the verification reports'() {
+  def 'by default only enables the console reporter'() {
     given:
     httpTarget.setTestClass(new TestClass(HttpTargetSpec), this)
 
     when:
-    httpTarget.setupReporters(verifier, 'test', 'test desc')
+    httpTarget.setupReporters(verifier)
 
     then:
-    0 * verifier.setReporters(_)
+    1 * verifier.setReporters { r ->  r*.class*.simpleName == ['AnsiConsoleReporter'] }
   }
 
   def 'enables the verification reports if there is an annotation on the test class'() {
@@ -41,12 +41,13 @@ class HttpTargetSpec extends Specification {
     httpTarget.setTestClass(new TestClass(StubTest), new StubTest())
 
     when:
-    httpTarget.setupReporters(verifier, 'test', 'test desc')
+    httpTarget.setupReporters(verifier)
 
     then:
     1 * verifier.setReporters { r ->  r*.class*.simpleName == ['AnsiConsoleReporter', 'MarkdownReporter'] }
   }
 
+  @SuppressWarnings('ClosureStatementOnOpeningLineOfMultipleLineClosure')
   def 'enables the verification reports if there is java properties defined'() {
     given:
     httpTarget.setTestClass(new TestClass(HttpTargetSpec), this)
@@ -61,12 +62,14 @@ class HttpTargetSpec extends Specification {
     }
 
     when:
-    httpTarget.setupReporters(verifier, 'test', 'test desc')
+    httpTarget.setupReporters(verifier)
 
     then:
-    1 * verifier.setReporters { r ->  r*.class*.simpleName == ['MarkdownReporter', 'JsonReporter'] }
+    1 * verifier.setReporters { r ->  r*.class*.simpleName == ['AnsiConsoleReporter', 'MarkdownReporter',
+                                                               'JsonReporter'] }
   }
 
+  @SuppressWarnings('ClosureStatementOnOpeningLineOfMultipleLineClosure')
   def 'handles white space in the report names'() {
     given:
     httpTarget.setTestClass(new TestClass(HttpTargetSpec), this)
@@ -81,10 +84,11 @@ class HttpTargetSpec extends Specification {
     }
 
     when:
-    httpTarget.setupReporters(verifier, 'test', 'test desc')
+    httpTarget.setupReporters(verifier)
 
     then:
-    1 * verifier.setReporters { r ->  r*.class*.simpleName == ['MarkdownReporter', 'JsonReporter'] }
+    1 * verifier.setReporters { r ->  r*.class*.simpleName == ['AnsiConsoleReporter', 'MarkdownReporter',
+                                                               'JsonReporter'] }
   }
 
   def 'handles an empty pact.verification.reports'() {
@@ -101,10 +105,10 @@ class HttpTargetSpec extends Specification {
     }
 
     when:
-    httpTarget.setupReporters(verifier, 'test', 'test desc')
+    httpTarget.setupReporters(verifier)
 
     then:
-    1 * verifier.setReporters { r ->  r.size() == 0 }
+    1 * verifier.setReporters { r ->  r*.class*.simpleName == ['AnsiConsoleReporter'] }
   }
 
 }

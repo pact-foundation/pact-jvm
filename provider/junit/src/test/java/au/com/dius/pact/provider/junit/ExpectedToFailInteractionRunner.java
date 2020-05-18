@@ -27,7 +27,7 @@ public class ExpectedToFailInteractionRunner extends Runner {
   @Override
   public void run(final RunNotifier notifier) {
     RunNotifier testNotifier = new RunNotifier();
-    final OrderedMap<Description, Boolean> failed = ListOrderedMap.listOrderedMap(new HashMap<Description, Boolean>());
+    final OrderedMap<Description, Boolean> failed = ListOrderedMap.listOrderedMap(new HashMap<>());
     testNotifier.addListener(new RunListener() {
       @Override
       public void testRunStarted(Description description) throws Exception {

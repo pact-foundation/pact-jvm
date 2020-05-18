@@ -1,9 +1,10 @@
 package au.com.dius.pact.provider.spring.target
 
 import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
-import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.junit.target.AmqpTarget
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
@@ -20,8 +21,13 @@ open class SpringAwareAmqpTarget : AmqpTarget(), BeanFactoryAware {
     this.beanFactory = beanFactory
   }
 
-  override fun setupVerifier(interaction: Interaction, provider: ProviderInfo, consumer: ConsumerInfo): IProviderVerifier {
-    val verifier = super.setupVerifier(interaction, provider, consumer)
+  override fun setupVerifier(
+    interaction: Interaction,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    pactSource: PactSource?
+  ): IProviderVerifier {
+    val verifier = super.setupVerifier(interaction, provider, consumer, pactSource)
     verifier.providerMethodInstance = Function { m -> beanFactory.getBean(m.declaringClass) }
     return verifier
   }

@@ -5,10 +5,13 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.Provider
 import mu.KLogging
 import java.net.URLClassLoader
@@ -36,18 +39,17 @@ open class AmqpTarget @JvmOverloads constructor(
     context: Map<String, Any>
   ) {
     val provider = getProviderInfo(source)
-    val consumer = ConsumerInfo(consumerName)
-    val verifier = setupVerifier(interaction, provider, consumer)
+    val consumer = consumerInfo(consumerName, source)
+    val verifier = setupVerifier(interaction, provider, consumer, source)
 
-    val failures = mutableMapOf<String, Any>()
-    verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interaction.description,
-      failures)
-    reportTestResult(failures.isEmpty(), verifier)
+    val result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
+      interaction.description, mutableMapOf())
+    reportTestResult(result, verifier)
 
     try {
-      if (failures.isNotEmpty()) {
-        verifier.displayFailures(failures)
-        throw getAssertionError(failures)
+      if (result is VerificationResult.Failed) {
+        verifier.displayFailures(listOf(result))
+        throw AssertionError(verifier.generateErrorStringFromVerificationResult(listOf(result)))
       }
     } finally {
       verifier.finaliseReports()
@@ -56,8 +58,9 @@ open class AmqpTarget @JvmOverloads constructor(
 
   override fun setupVerifier(
     interaction: Interaction,
-    provider: ProviderInfo,
-    consumer: ConsumerInfo
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    pactSource: PactSource?
   ): IProviderVerifier {
     val verifier = ProviderVerifier()
     verifier.projectClasspath = Supplier {
@@ -76,10 +79,10 @@ open class AmqpTarget @JvmOverloads constructor(
       }
     }
 
-    setupReporters(verifier, provider.name, interaction.description)
+    setupReporters(verifier)
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider, null)
+    verifier.reportVerificationForConsumer(consumer, provider, pactSource)
 
     if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {

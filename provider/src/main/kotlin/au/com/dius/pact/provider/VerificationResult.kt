@@ -55,7 +55,7 @@ sealed class VerificationFailureType {
     }
   }
 
-  data class ExceptionFailure(val e: Exception) : VerificationFailureType() {
+  data class ExceptionFailure(val e: Throwable) : VerificationFailureType() {
     override fun formatForDisplay(t: TermColors): String {
       return if (e.message.isNotEmpty()) {
         padLines(e.message!!, 6)
@@ -99,6 +99,7 @@ sealed class VerificationResult {
    * Result failed
    */
   data class Failed(
+    @Deprecated("use failures instead")
     var results: List<Map<String, Any?>> = emptyList(),
     val description: String = "",
     val verificationDescription: String = "",

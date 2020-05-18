@@ -103,4 +103,6 @@ open class SpringInteractionRunner<I>(
       target.port = Integer.parseInt(port)
     }
   }
+
+  open fun surrogateTestMethod() { }
 }

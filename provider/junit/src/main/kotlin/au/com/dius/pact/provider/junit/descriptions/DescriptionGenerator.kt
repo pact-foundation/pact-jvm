@@ -26,10 +26,32 @@ class DescriptionGenerator<I : Interaction>(
      */
     fun generate(interaction: Interaction): Description {
         return Description.createTestDescription(testClass.javaClass,
-                "${pact.consumer.name} ${this.getTagDescription()}- Upon ${interaction.description}")
+          "${consumerName()} ${this.getTagDescription()}- Upon ${interaction.description}${this.pending()}")
     }
 
-    private fun getTagDescription(): String {
+  private fun consumerName(): String {
+    return if (pact.source is BrokerUrlSource) {
+      val source = pact.source as BrokerUrlSource
+      source.result?.name ?: pact.consumer.name
+    } else {
+      pact.consumer.name
+    }
+  }
+
+  private fun pending(): String {
+    return if (pact.source is BrokerUrlSource) {
+      val source = pact.source as BrokerUrlSource
+      if (source.result != null && source.result!!.pending) {
+        " <PENDING>"
+      } else {
+        ""
+      }
+    } else {
+      ""
+    }
+  }
+
+  private fun getTagDescription(): String {
         if (pactSource is BrokerUrlSource && pactSource.tag.isNotEmpty()) {
             return "[tag:${pactSource.tag}] "
         }

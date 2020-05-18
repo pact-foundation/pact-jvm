@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.VerificationFailureType
+import au.com.dius.pact.provider.VerificationResult
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
@@ -46,8 +48,8 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     mockMvc: MockMvc
-  ) {
-    try {
+  ): VerificationResult {
+    return try {
       val request = interaction.request
 
       val mvcResult = executeMockMvcRequest(mockMvc, request, provider)
@@ -62,6 +64,10 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       reporters.forEach {
         it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
       }
+      return VerificationResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
+        "exception" to e, "interactionId" to interaction.interactionId)),
+        "Request to provider method failed with an exception", interactionMessage,
+        listOf(VerificationFailureType.ExceptionFailure(e)))
     }
   }
 

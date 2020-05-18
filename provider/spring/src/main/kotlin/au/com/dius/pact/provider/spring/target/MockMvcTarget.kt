@@ -4,12 +4,15 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.VerificationResult
+import au.com.dius.pact.provider.junit.target.BaseTarget
 import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
-import au.com.dius.pact.provider.junit.target.BaseTarget
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.spring.MvcProviderVerifier
 import org.springframework.http.converter.HttpMessageConverter
@@ -65,21 +68,23 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val mockMvc = buildMockMvc()
 
-    val verifier = setupVerifier(interaction, provider, consumer) as MvcProviderVerifier
+    val verifier = setupVerifier(interaction, provider, consumer, source) as MvcProviderVerifier
 
     val failures = HashMap<String, Any>()
 
-    repeat(1.rangeTo(runTimes).count()) {
+    val results = 1.rangeTo(runTimes).map {
       verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interaction.description,
         failures, mockMvc)
     }
+    val result = results.fold(VerificationResult.Ok) { acc: VerificationResult, r -> acc.merge(r) }
 
-    reportTestResult(failures.isEmpty(), verifier)
+    reportTestResult(result, verifier)
 
     try {
-      if (failures.isNotEmpty()) {
-        verifier.displayFailures(failures)
-        throw getAssertionError(failures)
+      if (result is VerificationResult.Failed) {
+        val errors = results.filterIsInstance<VerificationResult.Failed>()
+        verifier.displayFailures(errors)
+        throw AssertionError(verifier.generateErrorStringFromVerificationResult(errors))
       }
     } finally {
       verifier.finaliseReports()
@@ -103,16 +108,20 @@ class MockMvcTarget @JvmOverloads constructor(
       .build()
   }
 
-  override fun setupVerifier(interaction: Interaction, provider: ProviderInfo, consumer: ConsumerInfo):
-    IProviderVerifier {
+  override fun setupVerifier(
+    interaction: Interaction,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    pactSource: PactSource?
+  ): IProviderVerifier {
     val verifier = MvcProviderVerifier(printRequestResponse)
 
-    setupReporters(verifier, provider.name, interaction.description)
+    setupReporters(verifier)
 
     verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider, null)
+    verifier.reportVerificationForConsumer(consumer, provider, pactSource)
 
     if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
