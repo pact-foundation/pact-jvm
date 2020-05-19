@@ -3,8 +3,8 @@ package specification
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.provider.ResponseComparison
-import com.google.gson.JsonParser
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -27,10 +27,10 @@ class MessageSpecificationSpec extends Specification {
     def result = []
     file.eachDir { d ->
       d.eachFile { f ->
-        def json = f.withReader { new JsonParser().parse(it) }
+        def json = f.withReader { JsonParser.INSTANCE.parseReader(it) }
         def jsonMap = Json.INSTANCE.toMap(json)
         result << [jsonMap.comment, jsonMap.match, jsonMap.match ? 'should match' : 'should not match',
-                   Message.fromJson(json.asJsonObject.get('expected').asJsonObject),
+                   Message.fromJson(json.asObject().get('expected').asObject()),
                    jsonMap.actual.contents ?
                      OptionalBody.body(new JsonBuilder(jsonMap.actual.contents).toPrettyString().bytes) :
                      OptionalBody.missing()]

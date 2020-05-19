@@ -5,8 +5,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
-import com.google.gson.internal.LazilyParsedNumber
+import au.com.dius.pact.core.support.json.JsonParser
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -24,7 +23,7 @@ class PactWriterSpec extends Specification {
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
-    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -48,7 +47,7 @@ class PactWriterSpec extends Specification {
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
-    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
     def messageJson = json.messages.first()
 
     then:
@@ -70,7 +69,7 @@ class PactWriterSpec extends Specification {
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
-    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -90,7 +89,7 @@ class PactWriterSpec extends Specification {
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
-    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -114,7 +113,7 @@ class PactWriterSpec extends Specification {
     DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
     pact.interactions = [interaction2]
     DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
-    def json = file.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
+    def json = file.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
 
     then:
     json.interactions*.description == ['test interaction', 'test interaction two']
@@ -141,7 +140,7 @@ class PactWriterSpec extends Specification {
     DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
     pact.interactions = [interaction2]
     DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
-    def json = file.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
+    def json = file.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
 
     then:
     json.interactions*.description == ['test interaction two']
@@ -165,7 +164,7 @@ class PactWriterSpec extends Specification {
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
-    def json = Json.INSTANCE.toMap(JsonParser.parseString(sw.toString()))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -186,7 +185,7 @@ class PactWriterSpec extends Specification {
     DefaultPactWriter.INSTANCE.writePact(pactFile, pact, PactSpecVersion.V3)
 
     then:
-    pactFile.withReader { Json.INSTANCE.toMap(JsonParser.parseReader(it)) }.interactions[0].description ==
+    pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }.interactions[0].description ==
       'Request für ping'
 
     cleanup:
@@ -206,8 +205,8 @@ class PactWriterSpec extends Specification {
     DefaultPactWriter.INSTANCE.writePact(pactFile, pact, PactSpecVersion.V3)
 
     then:
-    pactFile.withReader { Json.INSTANCE.toMap(JsonParser.parseReader(it)) }.messages[0].metaData ==
-      [test: [new LazilyParsedNumber('1'), new LazilyParsedNumber('2'), new LazilyParsedNumber('3')]]
+    pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }.messages[0].metaData ==
+      [test: [1, 2, 3]]
 
     cleanup:
     pactFile.delete()
@@ -231,9 +230,9 @@ class PactWriterSpec extends Specification {
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V2)
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw2), PactSpecVersion.V3)
-    def json = Json.INSTANCE.toMap(JsonParser.parseString(sw.toString()))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
     def interactionJson = json.interactions.first()
-    def json2 = Json.INSTANCE.toMap(JsonParser.parseString(sw2.toString()))
+    def json2 = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw2.toString()))
     def interactionJson2 = json2.interactions.first()
 
     then:

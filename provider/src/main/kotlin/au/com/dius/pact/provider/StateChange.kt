@@ -8,7 +8,7 @@ import com.github.michaelbull.result.unwrap
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import groovy.lang.Closure
 import mu.KLogging
 import org.apache.http.HttpEntity

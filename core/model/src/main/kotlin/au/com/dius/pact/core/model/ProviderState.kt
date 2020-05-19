@@ -1,9 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.toMap
-import com.google.gson.JsonElement
+import au.com.dius.pact.core.support.json.JsonValue
 
 /**
  * Class that encapsulates all the info about a provider state
@@ -23,11 +21,11 @@ data class ProviderState @JvmOverloads constructor(val name: String?, val params
 
   companion object {
     @JvmStatic
-    fun fromJson(json: JsonElement): ProviderState {
-      return if (json.obj.has("params") && json.obj["params"].isJsonObject) {
-        ProviderState(Json.toString(json.obj["name"]), Json.toMap(json.obj["params"].obj))
+    fun fromJson(json: JsonValue): ProviderState {
+      return if (json.has("params") && json["params"] is JsonValue.Object) {
+        ProviderState(Json.toString(json["name"]), Json.toMap(json["params"]))
       } else {
-        ProviderState(Json.toString(json.obj["name"]))
+        ProviderState(Json.toString(json["name"]))
       }
     }
   }

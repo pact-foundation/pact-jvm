@@ -2,7 +2,7 @@ package specification
 
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
@@ -15,10 +15,10 @@ class BaseResponseSpec extends Specification {
     def result = []
     file.eachDir { d ->
       d.eachFile { f ->
-        def json = f.withReader { new JsonParser().parse(it) }
+        def json = f.withReader { JsonParser.INSTANCE.parseReader(it) }
         def jsonMap = Json.INSTANCE.toMap(json)
-        def expected = DefaultPactReader.extractResponse(json.asJsonObject.get('expected').asJsonObject)
-        def actual = DefaultPactReader.extractResponse(json.asJsonObject.get('actual').asJsonObject)
+        def expected = DefaultPactReader.extractResponse(json.asObject().get('expected').asObject())
+        def actual = DefaultPactReader.extractResponse(json.asObject().get('actual').asObject())
         if (expected.body.present) {
           expected.setDefaultContentType(expected.detectContentType())
         }

@@ -1,14 +1,14 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 
 class PactReaderTransformSpec extends Specification {
   private provider
   private consumer
-  private JsonObject jsonMap
+  private JsonValue.Object jsonMap
   private request
   private Map<String, Serializable> response
 
@@ -36,7 +36,7 @@ class PactReaderTransformSpec extends Specification {
     ]
 
     jsonMap = this.class.getResourceAsStream('/pact.json').withReader {
-      JsonParser.parseReader(it).asJsonObject
+      JsonParser.INSTANCE.parseReader(it).asObject()
     }
   }
 
@@ -45,7 +45,7 @@ class PactReaderTransformSpec extends Specification {
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -78,13 +78,14 @@ class PactReaderTransformSpec extends Specification {
 
   def 'converts provider state to camel case'() {
     given:
-    jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.addProperty('provider_state', 'provider state')
+    jsonMap.get('interactions').asArray().get(0).asObject().add('provider_state',
+      new JsonValue.StringValue('provider state'))
 
     when:
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -118,14 +119,16 @@ class PactReaderTransformSpec extends Specification {
 
   def 'handles both a snake and camel case provider state'() {
     given:
-    jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.addProperty('provider_state', 'provider state')
-    jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.addProperty('providerState', 'provider state 2')
+    jsonMap.get('interactions').asArray().get(0).asObject().add('provider_state',
+      new JsonValue.StringValue('provider state'))
+    jsonMap.get('interactions').asArray().get(0).asObject().add('providerState',
+      new JsonValue.StringValue('provider state 2'))
 
     when:
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -159,16 +162,16 @@ class PactReaderTransformSpec extends Specification {
 
   def 'converts request and response matching rules'() {
     given:
-    jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.get('request').asJsonObject
+    jsonMap.get('interactions').asArray().get(0).asObject().get('request').asObject()
       .add('requestMatchingRules', Json.INSTANCE.toJson([body: ['$': [['match': 'type']]]]))
-    jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.get('response').asJsonObject
+    jsonMap.get('interactions').asArray().get(0).asObject().get('response').asObject()
       .add('responseMatchingRules', Json.INSTANCE.toJson([body: ['$': [['match': 'type']]]]))
 
     when:
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -219,14 +222,14 @@ class PactReaderTransformSpec extends Specification {
 
   def 'converts the http methods to upper case'() {
     given:
-    jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.get('request').asJsonObject
-      .addProperty('method', 'post')
+    jsonMap.get('interactions').asArray().get(0).asObject().get('request').asObject()
+      .add('method', new JsonValue.StringValue('post'))
 
     when:
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },

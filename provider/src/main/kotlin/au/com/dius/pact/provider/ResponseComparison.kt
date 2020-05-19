@@ -17,9 +17,9 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.github.salomonbrys.kotson.jsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
 import java.nio.charset.Charset

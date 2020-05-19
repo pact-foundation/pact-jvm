@@ -7,7 +7,7 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.MapValueResolver
-import com.google.gson.JsonObject
+import au.com.dius.pact.core.support.json.JsonValue
 import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -30,7 +30,7 @@ const val DEFAULT_GENERATOR_PACKAGE = "au.com.dius.pact.core.model.generators"
  * au.com.dius.pact.model.generators package, but this can be extended by adding a comma separated list to the
  * pact.generators.packages system property. The generator class name needs to be <Type>Generator.
  */
-fun lookupGenerator(generatorJson: JsonObject): Generator? {
+fun lookupGenerator(generatorJson: JsonValue.Object): Generator? {
   var generator: Generator? = null
 
   try {
@@ -99,15 +99,15 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   }
 
   companion object {
-    fun fromJson(json: JsonObject): RandomIntGenerator {
-      val min = if (json["min"].isJsonPrimitive && json["min"].asJsonPrimitive.isNumber) {
-        json["min"].asJsonPrimitive.asNumber.toInt()
+    fun fromJson(json: JsonValue.Object): RandomIntGenerator {
+      val min = if (json["min"].isNumber) {
+        json["min"].asNumber().toInt()
       } else {
         logger.warn { "Ignoring invalid value for min: '${json["min"]}'" }
         0
       }
-      val max = if (json["max"].isJsonPrimitive && json["max"].asJsonPrimitive.isNumber) {
-        json["max"].asJsonPrimitive.asNumber.toInt()
+      val max = if (json["max"].isNumber) {
+        json["max"].asNumber().toInt()
       } else {
         logger.warn { "Ignoring invalid value for max: '${json["max"]}'" }
         Int.MAX_VALUE
@@ -128,9 +128,9 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   override fun generate(context: Map<String, Any?>): Any = BigDecimal(RandomStringUtils.randomNumeric(digits))
 
   companion object {
-    fun fromJson(json: JsonObject): RandomDecimalGenerator {
-      val digits = if (json["digits"].isJsonPrimitive && json["digits"].asJsonPrimitive.isNumber) {
-        json["digits"].asJsonPrimitive.asNumber.toInt()
+    fun fromJson(json: JsonValue.Object): RandomDecimalGenerator {
+      val digits = if (json["digits"].isNumber) {
+        json["digits"].asNumber().toInt()
       } else {
         logger.warn { "Ignoring invalid value for digits: '${json["digits"]}'" }
         10
@@ -151,9 +151,9 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   override fun generate(context: Map<String, Any?>): Any = RandomStringUtils.random(digits, "0123456789abcdef")
 
   companion object {
-    fun fromJson(json: JsonObject): RandomHexadecimalGenerator {
-      val digits = if (json["digits"].isJsonPrimitive && json["digits"].asJsonPrimitive.isNumber) {
-        json["digits"].asJsonPrimitive.asNumber.toInt()
+    fun fromJson(json: JsonValue.Object): RandomHexadecimalGenerator {
+      val digits = if (json["digits"].isNumber) {
+        json["digits"].asNumber().toInt()
       } else {
         logger.warn { "Ignoring invalid value for digits: '${json["digits"]}'" }
         10
@@ -176,9 +176,9 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   }
 
   companion object {
-    fun fromJson(json: JsonObject): RandomStringGenerator {
-      val size = if (json["size"].isJsonPrimitive && json["size"].asJsonPrimitive.isNumber) {
-        json["size"].asJsonPrimitive.asNumber.toInt()
+    fun fromJson(json: JsonValue.Object): RandomStringGenerator {
+      val size = if (json["size"].isNumber) {
+        json["size"].asNumber().toInt()
       } else {
         logger.warn { "Ignoring invalid value for size: '${json["size"]}'" }
         10
@@ -199,7 +199,7 @@ data class RegexGenerator(val regex: String) : Generator {
   override fun generate(context: Map<String, Any?>): Any = Generex(regex).random()
 
   companion object {
-    fun fromJson(json: JsonObject) = RegexGenerator(Json.toString(json["regex"]))
+    fun fromJson(json: JsonValue.Object) = RegexGenerator(Json.toString(json["regex"]))
   }
 }
 
@@ -216,7 +216,7 @@ object UuidGenerator : Generator {
   }
 
   @Suppress("UNUSED_PARAMETER")
-  fun fromJson(json: JsonObject): UuidGenerator {
+  fun fromJson(json: JsonValue.Object): UuidGenerator {
     return UuidGenerator
   }
 }
@@ -252,8 +252,10 @@ data class DateGenerator @JvmOverloads constructor(
   }
 
   companion object {
-    fun fromJson(json: JsonObject): DateGenerator {
-      return DateGenerator(Json.toNullableString(json["format"]), Json.toNullableString(json["expression"]))
+    fun fromJson(json: JsonValue.Object): DateGenerator {
+      val format = if (json["format"].isString) json["format"].asString() else null
+      val expression = if (json["expression"].isString) json["expression"].asString() else null
+      return DateGenerator(format, expression)
     }
   }
 }
@@ -288,8 +290,10 @@ data class TimeGenerator @JvmOverloads constructor(
   }
 
   companion object {
-    fun fromJson(json: JsonObject): TimeGenerator {
-      return TimeGenerator(Json.toNullableString(json["format"]), Json.toNullableString(json["expression"]))
+    fun fromJson(json: JsonValue.Object): TimeGenerator {
+      val format = if (json["format"].isString) json["format"].asString() else null
+      val expression = if (json["expression"].isString) json["expression"].asString() else null
+      return TimeGenerator(format, expression)
     }
   }
 }
@@ -325,8 +329,10 @@ data class DateTimeGenerator @JvmOverloads constructor(
   }
 
   companion object {
-    fun fromJson(json: JsonObject): DateTimeGenerator {
-      return DateTimeGenerator(Json.toNullableString(json["format"]), Json.toNullableString(json["expression"]))
+    fun fromJson(json: JsonValue.Object): DateTimeGenerator {
+      val format = if (json["format"].isString) json["format"].asString() else null
+      val expression = if (json["expression"].isString) json["expression"].asString() else null
+      return DateTimeGenerator(format, expression)
     }
   }
 }
@@ -347,7 +353,7 @@ object RandomBooleanGenerator : Generator {
   override fun equals(other: Any?) = other is RandomBooleanGenerator
 
   @Suppress("UNUSED_PARAMETER")
-  fun fromJson(json: JsonObject): RandomBooleanGenerator {
+  fun fromJson(json: JsonValue.Object): RandomBooleanGenerator {
     return RandomBooleanGenerator
   }
 }
@@ -380,7 +386,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
   companion object {
-    fun fromJson(json: JsonObject) = ProviderStateGenerator(
+    fun fromJson(json: JsonValue.Object) = ProviderStateGenerator(
       Json.toString(json["expression"]),
       if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
     )

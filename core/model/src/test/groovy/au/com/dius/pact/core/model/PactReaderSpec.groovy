@@ -5,10 +5,10 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
+import au.com.dius.pact.core.support.json.JsonParser
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
-import com.google.gson.JsonParser
 import org.apache.http.impl.client.BasicCredentialsProvider
 import spock.lang.Issue
 import spock.lang.Specification
@@ -319,7 +319,7 @@ class PactReaderSpec extends Specification {
   @Unroll
   def 'determining pact spec version'() {
     expect:
-    DefaultPactReader.INSTANCE.determineSpecVersion(JsonParser.parseString(json)) == version
+    DefaultPactReader.INSTANCE.determineSpecVersion(JsonParser.INSTANCE.parseString(json).asObject()) == version
 
     where:
 

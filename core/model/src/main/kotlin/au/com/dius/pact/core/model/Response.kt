@@ -6,9 +6,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.obj
-import com.google.gson.JsonObject
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 
 /**
@@ -68,22 +66,22 @@ class Response @JvmOverloads constructor(
     const val DEFAULT_STATUS = 200
 
     @JvmStatic
-    fun fromJson(json: JsonObject): Response {
+    fun fromJson(json: JsonValue.Object): Response {
       val status = when {
-        json.has("status") && json["status"].isJsonPrimitive -> {
-          val statusJson = json["status"].asJsonPrimitive
+        json.has("status") -> {
+          val statusJson = json["status"]
           when {
-            statusJson.isNumber -> statusJson.asNumber.toInt()
-            statusJson.isString -> statusJson.toString().toInt()
+            statusJson.isNumber -> statusJson.asNumber().toInt()
+            statusJson is JsonValue.StringValue -> statusJson.value.toInt()
             else -> DEFAULT_STATUS
           }
         }
         else -> DEFAULT_STATUS
       }
-      val headers = if (json.has("headers") && json["headers"].isJsonObject) {
-        json["headers"].obj.entrySet().associate { (key, value) ->
-          if (value.isJsonArray) {
-            key to value.array.map { Json.toString(it) }
+      val headers = if (json.has("headers") && json["headers"] is JsonValue.Object) {
+        json["headers"].asObject().entries.entries.associate { (key, value) ->
+          if (value is JsonValue.Array) {
+            key to value.values.map { Json.toString(it) }
           } else {
             key to Json.toString(value).split(",").map { it.trim() }
           }
@@ -99,17 +97,16 @@ class Response @JvmOverloads constructor(
       }
 
       val body = if (json.has("body")) {
-        when {
-          json["body"].isJsonNull -> OptionalBody.nullBody()
-          json["body"].isJsonPrimitive && json["body"].asJsonPrimitive.isString ->
-            OptionalBody.body(json["body"].asJsonPrimitive.asString.toByteArray(contentType.asCharset()), contentType)
-          else -> OptionalBody.body(json["body"].toString().toByteArray(contentType.asCharset()), contentType)
+        when (val b = json["body"]) {
+          is JsonValue.Null -> OptionalBody.nullBody()
+          is JsonValue.StringValue -> OptionalBody.body(b.value.toByteArray(contentType.asCharset()), contentType)
+          else -> OptionalBody.body(json["body"].serialise().toByteArray(contentType.asCharset()), contentType)
         }
       } else OptionalBody.missing()
-      val matchingRules = if (json.has("matchingRules") && json["matchingRules"].isJsonObject)
+      val matchingRules = if (json.has("matchingRules") && json["matchingRules"] is JsonValue.Object)
         MatchingRulesImpl.fromJson(json["matchingRules"])
       else MatchingRulesImpl()
-      val generators = if (json.has("generators") && json["generators"].isJsonObject)
+      val generators = if (json.has("generators") && json["generators"] is JsonValue.Object)
         Generators.fromJson(json["generators"])
       else Generators()
       return Response(status, headers.toMutableMap(), body, matchingRules, generators)

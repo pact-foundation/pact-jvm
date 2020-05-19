@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonElement
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import java.io.File
 import java.io.IOException
@@ -56,7 +56,7 @@ abstract class BasePact<I : Interaction> @JvmOverloads constructor(
     ))
 
     @JvmStatic
-    fun metaData(metadata: JsonElement?, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+    fun metaData(metadata: JsonValue?, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
       val pactJvmMetadata = mutableMapOf<String, Any>("version" to lookupVersion())
       val updatedToggles = FeatureToggles.updatedToggles()
       if (updatedToggles.isNotEmpty()) {

@@ -1,9 +1,9 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
+import au.com.dius.pact.core.support.json.JsonParser
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.google.gson.JsonParser
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
@@ -220,7 +220,7 @@ class HalClientSpec extends Specification {
   def 'uploading a JSON doc'() {
     given:
     client.httpClient = mockClient
-    client.pathInfo = JsonParser.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
+    client.pathInfo = JsonParser.INSTANCE.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
     }
@@ -236,7 +236,7 @@ class HalClientSpec extends Specification {
   def 'uploading a JSON doc returns an error'() {
     given:
     client.httpClient = mockClient
-    client.pathInfo = JsonParser.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
+    client.pathInfo = JsonParser.INSTANCE.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 400, 'Not OK')
       getEntity() >> new StringEntity('{"errors":["1","2","3"]}', ContentType.create('application/json'))
@@ -253,7 +253,7 @@ class HalClientSpec extends Specification {
   def 'uploading a JSON doc unsuccessful due to 409'() {
     given:
     client.httpClient = mockClient
-    client.pathInfo = JsonParser.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
+    client.pathInfo = JsonParser.INSTANCE.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 409, 'Not OK')
       getEntity() >> new StringEntity('error line')
@@ -419,7 +419,7 @@ class HalClientSpec extends Specification {
     1 * mockClient.execute({ it.URI.path == '/' }, _) >> mockRootResponse
     1 * mockClient.execute({ it.URI.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }, _) >> mockResponse
     _ * mockClient.execute(_, _) >> notFoundResponse
-    client.pathInfo['_links']['linkA'].toString() == '"ValueA"'
+    client.pathInfo['_links']['linkA'].serialise() == '"ValueA"'
   }
 
   def 'handles invalid URL characters when fetching documents from the broker'() {
@@ -436,13 +436,13 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }, _) >> mockResponse
-    result['_links']['multipleLink']*.toString() == ['"one"', '"two"', '"three"']
+    result['_links']['multipleLink'].values*.serialise() == ['"one"', '"two"', '"three"']
   }
 
   @Unroll
   def 'link url test'() {
     given:
-    client.pathInfo = new JsonParser().parse(json)
+    client.pathInfo = JsonParser.INSTANCE.parseString(json)
 
     expect:
     client.linkUrl(name) == url
@@ -460,26 +460,6 @@ class HalClientSpec extends Specification {
     '{"_links": { "test": { "blah": "123" } }}' | 'test' | null
     '{"_links": { "test": { "href": "123" } }}' | 'test' | '123'
     '{"_links": { "test": { "href": 123 } }}'   | 'test' | '123'
-  }
-
-  @Unroll
-  def 'from JSON test'() {
-    expect:
-    HalClient.fromJson(new JsonParser().parse(json)) == value
-
-    where:
-
-    json                                                    | value
-    'null'                                                  | null
-    '100'                                                   | 100
-    '100.3'                                                 | 100.3
-    'true'                                                  | true
-    '"a string value"'                                      | 'a string value'
-    '[]'                                                    | []
-    '["a string value"]'                                    | ['a string value']
-    '["a string value", 2]'                                 | ['a string value', 2]
-    '{}'                                                    | [:]
-    '{"a": "A", "b": 1, "c": [100], "d": {"href": "blah"}}' | [a: 'A', b: 1, c: [100], d: [href: 'blah']]
   }
 
   def 'initialise request adds all the default headers to the request'() {

@@ -1,11 +1,10 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import kotlin.Pair
 import kotlin.collections.MapsKt
 import spock.lang.Issue
@@ -293,17 +292,15 @@ class PactBrokerClientSpec extends Specification {
     }
     def url = 'https://test.pact.dius.com.au' +
       '/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2'
-    def json = new JsonObject()
-    json.addProperty('a', 'a')
-    json.addProperty('b', 100)
-    json.add('_links', new JsonObject())
-    def array = new JsonArray()
-    array.with {
-      it.add(true)
-      it.add(10.2)
-      it.add('test')
-    }
-    json.add('c', array)
+    def values = [
+      a: new JsonValue.StringValue('a'),
+      b: new JsonValue.Integer(100),
+      _links: new JsonValue.Object(),
+      c: new JsonValue.Array([
+        JsonValue.True.INSTANCE, new JsonValue.Decimal(10.2), new JsonValue.StringValue('test')
+      ])
+    ]
+    def json = new JsonValue.Object(values)
 
     when:
     def result = client.fetchPact(url, true)
@@ -339,7 +336,7 @@ class PactBrokerClientSpec extends Specification {
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true) ]
     def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}]}'
-    def jsonResult = JsonParser.parseString('''
+    def jsonResult = JsonParser.INSTANCE.parseString('''
       {
         "_embedded": {
           "pacts": [
@@ -389,7 +386,7 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def jsonResult = JsonParser.parseString('''
+    def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {
         "pacts": [

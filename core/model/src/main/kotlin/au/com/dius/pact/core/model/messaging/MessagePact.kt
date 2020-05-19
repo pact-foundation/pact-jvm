@@ -13,11 +13,9 @@ import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.extractFromJson
 import au.com.dius.pact.core.support.Utils.extractFromMap
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.obj
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.jsonObject
 import mu.KLogging
 import java.io.File
 
@@ -47,7 +45,7 @@ class MessagePact @JvmOverloads constructor (
 
   fun mergePacts(pact: Map<String, Any>, pactFile: File): Map<String, Any> {
     val newPact = pact.toMutableMap()
-    val json = pactFile.bufferedReader().use { JsonParser().parse(it) }
+    val json = pactFile.bufferedReader().use { JsonParser.parseReader(it) }
 
     val pactSpec = "pact-specification"
     val version = extractFromJson(json, "metadata", pactSpec, "version")
@@ -57,13 +55,13 @@ class MessagePact @JvmOverloads constructor (
         "$pactVersion, while the file is version $version")
     }
 
-    if (json.isJsonObject && json.obj.has("interactions")) {
+    if (json is JsonValue.Object && json.has("interactions")) {
       throw InvalidPactException("Could not merge pact into '$pactFile': file is not a message pact " +
         "(it contains request/response interactions)")
     }
 
     val messages = ((newPact["messages"] as List<Map<String, Any>>) +
-      json.obj["messages"].array.map { Json.toMap(it) })
+      json["messages"].asArray().values.map { Json.toMap(it) })
       .distinctBy { it["description"] }
     newPact["messages"] = messages
     return newPact
@@ -118,11 +116,11 @@ class MessagePact @JvmOverloads constructor (
   }
 
   companion object : KLogging() {
-    fun fromJson(json: JsonObject, source: PactSource = UnknownPactSource): MessagePact {
+    fun fromJson(json: JsonValue.Object, source: PactSource = UnknownPactSource): MessagePact {
       val transformedJson = DefaultPactReader.transformJson(json)
       val consumer = Consumer.fromJson(transformedJson["consumer"])
       val provider = Provider.fromJson(transformedJson["provider"])
-      val messages = transformedJson["messages"].array.map { Message.fromJson(it.obj) }
+      val messages = transformedJson["messages"].asArray().values.map { Message.fromJson(it.asObject()) }
       val metadata = if (transformedJson.has("metadata"))
         Json.toMap(transformedJson["metadata"])
       else emptyMap()

@@ -10,7 +10,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import org.jetbrains.annotations.NotNull
 import spock.lang.Specification
 
@@ -45,7 +45,7 @@ class V3PactSpec extends Specification {
 
         when:
         pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
-        def json = pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
+        def json = pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
 
         then:
         json.messages.size == 2
@@ -79,7 +79,7 @@ class V3PactSpec extends Specification {
 
         when:
         pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
-        def json = pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
+        def json = pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
 
         then:
         json.messages.size == 3
@@ -90,7 +90,7 @@ class V3PactSpec extends Specification {
 
     def 'refuse to merge pacts with different spec versions'() {
         given:
-        def json = pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
+        def json = pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
         json.metadata['pactSpecification'].version = '2.0.0'
         pactFile.write(Json.INSTANCE.gsonPretty.toJson(json))
 

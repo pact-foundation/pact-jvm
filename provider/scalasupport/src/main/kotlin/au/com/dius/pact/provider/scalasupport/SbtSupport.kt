@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.scalasupport
 
-import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.fromJson
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import java.io.File
 
 /**
@@ -14,6 +14,24 @@ data class Address @JvmOverloads constructor (
   val scheme: String = "http"
 ) {
   fun url() = "$scheme://$host:$port$path"
+
+  companion object {
+    fun from(json: JsonValue): Address {
+      val host = if (json.has("host")) {
+        json["host"].asString()
+      } else null
+      val port = if (json.has("port")) {
+        json["port"].asNumber().toInt()
+      } else null
+      val path = if (json.has("path")) {
+        json["path"].asString()
+      } else ""
+      val scheme = if (json.has("scheme")) {
+        json["scheme"].asString()
+      } else "http"
+      return Address(host, port, path, scheme)
+    }
+  }
 }
 
 /**
@@ -30,7 +48,14 @@ data class PactConfiguration(val providerRoot: Address?, val stateChangeUrl: Add
   companion object {
     @JvmStatic
     fun loadConfiguration(configFile: File): PactConfiguration {
-      val configuration = configFile.bufferedReader().use { Json.gson.fromJson<PactConfiguration>(it) }
+      val configurationJson = configFile.bufferedReader().use { JsonParser.parseReader(it) }
+      val root = if (configurationJson.has("providerRoot")) {
+        Address.from(configurationJson["providerRoot"])
+      } else null
+      val stateChangeUrl = if (configurationJson.has("stateChangeUrl")) {
+        Address.from(configurationJson["stateChangeUrl"])
+      } else null
+      val configuration = PactConfiguration(root, stateChangeUrl)
       configuration.validate()
       return configuration
     }

@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonObject
 import spock.lang.Specification
 
 import java.time.OffsetDateTime
@@ -28,10 +27,10 @@ class DateTimeGeneratorSpec extends Specification {
   def 'Uses json deserialization to work correctly with optional format fields'() {
     given:
     def map = [:]
-    def json = Json.INSTANCE.toJson(map)
+    def json = Json.INSTANCE.toJson(map).asObject()
     def baseDateTime = OffsetDateTime.now()
 
     expect:
-    DateTimeGenerator.@Companion.fromJson((JsonObject)json).generate([baseDateTime: baseDateTime]) == baseDateTime.toString()
+    DateTimeGenerator.@Companion.fromJson(json).generate([baseDateTime: baseDateTime]) == baseDateTime.toString()
   }
 }

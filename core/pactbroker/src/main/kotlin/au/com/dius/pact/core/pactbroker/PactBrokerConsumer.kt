@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonElement
+import au.com.dius.pact.core.support.json.JsonValue
 
 data class PactBrokerResult(
   val name: String,
@@ -17,9 +17,8 @@ data class VerificationNotice(
   val text: String
 ) {
   companion object {
-    fun fromJson(json: JsonElement): VerificationNotice {
-      val jsonObj = json.asJsonObject
-      return VerificationNotice(Json.toString(jsonObj["when"]), Json.toString(jsonObj["text"]))
+    fun fromJson(json: JsonValue.Object): VerificationNotice {
+      return VerificationNotice(Json.toString(json["when"]), Json.toString(json["text"]))
     }
   }
 }

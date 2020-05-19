@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonObject
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -17,7 +17,7 @@ class MatchingRulesSpec extends Specification {
 
   def 'fromMap handles an empty map'() {
     when:
-    def matchingRules = MatchingRulesImpl.fromJson(new JsonObject())
+    def matchingRules = MatchingRulesImpl.fromJson(new JsonValue.Object([:]))
 
     then:
     matchingRules.empty

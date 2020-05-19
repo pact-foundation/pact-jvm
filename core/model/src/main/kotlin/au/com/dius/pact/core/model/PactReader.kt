@@ -11,18 +11,13 @@ import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.get
-import com.github.salomonbrys.kotson.jsonArray
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.set
-import com.github.salomonbrys.kotson.string
+import au.com.dius.pact.core.support.json.JsonException
+import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.map
+import au.com.dius.pact.core.support.jsonArray
+import au.com.dius.pact.core.support.jsonObject
 import com.github.zafarkhaja.semver.Version
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.google.gson.JsonSyntaxException
 import mu.KLogging
 import mu.KotlinLogging
 import org.apache.http.auth.AuthScope
@@ -50,7 +45,7 @@ fun loadPactFromUrl(
   source: UrlPactSource,
   options: Map<String, Any>,
   http: CloseableHttpClient
-): Pair<JsonElement, PactSource> {
+): Pair<JsonValue.Object, PactSource> {
   return when (source) {
     is BrokerUrlSource -> {
       val brokerClient = PactBrokerClient(source.pactBrokerUrl, options)
@@ -58,7 +53,7 @@ fun loadPactFromUrl(
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options)
     }
     else -> when (val jsonResource = fetchJsonResource(http, source)) {
-      is Ok -> jsonResource.value.first.obj to jsonResource.value.second
+      is Ok -> jsonResource.value.first.asObject() to jsonResource.value.second
       is Err -> throw jsonResource.error
     }
   }
@@ -66,13 +61,11 @@ fun loadPactFromUrl(
 
 @Suppress("ThrowsCount")
 fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
-  Result<Pair<JsonElement, UrlPactSource>, Exception> {
+  Result<Pair<JsonValue, UrlPactSource>, Exception> {
   val url = URL(source.url)
   return Result.of {
     when (url.protocol) {
-      "file" -> {
-        JsonParser.parseString(URL(source.url).readText()) to source
-      }
+      "file" -> JsonParser.parseString(URL(source.url).readText()) to source
       else -> {
         val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, source.encodePath))
         httpGet.addHeader("Content-Type", "application/json")
@@ -183,18 +176,18 @@ object DefaultPactReader : PactReader, KLogging() {
     val version = determineSpecVersion(pactInfo.first)
     val specVersion = Version.valueOf(version)
     return when (specVersion.majorVersion) {
-      3 -> loadV3Pact(pactInfo.second, pactInfo.first.obj)
-      else -> loadV2Pact(pactInfo.second, pactInfo.first.obj)
+      3 -> loadV3Pact(pactInfo.second, pactInfo.first)
+      else -> loadV2Pact(pactInfo.second, pactInfo.first)
     }
   }
 
   @JvmStatic
-  fun determineSpecVersion(pactInfo: JsonElement): String {
+  fun determineSpecVersion(pactInfo: JsonValue.Object): String {
     var version = "2.0.0"
-    if (pactInfo.obj.has("metadata")) {
-      val metadata = pactInfo.obj["metadata"].obj
+    if (pactInfo.has("metadata")) {
+      val metadata = pactInfo["metadata"].asObject()
       version = when {
-        metadata.has("pactSpecificationVersion") -> metadata["pactSpecificationVersion"].string
+        metadata.has("pactSpecificationVersion") -> metadata["pactSpecificationVersion"].asString()
         metadata.has("pactSpecification") -> specVersion(metadata["pactSpecification"], version)
         metadata.has("pact-specification") -> specVersion(metadata["pact-specification"], version)
         else -> version
@@ -206,17 +199,17 @@ object DefaultPactReader : PactReader, KLogging() {
     return version
   }
 
-  private fun specVersion(specification: JsonElement, defaultVersion: String): String {
-    return if (specification.isJsonObject && specification.obj.has("version") &&
-      specification.obj["version"].isJsonPrimitive) {
-      specification.obj["version"].string
+  private fun specVersion(specification: JsonValue, defaultVersion: String): String {
+    return if (specification is JsonValue.Object && specification.has("version") &&
+      specification["version"].isString) {
+      specification["version"].asString()
     } else {
       return defaultVersion
     }
   }
 
   @JvmStatic
-  fun loadV3Pact(source: PactSource, pactJson: JsonObject): Pact<*> {
+  fun loadV3Pact(source: PactSource, pactJson: JsonValue.Object): Pact<*> {
     if (pactJson.has("messages")) {
       return MessagePact.fromJson(pactJson, source)
     } else {
@@ -224,17 +217,17 @@ object DefaultPactReader : PactReader, KLogging() {
       val provider = Provider.fromJson(transformedJson["provider"])
       val consumer = Consumer.fromJson(transformedJson["consumer"])
 
-      val interactions = transformedJson["interactions"].array.map { i ->
-        val request = extractRequest(i.obj["request"].obj)
-        val response = extractResponse(i.obj["response"].obj)
+      val interactions = transformedJson["interactions"].map { i ->
+        val request = extractRequest(i["request"].asObject())
+        val response = extractResponse(i["response"].asObject())
         val providerStates = mutableListOf<ProviderState>()
-        if (i.obj.has("providerStates")) {
-          providerStates.addAll(i["providerStates"].array.map { ProviderState.fromJson(it) })
-        } else if (i.obj.has("providerState")) {
+        if (i.has("providerStates")) {
+          providerStates.addAll(i["providerStates"].asArray().map { ProviderState.fromJson(it) })
+        } else if (i.has("providerState")) {
           providerStates.add(ProviderState(Json.toString(i["providerState"])))
         }
         RequestResponseInteraction(Json.toString(i["description"]), providerStates, request, response,
-          Json.toString(i.obj["_id"]))
+          Json.toString(i["_id"]))
       }
 
       return RequestResponsePact(provider, consumer, interactions.toMutableList(),
@@ -243,21 +236,21 @@ object DefaultPactReader : PactReader, KLogging() {
   }
 
   @JvmStatic
-  fun loadV2Pact(source: PactSource, pactJson: JsonObject): Pact<*> {
+  fun loadV2Pact(source: PactSource, pactJson: JsonValue.Object): RequestResponsePact {
     val transformedJson = transformJson(pactJson)
     val provider = Provider.fromJson(transformedJson["provider"])
     val consumer = Consumer.fromJson(transformedJson["consumer"])
 
     val interactions = if (transformedJson.has("interactions"))
-      transformedJson["interactions"].array.map { i ->
-        val request = extractRequest(i.obj["request"].obj)
-        val response = extractResponse(i.obj["response"].obj)
+      transformedJson["interactions"].asArray().map { i ->
+        val request = extractRequest(i["request"].asObject())
+        val response = extractResponse(i["response"].asObject())
         RequestResponseInteraction(Json.toString(i["description"]),
-          if (i.obj.has("providerState"))
-            listOf(ProviderState(Json.toString(i.obj["providerState"])))
+          if (i.has("providerState"))
+            listOf(ProviderState(Json.toString(i["providerState"])))
           else
             emptyList(),
-          request, response, Json.toString(i.obj["_id"]))
+          request, response, Json.toString(i["_id"]))
       }
     else emptyList()
 
@@ -266,36 +259,36 @@ object DefaultPactReader : PactReader, KLogging() {
   }
 
   @JvmStatic
-  fun extractResponse(responseJson: JsonObject): Response {
+  fun extractResponse(responseJson: JsonValue.Object): Response {
     formatBody(responseJson)
     return Response.fromJson(responseJson)
   }
 
   @JvmStatic
-  fun extractRequest(requestJson: JsonObject): Request {
+  fun extractRequest(requestJson: JsonValue.Object): Request {
     formatBody(requestJson)
     return Request.fromJson(requestJson)
   }
 
-  private fun formatBody(json: JsonElement) {
-    if (json.isJsonObject && json.obj.has("body")) {
-      val body = json.obj["body"]
-      if (!body.isJsonNull && !body.isJsonPrimitive || (body.isJsonPrimitive && !body.asJsonPrimitive.isString)) {
-        json.obj["body"] = body.toString()
+  private fun formatBody(json: JsonValue) {
+    if (json is JsonValue.Object && json.has("body")) {
+      val body = json["body"]
+      if (body !is JsonValue.Null && body !is JsonValue.StringValue) {
+        json["body"] = body.serialise()
       }
     }
   }
 
   @JvmStatic
-  fun transformJson(pactJson: JsonObject): JsonObject {
-    if (pactJson.has("interactions") && pactJson["interactions"].isJsonArray) {
-      pactJson["interactions"] = jsonArray(pactJson["interactions"].array.map { i ->
-        if (i.isJsonObject) {
-          val interaction = jsonObject(i.obj.entrySet().map { entry ->
+  fun transformJson(pactJson: JsonValue.Object): JsonValue.Object {
+    if (pactJson.has("interactions") && pactJson["interactions"] is JsonValue.Array) {
+      pactJson["interactions"] = jsonArray(pactJson["interactions"].asArray().map { i ->
+        if (i is JsonValue.Object) {
+          val interaction = jsonObject(i.entries.entries.map { entry ->
             when (entry.key) {
               "provider_state" -> "providerState" to entry.value
-              "request" -> "request" to transformRequestResponseJson(entry.value.obj)
-              "response" -> "response" to transformRequestResponseJson(entry.value.obj)
+              "request" -> "request" to transformRequestResponseJson(entry.value.asObject())
+              "response" -> "response" to transformRequestResponseJson(entry.value.asObject())
               else -> entry.toPair()
             }
           })
@@ -306,8 +299,8 @@ object DefaultPactReader : PactReader, KLogging() {
       })
     }
 
-    if (pactJson.has("metadata") && pactJson["metadata"].isJsonObject) {
-      pactJson["metadata"] = jsonObject(pactJson["metadata"].obj.entrySet().map { entry ->
+    if (pactJson.has("metadata") && pactJson["metadata"] is JsonValue.Object) {
+      pactJson["metadata"] = jsonObject(pactJson["metadata"].asObject().entries.entries.map { entry ->
         when (entry.key) {
           "pact-specification" -> "pactSpecification" to entry.value
           else -> entry.toPair()
@@ -318,8 +311,8 @@ object DefaultPactReader : PactReader, KLogging() {
     return pactJson
   }
 
-  private fun transformRequestResponseJson(requestJson: JsonObject): JsonObject {
-    return jsonObject(requestJson.entrySet().map { (k, v) ->
+  private fun transformRequestResponseJson(requestJson: JsonValue.Object): JsonValue.Object {
+    return jsonObject(requestJson.entries.entries.map { (k, v) ->
       when (k) {
         "responseMatchingRules" -> "matchingRules" to v
         "requestMatchingRules" -> "matchingRules" to v
@@ -330,11 +323,11 @@ object DefaultPactReader : PactReader, KLogging() {
   }
 
   @Suppress("ReturnCount")
-  private fun loadFile(source: Any, options: Map<String, Any> = emptyMap()): Pair<JsonElement, PactSource> {
+  private fun loadFile(source: Any, options: Map<String, Any> = emptyMap()): Pair<JsonValue.Object, PactSource> {
     if (source is ClosurePactSource) {
       return loadFile(source.closure.get(), options)
     } else if (source is FileSource<*>) {
-      return source.file.bufferedReader().use { JsonParser.parseReader(it) to source }
+      return source.file.bufferedReader().use { JsonParser.parseReader(it).asObject() to source }
     } else if (source is InputStream || source is Reader || source is File) {
       return loadPactFromFile(source)
     } else if (source is BrokerUrlSource) {
@@ -357,11 +350,11 @@ object DefaultPactReader : PactReader, KLogging() {
       return loadPactFromClasspath(source.substring(CLASSPATH_URI_START.length))
     } else if (source is String && fileExists(source)) {
       val file = File(source)
-      return file.bufferedReader().use { JsonParser.parseReader(it) to FileSource<Interaction>(file) }
+      return file.bufferedReader().use { JsonParser.parseReader(it).asObject() to FileSource<Interaction>(file) }
     } else {
       try {
-        return JsonParser.parseString(source.toString()) to UnknownPactSource
-      } catch (e: JsonSyntaxException) {
+        return JsonParser.parseString(source.toString()).asObject() to UnknownPactSource
+      } catch (e: JsonException) {
         throw UnsupportedOperationException(
           "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +
           "reader or an URL", e)
@@ -369,17 +362,17 @@ object DefaultPactReader : PactReader, KLogging() {
     }
   }
 
-  private fun loadPactFromFile(source: Any): Pair<JsonElement, PactSource> {
+  private fun loadPactFromFile(source: Any): Pair<JsonValue.Object, PactSource> {
     return when (source) {
-      is InputStream -> JsonParser.parseReader(InputStreamReader(source)) to InputStreamPactSource
-      is Reader -> JsonParser.parseReader(source) to ReaderPactSource
-      is File -> source.bufferedReader().use { JsonParser.parseReader(it) } to FileSource<Interaction>(source)
+      is InputStream -> JsonParser.parseReader(InputStreamReader(source)).asObject() to InputStreamPactSource
+      is Reader -> JsonParser.parseReader(source).asObject() to ReaderPactSource
+      is File -> source.bufferedReader().use { JsonParser.parseReader(it).asObject() } to FileSource<Interaction>(source)
       else -> throw IllegalArgumentException("loadPactFromFile expects either an InputStream, Reader or File. " +
         "Got a ${source.javaClass.name} instead")
     }
   }
 
-  private fun loadPactFromS3Bucket(source: String): Pair<JsonElement, PactSource> {
+  private fun loadPactFromS3Bucket(source: String): Pair<JsonValue.Object, PactSource> {
     val amazonS3URIClass = Class.forName("com.amazonaws.services.s3.AmazonS3URI")
     val s3Uri = amazonS3URIClass.getConstructor(String::class.java).newInstance(source)
     val bucket = amazonS3URIClass.getMethod("getBucket").invoke(s3Uri).toString()
@@ -393,10 +386,10 @@ object DefaultPactReader : PactReader, KLogging() {
       .invoke(s3Client, bucket, key)
     val s3ObjectClass = Class.forName("com.amazonaws.services.s3.model.S3Object")
     val objectContent = s3ObjectClass.getMethod("getObjectContent").invoke(s3Pact) as InputStream
-    return JsonParser.parseReader(InputStreamReader(objectContent)) to S3PactSource(source)
+    return JsonParser.parseReader(InputStreamReader(objectContent)).asObject() to S3PactSource(source)
   }
 
-  private fun loadPactFromClasspath(source: String): Pair<JsonElement, PactSource> {
+  private fun loadPactFromClasspath(source: String): Pair<JsonValue.Object, PactSource> {
     val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(source)
     if (inputStream == null) {
       throw IllegalStateException("not found on classpath: $source")

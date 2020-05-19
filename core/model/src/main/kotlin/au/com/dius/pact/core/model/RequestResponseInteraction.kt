@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import mu.KLogging
 import java.net.URLEncoder
 

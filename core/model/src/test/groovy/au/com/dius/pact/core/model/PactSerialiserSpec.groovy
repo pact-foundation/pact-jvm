@@ -10,7 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import spock.lang.Specification
 
 class PactSerialiserSpec extends Specification {
@@ -70,7 +70,7 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact.json').text.trim()
-    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
+    def testPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(testPactJson))
 
     when:
     DefaultPactWriter.INSTANCE.writePact(new RequestResponsePact(new Provider('test_provider'),
@@ -79,7 +79,7 @@ class PactSerialiserSpec extends Specification {
         request, response, null)]),
       new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
+    def actualPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(actualPactJson))
 
     then:
     actualPact == testPact
@@ -89,7 +89,7 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact_v3.json').text.trim()
-    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
+    def testPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(testPactJson))
     def expectedRequest = new Request('GET', '/',
       ['q': ['p', 'p2'], 'r': ['s']], [testreqheader: ['testreqheadervalue']],
       OptionalBody.body('{"test": true}'.bytes))
@@ -106,7 +106,7 @@ class PactSerialiserSpec extends Specification {
     when:
     DefaultPactWriter.INSTANCE.writePact(expectedPact, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
+    def actualPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(actualPactJson))
 
     then:
     actualPact == testPact
@@ -116,12 +116,12 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact_matchers.json').text.trim()
-    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
+    def testPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(testPactJson))
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pactWithMatchers, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
+    def actualPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(actualPactJson))
 
     then:
     actualPact == testPact
@@ -131,7 +131,7 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact.json').text.trim()
-    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
+    def testPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(testPactJson))
     def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
       [new RequestResponseInteraction('test interaction', [new ProviderState('test state')],
         ModelFixtures.requestLowerCaseMethod,
@@ -140,7 +140,7 @@ class PactSerialiserSpec extends Specification {
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
+    def actualPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(actualPactJson))
 
     then:
     actualPact == testPact
@@ -150,12 +150,12 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact_generators.json').text.trim()
-    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
+    def testPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(testPactJson))
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
+    def actualPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(actualPactJson))
 
     then:
     actualPact == testPact
@@ -165,12 +165,12 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('v3-message-pact-generators.json').text.trim()
-    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
+    def testPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(testPactJson))
 
     when:
     DefaultPactWriter.INSTANCE.writePact(messagePactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
+    def actualPact = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(actualPactJson))
 
     then:
     actualPact == testPact
@@ -257,7 +257,7 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must not convert fields called \'body\''() {
     expect:
-    pactBody == Json.INSTANCE.toMap(new JsonParser().parse('{\n' +
+    pactBody == Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString('{\n' +
       '  "body" : [ 1, 2, 3 ],\n' +
       '  "complete" : {\n' +
       '    "body" : 123456,\n' +
@@ -274,7 +274,7 @@ class PactSerialiserSpec extends Specification {
       '}'))
 
     where:
-    pactBody = Json.INSTANCE.toMap(new JsonParser().parse(
+    pactBody = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(
       DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_with_bodies.json'))
         .interactions[0].request.body.valueAsString()))
   }

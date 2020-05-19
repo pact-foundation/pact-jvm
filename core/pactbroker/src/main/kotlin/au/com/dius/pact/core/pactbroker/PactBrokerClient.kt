@@ -3,33 +3,28 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.json.map
+import au.com.dius.pact.core.support.jsonArray
+import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.github.salomonbrys.kotson.get
-import com.github.salomonbrys.kotson.jsonArray
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.set
-import com.github.salomonbrys.kotson.string
-import com.github.salomonbrys.kotson.toJson
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.unwrap
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import mu.KLogging
 import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
 import java.util.function.Consumer
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.unwrap
-import com.google.gson.JsonElement
 
 /**
  * Wraps the response for a Pact from the broker with the link data associated with the Pact document.
  */
-data class PactResponse(val pactFile: JsonObject, val links: Map<String, Any?>)
+data class PactResponse(val pactFile: JsonValue.Object, val links: Map<String, Any?>)
 
 sealed class TestResult {
   object Ok : TestResult() {
@@ -70,7 +65,7 @@ data class CanIDeployResult(val ok: Boolean, val message: String, val reason: St
  * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
  */
 data class ConsumerVersionSelector(val tag: String, val latest: Boolean = true) {
-  fun toJson() = jsonObject("tag" to tag, "latest" to latest)
+  fun toJson() = JsonValue.Object("tag" to Json.toJson(tag), "latest" to Json.toJson(latest))
 }
 
 interface IPactBrokerClient {
@@ -163,7 +158,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       else -> null
     }
     if (pactsForVerification != null) {
-      val body = jsonObject(
+      val body = JsonValue.Object(
         "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
       )
       if (enablePending) {
@@ -172,20 +167,17 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       }
 
       return handleWith {
-        halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.toString()).map { result ->
-          result["_embedded"]["pacts"].asJsonArray.map { pactJson ->
+        halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.serialise()).map { result ->
+          result["_embedded"]["pacts"].asArray().map { pactJson ->
             val selfLink = pactJson["_links"]["self"]
             val href = Precoded(Json.toString(selfLink["href"])).decoded().toString()
             val name = Json.toString(selfLink["name"])
             val properties = pactJson["verificationProperties"]
-            val notices = properties["notices"].asJsonArray
-              .map { VerificationNotice.fromJson(it) }
+            val notices = properties["notices"].asArray()
+              .map { VerificationNotice.fromJson(it.asObject()) }
             var pending = false
-            if (properties.isJsonObject && properties.obj.has("pending") && properties["pending"].isJsonPrimitive) {
-              val pendingProperty = properties["pending"].asJsonPrimitive
-              if (pendingProperty.isBoolean) {
-                pending = pendingProperty.asBoolean
-              }
+            if (properties is JsonValue.Object && properties.has("pending") && properties["pending"].isBoolean) {
+              pending = properties["pending"].asBoolean()
             }
             if (options.containsKey("authentication")) {
               PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending)
@@ -218,8 +210,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
-    val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].string)
-    val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].string)
+    val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].asString())
+    val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].asString())
     val version = urlPathSegmentEscaper().escape(unescapedVersion)
     if (tags.isNotEmpty()) {
       uploadTags(halClient, consumerName, version, tags)
@@ -242,8 +234,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
   }
 
   open fun fetchPact(url: String, encodePath: Boolean = true): PactResponse {
-    val halDoc = newHalClient().fetch(url, encodePath).unwrap().obj
-    return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj))
+    val halDoc = newHalClient().fetch(url, encodePath).unwrap()
+    return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].asObject()))
   }
 
   open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
@@ -264,7 +256,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       val jsonObject = buildPayload(result, version, buildUrl)
       val lowercaseMap = publishLink.mapKeys { it.key.toString().toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
-        halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString()).mapError {
+        halClient.postJson(lowercaseMap["href"].toString(), jsonObject.serialise()).mapError {
           logger.error(it) { "Publishing verification results failed with an exception" }
           "Publishing verification results failed with an exception: ${it.message}"
         }
@@ -276,10 +268,10 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     }
   }
 
-  fun buildPayload(result: TestResult, version: String, buildUrl: String?): JsonObject {
+  fun buildPayload(result: TestResult, version: String, buildUrl: String?): JsonValue.Object {
     val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
     if (buildUrl != null) {
-      jsonObject.add("buildUrl", buildUrl.toJson())
+      jsonObject["buildUrl"] = buildUrl
     }
 
     logger.debug { "Test result = $result" }
@@ -347,7 +339,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
 
           interactionJson
         }
-      jsonObject.add("testResults", jsonArray(values))
+      jsonObject["testResults"] = jsonArray(values)
     }
     return jsonObject
   }
@@ -397,8 +389,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     val result = halClient.getJson("/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to),
       false)
     return when (result) {
-      is Ok<JsonElement> -> {
-        val summary = result.value.asJsonObject["summary"].asJsonObject
+      is Ok<JsonValue> -> {
+        val summary = result.value["summary"].asObject()
         CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]))
       }
       is Err<Exception> -> {

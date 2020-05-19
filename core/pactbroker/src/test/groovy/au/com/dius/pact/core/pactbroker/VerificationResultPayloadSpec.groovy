@@ -16,7 +16,7 @@ class VerificationResultPayloadSpec extends Specification {
   }
 
   Map buildPayload() {
-    new JsonSlurper().parseText(pactBrokerClient.buildPayload(result, version, buildUrl).toString()) as Map
+    new JsonSlurper().parseText(pactBrokerClient.buildPayload(result, version, buildUrl).serialise()) as Map
   }
 
   def 'exceptions should be serialised as a message and exception class'() {

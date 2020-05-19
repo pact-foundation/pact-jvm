@@ -10,7 +10,13 @@ sealed class PactVerificationResult {
 
   data class Error(val error: Throwable, val mockServerState: PactVerificationResult) : PactVerificationResult()
 
-  data class PartialMismatch(val mismatches: List<Mismatch>) : PactVerificationResult()
+  data class PartialMismatch(val mismatches: List<Mismatch>) : PactVerificationResult() {
+    override fun getDescription(): String {
+      return mismatches.joinToString("\n") {
+        it.description()
+      }
+    }
+  }
 
   data class Mismatches(val mismatches: List<PactVerificationResult>) : PactVerificationResult() {
     override fun getDescription(): String {

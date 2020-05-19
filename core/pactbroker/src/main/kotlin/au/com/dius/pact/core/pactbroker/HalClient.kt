@@ -3,25 +3,18 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.HttpClient
+import au.com.dius.pact.core.support.Json.fromJson
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.json.get
+import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.unwrap
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.bool
-import com.github.salomonbrys.kotson.get
-import com.github.salomonbrys.kotson.jsonNull
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.keys
-import com.github.salomonbrys.kotson.nullObj
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.set
-import com.github.salomonbrys.kotson.string
+import com.github.michaelbull.result.Result
 import com.google.common.net.UrlEscapers
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.HttpHost
 import org.apache.http.HttpMessage
@@ -41,7 +34,6 @@ import java.net.URI
 import java.net.URLDecoder
 import java.util.function.BiFunction
 import java.util.function.Consumer
-import com.github.michaelbull.result.Result
 
 /**
  * Interface to a HAL Client
@@ -101,13 +93,13 @@ interface IHalClient {
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    * @param encodePath If the path should be encoded to make a valid URL
    */
-  fun fetch(path: String, encodePath: Boolean): Result<JsonElement, Exception>
+  fun fetch(path: String, encodePath: Boolean): Result<JsonValue.Object, Exception>
 
   /**
    * Fetches the HAL document from the provided path
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    */
-  fun fetch(path: String): Result<JsonElement, Exception>
+  fun fetch(path: String): Result<JsonValue.Object, Exception>
 
   /**
    * Sets the starting context from a previous broker interaction (Pact document)
@@ -117,7 +109,7 @@ interface IHalClient {
   /**
    * Sets the starting context from a previous broker interaction (Pact document)
    */
-  fun withDocContext(docAttributes: JsonElement): IHalClient
+  fun withDocContext(docAttributes: JsonValue.Object): IHalClient
 
   /**
    * Upload a JSON document to the current path link, using a PUT request
@@ -127,19 +119,19 @@ interface IHalClient {
   /**
    * Upload a JSON document to the current path link, using a POST request
    */
-  fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonElement, Exception>
+  fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonValue.Object, Exception>
 
   /**
    * Get JSON from the provided path
    */
-  fun getJson(path: String): Result<JsonElement, Exception>
+  fun getJson(path: String): Result<JsonValue, Exception>
 
   /**
    * Get JSON from the provided path
    * @param path Path to fetch the JSON document from
    * @param encodePath If the path should be encoded
    */
-  fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception>
+  fun getJson(path: String, encodePath: Boolean): Result<JsonValue, Exception>
 }
 
 /**
@@ -152,7 +144,7 @@ open class HalClient @JvmOverloads constructor(
 
   var httpClient: CloseableHttpClient? = null
   var httpContext: HttpClientContext? = null
-  var pathInfo: JsonElement? = null
+  var pathInfo: JsonValue.Object? = null
   var lastUrl: String? = null
   var defaultHeaders: MutableMap<String, String> = mutableMapOf()
   private var maxPublishRetries = 5
@@ -225,8 +217,8 @@ open class HalClient @JvmOverloads constructor(
 
   override fun navigate(): IHalClient {
     when (val result = fetch(ROOT)) {
-      is Ok<*> -> pathInfo = result.value as JsonElement?
-      is Err<*> -> logger.warn(result.error as Exception) { "Could not fetch the root HAL document" }
+      is Ok<JsonValue.Object> -> pathInfo = result.value
+      is Err<Exception> -> logger.warn(result.error) { "Could not fetch the root HAL document" }
     }
     return this
   }
@@ -241,14 +233,20 @@ open class HalClient @JvmOverloads constructor(
 
   override fun fetch(path: String) = fetch(path, true)
 
-  override fun fetch(path: String, encodePath: Boolean): Result<JsonElement, Exception> {
+  override fun fetch(path: String, encodePath: Boolean): Result<JsonValue.Object, Exception> {
     lastUrl = path
     logger.debug { "Fetching: $path" }
-    return getJson(path, encodePath)
+    return when (val result = getJson(path, encodePath)) {
+      is Ok -> when (result.value) {
+        is JsonValue.Object -> Ok(result.value)
+        else -> Err(RuntimeException("Expected a JSON document, but found a ${result.value}"))
+      }
+      is Err -> result
+    } as Result<JsonValue.Object, Exception>
   }
 
   override fun withDocContext(docAttributes: Map<String, Any?>): IHalClient {
-    val links = JsonObject()
+    val links = JsonValue.Object()
     links[LINKS] = jsonObject(docAttributes.entries.map {
       it.key to when (it.value) {
         is Map<*, *> -> jsonObject((it.value as Map<*, *>).entries.map { entry ->
@@ -258,21 +256,21 @@ open class HalClient @JvmOverloads constructor(
             entry.key.toString() to entry.value
           }
         })
-        else -> jsonNull
+        else -> JsonValue.Null
       }
     })
     pathInfo = links
     return this
   }
 
-  override fun withDocContext(docAttributes: JsonElement): IHalClient {
+  override fun withDocContext(docAttributes: JsonValue.Object): IHalClient {
     pathInfo = docAttributes
     return this
   }
 
   override fun getJson(path: String) = getJson(path, true)
 
-  override fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception> {
+  override fun getJson(path: String, encodePath: Boolean): Result<JsonValue, Exception> {
     setupHttpClient()
     return handleWith {
       val httpGet = initialiseRequest(HttpGet(buildUrl(baseUrl, path, encodePath)))
@@ -284,7 +282,7 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  private fun handleHalResponse(response: CloseableHttpResponse, path: String): Result<JsonElement, Exception> {
+  private fun handleHalResponse(response: CloseableHttpResponse, path: String): Result<JsonValue, Exception> {
     return if (response.statusLine.statusCode < 300) {
       val contentType = ContentType.getOrDefault(response.entity)
       if (isJsonResponse(contentType)) {
@@ -300,33 +298,31 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  private fun fetchLink(link: String, options: Map<String, Any>): JsonElement {
+  private fun fetchLink(link: String, options: Map<String, Any>): JsonValue.Object {
     val href = hrefForLink(link, options)
     return this.fetch(href.first, href.second).unwrap()
   }
 
   private fun hrefForLink(link: String, options: Map<String, Any>): Pair<String, Boolean> {
-    if (pathInfo?.nullObj?.get(LINKS) == null) {
+    if (pathInfo[LINKS].isNull) {
       throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got " +
         "a response with no '_links'. URL: '$baseUrl', LINK: '$link'")
     }
 
-    val links = pathInfo!![LINKS]
-    if (links.isJsonObject) {
-      if (!links.obj.has(link)) {
+    val links = pathInfo[LINKS]
+    if (links is JsonValue.Object) {
+      if (!links.has(link)) {
         throw InvalidHalResponse("Link '$link' was not found in the response, only the following links where " +
-          "found: ${links.obj.keys()}. URL: '$baseUrl', LINK: '$link'")
+          "found: ${links.entries.keys}. URL: '$baseUrl', LINK: '$link'")
       }
       val linkData = links[link]
-
-      if (linkData.isJsonArray) {
+      if (linkData is JsonValue.Array) {
         if (options.containsKey("name")) {
-          val linkByName = linkData.asJsonArray.find { it.isJsonObject && it["name"] == options["name"] }
-          return if (linkByName != null && linkByName.isJsonObject && linkByName["templated"].isJsonPrimitive &&
-            linkByName["templated"].bool) {
+          val linkByName = linkData.find { it is JsonValue.Object && it["name"] == options["name"] }
+          return if (linkByName is JsonValue.Object && linkByName["templated"].isBoolean) {
             parseLinkUrl(linkByName["href"].toString(), options) to false
-          } else if (linkByName != null && linkByName.isJsonObject) {
-            linkByName["href"].string to true
+          } else if (linkByName is JsonValue.Object) {
+            linkByName["href"].asString() to true
           } else {
             throw InvalidNavigationRequest("Link '$link' does not have an entry with name '${options["name"]}'. " +
               "URL: '$baseUrl', LINK: '$link'")
@@ -335,12 +331,11 @@ open class HalClient @JvmOverloads constructor(
           throw InvalidNavigationRequest("Link '$link' has multiple entries. You need to filter by the link name. " +
             "URL: '$baseUrl', LINK: '$link'")
         }
-      } else if (linkData.isJsonObject) {
-        return if (linkData.obj.has("templated") && linkData["templated"].isJsonPrimitive &&
-          linkData["templated"].bool) {
-          parseLinkUrl(linkData["href"].string, options) to false
+      } else if (linkData is JsonValue.Object) {
+        return if (linkData.has("templated") && linkData["templated"].isBoolean) {
+          parseLinkUrl(linkData["href"].asString(), options) to false
         } else {
-          linkData["href"].string to true
+          linkData["href"].asString() to true
         }
       } else {
         throw InvalidHalResponse("Expected link in map form in the response, but " +
@@ -388,16 +383,17 @@ open class HalClient @JvmOverloads constructor(
       if (isJsonResponse(contentType)) {
         var error = ""
         if (body.isNotEmpty()) {
-          val jsonBody = JsonParser.parseString(body)
-          if (jsonBody != null && jsonBody.obj.has("errors")) {
-            if (jsonBody["errors"].isJsonArray) {
-              error = " - " + jsonBody["errors"].asJsonArray.joinToString(", ") { it.asString }
-            } else if (jsonBody["errors"].isJsonObject) {
-              error = " - " + jsonBody["errors"].asJsonObject.entrySet().joinToString(", ") { entry ->
-                if (entry.value.isJsonArray) {
-                  "${entry.key}: ${entry.value.array.joinToString(", ") { it.asString }}"
+          val jsonBody = JsonParser.parseString(body!!)
+          if (jsonBody.has("errors")) {
+            val errors = jsonBody["errors"]
+            if (errors is JsonValue.Array) {
+              error = " - " + errors.values.joinToString(", ") { it.asString() }
+            } else if (errors is JsonValue.Object) {
+              error = " - " + errors.entries.entries.joinToString(", ") { entry ->
+                if (entry.value is JsonValue.Array) {
+                  "${entry.key}: ${(entry.value as JsonValue.Array).values.joinToString(", ") { it.asString() }}"
                 } else {
-                  "${entry.key}: ${entry.value.asString}"
+                  "${entry.key}: ${entry.value.asString()}"
                 }
               }
             }
@@ -413,11 +409,11 @@ open class HalClient @JvmOverloads constructor(
   }
 
   override fun linkUrl(name: String): String? {
-    if (pathInfo != null && pathInfo!!.obj.has(LINKS)) {
+    if (pathInfo != null && pathInfo!!.has(LINKS)) {
       val links = pathInfo!![LINKS]
-      if (links.isJsonObject && links.obj.has(name)) {
+      if (links is JsonValue.Object && links.has(name)) {
         val linkData = links[name]
-        if (linkData.isJsonObject && linkData.obj.has("href")) {
+        if (linkData is JsonValue.Object && linkData.has("href")) {
           return fromJson(linkData["href"]).toString()
         }
       }
@@ -429,12 +425,12 @@ open class HalClient @JvmOverloads constructor(
   override fun forAll(linkName: String, closure: Consumer<Map<String, Any?>>) {
     initPathInfo()
     val links = pathInfo!![LINKS]
-    if (links.isJsonObject && links.obj.has(linkName)) {
+    if (links is JsonValue.Object && links.has(linkName)) {
       val matchingLink = links[linkName]
-      if (matchingLink.isJsonArray) {
-        matchingLink.asJsonArray.forEach { closure.accept(asMap(it.asJsonObject)) }
+      if (matchingLink is JsonValue.Array) {
+        matchingLink.values.forEach { closure.accept(asMap(it.asObject())) }
       } else {
-        closure.accept(asMap(matchingLink.asJsonObject))
+        closure.accept(asMap(matchingLink.asObject()))
       }
     }
   }
@@ -458,7 +454,7 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  override fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonElement, Exception> {
+  override fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonValue.Object, Exception> {
     val href = hrefForLink(link, options)
     val http = initialiseRequest(HttpPost(buildUrl(baseUrl, href.first, href.second)))
     http.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
@@ -480,23 +476,7 @@ open class HalClient @JvmOverloads constructor(
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
 
     @JvmStatic
-    fun asMap(jsonObject: JsonObject) = jsonObject.entrySet().associate { entry -> entry.key to fromJson(entry.value) }
-
-    @JvmStatic
-    fun fromJson(jsonValue: JsonElement): Any? {
-      return when {
-        jsonValue.isJsonObject -> asMap(jsonValue.asJsonObject)
-        jsonValue.isJsonArray -> jsonValue.asJsonArray.map { fromJson(it) }
-        jsonValue.isJsonNull -> null
-        else -> {
-          val primitive = jsonValue.asJsonPrimitive
-          when {
-            primitive.isBoolean -> primitive.asBoolean
-            primitive.isNumber -> primitive.asBigDecimal
-            else -> primitive.asString
-          }
-        }
-      }
-    }
+    fun asMap(jsonObject: JsonValue.Object) = jsonObject.entries.entries
+      .associate { entry -> entry.key to fromJson(entry.value) }
   }
 }

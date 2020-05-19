@@ -9,10 +9,9 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.isNotEmpty
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.obj
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonException
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
@@ -52,11 +51,16 @@ class Message @JvmOverloads constructor(
     if (!contents.isMissing()) {
       map["contents"] = when {
         isJsonContents() -> {
-          val json = JsonParser.parseString(contents.valueAsString())
-          if (json.isJsonPrimitive && json.asJsonPrimitive.isString) {
+          try {
+            val json = JsonParser.parseString(contents.valueAsString())
+            if (json is JsonValue.StringValue) {
+              contents.valueAsString()
+            } else {
+              Json.fromJson(json)
+            }
+          } catch (ex: JsonException) {
+            logger.trace(ex) { "Failed to parse JSON body" }
             contents.valueAsString()
-          } else {
-            Json.fromJson(json)
           }
         }
         else -> formatContents()
@@ -91,7 +95,7 @@ class Message @JvmOverloads constructor(
     return if (contents.isPresent()) {
       val contentType = contentType(metaData) ?: contents.contentType.asMimeType()
       when {
-        isJson(contentType) -> Json.gsonPretty.toJson(JsonParser.parseString(contents.valueAsString()))
+        isJson(contentType) -> Json.gsonPretty.toJson(JsonParser.parseString(contents.valueAsString()).toGson())
         isOctetStream(contentType) -> Base64.encodeBase64String(contentsAsBytes())
         else -> contents.valueAsString()
       }
@@ -149,26 +153,25 @@ class Message @JvmOverloads constructor(
      * Builds a message from a Map
      */
     @JvmStatic
-    fun fromJson(json: JsonObject): Message {
+    fun fromJson(json: JsonValue.Object): Message {
       val providerStates = when {
-        json.has("providerStates") -> json["providerStates"].array.map { ProviderState.fromJson(it) }
+        json.has("providerStates") -> json["providerStates"].asArray().values.map { ProviderState.fromJson(it) }
         json.has("providerState") -> listOf(ProviderState(Json.toString(json["providerState"])))
         else -> listOf()
       }
 
       val metaData = if (json.has("metaData"))
-        json["metaData"].obj.entrySet().associate { it.key to Json.fromJson(it.value) }
+        json["metaData"].asObject().entries.entries.associate { it.key to Json.fromJson(it.value) }
       else
         emptyMap()
 
       val contentType = au.com.dius.pact.core.model.ContentType(contentType(metaData))
       val contents = if (json.has("contents")) {
-        val contents = json["contents"]
-        when {
-          contents.isJsonNull -> OptionalBody.nullBody()
-          contents.isJsonPrimitive && contents.asJsonPrimitive.isString ->
-            OptionalBody.body(contents.asJsonPrimitive.asString.toByteArray(contentType.asCharset()), contentType)
-          else -> OptionalBody.body(contents.toString().toByteArray(contentType.asCharset()), contentType)
+        when (val contents = json["contents"]) {
+          is JsonValue.Null -> OptionalBody.nullBody()
+          is JsonValue.StringValue -> OptionalBody.body(contents.value.toByteArray(contentType.asCharset()),
+            contentType)
+          else -> OptionalBody.body(contents.serialise().toByteArray(contentType.asCharset()), contentType)
         }
       } else {
         OptionalBody.missing()

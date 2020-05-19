@@ -1,8 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.obj
-import com.google.gson.JsonElement
+import au.com.dius.pact.core.support.json.JsonValue
 
 /**
  * Pact Provider
@@ -10,9 +9,9 @@ import com.google.gson.JsonElement
 data class Provider @JvmOverloads constructor (val name: String = "provider") {
   companion object {
     @JvmStatic
-    fun fromJson(json: JsonElement): Provider {
-      if (json.isJsonObject && json.obj.has("name") && json.obj["name"].isJsonPrimitive) {
-        val name = Json.toString(json.obj["name"])
+    fun fromJson(json: JsonValue): Provider {
+      if (json is JsonValue.Object && json.has("name") && json["name"] is JsonValue.StringValue) {
+        val name = Json.toString(json["name"])
         return Provider(if (name.isEmpty()) "provider" else name)
       }
       return Provider("provider")
@@ -26,9 +25,9 @@ data class Provider @JvmOverloads constructor (val name: String = "provider") {
 data class Consumer @JvmOverloads constructor (val name: String = "consumer") {
   companion object {
     @JvmStatic
-    fun fromJson(json: JsonElement): Consumer {
-      if (json.isJsonObject && json.obj.has("name") && json.obj["name"].isJsonPrimitive) {
-        val name = Json.toString(json.obj["name"])
+    fun fromJson(json: JsonValue): Consumer {
+      if (json is JsonValue.Object && json.has("name") && json["name"] is JsonValue.StringValue) {
+        val name = Json.toString(json["name"])
         return Consumer(if (name.isEmpty()) "consumer" else name)
       }
       return Consumer("consumer")

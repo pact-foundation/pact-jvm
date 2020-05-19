@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.jsonObject
+import au.com.dius.pact.core.support.jsonObject
 
 /**
  * Pact between a consumer and a provider

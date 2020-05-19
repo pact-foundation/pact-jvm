@@ -13,6 +13,10 @@ import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.jsonArray
+import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
@@ -21,18 +25,6 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.get
-import com.github.salomonbrys.kotson.isNotEmpty
-import com.github.salomonbrys.kotson.jsonArray
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.set
-import com.github.salomonbrys.kotson.string
-import com.github.salomonbrys.kotson.toJson
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.google.gson.JsonPrimitive
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
 import java.time.ZonedDateTime
@@ -44,12 +36,12 @@ import java.time.ZonedDateTime
 class JsonReporter(
   var name: String = "json",
   override var reportDir: File?,
-  var jsonData: JsonObject = JsonObject(),
+  var jsonData: JsonValue.Object = JsonValue.Object(),
   override var ext: String = ".json",
   private var providerName: String? = null
 ) : VerifierReporter {
 
-  constructor(name: String, reportDir: File?) : this(name, reportDir, JsonObject(), ".json", null)
+  constructor(name: String, reportDir: File?) : this(name, reportDir, JsonValue.Object(), ".json", null)
 
   override lateinit var reportFile: File
   override lateinit var verifier: IProviderVerifier
@@ -70,7 +62,7 @@ class JsonReporter(
         "reportFormat" to REPORT_FORMAT
       ),
       "provider" to jsonObject("name" to providerName),
-      "execution" to jsonArray()
+      "execution" to JsonValue.Array()
     )
     reportDir!!.mkdirs()
     reportFile = File(reportDir, providerName + ext)
@@ -81,16 +73,16 @@ class JsonReporter(
       when {
         reportFile.exists() && reportFile.length() > 0 -> {
           val existingContents = JsonParser.parseString(reportFile.readText())
-          if (existingContents.isJsonObject && existingContents.obj.has("provider") &&
-            providerName == existingContents["provider"].obj["name"].string) {
+          if (existingContents is JsonValue.Object && existingContents.has("provider") &&
+            providerName == existingContents["provider"]["name"].asString()) {
             existingContents["metaData"] = jsonData["metaData"]
-            existingContents["execution"].array.addAll(jsonData["execution"].array)
-            reportFile.writeText(existingContents.toString())
+            existingContents["execution"].asArray().addAll(jsonData["execution"])
+            reportFile.writeText(existingContents.serialise())
           } else {
-            reportFile.writeText(jsonData.toString())
+            reportFile.writeText(jsonData.serialise())
           }
         }
-        else -> reportFile.writeText(jsonData.toString())
+        else -> reportFile.writeText(jsonData.serialise())
       }
     }
   }
@@ -98,33 +90,33 @@ class JsonReporter(
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
     val jsonObject = jsonObject(
       "consumer" to jsonObject("name" to consumer.name),
-      "interactions" to jsonArray(),
+      "interactions" to JsonValue.Array(),
       "pending" to consumer.pending
     )
     if (tag.isNotEmpty()) {
-      jsonObject.add("tag", JsonPrimitive(tag))
+      jsonObject.add("tag", JsonValue.StringValue(tag!!))
     }
-    jsonData["execution"].array.add(jsonObject)
+    jsonData["execution"].add(jsonObject)
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
-    jsonData["execution"].array.last()["consumer"].obj["source"] = jsonObject("url" to pactUrl.url)
+    jsonData["execution"].asArray().last()["consumer"].asObject()["source"] = jsonObject("url" to pactUrl.url)
   }
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
-    jsonData["execution"].array.last()["consumer"].obj["source"] = jsonObject(
+    jsonData["execution"].asArray().last()["consumer"].asObject()["source"] = jsonObject(
       "file" to if (pactFile is FileSource<*>) pactFile.file.toString() else pactFile.description()
     )
   }
 
   override fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String) {
-    if (jsonData["execution"].array.size() == 0) {
-      jsonData["execution"].array.add(jsonObject(
+    if (jsonData["execution"].size() == 0) {
+      jsonData["execution"].add(jsonObject(
         "consumer" to jsonObject("name" to consumer.name),
-        "interactions" to jsonArray()
+        "interactions" to JsonValue.Array()
       ))
     }
-    jsonData["execution"].array.last()["result"] = jsonObject(
+    jsonData["execution"].asArray().last().asObject()["result"] = jsonObject(
       "state" to "Pact Load Failure",
       "message" to message
     )
@@ -135,7 +127,7 @@ class JsonReporter(
   override fun warnPactFileHasNoInteractions(pact: Pact<Interaction>) { }
 
   override fun interactionDescription(interaction: Interaction) {
-    jsonData["execution"].array.last()["interactions"].array.add(jsonObject(
+    jsonData["execution"].asArray().last()["interactions"].asArray().add(jsonObject(
       "interaction" to Json.toJson(interaction.toMap(PactSpecVersion.V3)),
       "verification" to jsonObject("result" to "OK")
     ))
@@ -158,7 +150,7 @@ class JsonReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    val interactions = jsonData["execution"].array.last()["interactions"].array
+    val interactions = jsonData["execution"].asArray().last()["interactions"].asArray()
     val error = jsonObject(
       "result" to FAILED,
       "message" to "State change '$state' callback failed",
@@ -172,7 +164,7 @@ class JsonReporter(
         "verification" to error
       ))
     } else {
-      interactions.last()["verification"] = error
+      interactions.last().asObject()["verification"] = error
     }
   }
 
@@ -193,7 +185,7 @@ class JsonReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    jsonData["execution"].array.last()["interactions"].array.last()["verification"] = jsonObject(
+    jsonData["execution"].asArray().last()["interactions"].asArray().last().asObject()["verification"] = jsonObject(
       "result" to FAILED,
       "message" to interactionMessage,
       "exception" to jsonObject(
@@ -208,7 +200,8 @@ class JsonReporter(
   override fun statusComparisonOk(status: Int) { }
 
   override fun statusComparisonFailed(status: Int, comparison: Any) {
-    val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"]
+    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
+      .asObject()
     verification["result"] = FAILED
     val statusJson = jsonArray(
       if (comparison.hasProperty("message")) {
@@ -225,15 +218,16 @@ class JsonReporter(
   override fun headerComparisonOk(key: String, value: List<String>) { }
 
   override fun headerComparisonFailed(key: String, value: List<String>, comparison: Any) {
-    val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"].obj
+    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
+      .asObject()
     verification["result"] = FAILED
     if (!verification.has("header")) {
       verification["header"] = jsonObject()
     }
-    verification["header"].obj[key] = when (comparison) {
+    verification["header"].asObject()[key] = when (comparison) {
       is List<*> -> Json.toJson(comparison.map {
         when (it) {
-          is HeaderMismatch -> it.mismatch.toJson()
+          is HeaderMismatch -> JsonValue.StringValue(it.mismatch)
           else -> Json.toJson(it)
         }
       })
@@ -244,7 +238,8 @@ class JsonReporter(
   override fun bodyComparisonOk() { }
 
   override fun bodyComparisonFailed(comparison: Any) {
-    val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"].obj
+    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
+      .asObject()
     verification["result"] = FAILED
     verification["body"] = when (comparison) {
       is Err<*> -> Json.toJson((comparison as Err<BodyTypeMismatch>).error.description())
@@ -254,18 +249,18 @@ class JsonReporter(
   }
 
   override fun errorHasNoAnnotatedMethodsFoundForInteraction(interaction: Interaction) {
-    jsonData["execution"].array.last()["interactions"].array.last()["verification"] = jsonObject(
+    jsonData["execution"].asArray().last()["interactions"].asArray().last().asObject()["verification"] = jsonObject(
       "result" to FAILED,
       "cause" to jsonObject("message" to "No Annotated Methods Found For Interaction")
     )
   }
 
   override fun verificationFailed(interaction: Interaction, e: Exception, printStackTrace: Boolean) {
-    jsonData["execution"].array.last()["interactions"].array.last()["verification"] = jsonObject(
+    jsonData["execution"].asArray().last()["interactions"].asArray().last().asObject()["verification"] = jsonObject(
       "result" to FAILED,
       "exception" to jsonObject(
         "message" to e.message,
-        "stackTrace" to jsonArray(*ExceptionUtils.getStackFrames(e))
+        "stackTrace" to ExceptionUtils.getStackFrames(e)
     )
     )
   }
@@ -277,12 +272,13 @@ class JsonReporter(
   override fun displayFailures(failures: List<VerificationResult.Failed>) { }
 
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
-    val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"].obj
+    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
+      .asObject()
     verification["result"] = FAILED
     if (!verification.has("metadata")) {
       verification["metadata"] = jsonObject()
     }
-    verification["metadata"].obj[key] = comparison
+    verification["metadata"].asObject()[key] = comparison
   }
 
   override fun includesMetadata() { }
@@ -296,7 +292,7 @@ class JsonReporter(
     provider: IProviderInfo,
     notices: List<VerificationNotice>
   ) {
-    jsonData["execution"].array.last()["consumer"]["notices"] = jsonArray(notices.map { it.text })
+    jsonData["execution"].asArray().last()["consumer"].asObject()["notices"] = jsonArray(notices.map { it.text })
   }
 
   override fun warnPublishResultsSkippedBecauseFiltered() { }

@@ -2,12 +2,7 @@ package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.forEach
-import com.github.salomonbrys.kotson.isNotEmpty
-import com.github.salomonbrys.kotson.keys
-import com.github.salomonbrys.kotson.obj
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 
 class MatchingRulesImpl : MatchingRules {
@@ -29,8 +24,8 @@ class MatchingRulesImpl : MatchingRules {
         return copy
     }
 
-    fun fromV2Json(json: JsonObject) {
-      json.forEach { key, value ->
+    fun fromV2Json(json: JsonValue.Object) {
+      json.entries.forEach { (key, value) ->
         val path = key.split('.')
         if (key.startsWith("$.body")) {
           if (key == "$.body") {
@@ -71,21 +66,21 @@ class MatchingRulesImpl : MatchingRules {
         entry.value.toMap(PactSpecVersion.V3)
     }
 
-    fun fromV3Json(json: JsonObject) {
-      json.forEach { key, value ->
+    fun fromV3Json(json: JsonValue.Object) {
+      json.entries.forEach { (key, value) ->
         addRules(key, Json.toMap(value))
       }
     }
 
     companion object : KLogging() {
       @JvmStatic
-      fun fromJson(json: JsonElement?): MatchingRules {
+      fun fromJson(json: JsonValue?): MatchingRules {
         val matchingRules = MatchingRulesImpl()
-        if (json != null && json.isJsonObject && json.obj.isNotEmpty()) {
-          if (json.obj.keys().first().startsWith("$")) {
-            matchingRules.fromV2Json(json.obj)
+        if (json is JsonValue.Object && json.entries.isNotEmpty()) {
+          if (json.entries.keys.first().startsWith("$")) {
+            matchingRules.fromV2Json(json)
           } else {
-            matchingRules.fromV3Json(json.obj)
+            matchingRules.fromV3Json(json)
           }
         } else logger.warn { "$json is not valid matching rules format" }
         return matchingRules

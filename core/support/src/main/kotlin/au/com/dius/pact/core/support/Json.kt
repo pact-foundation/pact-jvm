@@ -1,11 +1,7 @@
 package au.com.dius.pact.core.support
 
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.jsonArray
-import com.github.salomonbrys.kotson.jsonNull
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.toJson
+import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.json.JsonValue
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
@@ -14,6 +10,8 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import java.lang.reflect.Type
+import java.math.BigDecimal
+import java.math.BigInteger
 
 open class NumberSerializer : JsonSerializer<Number> {
   override fun serialize(src: Number, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
@@ -37,63 +35,48 @@ object Json {
   /**
    * Converts an Object graph to a JSON Object
    */
-  fun toJson(any: Any?): JsonElement {
+  fun toJson(any: Any?): JsonValue {
     return when (any) {
-      is JsonElement -> any
-      is Number -> any.toJson()
-      is String -> any.toJson()
-      is Boolean -> any.toJson()
-      is Char -> any.toJson()
-      is List<*> -> jsonArray(any.map { toJson(it) })
-      is Map<*, *> -> jsonObject(any.entries.map { it.key.toString() to toJson(it.value) })
-      else -> jsonNull
+      is JsonValue -> any
+      is Number -> any.toJsonValue()
+      is String -> any.toJsonValue()
+      is Boolean -> any.toJsonValue()
+      is Char -> any.toJsonValue()
+      is List<*> -> JsonValue.Array(any.map { toJson(it) }.toMutableList())
+      is Array<*> -> JsonValue.Array(any.map { toJson(it) }.toMutableList())
+      is Map<*, *> -> JsonValue.Object(any.entries.associate { it.key.toString() to toJson(it.value) }.toMutableMap())
+      else -> JsonValue.Null
     }
   }
 
   /**
    * Converts a JSON object to a raw string if it is a string value, else just calls toString()
    */
-  fun toString(jsonElement: JsonElement?): String = toNullableString(jsonElement) ?: jsonNull.toString()
-
-  /**
-   * Checks whether a JSON element is available and return null if jsonElement is null. Otherwise it would
-   * convert a JSON element to String
-   */
-  fun toNullableString(jsonElement: JsonElement?): String? = when {
-    jsonElement == null -> null
-    jsonElement.isJsonPrimitive -> {
-      val value = jsonElement.asJsonPrimitive
-      when {
-        value.isString -> value.asString
-        else -> value.toString()
-      }
-    }
-    else -> jsonElement.toString()
-  }
+  fun toString(json: JsonValue?): String = json?.asString() ?: "null"
 
   /**
    * Converts a JSON object to the Map of values
    */
-  fun toMap(jsonElement: JsonElement?) = when {
-    jsonElement != null && jsonElement.isJsonObject -> fromJson(jsonElement) as Map<String, Any?>
+  fun toMap(json: JsonValue?) = when (json) {
+    is JsonValue.Object -> fromJson(json) as Map<String, Any?>
     else -> emptyMap()
   }
 
   /**
    * Converts a JSON object to the List of values
    */
-  fun toList(jsonElement: JsonElement?) = when {
-    jsonElement != null && jsonElement.isJsonArray -> fromJson(jsonElement) as List<Any?>
+  fun toList(json: JsonValue?) = when (json) {
+    is JsonValue.Array -> fromJson(json) as List<Any?>
     else -> emptyList()
   }
 
-  fun extractFromJson(json: JsonElement, vararg s: String): Any? {
-    return if (json.isJsonObject && s.size == 1) {
-      json.obj[s.first()]
-    } else if (json.isJsonObject && json.obj.has(s.first())) {
-      val map = json.obj[s.first()]
-      if (map.isJsonObject) {
-        extractFromJson(map.obj, *s.drop(1).toTypedArray())
+  fun extractFromJson(json: JsonValue, vararg s: String): Any? {
+    return if (json is JsonValue.Object && s.size == 1) {
+      json[s.first()]
+    } else if (json is JsonValue.Object && json.has(s.first())) {
+      val map = json[s.first()]
+      if (map is JsonValue.Object) {
+        extractFromJson(map, *s.drop(1).toTypedArray())
       } else {
         null
       }
@@ -102,29 +85,49 @@ object Json {
     }
   }
 
-  fun fromJson(json: JsonElement?): Any? = when {
-    json == null || json.isJsonNull -> null
-    json.isJsonObject -> json.obj.entrySet().associate { it.key to fromJson(it.value) }
-    json.isJsonArray -> json.array.map { fromJson(it) }
-    else -> {
-      val primitive = json.asJsonPrimitive
-      when {
-        primitive.isBoolean -> primitive.asBoolean
-        primitive.isNumber -> primitive.asNumber
-        primitive.isString -> primitive.asString
-        else -> primitive.toString()
-      }
-    }
+  fun fromJson(json: JsonValue?): Any? = when {
+    json == null || json is JsonValue.Null -> null
+    json is JsonValue.Object -> json.entries.entries.associate { it.key to fromJson(it.value) }
+    json is JsonValue.Array -> json.values.map { fromJson(it) }
+    json.isBoolean -> json.asBoolean()
+    json.isNumber -> json.asNumber()
+    json is JsonValue.StringValue -> json.value
+    else -> json.toString()
   }
 
+  @Deprecated("")
   fun prettyPrint(json: String): String = gsonPretty.toJson(JsonParser.parseString(json))
 
-  fun exceptionToJson(exp: Exception) = jsonObject("message" to exp.message,
-    "exceptionClass" to exp.javaClass.name)
+  fun exceptionToJson(exp: Exception) = JsonValue.Object(mutableMapOf("message" to toJson(exp.message),
+    "exceptionClass" to toJson(exp.javaClass.name)))
 
-  fun toBoolean(jsonElement: JsonElement?) = when {
-    jsonElement == null || jsonElement.isJsonNull -> false
-    jsonElement.isJsonPrimitive && jsonElement.asJsonPrimitive.isBoolean -> jsonElement.asJsonPrimitive.asBoolean
+  fun toBoolean(jsonElement: JsonValue?) = when {
+    jsonElement == null -> false
+    jsonElement.isBoolean -> jsonElement.asBoolean()
     else -> false
   }
 }
+
+private fun Char.toJsonValue() = JsonValue.StringValue(this.toString())
+
+private fun Boolean.toJsonValue() = if (this) JsonValue.True
+  else JsonValue.False
+
+private fun String.toJsonValue() = JsonValue.StringValue(this)
+
+private fun Number.toJsonValue(): JsonValue = when (this) {
+  is Int -> JsonValue.Integer(this.toBigInteger())
+  is Long -> JsonValue.Integer(this.toBigInteger())
+  is BigInteger -> JsonValue.Integer(this)
+  else -> JsonValue.Decimal(BigDecimal(this.toString()))
+}
+
+fun jsonArray(list: List<Any?>) = toJson(list)
+
+fun jsonArray(value: Any?) = JsonValue.Array(mutableListOf(toJson(value)))
+
+fun jsonObject(vararg pairs: Pair<String, Any?>) = JsonValue.Object(
+  pairs.associate { it.first to toJson(it.second) }.toMutableMap())
+
+fun jsonObject(pairs: List<Pair<String, Any?>>) = JsonValue.Object(
+  pairs.associate { it.first to toJson(it.second) }.toMutableMap())

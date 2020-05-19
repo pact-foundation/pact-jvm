@@ -46,17 +46,20 @@ class JsonParserSpec extends Specification {
 
     where:
 
-    description | json                      | result
-    'integer'   | '  1234'                  | new JsonValue.Integer(1234)
-    'decimal'   | '  1234.56 '              | new JsonValue.Decimal(1234.56)
-    'true'      | 'true'                    | JsonValue.True.INSTANCE
-    'false'     | 'false'                   | JsonValue.False.INSTANCE
-    'null'      | 'null'                    | JsonValue.Null.INSTANCE
-    'string'    | '"null"'                  | new JsonValue.StringValue('null')
-    'array'     | '[1, 200, 3, "4"]'        | new JsonValue.Array([new JsonValue.Integer(1), new JsonValue.Integer(200), new JsonValue.Integer(3), new JsonValue.StringValue('4')])
-    '2d array'  | '[[1, 2], 3, "4"]'        | new JsonValue.Array([new JsonValue.Array([new JsonValue.Integer(1), new JsonValue.Integer(2)]), new JsonValue.Integer(3), new JsonValue.StringValue('4')])
-    'object'    | '{"1": 200, "3": "4"}'    | new JsonValue.Object(['1': new JsonValue.Integer(200), '3': new JsonValue.StringValue('4')])
-    '2d object' | '{"1": 2, "3": {"4":5}}'  | new JsonValue.Object(['1': new JsonValue.Integer(2), '3': new JsonValue.Object(['4': new JsonValue.Integer(5)])])
+    description    | json                     | result
+    'integer'      | '  1234'                 | new JsonValue.Integer(1234)
+    'decimal'      | '  1234.56 '             | new JsonValue.Decimal(1234.56)
+    'true'         | 'true'                   | JsonValue.True.INSTANCE
+    'false'        | 'false'                  | JsonValue.False.INSTANCE
+    'null'         | 'null'                   | JsonValue.Null.INSTANCE
+    'string'       | '"null"'                 | new JsonValue.StringValue('null')
+    'array'        | '[1, 200, 3, "4"]'       | new JsonValue.Array([new JsonValue.Integer(1), new JsonValue.Integer(200), new JsonValue.Integer(3), new JsonValue.StringValue('4')])
+    '2d array'     | '[[1, 2], 3, "4"]'       | new JsonValue.Array([new JsonValue.Array([new JsonValue.Integer(1), new JsonValue.Integer(2)]), new JsonValue.Integer(3), new JsonValue.StringValue('4')])
+    'object'       | '{"1": 200, "3": "4"}'   | new JsonValue.Object(['1': new JsonValue.Integer(200), '3': new JsonValue.StringValue('4')])
+    '2d object'    | '{"1": 2, "3": {"4":5}}' | new JsonValue.Object(['1': new JsonValue.Integer(2), '3': new JsonValue.Object(['4': new JsonValue.Integer(5)])])
+    'empty object' | '{}'                     | new JsonValue.Object([:])
+    'empty array'  | '[]'                     | new JsonValue.Array([])
+    'empty string' | '""'                     | new JsonValue.StringValue('')
   }
 
   def 'can parse a pact file'() {

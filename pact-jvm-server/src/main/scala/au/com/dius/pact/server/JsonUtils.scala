@@ -1,15 +1,15 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 
 import scala.collection.JavaConverters._
 
 object JsonUtils {
 
-  def parseJsonString(json: String) = {
+  def parseJsonString(json: String): Any = {
     if (json == null || json.trim.isEmpty) null
-    else javaObjectGraphToScalaObjectGraph(Json.INSTANCE.fromJson(new JsonParser().parse(json)))
+    else javaObjectGraphToScalaObjectGraph(Json.INSTANCE.fromJson(JsonParser.INSTANCE.parseString(json)))
   }
 
   def javaObjectGraphToScalaObjectGraph(value: AnyRef): Any = {

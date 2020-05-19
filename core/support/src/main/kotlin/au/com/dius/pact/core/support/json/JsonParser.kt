@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Ok
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.Reader
 
 class JsonException(message: String) : RuntimeException(message)
 
@@ -14,7 +15,7 @@ sealed class JsonSource {
   abstract fun peekNextChar(): Char?
   abstract fun advance(count: Int = 1)
 
-  data class StringSource(val json: String, var index: Int = 0) : JsonSource() {
+  open class StringSource(val json: String, var index: Int = 0) : JsonSource() {
     override fun nextChar(): Char? {
       val c = peekNextChar()
       if (c != null) {
@@ -36,8 +37,9 @@ sealed class JsonSource {
     }
   }
 
-  data class InputStreamSource(val json: InputStream) : JsonSource() {
-    private val reader = InputStreamReader(BufferedInputStream(json))
+  open class InputStreamSource(val json: InputStream) : ReaderSource(InputStreamReader(BufferedInputStream(json)))
+
+  open class ReaderSource(val reader: Reader) : JsonSource() {
     private var buffer: Char? = null
 
     override fun nextChar(): Char? {
@@ -306,6 +308,7 @@ class JsonLexer(val json: JsonSource) {
 
 object JsonParser {
 
+  @Throws(JsonException::class)
   fun parseString(json: String): JsonValue {
     if (json.isNotEmpty()) {
       return parse(JsonSource.StringSource(json))
@@ -314,8 +317,14 @@ object JsonParser {
     }
   }
 
+  @Throws(JsonException::class)
   fun parseStream(json: InputStream): JsonValue {
     return parse(JsonSource.InputStreamSource(json))
+  }
+
+  @Throws(JsonException::class)
+  fun parseReader(reader: Reader): JsonValue {
+    return parse(JsonSource.ReaderSource(reader))
   }
 
   private fun parse(json: JsonSource): JsonValue {
@@ -354,45 +363,47 @@ object JsonParser {
 
     do {
       token = nextTokenOrThrow(lexer)
-      val key = when (token) {
-        null -> throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-        is JsonToken.StringValue -> token.chars
-        else -> throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - expected a string but found unexpected characters " +
-            "'${token.chars}'")
-      }
+      if (token !is JsonToken.ObjectEnd) {
+        val key = when (token) {
+          null -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
+          is JsonToken.StringValue -> token.chars
+          else -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - expected a string but found unexpected characters " +
+              "'${token.chars}'")
+        }
 
-      token = nextTokenOrThrow(lexer)
-      if (token == null) {
-        throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-      } else if (token !is JsonToken.Colon) {
-        throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - expected a colon but found unexpected characters " +
-            "'${token.chars}'")
-      }
+        token = nextTokenOrThrow(lexer)
+        if (token == null) {
+          throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
+        } else if (token !is JsonToken.Colon) {
+          throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - expected a colon but found unexpected characters " +
+              "'${token.chars}'")
+        }
 
-      token = nextTokenOrThrow(lexer)
-      when (token) {
-        null -> throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-        is JsonToken.Integer -> map[key] = JsonValue.Integer(token.toInteger())
-        is JsonToken.Decimal -> map[key] = JsonValue.Decimal(token.toDecimal())
-        is JsonToken.StringValue -> map[key] = JsonValue.StringValue(token.chars)
-        is JsonToken.True -> map[key] = JsonValue.True
-        is JsonToken.False -> map[key] = JsonValue.False
-        is JsonToken.Null -> map[key] = JsonValue.Null
-        is JsonToken.ArrayStart -> map[key] = parseArray(lexer)
-        is JsonToken.ObjectStart -> map[key] = parseObject(lexer)
-        else -> throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters '${token.chars}'")
-      }
+        token = nextTokenOrThrow(lexer)
+        when (token) {
+          null -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
+          is JsonToken.Integer -> map[key] = JsonValue.Integer(token.toInteger())
+          is JsonToken.Decimal -> map[key] = JsonValue.Decimal(token.toDecimal())
+          is JsonToken.StringValue -> map[key] = JsonValue.StringValue(token.chars)
+          is JsonToken.True -> map[key] = JsonValue.True
+          is JsonToken.False -> map[key] = JsonValue.False
+          is JsonToken.Null -> map[key] = JsonValue.Null
+          is JsonToken.ArrayStart -> map[key] = parseArray(lexer)
+          is JsonToken.ObjectStart -> map[key] = parseObject(lexer)
+          else -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters '${token.chars}'")
+        }
 
-      token = nextTokenOrThrow(lexer)
-      if (token !is JsonToken.Comma && token != JsonToken.ObjectEnd && token != null) {
-        throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
+        token = nextTokenOrThrow(lexer)
+        if (token !is JsonToken.Comma && token != JsonToken.ObjectEnd && token != null) {
+          throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
+        }
       }
     } while (token != null && token != JsonToken.ObjectEnd)
 
@@ -410,25 +421,27 @@ object JsonParser {
 
     do {
       token = nextTokenOrThrow(lexer)
-      when (token) {
-        null -> throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing array")
-        is JsonToken.Integer -> array.add(JsonValue.Integer(token.toInteger()))
-        is JsonToken.Decimal -> array.add(JsonValue.Decimal(token.toDecimal()))
-        is JsonToken.StringValue -> array.add(JsonValue.StringValue(token.chars))
-        is JsonToken.True -> array.add(JsonValue.True)
-        is JsonToken.False -> array.add(JsonValue.False)
-        is JsonToken.Null -> array.add(JsonValue.Null)
-        is JsonToken.ArrayStart -> array.add(parseArray(lexer))
-        is JsonToken.ObjectStart -> array.add(parseObject(lexer))
-        else -> throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
-      }
+      if (token !is JsonToken.ArrayEnd) {
+        when (token) {
+          null -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing array")
+          is JsonToken.Integer -> array.add(JsonValue.Integer(token.toInteger()))
+          is JsonToken.Decimal -> array.add(JsonValue.Decimal(token.toDecimal()))
+          is JsonToken.StringValue -> array.add(JsonValue.StringValue(token.chars))
+          is JsonToken.True -> array.add(JsonValue.True)
+          is JsonToken.False -> array.add(JsonValue.False)
+          is JsonToken.Null -> array.add(JsonValue.Null)
+          is JsonToken.ArrayStart -> array.add(parseArray(lexer))
+          is JsonToken.ObjectStart -> array.add(parseObject(lexer))
+          else -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
+        }
 
-      token = nextTokenOrThrow(lexer)
-      if (token !is JsonToken.Comma && token != JsonToken.ArrayEnd && token != null) {
-        throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
+        token = nextTokenOrThrow(lexer)
+        if (token !is JsonToken.Comma && token != JsonToken.ArrayEnd && token != null) {
+          throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
+        }
       }
     } while (token != null && token != JsonToken.ArrayEnd)
 

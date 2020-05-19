@@ -11,8 +11,8 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import com.google.gson.JsonNull
-import com.google.gson.JsonPrimitive
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,6 +30,10 @@ class MatcherExecutorSpec extends Specification {
     XmlBodyMatcher.INSTANCE.parse(xml)
   }
 
+  static json(String json) {
+    JsonParser.INSTANCE.parseString(json)
+  }
+
   def setup() {
     mismatchFactory = [create: { p0, p1, p2, p3 -> new StatusMismatch(100, 100) } ] as MismatchFactory
     path = ['/']
@@ -41,21 +45,23 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected                  | actual                    || mustBeEmpty
-    '100'                     | '100'                     || true
-    100                       | '100'                     || false
-    100                       | 100                       || true
-    null                      | null                      || true
-    '100'                     | null                      || false
-    null                      | 100                       || false
-    JsonNull.INSTANCE         | null                      || true
-    null                      | JsonNull.INSTANCE         || true
-    JsonNull.INSTANCE         | JsonNull.INSTANCE         || true
-    xml('<a/>')               | xml('<a/>')               || true
-    xml('<a/>')               | xml('<b/>')               || false
-    xml('<e xmlns="a"/>')     | xml('<a:e xmlns:a="a"/>') || true
-    xml('<a:e xmlns:a="a"/>') | xml('<b:e xmlns:b="a"/>') || true
-    xml('<e xmlns="a"/>')     | xml('<e xmlns="b"/>')     || false
+    expected                   | actual                     || mustBeEmpty
+    '100'                      | '100'                      || true
+    100                        | '100'                      || false
+    100                        | 100                        || true
+    new JsonValue.Integer(100) | new JsonValue.Integer(100) || true
+    null                       | null                       || true
+    '100'                      | null                       || false
+    null                       | 100                        || false
+    JsonValue.Null.INSTANCE    | null                       || true
+    null                       | JsonValue.Null.INSTANCE    || true
+    JsonValue.Null.INSTANCE    | JsonValue.Null.INSTANCE    || true
+    xml('<a/>')                | xml('<a/>')                || true
+    xml('<a/>')                | xml('<b/>')                || false
+    xml('<e xmlns="a"/>')      | xml('<a:e xmlns:a="a"/>')  || true
+    xml('<a:e xmlns:a="a"/>')  | xml('<b:e xmlns:b="a"/>')  || true
+    xml('<e xmlns="a"/>')      | xml('<e xmlns="b"/>')      || false
+    json('"hello"')            | json('"hello"')            || true
   }
 
   @Unroll
@@ -64,10 +70,11 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected | actual  | regex      || mustBeEmpty
-    'Harry'  | 'Happy' | 'Ha[a-z]*' || true
-    'Harry'  | null    | 'Ha[a-z]*' || false
-    '100'    | 20123   | '\\d+'     || true
+    expected | actual                       | regex      || mustBeEmpty
+    'Harry'  | 'Happy'                      | 'Ha[a-z]*' || true
+    'Harry'  | null                         | 'Ha[a-z]*' || false
+    '100'    | 20123                        | '\\d+'     || true
+    '100'    | new JsonValue.Integer(20123) | '\\d+'     || true
   }
 
   @Unroll
@@ -85,14 +92,16 @@ class MatcherExecutorSpec extends Specification {
     200                       | null                       || false
     [100, 200, 300]           | [200.3]                    || true
     [a: 100]                  | [a: 200.3, b: 200, c: 300] || true
-    JsonNull.INSTANCE         | null                       || true
-    null                      | JsonNull.INSTANCE          || true
-    JsonNull.INSTANCE         | JsonNull.INSTANCE          || true
+    JsonValue.Null.INSTANCE   | null                       || true
+    null                      | JsonValue.Null.INSTANCE    || true
+    JsonValue.Null.INSTANCE   | JsonValue.Null.INSTANCE    || true
     xml('<a/>')               | xml('<a/>')                || true
     xml('<a/>')               | xml('<b/>')                || false
     xml('<e xmlns="a"/>')     | xml('<a:e xmlns:a="a"/>')  || true
     xml('<a:e xmlns:a="a"/>') | xml('<b:e xmlns:b="a"/>')  || true
     xml('<e xmlns="a"/>')     | xml('<e xmlns="b"/>')      || false
+    json('"hello"')           | json('"hello"')            || true
+    json('100')               | json('200')                || true
   }
 
   @Unroll
@@ -110,6 +119,7 @@ class MatcherExecutorSpec extends Specification {
     NUMBER     | 100      | 200.3                      || true
     DECIMAL    | 100.0    | 200.3                      || true
     INTEGER    | 100      | 200                        || true
+    INTEGER    | 100      | new JsonValue.Integer(200) || true
     NUMBER     | 100      | 200                        || true
     DECIMAL    | 100.0    | 200                        || false
     INTEGER    | 100      | false                      || false
@@ -247,18 +257,18 @@ class MatcherExecutorSpec extends Specification {
 
     where:
 
-    value                | result
-    new JsonPrimitive(0) | true
-    '100'                | false
-    100                  | false
-    100.0                | true
-    100.0 as float       | true
-    100.0 as double      | true
-    100 as int           | false
-    100 as long          | false
-    100 as BigInteger    | false
-    BigInteger.ZERO      | false
-    BigDecimal.ZERO      | true
+    value                    | result
+    new JsonValue.Decimal(0) | true
+    '100'                    | false
+    100                      | false
+    100.0                    | true
+    100.0 as float           | true
+    100.0 as double          | true
+    100 as int               | false
+    100 as long              | false
+    100 as BigInteger        | false
+    BigInteger.ZERO          | false
+    BigDecimal.ZERO          | true
   }
 
   @Unroll

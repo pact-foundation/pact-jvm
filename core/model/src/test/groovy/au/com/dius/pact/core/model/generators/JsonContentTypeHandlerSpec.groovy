@@ -43,7 +43,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
-    body.value.asNumber == 100
+    body.value.asNumber() == 100
   }
 
   def 'applies the generator to a list item'() {
@@ -84,7 +84,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
-    body.value.asNumber == 100
+    body.value.asNumber() == 100
   }
 
   def 'applies the generator to the root'() {
@@ -98,7 +98,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
-    body.value.asString == 'X'
+    body.value.asString() == 'X'
   }
 
   def 'applies the generator to the object graph'() {

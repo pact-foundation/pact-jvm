@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.support
 
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,7 +9,7 @@ class JsonSpec extends Specification {
   @Unroll
   def 'object to JSON string - #desc'() {
     expect:
-    Json.INSTANCE.toJson(value).toString() == jsonString
+    Json.INSTANCE.toJson(value).serialise() == jsonString
 
     where:
 
@@ -26,7 +26,7 @@ class JsonSpec extends Specification {
   @Unroll
   def 'toBoolean - #desc'() {
     expect:
-    Json.INSTANCE.toBoolean(json == null ? json : JsonParser.parseString(json)) == booleanValue
+    Json.INSTANCE.toBoolean(json == null ? json : JsonParser.INSTANCE.parseString(json)) == booleanValue
 
     where:
 
@@ -40,6 +40,26 @@ class JsonSpec extends Specification {
     'string'        | '"hello"'                               | false
     'list'          | '["hello", 1, true, {"a": "A"}]'        | false
     'object'        | '{"hello": "world", "list": [1, 2, 3]}' | false
+  }
+
+  @Unroll
+  def 'from JSON test'() {
+    expect:
+    Json.INSTANCE.fromJson(JsonParser.INSTANCE.parseString(json)) == value
+
+    where:
+
+    json                                                    | value
+    'null'                                                  | null
+    '100'                                                   | 100
+    '100.3'                                                 | 100.3
+    'true'                                                  | true
+    '"a string value"'                                      | 'a string value'
+    '[]'                                                    | []
+    '["a string value"]'                                    | ['a string value']
+    '["a string value", 2]'                                 | ['a string value', 2]
+    '{}'                                                    | [:]
+    '{"a": "A", "b": 1, "c": [100], "d": {"href": "blah"}}' | [a: 'A', b: 1, c: [100], d: [href: 'blah']]
   }
 
 }

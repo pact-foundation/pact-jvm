@@ -2,7 +2,7 @@ package specification
 
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import spock.lang.Specification
 
 class BaseRequestSpec extends Specification {
@@ -13,10 +13,10 @@ class BaseRequestSpec extends Specification {
     def result = []
     file.eachDir { d ->
       d.eachFile { f ->
-        def json = f.withReader { new JsonParser().parse(it) }
+        def json = f.withReader { JsonParser.INSTANCE.parseReader(it) }
         def jsonMap = Json.INSTANCE.toMap(json)
-        def expected = DefaultPactReader.extractRequest(json.asJsonObject.get('expected').asJsonObject)
-        def actual = DefaultPactReader.extractRequest(json.asJsonObject.get('actual').asJsonObject)
+        def expected = DefaultPactReader.extractRequest(json.asObject().get('expected').asObject())
+        def actual = DefaultPactReader.extractRequest(json.asObject().get('actual').asObject())
         if (expected.body.present) {
           expected.setDefaultContentType(expected.detectContentType())
         }

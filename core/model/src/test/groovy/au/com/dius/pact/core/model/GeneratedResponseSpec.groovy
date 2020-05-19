@@ -7,7 +7,7 @@ import au.com.dius.pact.core.model.generators.RandomIntGenerator
 import au.com.dius.pact.core.model.generators.RandomStringGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
 import spock.lang.Specification
 
 class GeneratedResponseSpec extends Specification {
@@ -52,7 +52,7 @@ class GeneratedResponseSpec extends Specification {
 
     when:
     def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
-    def generatedBody = Json.INSTANCE.toMap(new JsonParser().parse(generated.body.valueAsString()))
+    def generatedBody = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(generated.body.valueAsString()))
 
     then:
     generatedBody.a != 'A'

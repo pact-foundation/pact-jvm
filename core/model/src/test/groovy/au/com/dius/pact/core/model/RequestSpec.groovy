@@ -14,7 +14,7 @@ class RequestSpec extends Specification {
     ]
 
     when:
-    def request = Request.fromJson(Json.INSTANCE.toJson(json).asJsonObject)
+    def request = Request.fromJson(Json.INSTANCE.toJson(json).asObject())
 
     then:
     !request.matchingRules.empty
@@ -33,7 +33,7 @@ class RequestSpec extends Specification {
     request.generators.empty
 
     where:
-    request = Request.fromJson(Json.INSTANCE.toJson([:]).asJsonObject)
+    request = Request.fromJson(Json.INSTANCE.toJson([:]).asObject())
   }
 
   def 'detects multipart file uploads based on the content type'() {

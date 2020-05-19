@@ -41,7 +41,7 @@ class ResponseComparisonSpec extends Specification {
     expect:
     result.bodyMismatches instanceof Err
     result.bodyMismatches.error.description() ==
-      'Expected a response type of \'application/json\' but the actual type was \'text/plain\''
+      'BodyTypeMismatch: Expected a response type of \'application/json\' but the actual type was \'text/plain\''
   }
 
   def 'comparing bodies should pass with the same content types and body contents'() {
@@ -74,7 +74,7 @@ class ResponseComparisonSpec extends Specification {
     expect:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.stuff': ['Expected "is good" but received "should make the test fail"']
+      '$.stuff': ["BodyMismatch: Expected 'is good' but received 'should make the test fail'"]
     ]
     result.value.diff[1] == '-  "stuff": "is good"'
     result.value.diff[2] == '+  "stuff": "should make the test fail"'

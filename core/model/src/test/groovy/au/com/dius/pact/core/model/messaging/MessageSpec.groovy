@@ -38,7 +38,7 @@ class MessageSpec extends Specification {
     ]
 
     when:
-    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asJsonObject)
+    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asObject())
 
     then:
     message.providerStates == [new ProviderState('V3 state')]
@@ -49,7 +49,7 @@ class MessageSpec extends Specification {
     def map = [providerState: 'test state']
 
     when:
-    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asJsonObject)
+    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asObject())
 
     then:
     message.providerStates == [new ProviderState('test state')]
@@ -83,7 +83,7 @@ class MessageSpec extends Specification {
     ]
 
     when:
-    def message = Message.fromJson(Json.INSTANCE.toJson(json).asJsonObject)
+    def message = Message.fromJson(Json.INSTANCE.toJson(json).asObject())
 
     then:
     !message.matchingRules.empty

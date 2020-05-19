@@ -7,12 +7,9 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Json
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.forEach
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.set
-import com.google.gson.JsonElement
-import com.google.gson.JsonParser
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.json.orNull
 import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
 
@@ -34,24 +31,22 @@ fun setupDefaultContentTypeHandlers() {
   contentTypeHandlers["application/json"] = JsonContentTypeHandler
 }
 
-data class QueryResult(var value: JsonElement?, val key: Any? = null, val parent: JsonElement? = null)
+data class QueryResult(var value: JsonValue?, val key: Any? = null, val parent: JsonValue? = null)
 
 object JsonContentTypeHandler : ContentTypeHandler {
   override fun processBody(value: OptionalBody, fn: (QueryResult) -> Unit): OptionalBody {
     val bodyJson = QueryResult(JsonParser.parseString(value.valueAsString()))
     fn.invoke(bodyJson)
-    return OptionalBody.body(Json.gson.toJson(bodyJson.value)
+    return OptionalBody.body(bodyJson.value.orNull().serialise()
       .toByteArray(value.contentType.asCharset()), ContentType.JSON)
   }
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
-      @Suppress("UNCHECKED_CAST")
-      when {
-        parent != null && parent.isJsonObject ->
-          parent.obj[valueKey.toString()] = Json.toJson(generator.generate(context))
-        parent != null && parent.isJsonArray -> parent[valueKey as Int] = Json.toJson(generator.generate(context))
+      when (parent) {
+        is JsonValue.Object -> parent[valueKey.toString()] = Json.toJson(generator.generate(context))
+        is JsonValue.Array -> parent[valueKey as Int] = Json.toJson(generator.generate(context))
         else -> body.value = Json.toJson(generator.generate(context))
       }
     }
@@ -63,33 +58,29 @@ object JsonContentTypeHandler : ContentTypeHandler {
     while (pathExp.hasNext()) {
       val cursorValue = bodyCursor.value
       when (val token = pathExp.next()) {
-        is PathToken.Field -> if (cursorValue != null && cursorValue.isJsonObject && cursorValue.obj.has(token.name)) {
-          bodyCursor = QueryResult(cursorValue.obj[token.name], token.name, bodyCursor.value)
+        is PathToken.Field -> if (cursorValue is JsonValue.Object && cursorValue.has(token.name)) {
+          bodyCursor = QueryResult(cursorValue[token.name], token.name, bodyCursor.value)
         } else {
           return
         }
-        is PathToken.Index -> if (cursorValue != null && cursorValue.isJsonArray &&
-          cursorValue.array.size() > token.index) {
-          val list = cursorValue.array
-          bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
+        is PathToken.Index -> if (cursorValue is JsonValue.Array && cursorValue.values.size > token.index) {
+          bodyCursor = QueryResult(cursorValue[token.index], token.index, bodyCursor.value)
         } else {
           return
         }
-        is PathToken.Star -> if (cursorValue != null && cursorValue.isJsonObject) {
-          val map = cursorValue.obj
+        is PathToken.Star -> if (cursorValue is JsonValue.Object) {
           val pathIterator = IteratorUtils.toList(pathExp)
-          map.forEach { key, value ->
-            queryObjectGraph(pathIterator.iterator(), QueryResult(value, key, map), fn)
+          cursorValue.entries.forEach { (key, value) ->
+            queryObjectGraph(pathIterator.iterator(), QueryResult(value, key, cursorValue), fn)
           }
           return
         } else {
           return
         }
-        is PathToken.StarIndex -> if (cursorValue != null && cursorValue.isJsonArray) {
-          val list = cursorValue.array
+        is PathToken.StarIndex -> if (cursorValue is JsonValue.Array) {
           val pathIterator = IteratorUtils.toList(pathExp)
-          list.forEachIndexed { index, item ->
-            queryObjectGraph(pathIterator.iterator(), QueryResult(item!!, index, list), fn)
+          cursorValue.values.forEachIndexed { index, item ->
+            queryObjectGraph(pathIterator.iterator(), QueryResult(item, index, cursorValue), fn)
           }
           return
         } else {
@@ -110,15 +101,15 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
 
   companion object : KLogging() {
 
-    @JvmStatic fun fromJson(json: JsonElement?): Generators {
+    @JvmStatic fun fromJson(json: JsonValue?): Generators {
       val generators = Generators()
 
-      if (json != null && json.isJsonObject) {
-        json.obj.forEach { key, generatorJson ->
+      if (json is JsonValue.Object) {
+        json.entries.forEach { (key, generatorJson) ->
           try {
             when (val category = Category.valueOf(key.toUpperCase())) {
-              Category.STATUS, Category.PATH, Category.METHOD -> if (generatorJson.obj.has("type")) {
-                val generator = lookupGenerator(generatorJson.obj)
+              Category.STATUS, Category.PATH, Category.METHOD -> if (generatorJson.has("type")) {
+                val generator = lookupGenerator(generatorJson.asObject())
                 if (generator != null) {
                   generators.addGenerator(category, generator = generator)
                 } else {
@@ -127,9 +118,9 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
               } else {
                 logger.warn { "Ignoring invalid generator config '$generatorJson.obj'" }
               }
-              else -> generatorJson.obj.forEach { generatorKey, generatorValue ->
-                if (generatorValue.isJsonObject && generatorValue.obj.has("type")) {
-                  val generator = lookupGenerator(generatorValue.obj)
+              else -> generatorJson.asObject().entries.forEach { (generatorKey, generatorValue) ->
+                if (generatorValue is JsonValue.Object && generatorValue.has("type")) {
+                  val generator = lookupGenerator(generatorValue)
                   if (generator != null) {
                     generators.addGenerator(category, generatorKey, generator)
                   } else {

@@ -12,13 +12,13 @@ interface MismatchFactory<out M : Mismatch> {
 }
 
 sealed class Mismatch {
-  open fun description() = this.toString()
+  open fun description() = this::class.java.simpleName + ": " + this.toString()
   open fun description(t: TermColors) = this.description()
   fun type() = this::class.java.simpleName
 }
 
 data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
-  override fun description() = "expected status of $expected but was $actual"
+  override fun description() = "StatusMismatch: expected status of $expected but was $actual"
   override fun description(t: TermColors) =
     "expected status of ${t.bold(expected.toString())} but was ${t.bold(actual.toString())}"
   fun toMap(): Map<String, Any?> {
@@ -27,7 +27,7 @@ data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
 }
 
 data class BodyTypeMismatch(val expected: String?, val actual: String?) : Mismatch() {
-  override fun description() = "Expected a response type of '$expected' but the actual type was '$actual'"
+  override fun description() = "BodyTypeMismatch: Expected a response type of '$expected' but the actual type was '$actual'"
   override fun description(t: TermColors) =
     "Expected a response type of ${t.bold("'$expected'")} but the actual type was ${t.bold("'$actual'")}"
   fun toMap(): Map<String, Any?> {
@@ -44,7 +44,7 @@ data class PathMismatch @JvmOverloads constructor (
 ) : Mismatch() {
   override fun description() = when (mismatch) {
     null -> super.description()
-    else -> "PathMismatch - $mismatch"
+    else -> "PathMismatch: $mismatch"
   }
 }
 
@@ -75,7 +75,7 @@ data class HeaderMismatch(
   val mismatch: String
 ) : Mismatch() {
   val regex = Regex("'[^']*'")
-  override fun description() = mismatch
+  override fun description() = "HeaderMismatch: $mismatch"
   override fun description(t: TermColors): String {
     return mismatch.replace(regex) { m -> t.bold(m.value) }
   }
@@ -105,7 +105,7 @@ data class BodyMismatch @JvmOverloads constructor(
   val path: String = "/",
   val diff: String? = null
 ) : Mismatch() {
-  override fun description() = mismatch
+  override fun description() = "BodyMismatch: $mismatch"
 }
 
 object BodyMismatchFactory : MismatchFactory<BodyMismatch> {
@@ -114,7 +114,7 @@ object BodyMismatchFactory : MismatchFactory<BodyMismatch> {
 }
 
 data class MetadataMismatch(val key: String, val expected: Any?, val actual: Any?, val mismatch: String) : Mismatch() {
-  override fun description() = mismatch
+  override fun description() = "MetadataMismatch: $mismatch"
 
   fun merge(mismatch: MetadataMismatch) = copy(mismatch = this.mismatch + ", " + mismatch.mismatch)
 }

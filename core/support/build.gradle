@@ -7,7 +7,6 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation "com.google.code.findbugs:jsr305:3.0.2"
-  implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
   api "com.google.code.gson:gson:${project.gsonVersion}"
   api('io.github.microutils:kotlin-logging:1.6.26') {
     exclude group: 'org.jetbrains.kotlin'

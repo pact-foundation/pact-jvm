@@ -20,7 +20,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '/': ['Actual body \'{"a":1,"b":"3"}\' is not equal to the expected body \'{"a":1,"b":"2"}\'']
+      '/': ['BodyMismatch: Actual body \'{"a":1,"b":"3"}\' is not equal to the expected body \'{"a":1,"b":"2"}\'']
     ]
   }
 
@@ -36,7 +36,9 @@ class MessageComparisonSpec extends Specification {
     then:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '/': ['Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match']
+      '/': [
+        'BodyMismatch: Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match'
+      ]
     ]
   }
 
@@ -57,7 +59,9 @@ class MessageComparisonSpec extends Specification {
 
     then:
     result == [
-      'destination': ["Expected metadata key 'destination' to have value 'X001' (String) but was 'X002' (String)"]
+      'destination': [
+        "MetadataMismatch: Expected metadata key 'destination' to have value 'X001' (String) but was 'X002' (String)"
+      ]
     ]
   }
 
