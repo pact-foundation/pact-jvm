@@ -15,6 +15,7 @@ class ReporterManagerSpec extends Specification {
     'Console'   || false
     'markdown'  || true
     'json'      || true
+    'slf4j'      || true
     'other'     || false
   }
 
