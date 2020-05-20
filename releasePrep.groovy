@@ -52,7 +52,7 @@ ask('Execute Build?: [Y]') {
   executeOnShell './gradlew clean build'
 }
 
-def projectProps = './gradlew :core:pact-jvm-core-model:properties'.execute().text.split('\n').inject([:]) { acc, v ->
+def projectProps = './gradlew :core:model:properties'.execute().text.split('\n').inject([:]) { acc, v ->
   if (v ==~ /\w+: .*/) {
     def kv = v.split(':')
     acc[kv[0].trim()] = kv[1].trim()
@@ -110,7 +110,7 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-  executeOnShell './gradlew clean publish :provider:pact-jvm-provider-gradle:publishPlugins -S -x :pact-publish:uploadArchives'
+  executeOnShell './gradlew clean publish :provider:gradle:publishPlugins -S -x :pact-publish:uploadArchives'
 }
 
 ask('Publish pacts to pact-foundation.pact.dius.com.au?: [Y]') {
