@@ -12,8 +12,8 @@ Provides a DSL for use with Java to build consumer pacts.
 
 The library is available on maven central using:
 
-* group-id = `au.com.dius`
-* artifact-id = `pact-jvm-consumer`
+* group-id = `au.com.dius.pact`
+* artifact-id = `consumer`
 
 ## DSL Usage
 
@@ -150,7 +150,7 @@ one will be generated.
 _\* Note:_ JSON only supports double precision floating point values. Depending on the language implementation, they
 may parsed as integer, floating point or decimal numbers.
 
-#### Ensuring all items in a list match an example (2.2.0+)
+#### Ensuring all items in a list match an example
 
 Lots of the time you might not know the number of items that will be in a list, but you want to ensure that the list
 has a minimum or maximum size and that each item in the list matches a given example. You can do this with the `arrayLike`,
@@ -382,12 +382,12 @@ For example:
         .body("{\"hello\": \"harry\"}")
 ```
 
-# Forcing pact files to be overwritten (3.6.5+)
+# Forcing pact files to be overwritten
 
 By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
 overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
-# Having values injected from provider state callbacks (3.6.11+)
+# Having values injected from provider state callbacks
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
 bodies, etc.). This works by using the V3 spec generators with provider state callbacks that return values. One example

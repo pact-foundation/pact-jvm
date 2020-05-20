@@ -10,7 +10,7 @@ configured pacts against your provider.
 ```clojure
   :profiles {
              :pact {
-                    :plugins [[au.com.dius/pact-jvm-provider-lein "4.0.0" :exclusions [commons-logging]]]
+                    :plugins [[au.com.dius.pact.provider/lein "4.1.0" :exclusions [commons-logging]]]
                     :dependencies [[ch.qos.logback/logback-core "1.1.3"]
                                    [ch.qos.logback/logback-classic "1.1.3"]
                                    [org.apache.httpcomponents/httpclient "4.4.1"]]
@@ -148,11 +148,11 @@ The following plugin options can be specified on the command line:
 |Property|Description|
 |--------|-----------|
 |:pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
-|:pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies [version 3.3.6+]|
+|:pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies|
 |:pact.filter.consumers|Comma seperated list of consumer names to verify|
 |:pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |:pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
-|:pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true' [version 3.5.18+]|
+|:pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true'|
 |:pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to 'true'|
 
 Example, to run verification only for a particular consumer:
@@ -192,7 +192,7 @@ If the `:state-change-uses-body` is not specified, or is set to true, then the p
 As for normal requests (see Modifying the requests before they are sent), a state change request can be modified before
 it is sent. Set `:state-change-request-filter` to an anonymous function on the provider that will be called before the request is made.
 
-#### Returning values that can be injected (3.6.11+)
+#### Returning values that can be injected
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
 bodies, etc.). This works by using the V3 spec generators with provider state callbacks that return values. One example

@@ -15,8 +15,6 @@ The server implements a `JSON` `REST` Admin API with the following endpoints.
 
 ## Running the server
 
-### Versions 2.2.6+
-
 Pact server takes the following parameters:
 
 ```
@@ -45,13 +43,9 @@ Usage: pact-jvm-server [options] [port]
   --debug
         run with debug logging
 ```
-### Using trust store 3.4.0+
+
+### Using trust store
 Trust store can be used. However, it is limited to a single port for the time being.
-
-### Prior to version 2.2.6
-
-Pact server takes one optional parameter, the port number to listen on. If not provided, it will listen on 29999.
-It requires an active console to run.
 
 ### Using a distribution archive
 
@@ -60,17 +54,17 @@ There is both a ZIP and TAR archive. Unpack it to a directory of choice and then
 
 ### Building a distribution bundle
 
-You can build an application bundle with gradle by running (for 2.11 version):
+You can build an application bundle with gradle by running:
 
-    $ ./gradlew :pact-jvm-server_2.11:installdist
+    $ ./gradlew :pact-jvm-server:installdist
 
-This will create an app bundle in `build/2.11/install/pact-jvm-server_2.11`. You can then execute it with:
+This will create an app bundle in `build/install/pact-jvm-server`. You can then execute it with:
 
-    $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.11/lib/pact-jvm-server_2.11-3.2.11.jar
+    $ java -jar pact-jvm-server/build/install/pact-jvm-server/lib/pact-jvm-server-4.0.1.jar
 
 or with the generated bundle script file:
 
-    $ pact-jvm-server/build/2.11/install/pact-jvm-server_2.11/bin/pact-jvm-server_2.11
+    $ pact-jvm-server/build/install/pact-jvm-server/bin/pact-jvm-server
 
 By default will run on port `29999` but a port number can be optionally supplied.
 

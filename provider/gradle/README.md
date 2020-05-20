@@ -1,5 +1,5 @@
-pact-jvm-provider-gradle
-========================
+Gradle
+======
 
 Gradle plugin for verifying pacts against a provider.
 
@@ -12,7 +12,7 @@ not `-D` as with the other Pact-JVM modules!*__
 
 ### For Gradle versions prior to 2.1
 
-#### 1.1. Add the pact-jvm-provider-gradle jar file to your build script class path:
+#### 1.1. Add the gradle jar file to your build script class path:
 
 ```groovy
 buildscript {
@@ -20,7 +20,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius.pact.provider:gradle:4.0.0'
+        classpath 'au.com.dius.pact.provider:gradle:4.1.0'
     }
 }
 ```
@@ -35,7 +35,7 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "4.0.0"
+  id "au.com.dius.pact" version "4.1.0"
 }
 ```
 
@@ -781,7 +781,7 @@ It will then validate that the returned contents matches the contents for the me
 
 To publish the plugin to the community portal:
 
-    $ ./gradlew :pact-jvm-provider-gradle_2.11:publishPlugins
+    $ ./gradlew :pact-jvm-provider-gradle:publishPlugins
 
 # Verification Reports
 

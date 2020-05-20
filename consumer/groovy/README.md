@@ -7,19 +7,19 @@ Groovy DSL for Pact JVM
 
 The library is available on maven central using:
 
-* group-id = `au.com.dius`
-* artifact-id = `pact-jvm-consumer-groovy`
-* version-id = `4.0.x`
+* group-id = `au.com.dius.pact.consumer`
+* artifact-id = `groovy`
+* version-id = `4.1.0`
 
 ## Usage
 
-Add the `pact-jvm-consumer-groovy` library to your test class path. This provides a `PactBuilder` class for you to use
+Add the `groovy` library to your test class path. This provides a `PactBuilder` class for you to use
 to define your pacts. For a full example, have a look at the example JUnit `ExampleGroovyConsumerPactTest`.
 
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy:4.0.0'
+        testCompile 'au.com.dius.pact.consumer:groovy:4.1.0'
     }
 
 Then create an instance of the `PactBuilder` in your test.

@@ -15,9 +15,9 @@ The Maven plugin provides a `verify` goal which will verify all configured pacts
     <plugins>
       [...]
       <plugin>
-        <groupId>au.com.dius</groupId>
-        <artifactId>pact-jvm-provider-maven</artifactId>
-        <version>4.0.0</version>
+        <groupId>au.com.dius.pact.provider</groupId>
+        <artifactId>maven</artifactId>
+        <version>4.1.0</version>
       </plugin>
       [...]
     </plugins>
@@ -31,9 +31,9 @@ You define all the providers and consumers within the configuration element of t
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -69,9 +69,9 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -96,9 +96,9 @@ no pact files are loaded after processing all the directories in the list.
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -120,9 +120,9 @@ For providers that are running on SSL with self-signed certificates, you need to
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -141,9 +141,9 @@ For environments that are running their own certificate chains:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -170,9 +170,9 @@ bound to a variable named `request` prior to it being executed.
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -204,9 +204,9 @@ For example:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -263,9 +263,9 @@ Example in the configuration section:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -295,9 +295,9 @@ These values can be set at the provider level, or for a specific consumer. Consu
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -351,9 +351,9 @@ For example:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -375,9 +375,9 @@ For example, here is how you configure the plugin to use basic authentication fo
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.1</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -401,9 +401,9 @@ Here is how you configure the plugin to use bearer token authentication for veri
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.1</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -447,9 +447,9 @@ configuration in your POM.
  
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -474,9 +474,9 @@ For example:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -523,9 +523,9 @@ Add something like the following to your maven pom file:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -585,9 +585,9 @@ By default, the test classpath is scanned for annotated methods. You can overrid
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -620,9 +620,9 @@ For example:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
@@ -645,9 +645,9 @@ is setting the tag to the current source control branch. This supports using pac
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
@@ -670,9 +670,9 @@ For example:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerUsername>USERNAME</pactBrokerUsername>
@@ -685,9 +685,9 @@ Or to use a bearer token:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.0.1</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerToken>TOKEN</pactBrokerToken> <!-- Replace TOKEN with the actual token -->
@@ -704,9 +704,9 @@ configuration in your POM.
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerServerId>test-pact-broker</pactBrokerServerId>  <!-- This must match the server id in the maven settings -->
@@ -723,9 +723,9 @@ For example:
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <excludes>
@@ -754,9 +754,9 @@ the `reports` configuration list.
 
 ```xml
 <plugin>
-    <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.0</version>
     <configuration>
       <reports>
           <report>console</report>

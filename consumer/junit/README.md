@@ -7,9 +7,9 @@ Provides a DSL and a base test class for use with Junit to build consumer tests.
 
 The library is available on maven central using:
 
-* group-id = `au.com.dius`
-* artifact-id = `pact-jvm-consumer-junit`
-* version-id = `4.0.x`
+* group-id = `au.com.dius.pact.consumer`
+* artifact-id = `junit`
+* version-id = `4.1.0`
 
 ## Usage
 
