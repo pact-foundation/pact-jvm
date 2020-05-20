@@ -37,6 +37,10 @@ allprojects {
 
 subprojects {
 
+  if (name in ['core']) {
+    return
+  }
+
   version = '4.1.0'
   
   buildscript {
