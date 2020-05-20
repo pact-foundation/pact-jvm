@@ -168,7 +168,7 @@ for an example.
 #### Specify the additional classes on the test target
 
 You can provide the additional classes to the test target with the `withStateHandler` or `setStateHandlers` methods. See
-[BooksPactProviderTest](pact-jvm-provider-spring/src/test/java/au/com/dius/pact/provider/spring/BooksPactProviderTest.java) for an example. 
+[BooksPactProviderTest](spring/src/test/java/au/com/dius/pact/provider/spring/BooksPactProviderTest.java) for an example. 
 
 ## Pact source
 

@@ -2,7 +2,7 @@
 
 ## Overview
 Library provides ability to play contract tests against a provider using Spring & JUnit.
-This library is based on and references the JUnit package, so see the [Pact JUnit 4](../pact-jvm-provider-junit) or [Pact JUnit 5](../pact-jvm-provider-junit5) providers for more details regarding configuration using JUnit.
+This library is based on and references the JUnit package, so see the [Pact JUnit 4](../junit) or [Pact JUnit 5](../junit5) providers for more details regarding configuration using JUnit.
 
 Supports:
 

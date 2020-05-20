@@ -312,7 +312,7 @@ DslPart body = new PactDslJsonBody()
 
 ```
 
-For an example, have a look at [WildcardKeysTest](../pact-jvm-consumer-junit/src/test/java/au/com/dius/pact/consumer/WildcardKeysTest.java).
+For an example, have a look at [WildcardKeysTest](../junit/src/test/java/au/com/dius/pact/consumer/WildcardKeysTest.java).
 
 **NOTE:** The `eachKeyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition

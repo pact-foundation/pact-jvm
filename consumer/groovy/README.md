@@ -530,7 +530,7 @@ overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
 # Publishing your pact files to a pact broker
 
-If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/provider/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
+If you use Gradle, you can use the [pact Gradle plugin](../../provider/gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
 
 # Pact Specification V3
 

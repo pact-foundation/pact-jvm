@@ -55,7 +55,7 @@ It requires an active console to run.
 
 ### Using a distribution archive
 
-You can download a [distribution from maven central](http://search.maven.org/remotecontent?filepath=au/com/dius/pact-jvm-server_2.11/2.2.4/).
+You can download a [distribution from maven central](http://search.maven.org/remotecontent?filepath=au/com/dius/pact/pact-jvm-server/4.1.0/).
 There is both a ZIP and TAR archive. Unpack it to a directory of choice and then run the script in the bin directory.
 
 ### Building a distribution bundle

@@ -347,7 +347,7 @@ is verified. It is only recorded in the consumer tests and used by the provider 
 
 ### Building JSON bodies with PactDslJsonBody DSL
 
-**NOTE:** If you are using Java 8, there is [an updated DSL for consumer tests](../pact-jvm-consumer-java8).
+**NOTE:** If you are using Java 8, there is [an updated DSL for consumer tests](../java8).
 
 The body method of the ConsumerPactBuilder can accept a PactDslJsonBody, which can construct a JSON body as well as
 define regex and type matchers.
@@ -668,7 +668,7 @@ overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
 # Publishing your pact files to a pact broker
 
-If you use Gradle, you can use the [pact Gradle plugin](../../provider/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
+If you use Gradle, you can use the [pact Gradle plugin](../../provider/gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
 
 # Pact Specification V3
 
