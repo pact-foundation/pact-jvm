@@ -117,7 +117,7 @@ class JsonLexer(val json: JsonSource) {
       return when {
         next.isWhitespace() -> {
           val chars = mutableListOf(next)
-          chars.addAll(consumeChars(Char::isWhitespace))
+          consumeChars(chars, Char::isWhitespace)
           Ok(JsonToken.Whitespace(String(chars.toCharArray())))
         }
         next == '-' || next.isDigit() -> scanNumber(next)
@@ -139,7 +139,7 @@ class JsonLexer(val json: JsonSource) {
 
   private fun scanNumber(next: Char): Result<JsonToken, JsonException> {
     val chars = mutableListOf(next)
-    chars.addAll(consumeChars(Char::isDigit))
+    consumeChars(chars, Char::isDigit)
     if (next == '-' && chars.size == 1) {
       return Err(JsonException(
         "Invalid JSON (${documentPointer()}), found a '$next' that was not followed by any digits"))
@@ -155,7 +155,7 @@ class JsonLexer(val json: JsonSource) {
     var next = json.peekNextChar()
     if (next == '.') {
       chars.add(json.nextChar()!!)
-      chars.addAll(consumeChars(Char::isDigit))
+      consumeChars(chars, Char::isDigit)
       if (!chars.last().isDigit()) {
         return Err(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
       }
@@ -167,7 +167,7 @@ class JsonLexer(val json: JsonSource) {
       if (next == '+' || next == '-') {
         chars.add(json.nextChar()!!)
       }
-      chars.addAll(consumeChars(Char::isDigit))
+      consumeChars(chars, Char::isDigit)
       if (!chars.last().isDigit()) {
         return Err(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
       }
@@ -178,10 +178,9 @@ class JsonLexer(val json: JsonSource) {
   private fun scanString(): Result<JsonToken.StringValue, JsonException> {
     val chars = mutableListOf<Char>()
     do {
-      var next = json.nextChar()
+      val next = json.nextChar()
       if (next == '\\') {
-        val escapeCode = json.nextChar()
-        when (escapeCode) {
+        when (val escapeCode = json.nextChar()) {
           '"' -> chars.add('"')
           '\\' -> chars.add('\\')
           '/' -> chars.add('/')
@@ -281,15 +280,13 @@ class JsonLexer(val json: JsonSource) {
     return Ok(JsonToken.True)
   }
 
-  private fun consumeChars(predicate: (Char) -> Boolean): List<Char> {
-    val list = mutableListOf<Char>()
+  private fun consumeChars(list: MutableList<Char>, predicate: (Char) -> Boolean) {
     var next = json.peekNextChar()
     while (next != null && predicate(next)) {
       list.add(next)
       json.advance()
       next = json.peekNextChar()
     }
-    return list
   }
 
   private fun nextChar(): Char? {
