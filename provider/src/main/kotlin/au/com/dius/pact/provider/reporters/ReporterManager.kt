@@ -12,7 +12,8 @@ object ReporterManager {
   private val REPORTERS = mapOf(
     "console" to AnsiConsoleReporter::class,
     "markdown" to MarkdownReporter::class,
-    "json" to JsonReporter::class
+    "json" to JsonReporter::class,
+    "slf4j" to SLF4JReporter::class
   )
 
   @JvmStatic
