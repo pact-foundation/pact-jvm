@@ -42,7 +42,12 @@ class PactXmlBuilder @JvmOverloads constructor (
     if (version != null) {
       doc.xmlVersion = version
     }
-    val xmlNode = XmlNode(this, doc.documentElement, listOf("$", rootName))
+    val root = if (doc.documentElement == null) {
+      val element = doc.createElement(rootName)
+      doc.appendChild(element)
+      element
+    } else doc.documentElement
+    val xmlNode = XmlNode(this, root, listOf("$", rootName))
     cl.accept(xmlNode)
     return this
   }
@@ -56,11 +61,13 @@ class PactXmlBuilder @JvmOverloads constructor (
     val result = if (charset != null) {
       StreamResult(OutputStreamWriter(outputStream, charset))
     } else {
-      StreamResult(ByteArrayOutputStream())
+      StreamResult(outputStream)
     }
     transformer.transform(source, result)
     return outputStream.toByteArray()
   }
+
+  override fun toString() = String(asBytes())
 }
 
 class XmlNode(private val builder: PactXmlBuilder, private val element: Element, private val path: List<String>) {
