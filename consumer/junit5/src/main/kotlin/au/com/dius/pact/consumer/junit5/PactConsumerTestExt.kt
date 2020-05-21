@@ -1,13 +1,16 @@
 package au.com.dius.pact.consumer.junit5
 
+import au.com.dius.pact.consumer.AbstractBaseMockServer
 import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.PactConsumerConfig
+import au.com.dius.pact.consumer.PactTestRun
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
+import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.DefaultPactWriter
@@ -90,7 +93,12 @@ annotation class PactTestFor(
   /**
    * Type of provider (synchronous HTTP or asynchronous messages)
    */
-  val providerType: ProviderType = ProviderType.UNSPECIFIED
+  val providerType: ProviderType = ProviderType.UNSPECIFIED,
+
+  /**
+   * If HTTPS should be used. If enabled, a mock server with a self-signed cert will be started.
+   */
+  val https: Boolean = false
 )
 
 data class ProviderInfo @JvmOverloads constructor(
@@ -98,19 +106,32 @@ data class ProviderInfo @JvmOverloads constructor(
   val hostInterface: String = "",
   val port: String = "",
   val pactVersion: PactSpecVersion? = null,
-  val providerType: ProviderType? = null
+  val providerType: ProviderType? = null,
+  val https: Boolean = false
 ) {
 
-  fun mockServerConfig() =
-    MockProviderConfig.httpConfig(if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
-      if (port.isEmpty()) 0 else port.toInt(), pactVersion ?: PactSpecVersion.V3)
+  fun mockServerConfig() = if (https) {
+    MockHttpsProviderConfig.httpsConfig(
+      if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
+      if (port.isEmpty()) 0 else port.toInt(),
+      pactVersion ?: PactSpecVersion.V3
+    )
+  } else {
+    MockProviderConfig.httpConfig(
+      if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
+      if (port.isEmpty()) 0 else port.toInt(),
+      pactVersion ?: PactSpecVersion.V3
+    )
+  }
 
   fun merge(other: ProviderInfo): ProviderInfo {
     return copy(providerName = if (providerName.isNotEmpty()) providerName else other.providerName,
       hostInterface = if (hostInterface.isNotEmpty()) hostInterface else other.hostInterface,
       port = if (port.isNotEmpty()) port else other.port,
       pactVersion = pactVersion ?: other.pactVersion,
-      providerType = providerType ?: other.providerType)
+      providerType = providerType ?: other.providerType,
+      https = https || other.https
+    )
   }
 
   companion object {
@@ -123,15 +144,24 @@ data class ProviderInfo @JvmOverloads constructor(
         when (annotation.providerType) {
           ProviderType.UNSPECIFIED -> null
           else -> annotation.providerType
-        })
+        }, annotation.https)
   }
 }
 
-class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : MockServer by baseMockServer,
+class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : AbstractBaseMockServer(),
   ExtensionContext.Store.CloseableResource {
   override fun close() {
     baseMockServer.stop()
   }
+
+  override fun start() = baseMockServer.start()
+  override fun stop() = baseMockServer.stop()
+  override fun waitForServer() = baseMockServer.waitForServer()
+  override fun getUrl() = baseMockServer.getUrl()
+  override fun getPort() = baseMockServer.getPort()
+  override fun <R> runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>) =
+    baseMockServer.runAndWritePact(pact, pactVersion, testFn)
+  override fun validateMockServerState(testResult: Any?) = baseMockServer.validateMockServerState(testResult)
 }
 
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver, AfterTestExecutionCallback, AfterAllCallback {
@@ -184,21 +214,23 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val (providerInfo, pactMethod) = lookupProviderInfo(context)
     logger.debug { "providerInfo = $providerInfo" }
 
-    setupMockServer(providerInfo, pactMethod, context)
-  }
-
-  private fun setupMockServer(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): MockServer? {
-    val store = context.getStore(NAMESPACE)
-    return if (providerInfo.providerType != ProviderType.ASYNCH && store["mockServer"] == null) {
-      val config = providerInfo.mockServerConfig()
-      store.put("mockServerConfig", config)
-      val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context) as RequestResponsePact, config) as BaseMockServer
+    if (providerInfo.providerType != ProviderType.ASYNCH) {
+      val mockServer = setupMockServer(providerInfo, pactMethod, context)
       mockServer.start()
       mockServer.waitForServer()
+    }
+  }
+
+  private fun setupMockServer(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): AbstractBaseMockServer {
+    val store = context.getStore(NAMESPACE)
+    return if (store["mockServer"] == null) {
+      val config = providerInfo.mockServerConfig()
+      store.put("mockServerConfig", config)
+      val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context) as RequestResponsePact, config)
       store.put("mockServer", JUnit5MockServerSupport(mockServer))
       mockServer
     } else {
-      store["mockServer"] as MockServer?
+      store["mockServer"] as AbstractBaseMockServer
     }
   }
 

@@ -17,4 +17,5 @@ dependencies {
   testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
+  testCompile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
 }

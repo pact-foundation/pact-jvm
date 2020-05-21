@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.support
 
+import org.apache.commons.lang3.RandomUtils
+import java.io.IOException
+import java.net.ServerSocket
 import kotlin.reflect.full.cast
 
 object Utils {
@@ -29,6 +32,34 @@ object Utils {
       }
     } else {
       default
+    }
+  }
+
+  fun randomPort(lower: Int = 10000, upper: Int = 60000): Int {
+    var port: Int? = null
+    var count = 0
+    while (port == null && count < 20) {
+      val randomPort = RandomUtils.nextInt(lower, upper)
+      if (portAvailable(randomPort)) {
+        port = randomPort
+      }
+      count++
+    }
+
+    return port ?: 0
+  }
+
+  fun portAvailable(p: Int): Boolean {
+    var socket: ServerSocket? = null
+    return try {
+      socket = ServerSocket(p)
+      true
+    } catch (_: IOException) {
+      false
+    } finally {
+      try {
+        socket?.close()
+      } catch (_: Throwable) { }
     }
   }
 }

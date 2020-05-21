@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 /**
  * Returns a mock server for the pact and config
  */
-fun mockServer(pact: RequestResponsePact, config: MockProviderConfig): MockServer {
+fun mockServer(pact: RequestResponsePact, config: MockProviderConfig): BaseMockServer {
   return when (config) {
     is MockHttpsProviderConfig -> when (config.mockServerImplementation) {
       MockServerImplementation.KTorServer -> KTorMockServer(pact, config)
@@ -75,16 +75,19 @@ interface MockServer {
   fun validateMockServerState(testResult: Any?): PactVerificationResult
 }
 
-abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig) : MockServer {
+abstract class AbstractBaseMockServer : MockServer {
+  abstract fun start()
+  abstract fun stop()
+  abstract fun waitForServer()
+}
+
+abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig) : AbstractBaseMockServer() {
 
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
   private val matchedRequests = ConcurrentLinkedQueue<Request>()
   private val requestMatcher = RequestMatching(pact.interactions)
 
-  abstract fun start()
-  abstract fun stop()
-
-  fun waitForServer() {
+  override fun waitForServer() {
     val sf = SSLSocketFactory(TrustSelfSignedStrategy())
     val httpclient = HttpClientBuilder.create()
       .setConnectionManager(BasicHttpClientConnectionManager(RegistryBuilder.create<ConnectionSocketFactory>()
