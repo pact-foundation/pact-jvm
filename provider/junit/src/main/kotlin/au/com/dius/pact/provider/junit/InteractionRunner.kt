@@ -157,6 +157,7 @@ open class InteractionRunner<I>(
       } catch (e: Throwable) {
         if (!pending) {
           notifier.fireTestFailure(Failure(description, e))
+          notifier.fireTestFinished(description)
         }
         testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
           "exception" to e)),
