@@ -111,3 +111,25 @@ supported phase.
 By default, the test will fail with an exception if no pacts were found to verify. This can be overridden by adding the 
 `@IgnoreNoPactsToVerify` annotation to the test class. For this to work, you test class will need to be able to receive 
 null values for any of the injected parameters.
+
+# Pending Pact Support (version 4.1.0 and later)
+
+If your Pact broker supports pending pacts, you can enable support for that by enabling that on your Pact broker 
+annotation or with JVM system properties. You also need to provide the tags used to publish the providers main-line results (i.e. tags like prod or master).
+The broker will then label any pacts found that don't have a successful verification result as pending. That way, if
+they fail verification, the verifier will ignore those failures and not fail the build.
+
+For example, with annotation:
+
+```java
+@Provider("Activity Service")
+@PactBroker(host = "test.pactflow.io", tags = {"test"}, scheme = "https",
+  enablePendingPacts = "true",
+  providerTags = "master"
+)
+public class PactJUnitTest {
+```
+
+You can also use the `pactbroker.enablePending` and `pactbroker.providerTags` JVM system properties. 
+
+Then any pending pacts will not cause a build failure.
