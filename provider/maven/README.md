@@ -330,7 +330,7 @@ You can enable teardown state change calls by setting the property `<stateChange
 will add an `action` parameter to the state change call. The setup call before the test will receive `action=setup`, and
 then a teardown call will be made afterwards to the state change URL with `action=teardown`.
 
-#### Returning values that can be injected (3.6.11+)
+#### Returning values that can be injected
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
 bodies, etc.). This works by using the V3 spec generators with provider state callbacks that return values. One example
@@ -465,7 +465,7 @@ configuration in your POM.
 </plugin>
 ```
 
-### Verifying pacts from an pact broker that match particular tags
+### Verifying pacts from a pact broker that match particular tags
 
 If your pacts in your pact broker have been tagged, you can set the tags to fetch by configuring the `tags` 
 element of the `pactBroker` element of your provider.
@@ -664,7 +664,7 @@ You can also specify the tags using the `pact.consumer.tags` Java system propert
 ## Publishing to an authenticated pact broker
 
 For an authenticated pact broker, you can pass in the credentials with the `pactBrokerUsername` and `pactBrokerPassword`
-properties. Currently it only supports basic authentication.
+properties. Currently, it only supports basic authentication or a bearer token.
 
 For example:
 
@@ -768,3 +768,28 @@ the `reports` configuration list.
 ```
 
 These reports will be written to `target/reports/pact`.
+
+# Pending Pact Support (version 4.1.0 and later)
+
+If your Pact broker supports pending pacts, you can enable support for that by turning that on in your Pact broker 
+configuration. You also need to provide the tags used to publish the providers main-line results (i.e. tags like prod or master).
+The broker will then label any pacts found that don't have a successful verification result as pending. That way, if
+they fail verification, the verifier will ignore those failures and not fail the build.
+
+For example:
+
+```xml
+<pactBroker>
+    <url>https://test.pactflow.io/</url>
+    <tags>
+        <tag>test</tag>
+    </tags>
+    <enablePending>
+        <providerTags>
+            <tag>master</tag>
+        </providerTags>
+    </enablePending>
+</pactBroker>
+```
+
+Then any pending pacts will not cause a build failure.
