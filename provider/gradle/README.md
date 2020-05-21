@@ -10,6 +10,15 @@ not `-D` as with the other Pact-JVM modules!*__
 
 ## To Use It
 
+### For Gradle versions 2.1+
+
+```groovy
+plugins {
+  id "au.com.dius.pact" version "4.1.0"
+}
+```
+
+
 ### For Gradle versions prior to 2.1
 
 #### 1.1. Add the gradle jar file to your build script class path:
@@ -29,14 +38,6 @@ buildscript {
 
 ```groovy
 apply plugin: 'au.com.dius.pact'
-```
-
-### For Gradle versions 2.1+
-
-```groovy
-plugins {
-  id "au.com.dius.pact" version "4.1.0"
-}
 ```
 
 ### 2. Define the pacts between your consumers and providers
@@ -487,6 +488,53 @@ provider state.
 You can setup your build to validate against the pacts stored in a pact broker. The pact gradle plugin will query
 the pact broker for all consumers that have a pact with the provider based on its name.
 
+### For Pact-JVM 4.1.0 and later
+
+#### First: Add a `broker` configuration block
+
+You can enable Pact broker support by adding a `broker` configuration block to the `pact` block.
+
+For example:
+
+```groovy
+pact {
+
+    broker {
+        pactBrokerUrl = 'https://your-broker-url/'
+    
+        // To use basic auth    
+        pactBrokerUsername = '<USERNAME>'
+        pactBrokerPassword = '<PASSWORD>'
+    
+        // OR to use a bearer token
+        pactBrokerToken = '<TOKEN>'
+    }
+
+}
+```
+
+#### Second: Define your service provider
+
+```groovy
+pact {
+
+  serviceProviders {
+    myProvider { // Define the name of your provider here
+
+      fromPactBroker {
+        selectors = latestTags('test') // specify your tags here. You can leave this out to just use the latest pacts  
+      }
+
+    }
+  }
+
+}
+```
+
+### For Pact-JVM versions before 4.1.0
+
+You configure your service provider and then use the `hasPactsFrom..` methods.
+
 For example:
 
 ```groovy
@@ -544,7 +592,7 @@ pact {
 }
 ```
 
-### Using an authenticated Pact Broker
+#### Using an authenticated Pact Broker
 
 You can add the authentication details for the Pact Broker like so:
 
@@ -625,6 +673,9 @@ The pact gradle plugin provides a `pactPublish` task that can publish all pact f
 to a pact broker. To use it, you need to add a publish configuration to the pact configuration that defines the
 directory where the pact files are and the URL to the pact broker.
 
+If you have configured your broker details in a broker configuration block, the task will use that. Otherwise, 
+configure the broker details on the publish block.
+
 For example:
 
 ```groovy
@@ -646,7 +697,6 @@ pact {
 
     publish {
         pactDirectory = '/pact/dir' // defaults to $buildDir/pacts
-        pactBrokerUrl = 'http://pactbroker:1234'
         tags = [project.pactBrokerTag]
     }
 
@@ -659,21 +709,28 @@ otherwise the broker will reject the pact files.
 
 ## Publishing to an authenticated pact broker
 
-To publish to a broker protected by basic auth, include the username/password in the `pactBrokerUrl`.
+To publish to a broker protected by basic auth, include the username/password in the broker configuration
 
 For example:
 
 ```groovy
 pact {
 
-    publish {
-        pactBrokerUrl = 'https://username:password@mypactbroker.com'
+    broker {
+        pactBrokerUrl = 'https://your-broker-url/'
+    
+        // To use basic auth    
+        pactBrokerUsername = '<USERNAME>'
+        pactBrokerPassword = '<PASSWORD>'
+    
+        // OR to use a bearer token
+        pactBrokerToken = '<TOKEN>'
     }
 
 }
 ```
 
-You can add the username and password as properties.
+You can add the username and password as properties on the publish block.
 
 ```groovy
 pact {
@@ -711,7 +768,6 @@ For example:
 pact {
 
     publish {
-        pactBrokerUrl = 'https://mypactbroker.com'
         excludes = [ '.*\\-\\d+$' ] // exclude all pact files that end with a dash followed by a number in the name 
     }
 
@@ -776,12 +832,6 @@ class ConfirmationKafkaMessageBuilderTest {
 ```
 
 It will then validate that the returned contents matches the contents for the message in the pact file.
-
-## Publishing to the Gradle Community Portal
-
-To publish the plugin to the community portal:
-
-    $ ./gradlew :pact-jvm-provider-gradle:publishPlugins
 
 # Verification Reports
 
@@ -856,3 +906,32 @@ or you can set the `pact.provider.tag` JVM system property. For example:
 ```console
 $ ./gradlew -d pactverify -Ppact.verifier.publishResults=true -Dpact.provider.tag=Test2
 ``` 
+
+# Pending Pact Support (version 4.1.0 and later)
+
+If your Pact broker supports pending pacts, you can enable support for that by turning that on in your provider 
+configuration. You also need to provide the tags used to publish the providers main-line results (i.e. tags like prod or master).
+The broker will then label any pacts found that don't have a successful verification result as pending. That way, if
+they fail verification, the verifier will ignore those failures and not fail the build.
+
+For example:
+
+```groovy
+pact {
+
+  serviceProviders {
+    myProvider {
+
+      fromPactBroker {
+        selectors = latestTags('test') // specify your tags here. You can leave this out to just use the latest pacts
+        enablePending = true // enable pending pacts support
+        providerTags = ['master'] // specify the provider main-line tags  
+      }
+
+    }
+  }
+
+}
+```
+
+Then any pending pacts will not cause a build failure.
