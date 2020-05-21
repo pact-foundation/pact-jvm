@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
-import au.com.dius.pact.provider.junit.target.AmqpTarget
+import au.com.dius.pact.provider.junit.target.MessageTarget
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
 import java.util.function.Function
@@ -14,8 +14,7 @@ import java.util.function.Function
  * Target for message verification that supports a spring application context. For each annotated method, the owning
  * bean will be looked up from the application context
  */
-@Deprecated("Use SpringAwareMessageTarget instead")
-open class SpringAwareAmqpTarget : AmqpTarget(), BeanFactoryAware {
+open class SpringAwareMessageTarget : MessageTarget(), BeanFactoryAware {
   private lateinit var beanFactory: BeanFactory
 
   override fun setBeanFactory(beanFactory: BeanFactory) {

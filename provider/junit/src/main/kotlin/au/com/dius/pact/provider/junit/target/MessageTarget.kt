@@ -24,8 +24,7 @@ import java.util.function.Supplier
  * the performance cost
  * @param packagesToScan List of JVM packages
  */
-@Deprecated("Use MessageTarget")
-open class AmqpTarget @JvmOverloads constructor(
+open class MessageTarget @JvmOverloads constructor(
   private val packagesToScan: List<String> = emptyList(),
   private val classLoader: ClassLoader? = null
 ) : BaseTarget() {

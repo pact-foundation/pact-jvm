@@ -67,7 +67,7 @@ no parameters or a single Map parameter.
     }
 ```
 
-## Example of AMQP Message test
+## Example of Message test
 
 ```java
     @RunWith(PactRunner.class) // Say JUnit to run tests with custom Runner
@@ -76,7 +76,7 @@ no parameters or a single Map parameter.
     public class ConfirmationKafkaContractTest {
 
         @TestTarget // Annotation denotes Target that will be used for tests
-        public final Target target = new AmqpTarget(); // Out-of-the-box implementation of Target (for more information take a look at Test Target section)
+        public final Target target = new MessageTarget(); // Out-of-the-box implementation of Target (for more information take a look at Test Target section)
 
         @BeforeClass //Method will be run once: before whole contract test suite
         public static void setUpService() {
@@ -382,10 +382,10 @@ that will play pacts as http request and assert response from service by matchin
 
 You can also specify the protocol, defaults to "http".
 
-### AmqpTarget
+### MessageTarget
 
-`au.com.dius.pact.provider.junit.target.AmqpTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target`
-that will play pacts as an AMQP message and assert response from service by matching rules from pact.
+`au.com.dius.pact.provider.junit.target.MessageTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target`
+that will play pacts as an message and assert response from service by matching rules from pact.
 
 **Note for Maven users:** If you use Maven to run your tests, you will have to make sure that the Maven Surefire plugin is at least
   version 2.22.1 uses an isolated classpath.
