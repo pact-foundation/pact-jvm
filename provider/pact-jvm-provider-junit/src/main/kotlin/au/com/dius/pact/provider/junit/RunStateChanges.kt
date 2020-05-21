@@ -1,10 +1,16 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.ProviderState
+import mu.KLogging
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
 import java.util.function.Supplier
 import kotlin.reflect.full.isSubclassOf
+
+data class StateChangeCallbackFailed(
+  override val message: String,
+  override val cause: Throwable
+) : Exception(message, cause)
 
 class RunStateChanges(
   private val next: Statement,
@@ -29,10 +35,15 @@ class RunStateChanges(
         val target = stateChangeHandlers.map(Supplier<out Any>::get).find {
           it::class.isSubclassOf(method.first.declaringClass.kotlin)
         }
-        val stateChangeValue = if (method.first.method.parameterCount == 1) {
-          method.first.invokeExplosively(target, providerState.params)
-        } else {
-          method.first.invokeExplosively(target)
+        val stateChangeValue = try {
+          if (method.first.method.parameterCount == 1) {
+            method.first.invokeExplosively(target, providerState.params)
+          } else {
+            method.first.invokeExplosively(target)
+          }
+        } catch (e: Throwable) {
+          logger.error(e) { "State change method for \"${providerState.name}\" failed" }
+          throw StateChangeCallbackFailed("State change method for \"${providerState.name}\" failed", e)
         }
 
         if (stateChangeValue is Map<*, *>) {
@@ -41,4 +52,6 @@ class RunStateChanges(
       }
     }
   }
+
+  companion object : KLogging()
 }
