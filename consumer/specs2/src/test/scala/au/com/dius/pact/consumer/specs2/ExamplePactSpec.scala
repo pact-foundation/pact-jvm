@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
-import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -10,8 +9,7 @@ import org.specs2.runner.JUnitRunner
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-//@RunWith(classOf[JUnitRunner])
-@Ignore
+@RunWith(classOf[JUnitRunner])
 class ExamplePactSpec extends Specification with PactSpec {
 
   val consumer = "My Consumer"
@@ -29,8 +27,7 @@ class ExamplePactSpec extends Specification with PactSpec {
     .withConsumerTest((mockServer, _) => {
       val optionsResult = ConsumerService(mockServer.getUrl).options("/")
       val simpleGet = ConsumerService(mockServer.getUrl).simpleGet("/foo")
-      Await.result(optionsResult, timeout) must be_==(200, "",
-        Map("Content-Length" -> "0", "Connection" -> "keep-alive", "Option" -> "Value-X")) and
+      Await.result(optionsResult, timeout) must be_==(200, "", Map("Option" -> "Value-X")) and
         (Await.result(simpleGet, timeout) must be_==(200, "{}"))
     })
 
