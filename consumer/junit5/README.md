@@ -144,7 +144,7 @@ javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
 You can override the directory the pacts are written in a test by adding the `@PactFolder` annotation to the test
 class.
 
-## Forcing pact files to be overwritten (3.6.5+)
+## Forcing pact files to be overwritten
 
 By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
 overwritten, set the Java system property `pact.writer.overwrite` to `true`.
@@ -153,7 +153,7 @@ overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
 The current implementation does not support tests with multiple providers. This will be added in a later release.
 
-# Having values injected from provider state callbacks (3.6.11+)
+# Having values injected from provider state callbacks
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
 bodies, etc.). This works by using the V3 spec generators with provider state callbacks that return values. One example
@@ -179,3 +179,8 @@ You can also just use the key instead of an expression:
 ```java
     .valueFromProviderState('userId', 'userId', 100) // will look value using userId as the key
 ```
+
+## Using HTTPS
+
+You can enable a HTTPS mock server by setting `https=true` on the `@PactTestFor` annotation. Note that this mock
+server will use a self-signed certificate, so any client code will need to accept self-signed certificates.
