@@ -28,7 +28,7 @@ class PactConsumerTestExtSpec extends Specification {
     def parameter = PactConsumerTestExtSpec.getMethod(testMethod, model).parameters[0]
     def parameterContext = [getParameter: { parameter } ] as ParameterContext
     def providerInfo = new ProviderInfo('test', 'localhost', '0', PactSpecVersion.V3,
-      providerType)
+      providerType, false)
 
     def store = [get: { arg ->
       arg == 'providerInfo' ? providerInfo : model.newInstance(new Provider(), new Consumer(), [])
