@@ -1,5 +1,5 @@
 {
-  "match": true,
+  "match": false,
   "comment": "XML Unexpected favourite colour with empty value",
   "expected" : {
     "method": "POST",
