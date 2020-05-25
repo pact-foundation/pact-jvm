@@ -162,7 +162,13 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
             val expectedNode = comp.first
             val actualNode = comp.second
             when {
-              expectedNode == null -> emptyList()
+              expectedNode == null -> if (allowUnexpectedKeys || actualNode == null) {
+                emptyList()
+              } else {
+                listOf(BodyMismatch(expected, actual,
+                  "Unexpected child <${e.key}/>",
+                  (path + actualNode.nodeName + index.toString()).joinToString(".")))
+              }
               actualNode == null -> listOf(BodyMismatch(expected, actual,
                 "Expected child <${e.key}/> but was missing",
                 (path + expectedNode.nodeName + index.toString()).joinToString(".")))
