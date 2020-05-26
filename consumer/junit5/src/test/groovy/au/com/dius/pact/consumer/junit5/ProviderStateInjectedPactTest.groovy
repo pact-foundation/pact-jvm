@@ -1,17 +1,15 @@
 package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.MockServer
-import au.com.dius.pact.core.model.annotations.Pact
-import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import org.apache.http.HttpResponse
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -21,7 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 class ProviderStateInjectedPactTest {
   @Pact(provider = 'ProviderStateService', consumer = 'V3Consumer')
   RequestResponsePact articles(PactDslWithProvider builder) {
-    builder
+    def pact = builder
       .given('a provider state with injectable values', [valueA: 'A', valueB: 100])
       .uponReceiving('a request')
         .path('/values')
@@ -35,6 +33,14 @@ class ProviderStateInjectedPactTest {
           .valueFromProviderState('userId', 'userId', 100)
       )
       .toPact()
+
+    def generators = pact.interactions.first().response.generators.toMap(PactSpecVersion.V3)
+    assert generators == [
+      body: ['$.userId': [type: 'ProviderState', expression: 'userId', dataType: 'INTEGER']],
+      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}', dataType: 'STRING']]
+    ]
+
+    pact
   }
 
   @Test
@@ -44,17 +50,5 @@ class ProviderStateInjectedPactTest {
       .execute().returnResponse()
     assert httpResponse.statusLine.statusCode == 200
     assert httpResponse.entity.content.text == '{"userName":"Test","userId":100}'
-  }
-
-  @AfterAll
-  static void checkPactFile() {
-    def pactFile = new File("${PactConsumerConfig.pactDirectory}/V3Consumer-ProviderStateService.json")
-    def json = new JsonSlurper().parse(pactFile)
-    assert json.metadata.pactSpecification.version == '3.0.0'
-    def generators = json.interactions.first().response.generators
-    assert generators == [
-      body: ['$.userId': [type: 'ProviderState', expression: 'userId', dataType: 'INTEGER']],
-      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}', dataType: 'STRING']]
-    ]
   }
 }
