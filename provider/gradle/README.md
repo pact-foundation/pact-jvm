@@ -627,6 +627,8 @@ pact {
 
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` property to `true`.
 
+**NOTE:** If you're using [pactflow.io](https://pactflow.io/), follow these instructions for configuring your [bearer token](https://docs.pactflow.io/docs/getting-started/#configuring-your-api-token).
+
 ### Allowing just the changed pact specified in a webhook to be verified [4.0.6+]
 
 When a consumer publishes a new version of a pact file, the Pact broker can fire off a webhook with the URL of the changed 
