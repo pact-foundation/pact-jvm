@@ -13,9 +13,10 @@ import au.com.dius.pact.consumer.mockServer
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.BasePact
-import au.com.dius.pact.core.model.DefaultPactWriter
+import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactFolder
@@ -207,6 +208,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   override fun beforeAll(context: ExtensionContext) {
     val store = context.getStore(NAMESPACE)
     store.put("executedFragments", mutableListOf<Method>())
+    store.put("pactsToWrite", mutableMapOf<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>())
   }
 
   override fun beforeTestExecution(context: ExtensionContext) {
@@ -340,32 +342,35 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     if (!context.executionException.isPresent) {
       val store = context.getStore(NAMESPACE)
       val providerInfo = store["providerInfo"] as ProviderInfo
-      val pactDirectory = lookupPactDirectory(context)
-      if (providerInfo.providerType != ProviderType.ASYNCH) {
+      if (providerInfo.providerType == ProviderType.ASYNCH) {
+        storePactForWrite(store)
+      } else {
         val mockServer = store["mockServer"] as JUnit5MockServerSupport
-        val pact = store["pact"] as RequestResponsePact
-        val config = store["mockServerConfig"] as MockProviderConfig
         Thread.sleep(100) // give the mock server some time to have consistent state
         mockServer.close()
         val result = mockServer.validateMockServerState(null)
         if (result is PactVerificationResult.Ok) {
-          logger.debug {
-            "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
-              "${pact.fileForPact(pactDirectory)}"
-          }
-          val pactFile = pact.fileForPact(pactDirectory)
-          DefaultPactWriter.writePact(pactFile, pact, config.pactVersion)
+          storePactForWrite(store)
         } else {
           JUnitTestSupport.validateMockServerResult(result)
         }
-      } else {
-        val pact = store["pact"] as MessagePact
-        logger.debug {
-          "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
-            "${pact.fileForPact(pactDirectory)}"
-        }
-        pact.write(pactDirectory, PactSpecVersion.V3)
       }
+    }
+  }
+
+  private fun storePactForWrite(store: ExtensionContext.Store) {
+    @Suppress("UNCHECKED_CAST")
+    val pactsToWrite = store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>
+    val pact = store["pact"] as BasePact<*>
+    val providerInfo = store["providerInfo"] as ProviderInfo
+    val version = providerInfo.pactVersion ?: PactSpecVersion.V3
+
+    pactsToWrite.merge(
+      Pair(pact.consumer, pact.provider),
+      Pair(pact, version)
+    ) { (currentPact, currentVersion), _ ->
+      currentPact.mergeInteractions(pact.interactions)
+      Pair(currentPact, maxOf(version, currentVersion))
     }
   }
 
@@ -380,6 +385,20 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   override fun afterAll(context: ExtensionContext) {
     if (!context.executionException.isPresent) {
       val store = context.getStore(NAMESPACE)
+      val pactDirectory = lookupPactDirectory(context)
+
+      @Suppress("UNCHECKED_CAST")
+      val pactsToWrite =
+        store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>
+      pactsToWrite.values
+        .forEach { (pact, version) ->
+          logger.debug {
+            "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
+              "${pact.fileForPact(pactDirectory)}"
+          }
+          pact.write(pactDirectory, version)
+        }
+
       val executedFragments = store["executedFragments"] as MutableList<Method>
       val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
         HierarchyTraversalMode.TOP_DOWN)
