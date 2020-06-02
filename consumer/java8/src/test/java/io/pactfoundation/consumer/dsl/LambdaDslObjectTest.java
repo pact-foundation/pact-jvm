@@ -1,5 +1,6 @@
 package io.pactfoundation.consumer.dsl;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PM;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
@@ -990,4 +991,29 @@ public class LambdaDslObjectTest {
     arrayObjectRule = actualPactDsl.getMatchers().allMatchingRules().get(5).toMap(PactSpecVersion.V3);
     assertThat(arrayObjectRule.get("match"), is("type"));
   }
+
+    @Test
+    public void testUnorderedArrayMatcher() {
+        // Old DSL
+        final DslPart pactDslJson = new PactDslJsonBody()
+            .unorderedArray("foo")
+            .stringValue("a")
+            .stringValue("b")
+            .stringValue("c")
+            .closeArray()
+            .close();
+
+        // Lambda DSL
+        final DslPart lambdaPactDsl = LambdaDsl.newJsonBody(body ->
+            body.unorderedArray("foo", foo ->
+                foo.stringValue("a")
+                    .stringValue("b")
+                    .stringValue("c")
+            )
+        ).build().close();
+
+        assertThat(lambdaPactDsl.getBody().toString(), is(pactDslJson.getBody().toString()));
+        assertThat(lambdaPactDsl.getMatchers(), is(pactDslJson.getMatchers()));
+    }
+
 }

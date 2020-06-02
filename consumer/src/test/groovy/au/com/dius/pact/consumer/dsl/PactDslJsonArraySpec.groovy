@@ -232,4 +232,12 @@ class PactDslJsonArraySpec extends Specification {
       '$[2]': [type: 'DateTime', format: "yyyy-MM-dd'T'HH:mm:ss", expression: 'today + 1 hour']]]
   }
 
+  def 'unordered array with min and max function should validate the minSize less than maxSize'() {
+    when:
+    new PactDslJsonArray().unorderedMinMaxArray(4, 3)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
 }

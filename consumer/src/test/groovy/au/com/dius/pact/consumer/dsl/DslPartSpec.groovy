@@ -149,6 +149,46 @@ class DslPartSpec extends Specification {
     PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize) {
       null
     }
+
+    @Override
+    PactDslJsonArray unorderedArray(String name) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray unorderedArray() {
+      null
+    }
+
+    @Override
+    PactDslJsonArray unorderedMinArray(String name, int size) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray unorderedMinArray(int size) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray unorderedMaxArray(String name, int size) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray unorderedMaxArray(int size) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray unorderedMinMaxArray(String name, int minSize, int maxSize) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray unorderedMinMaxArray(int minSize, int maxSize) {
+      null
+    }
   }
 
   @Unroll
@@ -166,7 +206,8 @@ class DslPartSpec extends Specification {
     'matchMin'        | 1            | [match: 'type', min: 1]
     'matchMax'        | 1            | [match: 'type', max: 1]
     'includesMatcher' | 1            | [match: 'include', value: '1']
-
+    'matchMinIgnoreOrder' | 1        | [match: 'ignore-order', min: 1]
+    'matchMaxIgnoreOrder' | 1        | [match: 'ignore-order', max: 1]
   }
 
 }

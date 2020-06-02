@@ -212,4 +212,43 @@ public class LambdaDslTest {
         DslPart dslPart = LambdaDsl.newJsonBody(o -> o.numberValue("number", 1)).build();
         assertThat(dslPart.getBody().toString(), is("{\"number\":1}"));
     }
+
+    @Test
+    public void testUnorderedArrayWithObjects() {
+        /*
+            [
+                {
+                    "foo": "Foo"
+                },
+                {
+                    "bar": "Bar"
+                }
+            ]
+         */
+
+        // Old DSL
+        final DslPart pactDslJson = PactDslJsonArray
+            .newUnorderedArray()
+            .object()
+            .stringValue("foo", "Foo")
+            .closeObject()
+            .object()
+            .stringValue("bar", "Bar")
+            .closeObject()
+            .close();
+
+        // Lambda DSL
+        final DslPart lambdaPactDsl = LambdaDsl.newJsonArrayUnordered(array ->
+            array
+                .object(o ->
+                    o.stringValue("foo", "Foo")
+                )
+                .object(o ->
+                    o.stringValue("bar", "Bar")
+                )
+        ).build().close();
+
+        assertThat(lambdaPactDsl.getBody().toString(), is(pactDslJson.getBody().toString()));
+        assertThat(lambdaPactDsl.getMatchers(), is(pactDslJson.getMatchers()));
+    }
 }

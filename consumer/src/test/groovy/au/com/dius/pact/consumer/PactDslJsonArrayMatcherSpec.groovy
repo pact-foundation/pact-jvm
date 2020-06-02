@@ -4,13 +4,19 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import groovy.json.JsonSlurper
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class PactDslJsonArrayMatcherSpec extends Specification {
 
@@ -269,4 +275,81 @@ class PactDslJsonArrayMatcherSpec extends Specification {
       '$.body[*]': [match: 'type']
     ]
   }
+
+  @Unroll
+  def 'PactDsl generates an array with ignore-order #expectedMatcher.class.simpleName matching'() {
+    given:
+    subject."$method"(*params)
+        .string('a')
+        .stringType('b')
+        .close()
+
+    when:
+    def result = new JsonSlurper().parseText(subject.body.toString())
+
+    then:
+    result == [['a', 'b']]
+    subject.matchers.matchingRules == [
+        '$[0]': new MatchingRuleGroup([expectedMatcher]),
+        '$[0][1]': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    ]
+
+    where:
+
+    method                 | params | expectedMatcher
+    'unorderedArray'       | []     | EqualsIgnoreOrderMatcher.INSTANCE
+    'unorderedMinArray'    | [2]    | new MinEqualsIgnoreOrderMatcher(2)
+    'unorderedMaxArray'    | [4]    | new MaxEqualsIgnoreOrderMatcher(4)
+    'unorderedMinMaxArray' | [2, 4] | new MinMaxEqualsIgnoreOrderMatcher(2, 4)
+  }
+
+  @Unroll
+  def 'PactDsl generates a root array with ignore-order #expectedMatcher.class.simpleName matching'() {
+    given:
+    subject = PactDslJsonArray."$method"(*params)
+      .string('a')
+      .stringType('b')
+      .close()
+      .asArray()
+
+    when:
+    def result = new JsonSlurper().parseText(subject.body.toString())
+
+    then:
+    result == ['a', 'b']
+    subject.matchers.matchingRules == [
+        '$': new MatchingRuleGroup([expectedMatcher]),
+        '$[1]': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    ]
+
+    where:
+
+    method                    | params | expectedMatcher
+    'newUnorderedArray'       | []     | EqualsIgnoreOrderMatcher.INSTANCE
+    'newUnorderedMinArray'    | [2]    | new MinEqualsIgnoreOrderMatcher(2)
+    'newUnorderedMaxArray'    | [4]    | new MaxEqualsIgnoreOrderMatcher(4)
+    'newUnorderedMinMaxArray' | [2, 4] | new MinMaxEqualsIgnoreOrderMatcher(2, 4)
+  }
+
+  def 'PactDsl generates root array, ignore-order and regex wildcard matcher'() {
+    given:
+    subject = PactDslJsonArray.newUnorderedArray()
+      .stringMatcher('red|blue', 'red')
+      .stringValue('blue')
+      .wildcardArrayMatcher(new RegexMatcher('red|blue|green'))
+      .close()
+      .asArray()
+
+    when:
+    def result = new JsonSlurper().parseText(subject.body.toString())
+
+    then:
+    result == ['red', 'blue']
+    subject.matchers.matchingRules == [
+      '$': new MatchingRuleGroup([EqualsIgnoreOrderMatcher.INSTANCE]),
+      '$[0]': new MatchingRuleGroup([new RegexMatcher('red|blue')]),
+      '$[*]': new MatchingRuleGroup([new RegexMatcher('red|blue|green')])
+    ]
+  }
+
 }

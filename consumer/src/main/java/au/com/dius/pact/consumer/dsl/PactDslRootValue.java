@@ -739,6 +739,78 @@ public class PactDslRootValue extends DslPart {
   }
 
   /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedArray(String name) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedArray() {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinArray(String name, int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinArray(int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMaxArray(String name, int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMaxArray(int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinMaxArray(String name, int minSize, int maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinMaxArray(int minSize, int maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
    * Adds a value that will have it's value injected from the provider state
    * @param expression Expression to be evaluated from the provider state
    * @param example Example value to be used in the consumer test
