@@ -14,7 +14,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static au.com.dius.pact.consumer.Headers.MULTIPART_HEADER_REGEX;
@@ -53,10 +53,10 @@ public abstract class PactDslRequestBase {
       .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
       .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
       .build();
-    OutputStream os = new ByteArrayOutputStream();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
     multipart.writeTo(os);
 
-    requestBody = OptionalBody.body(os.toString().getBytes(),
+    requestBody = OptionalBody.body(os.toString(StandardCharsets.ISO_8859_1).getBytes(),
       new au.com.dius.pact.core.model.ContentType(multipart.getContentType().getValue()));
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
       multipart.getContentType().getValue()));
