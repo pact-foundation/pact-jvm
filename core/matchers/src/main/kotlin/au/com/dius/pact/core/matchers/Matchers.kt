@@ -3,8 +3,12 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.matchers.util.corresponds
 import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
@@ -74,6 +78,33 @@ object Matchers : KLogging() {
     if (matchers != null)
       resolveMatchers(matchers, category, path, pathComparator).isNotEmpty()
     else false
+
+  /**
+   * Determines if a matcher of the form '[*]' exists for the path
+   */
+  @JvmStatic
+  fun wildcardIndexMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
+    if (matchers != null) {
+      val resolvedMatchers = matchers.rulesForCategory(category).filter(Predicate {
+        matchesPath(it, path) == path.size
+      })
+      resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith("[*]") }
+    } else false
+
+  /**
+   * Determines if any ignore-order matcher is defined for path or ancestor of path.
+   */
+  @JvmStatic
+  fun isEqualsIgnoreOrderMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
+    if (matchers != null) {
+      val matcherDef = selectBestMatcher(matchers, category, path)
+      matcherDef.rules.any {
+        it is EqualsIgnoreOrderMatcher ||
+        it is MinEqualsIgnoreOrderMatcher ||
+        it is MaxEqualsIgnoreOrderMatcher ||
+        it is MinMaxEqualsIgnoreOrderMatcher
+      }
+    } else false
 
   /**
    * Determines if a matcher of the form '.*' exists for the path
