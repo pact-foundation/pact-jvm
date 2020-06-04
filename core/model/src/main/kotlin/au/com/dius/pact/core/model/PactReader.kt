@@ -51,7 +51,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
     is BrokerUrlSource -> {
       val brokerClient = PactBrokerClient(source.pactBrokerUrl, options)
       val pactResponse = brokerClient.fetchPact(source.url, source.encodePath)
-      pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options)
+      pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options, tag = source.tag)
     }
     else -> when (val jsonResource = fetchJsonResource(http, source)) {
       is Ok -> jsonResource.value.first.obj to jsonResource.value.second
@@ -331,7 +331,7 @@ object DefaultPactReader : PactReader, KLogging() {
       }
     } else if (source is PactBrokerResult) {
       return HttpClient.newHttpClient(options["authentication"], URI(source.pactBrokerUrl), mutableMapOf()).first.use {
-        loadPactFromUrl(BrokerUrlSource.fromResult(source, options), options, it)
+        loadPactFromUrl(BrokerUrlSource.fromResult(source, options, source.tag), options, it)
       }
     } else if (source is URL || source is UrlPactSource) {
       val urlSource = if (source is URL) UrlSource<Interaction>(source.toString()) else source as UrlPactSource

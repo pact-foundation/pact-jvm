@@ -66,7 +66,7 @@ class DescriptionGeneratorTest extends Specification {
     def interaction = new RequestResponseInteraction('Interaction 1',
       [ new ProviderState('Test State') ], new Request(), new Response())
     def pactSource =  new BrokerUrlSource('url', 'url', [:], [:], 'master',
-      new PactBrokerResult('test', 'test', 'test', [], [], pending == 'enabled'))
+      new PactBrokerResult('test', 'test', 'test', [], [], pending == 'enabled', null))
     def pact = new RequestResponsePact(new Provider(), new Consumer('the-consumer-name'), [ interaction ],
       [:], pactSource)
     def generator = new DescriptionGenerator(clazz, pact, pactSource)

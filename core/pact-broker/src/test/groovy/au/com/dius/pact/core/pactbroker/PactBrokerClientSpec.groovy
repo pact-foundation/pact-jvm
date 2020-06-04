@@ -362,7 +362,8 @@ class PactBrokerClientSpec extends Specification {
         new VerificationNotice('before_verification',
          'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')
       ],
-      false
+      false,
+      null
     )
   }
 

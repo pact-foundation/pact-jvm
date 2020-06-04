@@ -219,9 +219,9 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('c', true)
     ]
     def expected = [
-      new PactBrokerResult('test', 'a', '', [], [], false),
-      new PactBrokerResult('test', 'b', '', [], [], false),
-      new PactBrokerResult('test', 'c', '', [], [], false)
+      new PactBrokerResult('test', 'a', '', [], [], false, null),
+      new PactBrokerResult('test', 'b', '', [], [], false, null),
+      new PactBrokerResult('test', 'c', '', [], [], false, null)
     ]
 
     when:
@@ -245,8 +245,8 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('two', true)
     ]
     def expected = [
-      new PactBrokerResult('test', 'one', '', [], [], false),
-      new PactBrokerResult('test', 'two', '', [], [], false)
+      new PactBrokerResult('test', 'one', '', [], [], false, null),
+      new PactBrokerResult('test', 'two', '', [], [], false, null)
     ]
 
     when:
@@ -260,7 +260,7 @@ class PactBrokerLoaderSpec extends Specification {
   def 'Loads the latest pacts if no tag is provided'() {
     given:
     tags = []
-    def expected = [ new PactBrokerResult('test', 'latest', '', [], [], false) ]
+    def expected = [ new PactBrokerResult('test', 'latest', '', [], [], false, null) ]
 
     when:
     def result = pactBrokerLoader().load('test')
@@ -276,7 +276,7 @@ class PactBrokerLoaderSpec extends Specification {
     tags = ['${a}', '${latest}', '${b}']
     def loader = pactBrokerLoader()
     loader.valueResolver = [resolveValue: { val -> 'X' } ] as ValueResolver
-    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false) ]
+    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null) ]
     def selectors = [
       new ConsumerVersionSelector('X', true),
       new ConsumerVersionSelector('X', true),
@@ -297,10 +297,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = ['a', 'b', 'c']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false),
-      new PactBrokerResult('b', '', '', [], [], false),
-      new PactBrokerResult('c', '', '', [], [], false),
-      new PactBrokerResult('d', '', '', [], [], false)
+      new PactBrokerResult('a', '', '', [], [], false, null),
+      new PactBrokerResult('b', '', '', [], [], false, null),
+      new PactBrokerResult('c', '', '', [], [], false, null),
+      new PactBrokerResult('d', '', '', [], [], false, null)
     ]
 
     when:
@@ -320,10 +320,10 @@ class PactBrokerLoaderSpec extends Specification {
     System.setProperty('composite', "a${VALUES_SEPARATOR}b${VALUES_SEPARATOR}c")
     consumers = ['${composite}']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false),
-      new PactBrokerResult('b', '', '', [], [], false),
-      new PactBrokerResult('c', '', '', [], [], false),
-      new PactBrokerResult('d', '', '', [], [], false)
+      new PactBrokerResult('a', '', '', [], [], false, null),
+      new PactBrokerResult('b', '', '', [], [], false, null),
+      new PactBrokerResult('c', '', '', [], [], false, null),
+      new PactBrokerResult('d', '', '', [], [], false, null)
     ]
 
     when:
@@ -340,10 +340,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = []
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false),
-      new PactBrokerResult('b', '', '', [], [], false),
-      new PactBrokerResult('c', '', '', [], [], false),
-      new PactBrokerResult('d', '', '', [], [], false)
+      new PactBrokerResult('a', '', '', [], [], false, null),
+      new PactBrokerResult('b', '', '', [], [], false, null),
+      new PactBrokerResult('c', '', '', [], [], false, null),
+      new PactBrokerResult('d', '', '', [], [], false, null)
     ]
 
     when:
@@ -362,10 +362,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = ['${pactbroker.consumers:}']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false),
-      new PactBrokerResult('b', '', '', [], [], false),
-      new PactBrokerResult('c', '', '', [], [], false),
-      new PactBrokerResult('d', '', '', [], [], false)
+      new PactBrokerResult('a', '', '', [], [], false, null),
+      new PactBrokerResult('b', '', '', [], [], false, null),
+      new PactBrokerResult('c', '', '', [], [], false, null),
+      new PactBrokerResult('d', '', '', [], [], false, null)
     ]
 
     when:
@@ -383,10 +383,10 @@ class PactBrokerLoaderSpec extends Specification {
     consumers = ['a', 'b', 'c']
     tags = ['demo']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false),
-      new PactBrokerResult('b', '', '', [], [], false),
-      new PactBrokerResult('c', '', '', [], [], false),
-      new PactBrokerResult('d', '', '', [], [], false)
+      new PactBrokerResult('a', '', '', [], [], false, null),
+      new PactBrokerResult('b', '', '', [], [], false, null),
+      new PactBrokerResult('c', '', '', [], [], false, null),
+      new PactBrokerResult('d', '', '', [], [], false, null)
     ]
     def selectors = [ new ConsumerVersionSelector('demo', true) ]
 

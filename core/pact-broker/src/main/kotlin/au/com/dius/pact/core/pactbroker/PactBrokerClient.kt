@@ -103,17 +103,17 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
    */
   @Deprecated(message = "Use the version that takes selectors instead",
     replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
-  open fun fetchConsumers(provider: String): List<PactBrokerConsumer> {
+  open fun fetchConsumers(provider: String): List<PactBrokerResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactBrokerConsumer>()
+      val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS).forAll(PACTS, Consumer { pact ->
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl))
         }
       })
       consumers
@@ -128,18 +128,18 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
    */
   @Deprecated(message = "Use the version that takes selectors instead",
     replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
-  open fun fetchConsumersWithTag(provider: String, tag: String): List<PactBrokerConsumer> {
+  open fun fetchConsumersWithTag(provider: String, tag: String): List<PactBrokerResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactBrokerConsumer>()
+      val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider, "tag" to tag), LATEST_PROVIDER_PACTS_WITH_TAG)
         .forAll(PACTS, Consumer { pact ->
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag = tag))
         } else {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, emptyList(), tag))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList(), tag = tag))
         }
       })
       consumers
@@ -201,10 +201,9 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     } else {
       return handleWith {
         if (selectors.isEmpty()) {
-          fetchConsumers(providerName).map { PactBrokerResult.fromConsumer(it) }
+          fetchConsumers(providerName)
         } else {
           fetchConsumersWithTag(providerName, selectors.first().tag)
-            .map { PactBrokerResult.fromConsumer(it) }
         }
       }
     }
