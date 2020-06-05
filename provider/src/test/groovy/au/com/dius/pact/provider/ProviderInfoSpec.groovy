@@ -74,7 +74,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false) >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false)
+      new PactBrokerResult('consumer', '', url, [], [], false, null)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -97,7 +97,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true) >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true)
+      new PactBrokerResult('consumer', '', url, [], [], true, null)
     ])
     result.size == 1
     result[0].name == 'consumer'
