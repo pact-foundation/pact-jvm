@@ -14,6 +14,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -322,7 +323,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
       else OffsetDateTime.now()
     val datetime = DateTimeExpression.executeExpression(base, expression).getOr { base }
     return if (!format.isNullOrEmpty()) {
-      datetime.format(DateTimeFormatter.ofPattern(format))
+      datetime.toZonedDateTime().format(DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault()))
     } else {
       datetime.toString()
     }
