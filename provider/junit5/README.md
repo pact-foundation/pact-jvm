@@ -75,6 +75,8 @@ or `setStateHandlers` methods. See [StateAnnotationsOnAdditionalClassTest](src/t
 
 **Important Note:** You should only use this feature for things that can not be persisted in the pact file. By modifying
  the request, you are potentially modifying the contract from the consumer tests!
+ 
+**NOTE: JUnit 5 tests do not use `@TargetRequestFilter`**
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would be
 authentication tokens, which have a small life span. The Http and Https test targets support injecting the request that
