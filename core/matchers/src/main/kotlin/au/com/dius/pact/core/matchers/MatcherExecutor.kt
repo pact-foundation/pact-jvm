@@ -22,6 +22,10 @@ import org.w3c.dom.Text
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.ParseException
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 private val logger = KotlinLogging.logger {}
 private val integerRegex = Regex("^\\d+$")
@@ -111,7 +115,7 @@ fun <M : Mismatch> domatch(
     is NumberTypeMatcher -> matchNumber(matcher.numberType, path, expected, actual, mismatchFn)
     is DateMatcher -> matchDate(matcher.format, path, expected, actual, mismatchFn)
     is TimeMatcher -> matchTime(matcher.format, path, expected, actual, mismatchFn)
-    is TimestampMatcher -> matchTimestamp(matcher.format, path, expected, actual, mismatchFn)
+    is TimestampMatcher -> matchDateTime(matcher.format, path, expected, actual, mismatchFn)
     is MinTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn)
     is MaxTypeMatcher -> matchMaxType(matcher.max, path, expected, actual, mismatchFn)
     is MinMaxTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn) +
@@ -307,23 +311,23 @@ fun <M : Mismatch> matchTime(
   }
 }
 
-fun <M : Mismatch> matchTimestamp(
+fun <M : Mismatch> matchDateTime(
   pattern: String,
   path: List<String>,
   expected: Any?,
   actual: Any?,
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
-  logger.debug { "comparing ${valueOf(actual)} to timestamp pattern $pattern at $path" }
+  logger.debug { "comparing ${valueOf(actual)} to datetime pattern $pattern at $path" }
   return if (isCollection(actual)) {
     emptyList()
   } else {
     try {
-      DateUtils.parseDate(safeToString(actual), pattern)
+      ZonedDateTime.parse(safeToString(actual), DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault()))
       emptyList<M>()
-    } catch (e: ParseException) {
+    } catch (e: DateTimeParseException) {
       listOf(mismatchFactory.create(expected, actual,
-        "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
+        "Expected ${valueOf(actual)} to match a datetime of '$pattern': " +
           "${e.message}", path))
     }
   }

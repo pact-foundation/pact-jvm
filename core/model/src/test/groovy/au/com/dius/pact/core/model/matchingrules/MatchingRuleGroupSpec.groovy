@@ -61,7 +61,7 @@ class MatchingRuleGroupSpec extends Specification {
     new MinTypeMatcher(1)                                       | [match: 'type', min: 1]
     new MaxTypeMatcher(1)                                       | [match: 'type', max: 1]
     new MinMaxTypeMatcher(2, 3)                                 | [match: 'type', max: 3, min: 2]
-    new TimestampMatcher()                                      | [match: 'timestamp', timestamp: 'yyyy-MM-dd HH:mm:ssZZZ']
+    new TimestampMatcher()                                      | [match: 'timestamp', timestamp: 'yyyy-MM-dd HH:mm:ssZZZZZ']
     new TimeMatcher()                                           | [match: 'time', time: 'HH:mm:ss']
     new DateMatcher()                                           | [match: 'date', date: 'yyyy-MM-dd']
     new IncludeMatcher('A')                                     | [match: 'include', value: 'A']

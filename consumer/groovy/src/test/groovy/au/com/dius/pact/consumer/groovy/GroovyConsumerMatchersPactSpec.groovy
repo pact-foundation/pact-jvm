@@ -41,7 +41,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
         salary real
 
         ts(timestamp)
-        timestamp = timestamp('yyyy/MM/dd - HH:mm:ss.S')
+        timestamp = timestamp('yyyy/MM/dd - HH:mm:ss.SSS')
         nextReview = dateExpression('today + 1 year')
 
         values([1, 2, 3, numeric])

@@ -94,7 +94,7 @@ data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"
 /**
  * Matcher for time values
  */
-data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZ") : MatchingRule {
+data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZZZ") : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "timestamp", "timestamp" to format)
 }
 

@@ -602,8 +602,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
    * @param example Example value
    */
   public PactDslRequestWithPath queryMatchingISODatetime(String field, String example) {
-    return (PactDslRequestWithPath) queryMatchingDatetimeBase(field, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern(),
-      example);
+    return (PactDslRequestWithPath) queryMatchingDatetimeBase(field, "yyyy-MM-dd'T'HH:mm:ssXXX", example);
   }
 
   /**

@@ -23,7 +23,7 @@ import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.Number
 @SuppressWarnings(['UnnecessaryBooleanExpression', 'CyclomaticComplexity'])
 class MatcherExecutorSpec extends Specification {
 
-  def mismatchFactory
+  MismatchFactory mismatchFactory
   def path
 
   static xml(String xml) {
@@ -35,7 +35,7 @@ class MatcherExecutorSpec extends Specification {
   }
 
   def setup() {
-    mismatchFactory = [create: { p0, p1, p2, p3 -> new StatusMismatch(100, 100) } ] as MismatchFactory
+    mismatchFactory = [create: { p0, p1, p2, p3 -> new PathMismatch('', '', p2) } ] as MismatchFactory
     path = ['/']
   }
 
@@ -137,16 +137,18 @@ class MatcherExecutorSpec extends Specification {
   }
 
   @Unroll
+  @SuppressWarnings('LineLength')
   def 'timestamp matcher'() {
     expect:
     MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected                    | actual                      | pattern               || mustBeEmpty
-    '2014-01-01 14:00:00+10:00' | '2013-12-01 14:00:00+10:00' | null                  || true
-    '2014-01-01 14:00:00+10:00' | 'I\'m a timestamp!'         | null                  || false
-    '2014-01-01 14:00:00+10:00' | '2013#12#01#14#00#00'       | 'yyyy#MM#dd#HH#mm#ss' || true
-    '2014-01-01 14:00:00+10:00' | null                        | null                  || false
+    expected                                      | actual                                  | pattern                          || mustBeEmpty
+    '2014-01-01 14:00:00+10:00'                   | '2013-12-01 14:00:00+10:00'             | null                             || true
+    '2014-01-01 14:00:00+10:00'                   | 'I\'m a timestamp!'                     | null                             || false
+    '2014-01-01 14:00:00+10:00'                   | '2013#12#01#14#00#00'                   | "yyyy'#'MM'#'dd'#'HH'#'mm'#'ss"  || true
+    '2014-01-01 14:00:00+10:00'                   | null                                    | null                             || false
+    '2014-01-01T10:00+10:00[Australia/Melbourne]' | '2020-01-01T10:00+01:00[Europe/Warsaw]' | "yyyy-MM-dd'T'HH:mmXXX'['zzz']'" || true
 
     matcher = pattern ? new TimestampMatcher(pattern) : new TimestampMatcher()
   }
