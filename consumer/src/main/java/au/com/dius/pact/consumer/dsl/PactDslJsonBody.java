@@ -26,6 +26,7 @@ import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
@@ -379,25 +380,23 @@ public class PactDslJsonBody extends DslPart {
     /**
      * Attribute that must be an ISO formatted timestamp
      * @param name
+     * @deprecated Use datetime instead
      */
+    @Deprecated
     public PactDslJsonBody timestamp(String name) {
-      String pattern = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern();
-      generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(pattern, null));
-      body.put(name, DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date(DATE_2000)));
-      matchers.addRule(matcherKey(name), matchTimestamp(pattern));
+      datetime(name);
       return this;
     }
 
     /**
-     * Attribute that must match the given timestamp format
+     * Attribute that must match the given datetime format
      * @param name attribute name
      * @param format timestamp format
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public PactDslJsonBody timestamp(String name, String format) {
-        generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(format, null));
-        FastDateFormat instance = FastDateFormat.getInstance(format);
-        body.put(name, instance.format(new Date(DATE_2000)));
-        matchers.addRule(matcherKey(name), matchTimestamp(format));
+        datetime(name, format);
         return this;
     }
 
@@ -406,9 +405,11 @@ public class PactDslJsonBody extends DslPart {
      * @param name attribute name
      * @param format timestamp format
      * @param example example date and time to use for generated bodies
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public PactDslJsonBody timestamp(String name, String format, Date example) {
-        return timestamp(name, format, example, TimeZone.getDefault());
+        return datetime(name, format, example, TimeZone.getDefault());
     }
 
     /**
@@ -417,11 +418,11 @@ public class PactDslJsonBody extends DslPart {
      * @param format timestamp format
      * @param example example date and time to use for generated bodies
      * @param timeZone time zone used for formatting of example date and time
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public PactDslJsonBody timestamp(String name, String format, Date example, TimeZone timeZone) {
-        FastDateFormat instance = FastDateFormat.getInstance(format, timeZone);
-        body.put(name, instance.format(example));
-        matchers.addRule(matcherKey(name), matchTimestamp(format));
+        datetime(name, format, example, timeZone);
         return this;
     }
 
@@ -430,9 +431,11 @@ public class PactDslJsonBody extends DslPart {
      * @param name attribute name
      * @param format timestamp format
      * @param example example date and time to use for generated bodies
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public PactDslJsonBody timestamp(String name, String format, Instant example) {
-      return timestamp(name, format, example, TimeZone.getDefault());
+      return datetime(name, format, example, TimeZone.getDefault());
     }
 
     /**
@@ -441,13 +444,86 @@ public class PactDslJsonBody extends DslPart {
      * @param format timestamp format
      * @param example example date and time to use for generated bodies
      * @param timeZone time zone used for formatting of example date and time
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public PactDslJsonBody timestamp(String name, String format, Instant example, TimeZone timeZone) {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId());
-      body.put(name, formatter.format(example));
-      matchers.addRule(matcherKey(name), matchTimestamp(format));
+      datetime(name, format, example, timeZone);
       return this;
     }
+
+  /**
+   * Attribute that must be an ISO formatted datetime
+   * @param name
+   */
+  public PactDslJsonBody datetime(String name) {
+    String pattern = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern();
+    generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(pattern, null));
+    body.put(name, DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date(DATE_2000)));
+    matchers.addRule(matcherKey(name), matchTimestamp(pattern));
+    return this;
+  }
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format datetime format
+   */
+  public PactDslJsonBody datetime(String name, String format) {
+    generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(format, null));
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault());
+    body.put(name, formatter.format(new Date(DATE_2000).toInstant()));
+    matchers.addRule(matcherKey(name), matchTimestamp(format));
+    return this;
+  }
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format datetime format
+   * @param example example date and time to use for generated bodies
+   */
+  public PactDslJsonBody datetime(String name, String format, Date example) {
+    return datetime(name, format, example, TimeZone.getDefault());
+  }
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format datetime format
+   * @param example example date and time to use for generated bodies
+   * @param timeZone time zone used for formatting of example date and time
+   */
+  public PactDslJsonBody datetime(String name, String format, Date example, TimeZone timeZone) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId());
+    body.put(name, formatter.format(example.toInstant()));
+    matchers.addRule(matcherKey(name), matchTimestamp(format));
+    return this;
+  }
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format datetime format
+   * @param example example date and time to use for generated bodies
+   */
+  public PactDslJsonBody datetime(String name, String format, Instant example) {
+    return datetime(name, format, example, TimeZone.getDefault());
+  }
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format timestamp format
+   * @param example example date and time to use for generated bodies
+   * @param timeZone time zone used for formatting of example date and time
+   */
+  public PactDslJsonBody datetime(String name, String format, Instant example, TimeZone timeZone) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId());
+    body.put(name, formatter.format(example));
+    matchers.addRule(matcherKey(name), matchTimestamp(format));
+    return this;
+  }
 
     /**
      * Attribute named 'date' that must be formatted as an ISO date

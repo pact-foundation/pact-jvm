@@ -268,9 +268,11 @@ public class LambdaDslObject {
      * Attribute that must be an ISO formatted timestamp
      *
      * @param name attribute name
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public LambdaDslObject timestamp(String name) {
-        object.timestamp(name);
+        object.datetime(name);
         return this;
     }
 
@@ -279,9 +281,11 @@ public class LambdaDslObject {
      *
      * @param name   attribute name
      * @param format timestamp format
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public LambdaDslObject timestamp(String name, String format) {
-        object.timestamp(name, format);
+        object.datetime(name, format);
         return this;
     }
 
@@ -291,9 +295,11 @@ public class LambdaDslObject {
      * @param name    attribute name
      * @param format  timestamp format
      * @param example example date and time to use for generated bodies
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public LambdaDslObject timestamp(String name, String format, Date example) {
-        object.timestamp(name, format, example);
+        object.datetime(name, format, example);
         return this;
     }
 
@@ -303,9 +309,11 @@ public class LambdaDslObject {
      * @param name    attribute name
      * @param format  timestamp format
      * @param example example date and time to use for generated bodies
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public LambdaDslObject timestamp(String name, String format, Instant example) {
-        object.timestamp(name, format, example);
+        object.datetime(name, format, example);
         return this;
     }
 
@@ -316,9 +324,11 @@ public class LambdaDslObject {
      * @param format  timestamp format
      * @param example example date and time to use for generated bodies
      * @param timeZone time zone used for formatting of example date and time
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public LambdaDslObject timestamp(String name, String format, Date example, TimeZone timeZone){
-        object.timestamp(name, format, example, timeZone);
+        object.datetime(name, format, example, timeZone);
         return this;
     }
 
@@ -328,9 +338,81 @@ public class LambdaDslObject {
      * @param name    attribute name
      * @param format  timestamp format
      * @param example example date and time to use for generated bodies
+     * @deprecated use datetime instead
      */
+    @Deprecated
     public LambdaDslObject timestamp(String name, String format, ZonedDateTime example) {
-        object.timestamp(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
+        object.datetime(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
+        return this;
+    }
+
+    /**
+     * Attribute that must be an ISO formatted datetime
+     *
+     * @param name attribute name
+     */
+    public LambdaDslObject datetime(String name) {
+        object.datetime(name);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given datetime format
+     *
+     * @param name   attribute name
+     * @param format datetime format
+     */
+    public LambdaDslObject datetime(String name, String format) {
+        object.datetime(name, format);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given datetime format
+     *
+     * @param name    attribute name
+     * @param format  datetime format
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslObject datetime(String name, String format, Date example) {
+        object.datetime(name, format, example);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given datetime format
+     *
+     * @param name    attribute name
+     * @param format  datetime format
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslObject datetime(String name, String format, Instant example) {
+        object.datetime(name, format, example);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given datetime format
+     *
+     * @param name    attribute name
+     * @param format  datetime format
+     * @param example example date and time to use for generated bodies
+     * @param timeZone time zone used for formatting of example date and time
+     */
+    public LambdaDslObject datetime(String name, String format, Date example, TimeZone timeZone){
+        object.datetime(name, format, example, timeZone);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     *
+     * @param name    attribute name
+     * @param format  datetime format
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslObject datetime(String name, String format, ZonedDateTime example) {
+        object.datetime(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
         return this;
     }
 
