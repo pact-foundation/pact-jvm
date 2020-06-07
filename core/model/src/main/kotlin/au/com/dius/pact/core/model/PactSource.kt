@@ -68,13 +68,13 @@ data class BrokerUrlSource @JvmOverloads constructor(
   override fun description() = if (tag == null) "Pact Broker $url" else "Pact Broker $url (Tag $tag)"
 
   companion object {
-    fun fromResult(result: PactBrokerResult, options: Map<String, Any> = emptyMap()): BrokerUrlSource {
+    fun fromResult(result: PactBrokerResult, options: Map<String, Any> = emptyMap(), tag: String? = null): BrokerUrlSource {
       return BrokerUrlSource(
         result.source,
         result.pactBrokerUrl,
         emptyMap(),
         options,
-        null,
+        tag,
         result
       )
     }

@@ -3,7 +3,6 @@ package au.com.dius.pact.provider.junit.descriptions
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.support.isNotEmpty
 import org.junit.runner.Description
 import org.junit.runners.model.TestClass
@@ -13,8 +12,7 @@ import org.junit.runners.model.TestClass
  */
 class DescriptionGenerator<I : Interaction>(
   private val testClass: TestClass,
-  private val pact: Pact<I>,
-  private val pactSource: PactSource
+  private val pact: Pact<I>
 ) {
 
     /**
@@ -52,8 +50,9 @@ class DescriptionGenerator<I : Interaction>(
   }
 
   private fun getTagDescription(): String {
-        if (pactSource is BrokerUrlSource && pactSource.tag.isNotEmpty()) {
-            return "[tag:${pactSource.tag}] "
+      if (pact.source is BrokerUrlSource) {
+          val tag = (pact.source as BrokerUrlSource).tag
+          return if (tag.isNotEmpty()) "[tag:${(pact.source as BrokerUrlSource).tag}] " else ""
         }
         return ""
     }

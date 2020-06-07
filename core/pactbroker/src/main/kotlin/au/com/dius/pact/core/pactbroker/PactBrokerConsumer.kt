@@ -9,7 +9,8 @@ data class PactBrokerResult(
   val pactBrokerUrl: String,
   val pactFileAuthentication: List<String> = listOf(),
   val notices: List<VerificationNotice> = listOf(),
-  val pending: Boolean = false
+  val pending: Boolean = false,
+  val tag: String? = null
 )
 
 data class VerificationNotice(

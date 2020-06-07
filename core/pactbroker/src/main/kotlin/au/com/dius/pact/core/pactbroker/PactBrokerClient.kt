@@ -129,9 +129,9 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag = tag))
         } else {
-          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList()))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList(), tag = tag))
         }
       })
       consumers
