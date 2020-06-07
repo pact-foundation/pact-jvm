@@ -4,15 +4,21 @@ import au.com.dius.pact.core.model.generators.RandomBooleanGenerator
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator
 import au.com.dius.pact.core.model.generators.RandomIntGenerator
 import au.com.dius.pact.core.model.generators.RandomStringGenerator
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.time.DateUtils
 
 import java.text.ParseException
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.regex.Pattern
 
 /**
  * Base class for DSL matcher methods
  */
 @SuppressWarnings(['DuplicateNumberLiteral', 'ConfusingMethodName', 'MethodCount'])
+@Slf4j
 class Matchers {
 
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
@@ -107,20 +113,42 @@ class Matchers {
    * Match a timestamp
    * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
    * @param value Example value, if not provided the current date and time will be used
+   * @deprecated use datetime instead
    */
+  @Deprecated
   static timestamp(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
-    new TimestampMatcher(value: value, pattern: pattern)
+    new DateTimeMatcher(value: value, pattern: pattern)
   }
 
   /**
    * Match a timestamp generated from an expression
    * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
    * @param expression Expression to use to generate the timestamp
+   * @deprecated use datetime instead
    */
-
+  @Deprecated
   static timestampExpression(String expression, String pattern = null) {
-    new TimestampMatcher(pattern: pattern, expression: expression)
+    new DateTimeMatcher(pattern: pattern, expression: expression)
+  }
+
+  /**
+   * Match a datetime
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param value Example value, if not provided the current date and time will be used
+   */
+  static datetime(String pattern = null, def value = null) {
+    validateDateTimeValue(value, pattern)
+    new DateTimeMatcher(value: value, pattern: pattern)
+  }
+
+  /**
+   * Match a datetime generated from an expression
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param expression Expression to use to generate the datetime
+   */
+  static datetimeExpression(String expression, String pattern = null) {
+    new DateTimeMatcher(pattern: pattern, expression: expression)
   }
 
   private static validateTimeValue(String value, String pattern) {
@@ -128,6 +156,17 @@ class Matchers {
       try {
         DateUtils.parseDateStrictly(value, pattern)
       } catch (ParseException e) {
+        throw new InvalidMatcherException("Example \"$value\" does not match pattern \"$pattern\"")
+      }
+    }
+  }
+
+  private static validateDateTimeValue(String value, String pattern) {
+    if (value && pattern) {
+      try {
+        ZonedDateTime.parse(value, DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault()))
+      } catch (DateTimeParseException e) {
+        log.error("Example \"$value\" does not match pattern \"$pattern\"", e)
         throw new InvalidMatcherException("Example \"$value\" does not match pattern \"$pattern\"")
       }
     }

@@ -5,13 +5,14 @@ import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import org.apache.commons.lang3.time.DateFormatUtils
 
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
 /**
- * Matcher for timestamps
- * @deprecated use DateTimeMatcher instead
+ * Matcher for datetimes
  */
 @SuppressWarnings('UnnecessaryGetter')
-@Deprecated
-class TimestampMatcher extends Matcher {
+class DateTimeMatcher extends Matcher {
 
   String pattern
   String expression = null
@@ -25,7 +26,8 @@ class TimestampMatcher extends Matcher {
   }
 
   def getValue() {
-    super.@value ?: DateFormatUtils.format(new Date(Matchers.DATE_2000), getPattern())
+    super.@value ?: DateTimeFormatter.ofPattern(getPattern()).withZone(ZoneId.systemDefault()).format(
+      new Date(Matchers.DATE_2000).toInstant())
   }
 
   Generator getGenerator() {

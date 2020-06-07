@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer.groovy
 
+
 import au.com.dius.pact.core.model.PactSpecVersion
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -24,6 +26,7 @@ class MatchersSpec extends Specification {
     'hexValue'    | '1234'                                 | [match: 'regex', regex: '[0-9a-fA-F]+']
     'ipAddress'   | '1.2.3.4'                              | [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}']
     'timestamp'   | 'yyyy-mm-dd'                           | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
+    'datetime'    | 'yyyy-mm-dd'                           | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
     'date'        | 'yyyy-mm-dd'                           | [match: 'date', date: 'yyyy-mm-dd']
     'time'        | 'yyyy-mm-dd'                           | [match: 'time', time: 'yyyy-mm-dd']
     'uuid'        | '12345678-1234-1234-1234-123456789012' | [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
@@ -67,5 +70,14 @@ class MatchersSpec extends Specification {
   def 'bool matcher should generate value when not provided'() {
     expect:
     Matchers.bool().value instanceof Boolean
+  }
+
+  @Issue('#1107')
+  def 'handle datetimes with Zone IDs'() {
+    when:
+    Matchers.datetime("yyyy-MM-dd'T'HH:mmX'['VV']'")
+
+    then:
+    noExceptionThrown()
   }
 }

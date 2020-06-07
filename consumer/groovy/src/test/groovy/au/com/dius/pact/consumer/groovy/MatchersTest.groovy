@@ -55,12 +55,12 @@ class MatchersTest {
 
   @Test(expected = InvalidMatcherException)
   void 'timestamp matcher fails if the the example does not match the given pattern'() {
-    matchers.timestamp('yyyyMMddhh', '2001101014')
+    matchers.datetime('yyyyMMddhh', '2001101014')
   }
 
   @Test
   void 'timestamp matcher does not fail if the the example matches the pattern'() {
-    matchers.timestamp('yyyyMMddhh', '2001101002')
+    matchers.datetime('yyyyMMddHH', '2001101002')
   }
 
   @Test(expected = InvalidMatcherException)
