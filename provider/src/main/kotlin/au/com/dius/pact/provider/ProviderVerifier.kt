@@ -219,6 +219,8 @@ interface IProviderVerifier {
   fun reportInteractionDescription(interaction: Interaction)
 
   fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String
+
+  fun reportStateChangeFailed(providerState: ProviderState, error: Exception, isSetup: Boolean)
 }
 
 /**
@@ -500,6 +502,11 @@ open class ProviderVerifier @JvmOverloads constructor (
   override fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String {
     val reporter = reporters.filterIsInstance<AnsiConsoleReporter>().firstOrNull()
     return reporter?.failuresToString(result) ?: "Test failed. Enable the console reporter to see the details"
+  }
+
+  override fun reportStateChangeFailed(providerState: ProviderState, error: Exception, isSetup: Boolean) {
+    reporters.forEach { it.stateChangeRequestFailedWithException(providerState.name.toString(), isSetup,
+      error, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
   }
 
   override fun verifyRequestResponsePact(

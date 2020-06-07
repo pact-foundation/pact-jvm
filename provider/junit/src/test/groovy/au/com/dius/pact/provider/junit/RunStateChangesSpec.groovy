@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
 import kotlin.Pair
@@ -18,6 +19,7 @@ class RunStateChangesSpec extends Specification {
   private Map testContext
   private List<Pair<FrameworkMethod, State>> methods
   private List<Supplier> stateChangeHandlers
+  private IProviderVerifier verifier
 
   class TestTarget {
     boolean called = false
@@ -48,11 +50,12 @@ class RunStateChangesSpec extends Specification {
       { target } as Supplier
     ]
     target = Spy(TestTarget)
+    verifier = Mock()
   }
 
   def 'invokes the state change method before the next statement'() {
     when:
-    new RunStateChanges(next, methods, stateChangeHandlers, providerState, testContext).evaluate()
+    new RunStateChanges(next, methods, stateChangeHandlers, providerState, testContext, verifier).evaluate()
 
     then:
     1 * next.evaluate()
@@ -66,7 +69,7 @@ class RunStateChangesSpec extends Specification {
       TestTarget.getDeclaredMethod('stateChangeTeardown').getAnnotation(State))
 
     when:
-    new RunStateChanges(next, methods, stateChangeHandlers, providerState, testContext).evaluate()
+    new RunStateChanges(next, methods, stateChangeHandlers, providerState, testContext, verifier).evaluate()
 
     then:
     1 * next.evaluate()
@@ -85,7 +88,7 @@ class RunStateChangesSpec extends Specification {
     }
 
     when:
-    new RunStateChanges(next, methods, stateChangeHandlers, providerState, testContext).evaluate()
+    new RunStateChanges(next, methods, stateChangeHandlers, providerState, testContext, verifier).evaluate()
 
     then:
     1 * target.stateChange()

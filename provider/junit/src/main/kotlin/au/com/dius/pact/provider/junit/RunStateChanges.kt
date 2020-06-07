@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
 import mu.KLogging
@@ -19,7 +20,8 @@ class RunStateChanges(
   private val methods: List<Pair<FrameworkMethod, State>>,
   private val stateChangeHandlers: List<Supplier<out Any>>,
   private val providerState: ProviderState,
-  private val testContext: MutableMap<String, Any>
+  private val testContext: MutableMap<String, Any>,
+  private val verifier: IProviderVerifier
 ) : Statement() {
 
   override fun evaluate() {
@@ -45,7 +47,10 @@ class RunStateChanges(
           }
         } catch (e: Throwable) {
           logger.error(e) { "State change method for \"${providerState.name}\" failed" }
-          throw StateChangeCallbackFailed("State change method for \"${providerState.name}\" failed", e)
+          val callbackFailed = StateChangeCallbackFailed("State change method for \"${providerState.name}\" failed", e)
+          verifier.reportStateChangeFailed(providerState, callbackFailed, action == StateChangeAction.SETUP)
+          verifier.finaliseReports()
+          throw callbackFailed
         }
 
         if (stateChangeValue is Map<*, *>) {

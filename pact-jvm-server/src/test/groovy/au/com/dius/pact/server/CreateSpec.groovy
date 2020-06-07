@@ -1,6 +1,6 @@
 package au.com.dius.pact.server
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters
 import spock.lang.Specification
 
 import java.nio.file.Paths
@@ -14,9 +14,9 @@ class CreateSpec extends Specification {
 
     when:
     def result = Create.create('test state',
-      JavaConversions.asScalaBuffer(['/data']).toList(),
+      JavaConverters.asScalaBuffer(['/data']).toList(),
       pact, new scala.collection.immutable.HashMap(),
-      new Config(4444, 'localhost', false, 20000, 40000, true,
+      new au.com.dius.pact.server.Config(4444, 'localhost', false, 20000, 40000, true,
               2, '', '', 8444))
 
     then:
@@ -27,7 +27,7 @@ class CreateSpec extends Specification {
     if (result != null) {
       def state = result.newState()
       def values = state.values()
-      JavaConversions.asJavaCollection(values).each {
+      JavaConverters.asJavaCollection(values).each {
         it.stop()
       }
     }
@@ -41,9 +41,9 @@ class CreateSpec extends Specification {
 
     when:
     def result = Create.create('test state',
-      JavaConversions.asScalaBuffer([]).toList(),
+      JavaConverters.asScalaBuffer([]).toList(),
       pact, new scala.collection.immutable.HashMap(),
-      new Config(4444, 'localhost', false, 20000, 40000, true,
+      new au.com.dius.pact.server.Config(4444, 'localhost', false, 20000, 40000, true,
               2, keystorePath, password, 8444))
 
     then:
@@ -52,7 +52,7 @@ class CreateSpec extends Specification {
 
     cleanup:
     if (result != null) {
-      JavaConversions.asJavaCollection(result.newState().values()).each {
+      JavaConverters.asJavaCollection(result.newState().values()).each {
         it.stop()
       }
     }

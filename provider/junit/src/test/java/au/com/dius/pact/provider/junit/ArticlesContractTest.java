@@ -1,11 +1,11 @@
 package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.core.matchers.Matchers;
+import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.StateChangeAction;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
-import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.target.Target;
 import au.com.dius.pact.provider.junitsupport.target.TestTarget;
 import com.github.restdriver.clientdriver.ClientDriverRule;

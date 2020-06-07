@@ -38,8 +38,6 @@ interface VerifierReporter {
   fun warnStateChangeIgnored(state: String, provider: IProviderInfo, consumer: IConsumerInfo)
   fun stateChangeRequestFailedWithException(
     state: String,
-    provider: IProviderInfo,
-    consumer: IConsumerInfo,
     isSetup: Boolean,
     e: Exception,
     printStackTrace: Boolean

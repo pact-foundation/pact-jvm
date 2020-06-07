@@ -66,10 +66,6 @@ open class HttpTarget
     source: PactSource,
     context: Map<String, Any>
   ) {
-    val provider = getProviderInfo(source)
-    val consumer = consumerInfo(consumerName, source)
-    val verifier = setupVerifier(interaction, provider, consumer, source)
-
     val client = ProviderClient(provider, HttpClientFactory())
     val result = verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction,
       interaction.description, mutableMapOf(), client, context, consumer.pending)
@@ -103,8 +99,6 @@ open class HttpTarget
         verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
       }
     }
-
-    verifier.reportInteractionDescription(interaction)
 
     return verifier
   }

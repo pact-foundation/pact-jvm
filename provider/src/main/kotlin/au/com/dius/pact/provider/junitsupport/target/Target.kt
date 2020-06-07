@@ -53,4 +53,8 @@ interface Target {
   fun getStateHandlers(): List<Pair<Class<out Any>, Supplier<out Any>>>
 
   fun getRequestClass(): Class<*> = HttpRequest::class.java
+
+  fun configureVerifier(source: PactSource, consumerName: String, interaction: Interaction)
+
+  val verifier: IProviderVerifier
 }

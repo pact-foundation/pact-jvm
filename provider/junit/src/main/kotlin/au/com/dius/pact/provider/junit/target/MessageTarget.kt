@@ -38,10 +38,6 @@ open class MessageTarget @JvmOverloads constructor(
     source: PactSource,
     context: Map<String, Any>
   ) {
-    val provider = getProviderInfo(source)
-    val consumer = consumerInfo(consumerName, source)
-    val verifier = setupVerifier(interaction, provider, consumer, source)
-
     val result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
       interaction.description, mutableMapOf())
     reportTestResult(result, verifier)
@@ -89,8 +85,6 @@ open class MessageTarget @JvmOverloads constructor(
         verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
       }
     }
-
-    verifier.reportInteractionDescription(interaction)
 
     return verifier
   }

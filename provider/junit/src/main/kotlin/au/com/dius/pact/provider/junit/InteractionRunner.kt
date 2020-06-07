@@ -207,6 +207,8 @@ open class InteractionRunner<I>(
     }
 
     val target = lookupTarget(testInstance)
+    target.configureVerifier(source, pact.consumer.name, interaction)
+    target.verifier.reportInteractionDescription(interaction)
 
     var statement: Statement = object : Statement() {
       override fun evaluate() {
@@ -249,7 +251,7 @@ open class InteractionRunner<I>(
             "with @State(\"${state.name}\")"))
         } else {
           stateChange = RunStateChanges(stateChange, methods, listOf(Supplier { target }) +
-            testTarget.getStateHandlers().map { it.right }, state, testContext)
+            testTarget.getStateHandlers().map { it.right }, state, testContext, testTarget.verifier)
         }
       }
       stateChange

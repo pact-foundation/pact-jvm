@@ -21,6 +21,8 @@ import org.junit.runners.model.TestClass
 import java.io.File
 import java.util.function.BiConsumer
 import java.util.function.Supplier
+import au.com.dius.pact.core.support.BuiltToolConfig.detectedBuildToolPactDirectory
+import org.apache.commons.io.FilenameUtils
 
 /**
  * Out-of-the-box implementation of [Target],
@@ -35,6 +37,10 @@ abstract class BaseTarget : TestClassAwareTarget {
   private val callbacks = mutableListOf<BiConsumer<VerificationResult, IProviderVerifier>>()
   private val stateHandlers = mutableListOf<Pair<Class<out Any>, Supplier<out Any>>>()
 
+  protected lateinit var provider: IProviderInfo
+  protected lateinit var consumer: IConsumerInfo
+  override lateinit var verifier: IProviderVerifier
+
   protected abstract fun getProviderInfo(source: PactSource): ProviderInfo
 
   protected abstract fun setupVerifier(
@@ -45,19 +51,24 @@ abstract class BaseTarget : TestClassAwareTarget {
   ): IProviderVerifier
 
   protected fun setupReporters(verifier: IProviderVerifier) {
-    var reportDirectory = "target/pact/reports"
+    var reportDirectory = FilenameUtils.concat(detectedBuildToolPactDirectory(), "reports")
     var reportingEnabled = false
 
     val verificationReports = testClass.getAnnotation(VerificationReports::class.java)
     val reports: List<String> = when {
       verificationReports != null -> {
         reportingEnabled = true
-        reportDirectory = verificationReports.reportDir
+        if (verificationReports.reportDir.isNotEmpty()) {
+          reportDirectory = verificationReports.reportDir
+        }
         verificationReports.value.toList()
       }
       valueResolver.propertyDefined("pact.verification.reports") -> {
         reportingEnabled = true
-        reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")!!
+        val directory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")!!
+        if (directory.isNotEmpty()) {
+          reportDirectory = directory
+        }
         valueResolver.resolveValue("pact.verification.reports:")!!.split(",")
       }
       else -> emptyList()
@@ -134,5 +145,11 @@ abstract class BaseTarget : TestClassAwareTarget {
       }
       else -> ConsumerInfo(consumerName, pactSource = source)
     }
+  }
+
+  override fun configureVerifier(source: PactSource, consumerName: String, interaction: Interaction) {
+    provider = getProviderInfo(source)
+    consumer = consumerInfo(consumerName, source)
+    verifier = setupVerifier(interaction, provider, consumer, source)
   }
 }

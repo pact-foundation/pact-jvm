@@ -1,14 +1,14 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonParser
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapEither
 import com.github.michaelbull.result.unwrap
-import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.support.Json
-import au.com.dius.pact.core.support.json.JsonParser
 import groovy.lang.Closure
 import mu.KLogging
 import org.apache.http.HttpEntity
@@ -134,10 +134,7 @@ object DefaultStateChange : StateChange, KLogging() {
       return executeHttpStateChangeRequest(verifier, stateChangeHandler, stateChangeUsesBody, state, provider, isSetup,
         providerClient)
     } catch (e: Exception) {
-      verifier.reporters.forEach {
-        it.stateChangeRequestFailedWithException(state.name.toString(), provider, consumer, isSetup, e,
-          verifier.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
-      }
+      verifier.reportStateChangeFailed(state, e, isSetup)
       return Err(e)
     }
   }
