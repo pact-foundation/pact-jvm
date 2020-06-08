@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer.groovy
 
-
 import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Issue
 import spock.lang.Specification
