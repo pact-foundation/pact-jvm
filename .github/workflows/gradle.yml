@@ -18,5 +18,7 @@ jobs:
       with:
         java-version: 1.8
     - run: gradlew --version
+      shell: cmd
     - name: Build with Gradle
       run: gradlew --stacktrace --no-daemon -i check
+      shell: cmd
