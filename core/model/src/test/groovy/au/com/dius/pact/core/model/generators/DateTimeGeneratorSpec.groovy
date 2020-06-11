@@ -37,6 +37,6 @@ class DateTimeGeneratorSpec extends Specification {
   def 'supports timezones with zone IDs'() {
     expect:
     new DateTimeGenerator("yyyy-MM-dd'T'HH:mm:ssZ'['VV']'", null).generate([:]) ==~
-      /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d+\[\w+\/\w+]/
+      /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d+\[\w+(\/\w+)?]/
   }
 }
