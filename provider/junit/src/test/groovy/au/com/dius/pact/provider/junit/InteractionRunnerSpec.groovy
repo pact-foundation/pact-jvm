@@ -4,11 +4,9 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.model.Request
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.model.Response
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
@@ -119,5 +117,30 @@ class InteractionRunnerSpec extends Specification {
 
     then:
     0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _)
+  }
+
+  @RestoreSystemProperties
+  @SuppressWarnings('ClosureAsLastMethodParameter')
+  def 'If interaction is excluded via properties than it should be marked as ignored'() {
+    given:
+    System.properties.setProperty('pact.filter.interaction', 'interaction1')
+    def interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
+    def interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
+    def notifier = Mock(RunNotifier)
+    def testResultAccumulator = DefaultTestResultAccumulator.INSTANCE
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+    def runner = new InteractionRunner(clazz, pact, UnknownPactSource.INSTANCE)
+
+    when:
+    runner.run(notifier)
+
+    then:
+    1 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon interaction1') })
+    0 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon interaction2') })
+    0 * notifier.fireTestIgnored({ it.displayName.startsWith('consumer - Upon interaction1') })
+    1 * notifier.fireTestIgnored({ it.displayName.startsWith('consumer - Upon interaction2') })
   }
 }
