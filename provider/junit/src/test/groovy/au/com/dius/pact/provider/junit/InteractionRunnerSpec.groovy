@@ -123,7 +123,7 @@ class InteractionRunnerSpec extends Specification {
   @SuppressWarnings('ClosureAsLastMethodParameter')
   def 'If interaction is excluded via properties than it should be marked as ignored'() {
     given:
-    System.properties.setProperty('pact.filter.interaction', 'interaction1')
+    System.properties.setProperty('pact.filter.description', 'interaction1')
     def interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
     def interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])

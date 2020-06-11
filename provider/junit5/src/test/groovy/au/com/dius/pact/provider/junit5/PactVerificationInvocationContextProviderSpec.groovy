@@ -170,7 +170,7 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @RestoreSystemProperties
   def 'supports filtering the interactions'() {
     given:
-    System.setProperty('pact.filter.interaction', 'Get data 2')
+    System.setProperty('pact.filter.description', 'Get data 2')
 
     when:
     def extensions = provider.provideTestTemplateInvocationContexts([
