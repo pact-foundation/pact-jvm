@@ -261,7 +261,9 @@ open class InteractionRunner<I>(
         val methods = findStateChangeMethod(state, testTarget.getStateHandlers())
         if (methods.isEmpty()) {
           return Fail(MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated " +
-            "with @State(\"${state.name}\")"))
+            "with @State(\"${state.name}\") " +
+            "for Interaction (\"${interaction.description}\") " +
+            "and Consumer ${pact.consumer.name}"))
         } else {
           stateChange = RunStateChanges(stateChange, methods, listOf(Supplier { target }) +
             testTarget.getStateHandlers().map { it.right }, state, testContext, testTarget.verifier)
