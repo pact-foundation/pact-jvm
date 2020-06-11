@@ -13,7 +13,7 @@ class LambdaDslJsonBodySpec extends Specification {
     def body = new LambdaDslJsonBody(new PactDslJsonBody())
 
     when:
-    body.datetime('test', "yyyy-MM-dd'T'HH:mmX'['VV']'")
+    body.datetime('test', "yyyy-MM-dd'T'HH:mmx'['VV']'")
     def result = new JsonSlurper().parseText(body.pactDslObject.toString())
 
     then:
