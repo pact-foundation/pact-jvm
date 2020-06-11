@@ -146,31 +146,44 @@ open class InteractionRunner<I>(
       val description = describeChild(interaction)
       var testResult: VerificationResult = VerificationResult.Ok
       val pending = pact.source is BrokerUrlSource && (pact.source as BrokerUrlSource).result?.pending == true
-      if (!pending) {
+      val included = interactionIncluded(interaction)
+      if (!pending && included) {
         notifier.fireTestStarted(description)
       } else {
+        if (!included) {
+          logger.warn { "Ignoring interaction '${interaction.description}' as it does not match the filter " +
+            "pact.filter.interaction='${System.getProperty("pact.filter.interaction")}'" }
+        }
         notifier.fireTestIgnored(description)
       }
-      try {
-        interactionBlock(interaction, pactSource, testContext).evaluate()
-        notifier.fireTestFinished(description)
-      } catch (e: Throwable) {
-        if (!pending) {
-          notifier.fireTestFailure(Failure(description, e))
+
+      if (included) {
+        try {
+          interactionBlock(interaction, pactSource, testContext).evaluate()
           notifier.fireTestFinished(description)
-        }
-        testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-          "exception" to e)),
-          "Request to provider failed with an exception", description.displayName,
-          listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
-      } finally {
-        if (pact is FilteredPact) {
-          testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource)
-        } else {
-          testResultAccumulator.updateTestResult(pact, interaction, testResult.toTestResult(), pactSource)
+        } catch (e: Throwable) {
+          if (!pending) {
+            notifier.fireTestFailure(Failure(description, e))
+            notifier.fireTestFinished(description)
+          }
+          testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
+            "exception" to e)),
+            "Request to provider failed with an exception", description.displayName,
+            listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
+        } finally {
+          if (pact is FilteredPact) {
+            testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource)
+          } else {
+            testResultAccumulator.updateTestResult(pact, interaction, testResult.toTestResult(), pactSource)
+          }
         }
       }
     }
+  }
+
+  private fun interactionIncluded(interaction: Interaction): Boolean {
+    val interactionFilter = System.getProperty("pact.filter.description")
+    return interactionFilter.isNullOrEmpty() || interaction.description.matches(Regex(interactionFilter))
   }
 
   private fun providerVersion(): String {
