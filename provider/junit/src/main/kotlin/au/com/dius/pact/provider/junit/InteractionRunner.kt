@@ -182,7 +182,7 @@ open class InteractionRunner<I>(
   }
 
   private fun interactionIncluded(interaction: Interaction): Boolean {
-    val interactionFilter = System.getProperty("pact.filter.interaction")
+    val interactionFilter = System.getProperty("pact.filter.description")
     return interactionFilter.isNullOrEmpty() || interaction.description.matches(Regex(interactionFilter))
   }
 
