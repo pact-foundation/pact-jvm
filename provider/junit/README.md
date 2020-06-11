@@ -354,6 +354,15 @@ public class PactJUnitTest {
 }
 ```
 
+##### Filtering the interactions that are run
+
+**(version 4.1.2+)**
+
+You can filter the interactions that are run by setting the JVM system property `pact.filter.interaction`. This propery
+takes a regular expression to match against the interaction description.
+
+**NOTE!** this property needs to be set on the test JVM if your build is running with Gradle or Maven. 
+
 ### Setting the test to not fail when no pacts are found
 
 By default the pact runner will fail the verification test if no pact files are found to verify. To change the
