@@ -5,7 +5,7 @@ init:
 build: false
 
 build_script:
-  - set JAVA_HOME=C:\Program Files\Java\jdk12
+  - set JAVA_HOME=C:\Program Files\Java\jdk8
   - java -version
   - gradlew --version
   - gradlew --stacktrace --no-daemon -i check
