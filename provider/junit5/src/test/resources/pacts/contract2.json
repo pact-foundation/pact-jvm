@@ -7,7 +7,7 @@
   },
   "interactions" : [ {
     "providerState": "default",
-    "description" : "Get data",
+    "description" : "Get data 2",
     "request" : {
       "method" : "GET",
       "path" : "/data",

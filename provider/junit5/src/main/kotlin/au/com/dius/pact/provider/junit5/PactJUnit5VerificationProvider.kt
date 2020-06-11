@@ -450,8 +450,13 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
       filterPactsByAnnotations(pacts, context.requiredTestClass)
     }.filter { p -> consumerName == null || p.consumer.name == consumerName }
 
+    val interactionFilter = System.getProperty("pact.filter.interaction")
     return Pair(pactSources.flatMap { pact ->
-      pact.interactions.map { PactVerificationExtension(pact, pact.source, it, serviceName, consumerName) }
+      pact.interactions
+        .filter {
+          interactionFilter.isNullOrEmpty() || it.description.matches(Regex(interactionFilter))
+        }
+        .map { PactVerificationExtension(pact, pact.source, it, serviceName, consumerName) }
     }, description)
   }
 

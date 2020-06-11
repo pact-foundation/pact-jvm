@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
 class PactVerificationInvocationContextProviderSpec extends Specification {
@@ -159,6 +160,21 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     when:
     def extensions = provider.provideTestTemplateInvocationContexts([
       'getTestClass': { Optional.of(ChildClass) } ] as ExtensionContext
+    )
+
+    then:
+    extensions.count() == 1
+  }
+
+  @Issue('#1104')
+  @RestoreSystemProperties
+  def 'supports filtering the interactions'() {
+    given:
+    System.setProperty('pact.filter.interaction', 'Get data 2')
+
+    when:
+    def extensions = provider.provideTestTemplateInvocationContexts([
+      'getTestClass': { Optional.of(TestClassWithAnnotation) } ] as ExtensionContext
     )
 
     then:
