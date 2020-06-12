@@ -192,7 +192,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
         if (selectors.isEmpty()) {
           fetchConsumers(providerName)
         } else {
-          fetchConsumersWithTag(providerName, selectors.first().tag)
+          selectors.flatMap { fetchConsumersWithTag(providerName, it.tag) }
         }
       }
     }

@@ -116,6 +116,36 @@ class PactBrokerClientSpec extends Specification {
     consumers.first().source == 'http://bob.com/'
   }
 
+  def 'fetches consumers with more than one tag successfully'() {
+    given:
+    def halClient = Mock(IHalClient)
+    halClient.navigate() >> halClient
+    halClient.navigate(_, _) >> halClient
+    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
+
+    def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumersWithSelectors('provider',
+            [ new ConsumerVersionSelector('tag', true),
+              new ConsumerVersionSelector('anotherTag', true) ], [], false).value
+
+    then:
+    consumers.size() == 2
+
+    consumers.first()
+    consumers.first().name == 'bob'
+    consumers.first().source == 'http://bob.com/'
+    consumers.first().tag == 'tag'
+
+    consumers.last()
+    consumers.last().name == 'bob'
+    consumers.last().source == 'http://bob.com/'
+    consumers.last().tag == 'anotherTag'
+  }
+
   def 'when fetching consumers with specified tag, sets the auth if there is any'() {
     given:
     def halClient = Mock(IHalClient)
