@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.model.MockServerImplementation;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.consumer.PactVerificationResult;
@@ -37,7 +38,7 @@ public class BaseProviderRule extends ExternalResource {
     this.target = target;
     this.provider = provider;
     config = MockProviderConfig.httpConfig(StringUtils.isEmpty(hostInterface) ? MockProviderConfig.LOCALHOST : hostInterface,
-      port == null ? 0 : port, pactVersion);
+      port == null ? 0 : port, pactVersion, MockServerImplementation.Default);
   }
 
   public MockProviderConfig getConfig() {

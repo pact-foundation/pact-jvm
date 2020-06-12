@@ -15,17 +15,19 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.httpMethod
 import io.ktor.request.path
-import io.ktor.request.receiveText
+import io.ktor.request.receiveStream
 import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.response.respondBytes
-import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
+import io.ktor.server.netty.NettyApplicationEngine
 import mu.KLogging
+import java.util.zip.DeflaterInputStream
+import java.util.zip.GZIPInputStream
 
 class KTorMockServer(
   pact: RequestResponsePact,
@@ -71,10 +73,10 @@ class KTorMockServer(
     }
   }
 
-  private var server: ApplicationEngine = embeddedServer(Netty, environment = env, configure = {})
+  private var server: NettyApplicationEngine = embeddedServer(Netty, environment = env, configure = {})
 
   private suspend fun pactResponseToKTorResponse(response: Response, call: ApplicationCall) {
-    response.headers?.forEach { entry ->
+    response.headers.forEach { entry ->
       entry.value.forEach {
         call.response.headers.append(entry.key, it, safeOnly = false)
       }
@@ -90,19 +92,25 @@ class KTorMockServer(
 
   private suspend fun toPactRequest(call: ApplicationCall): Request {
     val headers = call.request.headers
-    val bodyContents = call.receiveText()
+    val stream = call.receiveStream()
+    val bodyContents = when (bodyIsCompressed(headers["Content-Encoding"])) {
+      "gzip" -> GZIPInputStream(stream).readBytes()
+      "deflate" -> DeflaterInputStream(stream).readBytes()
+      else -> stream.readBytes()
+    }
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents.toByteArray(), ContentType(headers["Content-Type"] ?: ContentType.JSON.contentType))
+      OptionalBody.body(bodyContents, ContentType(headers["Content-Type"] ?: ContentType.JSON.contentType))
     }
     return Request(call.request.httpMethod.value, call.request.path(),
       call.request.queryParameters.entries().associate { it.toPair() }.toMutableMap(),
       headers.entries().associate { it.toPair() }.toMutableMap(), body)
   }
 
-  override fun getUrl() =
-    "${config.scheme}://${server.environment.connectors.first().host}:${this.getPort()}"
+  override fun getUrl(): String {
+    return "${config.scheme}://${server.environment.connectors.first().host}:${this.getPort()}"
+  }
 
   override fun getPort() = server.environment.connectors.first().port
 

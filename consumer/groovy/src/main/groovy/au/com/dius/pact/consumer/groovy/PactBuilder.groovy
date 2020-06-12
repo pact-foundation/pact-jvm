@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.PactTestExecutionContext
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactReaderKt
@@ -353,7 +354,8 @@ class PactBuilder extends BaseBuilder {
     def pact = new RequestResponsePact(provider, consumer, interactions)
 
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
-    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion as PactSpecVersion)
+    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion as PactSpecVersion,
+      MockServerImplementation.Default)
 
     def runTest = closure
     if (closure.maximumNumberOfParameters < 2) {

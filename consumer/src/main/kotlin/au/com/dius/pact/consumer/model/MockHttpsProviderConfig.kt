@@ -22,7 +22,12 @@ class MockHttpsProviderConfig @JvmOverloads constructor(
   companion object {
     @JvmStatic
     @JvmOverloads
-    fun httpsConfig(hostname: String = LOCALHOST, port: Int = 0, pactVersion: PactSpecVersion = PactSpecVersion.V3): MockHttpsProviderConfig {
+    fun httpsConfig(
+      hostname: String = LOCALHOST,
+      port: Int = 0,
+      pactVersion: PactSpecVersion = PactSpecVersion.V3,
+      implementation: MockServerImplementation = MockServerImplementation.KTorServer
+    ): MockHttpsProviderConfig {
       val jksFile = File.createTempFile("PactTest", ".jks")
       val p = if (port == 0) {
         randomPort()
@@ -31,7 +36,7 @@ class MockHttpsProviderConfig @JvmOverloads constructor(
       }
       val keystore = io.ktor.network.tls.certificates.generateCertificate(jksFile, "SHA1withRSA", "PactTest", "changeit", "changeit", 1024)
       return MockHttpsProviderConfig(hostname, p, pactVersion, keystore, "PactTest", "changeit", "changeit",
-        MockServerImplementation.KTorServer)
+        implementation.merge(MockServerImplementation.KTorServer))
     }
   }
 }

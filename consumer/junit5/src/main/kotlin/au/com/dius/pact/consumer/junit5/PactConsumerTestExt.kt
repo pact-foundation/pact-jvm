@@ -12,6 +12,7 @@ import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Interaction
@@ -99,7 +100,13 @@ annotation class PactTestFor(
   /**
    * If HTTPS should be used. If enabled, a mock server with a self-signed cert will be started.
    */
-  val https: Boolean = false
+  val https: Boolean = false,
+
+  /**
+   * The type of mock server implementation to use. The default is to use the Java server for HTTP and the KTor
+   * server for HTTPS
+   */
+  val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default
 )
 
 data class ProviderInfo @JvmOverloads constructor(
@@ -108,20 +115,22 @@ data class ProviderInfo @JvmOverloads constructor(
   val port: String = "",
   val pactVersion: PactSpecVersion? = null,
   val providerType: ProviderType? = null,
-  val https: Boolean = false
+  val https: Boolean = false,
+  val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default
 ) {
-
   fun mockServerConfig() = if (https) {
     MockHttpsProviderConfig.httpsConfig(
       if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
       if (port.isEmpty()) 0 else port.toInt(),
-      pactVersion ?: PactSpecVersion.V3
+      pactVersion ?: PactSpecVersion.V3,
+      mockServerImplementation
     )
   } else {
     MockProviderConfig.httpConfig(
       if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
       if (port.isEmpty()) 0 else port.toInt(),
-      pactVersion ?: PactSpecVersion.V3
+      pactVersion ?: PactSpecVersion.V3,
+      mockServerImplementation
     )
   }
 
@@ -131,7 +140,8 @@ data class ProviderInfo @JvmOverloads constructor(
       port = if (port.isNotEmpty()) port else other.port,
       pactVersion = pactVersion ?: other.pactVersion,
       providerType = providerType ?: other.providerType,
-      https = https || other.https
+      https = https || other.https,
+      mockServerImplementation = mockServerImplementation.merge(other.mockServerImplementation)
     )
   }
 
@@ -145,7 +155,7 @@ data class ProviderInfo @JvmOverloads constructor(
         when (annotation.providerType) {
           ProviderType.UNSPECIFIED -> null
           else -> annotation.providerType
-        }, annotation.https)
+        }, annotation.https, annotation.mockServerImplementation)
   }
 }
 
@@ -227,6 +237,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val store = context.getStore(NAMESPACE)
     return if (store["mockServer"] == null) {
       val config = providerInfo.mockServerConfig()
+
       store.put("mockServerConfig", config)
       val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context) as RequestResponsePact, config)
       store.put("mockServer", JUnit5MockServerSupport(mockServer))

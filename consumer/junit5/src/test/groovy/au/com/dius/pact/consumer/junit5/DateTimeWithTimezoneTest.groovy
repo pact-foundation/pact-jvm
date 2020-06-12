@@ -23,10 +23,10 @@ class DateTimeWithTimezoneTest {
       .uponReceiving('a request with some datetime info')
         .method('POST')
         .path('/values')
-        .body(new PactDslJsonBody().datetime('datetime', "YYYY-MM-dd'T'HH:mm:ss.SSSxxx"))
+        .body(new PactDslJsonBody().datetime('datetime', "YYYY-MM-dd'T'HH:mm:ss.SSSXXX"))
       .willRespondWith()
         .status(200)
-        .body(new PactDslJsonBody().datetime('datetime', "YYYY-MM-dd'T'HH:mm:ss.SSSxxx"))
+        .body(new PactDslJsonBody().datetime('datetime', "YYYY-MM-dd'T'HH:mm:ss.SSSXXX"))
       .toPact()
   }
 
@@ -34,7 +34,7 @@ class DateTimeWithTimezoneTest {
   void testFiles(MockServer mockServer) {
     HttpResponse httpResponse = Request.Post("${mockServer.url}/values")
       .body(new StringEntity('{"datetime": "' +
-        DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss.SSSxxx").format(ZonedDateTime.now())
+        DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss.SSSXXX").format(ZonedDateTime.now())
         + '"}', 'application/json', 'UTF-8'))
       .execute().returnResponse()
     assert httpResponse.statusLine.statusCode == 200

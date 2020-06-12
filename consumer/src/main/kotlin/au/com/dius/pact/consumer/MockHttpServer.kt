@@ -15,6 +15,7 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
+import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
@@ -35,6 +36,8 @@ import java.lang.Thread.sleep
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.zip.DeflaterInputStream
+import java.util.zip.GZIPInputStream
 
 /**
  * Returns a mock server for the pact and config
@@ -79,6 +82,14 @@ abstract class AbstractBaseMockServer : MockServer {
   abstract fun start()
   abstract fun stop()
   abstract fun waitForServer()
+
+  protected fun bodyIsCompressed(encoding: String?): String? {
+    return if (COMPRESSED_ENCODINGS.contains(encoding)) encoding else null
+  }
+
+  companion object : KLogging() {
+    val COMPRESSED_ENCODINGS = setOf("gzip", "deflate")
+  }
 }
 
 abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig) : AbstractBaseMockServer() {
@@ -89,12 +100,14 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
 
   override fun waitForServer() {
     val sf = SSLSocketFactory(TrustSelfSignedStrategy())
+    val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 500)
     val httpclient = HttpClientBuilder.create()
       .setConnectionManager(BasicHttpClientConnectionManager(RegistryBuilder.create<ConnectionSocketFactory>()
         .register("http", PlainConnectionSocketFactory.getSocketFactory())
         .register("https", sf)
         .build()))
       .setSSLSocketFactory(sf)
+      .setServiceUnavailableRetryStrategy(retryStrategy)
       .build()
 
     val httpOptions = HttpOptions(getUrl())
@@ -227,11 +240,16 @@ abstract class BaseJdkMockServer(
 
   private fun toPactRequest(exchange: HttpExchange): Request {
     val headers = exchange.requestHeaders
-    val bodyContents = exchange.requestBody.readBytes()
+    val contentType = contentType(headers)
+    val bodyContents = when (bodyIsCompressed(headers.getFirst("Content-Encoding"))) {
+      "gzip" -> GZIPInputStream(exchange.requestBody).readBytes()
+      "deflate" -> DeflaterInputStream(exchange.requestBody).readBytes()
+      else -> exchange.requestBody.readBytes()
+    }
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents, contentType(headers))
+      OptionalBody.body(bodyContents, contentType)
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
       queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers.toMutableMap(), body)

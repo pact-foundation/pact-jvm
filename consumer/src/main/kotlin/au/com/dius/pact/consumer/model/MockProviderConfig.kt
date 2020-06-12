@@ -15,7 +15,18 @@ enum class MockServerImplementation {
   /**
    * Uses the KTor server framework
    */
-  KTorServer
+  KTorServer,
+
+  /**
+   * Use the Java server for HTTP and the KTor server for HTTPS
+   */
+  Default;
+
+  fun merge(implementation: MockServerImplementation) = if (this == Default) {
+    implementation
+  } else {
+    this
+  }
 }
 
 /**
@@ -44,8 +55,9 @@ open class MockProviderConfig @JvmOverloads constructor (
     fun httpConfig(
       hostname: String = LOCALHOST,
       port: Int = 0,
-      pactVersion: PactSpecVersion = PactSpecVersion.V3
-    ) = MockProviderConfig(hostname, port, pactVersion, HTTP)
+      pactVersion: PactSpecVersion = PactSpecVersion.V3,
+      implementation: MockServerImplementation = MockServerImplementation.JavaHttpServer
+    ) = MockProviderConfig(hostname, port, pactVersion, HTTP, implementation.merge(MockServerImplementation.JavaHttpServer))
 
     @JvmStatic
     fun createDefault() = createDefault(LOCALHOST, PactSpecVersion.V3)
