@@ -22,8 +22,6 @@ import org.w3c.dom.Text
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.ParseException
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
@@ -323,7 +321,7 @@ fun <M : Mismatch> matchDateTime(
     emptyList()
   } else {
     try {
-      ZonedDateTime.parse(safeToString(actual), DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault()))
+      DateTimeFormatter.ofPattern(pattern).parse(safeToString(actual))
       emptyList<M>()
     } catch (e: DateTimeParseException) {
       listOf(mismatchFactory.create(expected, actual,
