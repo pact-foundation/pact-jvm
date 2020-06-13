@@ -372,17 +372,17 @@ open class ProviderVerifier @JvmOverloads constructor (
       when (messageResult) {
         is MessageAndMetadata -> {
           messageMetadata = messageResult.metadata
-          contentType = ContentType(Message.contentType(messageResult.metadata))
+          contentType = Message.contentType(messageResult.metadata)
           actualMessage = messageResult.messageData
         }
         is Pair<*, *> -> {
           messageMetadata = messageResult.second as Map<String, Any>
-          contentType = ContentType(Message.contentType(messageMetadata))
+          contentType = Message.contentType(messageMetadata)
           actualMessage = messageResult.first.toString().toByteArray(contentType.asCharset())
         }
         is org.apache.commons.lang3.tuple.Pair<*, *> -> {
           messageMetadata = messageResult.right as Map<String, Any>
-          contentType = ContentType(Message.contentType(messageMetadata))
+          contentType = Message.contentType(messageMetadata)
           actualMessage = messageResult.left.toString().toByteArray(contentType.asCharset())
         }
         else -> {

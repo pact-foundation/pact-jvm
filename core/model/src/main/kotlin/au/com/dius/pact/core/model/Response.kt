@@ -34,7 +34,7 @@ class Response @JvmOverloads constructor(
     generators.applyGenerator(Category.HEADER, mode) { key, g ->
       r.headers[key] = listOf(g.generate(context).toString())
     }
-    r.body = generators.applyBodyGenerators(r.body, ContentType(contentType()), context, mode)
+    r.body = generators.applyBodyGenerators(r.body, ContentType.fromString(contentType()), context, mode)
     return r
   }
 

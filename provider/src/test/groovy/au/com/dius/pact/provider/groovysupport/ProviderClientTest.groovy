@@ -71,7 +71,7 @@ class ProviderClientTest {
   }
 
   @Test
-  void 'setupBody() needs to take Content-Type headegr into account (UTF-8)'() {
+  void 'setupBody() needs to take Content-Type header into account (UTF-8)'() {
     def contentType = 'text/plain; charset=UTF-8'
     def headers = ['Content-Type': [contentType]]
     def body = 'ÄÉÌÕÛ'
@@ -95,8 +95,8 @@ class ProviderClientTest {
   }
 
   @Test
-  void 'setupBody() Content-Type defaults to plain text without encoding'() {
-    def contentType = 'text/plain'
+  void 'setupBody() Content-Type defaults to plain text with encoding'() {
+    def contentType = 'text/plain; charset=ISO-8859-1'
     def body = 'ÄÉÌÕÛ'
     def request = new Request('PUT', '/', [:], [:], OptionalBody.body(body.bytes))
     def method = new BasicHttpEntityEnclosingRequest('PUT', '/')

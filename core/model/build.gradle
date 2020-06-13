@@ -25,6 +25,7 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   api "com.google.code.gson:gson:${project.gsonVersion}"
+  implementation 'org.apache.tika:tika-core:1.24.1'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"

@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.messaging
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -15,7 +16,6 @@ import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
-import org.apache.http.entity.ContentType
 
 /**
  * Message in a Message Pact
@@ -34,14 +34,7 @@ class Message @JvmOverloads constructor(
 
   fun contentsAsString() = contents.valueAsString()
 
-  fun getContentType() = if (contents.isPresent() && contents.contentType.contentType.isNotEmpty()) {
-    contents.contentType.contentType
-  } else {
-    contentType(metaData)
-  }
-
-  @Deprecated("Use the content type associated with the message body")
-  fun getParsedContentType() = parseContentType(this.getContentType() ?: "")
+  fun getContentType() = contentType(metaData).or(contents.contentType)
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     val map: MutableMap<String, Any?> = mutableMapOf(
@@ -80,12 +73,7 @@ class Message @JvmOverloads constructor(
 
   private fun isJsonContents(): Boolean {
     return if (contents.isPresent()) {
-      val contentType = contentType(metaData)
-      if (contentType.isNotEmpty()) {
-        isJson(contentType)
-      } else {
-        isJson(contents.contentType.asMimeType())
-      }
+      contentType(metaData).or(contents.contentType).isJson()
     } else {
       false
     }
@@ -93,10 +81,10 @@ class Message @JvmOverloads constructor(
 
   fun formatContents(): String {
     return if (contents.isPresent()) {
-      val contentType = contentType(metaData) ?: contents.contentType.asMimeType()
+      val contentType = contentType(metaData).or(contents.contentType)
       when {
-        isJson(contentType) -> Json.gsonPretty.toJson(JsonParser.parseString(contents.valueAsString()).toGson())
-        isOctetStream(contentType) -> Base64.encodeBase64String(contentsAsBytes())
+        contentType.isJson() -> Json.gsonPretty.toJson(JsonParser.parseString(contents.valueAsString()).toGson())
+        contentType.isOctetStream() -> Base64.encodeBase64String(contentsAsBytes())
         else -> contents.valueAsString()
       }
     } else {
@@ -146,8 +134,6 @@ class Message @JvmOverloads constructor(
   }
 
   companion object : KLogging() {
-    const val JSON = "application/json"
-    const val TEXT = "text/plain"
 
     /**
      * Builds a message from a Map
@@ -165,7 +151,7 @@ class Message @JvmOverloads constructor(
       else
         emptyMap()
 
-      val contentType = au.com.dius.pact.core.model.ContentType(contentType(metaData))
+      val contentType = contentType(metaData)
       val contents = if (json.has("contents")) {
         when (val contents = json["contents"]) {
           is JsonValue.Null -> OptionalBody.nullBody()
@@ -187,29 +173,10 @@ class Message @JvmOverloads constructor(
         contents, matchingRules, generators, metaData.toMutableMap(), Json.toString(json["_id"]))
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    private fun parseContentType(contentType: String?): ContentType? {
-      return if (contentType.isNotEmpty()) {
-        try {
-          ContentType.parse(contentType)
-        } catch (e: RuntimeException) {
-          logger.debug(e) { "Failed to parse content type '$contentType'" }
-          null
-        }
-      } else {
-        null
-      }
-    }
-
-    fun contentType(metaData: Map<String, Any?>): String? {
-      return parseContentType(metaData.entries.find {
+    fun contentType(metaData: Map<String, Any?>): ContentType {
+      return ContentType.fromString(metaData.entries.find {
         it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
-      }?.value?.toString())?.mimeType
+      }?.value?.toString())
     }
-
-    private fun isJson(contentType: String?) =
-      contentType != null && contentType.matches(Regex("application/.*json"))
-
-    private fun isOctetStream(contentType: String?) = contentType == "application/octet-stream"
   }
 }

@@ -18,9 +18,10 @@ class BaseRequestSpec extends Specification {
         def expected = DefaultPactReader.extractRequest(json.asObject().get('expected').asObject())
         def actual = DefaultPactReader.extractRequest(json.asObject().get('actual').asObject())
         if (expected.body.present) {
-          expected.setDefaultContentType(expected.detectContentType())
+          expected.setDefaultContentType(expected.body.detectContentType().toString())
         }
-        actual.setDefaultContentType(actual.body.present ? actual.detectContentType() : 'application/json')
+        actual.setDefaultContentType(actual.body.present ? actual.body.detectContentType().toString() :
+          'application/json')
         result << [d.name, f.name, jsonMap.comment, jsonMap.match, jsonMap.match ? 'should match' : 'should not match',
                    expected, actual]
       }

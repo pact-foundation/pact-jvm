@@ -1,41 +1,33 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.ContentType.Companion.HTMLREGEXP
+import au.com.dius.pact.core.model.ContentType.Companion.JSONREGEXP
+import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
+import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
+import org.apache.tika.config.TikaConfig
+import org.apache.tika.io.TikaInputStream
+import org.apache.tika.metadata.Metadata
+
 /**
  * Class to represent missing, empty, null and present bodies
  */
 data class OptionalBody(
   val state: State,
   val value: ByteArray? = null,
-  val contentType: ContentType = ContentType.UNKNOWN
+  var contentType: ContentType = ContentType.UNKNOWN
 ) {
+
+  init {
+    if (contentType == ContentType.UNKNOWN) {
+      val detectedContentType = detectContentType()
+      if (detectedContentType != null) {
+        this.contentType = detectedContentType
+      }
+    }
+  }
 
   enum class State {
     MISSING, EMPTY, NULL, PRESENT
-  }
-
-  companion object {
-
-    @JvmStatic fun missing(): OptionalBody {
-      return OptionalBody(State.MISSING)
-    }
-
-    @JvmStatic fun empty(): OptionalBody {
-      return OptionalBody(State.EMPTY, ByteArray(0))
-    }
-
-    @JvmStatic fun nullBody(): OptionalBody {
-      return OptionalBody(State.NULL)
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun body(body: ByteArray?, contentType: ContentType = ContentType.UNKNOWN): OptionalBody {
-      return when {
-        body == null -> nullBody()
-        body.isEmpty() -> empty()
-        else -> OptionalBody(State.PRESENT, body, contentType)
-      }
-    }
   }
 
   fun isMissing(): Boolean {
@@ -113,6 +105,62 @@ data class OptionalBody(
       State.NULL -> ""
       State.MISSING -> ""
     }
+  }
+
+  fun detectContentType(): ContentType? = when {
+    this.isPresent() -> {
+      val metadata = Metadata()
+      val mimetype = tika.detector.detect(TikaInputStream.get(value!!), metadata)
+      if (mimetype.baseType.type == "text") {
+        detectStandardTextContentType() ?: ContentType(mimetype)
+      } else {
+        ContentType(mimetype)
+      }
+    }
+    else -> null
+  }
+
+  private fun detectStandardTextContentType(): ContentType? = when {
+    isPresent() -> {
+      val s = value!!.take(32).map {
+        if (it == '\n'.toByte()) ' ' else it.toChar()
+      }.joinToString("")
+      when {
+        s.matches(XMLREGEXP) -> ContentType.XML
+        s.toUpperCase().matches(HTMLREGEXP) -> ContentType.HTML
+        s.matches(JSONREGEXP) -> ContentType.JSON
+        s.matches(XMLREGEXP2) -> ContentType.XML
+        else -> null
+      }
+    }
+    else -> null
+  }
+
+  companion object {
+
+    @JvmStatic fun missing(): OptionalBody {
+      return OptionalBody(State.MISSING)
+    }
+
+    @JvmStatic fun empty(): OptionalBody {
+      return OptionalBody(State.EMPTY, ByteArray(0))
+    }
+
+    @JvmStatic fun nullBody(): OptionalBody {
+      return OptionalBody(State.NULL)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun body(body: ByteArray?, contentType: ContentType = ContentType.UNKNOWN): OptionalBody {
+      return when {
+        body == null -> nullBody()
+        body.isEmpty() -> empty()
+        else -> OptionalBody(State.PRESENT, body, contentType)
+      }
+    }
+
+    private val tika = TikaConfig()
   }
 }
 

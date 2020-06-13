@@ -22,8 +22,8 @@ class MultipartMessageBodyMatcher : BodyMatcher {
               null, "Expected a multipart body but was missing"))
       expected.isEmpty() && actual.isEmpty() -> emptyList()
       else -> {
-        val expectedMultipart = parseMultipart(expected.valueAsString(), expected.contentType.contentType!!)
-        val actualMultipart = parseMultipart(actual.valueAsString(), actual.contentType.contentType!!)
+        val expectedMultipart = parseMultipart(expected.valueAsString(), expected.contentType.toString())
+        val actualMultipart = parseMultipart(actual.valueAsString(), actual.contentType.toString())
         compareHeaders(expectedMultipart, actualMultipart) + compareContents(expectedMultipart, actualMultipart)
       }
     }

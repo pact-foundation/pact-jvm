@@ -53,10 +53,10 @@ public abstract class PactDslRequestBase {
       .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
       .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
       .build();
-    OutputStream os = new ByteArrayOutputStream();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
     multipart.writeTo(os);
 
-    requestBody = OptionalBody.body(os.toString().getBytes(),
+    requestBody = OptionalBody.body(os.toByteArray(),
       new au.com.dius.pact.core.model.ContentType(multipart.getContentType().getValue()));
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
       multipart.getContentType().getValue()));

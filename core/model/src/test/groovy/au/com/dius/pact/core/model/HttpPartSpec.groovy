@@ -38,7 +38,7 @@ class HttpPartSpec extends Specification {
 
     where:
     request                                                                             | charset
-    new Request('Get', '')                                                              | Charset.defaultCharset()
+    new Request('Get', '')                                                              | null
     new Request('Get', '', [:], ['Content-Type': ['text/html']])                        | Charset.defaultCharset()
     new Request('Get', '', [:], ['Content-Type': ['application/json; charset=UTF-16']]) | Charset.forName('UTF-16')
   }

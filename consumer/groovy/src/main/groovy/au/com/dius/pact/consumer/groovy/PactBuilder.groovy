@@ -124,15 +124,17 @@ class PactBuilder extends BaseBuilder {
       Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers, requestGenerators)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers, responseGenerators)
       String path = setupPath(requestData[i].path ?: '/', requestMatchers, requestGenerators)
+      def requestBody = requestData[i].body instanceof String ? requestData[i].body.bytes : requestData[i].body
+      def responseBody = responseData[i].body instanceof String ? responseData[i].body.bytes : responseData[i].body
       interactions << new RequestResponseInteraction(
         requestDescription,
         providerStates,
         new Request(requestData[i].method ?: 'get', path, query, headers,
-          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body.bytes, contentType(headers)) :
+          requestData[i].containsKey(BODY) ? OptionalBody.body(requestBody, contentType(headers)) :
             OptionalBody.missing(),
           requestMatchers, requestGenerators),
         new Response(responseData[i].status ?: 200, responseHeaders,
-          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body.bytes,
+          responseData[i].containsKey(BODY) ? OptionalBody.body(responseBody,
             contentType(responseHeaders)) : OptionalBody.missing(),
           responseMatchers, responseGenerators), null
       )
@@ -402,16 +404,16 @@ class PactBuilder extends BaseBuilder {
       .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
       .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
       .build()
-    def os = new ByteArrayOutputStream()
+    ByteArrayOutputStream os = new ByteArrayOutputStream()
     multipart.writeTo(os)
     if (requestState) {
-      requestData.last().body = os.toString()
+      requestData.last().body = os.toByteArray()
       requestData.last().headers = requestData.last().headers ?: [:]
       requestData.last().headers[CONTENT_TYPE] = multipart.contentType.value
       Category category  = requestData.last().matchers.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     } else {
-      responseData.last().body = os.toString()
+      responseData.last().body = os.toByteArray()
       responseData.last().headers = responseData.last().headers ?: [:]
       responseData.last().headers[CONTENT_TYPE] = multipart.contentType.value
       Category category  = responseData.last().matchers.addCategory(HEADER)

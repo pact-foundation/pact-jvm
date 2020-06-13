@@ -118,8 +118,9 @@ class MessageSpec extends Specification {
 
     body                               | contentType                | contents
     '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
-    '{"A": "Value A", "B": "Value B"}' | ''                         | '{"A": "Value A", "B": "Value B"}'
+    '{"A": "Value A", "B": "Value B"}' | ''                         | [A: 'Value A', B: 'Value B']
     '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
+    '1 2 3 4'                          | ''                         | '1 2 3 4'
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
     message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
@@ -135,8 +136,10 @@ class MessageSpec extends Specification {
 
     body                               | contentType                | contents
     '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
-    '{"A": "Value A", "B": "Value B"}' | ''                         | '{"A": "Value A", "B": "Value B"}'
+    '{"A": "Value A", "B": "Value B"}' | ''                         | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}' | 'text/plain'               | '{"A": "Value A", "B": "Value B"}'
     '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
+    '1 2 3 4'                          | ''                         | '1 2 3 4'
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
     message = new Message('test', [], OptionalBody.body(body.bytes),
@@ -152,8 +155,10 @@ class MessageSpec extends Specification {
 
     body                               | contentType                | contents
     '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
-    '{"A": "Value A", "B": "Value B"}' | ''                         | '{"A": "Value A", "B": "Value B"}'
+    '{"A": "Value A", "B": "Value B"}' | ''                         | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}' | 'text/plain'               | '{"A": "Value A", "B": "Value B"}'
     '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
+    '1 2 3 4'                          | ''                         | '1 2 3 4'
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
     message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
@@ -163,7 +168,7 @@ class MessageSpec extends Specification {
   @Unroll
   def 'get content type test'() {
     expect:
-    message.contentType == result
+    message.contentType.toString() == result
 
     where:
 
@@ -171,7 +176,7 @@ class MessageSpec extends Specification {
     'contentType'  | 'application/json'         | 'application/json'
     'Content-Type' | 'text/plain'               | 'text/plain'
     'contenttype'  | 'application/octet-stream' | 'application/octet-stream'
-    'none'         | 'none'                     | null
+    'none'         | 'none'                     | 'null'
 
     message = new Message('Test').withMetaData([(key): contentType])
   }
@@ -191,11 +196,11 @@ class MessageSpec extends Specification {
     'text/plain'                               | '{"a": 100.0, "b": "test"}'
     'application/octet-stream;charset=UTF-8'   | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
     'application/octet-stream'                 | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
-    ''                                         | '{"a": 100.0, "b": "test"}'
-    null                                       | '{"a": 100.0, "b": "test"}'
+    ''                                         | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    null                                       | '{\n  "a": 100.0,\n  "b": "test"\n}'
 
     message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes,
-      new ContentType(contentType)),
+      ContentType.fromString(contentType)),
       new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
   }
 

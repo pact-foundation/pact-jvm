@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider
 
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
@@ -20,9 +19,9 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.google.gson.JsonParser
 import mu.KLogging
-import java.nio.charset.Charset
 
 data class BodyComparisonResult(
   val mismatches: Map<String, List<BodyMismatch>> = emptyMap(),
@@ -48,7 +47,7 @@ class ResponseComparison(
   val expectedHeaders: Map<String, List<String>>,
   val expectedBody: OptionalBody,
   val isJsonBody: Boolean,
-  val actualResponseContentType: org.apache.http.entity.ContentType,
+  val actualResponseContentType: ContentType,
   val actualBody: String?
 ) {
 
@@ -76,18 +75,17 @@ class ResponseComparison(
         .groupBy { bm -> bm.path }
 
       val contentType = this.actualResponseContentType
-      val diff = generateFullDiff(actualBody.orEmpty(), contentType.mimeType.toString(),
-        expectedBody.valueAsString(), isJsonBody)
+      val diff = generateFullDiff(actualBody.orEmpty(), contentType, expectedBody.valueAsString(), isJsonBody)
       Ok(BodyComparisonResult(bodyMismatches, diff))
     }
   }
 
   companion object : KLogging() {
 
-    private fun generateFullDiff(actual: String, mimeType: String, response: String, jsonBody: Boolean): List<String> {
+    private fun generateFullDiff(actual: String, contentType: ContentType, response: String, jsonBody: Boolean): List<String> {
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
-        actualBodyString = if (mimeType.matches(Regex("application/.*json"))) {
+        actualBodyString = if (contentType.isJson()) {
           Json.gsonPretty.toJson(JsonParser.parseString(actual))
         } else {
           actual
@@ -114,12 +112,12 @@ class ResponseComparison(
       actualHeaders: Map<String, List<String>>,
       actualBody: String?
     ): ComparisonResult {
-      val actualResponseContentType = actualResponse["contentType"] as org.apache.http.entity.ContentType
+      val actualResponseContentType = ContentType.fromString(actualResponse["contentType"]?.toString())
       val comparison = ResponseComparison(response.headers, response.body, response.jsonBody(),
         actualResponseContentType, actualBody)
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualStatus,
         actualHeaders.toMutableMap(), OptionalBody.body(actualBody?.toByteArray(
-        actualResponseContentType.charset ?: Charset.defaultCharset()))), true)
+        actualResponseContentType.asCharset()))), true)
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches))
     }
@@ -134,19 +132,17 @@ class ResponseComparison(
         else -> Matching.compareMessageMetadata(message.metaData, metadata, message.matchingRules)
       }
 
-      val messageContentType = message.getContentType()
-      val contentType = if (messageContentType.isNullOrEmpty()) Message.TEXT else messageContentType
+      val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
       val responseComparison = ResponseComparison(
-        mapOf("Content-Type" to listOf(contentType)), message.contents,
-        contentType == ContentType.JSON.contentType,
-        org.apache.http.entity.ContentType.parse(contentType), actual.valueAsString())
+        mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents,
+        messageContentType.isJson(), messageContentType, actual.valueAsString())
       return ComparisonResult(bodyMismatches = responseComparison.bodyResult(bodyMismatches),
         metadataMismatches = metadataMismatches.groupBy { it.key })
     }
 
     @JvmStatic
     private fun compareMessageBody(message: Message, actual: OptionalBody): MutableList<BodyMismatch> {
-      val result = MatchingConfig.lookupBodyMatcher(message.getContentType().orEmpty())
+      val result = MatchingConfig.lookupBodyMatcher(message.getContentType().getBaseType())
       var bodyMismatches = mutableListOf<BodyMismatch>()
       if (result != null) {
         bodyMismatches = result.matchBody(message.contents, actual, true, message.matchingRules)

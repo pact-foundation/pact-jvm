@@ -82,7 +82,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
         map["query"] = if (pactSpecVersion >= PactSpecVersion.V3) request.query else mapToQueryStr(request.query)
       }
       if (request.body.isPresent()) {
-        map["body"] = parseBody(request)
+        map["body"] = setupBodyForJson(request)
       }
       if (request.matchingRules.isNotEmpty()) {
         map["matchingRules"] = request.matchingRules.toMap(pactSpecVersion)
@@ -100,7 +100,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
         map["headers"] = response.headers.entries.associate { (key, value) -> key to value.joinToString(COMMA) }
       }
       if (response.body.isPresent()) {
-        map["body"] = parseBody(response)
+        map["body"] = setupBodyForJson(response)
       }
       if (response.matchingRules.isNotEmpty()) {
         map["matchingRules"] = response.matchingRules.toMap(pactSpecVersion)
@@ -117,7 +117,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       }
     }
 
-    private fun parseBody(httpPart: HttpPart): Any? {
+    private fun setupBodyForJson(httpPart: HttpPart): Any? {
       return if (httpPart.jsonBody() && httpPart.body.isPresent()) {
         val body = Json.fromJson(JsonParser.parseString(httpPart.body.valueAsString()))
         if (body is String) {

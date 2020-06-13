@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 class MessageComparisonSpec extends Specification {
 
-  def 'compares the message contents as TEXT by default'() {
+  def 'compares the message contents as JSON'() {
     given:
     def message = new Message('test', [], OptionalBody.body('{"a":1,"b":"2"}'.bytes))
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
@@ -20,7 +20,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '/': ['BodyMismatch: Actual body \'{"a":1,"b":"3"}\' is not equal to the expected body \'{"a":1,"b":"2"}\'']
+      '$.b': ['BodyMismatch: Expected \'2\' but received \'3\'']
     ]
   }
 

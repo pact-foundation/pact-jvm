@@ -92,7 +92,7 @@ class ProviderClientSpec extends Specification {
       B: ['b'],
       C: ['c']
     ]
-    request = new Request('PUT', '/', [:], headers, OptionalBody.body('{}'.bytes))
+    request = new Request('PUT', '/', [:], headers, OptionalBody.body('this is some text'.bytes))
 
     when:
     client.setupHeaders(request, httpRequest)
@@ -102,7 +102,7 @@ class ProviderClientSpec extends Specification {
     headers.each {
       1 * httpRequest.addHeader(it.key, it.value[0])
     }
-    1 * httpRequest.addHeader('Content-Type', 'text/plain; charset=ISO-8859-1')
+    1 * httpRequest.addHeader('Content-Type', 'text/plain')
 
     0 * httpRequest._
   }
