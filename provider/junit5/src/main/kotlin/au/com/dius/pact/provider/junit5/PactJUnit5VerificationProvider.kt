@@ -360,7 +360,9 @@ class PactVerificationStateChangeExtension(
       val stateChangeMethods = findStateChangeMethods(context.requiredTestInstance,
         testContext.stateChangeHandlers, state)
       if (stateChangeMethods.isEmpty()) {
-        errors.add("Did not find a test class method annotated with @State(\"${state.name}\")")
+        errors.add("Did not find a test class method annotated with @State(\"${state.name}\") \n" +
+          "for Interaction \"${testContext.interaction.description}\" \n" +
+          "with Consumer \"${testContext.consumer.name}\"")
       } else {
         stateChangeMethods.filter { it.second.action == action }.forEach { (method, _, instance) ->
           logger.debug { "Invoking state change method ${method.name} for state '${state.name}' on $instance" }
