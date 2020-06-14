@@ -133,4 +133,20 @@ class PactDslRequestWithPathSpec extends Specification {
     ]
   }
 
+  @Issue('#1121')
+  def 'content type header is case sensitive'() {
+    given:
+    ConsumerPactBuilder consumerPactBuilder = ConsumerPactBuilder.consumer('spec')
+
+    when:
+    PactDslRequestWithPath request = new PactDslRequestWithPath(consumerPactBuilder,
+      'test', 'test', [], 'test', '/', 'GET', [:], [:], OptionalBody.missing(), new MatchingRulesImpl(),
+      new Generators(), null, null)
+      .headers('content-type', 'text/plain')
+      .body(new PactDslJsonBody())
+
+    then:
+    request.requestHeaders == ['content-type': ['text/plain']]
+  }
+
 }

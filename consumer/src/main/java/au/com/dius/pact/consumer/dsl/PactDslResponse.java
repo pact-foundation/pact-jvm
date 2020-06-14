@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.xml.PactXmlBuilder;
 import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.ProviderState;
@@ -207,11 +206,11 @@ public class PactDslResponse {
      * @param body Response body in JSON form
      */
     public PactDslResponse body(JSONObject body) {
-      if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+      if (isContentTypeHeaderNotSet()) {
         matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
         this.responseBody = OptionalBody.body(body.toString().getBytes());
       } else {
-        String contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+        String contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
         this.responseBody = OptionalBody.body(body.toString().getBytes(charset),
@@ -237,10 +236,10 @@ public class PactDslResponse {
 
       Charset charset = Charset.defaultCharset();
       String contentType = ContentType.APPLICATION_JSON.toString();
-      if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+      if (isContentTypeHeaderNotSet()) {
         matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, contentType);
       } else {
-        contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+        contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
       }
@@ -255,17 +254,17 @@ public class PactDslResponse {
       return this;
     }
 
-    /**
+  /**
      * Response body to return
      *
      * @param body Response body as an XML Document
      */
     public PactDslResponse body(Document body) throws TransformerException {
-      if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+      if (isContentTypeHeaderNotSet()) {
         responseHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes());
       } else {
-        String contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+        String contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
         responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes(charset),
@@ -391,11 +390,11 @@ public class PactDslResponse {
     responseMatchers.addCategory(xmlBuilder.getMatchingRules());
     responseGenerators.addGenerators(xmlBuilder.getGenerators());
 
-    if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+    if (isContentTypeHeaderNotSet()) {
       responseHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
       responseBody = OptionalBody.body(xmlBuilder.asBytes());
     } else {
-      String contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+      String contentType = getContentTypeHeader();
       ContentType ct = ContentType.parse(contentType);
       Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
       responseBody = OptionalBody.body(xmlBuilder.asBytes(charset),
@@ -403,5 +402,15 @@ public class PactDslResponse {
     }
 
     return this;
+  }
+
+  protected boolean isContentTypeHeaderNotSet() {
+    return responseHeaders.keySet().stream().noneMatch(key -> key.equalsIgnoreCase(CONTENT_TYPE));
+  }
+
+  protected String getContentTypeHeader() {
+    return responseHeaders.entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase(CONTENT_TYPE))
+      .findFirst()
+      .map(entry -> entry.getValue().get(0)).orElse("");
   }
 }

@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class PactDslRequestWithPath extends PactDslRequestBase {
-  private static final String CONTENT_TYPE = "Content-Type";
 
   private final ConsumerPactBuilder consumerPactBuilder;
 
@@ -267,11 +266,11 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
     public PactDslRequestWithPath body(JSONObject body) {
         requestBody = OptionalBody.body(body.toString().getBytes(),
           au.com.dius.pact.core.model.ContentType.Companion.getJSON());
-        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+        if (isContentTypeHeaderNotSet()) {
           requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
           requestBody = OptionalBody.body(body.toString().getBytes());
         } else {
-          ContentType contentType = ContentType.parse(requestHeaders.get(CONTENT_TYPE).get(0));
+          ContentType contentType = ContentType.parse(getContentTypeHeader());
           Charset charset = contentType.getCharset() != null ? contentType.getCharset() : Charset.defaultCharset();
           requestBody = OptionalBody.body(body.toString().getBytes(charset),
             new au.com.dius.pact.core.model.ContentType(contentType.toString()));
@@ -296,10 +295,10 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
 
         Charset charset = Charset.defaultCharset();
         String contentType = ContentType.APPLICATION_JSON.toString();
-        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+        if (isContentTypeHeaderNotSet()) {
           requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
         } else {
-          contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+          contentType = getContentTypeHeader();
           ContentType ct = ContentType.parse(contentType);
           charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
         }
@@ -320,13 +319,13 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithPath body(Document body) throws TransformerException {
-      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+      if (isContentTypeHeaderNotSet()) {
         String contentType = ContentType.APPLICATION_XML.toString();
         requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
         requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes(),
           new au.com.dius.pact.core.model.ContentType(contentType));
       } else {
-        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        String contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
         requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes(charset),
@@ -345,11 +344,11 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
     requestMatchers.addCategory(xmlBuilder.getMatchingRules());
     requestGenerators.addGenerators(xmlBuilder.getGenerators());
 
-    if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+    if (isContentTypeHeaderNotSet()) {
       requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
       requestBody = OptionalBody.body(xmlBuilder.asBytes());
     } else {
-      String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+      String contentType = getContentTypeHeader();
       ContentType ct = ContentType.parse(contentType);
       Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
       requestBody = OptionalBody.body(xmlBuilder.asBytes(charset),
@@ -612,4 +611,5 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
   public PactDslRequestWithPath queryMatchingISODatetime(String field) {
     return queryMatchingISODatetime(field, null);
   }
+
 }

@@ -209,11 +209,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithoutPath body(JSONObject body) {
-      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+      if (isContentTypeHeaderNotSet()) {
         requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         requestBody = OptionalBody.body(body.toString().getBytes());
       } else {
-        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        String contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
         requestBody = OptionalBody.body(body.toString().getBytes(charset),
@@ -232,11 +232,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
       DslPart parent = body.close();
       requestMatchers.addCategory(parent.matchers);
       requestGenerators.addGenerators(parent.generators);
-      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+      if (isContentTypeHeaderNotSet()) {
         requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         requestBody = OptionalBody.body(parent.toString().getBytes());
       } else {
-        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        String contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
         requestBody = OptionalBody.body(parent.toString().getBytes(charset),
@@ -251,11 +251,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithoutPath body(Document body) throws TransformerException {
-      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+      if (isContentTypeHeaderNotSet()) {
         requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         requestBody = OptionalBody.body(xmlToString(body).getBytes());
       } else {
-        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        String contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
         requestBody = OptionalBody.body(xmlToString(body).getBytes(charset),
@@ -274,11 +274,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
     requestMatchers.addCategory(xmlBuilder.getMatchingRules());
     requestGenerators.addGenerators(xmlBuilder.getGenerators());
 
-    if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+    if (isContentTypeHeaderNotSet()) {
       requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
       requestBody = OptionalBody.body(xmlBuilder.asBytes());
     } else {
-      String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+      String contentType = getContentTypeHeader();
       ContentType ct = ContentType.parse(contentType);
       Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
       requestBody = OptionalBody.body(xmlBuilder.asBytes(charset),

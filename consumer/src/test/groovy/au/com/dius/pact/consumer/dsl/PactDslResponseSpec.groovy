@@ -130,4 +130,20 @@ class PactDslResponseSpec extends Specification {
     pact.interactions*.request.path == ['/response/1', '/response/1']
   }
 
+  @Issue('#1121')
+  def 'content type header is case sensitive'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
+
+    when:
+    def response = builder.uponReceiving('a request for response No 1')
+      .path('/')
+      .willRespondWith()
+      .headers(['content-type': 'text/plain'])
+      .body(new PactDslJsonBody())
+
+    then:
+    response.responseHeaders == ['content-type': ['text/plain']]
+  }
+
 }

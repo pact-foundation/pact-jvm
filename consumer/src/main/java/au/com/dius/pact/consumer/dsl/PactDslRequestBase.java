@@ -98,4 +98,14 @@ public abstract class PactDslRequestBase {
     }
     return this;
   }
+
+  protected boolean isContentTypeHeaderNotSet() {
+    return requestHeaders.keySet().stream().noneMatch(key -> key.equalsIgnoreCase(CONTENT_TYPE));
+  }
+
+  protected String getContentTypeHeader() {
+    return requestHeaders.entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase(CONTENT_TYPE))
+      .findFirst()
+      .map(entry -> entry.getValue().get(0)).orElse("");
+  }
 }

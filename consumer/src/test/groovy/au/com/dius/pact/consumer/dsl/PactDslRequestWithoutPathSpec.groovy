@@ -2,6 +2,9 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import spock.lang.Issue
 import spock.lang.Specification
 
 class PactDslRequestWithoutPathSpec extends Specification {
@@ -26,6 +29,22 @@ class PactDslRequestWithoutPathSpec extends Specification {
     subject.requestHeaders == [test: ['test']]
     subject.query == [test: ['true']]
     subject.requestBody == OptionalBody.body('{"test":true}'.bytes)
+  }
+
+  @Issue('#1121')
+  def 'content type header is case sensitive'() {
+    given:
+    ConsumerPactBuilder consumerPactBuilder = ConsumerPactBuilder.consumer('spec')
+    PactDslWithState pactDslWithState = new PactDslWithState(consumerPactBuilder, 'spec', 'spec', null, null)
+
+    when:
+    PactDslRequestWithoutPath request = new PactDslRequestWithoutPath(consumerPactBuilder,
+      pactDslWithState, 'test', null, null)
+      .headers('content-type', 'text/plain')
+      .body(new PactDslJsonBody())
+
+    then:
+    request.requestHeaders == ['content-type': ['text/plain']]
   }
 
 }
