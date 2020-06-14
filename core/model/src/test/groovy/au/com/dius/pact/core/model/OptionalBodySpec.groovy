@@ -147,7 +147,7 @@ class OptionalBodySpec extends Specification {
     OptionalBody.missing()                             | 'null'
     OptionalBody.body(''.bytes, ContentType.UNKNOWN)   | 'null'
     OptionalBody.body('{}'.bytes, ContentType.UNKNOWN) | 'application/json'
-    bodyFromFile('/1070-ApiConsumer-ApiProvider.json') | 'application/json'
+    bodyFromFile('/v1-pact.json')                      | 'application/json'
     bodyFromFile('/logback-test.xml')                  | 'application/xml'
     bodyFromFile('/RAT.JPG')                           | 'image/jpeg'
   }

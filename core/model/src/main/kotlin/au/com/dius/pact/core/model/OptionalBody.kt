@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.ContentType.Companion.HTMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.JSONREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
+import mu.KLogging
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
@@ -19,7 +20,9 @@ data class OptionalBody(
 
   init {
     if (contentType == ContentType.UNKNOWN) {
+      logger.debug { "Body content type is unknown, will try detect body contents" }
       val detectedContentType = detectContentType()
+      logger.debug { "Detected content type = $detectedContentType" }
       if (detectedContentType != null) {
         this.contentType = detectedContentType
       }
@@ -111,7 +114,9 @@ data class OptionalBody(
     this.isPresent() -> {
       val metadata = Metadata()
       val mimetype = tika.detector.detect(TikaInputStream.get(value!!), metadata)
+      logger.debug { "Tika returned $mimetype" }
       if (mimetype.baseType.type == "text") {
+        logger.debug { "Base type is text, will try match the contents" }
         detectStandardTextContentType() ?: ContentType(mimetype)
       } else {
         ContentType(mimetype)
@@ -122,8 +127,9 @@ data class OptionalBody(
 
   private fun detectStandardTextContentType(): ContentType? = when {
     isPresent() -> {
+      val newLine = '\n'.toByte()
       val s = value!!.take(32).map {
-        if (it == '\n'.toByte()) ' ' else it.toChar()
+        if (it == newLine) ' ' else it.toChar()
       }.joinToString("")
       when {
         s.matches(XMLREGEXP) -> ContentType.XML
@@ -136,7 +142,7 @@ data class OptionalBody(
     else -> null
   }
 
-  companion object {
+  companion object : KLogging() {
 
     @JvmStatic fun missing(): OptionalBody {
       return OptionalBody(State.MISSING)
