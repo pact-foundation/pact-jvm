@@ -20,9 +20,7 @@ data class OptionalBody(
 
   init {
     if (contentType == ContentType.UNKNOWN) {
-      logger.debug { "Body content type is unknown, will try detect body contents" }
       val detectedContentType = detectContentType()
-      logger.debug { "Detected content type = $detectedContentType" }
       if (detectedContentType != null) {
         this.contentType = detectedContentType
       }
@@ -114,9 +112,7 @@ data class OptionalBody(
     this.isPresent() -> {
       val metadata = Metadata()
       val mimetype = tika.detector.detect(TikaInputStream.get(value!!), metadata)
-      logger.debug { "Tika returned $mimetype" }
       if (mimetype.baseType.type == "text") {
-        logger.debug { "Base type is text, will try match the contents" }
         detectStandardTextContentType() ?: ContentType(mimetype)
       } else {
         ContentType(mimetype)
