@@ -48,15 +48,21 @@ data class ContentType(val contentType: MediaType?) {
 
   fun isBinaryType(): Boolean {
     return if (contentType != null) {
-      val baseType = registry.getSupertype(contentType)
-      val type = baseType.type
+      val superType = registry.getSupertype(contentType)
+      val type = contentType.type
+      val baseType = superType.type
       when {
-        isOctetStream() -> true
-        type == "image" -> true
-        type == "audio" -> true
-        type == "video" -> true
-        baseType == MediaType.APPLICATION_ZIP -> true
-        baseType.subtype == "pdf" -> true
+        type == "text" || baseType == "text" -> false
+        type == "image" || baseType == "image" -> true
+        type == "audio" || baseType == "audio" -> true
+        type == "video" || baseType == "video" -> true
+        type == "application" && superType.subtype == "pdf" -> true
+        type == "application" && superType.subtype == "xml" -> false
+        type == "application" && superType.subtype == "json" -> false
+        type == "application" && superType.subtype == "javascript" -> false
+        type == "application" && contentType.subtype.matches(JSON_TYPE) -> false
+        superType == MediaType.APPLICATION_ZIP -> true
+        superType == MediaType.OCTET_STREAM -> true
         else -> false
       }
     } else false
@@ -78,6 +84,8 @@ data class ContentType(val contentType: MediaType?) {
     val HTMLREGEXP = """^\s*(<!DOCTYPE)|(<HTML>).*""".toRegex()
     val JSONREGEXP = """^\s*(true|false|null|[0-9]+|"\w*|\{\s*(}|"\w+)|\[\s*).*""".toRegex()
     val XMLREGEXP2 = """^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*""".toRegex()
+
+    val JSON_TYPE = ".*json".toRegex(setOf(RegexOption.IGNORE_CASE))
 
     val registry: MediaTypeRegistry = MediaTypeRegistry.getDefaultRegistry()
 

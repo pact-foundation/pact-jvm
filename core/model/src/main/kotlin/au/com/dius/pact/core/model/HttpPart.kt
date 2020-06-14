@@ -2,8 +2,10 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import java.nio.charset.Charset
+import java.util.Base64
 
 /**
  * Base trait for an object that represents part of an http message
@@ -58,5 +60,26 @@ abstract class HttpPart {
 
   companion object : KLogging() {
     private const val CONTENT_TYPE = "Content-Type"
+
+    @JvmStatic
+    fun extractBody(json: JsonValue.Object, contentType: ContentType): OptionalBody {
+      return when (val b = json["body"]) {
+        is JsonValue.Null -> OptionalBody.nullBody()
+        is JsonValue.StringValue -> decodeBody(b.value, contentType)
+        else -> decodeBody(b.serialise(), contentType)
+      }
+    }
+
+    private fun decodeBody(body: String, contentType: ContentType): OptionalBody {
+      return when {
+        contentType.isBinaryType() || contentType.isMultipart() -> try {
+          OptionalBody.body(Base64.getDecoder().decode(body), contentType)
+        } catch (ex: IllegalArgumentException) {
+          logger.warn(ex) { "Expected body for content type $contentType to be base64 encoded" }
+          OptionalBody.body(body.toByteArray(contentType.asCharset()), contentType)
+        }
+        else -> OptionalBody.body(body.toByteArray(contentType.asCharset()), contentType)
+      }
+    }
   }
 }

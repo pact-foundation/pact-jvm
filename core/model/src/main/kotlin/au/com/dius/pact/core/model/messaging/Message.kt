@@ -9,7 +9,6 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
-import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue

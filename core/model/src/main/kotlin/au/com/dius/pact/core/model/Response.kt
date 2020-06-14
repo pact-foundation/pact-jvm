@@ -97,11 +97,7 @@ class Response @JvmOverloads constructor(
       }
 
       val body = if (json.has("body")) {
-        when (val b = json["body"]) {
-          is JsonValue.Null -> OptionalBody.nullBody()
-          is JsonValue.StringValue -> OptionalBody.body(b.value.toByteArray(contentType.asCharset()), contentType)
-          else -> OptionalBody.body(json["body"].serialise().toByteArray(contentType.asCharset()), contentType)
-        }
+        extractBody(json, contentType)
       } else OptionalBody.missing()
       val matchingRules = if (json.has("matchingRules") && json["matchingRules"] is JsonValue.Object)
         MatchingRulesImpl.fromJson(json["matchingRules"])

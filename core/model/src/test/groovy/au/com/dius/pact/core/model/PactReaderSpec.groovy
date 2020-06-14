@@ -367,4 +367,18 @@ class PactReaderSpec extends Specification {
     pact.interactions[0].request.matchingRules == matchingRules
   }
 
+  @Issue('#1110')
+  @SuppressWarnings('LineLength')
+  def 'handle multipart form post bodies'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('pact-multipart-form-post.json')
+
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].request.determineContentType().baseType == 'multipart/form-data'
+    pact.interactions[0].request.body.valueAsString().startsWith('--lk9eSoRxJdPHMNbDpbvOYepMB0gWDyQPWo\r\nContent-Disposition: form-data; name="photo"; filename="ron.jpg"\r\nContent-Type: image/jpeg')
+  }
 }

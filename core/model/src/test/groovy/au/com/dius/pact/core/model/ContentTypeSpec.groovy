@@ -60,4 +60,29 @@ class ContentTypeSpec extends Specification {
     contentType = new ContentType(value)
   }
 
+  @Unroll
+  def '"#value" is binary -> #result'() {
+    expect:
+    contentType.binaryType == result
+
+    where:
+
+    value                  || result
+    ''                     || false
+    'text/plain'           || false
+    'application/pdf'      || true
+    'application/zip'      || true
+    'application/json'     || false
+    'application/hal+json' || false
+    'application/HAL+JSON' || false
+    'application/xml'      || false
+    'application/atom+xml' || false
+    'image/jpeg'           || true
+    'video/H264'           || true
+    'audio/aac'            || true
+    'text/csv'             || false
+    'multipart/form-data'  || true
+
+    contentType = new ContentType(value)
+  }
 }

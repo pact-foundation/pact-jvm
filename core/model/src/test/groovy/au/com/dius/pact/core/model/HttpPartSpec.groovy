@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -11,7 +12,7 @@ class HttpPartSpec extends Specification {
   @Unroll
   def 'Pact contentType'() {
     expect:
-    request.contentType() == contentType
+    request.determineContentType().asString() == contentType
 
     where:
     request                                                                                                                 | contentType
@@ -41,5 +42,23 @@ class HttpPartSpec extends Specification {
     new Request('Get', '')                                                              | null
     new Request('Get', '', [:], ['Content-Type': ['text/html']])                        | Charset.defaultCharset()
     new Request('Get', '', [:], ['Content-Type': ['application/json; charset=UTF-16']]) | Charset.forName('UTF-16')
+  }
+
+  def 'handles base64 encoded bodies'() {
+    given:
+    def json = new JsonValue.Object([body: new JsonValue.StringValue('aGVsbG8=')])
+
+    expect:
+    HttpPart.extractBody(json, ContentType.fromString('application/zip'))
+      .valueAsString() == 'hello'
+  }
+
+  def 'returns the raw body if it can not be decoded'() {
+    given:
+    def json = new JsonValue.Object([body: new JsonValue.StringValue('hello')])
+
+    expect:
+    HttpPart.extractBody(json, ContentType.fromString('application/zip'))
+      .valueAsString() == 'hello'
   }
 }
