@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.support.isNotEmpty
 import mu.KLogging
 import org.apache.tika.mime.MediaType
+import org.apache.tika.mime.MediaTypeRegistry
 import java.nio.charset.Charset
 
 private val jsonRegex = Regex(".*json")
@@ -45,6 +46,26 @@ data class ContentType(val contentType: MediaType?) {
 
   fun getBaseType() = contentType?.baseType?.toString()
 
+  fun isBinaryType(): Boolean {
+    return if (contentType != null) {
+      val baseType = registry.getSupertype(contentType)
+      val type = baseType.type
+      when {
+        isOctetStream() -> true
+        type == "image" -> true
+        type == "audio" -> true
+        type == "video" -> true
+        baseType == MediaType.APPLICATION_ZIP -> true
+        baseType.subtype == "pdf" -> true
+        else -> false
+      }
+    } else false
+  }
+
+  fun isMultipart() = if (contentType != null)
+    contentType.baseType.type == "multipart"
+    else false
+
   companion object : KLogging() {
     @JvmStatic
     fun fromString(contentType: String?) = if (contentType.isNullOrEmpty()) {
@@ -57,6 +78,8 @@ data class ContentType(val contentType: MediaType?) {
     val HTMLREGEXP = """^\s*(<!DOCTYPE)|(<HTML>).*""".toRegex()
     val JSONREGEXP = """^\s*(true|false|null|[0-9]+|"\w*|\{\s*(}|"\w+)|\[\s*).*""".toRegex()
     val XMLREGEXP2 = """^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*""".toRegex()
+
+    val registry: MediaTypeRegistry = MediaTypeRegistry.getDefaultRegistry()
 
     @JvmStatic
     val UNKNOWN = ContentType(null)

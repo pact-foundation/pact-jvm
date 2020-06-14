@@ -8,6 +8,7 @@ import mu.KLogging
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
+import java.util.Base64
 
 /**
  * Class to represent missing, empty, null and present bodies
@@ -102,9 +103,7 @@ data class OptionalBody(
   fun valueAsString(): String {
     return when (state) {
       State.PRESENT -> value!!.toString(contentType.asCharset())
-      State.EMPTY -> ""
-      State.NULL -> ""
-      State.MISSING -> ""
+      else -> ""
     }
   }
 
@@ -137,6 +136,13 @@ data class OptionalBody(
       }
     }
     else -> null
+  }
+
+  fun valueAsBase64(): String {
+    return when (state) {
+      State.PRESENT -> Base64.getEncoder().encodeToString(value!!)
+      else -> ""
+    }
   }
 
   companion object : KLogging() {

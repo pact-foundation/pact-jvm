@@ -118,13 +118,16 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     }
 
     private fun setupBodyForJson(httpPart: HttpPart): Any? {
-      return if (httpPart.jsonBody() && httpPart.body.isPresent()) {
+      val contentType = httpPart.determineContentType()
+      return if (contentType.isJson()) {
         val body = Json.fromJson(JsonParser.parseString(httpPart.body.valueAsString()))
         if (body is String) {
           httpPart.body.valueAsString()
         } else {
           body
         }
+      } else if (contentType.isBinaryType() || contentType.isMultipart()) {
+        httpPart.body.valueAsBase64()
       } else {
         httpPart.body.valueAsString()
       }
