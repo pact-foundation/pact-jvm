@@ -154,7 +154,7 @@ class Message @JvmOverloads constructor(
       val contents = if (json.has("contents")) {
         when (val contents = json["contents"]) {
           is JsonValue.Null -> OptionalBody.nullBody()
-          is JsonValue.StringValue -> OptionalBody.body(contents.value.toByteArray(contentType.asCharset()),
+          is JsonValue.StringValue -> OptionalBody.body(contents.asString().toByteArray(contentType.asCharset()),
             contentType)
           else -> OptionalBody.body(contents.serialise().toByteArray(contentType.asCharset()), contentType)
         }

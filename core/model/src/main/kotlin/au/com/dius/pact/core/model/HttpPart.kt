@@ -65,7 +65,7 @@ abstract class HttpPart {
     fun extractBody(json: JsonValue.Object, contentType: ContentType): OptionalBody {
       return when (val b = json["body"]) {
         is JsonValue.Null -> OptionalBody.nullBody()
-        is JsonValue.StringValue -> decodeBody(b.value, contentType)
+        is JsonValue.StringValue -> decodeBody(b.asString(), contentType)
         else -> decodeBody(b.serialise(), contentType)
       }
     }

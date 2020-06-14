@@ -79,7 +79,7 @@ class PactReaderTransformSpec extends Specification {
   def 'converts provider state to camel case'() {
     given:
     jsonMap.get('interactions').asArray().get(0).asObject().add('provider_state',
-      new JsonValue.StringValue('provider state'))
+      new JsonValue.StringValue('provider state'.chars))
 
     when:
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
@@ -120,9 +120,9 @@ class PactReaderTransformSpec extends Specification {
   def 'handles both a snake and camel case provider state'() {
     given:
     jsonMap.get('interactions').asArray().get(0).asObject().add('provider_state',
-      new JsonValue.StringValue('provider state'))
+      new JsonValue.StringValue('provider state'.chars))
     jsonMap.get('interactions').asArray().get(0).asObject().add('providerState',
-      new JsonValue.StringValue('provider state 2'))
+      new JsonValue.StringValue('provider state 2'.chars))
 
     when:
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
@@ -223,7 +223,7 @@ class PactReaderTransformSpec extends Specification {
   def 'converts the http methods to upper case'() {
     given:
     jsonMap.get('interactions').asArray().get(0).asObject().get('request').asObject()
-      .add('method', new JsonValue.StringValue('post'))
+      .add('method', new JsonValue.StringValue('post'.chars))
 
     when:
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)

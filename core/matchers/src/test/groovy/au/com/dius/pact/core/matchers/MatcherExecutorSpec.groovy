@@ -45,23 +45,23 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected                   | actual                     || mustBeEmpty
-    '100'                      | '100'                      || true
-    100                        | '100'                      || false
-    100                        | 100                        || true
-    new JsonValue.Integer(100) | new JsonValue.Integer(100) || true
-    null                       | null                       || true
-    '100'                      | null                       || false
-    null                       | 100                        || false
-    JsonValue.Null.INSTANCE    | null                       || true
-    null                       | JsonValue.Null.INSTANCE    || true
-    JsonValue.Null.INSTANCE    | JsonValue.Null.INSTANCE    || true
-    xml('<a/>')                | xml('<a/>')                || true
-    xml('<a/>')                | xml('<b/>')                || false
-    xml('<e xmlns="a"/>')      | xml('<a:e xmlns:a="a"/>')  || true
-    xml('<a:e xmlns:a="a"/>')  | xml('<b:e xmlns:b="a"/>')  || true
-    xml('<e xmlns="a"/>')      | xml('<e xmlns="b"/>')      || false
-    json('"hello"')            | json('"hello"')            || true
+    expected                           | actual                             || mustBeEmpty
+    '100'                              | '100'                              || true
+    100                                | '100'                              || false
+    100                                | 100                                || true
+    new JsonValue.Integer('100'.chars) | new JsonValue.Integer('100'.chars) || true
+    null                               | null                               || true
+    '100'                              | null                               || false
+    null                               | 100                                || false
+    JsonValue.Null.INSTANCE            | null                               || true
+    null                               | JsonValue.Null.INSTANCE            || true
+    JsonValue.Null.INSTANCE            | JsonValue.Null.INSTANCE            || true
+    xml('<a/>')                        | xml('<a/>')                        || true
+    xml('<a/>')                        | xml('<b/>')                        || false
+    xml('<e xmlns="a"/>')              | xml('<a:e xmlns:a="a"/>')          || true
+    xml('<a:e xmlns:a="a"/>')          | xml('<b:e xmlns:b="a"/>')          || true
+    xml('<e xmlns="a"/>')              | xml('<e xmlns="b"/>')              || false
+    json('"hello"')                    | json('"hello"')                    || true
   }
 
   @Unroll
@@ -70,11 +70,11 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected | actual                       | regex      || mustBeEmpty
-    'Harry'  | 'Happy'                      | 'Ha[a-z]*' || true
-    'Harry'  | null                         | 'Ha[a-z]*' || false
-    '100'    | 20123                        | '\\d+'     || true
-    '100'    | new JsonValue.Integer(20123) | '\\d+'     || true
+    expected | actual                               | regex      || mustBeEmpty
+    'Harry'  | 'Happy'                              | 'Ha[a-z]*' || true
+    'Harry'  | null                                 | 'Ha[a-z]*' || false
+    '100'    | 20123                                | '\\d+'     || true
+    '100'    | new JsonValue.Integer('20123'.chars) | '\\d+'     || true
   }
 
   @Unroll
@@ -111,29 +111,29 @@ class MatcherExecutorSpec extends Specification {
       mustBeEmpty
 
     where:
-    numberType | expected | actual                     || mustBeEmpty
-    INTEGER    | 100      | 'Some other string'        || false
-    DECIMAL    | 100.0    | 'Some other string'        || false
-    NUMBER     | 100      | 'Some other string'        || false
-    INTEGER    | 100      | 200.3                      || false
-    NUMBER     | 100      | 200.3                      || true
-    DECIMAL    | 100.0    | 200.3                      || true
-    INTEGER    | 100      | 200                        || true
-    INTEGER    | 100      | new JsonValue.Integer(200) || true
-    NUMBER     | 100      | 200                        || true
-    DECIMAL    | 100.0    | 200                        || false
-    INTEGER    | 100      | false                      || false
-    DECIMAL    | 100.0    | false                      || false
-    NUMBER     | 100      | false                      || false
-    INTEGER    | 100      | null                       || false
-    DECIMAL    | 100.0    | null                       || false
-    NUMBER     | 100      | null                       || false
-    INTEGER    | 100      | [200.3]                    || false
-    DECIMAL    | 100.0    | [200.3]                    || false
-    NUMBER     | 100      | [200.3]                    || false
-    INTEGER    | 100      | [a: 200.3, b: 200, c: 300] || false
-    DECIMAL    | 100.0    | [a: 200.3, b: 200, c: 300] || false
-    NUMBER     | 100      | [a: 200.3, b: 200, c: 300] || false
+    numberType | expected | actual                             || mustBeEmpty
+    INTEGER    | 100      | 'Some other string'                || false
+    DECIMAL    | 100.0    | 'Some other string'                || false
+    NUMBER     | 100      | 'Some other string'                || false
+    INTEGER    | 100      | 200.3                              || false
+    NUMBER     | 100      | 200.3                              || true
+    DECIMAL    | 100.0    | 200.3                              || true
+    INTEGER    | 100      | 200                                || true
+    INTEGER    | 100      | new JsonValue.Integer('200'.chars) || true
+    NUMBER     | 100      | 200                                || true
+    DECIMAL    | 100.0    | 200                                || false
+    INTEGER    | 100      | false                              || false
+    DECIMAL    | 100.0    | false                              || false
+    NUMBER     | 100      | false                              || false
+    INTEGER    | 100      | null                               || false
+    DECIMAL    | 100.0    | null                               || false
+    NUMBER     | 100      | null                               || false
+    INTEGER    | 100      | [200.3]                            || false
+    DECIMAL    | 100.0    | [200.3]                            || false
+    NUMBER     | 100      | [200.3]                            || false
+    INTEGER    | 100      | [a: 200.3, b: 200, c: 300]         || false
+    DECIMAL    | 100.0    | [a: 200.3, b: 200, c: 300]         || false
+    NUMBER     | 100      | [a: 200.3, b: 200, c: 300]         || false
   }
 
   @Unroll
@@ -259,18 +259,18 @@ class MatcherExecutorSpec extends Specification {
 
     where:
 
-    value                    | result
-    new JsonValue.Decimal(0) | true
-    '100'                    | false
-    100                      | false
-    100.0                    | true
-    100.0 as float           | true
-    100.0 as double          | true
-    100 as int               | false
-    100 as long              | false
-    100 as BigInteger        | false
-    BigInteger.ZERO          | false
-    BigDecimal.ZERO          | true
+    value                            | result
+    new JsonValue.Decimal('0'.chars) | true
+    '100'                            | false
+    100                              | false
+    100.0                            | true
+    100.0 as float                   | true
+    100.0 as double                  | true
+    100 as int                       | false
+    100 as long                      | false
+    100 as BigInteger                | false
+    BigInteger.ZERO                  | false
+    BigDecimal.ZERO                  | true
   }
 
   @Unroll

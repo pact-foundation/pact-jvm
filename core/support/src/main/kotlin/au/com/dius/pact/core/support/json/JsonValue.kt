@@ -7,18 +7,24 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import org.apache.commons.lang3.StringEscapeUtils
-import java.math.BigDecimal
-import java.math.BigInteger
 
 sealed class JsonValue {
-  data class Integer(val value: BigInteger) : JsonValue()
-  data class Decimal(val value: BigDecimal) : JsonValue()
-  data class StringValue(val value: String) : JsonValue()
+  class Integer(val value: CharArray) : JsonValue() {
+    fun toBigInteger() = String(this.value).toBigInteger()
+  }
+
+  class Decimal(val value: CharArray) : JsonValue() {
+    fun toBigDecimal() = String(this.value).toBigDecimal()
+  }
+
+  class StringValue(val value: CharArray) : JsonValue() {
+    override fun toString() = String(value)
+  }
   object True : JsonValue()
   object False : JsonValue()
   object Null : JsonValue()
 
-  data class Array(val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
+  class Array(val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
     fun find(function: (JsonValue) -> Boolean) = values.find(function)
     operator fun set(i: Int, value: JsonValue) {
       values[i] = value
@@ -36,7 +42,7 @@ sealed class JsonValue {
     fun last() = values.last()
   }
 
-  data class Object(val entries: MutableMap<String, JsonValue>) : JsonValue() {
+  class Object(val entries: MutableMap<String, JsonValue>) : JsonValue() {
     constructor(vararg values: Pair<String, JsonValue>) : this(values.associate { it }.toMutableMap())
     operator fun get(name: String) = entries[name] ?: Null
     override fun has(field: String) = entries.containsKey(field)
@@ -73,7 +79,7 @@ sealed class JsonValue {
 
   fun asString(): String {
     return if (this is StringValue) {
-      value
+      String(value)
     } else {
       serialise()
     }
@@ -86,8 +92,8 @@ sealed class JsonValue {
   }
 
   fun asNumber(): Number = when (this) {
-    is Integer -> this.value
-    is Decimal -> this.value
+    is Integer -> this.toBigInteger()
+    is Decimal -> this.toBigDecimal()
     else -> throw UnsupportedOperationException("Expected a Number, but found a $this")
   }
 
@@ -105,9 +111,9 @@ sealed class JsonValue {
   fun serialise(): String {
     return when (this) {
       is Null -> "null"
-      is Decimal -> this.value.toString()
-      is Integer -> this.value.toString()
-      is StringValue -> "\"${StringEscapeUtils.escapeJson(this.value)}\""
+      is Decimal -> String(this.value)
+      is Integer -> String(this.value)
+      is StringValue -> "\"${StringEscapeUtils.escapeJson(this.asString())}\""
       is True -> "true"
       is False -> "false"
       is Array -> "[${this.values.joinToString(",") { it.serialise() }}]"
@@ -118,9 +124,9 @@ sealed class JsonValue {
   fun toGson(): JsonElement {
     return when (this) {
       is Null -> JsonNull.INSTANCE
-      is Decimal -> JsonPrimitive(this.value)
-      is Integer -> JsonPrimitive(this.value)
-      is StringValue -> JsonPrimitive(this.value)
+      is Decimal -> JsonPrimitive(this.asNumber())
+      is Integer -> JsonPrimitive(this.asNumber())
+      is StringValue -> JsonPrimitive(this.asString())
       is True -> JsonPrimitive(true)
       is False -> JsonPrimitive(false)
       is Array -> {
@@ -160,9 +166,9 @@ sealed class JsonValue {
   fun unwrap(): Any? {
     return when (this) {
       is Null -> null
-      is Decimal -> this.value
-      is Integer -> this.value
-      is StringValue -> this.value
+      is Decimal -> this.toBigDecimal()
+      is Integer -> this.toBigInteger()
+      is StringValue -> this.asString()
       is True -> true
       is False -> false
       is Array -> this.values
@@ -170,9 +176,43 @@ sealed class JsonValue {
     }
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (other !is JsonValue) return false
+    return when (this) {
+      is Null -> other is Null
+      is Decimal -> other is Decimal && this.toBigDecimal() == other.toBigDecimal()
+      is Integer -> other is Integer && this.toBigInteger() == other.toBigInteger()
+      is StringValue -> other is StringValue && this.asString() == other.asString()
+      is True -> other is True
+      is False -> other is False
+      is Array -> other is Array && this.values == other.values
+      is Object -> other is Object && this.entries == other.entries
+    }
+  }
+
+  override fun hashCode() = when (this) {
+    is Null -> 0.hashCode()
+    is Decimal -> this.toBigDecimal().hashCode()
+    is Integer -> this.toBigInteger().hashCode()
+    is StringValue -> this.asString().hashCode()
+    is True -> true.hashCode()
+    is False -> false.hashCode()
+    is Array -> this.values.hashCode()
+    is Object -> this.entries.hashCode()
+  }
+
   val name: String
     get() {
-      return this.javaClass.simpleName
+      return when (this) {
+        is Null -> "Null"
+        is Decimal -> "Decimal"
+        is Integer -> "Integer"
+        is StringValue -> "String"
+        is True -> "True"
+        is False -> "False"
+        is Array -> "Array"
+        is Object -> "Object"
+      }
     }
 
   val isBoolean: Boolean

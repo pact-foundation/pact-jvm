@@ -94,7 +94,7 @@ class JsonReporter(
       "pending" to consumer.pending
     )
     if (tag.isNotEmpty()) {
-      jsonObject.add("tag", JsonValue.StringValue(tag!!))
+      jsonObject.add("tag", JsonValue.StringValue(tag!!.toCharArray()))
     }
     jsonData["execution"].add(jsonObject)
   }
@@ -225,7 +225,7 @@ class JsonReporter(
     verification["header"].asObject()[key] = when (comparison) {
       is List<*> -> Json.toJson(comparison.map {
         when (it) {
-          is HeaderMismatch -> JsonValue.StringValue(it.mismatch)
+          is HeaderMismatch -> JsonValue.StringValue(it.mismatch.toCharArray())
           else -> Json.toJson(it)
         }
       })

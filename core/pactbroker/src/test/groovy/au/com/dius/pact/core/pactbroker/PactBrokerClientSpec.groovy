@@ -323,11 +323,11 @@ class PactBrokerClientSpec extends Specification {
     def url = 'https://test.pact.dius.com.au' +
       '/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2'
     def values = [
-      a: new JsonValue.StringValue('a'),
-      b: new JsonValue.Integer(100),
+      a: new JsonValue.StringValue('a'.chars),
+      b: new JsonValue.Integer('100'.chars),
       _links: new JsonValue.Object(),
       c: new JsonValue.Array([
-        JsonValue.True.INSTANCE, new JsonValue.Decimal(10.2), new JsonValue.StringValue('test')
+        JsonValue.True.INSTANCE, new JsonValue.Decimal('10.2'.chars), new JsonValue.StringValue('test'.chars)
       ])
     ]
     def json = new JsonValue.Object(values)

@@ -1,8 +1,8 @@
 package au.com.dius.pact.core.support.json
 
-import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -15,7 +15,7 @@ sealed class JsonSource {
   abstract fun peekNextChar(): Char?
   abstract fun advance(count: Int = 1)
 
-  open class StringSource(val json: String, var index: Int = 0) : JsonSource() {
+  open class StringSource(val json: CharArray, var index: Int = 0) : JsonSource() {
     override fun nextChar(): Char? {
       val c = peekNextChar()
       if (c != null) {
@@ -25,7 +25,7 @@ sealed class JsonSource {
     }
 
     override fun peekNextChar(): Char? {
-      return if (index >= json.length) {
+      return if (index >= json.size) {
         null
       } else {
         json[index]
@@ -39,7 +39,7 @@ sealed class JsonSource {
 
   open class InputStreamSource(val json: InputStream) : ReaderSource(InputStreamReader(BufferedInputStream(json)))
 
-  open class ReaderSource(val reader: Reader) : JsonSource() {
+  open class ReaderSource(private val reader: Reader) : JsonSource() {
     private var buffer: Char? = null
 
     override fun nextChar(): Char? {
@@ -81,24 +81,51 @@ sealed class JsonSource {
   }
 }
 
-sealed class JsonToken(open val chars: String) {
-  data class Whitespace(override val chars: String) : JsonToken(chars)
-  data class Integer(override val chars: String) : JsonToken(chars) {
-    fun toInteger() = chars.toBigInteger()
+sealed class JsonToken(open val chars: CharArray) {
+  object Whitespace : JsonToken("".toCharArray())
+  class Integer(override val chars: CharArray) : JsonToken(chars)
+  class Decimal(override val chars: CharArray) : JsonToken(chars)
+  object True : JsonToken("true".toCharArray())
+  object False : JsonToken("false".toCharArray())
+  object Null : JsonToken("null".toCharArray())
+  class StringValue(override val chars: CharArray) : JsonToken(chars)
+  object ArrayStart : JsonToken("[".toCharArray())
+  object ArrayEnd : JsonToken("]".toCharArray())
+  object ObjectStart : JsonToken("{".toCharArray())
+  object ObjectEnd : JsonToken("}".toCharArray())
+  object Comma : JsonToken(",".toCharArray())
+  object Colon : JsonToken(":".toCharArray())
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as JsonToken
+
+    if (!chars.contentEquals(other.chars)) return false
+
+    return true
   }
-  data class Decimal(override val chars: String) : JsonToken(chars) {
-    fun toDecimal() = chars.toBigDecimal()
+
+  override fun hashCode(): Int {
+    return chars.contentHashCode()
   }
-  object True : JsonToken("true")
-  object False : JsonToken("false")
-  object Null : JsonToken("null")
-  data class StringValue(override val chars: String) : JsonToken(chars)
-  object ArrayStart : JsonToken("[")
-  object ArrayEnd : JsonToken("]")
-  object ObjectStart : JsonToken("{")
-  object ObjectEnd : JsonToken("}")
-  object Comma : JsonToken(",")
-  object Colon : JsonToken(":")
+
+  override fun toString() = when (this) {
+    is Whitespace -> "Whitespace"
+    is Integer -> "Integer(${chars.contentToString()})"
+    is Decimal -> "Decimal(${chars.contentToString()})"
+    is True -> "True"
+    is False -> "False"
+    is Null -> "Null"
+    is StringValue -> "String(${chars.contentToString()})"
+    is ArrayStart -> "ArrayStart"
+    is ArrayEnd -> "ArrayEnd"
+    is ObjectStart -> "ObjectStart"
+    is ObjectEnd -> "ObjectEnd"
+    is Comma -> "Comma"
+    is Colon -> "Colon"
+  }
 }
 
 class JsonLexer(val json: JsonSource) {
@@ -116,9 +143,8 @@ class JsonLexer(val json: JsonSource) {
     if (next != null) {
       return when {
         next.isWhitespace() -> {
-          val chars = mutableListOf(next)
-          consumeChars(chars, Char::isWhitespace)
-          Ok(JsonToken.Whitespace(String(chars.toCharArray())))
+          skipWhitespace()
+          Ok(JsonToken.Whitespace)
         }
         next == '-' || next.isDigit() -> scanNumber(next)
         next == 't' -> scanTrue()
@@ -137,9 +163,17 @@ class JsonLexer(val json: JsonSource) {
     return Ok(null)
   }
 
+  private fun skipWhitespace() {
+    var next = json.peekNextChar()
+    while (next != null && next.isWhitespace()) {
+      json.advance()
+      next = json.peekNextChar()
+    }
+  }
+
   private fun scanNumber(next: Char): Result<JsonToken, JsonException> {
     val chars = mutableListOf(next)
-    consumeChars(chars, Char::isDigit)
+    chars.addAll(consumeChars(Char::isDigit).asIterable())
     if (next == '-' && chars.size == 1) {
       return Err(JsonException(
         "Invalid JSON (${documentPointer()}), found a '$next' that was not followed by any digits"))
@@ -147,7 +181,7 @@ class JsonLexer(val json: JsonSource) {
     return if (validNumberSuffixes.contains(json.peekNextChar())) {
       scanDecimalNumber(chars)
     } else {
-      Ok(JsonToken.Integer(String(chars.toCharArray())))
+      Ok(JsonToken.Integer(chars.toCharArray()))
     }
   }
 
@@ -155,7 +189,7 @@ class JsonLexer(val json: JsonSource) {
     var next = json.peekNextChar()
     if (next == '.') {
       chars.add(json.nextChar()!!)
-      consumeChars(chars, Char::isDigit)
+      chars.addAll(consumeChars(Char::isDigit).asIterable())
       if (!chars.last().isDigit()) {
         return Err(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
       }
@@ -167,12 +201,12 @@ class JsonLexer(val json: JsonSource) {
       if (next == '+' || next == '-') {
         chars.add(json.nextChar()!!)
       }
-      consumeChars(chars, Char::isDigit)
+      chars.addAll(consumeChars(Char::isDigit).asIterable())
       if (!chars.last().isDigit()) {
         return Err(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
       }
     }
-    return Ok(JsonToken.Decimal(String(chars.toCharArray())))
+    return Ok(JsonToken.Decimal(chars.toCharArray()))
   }
 
   private fun scanString(): Result<JsonToken.StringValue, JsonException> {
@@ -235,7 +269,7 @@ class JsonLexer(val json: JsonSource) {
         chars.add(next)
       }
     } while (next != '"')
-    return Ok(JsonToken.StringValue(String(chars.toCharArray())))
+    return Ok(JsonToken.StringValue(chars.toCharArray()))
   }
 
   private fun validHex(char: Char?) = validHexDigits.contains(char) || validHexCharsLower.contains(char) ||
@@ -280,13 +314,15 @@ class JsonLexer(val json: JsonSource) {
     return Ok(JsonToken.True)
   }
 
-  private fun consumeChars(list: MutableList<Char>, predicate: (Char) -> Boolean) {
+  private fun consumeChars(predicate: (Char) -> Boolean): CharArray {
+    val array = ArrayList<Char>(1000)
     var next = json.peekNextChar()
     while (next != null && predicate(next)) {
-      list.add(next)
+      array.add(next)
       json.advance()
       next = json.peekNextChar()
     }
+    return array.toCharArray()
   }
 
   private fun nextChar(): Char? {
@@ -308,7 +344,7 @@ object JsonParser {
   @Throws(JsonException::class)
   fun parseString(json: String): JsonValue {
     if (json.isNotEmpty()) {
-      return parse(JsonSource.StringSource(json))
+      return parse(JsonSource.StringSource(json.toCharArray()))
     } else {
       throw JsonException("Json document is empty")
     }
@@ -328,8 +364,8 @@ object JsonParser {
     val lexer = JsonLexer(json)
     var token = nextTokenOrThrow(lexer)
     val jsonValue = when (token) {
-      is JsonToken.Integer -> JsonValue.Integer(token.toInteger())
-      is JsonToken.Decimal -> JsonValue.Decimal(token.toDecimal())
+      is JsonToken.Integer -> JsonValue.Integer(token.chars)
+      is JsonToken.Decimal -> JsonValue.Decimal(token.chars)
       is JsonToken.StringValue -> JsonValue.StringValue(token.chars)
       is JsonToken.True -> JsonValue.True
       is JsonToken.False -> JsonValue.False
@@ -338,7 +374,7 @@ object JsonParser {
       is JsonToken.ObjectStart -> parseObject(lexer)
       else -> if (token != null) {
         throw JsonException(
-          "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters '${token.chars}'")
+          "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters '${String(token.chars)}'")
       } else {
         throw JsonException(
           "Invalid Json document (${lexer.documentPointer()}) - found only whitespace characters")
@@ -348,7 +384,7 @@ object JsonParser {
     token = nextTokenOrThrow(lexer)
     if (token != null) {
       throw JsonException(
-        "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters '${token.chars}'")
+        "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters '${String(token.chars)}'")
     }
 
     return jsonValue
@@ -364,7 +400,7 @@ object JsonParser {
         val key = when (token) {
           null -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-          is JsonToken.StringValue -> token.chars
+          is JsonToken.StringValue -> String(token.chars)
           else -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - expected a string but found unexpected characters " +
               "'${token.chars}'")
@@ -377,15 +413,15 @@ object JsonParser {
         } else if (token !is JsonToken.Colon) {
           throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - expected a colon but found unexpected characters " +
-              "'${token.chars}'")
+              "'${String(token.chars)}'")
         }
 
         token = nextTokenOrThrow(lexer)
         when (token) {
           null -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-          is JsonToken.Integer -> map[key] = JsonValue.Integer(token.toInteger())
-          is JsonToken.Decimal -> map[key] = JsonValue.Decimal(token.toDecimal())
+          is JsonToken.Integer -> map[key] = JsonValue.Integer(token.chars)
+          is JsonToken.Decimal -> map[key] = JsonValue.Decimal(token.chars)
           is JsonToken.StringValue -> map[key] = JsonValue.StringValue(token.chars)
           is JsonToken.True -> map[key] = JsonValue.True
           is JsonToken.False -> map[key] = JsonValue.False
@@ -422,8 +458,8 @@ object JsonParser {
         when (token) {
           null -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing array")
-          is JsonToken.Integer -> array.add(JsonValue.Integer(token.toInteger()))
-          is JsonToken.Decimal -> array.add(JsonValue.Decimal(token.toDecimal()))
+          is JsonToken.Integer -> array.add(JsonValue.Integer(token.chars))
+          is JsonToken.Decimal -> array.add(JsonValue.Decimal(token.chars))
           is JsonToken.StringValue -> array.add(JsonValue.StringValue(token.chars))
           is JsonToken.True -> array.add(JsonValue.True)
           is JsonToken.False -> array.add(JsonValue.False)
@@ -431,13 +467,13 @@ object JsonParser {
           is JsonToken.ArrayStart -> array.add(parseArray(lexer))
           is JsonToken.ObjectStart -> array.add(parseObject(lexer))
           else -> throw JsonException(
-            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${String(token.chars)}")
         }
 
         token = nextTokenOrThrow(lexer)
         if (token !is JsonToken.Comma && token != JsonToken.ArrayEnd && token != null) {
           throw JsonException(
-            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${token.chars}")
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected characters ${String(token.chars)}")
         }
       }
     } while (token != null && token != JsonToken.ArrayEnd)

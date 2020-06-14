@@ -9,7 +9,7 @@ class JsonLexerSpec extends Specification {
   @Unroll
   def 'next token - #description'() {
     given:
-    def lexer = new JsonLexer(new JsonSource.StringSource(json, 0))
+    def lexer = new JsonLexer(new JsonSource.StringSource(json.chars, 0))
 
     when:
     def token = lexer.nextToken()
@@ -21,19 +21,19 @@ class JsonLexerSpec extends Specification {
 
     description                     | json               | tokenValue
     'empty document'                | ''                 | null
-    'whitespace'                    | '  \t\r\n'         | new JsonToken.Whitespace('  \t\r\n')
-    'digit'                         | '6'                | new JsonToken.Integer('6')
-    'integer'                       | '1234'             | new JsonToken.Integer('1234')
-    'negative integer'              | '-666'             | new JsonToken.Integer('-666')
+    'whitespace'                    | '  \t\r\n'         | JsonToken.Whitespace.INSTANCE
+    'digit'                         | '6'                | new JsonToken.Integer('6'.chars)
+    'integer'                       | '1234'             | new JsonToken.Integer('1234'.chars)
+    'negative integer'              | '-666'             | new JsonToken.Integer('-666'.chars)
     'null value'                    | 'null'             | JsonToken.Null.INSTANCE
     'true value'                    | 'true'             | JsonToken.True.INSTANCE
     'false value'                   | 'false'            | JsonToken.False.INSTANCE
-    'decimal'                       | '1234.65'          | new JsonToken.Decimal('1234.65')
-    'decimal with exponent'         | '1234.65E-4'       | new JsonToken.Decimal('1234.65E-4')
-    'decimal with exponent 2'       | '12345E4'          | new JsonToken.Decimal('12345E4')
-    'string'                        | '"12345E4"'        | new JsonToken.StringValue('12345E4')
-    'string with escaped chars'     | '"123\\"45E4"'     | new JsonToken.StringValue('123"45E4')
-    'string with escaped hex chars' | '"123\\uaBcD45E4"' | new JsonToken.StringValue('123\uaBcD45E4')
+    'decimal'                       | '1234.65'          | new JsonToken.Decimal('1234.65'.chars)
+    'decimal with exponent'         | '1234.65E-4'       | new JsonToken.Decimal('1234.65E-4'.chars)
+    'decimal with exponent 2'       | '12345E4'          | new JsonToken.Decimal('12345E4'.chars)
+    'string'                        | '"12345E4"'        | new JsonToken.StringValue('12345E4'.chars)
+    'string with escaped chars'     | '"123\\"45E4"'     | new JsonToken.StringValue('123"45E4'.chars)
+    'string with escaped hex chars' | '"123\\uaBcD45E4"' | new JsonToken.StringValue('123\uaBcD45E4'.chars)
     'array start'                   | '['                | JsonToken.ArrayStart.INSTANCE
     'array end'                     | ']'                | JsonToken.ArrayEnd.INSTANCE
     'object start'                  | '{'                | JsonToken.ObjectStart.INSTANCE
@@ -45,7 +45,7 @@ class JsonLexerSpec extends Specification {
   @Unroll
   def 'invalid next token - #description'() {
     given:
-    def lexer = new JsonLexer(new JsonSource.StringSource(json, 0))
+    def lexer = new JsonLexer(new JsonSource.StringSource(json.chars, 0))
 
     when:
     def token = lexer.nextToken()

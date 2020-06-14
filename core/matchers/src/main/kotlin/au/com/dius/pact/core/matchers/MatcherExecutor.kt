@@ -241,8 +241,11 @@ fun matchDecimal(actual: Any?): Boolean {
     actual is Float -> true
     actual is Double -> true
     actual is BigDecimal && (actual == BigDecimal.ZERO || actual.scale() > 0) -> true
-    actual is JsonValue.Decimal && (actual.value == BigDecimal.ZERO || actual.value.scale() > 0) -> true
-    actual is JsonValue.Integer -> decimalRegex.matches(actual.toString())
+    actual is JsonValue.Decimal -> {
+      val bigDecimal = actual.toBigDecimal()
+      bigDecimal == BigDecimal.ZERO || bigDecimal.scale() > 0
+    }
+    actual is JsonValue.Integer -> decimalRegex.matches(actual.asString())
     else -> false
   }
   logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches decimal number -> $result" }
@@ -256,7 +259,7 @@ fun matchInteger(actual: Any?): Boolean {
     actual is BigInteger -> true
     actual is JsonValue.Integer -> true
     actual is BigDecimal && actual.scale() == 0 -> true
-    actual is JsonValue.Decimal -> integerRegex.matches(actual.value.toString())
+    actual is JsonValue.Decimal -> integerRegex.matches(actual.asString())
     else -> false
   }
   logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches integer -> $result" }

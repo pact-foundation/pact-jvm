@@ -197,7 +197,7 @@ class JsonBodyMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, true, matchers).find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Expected 100 but received 101')
+        it.mismatch.contains('Expected 100 (Integer) but received 101 (Integer)')
     }
 
     where:
@@ -224,7 +224,7 @@ class JsonBodyMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, true, matchers).find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Type mismatch: Expected List [100,100] but received Primitive 100')
+        it.mismatch.contains('Type mismatch: Expected List [100,100] but received Integer 100')
     }
 
     where:

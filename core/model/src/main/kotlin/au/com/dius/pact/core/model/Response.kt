@@ -72,7 +72,7 @@ class Response @JvmOverloads constructor(
           val statusJson = json["status"]
           when {
             statusJson.isNumber -> statusJson.asNumber().toInt()
-            statusJson is JsonValue.StringValue -> statusJson.value.toInt()
+            statusJson is JsonValue.StringValue -> statusJson.asString().toInt()
             else -> DEFAULT_STATUS
           }
         }

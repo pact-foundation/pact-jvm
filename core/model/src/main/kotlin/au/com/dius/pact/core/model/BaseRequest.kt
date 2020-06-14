@@ -55,7 +55,7 @@ abstract class BaseRequest : HttpPart() {
           }
           entry.key to list
         }
-        is JsonValue.StringValue -> queryStringToMap(query.value)
+        is JsonValue.StringValue -> queryStringToMap(query.asString())
         else -> emptyMap()
       }
     }

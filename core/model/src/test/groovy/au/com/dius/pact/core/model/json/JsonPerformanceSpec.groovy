@@ -1,0 +1,100 @@
+package au.com.dius.pact.core.model.json
+
+import au.com.dius.pact.core.support.json.JsonParser
+import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
+import org.junit.Before
+import org.junit.Ignore
+import org.junit.Test
+
+@CompileStatic
+@Ignore
+class JsonPerformanceSpec {
+
+  private final Map<String, String> jsonFiles = [:]
+
+  @Before
+  void setup() {
+    def resource = JsonPerformanceSpec.getResource('/v1-pact.json')
+    def file = new File(resource.toURI())
+    file.parentFile.eachFile { f ->
+      if (f.file && f.name.endsWith('.json')) {
+        jsonFiles[f.name] = f.text
+      }
+    }
+
+    resource.openStream().withCloseable {
+      JsonParser.INSTANCE.parseStream(it)
+    }
+    resource.openStream().withCloseable {
+      com.google.gson.JsonParser.parseReader(it.newReader())
+    }
+    resource.openStream().withCloseable {
+     new JsonSlurper().parse(it)
+    }
+  }
+
+  @Test
+  void 'test Pact JSON parser'() {
+    Map<String, Long> result = [:]
+
+    jsonFiles.each { entry ->
+      long start = System.nanoTime()
+      JsonParser.INSTANCE.parseString(entry.value)
+      long time = System.nanoTime() - start
+      result[entry.key] = time
+    }
+
+    println 'RESULT:'
+    long total = 0
+    result.keySet().toSorted().each { key ->
+      println("${key.padRight(40)}: ${result[key]}")
+      total += result[key]
+    }
+    println("${'TOTAL'.padRight(40)}: ${total}")
+    println()
+  }
+
+  @Test
+  void 'test GSON parser'() {
+    Map<String, Long> result = [:]
+
+    jsonFiles.each { entry ->
+      long start = System.nanoTime()
+      com.google.gson.JsonParser.parseString(entry.value)
+      long time = System.nanoTime() - start
+      result[entry.key] = time
+    }
+
+    println 'RESULT:'
+    long total = 0
+    result.keySet().toSorted().each { key ->
+      println("${key.padRight(40)}: ${result[key]}")
+      total += result[key]
+    }
+    println("${'TOTAL'.padRight(40)}: ${total}")
+    println()
+  }
+
+  @Test
+  void 'test Groovy Json slurper parser'() {
+    Map<String, Long> result = [:]
+    JsonSlurper slurper = new JsonSlurper()
+
+    jsonFiles.each { entry ->
+      long start = System.nanoTime()
+      slurper.parseText(entry.value)
+      long time = System.nanoTime() - start
+      result[entry.key] = time
+    }
+
+    println 'RESULT:'
+    long total = 0
+    result.keySet().toSorted().each { key ->
+      println("${key.padRight(40)}: ${result[key]}")
+      total += result[key]
+    }
+    println("${'TOTAL'.padRight(40)}: ${total}")
+    println()
+  }
+}

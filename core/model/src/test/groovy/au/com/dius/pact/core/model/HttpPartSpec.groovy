@@ -46,7 +46,7 @@ class HttpPartSpec extends Specification {
 
   def 'handles base64 encoded bodies'() {
     given:
-    def json = new JsonValue.Object([body: new JsonValue.StringValue('aGVsbG8=')])
+    def json = new JsonValue.Object([body: new JsonValue.StringValue('aGVsbG8='.chars)])
 
     expect:
     HttpPart.extractBody(json, ContentType.fromString('application/zip'))
@@ -55,7 +55,7 @@ class HttpPartSpec extends Specification {
 
   def 'returns the raw body if it can not be decoded'() {
     given:
-    def json = new JsonValue.Object([body: new JsonValue.StringValue('hello')])
+    def json = new JsonValue.Object([body: new JsonValue.StringValue('hello'.chars)])
 
     expect:
     HttpPart.extractBody(json, ContentType.fromString('application/zip'))

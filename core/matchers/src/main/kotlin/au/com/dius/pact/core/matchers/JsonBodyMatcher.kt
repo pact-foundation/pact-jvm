@@ -35,7 +35,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
 
   private fun valueOf(value: Any?) = when (value) {
     is String -> "'$value'"
-    is JsonValue.StringValue -> "'${value.value}'"
+    is JsonValue.StringValue -> "'${value.asString()}'"
     is JsonValue -> value.serialise()
     null -> "null"
     else -> value.toString()
@@ -47,7 +47,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     value is List<*> -> "List"
     value is JsonValue.Array -> "List"
     value is JsonValue.Null -> "Null"
-    value is JsonValue && (value.isNumber || value.isString || value.isBoolean) -> "Primitive"
+    value is JsonValue -> value.name
     value == null -> "Null"
     else -> value.javaClass.simpleName
   }
@@ -190,7 +190,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
       if (expected == actual) {
         emptyList()
       } else {
-        listOf(BodyMismatch(expected, actual, "Expected ${valueOf(expected)} but received ${valueOf(actual)}",
+        listOf(BodyMismatch(expected, actual, "Expected ${valueOf(expected)} (${typeOf(expected)}) but received ${valueOf(actual)} (${typeOf(actual)})",
           path.joinToString(".")))
       }
     }

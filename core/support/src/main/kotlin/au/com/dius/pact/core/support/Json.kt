@@ -10,7 +10,6 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import java.lang.reflect.Type
-import java.math.BigDecimal
 import java.math.BigInteger
 
 open class NumberSerializer : JsonSerializer<Number> {
@@ -91,7 +90,7 @@ object Json {
     json is JsonValue.Array -> json.values.map { fromJson(it) }
     json.isBoolean -> json.asBoolean()
     json.isNumber -> json.asNumber()
-    json is JsonValue.StringValue -> json.value
+    json is JsonValue.StringValue -> json.asString()
     else -> json.toString()
   }
 
@@ -108,18 +107,18 @@ object Json {
   }
 }
 
-private fun Char.toJsonValue() = JsonValue.StringValue(this.toString())
+private fun Char.toJsonValue() = JsonValue.StringValue(charArrayOf(this))
 
 private fun Boolean.toJsonValue() = if (this) JsonValue.True
   else JsonValue.False
 
-private fun String.toJsonValue() = JsonValue.StringValue(this)
+private fun String.toJsonValue() = JsonValue.StringValue(this.toCharArray())
 
 private fun Number.toJsonValue(): JsonValue = when (this) {
-  is Int -> JsonValue.Integer(this.toBigInteger())
-  is Long -> JsonValue.Integer(this.toBigInteger())
-  is BigInteger -> JsonValue.Integer(this)
-  else -> JsonValue.Decimal(BigDecimal(this.toString()))
+  is Int -> JsonValue.Integer(this.toString().toCharArray())
+  is Long -> JsonValue.Integer(this.toString().toCharArray())
+  is BigInteger -> JsonValue.Integer(this.toString().toCharArray())
+  else -> JsonValue.Decimal(this.toString().toCharArray())
 }
 
 fun jsonArray(list: List<Any?>) = toJson(list)
