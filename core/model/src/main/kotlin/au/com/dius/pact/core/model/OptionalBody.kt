@@ -128,8 +128,9 @@ data class OptionalBody(
   private fun detectStandardTextContentType(): ContentType? = when {
     isPresent() -> {
       val newLine = '\n'.toByte()
+      val cReturn = '\r'.toByte()
       val s = value!!.take(32).map {
-        if (it == newLine) ' ' else it.toChar()
+        if (it == newLine || it == cReturn) ' ' else it.toChar()
       }.joinToString("")
       when {
         s.matches(XMLREGEXP) -> ContentType.XML
