@@ -155,10 +155,14 @@ class PactVerificationExtension(
 
   override fun getDisplayName(invocationIndex: Int): String {
     return when {
-      pactSource is BrokerUrlSource && pactSource.result != null -> if (pactSource.result!!.pending) {
-        pactSource.result!!.name + " [PENDING]"
-      } else {
-        pactSource.result!!.name
+      pactSource is BrokerUrlSource && pactSource.result != null -> {
+        var displayName = pactSource.result!!.name + " - ${interaction.description}"
+        if (pactSource.tag.isNotEmpty()) displayName += " (tag ${pactSource.tag})\""
+        if (pactSource.result!!.pending) {
+          "$displayName [PENDING]"
+        } else {
+          displayName
+        }
       }
       pactSource is BrokerUrlSource && pactSource.tag.isNotEmpty() -> "${pact.consumer.name} - ${interaction.description} (tag ${pactSource.tag})"
       else -> "${pact.consumer.name} - ${interaction.description}"
