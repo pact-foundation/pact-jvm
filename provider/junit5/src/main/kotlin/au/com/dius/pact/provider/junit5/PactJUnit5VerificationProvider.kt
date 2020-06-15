@@ -157,7 +157,7 @@ class PactVerificationExtension(
     return when {
       pactSource is BrokerUrlSource && pactSource.result != null -> {
         var displayName = pactSource.result!!.name + " - ${interaction.description}"
-        if (pactSource.tag.isNotEmpty()) displayName += " (tag ${pactSource.tag})\""
+        if (pactSource.tag.isNotEmpty()) displayName += " (tag ${pactSource.tag})"
         if (pactSource.result!!.pending) {
           "$displayName [PENDING]"
         } else {
