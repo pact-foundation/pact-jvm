@@ -324,7 +324,11 @@ fun <M : Mismatch> matchDateTime(
     emptyList()
   } else {
     try {
-      DateTimeFormatter.ofPattern(pattern).parse(safeToString(actual))
+      /**
+        Replacing 'Z' with 'X' in order to offer backward compatibility for consumers who might be
+        using ISO 8601 the UTC designator 'Z'
+       **/
+      DateTimeFormatter.ofPattern(pattern.replace('Z', 'X')).parse(safeToString(actual))
       emptyList<M>()
     } catch (e: DateTimeParseException) {
       listOf(mismatchFactory.create(expected, actual,
