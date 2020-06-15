@@ -108,6 +108,31 @@ no parameters or a single Map parameter.
     }
 ```
 
+### Example of Message test that verifies metadata
+
+To have the message metadata - such as the topic - also verified you need to return a `MessageAndMetadata` from the invoked method that contains the payload and metadata to be validation. For example, to verify the metadata of an integration using the Spring [Message](https://docs.spring.io/spring-integration/reference/html/message.html) interface, you can do something like the following:
+
+```java
+  ...
+
+  @PactVerifyProvider("a product event update")
+  public MessageAndMetadata verifyMessageForOrder() {
+    ProductEvent product = new ProductEvent("id1", "product name", "product type", "v1", EventType.CREATED);
+    Message<String> message = new ProductMessageBuilder().withProduct(product).build();
+
+    return generateMessageAndMetadata(message);
+  }
+
+  private MessageAndMetadata generateMessageAndMetadata(Message<String> message) {
+    HashMap<String, Object> metadata = new HashMap<String, Object>();
+    message.getHeaders().forEach((k, v) -> metadata.put(k, v));
+
+    return new MessageAndMetadata(message.getPayload().getBytes(), metadata);
+  }
+```
+
+_NOTE: this requires you to add medadata expections in your consumer test_
+
 ## Provider state callback methods
 
 For the provider states in the pact being verified, you can define methods to be invoked to setup the correct state
