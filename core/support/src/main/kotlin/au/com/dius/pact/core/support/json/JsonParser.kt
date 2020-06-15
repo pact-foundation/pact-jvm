@@ -7,6 +7,7 @@ import java.io.BufferedInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
+import java.util.ArrayDeque
 
 class JsonException(message: String) : RuntimeException(message)
 
@@ -315,7 +316,7 @@ class JsonLexer(val json: JsonSource) {
   }
 
   private fun consumeChars(predicate: (Char) -> Boolean): CharArray {
-    val array = ArrayList<Char>(1000)
+    val array = mutableListOf<Char>()
     var next = json.peekNextChar()
     while (next != null && predicate(next)) {
       array.add(next)
@@ -364,9 +365,9 @@ object JsonParser {
     val lexer = JsonLexer(json)
     var token = nextTokenOrThrow(lexer)
     val jsonValue = when (token) {
-      is JsonToken.Integer -> JsonValue.Integer(token.chars)
-      is JsonToken.Decimal -> JsonValue.Decimal(token.chars)
-      is JsonToken.StringValue -> JsonValue.StringValue(token.chars)
+      is JsonToken.Integer -> JsonValue.Integer(token)
+      is JsonToken.Decimal -> JsonValue.Decimal(token)
+      is JsonToken.StringValue -> JsonValue.StringValue(token)
       is JsonToken.True -> JsonValue.True
       is JsonToken.False -> JsonValue.False
       is JsonToken.Null -> JsonValue.Null
@@ -420,9 +421,9 @@ object JsonParser {
         when (token) {
           null -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-          is JsonToken.Integer -> map[key] = JsonValue.Integer(token.chars)
-          is JsonToken.Decimal -> map[key] = JsonValue.Decimal(token.chars)
-          is JsonToken.StringValue -> map[key] = JsonValue.StringValue(token.chars)
+          is JsonToken.Integer -> map[key] = JsonValue.Integer(token)
+          is JsonToken.Decimal -> map[key] = JsonValue.Decimal(token)
+          is JsonToken.StringValue -> map[key] = JsonValue.StringValue(token)
           is JsonToken.True -> map[key] = JsonValue.True
           is JsonToken.False -> map[key] = JsonValue.False
           is JsonToken.Null -> map[key] = JsonValue.Null
@@ -449,7 +450,7 @@ object JsonParser {
   }
 
   private fun parseArray(lexer: JsonLexer): JsonValue.Array {
-    val array = mutableListOf<JsonValue>()
+    val array = ArrayDeque<JsonValue>()
     var token: JsonToken?
 
     do {
@@ -458,9 +459,9 @@ object JsonParser {
         when (token) {
           null -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing array")
-          is JsonToken.Integer -> array.add(JsonValue.Integer(token.chars))
-          is JsonToken.Decimal -> array.add(JsonValue.Decimal(token.chars))
-          is JsonToken.StringValue -> array.add(JsonValue.StringValue(token.chars))
+          is JsonToken.Integer -> array.add(JsonValue.Integer(token))
+          is JsonToken.Decimal -> array.add(JsonValue.Decimal(token))
+          is JsonToken.StringValue -> array.add(JsonValue.StringValue(token))
           is JsonToken.True -> array.add(JsonValue.True)
           is JsonToken.False -> array.add(JsonValue.False)
           is JsonToken.Null -> array.add(JsonValue.Null)
@@ -483,7 +484,7 @@ object JsonParser {
         "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing array")
     }
 
-    return JsonValue.Array(array)
+    return JsonValue.Array(array.toMutableList())
   }
 
   private fun nextTokenOrThrow(lexer: JsonLexer): JsonToken? {

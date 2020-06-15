@@ -14,6 +14,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonToken
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
@@ -94,7 +95,7 @@ class JsonReporter(
       "pending" to consumer.pending
     )
     if (tag.isNotEmpty()) {
-      jsonObject.add("tag", JsonValue.StringValue(tag!!.toCharArray()))
+      jsonObject.add("tag", JsonValue.StringValue(JsonToken.StringValue(tag!!.toCharArray())))
     }
     jsonData["execution"].add(jsonObject)
   }
@@ -225,7 +226,7 @@ class JsonReporter(
     verification["header"].asObject()[key] = when (comparison) {
       is List<*> -> Json.toJson(comparison.map {
         when (it) {
-          is HeaderMismatch -> JsonValue.StringValue(it.mismatch.toCharArray())
+          is HeaderMismatch -> JsonValue.StringValue(JsonToken.StringValue(it.mismatch.toCharArray()))
           else -> Json.toJson(it)
         }
       })

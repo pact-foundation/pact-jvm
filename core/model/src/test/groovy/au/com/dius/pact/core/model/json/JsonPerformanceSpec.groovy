@@ -9,6 +9,7 @@ import org.junit.Test
 
 @CompileStatic
 @Ignore
+@SuppressWarnings('ExplicitCallToDivMethod')
 class JsonPerformanceSpec {
 
   private final Map<String, String> jsonFiles = [:]
@@ -36,20 +37,25 @@ class JsonPerformanceSpec {
 
   @Test
   void 'test Pact JSON parser'() {
-    Map<String, Long> result = [:]
-
+    Map<String, BigInteger> result = [:]
     jsonFiles.each { entry ->
-      long start = System.nanoTime()
-      JsonParser.INSTANCE.parseString(entry.value)
-      long time = System.nanoTime() - start
-      result[entry.key] = time
+      result[entry.key] = BigInteger.ZERO
+    }
+
+    100.times {
+      jsonFiles.each { entry ->
+        long start = System.nanoTime()
+        JsonParser.INSTANCE.parseString(entry.value)
+        long time = System.nanoTime() - start
+        result[entry.key] += time.toBigInteger()
+      }
     }
 
     println 'RESULT:'
-    long total = 0
+    BigInteger total = 0
     result.keySet().toSorted().each { key ->
-      println("${key.padRight(40)}: ${result[key]}")
-      total += result[key]
+      println("${key.padRight(40)}: ${result[key] / 100}")
+      total += result[key].div(100).toBigInteger()
     }
     println("${'TOTAL'.padRight(40)}: ${total}")
     println()
@@ -57,20 +63,25 @@ class JsonPerformanceSpec {
 
   @Test
   void 'test GSON parser'() {
-    Map<String, Long> result = [:]
-
+    Map<String, BigInteger> result = [:]
     jsonFiles.each { entry ->
-      long start = System.nanoTime()
-      com.google.gson.JsonParser.parseString(entry.value)
-      long time = System.nanoTime() - start
-      result[entry.key] = time
+      result[entry.key] = BigInteger.ZERO
+    }
+
+    100.times {
+      jsonFiles.each { entry ->
+        long start = System.nanoTime()
+        com.google.gson.JsonParser.parseString(entry.value)
+        long time = System.nanoTime() - start
+        result[entry.key] += time.toBigInteger()
+      }
     }
 
     println 'RESULT:'
-    long total = 0
+    BigInteger total = 0
     result.keySet().toSorted().each { key ->
-      println("${key.padRight(40)}: ${result[key]}")
-      total += result[key]
+      println("${key.padRight(40)}: ${result[key] / 100}")
+      total += result[key].div(100).toBigInteger()
     }
     println("${'TOTAL'.padRight(40)}: ${total}")
     println()
@@ -78,21 +89,26 @@ class JsonPerformanceSpec {
 
   @Test
   void 'test Groovy Json slurper parser'() {
-    Map<String, Long> result = [:]
     JsonSlurper slurper = new JsonSlurper()
-
+    Map<String, BigInteger> result = [:]
     jsonFiles.each { entry ->
-      long start = System.nanoTime()
-      slurper.parseText(entry.value)
-      long time = System.nanoTime() - start
-      result[entry.key] = time
+      result[entry.key] = BigInteger.ZERO
+    }
+
+    100.times {
+      jsonFiles.each { entry ->
+        long start = System.nanoTime()
+        slurper.parseText(entry.value)
+        long time = System.nanoTime() - start
+        result[entry.key] += time.toBigInteger()
+      }
     }
 
     println 'RESULT:'
-    long total = 0
+    BigInteger total = 0
     result.keySet().toSorted().each { key ->
-      println("${key.padRight(40)}: ${result[key]}")
-      total += result[key]
+      println("${key.padRight(40)}: ${result[key] / 100}")
+      total += result[key].div(100).toBigInteger()
     }
     println("${'TOTAL'.padRight(40)}: ${total}")
     println()

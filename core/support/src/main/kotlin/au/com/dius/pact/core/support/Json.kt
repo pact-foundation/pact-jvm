@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.support
 
 import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.json.JsonToken
 import au.com.dius.pact.core.support.json.JsonValue
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -107,18 +108,18 @@ object Json {
   }
 }
 
-private fun Char.toJsonValue() = JsonValue.StringValue(charArrayOf(this))
+private fun Char.toJsonValue() = JsonValue.StringValue(JsonToken.StringValue(charArrayOf(this)))
 
 private fun Boolean.toJsonValue() = if (this) JsonValue.True
   else JsonValue.False
 
-private fun String.toJsonValue() = JsonValue.StringValue(this.toCharArray())
+private fun String.toJsonValue() = JsonValue.StringValue(JsonToken.StringValue(this.toCharArray()))
 
 private fun Number.toJsonValue(): JsonValue = when (this) {
-  is Int -> JsonValue.Integer(this.toString().toCharArray())
-  is Long -> JsonValue.Integer(this.toString().toCharArray())
-  is BigInteger -> JsonValue.Integer(this.toString().toCharArray())
-  else -> JsonValue.Decimal(this.toString().toCharArray())
+  is Int -> JsonValue.Integer(JsonToken.Integer(this.toString().toCharArray()))
+  is Long -> JsonValue.Integer(JsonToken.Integer(this.toString().toCharArray()))
+  is BigInteger -> JsonValue.Integer(JsonToken.Integer(this.toString().toCharArray()))
+  else -> JsonValue.Decimal(JsonToken.Decimal(this.toString().toCharArray()))
 }
 
 fun jsonArray(list: List<Any?>) = toJson(list)
