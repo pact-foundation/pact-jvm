@@ -34,6 +34,12 @@ how to get going.
 
 * For examples of using pact-jvm with spring boot, have a look at https://github.com/Mikuu/Pact-JVM-Example and https://github.com/mstine/microservices-pact
 
+## Tutorial (60 minutes)
+
+Learn everything in Pact in 60 minutes: https://github.com/DiUS/pact-workshop-jvm.
+
+The workshop takes you through all of the key concepts of consumer and provider testing using a Spring boot application.
+
 ## Documentation
 
 Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
