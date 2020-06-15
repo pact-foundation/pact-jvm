@@ -9,16 +9,19 @@ import com.google.gson.JsonPrimitive
 import org.apache.commons.lang3.StringEscapeUtils
 
 sealed class JsonValue {
-  class Integer(val value: CharArray) : JsonValue() {
-    fun toBigInteger() = String(this.value).toBigInteger()
+  class Integer(val value: JsonToken.Integer) : JsonValue() {
+    constructor(value: CharArray) : this(JsonToken.Integer(value))
+    fun toBigInteger() = String(this.value.chars).toBigInteger()
   }
 
-  class Decimal(val value: CharArray) : JsonValue() {
-    fun toBigDecimal() = String(this.value).toBigDecimal()
+  class Decimal(val value: JsonToken.Decimal) : JsonValue() {
+    constructor(value: CharArray) : this(JsonToken.Decimal(value))
+    fun toBigDecimal() = String(this.value.chars).toBigDecimal()
   }
 
-  class StringValue(val value: CharArray) : JsonValue() {
-    override fun toString() = String(value)
+  class StringValue(val value: JsonToken.StringValue) : JsonValue() {
+    constructor(value: CharArray) : this(JsonToken.StringValue(value))
+    override fun toString() = String(value.chars)
   }
   object True : JsonValue()
   object False : JsonValue()
@@ -79,7 +82,7 @@ sealed class JsonValue {
 
   fun asString(): String {
     return if (this is StringValue) {
-      String(value)
+      String(value.chars)
     } else {
       serialise()
     }
@@ -111,8 +114,8 @@ sealed class JsonValue {
   fun serialise(): String {
     return when (this) {
       is Null -> "null"
-      is Decimal -> String(this.value)
-      is Integer -> String(this.value)
+      is Decimal -> String(this.value.chars)
+      is Integer -> String(this.value.chars)
       is StringValue -> "\"${StringEscapeUtils.escapeJson(this.asString())}\""
       is True -> "true"
       is False -> "false"

@@ -9,6 +9,7 @@ import org.junit.Test
 
 @CompileStatic
 @Ignore
+@SuppressWarnings('ExplicitCallToDivMethod')
 class JsonPerformanceSpec {
 
   private final Map<String, String> jsonFiles = [:]
