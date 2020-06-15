@@ -7,6 +7,7 @@ import java.io.BufferedInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
+import java.util.ArrayDeque
 
 class JsonException(message: String) : RuntimeException(message)
 
@@ -449,7 +450,7 @@ object JsonParser {
   }
 
   private fun parseArray(lexer: JsonLexer): JsonValue.Array {
-    val array = mutableListOf<JsonValue>()
+    val array = ArrayDeque<JsonValue>()
     var token: JsonToken?
 
     do {
@@ -483,7 +484,7 @@ object JsonParser {
         "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing array")
     }
 
-    return JsonValue.Array(array)
+    return JsonValue.Array(array.toMutableList())
   }
 
   private fun nextTokenOrThrow(lexer: JsonLexer): JsonToken? {
