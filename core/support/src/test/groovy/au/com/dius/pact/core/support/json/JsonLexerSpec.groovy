@@ -9,7 +9,7 @@ class JsonLexerSpec extends Specification {
   @Unroll
   def 'next token - #description'() {
     given:
-    def lexer = new JsonLexer(new JsonSource.StringSource(json.chars, 0))
+    def lexer = new JsonLexer(new StringSource(json.chars))
 
     when:
     def token = lexer.nextToken()
@@ -45,7 +45,7 @@ class JsonLexerSpec extends Specification {
   @Unroll
   def 'invalid next token - #description'() {
     given:
-    def lexer = new JsonLexer(new JsonSource.StringSource(json.chars, 0))
+    def lexer = new JsonLexer(new StringSource(json.chars))
 
     when:
     def token = lexer.nextToken()

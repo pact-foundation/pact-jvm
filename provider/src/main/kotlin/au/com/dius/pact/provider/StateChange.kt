@@ -183,9 +183,14 @@ object DefaultStateChange : StateChange, KLogging() {
   }
 
   private fun parseJsonResponse(entity: HttpEntity?): Result<Map<String, Any?>, Exception> {
-    return if (entity != null && ContentType.get(entity).mimeType == ContentType.APPLICATION_JSON.mimeType) {
+    return if (entity != null) {
+      val contentType: ContentType? = ContentType.get(entity)
+      if (contentType != null && contentType.mimeType == ContentType.APPLICATION_JSON.mimeType) {
       val body = EntityUtils.toString(entity)
       Ok(Json.toMap(JsonParser.parseString(body)))
+    } else {
+      Ok(emptyMap())
+    }
     } else {
       Ok(emptyMap())
     }
