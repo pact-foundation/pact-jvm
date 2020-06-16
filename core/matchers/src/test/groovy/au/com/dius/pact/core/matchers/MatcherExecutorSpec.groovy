@@ -156,6 +156,7 @@ class MatcherExecutorSpec extends Specification {
     '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ssZ"         || true
     '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45Z'                     | "yyyy-MM-dd'T'HH:mmZ"            || true
     '2019-11-25T13:45:00+0200'                    | '2019-11-25T11Z'                        | "yyyy-MM-dd'T'HHZ"               || true
+    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ss'Z'"       || true
 
     matcher = pattern ? new TimestampMatcher(pattern) : new TimestampMatcher()
   }
