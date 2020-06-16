@@ -3,6 +3,10 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
 import com.github.michaelbull.result.Ok
+import org.apache.http.HttpEntity
+import org.apache.http.ProtocolVersion
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.message.BasicStatusLine
 import spock.lang.Specification
 
 @SuppressWarnings('PrivateFieldCouldBeFinal')
@@ -12,7 +16,7 @@ class StateChangeSpec extends Specification {
   private ProviderInfo providerInfo
   private Closure consumer
   private ProviderState state
-  private makeStateChangeRequestArgs
+  private makeStateChangeRequestArgs, stateChangeResponse
   private Map consumerMap = [name: 'bob']
   private ProviderClient mockProviderClient
 
@@ -22,10 +26,11 @@ class StateChangeSpec extends Specification {
     consumer = { consumerMap as ConsumerInfo }
     providerVerifier = new ProviderVerifier()
     makeStateChangeRequestArgs = []
+    stateChangeResponse = null
     mockProviderClient = Mock(ProviderClient) {
       makeStateChangeRequest(_, _, _, _, _) >> { args ->
         makeStateChangeRequestArgs << args
-        null
+        stateChangeResponse
       }
       makeRequest(_) >> [statusCode: 200, headers: [:], data: '{}', contentType: 'application/json']
     }
@@ -40,7 +45,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result
+    result instanceof Ok
     makeStateChangeRequestArgs == []
   }
 
@@ -53,7 +58,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result
+    result instanceof Ok
     makeStateChangeRequestArgs == []
   }
 
@@ -66,7 +71,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result
+    result instanceof Ok
     makeStateChangeRequestArgs == []
   }
 
@@ -79,10 +84,28 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result
+    result instanceof Ok
     makeStateChangeRequestArgs == [
       [new URI('http://localhost:2000/hello'), state, true, true, false]
     ]
+  }
+
+  def 'Handle the case were the state change response has no body'() {
+    given:
+    consumerMap.stateChange = 'http://localhost:2000/hello'
+    def entity = [getContentType: { null }] as HttpEntity
+    stateChangeResponse = [
+      getEntity: { entity },
+      getStatusLine: { new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 200, 'OK') },
+      close: { }
+    ] as CloseableHttpResponse
+
+    when:
+    def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+      mockProviderClient)
+
+    then:
+    result instanceof Ok
   }
 
   def 'if the state change is a closure, executes it with the state change as a parameter'() {
@@ -95,7 +118,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result
+    result instanceof Ok
     makeStateChangeRequestArgs == []
     closureArgs == [state]
   }
@@ -109,7 +132,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result
+    result instanceof Ok
     makeStateChangeRequestArgs == []
   }
 
