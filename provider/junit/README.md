@@ -402,6 +402,15 @@ to `true`.
 ** WARNING! Do not enable this on your CI server, as this could result in your build passing with no providers 
 having been verified due to a configuration error. **        
 
+### Overriding the handling of a body data type
+
+**NOTE: version 4.1.3+**
+
+By default, bodies will be handled based on their content types. For binary contents, the bodies will be base64
+encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
+an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`. For instance, setting 
+`pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
+
 ## Test target
 
 The field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget`

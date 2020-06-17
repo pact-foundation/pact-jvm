@@ -99,7 +99,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.provider.tag`|Sets the provider tag to push before publishing verification results|
-
+|`pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`|Overrides the handling of a particular content type [4.1.3+]|
 
 ## Specifying the provider hostname at runtime
 
@@ -344,6 +344,15 @@ behaviour off, set the property `pact.verifier.disableUrlPathDecoding` to `true`
 
 __*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are
 correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
+
+## Overriding the handling of a body data type
+
+**NOTE: version 4.1.3+**
+
+By default, bodies will be handled based on their content types. For binary contents, the bodies will be base64
+encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
+an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`. For instance, setting 
+`pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
 
 ## Provider States
 
