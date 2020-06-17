@@ -51,14 +51,16 @@ data class ContentType(val contentType: MediaType?) {
       val superType = registry.getSupertype(contentType)
       val type = contentType.type
       val baseType = superType.type
+      val override = System.getProperty("pact.content_type.override.$type.${contentType.subtype}")
       when {
+        override.isNotEmpty() -> override == "binary"
         type == "text" || baseType == "text" -> false
         type == "image" || baseType == "image" -> true
         type == "audio" || baseType == "audio" -> true
         type == "video" || baseType == "video" -> true
-        type == "application" && superType.subtype == "pdf" -> true
-        type == "application" && superType.subtype == "xml" -> false
-        type == "application" && superType.subtype == "json" -> false
+        type == "application" && contentType.subtype == "pdf" -> true
+        type == "application" && contentType.subtype == "xml" -> false
+        type == "application" && contentType.subtype == "json" -> false
         type == "application" && superType.subtype == "javascript" -> false
         type == "application" && contentType.subtype.matches(JSON_TYPE) -> false
         superType == MediaType.APPLICATION_ZIP -> true

@@ -114,6 +114,15 @@ By default, the test will fail with an exception if no pacts were found to verif
 `@IgnoreNoPactsToVerify` annotation to the test class. For this to work, you test class will need to be able to receive 
 null values for any of the injected parameters.
 
+## Overriding the handling of a body data type
+
+**NOTE: version 4.1.3+**
+
+By default, bodies will be handled based on their content types. For binary contents, the bodies will be base64
+encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
+an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`. For instance, setting 
+`pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
+
 # Pending Pact Support (version 4.1.0 and later)
 
 If your Pact broker supports pending pacts, you can enable support for that by enabling that on your Pact broker 

@@ -159,7 +159,7 @@ class PactBuilder extends BaseBuilder {
         matchers.addCategory(header).addRule(key, value.matcher)
         [key, [value.value]]
       } else if (value instanceof Pattern) {
-        def matcher = new RegexpMatcher(regex: value)
+        def matcher = new RegexpMatcher(value.toString())
         matchers.addCategory(header).addRule(key, matcher.matcher)
         [key, [matcher.value]]
       } else if (value instanceof GeneratedValue) {
@@ -178,7 +178,7 @@ class PactBuilder extends BaseBuilder {
       matchers.addCategory(category).addRule(path.matcher)
       path.value
     } else if (path instanceof Pattern) {
-      def matcher = new RegexpMatcher(regex: path)
+      def matcher = new RegexpMatcher(path.toString())
       matchers.addCategory(category).addRule(matcher.matcher)
       matcher.value
     } else if (path instanceof GeneratedValue) {
@@ -197,7 +197,7 @@ class PactBuilder extends BaseBuilder {
         matchers.addCategory(category).addRule(key, value[0].matcher)
         [key, [value[0].value]]
       } else if (value[0] instanceof Pattern) {
-        def matcher = new RegexpMatcher(regex: value[0].toString())
+        def matcher = new RegexpMatcher(value[0].toString())
         matchers.addCategory(category).addRule(key, matcher.matcher)
         [key, [matcher.value]]
       } else if (value[0] instanceof GeneratedValue) {
@@ -240,6 +240,7 @@ class PactBuilder extends BaseBuilder {
         request.matchers.addCategory(body.matchers)
         request.generators.addGenerators(body.generators)
       } else if (body != null && !(body instanceof String)) {
+
         if (requestData.prettyPrint == null && !compactMimeTypes(requestData) || requestData.prettyPrint) {
           request.body = new JsonBuilder(body).toPrettyString()
         } else {
@@ -393,7 +394,8 @@ class PactBuilder extends BaseBuilder {
   }
 
   /**
-   * Sets up a file upload request. This will add the correct content type header to the request
+   * Sets up a file upload request using a multipart FORM POST. This will add the correct content type header to
+   * the request
    * @param partName This is the name of the part in the multipart body.
    * @param fileName This is the name of the file that was uploaded
    * @param fileContentType This is the content type of the uploaded file

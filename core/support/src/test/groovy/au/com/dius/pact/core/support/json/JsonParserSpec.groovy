@@ -46,20 +46,22 @@ class JsonParserSpec extends Specification {
 
     where:
 
-    description    | json                     | result
-    'integer'      | '  1234'                 | new JsonValue.Integer('1234'.chars)
-    'decimal'      | '  1234.56 '             | new JsonValue.Decimal('1234.56'.chars)
-    'true'         | 'true'                   | JsonValue.True.INSTANCE
-    'false'        | 'false'                  | JsonValue.False.INSTANCE
-    'null'         | 'null'                   | JsonValue.Null.INSTANCE
-    'string'       | '"null"'                 | new JsonValue.StringValue('null'.chars)
-    'array'        | '[1, 200, 3, "4"]'       | new JsonValue.Array([new JsonValue.Integer('1'.chars), new JsonValue.Integer('200'.chars), new JsonValue.Integer('3'.chars), new JsonValue.StringValue('4'.chars)])
-    '2d array'     | '[[1, 2], 3, "4"]'       | new JsonValue.Array([new JsonValue.Array([new JsonValue.Integer('1'.chars), new JsonValue.Integer('2'.chars)]), new JsonValue.Integer('3'.chars), new JsonValue.StringValue('4'.chars)])
-    'object'       | '{"1": 200, "3": "4"}'   | new JsonValue.Object(['1': new JsonValue.Integer('200'.chars), '3': new JsonValue.StringValue('4'.chars)])
-    '2d object'    | '{"1": 2, "3": {"4":5}}' | new JsonValue.Object(['1': new JsonValue.Integer('2'.chars), '3': new JsonValue.Object(['4': new JsonValue.Integer('5'.chars)])])
-    'empty object' | '{}'                     | new JsonValue.Object([:])
-    'empty array'  | '[]'                     | new JsonValue.Array([])
-    'empty string' | '""'                     | new JsonValue.StringValue(''.chars)
+    description                       | json                     | result
+    'integer'                         | '  1234'                 | new JsonValue.Integer('1234'.chars)
+    'decimal'                         | '  1234.56 '             | new JsonValue.Decimal('1234.56'.chars)
+    'true'                            | 'true'                   | JsonValue.True.INSTANCE
+    'false'                           | 'false'                  | JsonValue.False.INSTANCE
+    'null'                            | 'null'                   | JsonValue.Null.INSTANCE
+    'string'                          | '"null"'                 | new JsonValue.StringValue('null'.chars)
+    'array'                           | '[1, 200, 3, "4"]'       | new JsonValue.Array([new JsonValue.Integer('1'.chars), new JsonValue.Integer('200'.chars), new JsonValue.Integer('3'.chars), new JsonValue.StringValue('4'.chars)])
+    '2d array'                        | '[[1, 2], 3, "4"]'       | new JsonValue.Array([new JsonValue.Array([new JsonValue.Integer('1'.chars), new JsonValue.Integer('2'.chars)]), new JsonValue.Integer('3'.chars), new JsonValue.StringValue('4'.chars)])
+    'object'                          | '{"1": 200, "3": "4"}'   | new JsonValue.Object(['1': new JsonValue.Integer('200'.chars), '3': new JsonValue.StringValue('4'.chars)])
+    'object with decimal value 1'     | '{"1": 20.25}'           | new JsonValue.Object(['1': new JsonValue.Decimal('20.25'.chars)])
+    'object with decimal value 2'     | '{"1": 200.25}'          | new JsonValue.Object(['1': new JsonValue.Decimal('200.25'.chars)])
+    '2d object'                       | '{"1": 2, "3": {"4":5}}' | new JsonValue.Object(['1': new JsonValue.Integer('2'.chars), '3': new JsonValue.Object(['4': new JsonValue.Integer('5'.chars)])])
+    'empty object'                    | '{}'                     | new JsonValue.Object([:])
+    'empty array'                     | '[]'                     | new JsonValue.Array([])
+    'empty string'                    | '""'                     | new JsonValue.StringValue(''.chars)
   }
 
   def 'can parse a pact file'() {

@@ -53,13 +53,15 @@ object Matching : KLogging() {
     else MethodMismatch(expected, actual)
 
   fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<Mismatch> {
-    return if (expected.contentType() == actual.contentType()) {
-      val matcher = MatchingConfig.lookupBodyMatcher(actual.contentType())
+    val expectedContentType = expected.determineContentType()
+    val actualContentType = actual.determineContentType()
+    return if (expectedContentType.getBaseType() == actualContentType.getBaseType()) {
+      val matcher = MatchingConfig.lookupBodyMatcher(actualContentType.getBaseType())
       if (matcher != null) {
-        logger.debug { "Found a matcher for ${actual.contentType()} -> $matcher" }
+        logger.debug { "Found a matcher for $actualContentType -> $matcher" }
         matcher.matchBody(expected.body, actual.body, allowUnexpectedKeys, expected.matchingRules)
       } else {
-        logger.debug { "No matcher for ${actual.contentType()}, using equality" }
+        logger.debug { "No matcher for $actualContentType, using equality" }
         when {
           expected.body.isMissing() -> emptyList()
           expected.body.isNull() && actual.body.isPresent() -> listOf(BodyMismatch(null, actual.body.unwrap(),
@@ -69,13 +71,13 @@ object Matching : KLogging() {
             "Expected body '${expected.body.unwrap()}' but was missing"))
           expected.body.unwrap().contentEquals(actual.body.unwrap()) -> emptyList()
           else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
-            "Actual body '${actual.body.unwrap()}' is not equal to the expected body " +
-              "'${expected.body.unwrap()}'"))
+            "Actual body '${actual.body.valueAsString()}' is not equal to the expected body " +
+              "'${expected.body.valueAsString()}'"))
         }
       }
     } else {
       if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty()) emptyList()
-      else listOf(BodyTypeMismatch(expected.contentType(), actual.contentType()))
+      else listOf(BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()))
     }
   }
 

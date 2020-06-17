@@ -1,0 +1,32 @@
+{
+  "provider": {
+    "name": "File Service"
+  },
+  "consumer": {
+    "name": "PDF Consumer Unencoded"
+  },
+  "interactions": [
+    {
+      "description": "a request for a PDF",
+      "request": {
+        "method": "GET",
+        "path": "/get-file"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/pdf"
+        },
+        "body": "0111010001110111"
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.3"
+    }
+  }
+}
