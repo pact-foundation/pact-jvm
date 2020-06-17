@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.ContentType.Companion.JSONREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
 import mu.KLogging
+import org.apache.commons.codec.binary.Hex
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
@@ -93,7 +94,11 @@ data class OptionalBody(
 
   override fun toString(): String {
     return when (state) {
-      State.PRESENT -> "PRESENT(${value!!.toString(contentType.asCharset())})"
+      State.PRESENT -> if (contentType.isBinaryType()) {
+        "PRESENT(${value!!.size} bytes starting with ${Hex.encodeHexString(slice(16))}...)"
+      } else {
+        "PRESENT(${value!!.toString(contentType.asCharset())})"
+      }
       State.EMPTY -> "EMPTY"
       State.NULL -> "NULL"
       State.MISSING -> "MISSING"
@@ -142,6 +147,17 @@ data class OptionalBody(
     return when (state) {
       State.PRESENT -> Base64.getEncoder().encodeToString(value!!)
       else -> ""
+    }
+  }
+
+  fun slice(size: Int): ByteArray {
+    return when (state) {
+      State.PRESENT -> if (value!!.size > size) {
+        value.copyOf(size)
+      } else {
+        value
+      }
+      else -> ByteArray(0)
     }
   }
 
