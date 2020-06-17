@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
 import au.com.dius.pact.consumer.PactConsumerConfig
-import au.com.dius.pact.consumer.groovy.BaseBuilder
+import au.com.dius.pact.consumer.groovy.GroovyBuilder
 import au.com.dius.pact.consumer.groovy.Matcher
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.core.model.Consumer
@@ -17,7 +17,7 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 /**
  * Pact builder for consumer tests for messaging
  */
-class PactMessageBuilder extends BaseBuilder {
+class PactMessageBuilder extends GroovyBuilder {
   Consumer consumer
   Provider provider
   List<ProviderState> providerStates = []

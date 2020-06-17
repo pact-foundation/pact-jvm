@@ -23,7 +23,6 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.expressions.DataType
-import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
@@ -37,13 +36,7 @@ import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
  * Builder DSL for Pact tests
  */
 @SuppressWarnings('PropertyName')
-class PactBuilder extends BaseBuilder {
-
-  private static final String CONTENT_TYPE = 'Content-Type'
-  private static final String JSON = 'application/json'
-  private static final String BODY = 'body'
-  private static final String LOCALHOST = 'localhost'
-  public static final String HEADER = 'header'
+class PactBuilder extends GroovyBuilder {
 
   Consumer consumer
   Provider provider
@@ -232,24 +225,6 @@ class PactBuilder extends BaseBuilder {
     this
   }
 
-  private setupBody(Map requestData, Map request) {
-    if (requestData.containsKey(BODY)) {
-      def body = requestData.body
-      if (body instanceof PactBodyBuilder) {
-        request.body = body.body
-        request.matchers.addCategory(body.matchers)
-        request.generators.addGenerators(body.generators)
-      } else if (body != null && !(body instanceof String)) {
-
-        if (requestData.prettyPrint == null && !compactMimeTypes(requestData) || requestData.prettyPrint) {
-          request.body = new JsonBuilder(body).toPrettyString()
-        } else {
-          request.body = new JsonBuilder(body).toString()
-        }
-      }
-    }
-  }
-
   /**
    * Defines the response attributes (body, headers, etc.) that are returned for the request
    * @param responseData Map of attributes
@@ -262,10 +237,6 @@ class PactBuilder extends BaseBuilder {
     this.responseData << response
     requestState = false
     this
-  }
-
-  private static boolean compactMimeTypes(Map reqResData) {
-    reqResData.headers && reqResData.headers[CONTENT_TYPE] in COMPACT_MIME_TYPES
   }
 
   /**

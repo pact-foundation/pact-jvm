@@ -4,6 +4,7 @@ import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder
 import com.github.tomakehurst.wiremock.WireMockServer
 import groovy.util.logging.Slf4j
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestTemplate
@@ -33,6 +34,11 @@ class BinaryFileProviderTest {
   @BeforeAll
   static void beforeAll() {
     System.setProperty('pact.content_type.override.application.pdf', 'text')
+  }
+
+  @AfterAll
+  static void afterAll() {
+    System.clearProperty('pact.content_type.override.application.pdf')
   }
 
   @BeforeEach

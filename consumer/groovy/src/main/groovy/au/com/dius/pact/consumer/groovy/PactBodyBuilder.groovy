@@ -18,7 +18,7 @@ import static au.com.dius.pact.core.model.PathExpressionsKt.PATH_SPECIAL_CHARS
 /**
  * DSL Builder for constructing JSON bodies
  */
-class PactBodyBuilder extends BaseBuilder {
+class PactBodyBuilder extends GroovyBuilder {
 
   public static final String PATH_SEP = '.'
   public static final String START_LIST = '['
@@ -45,11 +45,7 @@ class PactBodyBuilder extends BaseBuilder {
   }
 
   private boolean shouldPrettyPrint() {
-    prettyPrintBody == null && !compactMimeType() || prettyPrintBody
-  }
-
-  private boolean compactMimeType() {
-    mimetype in COMPACT_MIME_TYPES
+    prettyPrintBody == null && (mimetype != null && !isCompactMimeType(mimetype) || mimetype == null) || prettyPrintBody
   }
 
   def methodMissing(String name, args) {

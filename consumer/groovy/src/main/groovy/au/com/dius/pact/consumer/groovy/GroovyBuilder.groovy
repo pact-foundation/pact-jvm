@@ -3,9 +3,7 @@ package au.com.dius.pact.consumer.groovy
 /**
  * Base class for builders
  */
-class BaseBuilder extends Matchers {
-  public static final List COMPACT_MIME_TYPES = ['application/x-thrift+json']
-
+class GroovyBuilder extends BaseBuilder {
   def call(Closure closure) {
     build(closure)
   }
@@ -15,5 +13,4 @@ class BaseBuilder extends Matchers {
     closure.resolveStrategy = Closure.DELEGATE_FIRST
     closure.call()
   }
-
 }
