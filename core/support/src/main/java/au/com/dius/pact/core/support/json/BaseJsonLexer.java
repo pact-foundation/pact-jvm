@@ -94,7 +94,7 @@ public class BaseJsonLexer {
   }
 
   private char[] allocate(char[] buffer, int size) {
-    char[] newBuffer = new char[Math.max(buffer.length * 2, size)];
+    char[] newBuffer = new char[buffer.length + size];
     System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
     return newBuffer;
   }
