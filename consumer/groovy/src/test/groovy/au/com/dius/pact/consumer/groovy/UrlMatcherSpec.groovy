@@ -8,7 +8,7 @@ class UrlMatcherSpec extends Specification {
   def 'converts groovy regex matcher class to matching rule regex class'() {
     when:
     def matcher = new UrlMatcher('http://localhost:8080',
-      ['a', new RegexpMatcher(value: '123', regex: '\\d+'), 'b'])
+      ['a', new RegexpMatcher('\\d+', '123'), 'b'])
 
     then:
     matcher.matcher.toMap(PactSpecVersion.V3) == [match: 'regex', regex: '.*\\Qa\\E\\/\\d+\\/\\Qb\\E$' ]
