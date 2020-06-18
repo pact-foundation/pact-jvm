@@ -23,8 +23,8 @@ import java.io.File
  * Pact for a sequences of messages
  */
 class MessagePact @JvmOverloads constructor (
-  override val provider: Provider,
-  override val consumer: Consumer,
+  override var provider: Provider,
+  override var consumer: Consumer,
   var messages: MutableList<Message> = mutableListOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource

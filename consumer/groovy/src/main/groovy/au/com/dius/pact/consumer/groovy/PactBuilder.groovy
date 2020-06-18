@@ -38,10 +38,9 @@ import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
 @SuppressWarnings('PropertyName')
 class PactBuilder extends GroovyBuilder {
 
-  Consumer consumer
-  Provider provider
+  RequestResponsePact pact = new RequestResponsePact(new Provider(), new Consumer())
   Integer port = 0
-  String requestDescription
+  RequestResponseInteraction currentInteraction
   List requestData = []
   List responseData = []
   List interactions = []
@@ -53,7 +52,7 @@ class PactBuilder extends GroovyBuilder {
    * @param consumer consumer name
    */
   PactBuilder serviceConsumer(String consumer) {
-    this.consumer = new Consumer(consumer)
+    this.pact.consumer = new Consumer(consumer)
     this
   }
 
@@ -62,7 +61,7 @@ class PactBuilder extends GroovyBuilder {
    * @param provider provider name
    */
   PactBuilder hasPactWith(String provider) {
-    this.provider = new Provider(provider)
+    this.pact.provider = new Provider(provider)
     this
   }
 
@@ -101,7 +100,7 @@ class PactBuilder extends GroovyBuilder {
    */
   PactBuilder uponReceiving(String requestDescription) {
     buildInteractions()
-    this.requestDescription = requestDescription
+    this.currentInteraction = new RequestResponseInteraction(requestDescription)
     requestState = true
     this
   }
@@ -120,7 +119,7 @@ class PactBuilder extends GroovyBuilder {
       def requestBody = requestData[i].body instanceof String ? requestData[i].body.bytes : requestData[i].body
       def responseBody = responseData[i].body instanceof String ? responseData[i].body.bytes : responseData[i].body
       interactions << new RequestResponseInteraction(
-        requestDescription,
+        this.currentInteraction.description,
         providerStates,
         new Request(requestData[i].method ?: 'get', path, query, headers,
           requestData[i].containsKey(BODY) ? OptionalBody.body(requestBody, contentType(headers)) :
@@ -256,7 +255,7 @@ class PactBuilder extends GroovyBuilder {
         '  `fruits eachLike(1)` or `id = integer()`'
       )
     }
-    setupBody(body, options)
+    setupRequestOrResponse(body, options)
     this
   }
 
@@ -270,7 +269,7 @@ class PactBuilder extends GroovyBuilder {
   PactBuilder withBody(Map options = [:], List array) {
     def body = new PactBodyBuilder(mimetype: options.mimeType, prettyPrintBody: options.prettyPrint)
     body.bodyRepresentation = body.build(array)
-    setupBody(body, options)
+    setupRequestOrResponse(body, options)
     this
   }
 
@@ -284,11 +283,11 @@ class PactBuilder extends GroovyBuilder {
   PactBuilder withBody(Map options = [:], LikeMatcher matcher) {
     def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint)
     body.bodyRepresentation = body.build(matcher)
-    setupBody(body, options)
+    setupRequestOrResponse(body, options)
     this
   }
 
-  private setupBody(PactBodyBuilder body, Map options) {
+  private setupRequestOrResponse(PactBodyBuilder body, Map options) {
     if (requestState) {
       requestData.last().body = body.body
       requestData.last().matchers.addCategory(body.matchers)
@@ -325,7 +324,7 @@ class PactBuilder extends GroovyBuilder {
   @CompileStatic
   PactVerificationResult runTest(Map options = [:], Closure closure) {
     buildInteractions()
-    def pact = new RequestResponsePact(provider, consumer, interactions)
+    this.pact.interactions = interactions
 
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
     MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion as PactSpecVersion,

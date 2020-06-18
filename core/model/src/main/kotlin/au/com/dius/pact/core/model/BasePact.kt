@@ -14,8 +14,8 @@ import kotlin.reflect.full.memberProperties
  * Base Pact class
  */
 abstract class BasePact<I : Interaction> @JvmOverloads constructor(
-  override val consumer: Consumer,
-  override val provider: Provider,
+  override var consumer: Consumer,
+  override var provider: Provider,
   open val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
 ) : Pact<I> {

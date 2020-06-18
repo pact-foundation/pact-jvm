@@ -7,8 +7,8 @@ import au.com.dius.pact.core.support.jsonObject
  * Pact between a consumer and a provider
  */
 class RequestResponsePact @JvmOverloads constructor(
-  override val provider: Provider,
-  override val consumer: Consumer,
+  override var provider: Provider,
+  override var consumer: Consumer,
   interactions: List<RequestResponseInteraction> = listOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
