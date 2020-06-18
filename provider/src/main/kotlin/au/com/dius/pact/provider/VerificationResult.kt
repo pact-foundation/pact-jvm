@@ -16,6 +16,7 @@ private fun padLines(str: String, indent: Int): String {
 }
 
 sealed class VerificationFailureType {
+  abstract fun description(): String
   abstract fun formatForDisplay(t: TermColors): String
   abstract fun hasException(): Boolean
   abstract fun getException(): Throwable?
@@ -25,6 +26,7 @@ sealed class VerificationFailureType {
     val interaction: Interaction? = null,
     val pact: Pact<Interaction>? = null
   ) : VerificationFailureType() {
+    override fun description() = formatForDisplay(TermColors())
     override fun formatForDisplay(t: TermColors): String {
       return when (mismatch) {
         is BodyMismatch -> {
@@ -56,6 +58,7 @@ sealed class VerificationFailureType {
   }
 
   data class ExceptionFailure(val e: Throwable) : VerificationFailureType() {
+    override fun description() = e.message ?: e.javaClass.name
     override fun formatForDisplay(t: TermColors): String {
       return if (e.message.isNotEmpty()) {
         padLines(e.message!!, 6)
@@ -69,6 +72,7 @@ sealed class VerificationFailureType {
   }
 
   data class StateChangeFailure(val result: StateChangeResult) : VerificationFailureType() {
+    override fun description() = formatForDisplay(TermColors())
     override fun formatForDisplay(t: TermColors): String {
       val e = result.stateChangeResult.getError()
       return "State change callback failed with an exception - " + e?.message.toString()

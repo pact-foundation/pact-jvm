@@ -87,11 +87,14 @@ data class PactVerificationContext @JvmOverloads constructor(
     val request = store.get("request")
     val testContext = store.get("interactionContext") as PactVerificationContext
     try {
-      this.testExecutionResult.addAll(validateTestExecution(client, request, testContext.executionContext ?: emptyMap())
-        .filterIsInstance<VerificationResult.Failed>())
+      val result = validateTestExecution(client, request, testContext.executionContext ?: emptyMap())
+        .filterIsInstance<VerificationResult.Failed>()
+      this.testExecutionResult.addAll(result)
       if (testExecutionResult.isNotEmpty()) {
         verifier!!.displayFailures(testExecutionResult)
-        throw AssertionError(verifier!!.generateErrorStringFromVerificationResult(testExecutionResult))
+        if (testExecutionResult.any { !it.pending }) {
+          throw AssertionError(verifier!!.generateErrorStringFromVerificationResult(testExecutionResult))
+        }
       }
     } finally {
       verifier!!.finaliseReports()
