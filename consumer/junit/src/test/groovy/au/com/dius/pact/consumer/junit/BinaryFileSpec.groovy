@@ -17,13 +17,14 @@ class BinaryFileSpec {
 
   @Pact(provider = 'File Service', consumer= 'PDF Consumer')
   RequestResponsePact createPact(PactDslWithProvider builder) {
+    def pdf = BinaryFileSpec.getResourceAsStream('/sample.pdf').bytes
     builder
       .uponReceiving('a request for a PDF')
       .path('/get-file')
       .method('GET')
       .willRespondWith()
       .status(200)
-      .body('0111010001110111', 'application/pdf')
+      .withBinaryData(pdf, 'application/pdf')
       .toPact()
   }
 
@@ -37,7 +38,8 @@ class BinaryFileSpec {
         .build()
       def response = httpclient.execute(request)
       assert response.statusLine.statusCode == 200
-      assert new String(response.entity.content.bytes) == '0111010001110111'
+      assert response.entity.contentType.value == 'application/pdf'
+      assert response.entity.content.bytes[0..7] == [37, 80, 68, 70, 45, 49, 46, 53] as byte[]
     }
   }
 }

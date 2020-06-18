@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static au.com.dius.pact.consumer.Headers.MULTIPART_HEADER_REGEX;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class PactDslResponse {
@@ -273,6 +274,17 @@ public class PactDslResponse {
 
       return this;
     }
+
+  /**
+   * Response body as a binary data.
+   * @param example Example contents to use in the consumer test
+   * @param contentType Content type of the data
+   */
+  public PactDslResponse withBinaryData(byte[] example, String contentType) {
+    responseBody = OptionalBody.body(example, au.com.dius.pact.core.model.ContentType.fromString(contentType));
+    responseHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
+    return this;
+  }
 
     /**
      * Match a response header. A random example header value will be generated from the provided regular expression.
