@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.Response;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.Generators;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
@@ -276,13 +277,14 @@ public class PactDslResponse {
     }
 
   /**
-   * Response body as a binary data.
+   * Response body as a binary data. It will match any expected bodies against the content type.
    * @param example Example contents to use in the consumer test
    * @param contentType Content type of the data
    */
   public PactDslResponse withBinaryData(byte[] example, String contentType) {
     responseBody = OptionalBody.body(example, au.com.dius.pact.core.model.ContentType.fromString(contentType));
     responseHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
+    responseMatchers.addCategory("body").addRule("$", new ContentTypeMatcher(contentType));
     return this;
   }
 
