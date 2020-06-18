@@ -29,10 +29,19 @@ object HttpClientUtils {
       }
     } else {
       if (encodePath) {
-        URIBuilder(baseUrl).setPath(url).build()
+        val builder = URIBuilder(baseUrl)
+        pathCombiner(builder, url)
       } else {
         URI(baseUrl + url)
       }
+    }
+  }
+
+  fun pathCombiner(builder: URIBuilder, url: String): URI {
+    return if (builder.getPath() != null) {
+      builder.setPath(builder.getPath() + url).build()
+    } else {
+      builder.setPath(url).build()
     }
   }
 
