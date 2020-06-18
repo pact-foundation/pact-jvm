@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
-import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher

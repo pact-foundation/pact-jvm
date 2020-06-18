@@ -71,15 +71,23 @@ object Matching : KLogging() {
           expected.body.isNull() -> emptyList()
           actual.body.isMissing() -> listOf(BodyMismatch(expected.body.unwrap(), null,
             "Expected body '${expected.body.unwrap()}' but was missing"))
-          expected.body.unwrap().contentEquals(actual.body.unwrap()) -> emptyList()
-          else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
-            "Actual body '${actual.body.valueAsString()}' is not equal to the expected body " +
-              "'${expected.body.valueAsString()}'"))
+          else -> matchBodyContents(expected, actual)
         }
       }
     } else {
       if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty()) emptyList()
       else listOf(BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()))
+    }
+  }
+
+  fun matchBodyContents(expected: HttpPart, actual: HttpPart): List<BodyMismatch> {
+    val matcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
+    return when {
+      matcher != null -> domatch(matcher, listOf("$"), expected.body.unwrap(), actual.body.unwrap(), BodyMismatchFactory)
+      expected.body.unwrap().contentEquals(actual.body.unwrap()) -> emptyList()
+      else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
+        "Actual body '${actual.body.valueAsString()}' is not equal to the expected body " +
+          "'${expected.body.valueAsString()}'"))
     }
   }
 

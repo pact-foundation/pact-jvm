@@ -366,7 +366,8 @@ object DefaultPactReader : PactReader, KLogging() {
     return when (source) {
       is InputStream -> JsonParser.parseReader(InputStreamReader(source)).asObject() to InputStreamPactSource
       is Reader -> JsonParser.parseReader(source).asObject() to ReaderPactSource
-      is File -> source.bufferedReader().use { JsonParser.parseReader(it).asObject() } to FileSource<Interaction>(source)
+      is File -> source.bufferedReader().use {
+        JsonParser.parseReader(it).asObject() } to FileSource<Interaction>(source)
       else -> throw IllegalArgumentException("loadPactFromFile expects either an InputStream, Reader or File. " +
         "Got a ${source.javaClass.name} instead")
     }

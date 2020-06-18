@@ -3,6 +3,9 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactReaderKt
 import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import spock.lang.Specification
 
 class MatchingSpec extends Specification {
@@ -92,4 +95,38 @@ class MatchingSpec extends Specification {
     Matching.compareMessageMetadata([A: 'B', contentType: 'D'], [A: 'B'], null).empty
   }
 
+  def 'Body Matching - compares the bytes of the body'() {
+    expect:
+    Matching.INSTANCE.matchBody(expected, actual, false).empty
+
+    where:
+
+    expected = new Response(200, [:], OptionalBody.body([1, 2, 3, 4] as byte[]))
+    actual = new Response(200, [:], OptionalBody.body([1, 2, 3, 4] as byte[]))
+  }
+
+  def 'Body Matching - compares the bytes of the body with text'() {
+    expect:
+    Matching.INSTANCE.matchBody(expected, actual, false).empty
+
+    where:
+
+    expected = new Response(200, [:], OptionalBody.body('hello'.bytes))
+    actual = new Response(200, [:], OptionalBody.body('hello'.bytes))
+  }
+
+  def 'Body Matching - compares the body with aby defined matcher'() {
+    given:
+    def matchingRulesImpl = new MatchingRulesImpl()
+    matchingRulesImpl.addCategory('body').addRule('$', new ContentTypeMatcher('image/jpeg'))
+    def expected = new Response(200, ['Content-Type': ['image/jpeg']], OptionalBody.body('hello'.bytes),
+      matchingRulesImpl)
+    def actual = new Response(200, [:], OptionalBody.body(MatchingSpec.getResourceAsStream('/RAT.JPG').bytes))
+
+    when:
+    def result = Matching.INSTANCE.matchBody(expected, actual, false)
+
+    then:
+    result.empty
+  }
 }
