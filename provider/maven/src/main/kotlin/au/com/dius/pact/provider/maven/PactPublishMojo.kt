@@ -18,13 +18,13 @@ open class PactPublishMojo : PactBaseMojo() {
     @Parameter(defaultValue = "false", expression = "\${skipPactPublish}")
     private var skipPactPublish: Boolean = false
 
-    @Parameter(required = true, defaultValue = "\${project.version}")
+    @Parameter(required = true, defaultValue = "\${project.version}", property = "pact.projectVersion")
     private lateinit var projectVersion: String
 
-    @Parameter(defaultValue = "false")
+    @Parameter(defaultValue = "false", property = "pact.trimSnapshot")
     private var trimSnapshot: Boolean = false
 
-    @Parameter(defaultValue = "\${project.build.directory}/pacts")
+    @Parameter(defaultValue = "\${project.build.directory}/pacts", property = "pact.pactDirectory")
     private lateinit var pactDirectory: String
 
     private var brokerClient: PactBrokerClient? = null

@@ -8,22 +8,22 @@ import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest
 import org.apache.maven.settings.crypto.SettingsDecrypter
 
 abstract class PactBaseMojo : AbstractMojo() {
-  @Parameter
+  @Parameter(property = "pact.broker.url")
   protected var pactBrokerUrl: String? = null
 
-  @Parameter
+  @Parameter(property = "pact.broker.serverId")
   protected var pactBrokerServerId: String? = null
 
-  @Parameter
+  @Parameter(property = "pact.broker.token")
   protected var pactBrokerToken: String? = null
 
-  @Parameter
+  @Parameter(property = "pact.broker.username")
   protected var pactBrokerUsername: String? = null
 
-  @Parameter
+  @Parameter(property = "pact.broker.password")
   protected var pactBrokerPassword: String? = null
 
-  @Parameter(defaultValue = "basic")
+  @Parameter(defaultValue = "basic", property = "pact.broker.authenticationScheme")
   protected var pactBrokerAuthenticationScheme: String? = null
 
   @Parameter(defaultValue = "\${settings}", readonly = true)
