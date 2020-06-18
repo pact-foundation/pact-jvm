@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.3 - bugfixes & enhancements
+
+* 9fb20fd22 - fix: JUnit 5 tests should not throw exception if only pending failures (Ronald Holshausen, Thu Jun 18 13:35:25 2020 +1000)
+* 1b3487133 - feat: Add a method for binary data in the Java DSL (Ronald Holshausen, Thu Jun 18 11:51:08 2020 +1000)
+* 6b0e0708c - refactor: update Groovy pact builder to start using the Pact models (Ronald Holshausen, Thu Jun 18 11:11:00 2020 +1000)
+* 752cdfcce - chore: upgrade Kotlin to 1.3.72 (Ronald Holshausen, Thu Jun 18 10:39:25 2020 +1000)
+* aeb14dca3 - fix: buffer was sized correctly in Json parser (Ronald Holshausen, Thu Jun 18 09:59:45 2020 +1000)
+* 63f3df0d1 - Merge pull request #1133 from anto-ac/issue-with-object-with-decimal-value (Ronald Holshausen, Thu Jun 18 09:50:53 2020 +1000)
+* d7a9b93f6 - refactor: more some more Groovy code to Kotlin (Ronald Holshausen, Thu Jun 18 09:05:07 2020 +1000)
+* dad77e470 - Merge branch 'issue-with-object-with-decimal-value' of github.com:anto-ac/pact-jvm into issue-with-object-with-decimal-value (Emanuele, Wed Jun 17 18:06:18 2020 +0100)
+* 345dedad7 - fix the size of the buffer used when scanning decimal numbers (Emanuele, Wed Jun 17 18:04:21 2020 +0100)
+* 0afd421f0 - fix: add missing test case for JsonParser (anto, Wed Jun 17 17:57:40 2020 +0100)
+* 68b0d6cc7 - feat: with binary body do not print the body contents out (Ronald Holshausen, Wed Jun 17 16:50:20 2020 +1000)
+* 62578187a - refactor: converted Groovy matcher classes to Kotlin (Ronald Holshausen, Wed Jun 17 16:49:24 2020 +1000)
+* 2333d232f - feat: update readme about override for handling a content type as binary (Ronald Holshausen, Wed Jun 17 12:27:34 2020 +1000)
+* 0b774ea14 - feat: add an override for handling a content type as binary (Ronald Holshausen, Wed Jun 17 12:12:25 2020 +1000)
+* 64cb151ae - Merge pull request #1127 from anto-ac/backward-compatibility-for-Z-UTC-designator (Antonello Caboni, Tue Jun 16 09:24:11 2020 +0100)
+* 7ae9e7fcd - Only Z not in quotes should be replaced with X (anto, Tue Jun 16 08:37:09 2020 +0100)
+* c605962c3 - Merge branch 'master' into backward-compatibility-for-Z-UTC-designator (Antonello Caboni, Tue Jun 16 07:39:22 2020 +0100)
+* d96859fcf - fix: handle statechage calls that do not return a body (Ronald Holshausen, Tue Jun 16 16:23:18 2020 +1000)
+* 4d67a8c73 - chore: optimisation - use char arrays in JSON parser instead of lists (Ronald Holshausen, Tue Jun 16 10:26:44 2020 +1000)
+* 2a16da943 - fix: backward compatible support for Z UTC designator in timestamps (anto, Mon Jun 15 20:21:07 2020 +0100)
+* d87fef54b - bump version to 4.1.3 (anto, Mon Jun 15 11:00:31 2020 +0100)
+
 # 4.1.2 - bugfixes + enhancements
 
 * 551f86d2a - fix: removed extra quote (Ronald Holshausen, Mon Jun 15 18:11:15 2020 +1000)
