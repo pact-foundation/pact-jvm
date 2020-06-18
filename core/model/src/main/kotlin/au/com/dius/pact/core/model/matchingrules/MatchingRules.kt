@@ -119,6 +119,13 @@ object ValuesMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "values")
 }
 
+/**
+ * Content type matcher. Matches the content type of binary data
+ */
+data class ContentTypeMatcher @JvmOverloads constructor (val contentType: String) : MatchingRule {
+  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "contentType", "value" to contentType)
+}
+
 data class MatchingRuleGroup @JvmOverloads constructor(
   val rules: MutableList<MatchingRule> = mutableListOf(),
   val ruleLogic: RuleLogic = RuleLogic.AND
@@ -209,6 +216,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
             if (map.containsKey(DATE)) DateMatcher(map[DATE].toString())
             else DateMatcher()
           "values" -> ValuesMatcher
+          "contentType" -> ContentTypeMatcher(map["value"].toString())
           else -> {
             logger.warn { "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
             EqualsMatcher

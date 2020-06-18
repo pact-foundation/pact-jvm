@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
@@ -17,6 +20,9 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.json.JsonValue
 import mu.KotlinLogging
 import org.apache.commons.lang3.time.DateUtils
+import org.apache.tika.config.TikaConfig
+import org.apache.tika.io.TikaInputStream
+import org.apache.tika.metadata.Metadata
 import org.w3c.dom.Element
 import org.w3c.dom.Text
 import java.math.BigDecimal
@@ -120,6 +126,7 @@ fun <M : Mismatch> domatch(
             matchMaxType(matcher.max, path, expected, actual, mismatchFn)
     is IncludeMatcher -> matchInclude(matcher.value, path, expected, actual, mismatchFn)
     is NullMatcher -> matchNull(path, actual, mismatchFn)
+    is ContentTypeMatcher -> matchContentType(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     else -> matchEquality(path, expected, actual, mismatchFn)
   }
 }
@@ -412,5 +419,34 @@ fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: 
     emptyList()
   } else {
     listOf(mismatchFactory.create(null, actual, "Expected ${valueOf(actual)} to be null", path))
+  }
+}
+
+private val tika = TikaConfig()
+
+fun <M : Mismatch> matchContentType(
+  path: List<String>,
+  contentType: ContentType,
+  actual: Any?,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  val binaryData = when (actual) {
+    is ByteArray -> actual
+    else -> actual.toString().toByteArray(contentType.asCharset())
+  }
+  val metadata = Metadata()
+  val stream = TikaInputStream.get(binaryData)
+  val detectedContentType = stream.use { stream ->
+    tika.detector.detect(stream, metadata)
+  }
+  val matches = contentType.equals(detectedContentType)
+  logger.debug { "Matching binary contents by content type: " +
+    "expected '$contentType', detected '$detectedContentType' -> $matches" }
+  return if (matches) {
+    emptyList()
+  } else {
+    listOf(mismatchFactory.create(contentType.toString(), actual,
+      "Expected binary contents to have content type '$contentType' " +
+        "but detected contents was '$detectedContentType'", path))
   }
 }

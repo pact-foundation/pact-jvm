@@ -9,7 +9,7 @@ import java.nio.charset.Charset
 private val jsonRegex = Regex(".*json")
 private val xmlRegex = Regex(".*xml")
 
-data class ContentType(val contentType: MediaType?) {
+class ContentType(val contentType: MediaType?) {
 
   constructor(contentType: String) : this(MediaType.parse(contentType))
 
@@ -73,6 +73,19 @@ data class ContentType(val contentType: MediaType?) {
   fun isMultipart() = if (contentType != null)
     contentType.baseType.type == "multipart"
     else false
+
+  override fun equals(other: Any?): Boolean {
+    return when {
+      this === other -> true
+      other is MediaType -> contentType == other
+      other !is ContentType -> false
+      else -> contentType == other.contentType
+    }
+  }
+
+  override fun hashCode(): Int {
+    return contentType?.hashCode() ?: 0
+  }
 
   companion object : KLogging() {
     @JvmStatic
