@@ -143,20 +143,24 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected                                      | actual                                  | pattern                          || mustBeEmpty
-    '2014-01-01 14:00:00+10:00'                   | '2013-12-01 14:00:00+10:00'             | null                             || true
-    '2014-01-01 14:00:00+10:00'                   | 'I\'m a timestamp!'                     | null                             || false
-    '2014-01-01 14:00:00+10:00'                   | '2013#12#01#14#00#00'                   | "yyyy'#'MM'#'dd'#'HH'#'mm'#'ss"  || true
-    '2014-01-01 14:00:00+10:00'                   | null                                    | null                             || false
-    '2014-01-01T10:00+10:00[Australia/Melbourne]' | '2020-01-01T10:00+01:00[Europe/Warsaw]' | "yyyy-MM-dd'T'HH:mmXXX'['zzz']'" || true
-    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ssX"         || true
-    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ssZZ"        || true
-    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11:45Z'                     | "yyyy-MM-dd'T'HH:mmZZ"           || true
-    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11Z'                        | "yyyy-MM-dd'T'HHZZ"              || true
-    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ssZ"         || true
-    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45Z'                     | "yyyy-MM-dd'T'HH:mmZ"            || true
-    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11Z'                        | "yyyy-MM-dd'T'HHZ"               || true
-    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ss'Z'"       || true
+    expected                                      | actual                                  | pattern                           || mustBeEmpty
+    '2014-01-01 14:00:00+10:00'                   | '2013-12-01 14:00:00+10:00'             | null                              || true
+    '2014-01-01 14:00:00+10:00'                   | 'I\'m a timestamp!'                     | null                              || false
+    '2014-01-01 14:00:00+10:00'                   | '2013#12#01#14#00#00'                   | "yyyy'#'MM'#'dd'#'HH'#'mm'#'ss"   || true
+    '2014-01-01 14:00:00+10:00'                   | null                                    | null                              || false
+    '2014-01-01T10:00+10:00[Australia/Melbourne]' | '2020-01-01T10:00+01:00[Europe/Warsaw]' | "yyyy-MM-dd'T'HH:mmXXX'['zzz']'"  || true
+    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ssX"          || true
+    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ssZZ"         || true
+    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11:45Z'                     | "yyyy-MM-dd'T'HH:mmZZ"            || true
+    '2019-11-25T13:45:00+02:00'                   | '2019-11-25T11Z'                        | "yyyy-MM-dd'T'HHZZ"               || true
+    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ssZ"          || true
+    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45Z'                     | "yyyy-MM-dd'T'HH:mmZ"             || true
+    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11Z'                        | "yyyy-MM-dd'T'HHZ"                || true
+    '2019-11-25T13:45:00+0200'                    | '2019-11-25T11:45:00Z'                  | "yyyy-MM-dd'T'HH:mm:ss'Z'"        || true
+    '2019-11-25T13:45:00:000000+0200'             | '2019-11-25T11:19:00.000000Z'           | "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" || true
+    '2019-11-25T13:45:00:000+0200'                | '2019-11-25T11:19:00.000Z'              | "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"    || true
+//  This is in order to keep backwards compatibility with version < 4.1.1
+    '2019-11-25T13:45:00:000000+0200'             | '2019-11-25T11:19:00.000000Z'           | "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"    || true
 
     matcher = pattern ? new TimestampMatcher(pattern) : new TimestampMatcher()
   }

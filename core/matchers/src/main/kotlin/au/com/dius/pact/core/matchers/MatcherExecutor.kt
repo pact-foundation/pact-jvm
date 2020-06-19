@@ -341,20 +341,31 @@ fun <M : Mismatch> matchDateTime(
   } else {
     var newPattern = pattern
     try {
-      /**
-        Replacing 'Z' with 'X' in order to offer backward compatibility for consumers who might be
-        using ISO 8601 the UTC designator 'Z'
-       **/
       if (pattern.endsWith('Z')) {
         newPattern = pattern.replace('Z', 'X')
-        logger.warn { "Found unsupported UTC designator in pattern '$pattern'. Replacing non quote 'Z's with 'X's" }
+        logger.warn {
+          """Found unsupported UTC designator in pattern '$pattern'. Replacing non quote 'Z's with 'X's
+          This is in order to offer backwards compatibility for consumers using the ISO 8601 UTC designator 'Z'
+          Please update your patterns in your pact tests as this may not be supported in future versions."""
+        }
       }
       DateTimeFormatter.ofPattern(newPattern).parse(safeToString(actual))
       emptyList<M>()
     } catch (e: DateTimeParseException) {
-      listOf(mismatchFactory.create(expected, actual,
-        "Expected ${valueOf(actual)} to match a datetime of '$newPattern': " +
-          "${e.message}", path))
+      try {
+        logger.warn {
+          """Unable to parse ${valueOf(actual)} with $pattern using java.time.format.DateTimeFormatter.
+          Attempting to parse using org.apache.commons.lang3.time.DateUtils 
+          to guarantee backwards compatibility with versions < 4.1.1.
+          Please update your patterns in your pact tests as this may not be supported in future versions."""
+        }
+        DateUtils.parseDate(safeToString(actual), pattern)
+        emptyList<M>()
+      } catch (e: ParseException) {
+        listOf(mismatchFactory.create(expected, actual,
+                "Expected ${valueOf(actual)} to match a datetime of '$pattern': " +
+                        "${e.message}", path))
+      }
     }
   }
 }
