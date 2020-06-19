@@ -48,7 +48,7 @@ class ContentType(val contentType: MediaType?) {
 
   fun isBinaryType(): Boolean {
     return if (contentType != null) {
-      val superType = registry.getSupertype(contentType)
+      val superType = registry.getSupertype(contentType) ?: MediaType.OCTET_STREAM
       val type = contentType.type
       val baseType = superType.type
       val override = System.getProperty("pact.content_type.override.$type.${contentType.subtype}")
