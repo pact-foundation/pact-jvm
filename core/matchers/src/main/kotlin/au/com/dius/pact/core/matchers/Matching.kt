@@ -83,7 +83,8 @@ object Matching : KLogging() {
   fun matchBodyContents(expected: HttpPart, actual: HttpPart): List<BodyMismatch> {
     val matcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
     return when {
-      matcher != null -> domatch(matcher, listOf("$"), expected.body.unwrap(), actual.body.unwrap(), BodyMismatchFactory)
+      matcher != null && matcher.canMatch(expected.determineContentType()) ->
+        domatch(matcher, listOf("$"), expected.body.unwrap(), actual.body.unwrap(), BodyMismatchFactory)
       expected.body.unwrap().contentEquals(actual.body.unwrap()) -> emptyList()
       else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
         "Actual body '${actual.body.valueAsString()}' is not equal to the expected body " +

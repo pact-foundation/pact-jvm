@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.matchingrules
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.PactSpecVersion
 import mu.KLogging
 import java.lang.IllegalArgumentException
@@ -16,6 +17,7 @@ enum class RuleLogic {
  */
 interface MatchingRule {
   fun toMap(spec: PactSpecVersion): Map<String, Any?>
+  fun canMatch(contentType: ContentType): Boolean = false
 }
 
 /**
@@ -30,6 +32,7 @@ data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-d
  */
 object EqualsMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "equality")
+  override fun canMatch(contentType: ContentType) = true
 }
 
 /**
@@ -37,6 +40,7 @@ object EqualsMatcher : MatchingRule {
  */
 data class IncludeMatcher(val value: String) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "include", "value" to value)
+  override fun canMatch(contentType: ContentType) = true
 }
 
 /**
@@ -124,6 +128,7 @@ object ValuesMatcher : MatchingRule {
  */
 data class ContentTypeMatcher @JvmOverloads constructor (val contentType: String) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "contentType", "value" to contentType)
+  override fun canMatch(contentType: ContentType) = true
 }
 
 data class MatchingRuleGroup @JvmOverloads constructor(
@@ -137,6 +142,8 @@ data class MatchingRuleGroup @JvmOverloads constructor(
       mapOf("matchers" to rules.map { it.toMap(pactSpecVersion) }, "combine" to ruleLogic.name)
     }
   }
+
+  fun canMatch(contentType: ContentType) = rules.all { it.canMatch(contentType) }
 
   companion object : KLogging() {
     fun fromMap(map: Map<String, Any?>): MatchingRuleGroup {

@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 
 class MatchingSpec extends Specification {
@@ -115,7 +116,7 @@ class MatchingSpec extends Specification {
     actual = new Response(200, [:], OptionalBody.body('hello'.bytes))
   }
 
-  def 'Body Matching - compares the body with aby defined matcher'() {
+  def 'Body Matching - compares the body with any defined matcher'() {
     given:
     def matchingRulesImpl = new MatchingRulesImpl()
     matchingRulesImpl.addCategory('body').addRule('$', new ContentTypeMatcher('image/jpeg'))
@@ -128,5 +129,21 @@ class MatchingSpec extends Specification {
 
     then:
     result.empty
+  }
+
+  def 'Body Matching - only use a matcher that can handle the body type'() {
+    given:
+    def matchingRulesImpl = new MatchingRulesImpl()
+    matchingRulesImpl.addCategory('body').addRule('$', TypeMatcher.INSTANCE)
+    def expected = new Response(200, ['Content-Type': ['image/jpeg']], OptionalBody.body('hello'.bytes),
+      matchingRulesImpl)
+    def actual = new Response(200, [:], OptionalBody.body(MatchingSpec.getResourceAsStream('/RAT.JPG').bytes))
+
+    when:
+    def result = Matching.INSTANCE.matchBody(expected, actual, false)
+
+    then:
+    !result.empty
+    result[0].mismatch.endsWith("is not equal to the expected body 'hello'")
   }
 }
