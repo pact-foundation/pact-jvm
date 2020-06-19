@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.4 - bugfixes & enhancements
+
+* 7a9733fd4 - Merge pull request #1141 from anto-ac/add-more-backwards-compatibility-with-dates (Antonello Caboni, Fri Jun 19 13:44:54 2020 +0100)
+* 2810b0bb8 - fix: backward compatibily with legacy date formats #1007 (anto, Fri Jun 19 12:55:24 2020 +0100)
+* 89e0db280 - chore: update the XML matching to handle when child elements have different types of children (Ronald Holshausen, Fri Jun 19 14:01:01 2020 +1000)
+* 755a96834 - fix: only apply valid matchers for binary bodies (Ronald Holshausen, Fri Jun 19 11:03:00 2020 +1000)
+* 9f21d6297 - Merge pull request #1139 from jgelon/master (Ronald Holshausen, Fri Jun 19 10:38:11 2020 +1000)
+* 152ecc102 - Merge pull request #1137 from anto-ac/fix-contenttype-supertype-resolution-octet-stream (Ronald Holshausen, Fri Jun 19 10:29:56 2020 +1000)
+* 9ec845a1e - fix: Finally got Groovy DSL to handle binary data (Ronald Holshausen, Fri Jun 19 10:24:36 2020 +1000)
+* cc8df0340 - refactor: update Groovy PactBuilder to use support methods written in Kotlin (Ronald Holshausen, Fri Jun 19 10:11:05 2020 +1000)
+* 59cf0f5f2 - Merge branch 'v4.1.x' (Ronald Holshausen, Fri Jun 19 09:40:46 2020 +1000)
+* fb78bbfbd - Keep path on baseUrl when combining baseUrl and url instead of throwing it away (jmieghem, Thu Jun 18 19:03:09 2020 +0200)
+* 7d9eab395 - fix: content-type super-type resolution for application/octet-stream is now correct (Emanuele, Thu Jun 18 15:15:58 2020 +0100)
+* ba9a8a593 - bump version to 4.1.4 (anto, Thu Jun 18 11:01:08 2020 +0100)
+* 512f683c9 - feat: set content type matcher with withBinaryData DSL method (Ronald Holshausen, Thu Jun 18 15:55:40 2020 +1000)
+* 82034525a - feat: allow matchers to be applied to unknown body formats (Ronald Holshausen, Thu Jun 18 15:42:36 2020 +1000)
+* c1717970d - feat: implemented content type matcher (Ronald Holshausen, Thu Jun 18 14:39:27 2020 +1000)
+
 # 4.1.3 - bugfixes & enhancements
 
 * 9fb20fd22 - fix: JUnit 5 tests should not throw exception if only pending failures (Ronald Holshausen, Thu Jun 18 13:35:25 2020 +1000)
