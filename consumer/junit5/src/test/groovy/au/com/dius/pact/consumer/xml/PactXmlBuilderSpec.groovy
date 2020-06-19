@@ -1,13 +1,12 @@
 package au.com.dius.pact.consumer.xml
 
-import spock.lang.Ignore
+import groovy.xml.XmlSlurper
 import spock.lang.Specification
 
 import static au.com.dius.pact.consumer.dsl.Matchers.integer
 import static au.com.dius.pact.consumer.dsl.Matchers.string
 
 class PactXmlBuilderSpec extends Specification {
-  @Ignore // fails on travis due to whitespace differences
   def 'without a namespace'() {
     given:
     def builder = new PactXmlBuilder('projects').build { root ->
@@ -20,14 +19,41 @@ class PactXmlBuilderSpec extends Specification {
     }
 
     when:
-    def result = builder.toString()
+    def result = new XmlSlurper().parseText(builder.toString())
 
     then:
-    result == '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-      |<projects id="1234">
-      |<project id="12" name=" Project 1 " type="activity"/>
-      |<project id="12" name=" Project 1 " type="activity"/>
-      |</projects>
-      |'''.stripMargin()
+    result.@id == '1234'
+    result.project.size() == 2
+    result.project.each {
+      assert it.@id == '12'
+      assert it.@name == ' Project 1 '
+      assert it.@type == 'activity'
+    }
+  }
+
+  def 'elements with mutiple different types'() {
+    given:
+    def builder = new PactXmlBuilder('animals').build { root ->
+      root.eachLike('dog', 2, [
+        id: integer(1),
+        name: string('Canine')
+      ])
+      root.eachLike('cat', 3, [
+        id: integer(2),
+        name: string('Feline')
+      ])
+      root.eachLike('wolf', 1, [
+        id: integer(3),
+        name: string('Canine')
+      ])
+    }
+
+    when:
+    def result = new XmlSlurper().parseText(builder.toString())
+
+    then:
+    result.dog.size() == 2
+    result.cat.size() == 3
+    result.wolf.size() == 1
   }
 }

@@ -8,8 +8,7 @@ import org.junit.Ignore
 import org.junit.Test
 
 @CompileStatic
-//@Ignore
-@SuppressWarnings('ExplicitCallToDivMethod')
+@Ignore
 class JsonPerformanceSpec {
 
   private final Map<String, String> jsonFiles = [:]
@@ -55,7 +54,7 @@ class JsonPerformanceSpec {
     BigInteger total = 0
     result.keySet().toSorted().each { key ->
       println("${key.padRight(40)}: ${result[key] / 100}")
-      total += result[key].div(100).toBigInteger()
+      total += (result[key] / 100).toBigInteger()
     }
     println("${'TOTAL'.padRight(40)}: ${total}")
     println()
@@ -81,7 +80,7 @@ class JsonPerformanceSpec {
     BigInteger total = 0
     result.keySet().toSorted().each { key ->
       println("${key.padRight(40)}: ${result[key] / 100}")
-      total += result[key].div(100).toBigInteger()
+      total += (result[key] / 100).toBigInteger()
     }
     println("${'TOTAL'.padRight(40)}: ${total}")
     println()
@@ -108,7 +107,7 @@ class JsonPerformanceSpec {
     BigInteger total = 0
     result.keySet().toSorted().each { key ->
       println("${key.padRight(40)}: ${result[key] / 100}")
-      total += result[key].div(100).toBigInteger()
+      total += (result[key] / 100).toBigInteger()
     }
     println("${'TOTAL'.padRight(40)}: ${total}")
     println()

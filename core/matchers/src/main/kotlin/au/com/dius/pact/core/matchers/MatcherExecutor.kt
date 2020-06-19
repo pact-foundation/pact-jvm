@@ -22,7 +22,9 @@ import org.apache.commons.lang3.time.DateUtils
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
+import org.w3c.dom.Attr
 import org.w3c.dom.Element
+import org.w3c.dom.Node
 import org.w3c.dom.Text
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -49,6 +51,7 @@ fun typeOf(value: Any?): String {
   return when (value) {
     null -> "Null"
     is JsonValue -> value.type()
+    is Attr -> "XmlAttr"
     else -> value.javaClass.simpleName
   }
 }
@@ -58,6 +61,7 @@ fun safeToString(value: Any?): String {
     null -> ""
     is Text -> value.wholeText
     is Element -> value.textContent
+    is Attr -> value.nodeValue
     is JsonValue -> value.asString()
     else -> value.toString()
   }
@@ -139,6 +143,8 @@ fun <M : Mismatch> matchEquality(
   val matches = when {
     (actual == null || actual is JsonValue.Null) && (expected == null || expected is JsonValue.Null) -> true
     actual is Element && expected is Element -> QualifiedName(actual) == QualifiedName(expected)
+    actual is Attr && expected is Attr -> QualifiedName(actual) == QualifiedName(expected) &&
+      actual.nodeValue == expected.nodeValue
     else -> actual != null && actual == expected
   }
   logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
@@ -183,7 +189,8 @@ fun <M : Mismatch> matchType(
     expected is JsonValue.Array && actual is JsonValue.Array ||
     expected is Map<*, *> && actual is Map<*, *> ||
     expected is JsonValue.Object && actual is JsonValue.Object ||
-    expected is Element && actual is Element && QualifiedName(actual) == QualifiedName(expected)
+    expected is Element && actual is Element && QualifiedName(actual) == QualifiedName(expected) ||
+    expected is Attr && actual is Attr && QualifiedName(actual) == QualifiedName(expected)
   ) {
     emptyList()
   } else if (expected is JsonValue && actual is JsonValue &&
@@ -217,7 +224,8 @@ fun <M : Mismatch> matchNumber(
   when (numberType) {
     NumberTypeMatcher.NumberType.NUMBER -> {
       logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to a number at $path" }
-      if (actual is JsonValue && !actual.isNumber || actual !is JsonValue && actual !is Number) {
+      if (actual is JsonValue && !actual.isNumber || actual is Attr && actual.nodeValue.matches(decimalRegex) ||
+        actual !is JsonValue && actual !is Node && actual !is Number) {
         return listOf(mismatchFactory.create(expected, actual,
           "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a number", path))
       }
@@ -252,6 +260,7 @@ fun matchDecimal(actual: Any?): Boolean {
       bigDecimal == BigDecimal.ZERO || bigDecimal.scale() > 0
     }
     actual is JsonValue.Integer -> decimalRegex.matches(actual.asString())
+    actual is Attr -> decimalRegex.matches(actual.nodeValue)
     else -> false
   }
   logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches decimal number -> $result" }
@@ -266,6 +275,7 @@ fun matchInteger(actual: Any?): Boolean {
     actual is JsonValue.Integer -> true
     actual is BigDecimal && actual.scale() == 0 -> true
     actual is JsonValue.Decimal -> integerRegex.matches(actual.asString())
+    actual is Attr -> integerRegex.matches(actual.nodeValue)
     else -> false
   }
   logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches integer -> $result" }

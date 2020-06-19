@@ -5,6 +5,7 @@ import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
 import java.util.Comparator
@@ -133,5 +134,10 @@ object Matchers : KLogging() {
     else {
       matcherCategory.matchingRules.values.first()
     }
+  }
+
+  fun typeMatcherDefined(category: String, path: List<String>, matchingRules: MatchingRules): Boolean {
+    val resolvedMatchers = resolveMatchers(matchingRules, category, path, Comparator.naturalOrder())
+    return resolvedMatchers.allMatchingRules().any { it is TypeMatcher }
   }
 }

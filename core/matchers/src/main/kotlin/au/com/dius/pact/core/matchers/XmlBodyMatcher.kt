@@ -1,6 +1,5 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.support.zipAll
@@ -140,46 +139,64 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     allowUnexpectedKeys: Boolean,
     matchers: MatchingRules
   ): List<BodyMismatch> {
-    var expectedChildren = asList(expected.childNodes).filter { n -> n.nodeType == ELEMENT_NODE }
+    val expectedChildren = asList(expected.childNodes).filter { n -> n.nodeType == ELEMENT_NODE }
     val actualChildren = asList(actual.childNodes).filter { n -> n.nodeType == ELEMENT_NODE }
-    val mismatches = if (Matchers.matcherDefined("body", path, matchers)) {
-      if (expectedChildren.isNotEmpty()) expectedChildren = expectedChildren.padTo(actualChildren.size, expectedChildren.first())
-      emptyList()
-    } else if (expectedChildren.isEmpty() && actualChildren.isNotEmpty() && !allowUnexpectedKeys) {
-        listOf(BodyMismatch(expected, actual,
+    val mismatches = mutableListOf<BodyMismatch>()
+    if (expectedChildren.isEmpty() && actualChildren.isNotEmpty() && !allowUnexpectedKeys) {
+      mismatches.add(BodyMismatch(expected, actual,
           "Expected an empty List but received ${actualChildren.size} child nodes",
           path.joinToString(".")))
-    } else {
-      emptyList()
     }
 
-    val actualChildrenByQName = actualChildren.groupBy { QualifiedName(it) }
-    return mismatches + expectedChildren
+    val expectedChildrenByQName = expectedChildren.groupBy { QualifiedName(it) }.toMutableMap()
+    mismatches.addAll(actualChildren
       .groupBy { QualifiedName(it) }
       .flatMap { e ->
-        if (actualChildrenByQName.contains(e.key)) {
-          e.value.zipAll(actualChildrenByQName.getValue(e.key)).mapIndexed { index, comp ->
-            val expectedNode = comp.first
-            val actualNode = comp.second
-            when {
-              expectedNode == null -> if (allowUnexpectedKeys || actualNode == null) {
-                emptyList()
-              } else {
-                listOf(BodyMismatch(expected, actual,
-                  "Unexpected child <${e.key}/>",
-                  (path + actualNode.nodeName + index.toString()).joinToString(".")))
-              }
-              actualNode == null -> listOf(BodyMismatch(expected, actual,
-                "Expected child <${e.key}/> but was missing",
-                (path + expectedNode.nodeName + index.toString()).joinToString(".")))
-              else -> compareNode(path, expectedNode, actualNode, allowUnexpectedKeys, matchers)
+        val childPath = path + e.key.toString()
+        if (expectedChildrenByQName.contains(e.key)) {
+          val expectedChild = expectedChildrenByQName.remove(e.key)!!
+          if (Matchers.matcherDefined("body", childPath, matchers)) {
+            val list = mutableListOf<BodyMismatch>()
+            logger.debug { "compareChild: Matcher defined for path $childPath" }
+            e.value.forEach { actualChild ->
+              list.addAll(Matchers.domatch(matchers, "body", childPath, actualChild, expectedChild.first(),
+                BodyMismatchFactory))
+              list.addAll(compareNode(path, expectedChild.first(), actualChild, allowUnexpectedKeys, matchers))
             }
-          }.flatten()
-        } else {
+            list
+          } else {
+            expectedChild.zipAll(e.value).mapIndexed { index, comp ->
+              val expectedNode = comp.first
+              val actualNode = comp.second
+              when {
+                expectedNode == null -> if (allowUnexpectedKeys || actualNode == null) {
+                  emptyList()
+                } else {
+                  listOf(BodyMismatch(expected, actual,
+                    "Unexpected child <${e.key}/>",
+                    (path + actualNode.nodeName + index.toString()).joinToString(".")))
+                }
+                actualNode == null -> listOf(BodyMismatch(expected, actual,
+                  "Expected child <${e.key}/> but was missing",
+                  (path + expectedNode.nodeName + index.toString()).joinToString(".")))
+                else -> compareNode(path, expectedNode, actualNode, allowUnexpectedKeys, matchers)
+              }
+            }.flatten()
+          }
+        } else if (!allowUnexpectedKeys || Matchers.typeMatcherDefined("body", childPath, matchers)) {
           listOf(BodyMismatch(expected, actual,
-            "Expected child <${e.key}/> but was missing", path.joinToString(".")))
+            "Unexpected child <${e.key}/>", path.joinToString(".")))
+        } else {
+          emptyList()
         }
+      })
+    if (expectedChildrenByQName.isNotEmpty()) {
+      expectedChildrenByQName.keys.forEach {
+        mismatches.add(BodyMismatch(expected, actual, "Expected child <$it/> but was missing",
+          path.joinToString(".")))
       }
+    }
+    return mismatches
   }
 
   private fun compareAttributes(
@@ -216,27 +233,27 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
               logger.debug { "compareText: Matcher defined for path $attrPath" }
               Matchers.domatch(matchers, "body", attrPath, attr.value, actualVal, BodyMismatchFactory)
             }
-            attr.value != actualVal ->
-              listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value}' but received $actualVal",
+            attr.value.nodeValue != actualVal?.nodeValue ->
+              listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' but received ${attr.key}='${actualVal?.nodeValue}'",
                 attrPath.joinToString(".")))
             else -> emptyList()
           }
         } else {
-          listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value}' but was missing",
+          listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' but was missing",
             appendAttribute(path, attr.key).joinToString(".")))
         }
       }
     }
   }
 
-  private fun attributesToMap(attributes: NamedNodeMap?): Map<QualifiedName, String> {
+  private fun attributesToMap(attributes: NamedNodeMap?): Map<QualifiedName, Node> {
     return if (attributes == null) {
       emptyMap()
     } else {
       (0 until attributes.length)
               .map { attributes.item(it) }
               .filter { it.namespaceURI != XMLConstants.XMLNS_ATTRIBUTE_NS_URI }
-              .map { QualifiedName(it) to it.nodeValue }
+              .map { QualifiedName(it) to it }
               .toMap()
     }
   }

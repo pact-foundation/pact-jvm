@@ -2,7 +2,9 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -128,8 +130,8 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected an empty List but received 1 child nodes']
-    mismatches*.path == ['$.foo']
+    mismatches*.mismatch == ['Expected an empty List but received 1 child nodes', 'Unexpected child <item/>']
+    mismatches*.path == ['$.foo', '$.foo']
   }
 
   def 'matching XML bodies - returns a mismatch - when comparing a list to one with with different size'() {
@@ -156,8 +158,8 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected child <three/> but was missing']
-    mismatches*.path == ['$.foo.three.1']
+    mismatches*.mismatch == ['Expected child <three/> but was missing', 'Unexpected child <four/>']
+    mismatches*.path == ['$.foo.three.1', '$.foo']
   }
 
   def 'matching XML bodies - returns no mismatch - when comparing a list to one where the items are in the wrong order'() {
@@ -237,7 +239,7 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ["Expected something='100' but received 101"]
+    mismatches*.mismatch == ["Expected something='100' but received something='101'"]
     mismatches*.path == ['$.foo.@something']
   }
 
@@ -275,7 +277,7 @@ class XmlBodyMatcherSpec extends Specification {
       '<address> <city>Manchester</city>\t</address> </note>').bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
   }
 
   @Issue('#975')
@@ -475,4 +477,92 @@ class XmlBodyMatcherSpec extends Specification {
     matcher.matchBody(expectedBody, actualBody, false, matchers).empty
   }
 
+  def 'when an element has different types of children but we allow unexpected keys'() {
+    given:
+    def actual = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <animals>
+        <dog id="1" name="Canine"/>
+        <dog id="1" name="Canine"/>
+        <cat id="2" name="Feline"/>
+        <cat id="2" name="Feline"/>
+        <cat id="2" name="Feline"/>
+        <wolf id="3" name="Canine"/>
+      </animals>
+    '''
+    actualBody = OptionalBody.body(actual.bytes)
+
+    def expected = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <animals>
+        <dog id="1" name="Canine"/>
+        <cat id="2" name="Feline"/>
+        <wolf id="3" name="Canine"/>
+      </animals>
+    '''
+    expectedBody = OptionalBody.body(expected.bytes)
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+  }
+
+  def 'when an element has different types of children but we do not allow unexpected keys'() {
+    given:
+    def actual = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <animals>
+        <dog id="1" name="Canine"/>
+        <dog id="1" name="Canine"/>
+        <cat id="2" name="Feline"/>
+        <cat id="2" name="Feline"/>
+        <cat id="2" name="Feline"/>
+        <wolf id="3" name="Canine"/>
+      </animals>
+    '''
+    actualBody = OptionalBody.body(actual.bytes)
+
+    def expected = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <animals>
+        <dog id="1" name="Canine"/>
+        <cat id="2" name="Feline"/>
+        <wolf id="3" name="Canine"/>
+      </animals>
+    '''
+    expectedBody = OptionalBody.body(expected.bytes)
+
+    when:
+    def result = matcher.matchBody(expectedBody, actualBody, false, matchers)
+
+    then:
+    result.size() == 3
+    result*.description() == ['BodyMismatch: Unexpected child <dog/>', 'BodyMismatch: Unexpected child <cat/>',
+                              'BodyMismatch: Unexpected child <cat/>']
+  }
+
+  def 'type matcher when an element has different types of children'() {
+    given:
+    def actual = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <animals>
+        <dog id="1" name="Canine"/>
+        <cat id="2" name="Feline"/>
+        <dog id="1" name="Canine"/>
+        <cat id="2" name="Feline"/>
+        <cat id="2" name="Feline"/>
+        <wolf id="3" name="Canine"/>
+      </animals>
+    '''
+    actualBody = OptionalBody.body(actual.bytes)
+
+    def expected = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <animals>
+        <dog id="1" name="Canine"/>
+        <cat id="2" name="Feline"/>
+        <wolf id="3" name="Canine"/>
+      </animals>
+    '''
+    expectedBody = OptionalBody.body(expected.bytes)
+       matchers.addCategory('body')
+         .addRule("\$.animals.*", TypeMatcher.INSTANCE)
+         .addRule("\$.animals.*['@id']", new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+  }
 }
