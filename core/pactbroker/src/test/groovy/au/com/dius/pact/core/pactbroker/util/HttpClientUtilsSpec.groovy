@@ -22,6 +22,7 @@ class HttpClientUtilsSpec extends Specification {
     'path with spaces'        | ''                      | '/path/with spaces'                      | '/path/with%20spaces'
     'Full URL with spaces'    | ''                      | 'http://localhost:1234/path/with spaces' | 'http://localhost:1234/path/with%20spaces'
     'no port'                 | 'http://localhost'      | '/path/with spaces'                      | 'http://localhost/path/with%20spaces'
+    'Extra path'              | 'http://localhost/sub'  | '/extraPath/with spaces'                 | 'http://localhost/sub/extraPath/with%20spaces'
   }
 
 }
