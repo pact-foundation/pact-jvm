@@ -28,7 +28,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
 
     then:
     aliceService.interactions.size() == 1
@@ -48,7 +48,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
 
     then:
     aliceService.interactions.size() == 1
@@ -70,7 +70,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
 
     then:
     aliceService.interactions.size() == 1
@@ -92,7 +92,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def firstInteraction = aliceService.interactions[0]
 
     then:
@@ -118,7 +118,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def firstInteraction = aliceService.interactions[0]
 
     then:
@@ -149,7 +149,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def firstInteraction = aliceService.interactions[0]
 
     then:
@@ -182,7 +182,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def firstInteraction = aliceService.interactions[0]
 
     then:
@@ -212,7 +212,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def request = aliceService.interactions.first().request
     def response = aliceService.interactions.first().response
 
@@ -242,7 +242,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def request = aliceService.interactions.first().request
     def response = aliceService.interactions.first().response
 
@@ -272,7 +272,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def request = aliceService.interactions.first().request
     def response = aliceService.interactions.first().response
 
@@ -295,7 +295,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def request = aliceService.interactions.first().request
     def response = aliceService.interactions.first().response
 
@@ -316,7 +316,7 @@ class PactBuilderSpec extends Specification {
     }
 
     when:
-    aliceService.buildInteractions()
+    aliceService.updateInteractions()
     def response = aliceService.interactions.first().response
 
     then:

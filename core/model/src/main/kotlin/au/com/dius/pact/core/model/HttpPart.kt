@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
@@ -15,6 +16,7 @@ abstract class HttpPart {
   abstract var body: OptionalBody
   abstract var headers: MutableMap<String, List<String>>
   abstract var matchingRules: MatchingRules
+  abstract var generators: Generators
 
   @Deprecated("use method that returns a content type object",
     replaceWith = ReplaceWith("determineContentType"))

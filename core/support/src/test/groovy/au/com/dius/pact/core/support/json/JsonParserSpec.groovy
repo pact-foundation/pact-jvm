@@ -64,6 +64,59 @@ class JsonParserSpec extends Specification {
     'empty string'                    | '""'                     | new JsonValue.StringValue(''.chars)
   }
 
+  @SuppressWarnings('TrailingWhitespace')
+  def 'parse a basic message pact'() {
+    given:
+    def pact = '''{
+      "consumer": {
+        "name": "consumer"
+      },
+      "provider": {
+        "name": "provider"
+      },
+      "messages": [
+        {
+          "metaData": {
+            "contentType": "application/json"
+          },
+          "providerStates": [
+            {
+              "name": "message exists",
+              "params": {}
+            }
+          ],
+          "contents": "Hello",
+          "matchingRules": {
+           
+          },
+          "description": "a hello message"
+        }
+      ],
+      "metadata": {
+        "pactSpecification": {
+          "version": "3.0.0"
+        },
+        "pact-jvm": {
+          "version": "4.0.10"
+        }
+      }
+    }
+    '''
+
+    when:
+    def value = JsonParser.INSTANCE.parseString(pact)
+
+    then:
+    value instanceof JsonValue.Object
+    value.entries.keySet() == ['consumer', 'provider', 'messages', 'metadata'] as Set
+    value.entries['consumer'] == new JsonValue.Object(['name': new JsonValue.StringValue('consumer'.chars)])
+    value.entries['provider'] == new JsonValue.Object(['name': new JsonValue.StringValue('provider'.chars)])
+    value.entries['metadata'] == new JsonValue.Object([
+      'pactSpecification': new JsonValue.Object(['version': new JsonValue.StringValue('3.0.0'.chars)]),
+      'pact-jvm': new JsonValue.Object(['version': new JsonValue.StringValue('4.0.10'.chars)])
+    ])
+  }
+
   def 'can parse a pact file'() {
     given:
     def pactfile = JsonParserSpec.getResourceAsStream('/v3-pact-broker.json')

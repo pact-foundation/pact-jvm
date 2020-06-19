@@ -19,7 +19,7 @@ class Request @JvmOverloads constructor(
   override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override var matchingRules: MatchingRules = MatchingRulesImpl(),
-  var generators: Generators = Generators()
+  override var generators: Generators = Generators()
 ) : BaseRequest(), Comparable<Request> {
 
   override fun compareTo(other: Request) = if (equals(other)) 0 else 1
@@ -54,7 +54,7 @@ class Request @JvmOverloads constructor(
   }
 
   fun cookie(): List<String> {
-    val cookieEntry = headers.entries.find { (k, v) -> k.toLowerCase() == COOKIE_KEY }
+    val cookieEntry = headers.entries.find { (k, _) -> k.toLowerCase() == COOKIE_KEY }
     return if (cookieEntry != null) {
       cookieEntry.value.flatMap {
         it.split(';')

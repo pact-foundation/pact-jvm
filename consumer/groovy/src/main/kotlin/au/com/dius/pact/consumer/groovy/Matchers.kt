@@ -46,6 +46,11 @@ const val INTEGER = "integer"
 class InvalidMatcherException(message: String) : RuntimeException(message)
 
 /**
+ * Marker class for generated values
+ */
+data class GeneratedValue(val expression: String, val exampleValue: Any?)
+
+/**
  * Base class for matchers
  */
 open class Matcher @JvmOverloads constructor(

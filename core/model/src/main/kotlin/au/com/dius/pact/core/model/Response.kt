@@ -17,7 +17,7 @@ class Response @JvmOverloads constructor(
   override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override var matchingRules: MatchingRules = MatchingRulesImpl(),
-  var generators: Generators = Generators()
+  override var generators: Generators = Generators()
 ) : HttpPart() {
 
   override fun toString() =

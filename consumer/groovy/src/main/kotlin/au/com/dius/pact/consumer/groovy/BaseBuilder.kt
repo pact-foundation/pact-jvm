@@ -1,30 +1,122 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.queryStringToMap
+import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.property
 import groovy.json.JsonBuilder
 import mu.KLogging
+import java.util.regex.Pattern
 
 open class BaseBuilder : Matchers() {
-  protected fun setupBody(requestData: Map<String, Any>, request: MutableMap<String, Any>) {
-    if (requestData.containsKey(BODY)) {
+  protected fun setupBody(requestData: Map<String, Any>, httpPart: HttpPart): OptionalBody {
+    return if (requestData.containsKey(BODY)) {
       val body = requestData[BODY]
       if (body != null && body::class.qualifiedName == "au.com.dius.pact.consumer.groovy.PactBodyBuilder") {
-        request[BODY] = body::class.property(BODY)?.get(body) as Any
-        val matchers = request["matchers"] as MatchingRules
-        matchers.addCategory(body::class.property("matchers")?.get(body) as Category)
-        val generators = request["generators"] as Generators
-        generators.addGenerators(body::class.property("generators")?.get(body) as Generators)
+        httpPart.matchingRules.addCategory(body::class.property("matchers")?.get(body) as Category)
+        httpPart.generators.addGenerators(body::class.property("generators")?.get(body) as Generators)
+        OptionalBody.body(body::class.property(BODY)?.get(body).toString().toByteArray())
       } else if (body != null && body !is String) {
         val prettyPrint = requestData["prettyPrint"] as Boolean?
         if (prettyPrint == null && !compactMimeTypes(requestData) || prettyPrint == true) {
-          request[BODY] = JsonBuilder(body).toPrettyString()
+          OptionalBody.body(JsonBuilder(body).toPrettyString().toByteArray())
         } else {
-          request[BODY] = JsonBuilder(body).toString()
+          OptionalBody.body(JsonBuilder(body).toString().toByteArray())
+        }
+      } else {
+        OptionalBody.body(body.toString().toByteArray())
+      }
+    } else {
+      OptionalBody.missing()
+    }
+  }
+
+  protected fun setupHeaders(
+    headers: Map<String, Any>,
+    matchers: MatchingRules,
+    generators: Generators
+  ): Map<String, List<String>> {
+    return headers.entries.associate { (key, value) ->
+      when (value) {
+        is Matcher -> {
+          matchers.addCategory(HEADER).addRule(key, value.matcher!!)
+          key to listOf(value.value.toString())
+        }
+        is Pattern -> {
+          val matcher = RegexpMatcher(value.toString())
+          matchers.addCategory(HEADER).addRule(key, matcher.matcher!!)
+          key to listOf(matcher.value.toString())
+        }
+        is GeneratedValue -> {
+          generators.addGenerator(au.com.dius.pact.core.model.generators.Category.HEADER, key,
+            ProviderStateGenerator(value.expression, DataType.STRING))
+          key to listOf(value.exampleValue.toString())
+        }
+        else -> {
+          val list = if (value is List<*>) value.map { it.toString() } else listOf(value.toString())
+          key to list
         }
       }
+    }
+  }
+
+  protected fun setupPath(path: Any, matchers: MatchingRules, generators: Generators): String {
+    return when (path) {
+      is Matcher -> {
+        matchers.addCategory("path").addRule(path.matcher!!)
+        path.value.toString()
+      }
+      is Pattern -> {
+        val matcher = RegexpMatcher(path.toString())
+        matchers.addCategory("path").addRule(matcher.matcher!!)
+        matcher.value.toString()
+      }
+      is GeneratedValue -> {
+        generators.addGenerator(au.com.dius.pact.core.model.generators.Category.PATH,
+          generator = ProviderStateGenerator(path.expression, DataType.STRING))
+        path.exampleValue.toString()
+      }
+      else -> {
+        path.toString()
+      }
+    }
+  }
+
+  protected fun setupQueryParameters(
+    query: Any,
+    matchers: MatchingRules,
+    generators: Generators
+  ): Map<String, List<String>> {
+    return if (query is Map<*, *>) {
+      query.entries.associate { (key, value) ->
+        when (value) {
+          is Matcher -> {
+            matchers.addCategory("query").addRule(key.toString(), value.matcher!!)
+            key.toString() to listOf(value.value.toString())
+          }
+          is Pattern -> {
+            val matcher = RegexpMatcher(value.toString())
+            matchers.addCategory("query").addRule(key.toString(), matcher.matcher!!)
+            key.toString() to listOf(matcher.value.toString())
+          }
+          is GeneratedValue -> {
+            generators.addGenerator(au.com.dius.pact.core.model.generators.Category.QUERY, key.toString(),
+              ProviderStateGenerator(value.expression, DataType.STRING))
+            key.toString() to listOf(value.exampleValue.toString())
+          }
+          else -> {
+            val list = if (value is List<*>) value.map { it.toString() } else listOf(value.toString())
+            key.toString() to list
+          }
+        }
+      }
+    } else {
+      queryStringToMap(query.toString())
     }
   }
 

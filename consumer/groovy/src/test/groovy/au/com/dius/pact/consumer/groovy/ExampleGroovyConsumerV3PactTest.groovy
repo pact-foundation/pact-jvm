@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.core.support.BuiltToolConfig
 import groovy.json.JsonSlurper
 import groovyx.net.http.ContentTypes
 import groovyx.net.http.FromServer
@@ -58,7 +58,7 @@ class ExampleGroovyConsumerV3PactTest {
         }
         assert result instanceof PactVerificationResult.Ok
 
-      def pactFile = new File("${PactConsumerConfig.INSTANCE.pactDirectory}/V3Consumer-V3Service.json")
+      def pactFile = new File("${BuiltToolConfig.INSTANCE.pactDirectory}/V3Consumer-V3Service.json")
       def json = new JsonSlurper().parse(pactFile)
       assert json.metadata.pactSpecification.version == '3.0.0'
       def providerStates = json.interactions.first().providerStates

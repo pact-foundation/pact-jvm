@@ -8,27 +8,19 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.PactReaderKt
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.core.support.expressions.DataType
 import groovy.transform.CompileStatic
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
-
-import java.util.regex.Pattern
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
 
@@ -41,8 +33,6 @@ class PactBuilder extends GroovyBuilder {
   RequestResponsePact pact = new RequestResponsePact(new Provider(), new Consumer())
   Integer port = 0
   RequestResponseInteraction currentInteraction
-  List requestData = []
-  List responseData = []
   List interactions = []
   List<ProviderState> providerStates = []
   boolean requestState
@@ -99,106 +89,16 @@ class PactBuilder extends GroovyBuilder {
    * @param requestDescription Description of the interaction. Must be unique.
    */
   PactBuilder uponReceiving(String requestDescription) {
-    buildInteractions()
-    this.currentInteraction = new RequestResponseInteraction(requestDescription)
+    updateInteractions()
+    this.currentInteraction = new RequestResponseInteraction(requestDescription, providerStates)
     requestState = true
+    providerStates = []
     this
   }
 
-  def buildInteractions() {
-    int numInteractions = Math.min(requestData.size(), responseData.size())
-    for (int i = 0; i < numInteractions; i++) {
-      MatchingRules requestMatchers = requestData[i].matchers
-      MatchingRules responseMatchers = responseData[i].matchers
-      Generators requestGenerators = requestData[i].generators
-      Generators responseGenerators = responseData[i].generators
-      Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers, requestGenerators)
-      Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers, requestGenerators)
-      Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers, responseGenerators)
-      String path = setupPath(requestData[i].path ?: '/', requestMatchers, requestGenerators)
-      def requestBody = requestData[i].body instanceof String ? requestData[i].body.bytes : requestData[i].body
-      def responseBody = responseData[i].body instanceof String ? responseData[i].body.bytes : responseData[i].body
-      interactions << new RequestResponseInteraction(
-        this.currentInteraction.description,
-        providerStates,
-        new Request(requestData[i].method ?: 'get', path, query, headers,
-          requestData[i].containsKey(BODY) ? OptionalBody.body(requestBody, contentType(headers)) :
-            OptionalBody.missing(),
-          requestMatchers, requestGenerators),
-        new Response(responseData[i].status ?: 200, responseHeaders,
-          responseData[i].containsKey(BODY) ? OptionalBody.body(responseBody,
-            contentType(responseHeaders)) : OptionalBody.missing(),
-          responseMatchers, responseGenerators), null
-      )
-    }
-    requestData = []
-    responseData = []
-  }
-
-  au.com.dius.pact.core.model.ContentType contentType(Map<?, ?> headers) {
-    def contentTypeHeader = headers.find { it.key.toLowerCase() == 'content-type' }
-    if (contentTypeHeader) {
-      new au.com.dius.pact.core.model.ContentType(contentTypeHeader.value.first())
-    } else {
-      au.com.dius.pact.core.model.ContentType.UNKNOWN
-    }
-  }
-
-  private static Map setupHeaders(Map headers, MatchingRules matchers, Generators generators) {
-    headers.collectEntries { key, value ->
-      def header = HEADER
-      if (value instanceof Matcher) {
-        matchers.addCategory(header).addRule(key, value.matcher)
-        [key, [value.value]]
-      } else if (value instanceof Pattern) {
-        def matcher = new RegexpMatcher(value.toString())
-        matchers.addCategory(header).addRule(key, matcher.matcher)
-        [key, [matcher.value]]
-      } else if (value instanceof GeneratedValue) {
-        generators.addGenerator(au.com.dius.pact.core.model.generators.Category.HEADER, key,
-          new ProviderStateGenerator(value.expression, DataType.STRING))
-        [key, [value.exampleValue]]
-      } else {
-        [key, value instanceof List ? value : [value]]
-      }
-    }
-  }
-
-  private static String setupPath(def path, MatchingRules matchers, Generators generators) {
-    def category = 'path'
-    if (path instanceof Matcher) {
-      matchers.addCategory(category).addRule(path.matcher)
-      path.value
-    } else if (path instanceof Pattern) {
-      def matcher = new RegexpMatcher(path.toString())
-      matchers.addCategory(category).addRule(matcher.matcher)
-      matcher.value
-    } else if (path instanceof GeneratedValue) {
-      generators.addGenerator(au.com.dius.pact.core.model.generators.Category.PATH,
-        new ProviderStateGenerator(path.expression, DataType.STRING))
-      path.exampleValue
-    } else {
-      path as String
-    }
-  }
-
-  private static Map setupQueryParameters(Map query, MatchingRules matchers, Generators generators) {
-    query.collectEntries { key, value ->
-      def category = 'query'
-      if (value[0] instanceof Matcher) {
-        matchers.addCategory(category).addRule(key, value[0].matcher)
-        [key, [value[0].value]]
-      } else if (value[0] instanceof Pattern) {
-        def matcher = new RegexpMatcher(value[0].toString())
-        matchers.addCategory(category).addRule(key, matcher.matcher)
-        [key, [matcher.value]]
-      } else if (value[0] instanceof GeneratedValue) {
-        generators.addGenerator(au.com.dius.pact.core.model.generators.Category.QUERY, key,
-          new ProviderStateGenerator(value[0].expression, DataType.STRING))
-        [key, [value[0].exampleValue]]
-      } else {
-        [key, value]
-      }
+  def updateInteractions() {
+    if (currentInteraction) {
+      interactions << currentInteraction
     }
   }
 
@@ -207,20 +107,17 @@ class PactBuilder extends GroovyBuilder {
    * @param requestData Map of attributes
    */
   PactBuilder withAttributes(Map requestData) {
-    def request = [matchers: new MatchingRulesImpl(), generators: new Generators()] + requestData
-    setupBody(requestData, request)
-    if (requestData.query instanceof String) {
-      request.query = PactReaderKt.queryStringToMap(requestData.query)
-    } else {
-      request.query = requestData.query?.collectEntries { k, v ->
-        if (v instanceof Collection) {
-          [k, v]
-        } else {
-          [k, [v]]
-        }
-      }
-    }
-    this.requestData << request
+    MatchingRules requestMatchers = currentInteraction.request.matchingRules
+    Generators requestGenerators = currentInteraction.request.generators
+    Map headers = setupHeaders(requestData.headers ?: [:], requestMatchers, requestGenerators)
+    Map query = setupQueryParameters(requestData.query ?: [:], requestMatchers, requestGenerators)
+    String path = setupPath(requestData.path ?: '/', requestMatchers, requestGenerators)
+    def requestBody = setupBody(requestData, currentInteraction.request)
+    this.currentInteraction.request.method = requestData.method ?: 'GET'
+    this.currentInteraction.request.headers = headers
+    this.currentInteraction.request.query = query
+    this.currentInteraction.request.path = path
+    this.currentInteraction.request.body = requestBody
     this
   }
 
@@ -231,9 +128,13 @@ class PactBuilder extends GroovyBuilder {
    */
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder willRespondWith(Map responseData) {
-    def response = [matchers: new MatchingRulesImpl(), generators: new Generators()] + responseData
-    setupBody(responseData, response)
-    this.responseData << response
+    MatchingRules responseMatchers = currentInteraction.response.matchingRules
+    Generators responseGenerators = currentInteraction.response.generators
+    Map responseHeaders = setupHeaders(responseData.headers ?: [:], responseMatchers, responseGenerators)
+    def responseBody = setupBody(responseData, currentInteraction.response)
+    this.currentInteraction.response.status = responseData.status ?: 200
+    this.currentInteraction.response.headers = responseHeaders
+    this.currentInteraction.response.body = responseBody
     requestState = false
     this
   }
@@ -289,27 +190,27 @@ class PactBuilder extends GroovyBuilder {
 
   private setupRequestOrResponse(PactBodyBuilder body, Map options) {
     if (requestState) {
-      requestData.last().body = body.body
-      requestData.last().matchers.addCategory(body.matchers)
-      requestData.last().generators.addGenerators(body.generators)
-      requestData.last().headers = requestData.last().headers ?: [:]
-      if (!requestData.last().headers[CONTENT_TYPE]) {
+      currentInteraction.request.body = body.body instanceof OptionalBody ? body.body :
+        OptionalBody.body(body.body.bytes)
+      currentInteraction.request.matchingRules.addCategory(body.matchers)
+      currentInteraction.request.generators.addGenerators(body.generators)
+      if (!currentInteraction.request.contentTypeHeader()) {
         if (options.mimeType) {
-          requestData.last().headers[CONTENT_TYPE] = options.mimeType
+          currentInteraction.request.headers[CONTENT_TYPE] = [ options.mimeType ]
         } else {
-          requestData.last().headers[CONTENT_TYPE] = JSON
+          currentInteraction.request.headers[CONTENT_TYPE] = [ JSON ]
         }
       }
     } else {
-      responseData.last().body = body.body
-      responseData.last().matchers.addCategory(body.matchers)
-      responseData.last().generators.addGenerators(body.generators)
-      responseData.last().headers = responseData.last().headers ?: [:]
-      if (!responseData.last().headers[CONTENT_TYPE]) {
+      currentInteraction.response.body = body.body instanceof OptionalBody ? body.body :
+        OptionalBody.body(body.body.bytes)
+      currentInteraction.response.matchingRules.addCategory(body.matchers)
+      currentInteraction.response.generators.addGenerators(body.generators)
+      if (!currentInteraction.response.contentTypeHeader()) {
         if (options.mimeType) {
-          responseData.last().headers[CONTENT_TYPE] = options.mimeType
+          currentInteraction.response.headers[CONTENT_TYPE] = [ options.mimeType ]
         } else {
-          responseData.last().headers[CONTENT_TYPE] = JSON
+          currentInteraction.response.headers[CONTENT_TYPE] = [ JSON ]
         }
       }
     }
@@ -323,7 +224,7 @@ class PactBuilder extends GroovyBuilder {
    */
   @CompileStatic
   PactVerificationResult runTest(Map options = [:], Closure closure) {
-    buildInteractions()
+    updateInteractions()
     this.pact.interactions = interactions
 
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
@@ -379,16 +280,14 @@ class PactBuilder extends GroovyBuilder {
     ByteArrayOutputStream os = new ByteArrayOutputStream()
     multipart.writeTo(os)
     if (requestState) {
-      requestData.last().body = os.toByteArray()
-      requestData.last().headers = requestData.last().headers ?: [:]
-      requestData.last().headers[CONTENT_TYPE] = multipart.contentType.value
-      Category category  = requestData.last().matchers.addCategory(HEADER)
+      currentInteraction.request.body = OptionalBody.body(os.toByteArray())
+      currentInteraction.request.headers[CONTENT_TYPE] = [ multipart.contentType.value ]
+      Category category  = currentInteraction.request.matchingRules.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     } else {
-      responseData.last().body = os.toByteArray()
-      responseData.last().headers = responseData.last().headers ?: [:]
-      responseData.last().headers[CONTENT_TYPE] = multipart.contentType.value
-      Category category  = responseData.last().matchers.addCategory(HEADER)
+      currentInteraction.response.body = OptionalBody.body(os.toByteArray())
+      currentInteraction.response.headers[CONTENT_TYPE] = [ multipart.contentType.value ]
+      Category category  = currentInteraction.response.matchingRules.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     }
   }

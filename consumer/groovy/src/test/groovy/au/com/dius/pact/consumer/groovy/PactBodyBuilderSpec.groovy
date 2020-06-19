@@ -88,7 +88,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def keys = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString()).keySet()
     def requestMatchingRules = service.interactions[0].request.matchingRules
     def bodyMatchingRules = requestMatchingRules.rulesForCategory('body').matchingRules
@@ -160,7 +160,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString()))
     def rules = service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules
 
@@ -208,7 +208,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString())
 
     then:
@@ -247,7 +247,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString())
 
     then:
@@ -279,7 +279,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString())
 
     then:
@@ -315,7 +315,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def response = service.interactions.first().response
 
@@ -349,7 +349,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def response = service.interactions.first().response
 
@@ -383,7 +383,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def response = service.interactions.first().response
 
@@ -410,7 +410,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def response = service.interactions.first().response
 
@@ -441,7 +441,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString()))
 
     then:
@@ -485,7 +485,7 @@ class PactBodyBuilderSpec extends Specification {
     ]
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def response = service.interactions.first().response
 
@@ -552,7 +552,7 @@ class PactBodyBuilderSpec extends Specification {
     ]
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
 
     then:
@@ -582,7 +582,7 @@ class PactBodyBuilderSpec extends Specification {
     ]
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
 
     then:
@@ -610,7 +610,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def body = new JsonSlurper().parseText(request.body.valueAsString())
 
@@ -636,7 +636,7 @@ class PactBodyBuilderSpec extends Specification {
     ]
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def body = new JsonSlurper().parseText(request.body.valueAsString())
 
@@ -664,7 +664,7 @@ class PactBodyBuilderSpec extends Specification {
     ]
 
     when:
-    service.buildInteractions()
+    service.updateInteractions()
     def request = service.interactions.first().request
     def body = new JsonSlurper().parseText(request.body.valueAsString())
 
