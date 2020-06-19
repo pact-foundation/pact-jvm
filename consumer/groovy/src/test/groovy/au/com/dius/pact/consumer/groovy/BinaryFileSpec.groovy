@@ -5,10 +5,8 @@ import au.com.dius.pact.consumer.PactVerificationResult
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
-import spock.lang.Ignore
 import spock.lang.Specification
 
-@Ignore
 class BinaryFileSpec extends Specification {
 
   def 'handles bodies from form posts'() {

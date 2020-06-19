@@ -112,11 +112,11 @@ class PactBuilder extends GroovyBuilder {
     Map headers = setupHeaders(requestData.headers ?: [:], requestMatchers, requestGenerators)
     Map query = setupQueryParameters(requestData.query ?: [:], requestMatchers, requestGenerators)
     String path = setupPath(requestData.path ?: '/', requestMatchers, requestGenerators)
-    def requestBody = setupBody(requestData, currentInteraction.request)
     this.currentInteraction.request.method = requestData.method ?: 'GET'
     this.currentInteraction.request.headers = headers
     this.currentInteraction.request.query = query
     this.currentInteraction.request.path = path
+    def requestBody = setupBody(requestData, currentInteraction.request)
     this.currentInteraction.request.body = requestBody
     this
   }
@@ -131,9 +131,9 @@ class PactBuilder extends GroovyBuilder {
     MatchingRules responseMatchers = currentInteraction.response.matchingRules
     Generators responseGenerators = currentInteraction.response.generators
     Map responseHeaders = setupHeaders(responseData.headers ?: [:], responseMatchers, responseGenerators)
-    def responseBody = setupBody(responseData, currentInteraction.response)
     this.currentInteraction.response.status = responseData.status ?: 200
     this.currentInteraction.response.headers = responseHeaders
+    def responseBody = setupBody(responseData, currentInteraction.response)
     this.currentInteraction.response.body = responseBody
     requestState = false
     this
@@ -190,10 +190,6 @@ class PactBuilder extends GroovyBuilder {
 
   private setupRequestOrResponse(PactBodyBuilder body, Map options) {
     if (requestState) {
-      currentInteraction.request.body = body.body instanceof OptionalBody ? body.body :
-        OptionalBody.body(body.body.bytes)
-      currentInteraction.request.matchingRules.addCategory(body.matchers)
-      currentInteraction.request.generators.addGenerators(body.generators)
       if (!currentInteraction.request.contentTypeHeader()) {
         if (options.mimeType) {
           currentInteraction.request.headers[CONTENT_TYPE] = [ options.mimeType ]
@@ -201,11 +197,11 @@ class PactBuilder extends GroovyBuilder {
           currentInteraction.request.headers[CONTENT_TYPE] = [ JSON ]
         }
       }
-    } else {
-      currentInteraction.response.body = body.body instanceof OptionalBody ? body.body :
+      currentInteraction.request.body = body.body instanceof OptionalBody ? body.body :
         OptionalBody.body(body.body.bytes)
-      currentInteraction.response.matchingRules.addCategory(body.matchers)
-      currentInteraction.response.generators.addGenerators(body.generators)
+      currentInteraction.request.matchingRules.addCategory(body.matchers)
+      currentInteraction.request.generators.addGenerators(body.generators)
+    } else {
       if (!currentInteraction.response.contentTypeHeader()) {
         if (options.mimeType) {
           currentInteraction.response.headers[CONTENT_TYPE] = [ options.mimeType ]
@@ -213,6 +209,10 @@ class PactBuilder extends GroovyBuilder {
           currentInteraction.response.headers[CONTENT_TYPE] = [ JSON ]
         }
       }
+      currentInteraction.response.body = body.body instanceof OptionalBody ? body.body :
+        OptionalBody.body(body.body.bytes)
+      currentInteraction.response.matchingRules.addCategory(body.matchers)
+      currentInteraction.response.generators.addGenerators(body.generators)
     }
   }
 

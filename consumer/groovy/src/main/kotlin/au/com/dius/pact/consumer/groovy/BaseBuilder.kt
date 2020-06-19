@@ -14,22 +14,30 @@ import mu.KLogging
 import java.util.regex.Pattern
 
 open class BaseBuilder : Matchers() {
-  protected fun setupBody(requestData: Map<String, Any>, httpPart: HttpPart): OptionalBody {
-    return if (requestData.containsKey(BODY)) {
-      val body = requestData[BODY]
+  protected fun setupBody(data: Map<String, Any>, httpPart: HttpPart): OptionalBody {
+    return if (data.containsKey(BODY)) {
+      val body = data[BODY]
+      val contentType = httpPart.determineContentType()
       if (body != null && body::class.qualifiedName == "au.com.dius.pact.consumer.groovy.PactBodyBuilder") {
         httpPart.matchingRules.addCategory(body::class.property("matchers")?.get(body) as Category)
         httpPart.generators.addGenerators(body::class.property("generators")?.get(body) as Generators)
-        OptionalBody.body(body::class.property(BODY)?.get(body).toString().toByteArray())
+        OptionalBody.body(body::class.property(BODY)?.get(body).toString().toByteArray(contentType.asCharset()))
       } else if (body != null && body !is String) {
-        val prettyPrint = requestData["prettyPrint"] as Boolean?
-        if (prettyPrint == null && !compactMimeTypes(requestData) || prettyPrint == true) {
-          OptionalBody.body(JsonBuilder(body).toPrettyString().toByteArray())
+        if (contentType.isBinaryType()) {
+          when (body) {
+            is ByteArray -> OptionalBody.body(body)
+            else -> OptionalBody.body(body.toString().toByteArray(contentType.asCharset()))
+          }
         } else {
-          OptionalBody.body(JsonBuilder(body).toString().toByteArray())
+          val prettyPrint = data["prettyPrint"] as Boolean?
+          if (prettyPrint == null && !compactMimeTypes(data) || prettyPrint == true) {
+            OptionalBody.body(JsonBuilder(body).toPrettyString().toByteArray(contentType.asCharset()))
+          } else {
+            OptionalBody.body(JsonBuilder(body).toString().toByteArray(contentType.asCharset()))
+          }
         }
       } else {
-        OptionalBody.body(body.toString().toByteArray())
+        OptionalBody.body(body.toString().toByteArray(contentType.asCharset()))
       }
     } else {
       OptionalBody.missing()
