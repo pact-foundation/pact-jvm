@@ -2,7 +2,6 @@ package au.com.dius.pact.provider.junitsupport.loader;
 
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver;
 import au.com.dius.pact.core.support.expressions.ValueResolver;
-import au.com.dius.pact.provider.junitsupport.loader.PactBrokerLoader;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -39,8 +38,19 @@ public @interface PactBroker {
     /**
      * Tags to use to fetch pacts for, defaults to `latest`
      * If you set the tags through the `pactbroker.tags` system property, separate the tags by commas
+     *
+     * @deprecated Use {@link #consumerVersionSelectors} instead
      */
+    @Deprecated
     String[] tags() default "${pactbroker.tags:}";
+
+    /**
+     * Consumer version selectors to fetch pacts for, defaults to latest version
+     * If you set the version selector tags or latest fields through system properties, separate values by commas
+     */
+    VersionSelector[] consumerVersionSelectors() default @VersionSelector(
+            tag = "${pactbroker.consumerversionselectors.tags:}",
+            latest = "${pactbroker.consumerversionselectors.latest:}");
 
     /**
      * Consumers to fetch pacts for, defaults to all consumers
