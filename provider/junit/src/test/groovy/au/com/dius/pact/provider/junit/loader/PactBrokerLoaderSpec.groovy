@@ -360,9 +360,9 @@ class PactBrokerLoaderSpec extends Specification {
   def 'processes consumer version selectors with the provided value resolver'() {
     given:
     consumerVersionSelectors = [
-      createVersionSelector('${a}', "true"),
-      createVersionSelector('${latest}', "false"),
-      createVersionSelector('${c}', "true")
+      createVersionSelector('${a}', 'true'),
+      createVersionSelector('${latest}', 'false'),
+      createVersionSelector('${c}', 'true')
     ]
     def newLoader = pactBrokerLoader()
     newLoader.valueResolver = [resolveValue: { val -> 'X' }] as ValueResolver
@@ -591,13 +591,16 @@ class PactBrokerLoaderSpec extends Specification {
       loader.pactReader = mockReader
       loader
     }
+    def selectors = [
+      new ConsumerVersionSelector('latest', true)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok([])
   }
 
   def 'configured from annotation with https and no port'() {
@@ -616,13 +619,16 @@ class PactBrokerLoaderSpec extends Specification {
       loader.pactReader = mockReader
       loader
     }
+    def selectors = [
+      new ConsumerVersionSelector('latest', true)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok([])
   }
 
   def 'Auth: Uses no auth if no auth is provided'() {
@@ -709,20 +715,20 @@ class PactBrokerLoaderSpec extends Specification {
   }
 
   private static VersionSelector createVersionSelector(String tag, String latest) {
-    return new VersionSelector() {
+    new VersionSelector() {
       @Override
       String tag() {
-        return tag
+        tag
       }
 
       @Override
       String latest() {
-        return latest
+        latest
       }
 
       @Override
       Class<? extends Annotation> annotationType() {
-        return VersionSelector.class
+        VersionSelector
       }
     }
   }

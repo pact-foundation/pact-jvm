@@ -30,20 +30,20 @@ import kotlin.reflect.KClass
  */
 @Suppress("LongParameterList", "TooManyFunctions")
 open class PactBrokerLoader(
-        val pactBrokerHost: String,
-        val pactBrokerPort: String?,
-        val pactBrokerScheme: String,
-        @Deprecated(message = "Use Consumer version selectors instead",
+  val pactBrokerHost: String,
+  val pactBrokerPort: String?,
+  val pactBrokerScheme: String,
+  @Deprecated(message = "Use Consumer version selectors instead",
     replaceWith = ReplaceWith("pactBrokerConsumerVersionSelectors"))
   val pactBrokerTags: List<String>? = listOf("latest"),
-        val pactBrokerConsumerVersionSelectors: List<VersionSelector>,
-        val pactBrokerConsumers: List<String> = emptyList(),
-        var failIfNoPactsFound: Boolean = true,
-        var authentication: PactBrokerAuth?,
-        var valueResolverClass: KClass<out ValueResolver>?,
-        valueResolver: ValueResolver? = null,
-        val enablePendingPacts: String = "false",
-        val providerTags: List<String> = emptyList()
+  val pactBrokerConsumerVersionSelectors: List<VersionSelector>,
+  val pactBrokerConsumers: List<String> = emptyList(),
+  var failIfNoPactsFound: Boolean = true,
+  var authentication: PactBrokerAuth?,
+  var valueResolverClass: KClass<out ValueResolver>?,
+  valueResolver: ValueResolver? = null,
+  val enablePendingPacts: String = "false",
+  val providerTags: List<String> = emptyList()
 ) : OverrideablePactLoader {
 
   private var resolver: ValueResolver? = valueResolver
@@ -110,11 +110,12 @@ open class PactBrokerLoader(
 
   private fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
     return if (pactBrokerConsumerVersionSelectors.isEmpty()) {
-      pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) } .map { ConsumerVersionSelector(it) }
+      pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }.map { ConsumerVersionSelector(it) }
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
-        val tags = parseListExpression(it.tag, resolver)
+        val parsedTags = parseListExpression(it.tag, resolver)
         val parsedLatest = parseListExpression(it.latest, resolver)
+        val tags = if (parsedTags.isEmpty()) listOf("latest") else parsedTags
         val latest = if (parsedLatest.isEmpty()) List(tags.size) { true.toString() } else parsedLatest
         if (tags.size != latest.size) {
           throw IllegalArgumentException("Invalid Consumer version selectors. Each version selector must have a tag " +

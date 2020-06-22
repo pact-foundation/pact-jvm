@@ -14,9 +14,9 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface VersionSelector {
     /**
-     * @return Tags to use to fetch pacts for, defaults to `latest`
+     * @return Tags to use to fetch pacts for
      */
-    String tag() default "latest";
+    String tag();
 
     /**
      * @return "true" to fetch the latest version of the pact, or "false" to fetch all versions
