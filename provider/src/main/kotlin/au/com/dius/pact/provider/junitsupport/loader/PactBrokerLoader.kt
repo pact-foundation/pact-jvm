@@ -33,7 +33,10 @@ open class PactBrokerLoader(
   val pactBrokerHost: String,
   val pactBrokerPort: String?,
   val pactBrokerScheme: String,
+  @Deprecated(message = "Use Consumer version selectors instead",
+    replaceWith = ReplaceWith("pactBrokerConsumerVersionSelectors"))
   val pactBrokerTags: List<String>? = listOf("latest"),
+  val pactBrokerConsumerVersionSelectors: List<VersionSelector>,
   val pactBrokerConsumers: List<String> = emptyList(),
   var failIfNoPactsFound: Boolean = true,
   var authentication: PactBrokerAuth?,
@@ -54,6 +57,7 @@ open class PactBrokerLoader(
     pactBroker.port,
     pactBroker.scheme,
     pactBroker.tags.toList(),
+    pactBroker.consumerVersionSelectors.toList(),
     pactBroker.consumers.toList(),
     true,
     pactBroker.authentication,
@@ -65,11 +69,11 @@ open class PactBrokerLoader(
 
   override fun description(): String {
     val resolver = setupValueResolver()
-    val tags = pactBrokerTags?.flatMap { parseListExpression(it, resolver) }?.filter { it.isNotEmpty() }
+    val consumerVersionSelectors = buildConsumerVersionSelectors(resolver)
     val consumers = pactBrokerConsumers.flatMap { parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
     var source = getPactBrokerSource(resolver).description()
-    if (tags != null && tags.isNotEmpty()) {
-      source += " tags=$tags"
+    if (!consumerVersionSelectors.isNullOrEmpty()) {
+      source += " consumerVersionSelectors=$consumerVersionSelectors"
     }
     if (consumers.isNotEmpty()) {
       source += " consumers=$consumers"
@@ -94,12 +98,30 @@ open class PactBrokerLoader(
       }
       else -> {
         try {
-          val tags = pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }
-          loadPactsForProvider(providerName, tags, resolver)
+          val consumerVersionSelectors = buildConsumerVersionSelectors(resolver)
+          loadPactsForProvider(providerName, consumerVersionSelectors, resolver)
         } catch (e: NoPactsFoundException) {
           // Ignoring exception at this point, it will be handled at a higher level
           emptyList<Pact<Interaction>>()
         }
+      }
+    }
+  }
+
+  private fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
+    return if (pactBrokerConsumerVersionSelectors.isEmpty()) {
+      pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }.map { ConsumerVersionSelector(it) }
+    } else {
+      pactBrokerConsumerVersionSelectors.flatMap {
+        val parsedTags = parseListExpression(it.tag, resolver)
+        val parsedLatest = parseListExpression(it.latest, resolver)
+        val tags = if (parsedTags.isEmpty()) listOf("latest") else parsedTags
+        val latest = if (parsedLatest.isEmpty()) List(tags.size) { true.toString() } else parsedLatest
+        if (tags.size != latest.size) {
+          throw IllegalArgumentException("Invalid Consumer version selectors. Each version selector must have a tag " +
+                  "and latest property")
+        }
+        tags.mapIndexed { index, tag -> ConsumerVersionSelector(tag, latest[index].toBoolean()) }
       }
     }
   }
@@ -132,10 +154,10 @@ open class PactBrokerLoader(
   @Throws(IOException::class, IllegalArgumentException::class)
   private fun loadPactsForProvider(
     providerName: String,
-    tags: List<String>,
+    selectors: List<ConsumerVersionSelector>,
     resolver: ValueResolver
   ): List<Pact<*>> {
-    logger.debug { "Loading pacts from pact broker for provider $providerName and tags $tags" }
+    logger.debug { "Loading pacts from pact broker for provider $providerName and consumer version selectors $selectors" }
     val pending = parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
     val providerTags = providerTags.flatMap { parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
     if (pending && providerTags.none { it.isNotEmpty() }) {
@@ -148,7 +170,6 @@ open class PactBrokerLoader(
     val uriBuilder = brokerUrl(resolver)
     try {
       val pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver)
-      val selectors = tags.map { ConsumerVersionSelector(it) }
 
       val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, pending)
       var consumers = when (result) {
@@ -157,8 +178,8 @@ open class PactBrokerLoader(
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {
-        throw NoPactsFoundException("No consumer pacts were found for provider '" + providerName + "' and tags '" +
-          tags + "'. (URL " + getUrlForProvider(providerName, pactBrokerClient) + ")")
+        throw NoPactsFoundException("No consumer pacts were found for provider '" + providerName + "' and consumer " +
+          "version selectors '" + selectors + "'. (URL " + getUrlForProvider(providerName, pactBrokerClient) + ")")
       }
 
       if (pactBrokerConsumers.isNotEmpty()) {

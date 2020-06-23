@@ -9,6 +9,7 @@ import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.provider.junitsupport.loader.VersionSelector
 import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker
 import au.com.dius.pact.provider.junitsupport.loader.PactBrokerAuth
@@ -17,6 +18,8 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
+
+import java.lang.annotation.Annotation
 
 import static au.com.dius.pact.core.support.expressions.ExpressionParser.VALUES_SEPARATOR
 
@@ -28,6 +31,7 @@ class PactBrokerLoaderSpec extends Specification {
   private String port
   private String protocol
   private List tags
+  private List<VersionSelector> consumerVersionSelectors
   private List consumers
   private IPactBrokerClient brokerClient
   private Pact mockPact
@@ -38,6 +42,7 @@ class PactBrokerLoaderSpec extends Specification {
     port = '1234'
     protocol = 'http'
     tags = []
+    consumerVersionSelectors = []
     consumers = []
     brokerClient = Mock(IPactBrokerClient) {
       getOptions() >> [:]
@@ -49,8 +54,8 @@ class PactBrokerLoaderSpec extends Specification {
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       IPactBrokerClient client = brokerClient
-      def loader = new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null,
-        null, null, '', []) {
+      def loader = new PactBrokerLoader(host, port, protocol, tags, consumerVersionSelectors, consumers,
+        failIfNoPactsFound, null, null, null, '', []) {
         @Override
         IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           client
@@ -239,6 +244,34 @@ class PactBrokerLoaderSpec extends Specification {
     result.size() == 3
   }
 
+  def 'Loads pacts for each provided consumer version selector'() {
+    given:
+    consumerVersionSelectors = [
+      createVersionSelector('a', 'true'),
+      createVersionSelector('b', 'false'),
+      createVersionSelector('c', 'true')
+    ]
+    def selectors = [
+      new ConsumerVersionSelector('a', true),
+      new ConsumerVersionSelector('b', false),
+      new ConsumerVersionSelector('c', true)
+    ]
+    def expected = [
+      new PactBrokerResult('test', 'a', '', [], [], false, null),
+      new PactBrokerResult('test', 'b', '', [], [], false, null),
+      new PactBrokerResult('test', 'c', '', [], [], false, null)
+    ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    0 * brokerClient._
+    result.size() == 3
+  }
+
   @RestoreSystemProperties
   @SuppressWarnings('GStringExpressionWithinString')
   def 'Processes tags before pact load'() {
@@ -262,7 +295,31 @@ class PactBrokerLoaderSpec extends Specification {
     result.size() == 2
   }
 
-  def 'Loads the latest pacts if no tag is provided'() {
+  @RestoreSystemProperties
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'Processes consumer version selectors before pact load'() {
+    given:
+    System.setProperty('compositeTag', "one${VALUES_SEPARATOR}two")
+    System.setProperty('compositeLatest', "true${VALUES_SEPARATOR}false")
+    consumerVersionSelectors = [createVersionSelector('${compositeTag}', '${compositeLatest}')]
+    def selectors = [
+      new ConsumerVersionSelector('one', true),
+      new ConsumerVersionSelector('two', false)
+    ]
+    def expected = [
+      new PactBrokerResult('test', 'one', '', [], [], false, null),
+      new PactBrokerResult('test', 'two', '', [], [], false, null)
+    ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    result.size() == 2
+  }
+
+  def 'Loads the latest pacts if no consumer version selector or tag is provided'() {
     given:
     tags = []
     def expected = [ new PactBrokerResult('test', 'latest', '', [], [], false, null) ]
@@ -296,6 +353,73 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
     0 * brokerClient._
     result.size() == 1
+  }
+
+  @RestoreSystemProperties
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'processes consumer version selectors with the provided value resolver'() {
+    given:
+    consumerVersionSelectors = [
+      createVersionSelector('${a}', 'true'),
+      createVersionSelector('${latest}', 'false'),
+      createVersionSelector('${c}', 'true')
+    ]
+    def newLoader = pactBrokerLoader()
+    newLoader.valueResolver = [resolveValue: { val -> 'X' }] as ValueResolver
+    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null) ]
+    def selectors = [
+      new ConsumerVersionSelector('X', true),
+      new ConsumerVersionSelector('X', false),
+      new ConsumerVersionSelector('X', true)
+    ]
+
+    when:
+    def result = newLoader.load('test')
+
+    then:
+    1 * brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    0 * brokerClient._
+    result.size() == 1
+  }
+
+  @RestoreSystemProperties
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'Ues true for latest when only tags are specified for consumer version selector'() {
+    given:
+    System.setProperty('compositeTag', "one${VALUES_SEPARATOR}two${VALUES_SEPARATOR}three")
+    consumerVersionSelectors = [createVersionSelector('${compositeTag}', '')]
+    def selectors = [
+      new ConsumerVersionSelector('one', true),
+      new ConsumerVersionSelector('two', true),
+      new ConsumerVersionSelector('three', true)
+    ]
+    def expected = [
+      new PactBrokerResult('test', 'one', '', [], [], false, null),
+      new PactBrokerResult('test', 'two', '', [], [], false, null)
+    ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    result.size() == 2
+  }
+
+  @RestoreSystemProperties
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'Throws exception if consumer version selector properties do not match in length'() {
+    given:
+    System.setProperty('compositeTag', "one${VALUES_SEPARATOR}two${VALUES_SEPARATOR}three")
+    System.setProperty('compositeLatest', "true${VALUES_SEPARATOR}false")
+    consumerVersionSelectors = [createVersionSelector('${compositeTag}', '${compositeLatest}')]
+
+    when:
+    pactBrokerLoader().load('test')
+
+    then:
+    thrown(IllegalArgumentException)
   }
 
   def 'Loads pacts only for provided consumers'() {
@@ -405,6 +529,28 @@ class PactBrokerLoaderSpec extends Specification {
     result.size() == 3
   }
 
+  def 'Loads pacts only for provided consumers with the specified consumer version selectors'() {
+    given:
+    consumers = ['a', 'b', 'c']
+    consumerVersionSelectors = [createVersionSelector('demo', 'true')]
+    def expected = [
+      new PactBrokerResult('a', '', '', [], [], false, 'demo'),
+      new PactBrokerResult('b', '', '', [], [], false, 'demo'),
+      new PactBrokerResult('c', '', '', [], [], false, 'demo'),
+      new PactBrokerResult('d', '', '', [], [], false, 'demo')
+    ]
+    def selectors = [ new ConsumerVersionSelector('demo', true) ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    0 * brokerClient._
+    result.size() == 3
+  }
+
   def 'use the overridden pact URL'() {
     given:
     consumers = ['a', 'b', 'c']
@@ -445,13 +591,16 @@ class PactBrokerLoaderSpec extends Specification {
       loader.pactReader = mockReader
       loader
     }
+    def selectors = [
+      new ConsumerVersionSelector('latest', true)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok([])
   }
 
   def 'configured from annotation with https and no port'() {
@@ -470,13 +619,16 @@ class PactBrokerLoaderSpec extends Specification {
       loader.pactReader = mockReader
       loader
     }
+    def selectors = [
+      new ConsumerVersionSelector('latest', true)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok([])
   }
 
   def 'Auth: Uses no auth if no auth is provided'() {
@@ -560,6 +712,25 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     pactBrokerClient.options == [:]
+  }
+
+  private static VersionSelector createVersionSelector(String tag, String latest) {
+    new VersionSelector() {
+      @Override
+      String tag() {
+        tag
+      }
+
+      @Override
+      String latest() {
+        latest
+      }
+
+      @Override
+      Class<? extends Annotation> annotationType() {
+        VersionSelector
+      }
+    }
   }
 
   @PactBroker(host = 'pactbroker.host', port = '1000')
