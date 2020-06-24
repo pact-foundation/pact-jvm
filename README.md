@@ -27,7 +27,7 @@ how to get going.
 ## Contact
 
 * Twitter: [@pact_up](https://twitter.com/pact_up)
-* Slack: [Join the chat at http://slack.pact.io/](http://slack.pact.io/)
+* Slack: [Join the chat at https://slack.pact.io/](https://slack.pact.io/)
 * Stack Overflow: https://stackoverflow.com/questions/tagged/pact
 
 ## Links
