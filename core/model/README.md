@@ -1,4 +1,5 @@
-# Pact model
+Pact model
+==========
 
 The model project is responsible for providing:
 *  a model to represent pacts
