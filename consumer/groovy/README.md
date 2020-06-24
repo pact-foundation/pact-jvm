@@ -140,8 +140,8 @@ Defines the request for the interaction. The request data map can contain the fo
 | body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
 | prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies below |
 
-For the path, header attributes and query parameters (version 2.2.2+ for headers, 3.3.7+ for query parameters), 
-you can use regular expressions to match. You can either provide a regex `Pattern` class or use the `regexp` method 
+For the path, header attributes and query parameters (version 2.2.2+ for headers, 3.3.7+ for query parameters),
+you can use regular expressions to match. You can either provide a regex `Pattern` class or use the `regexp` method
 to construct a `RegexpMatcher` (you can use any of the defined matcher methods, see DSL methods below).
 If you use a `Pattern`, or the `regexp` method but don't provide a value, a random one will be generated from the
 regular expression. This value is used when generating requests.
@@ -428,7 +428,7 @@ withBody {
 }
 ```
 
-You can also match arrays at the root level, for instance, 
+You can also match arrays at the root level, for instance,
 
 ```groovy
 withBody PactBodyBuilder.eachLike(regexp(~/\w+/))
@@ -457,7 +457,7 @@ This will generate an array of arrays for the `answer` attribute.
 
 ### Matching any key in a map
 
-The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
+The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see
 [#313](https://github.com/DiUS/pact-jvm/issues/313). In this case you can use the `keyLike` method, which takes an
 example key as a parameter.
 
@@ -478,10 +478,10 @@ withBody {
       }
     }
     four {
-      keyLike '001XYZ', eachLike {      // key like an id mapped to an array where each item is matched by the following 
+      keyLike '001XYZ', eachLike {      // key like an id mapped to an array where each item is matched by the following
         id identifier()                 // example
       }
-    }  
+    }
   }
 }
 ```
@@ -491,22 +491,22 @@ For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/cons
 **NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
  applied to a map will result in only one being applied when the pact is verified (probably the last).
- 
-**Further Note: From version 3.5.22 onwards pacts with wildcards applied to map keys will require the Java system property 
+
+**Further Note: From version 3.5.22 onwards pacts with wildcards applied to map keys will require the Java system property
 "pact.matching.wildcard" set to value "true" when the pact file is verified.**
 
 ### Matching with an OR
 
 The V3 spec allows multiple matchers to be combined using either AND or OR for a value. The main use of this would be to
  either be able to match a value or a null, or to combine different matchers.
- 
+
 For example:
 
 ```groovy
     withBody {
         valueA and('AB', includeStr('A'), includeStr('B')) // valueA must include both A and B
         valueB or('100', regex(~/\d+/), nullValue()) // valueB must either match a regular expression or be null
-        valueC or('12345678', regex(~/\d{8}/), regex(~/X\d{13}/)) // valueC must match either 8 or X followed by 13 digits 
+        valueC or('12345678', regex(~/\d{8}/), regex(~/X\d{13}/)) // valueC must match either 8 or X followed by 13 digits
     }
 ```
 
@@ -516,7 +516,7 @@ For example:
 
 By default, bodies will be handled based on their content types. For binary contents, the bodies will be base64
 encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
-an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`. For instance, setting 
+an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`. For instance, setting
 `pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
 
 ## Changing the directory pact files are written to
@@ -534,7 +534,7 @@ test {
 
 ## Forcing pact files to be overwritten (3.6.5+)
 
-By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
+By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be
 overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
 # Publishing your pact files to a pact broker
@@ -649,4 +649,3 @@ service {
     }
 }
 ```
-
