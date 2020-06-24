@@ -18,7 +18,7 @@ jobs:
         id: detect-changed-markdown-files
         uses: marceloprado/has-changed-path@master
         with:
-          paths: "*.md"
+          paths: "\*.md"
 
       - name: Trigger docs.pact.io update workflow
         if: steps.detect-changed-markdown-files.outputs.changed == 'true'
