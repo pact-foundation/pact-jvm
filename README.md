@@ -7,7 +7,7 @@ pact-jvm
 
 JVM implementation of the consumer driven contract library [pact](https://github.com/pact-foundation/pact-specification).
 
-From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
+From the [Ruby Pact website](https://github.com/pact-foundation/pact-ruby):
 
 > Define a pact between service consumers and providers, enabling "consumer driven contract" testing.
 >
