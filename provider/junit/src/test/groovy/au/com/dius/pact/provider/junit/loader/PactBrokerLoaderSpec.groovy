@@ -33,6 +33,9 @@ class PactBrokerLoaderSpec extends Specification {
   private List tags
   private List<VersionSelector> consumerVersionSelectors
   private List consumers
+  private String enablePendingPacts
+  private List<String> providerTags
+  private String includeWipPactsSince
   private IPactBrokerClient brokerClient
   private Pact mockPact
   private PactReader mockReader
@@ -44,6 +47,9 @@ class PactBrokerLoaderSpec extends Specification {
     tags = []
     consumerVersionSelectors = []
     consumers = []
+    enablePendingPacts = ''
+    providerTags = []
+    includeWipPactsSince = ''
     brokerClient = Mock(IPactBrokerClient) {
       getOptions() >> [:]
     }
@@ -55,7 +61,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       IPactBrokerClient client = brokerClient
       def loader = new PactBrokerLoader(host, port, protocol, tags, consumerVersionSelectors, consumers,
-        failIfNoPactsFound, null, null, null, '', []) {
+        failIfNoPactsFound, null, null, null, enablePendingPacts, providerTags, includeWipPactsSince) {
         @Override
         IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           client
@@ -71,7 +77,7 @@ class PactBrokerLoaderSpec extends Specification {
     def list = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
     notThrown(NoPactsFoundException)
     list.empty
   }
@@ -81,13 +87,13 @@ class PactBrokerLoaderSpec extends Specification {
     def result = pactBrokerLoader(false).load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
     result == []
   }
 
   def 'Throws any Exception On Execution Exception'() {
     given:
-    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Err(new InvalidHalResponse('message'))
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Err(new InvalidHalResponse('message'))
 
     when:
     pactBrokerLoader().load('test')
@@ -125,7 +131,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
   }
 
   @RestoreSystemProperties
@@ -149,7 +155,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
   }
 
   @RestoreSystemProperties
@@ -217,7 +223,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     noExceptionThrown()
-    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
   }
 
   def 'Loads pacts for each provided tag'() {
@@ -229,9 +235,9 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('c', true)
     ]
     def expected = [
-      new PactBrokerResult('test', 'a', '', [], [], false, null),
-      new PactBrokerResult('test', 'b', '', [], [], false, null),
-      new PactBrokerResult('test', 'c', '', [], [], false, null)
+      new PactBrokerResult('test', 'a', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'b', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'c', '', [], [], false, null, false)
     ]
 
     when:
@@ -239,7 +245,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 3
   }
@@ -257,9 +263,9 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('c', true)
     ]
     def expected = [
-      new PactBrokerResult('test', 'a', '', [], [], false, null),
-      new PactBrokerResult('test', 'b', '', [], [], false, null),
-      new PactBrokerResult('test', 'c', '', [], [], false, null)
+      new PactBrokerResult('test', 'a', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'b', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'c', '', [], [], false, null, false)
     ]
 
     when:
@@ -267,7 +273,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 3
   }
@@ -283,15 +289,15 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('two', true)
     ]
     def expected = [
-      new PactBrokerResult('test', 'one', '', [], [], false, null),
-      new PactBrokerResult('test', 'two', '', [], [], false, null)
+      new PactBrokerResult('test', 'one', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'two', '', [], [], false, null, false)
     ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     result.size() == 2
   }
 
@@ -307,29 +313,29 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('two', false)
     ]
     def expected = [
-      new PactBrokerResult('test', 'one', '', [], [], false, null),
-      new PactBrokerResult('test', 'two', '', [], [], false, null)
+      new PactBrokerResult('test', 'one', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'two', '', [], [], false, null, false)
     ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     result.size() == 2
   }
 
   def 'Loads the latest pacts if no consumer version selector or tag is provided'() {
     given:
     tags = []
-    def expected = [ new PactBrokerResult('test', 'latest', '', [], [], false, null) ]
+    def expected = [ new PactBrokerResult('test', 'latest', '', [], [], false, null, false) ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
     result.size() == 1
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok(expected)
   }
 
   @SuppressWarnings('GStringExpressionWithinString')
@@ -338,7 +344,7 @@ class PactBrokerLoaderSpec extends Specification {
     tags = ['${a}', '${latest}', '${b}']
     def loader = pactBrokerLoader()
     loader.valueResolver = [resolveValue: { val -> 'X' } ] as ValueResolver
-    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null) ]
+    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null, false) ]
     def selectors = [
       new ConsumerVersionSelector('X', true),
       new ConsumerVersionSelector('X', true),
@@ -350,7 +356,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     1 * brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 1
   }
@@ -366,7 +372,7 @@ class PactBrokerLoaderSpec extends Specification {
     ]
     def newLoader = pactBrokerLoader()
     newLoader.valueResolver = [resolveValue: { val -> 'X' }] as ValueResolver
-    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null) ]
+    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null, false) ]
     def selectors = [
       new ConsumerVersionSelector('X', true),
       new ConsumerVersionSelector('X', false),
@@ -378,7 +384,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     1 * brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 1
   }
@@ -395,15 +401,15 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('three', true)
     ]
     def expected = [
-      new PactBrokerResult('test', 'one', '', [], [], false, null),
-      new PactBrokerResult('test', 'two', '', [], [], false, null)
+      new PactBrokerResult('test', 'one', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'two', '', [], [], false, null, false)
     ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     result.size() == 2
   }
 
@@ -426,10 +432,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = ['a', 'b', 'c']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null),
-      new PactBrokerResult('b', '', '', [], [], false, null),
-      new PactBrokerResult('c', '', '', [], [], false, null),
-      new PactBrokerResult('d', '', '', [], [], false, null)
+      new PactBrokerResult('a', '', '', [], [], false, null, false),
+      new PactBrokerResult('b', '', '', [], [], false, null, false),
+      new PactBrokerResult('c', '', '', [], [], false, null, false),
+      new PactBrokerResult('d', '', '', [], [], false, null, false)
     ]
 
     when:
@@ -437,7 +443,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 3
   }
@@ -449,10 +455,10 @@ class PactBrokerLoaderSpec extends Specification {
     System.setProperty('composite', "a${VALUES_SEPARATOR}b${VALUES_SEPARATOR}c")
     consumers = ['${composite}']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null),
-      new PactBrokerResult('b', '', '', [], [], false, null),
-      new PactBrokerResult('c', '', '', [], [], false, null),
-      new PactBrokerResult('d', '', '', [], [], false, null)
+      new PactBrokerResult('a', '', '', [], [], false, null, false),
+      new PactBrokerResult('b', '', '', [], [], false, null, false),
+      new PactBrokerResult('c', '', '', [], [], false, null, false),
+      new PactBrokerResult('d', '', '', [], [], false, null, false)
     ]
 
     when:
@@ -460,7 +466,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 3
   }
@@ -469,10 +475,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = []
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null),
-      new PactBrokerResult('b', '', '', [], [], false, null),
-      new PactBrokerResult('c', '', '', [], [], false, null),
-      new PactBrokerResult('d', '', '', [], [], false, null)
+      new PactBrokerResult('a', '', '', [], [], false, null, false),
+      new PactBrokerResult('b', '', '', [], [], false, null, false),
+      new PactBrokerResult('c', '', '', [], [], false, null, false),
+      new PactBrokerResult('d', '', '', [], [], false, null, false)
     ]
 
     when:
@@ -480,7 +486,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 4
   }
@@ -491,10 +497,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = ['${pactbroker.consumers:}']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null),
-      new PactBrokerResult('b', '', '', [], [], false, null),
-      new PactBrokerResult('c', '', '', [], [], false, null),
-      new PactBrokerResult('d', '', '', [], [], false, null)
+      new PactBrokerResult('a', '', '', [], [], false, null, false),
+      new PactBrokerResult('b', '', '', [], [], false, null, false),
+      new PactBrokerResult('c', '', '', [], [], false, null, false),
+      new PactBrokerResult('d', '', '', [], [], false, null, false)
     ]
 
     when:
@@ -502,7 +508,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 4
   }
@@ -512,10 +518,10 @@ class PactBrokerLoaderSpec extends Specification {
     consumers = ['a', 'b', 'c']
     tags = ['demo']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, 'demo'),
-      new PactBrokerResult('b', '', '', [], [], false, 'demo'),
-      new PactBrokerResult('c', '', '', [], [], false, 'demo'),
-      new PactBrokerResult('d', '', '', [], [], false, 'demo')
+      new PactBrokerResult('a', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('b', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('c', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('d', '', '', [], [], false, 'demo', false)
     ]
     def selectors = [ new ConsumerVersionSelector('demo', true) ]
 
@@ -524,7 +530,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 3
   }
@@ -534,10 +540,10 @@ class PactBrokerLoaderSpec extends Specification {
     consumers = ['a', 'b', 'c']
     consumerVersionSelectors = [createVersionSelector('demo', 'true')]
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, 'demo'),
-      new PactBrokerResult('b', '', '', [], [], false, 'demo'),
-      new PactBrokerResult('c', '', '', [], [], false, 'demo'),
-      new PactBrokerResult('d', '', '', [], [], false, 'demo')
+      new PactBrokerResult('a', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('b', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('c', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('d', '', '', [], [], false, 'demo', false)
     ]
     def selectors = [ new ConsumerVersionSelector('demo', true) ]
 
@@ -546,7 +552,63 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
+    0 * brokerClient._
+    result.size() == 3
+  }
+
+  def 'Does not loads wip pacts when pending is false'() {
+    given:
+    consumerVersionSelectors = [
+      createVersionSelector('a', 'true'),
+      createVersionSelector('b', 'false'),
+    ]
+    includeWipPactsSince = '2020-06-25'
+    def selectors = [
+      new ConsumerVersionSelector('a', true),
+      new ConsumerVersionSelector('b', false),
+    ]
+    def expected = [
+      new PactBrokerResult('test', 'a', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'b', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'c', '', [], [], false, null, false),
+    ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
+    0 * brokerClient._
+    result.size() == 3
+  }
+
+  def 'Loads wip pacts when pending and includeWipPactsSince parameters set'() {
+    given:
+    consumerVersionSelectors = [
+      createVersionSelector('a', 'true'),
+      createVersionSelector('b', 'false'),
+    ]
+    enablePendingPacts = 'true'
+    providerTags = ['dev']
+    includeWipPactsSince = '2020-06-25'
+    def selectors = [
+      new ConsumerVersionSelector('a', true),
+      new ConsumerVersionSelector('b', false),
+    ]
+    def expected = [
+      new PactBrokerResult('test', 'a', '', [], [], false, null, false),
+      new PactBrokerResult('test', 'b1', '', [], [], true, null, false),
+      new PactBrokerResult('test', 'b2', '', [], [], true, null, true),
+    ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, ['dev'], true, '2020-06-25') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 3
   }
@@ -573,7 +635,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok([])
     noExceptionThrown()
   }
 
@@ -600,7 +662,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok([])
   }
 
   def 'configured from annotation with https and no port'() {
@@ -628,7 +690,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Ok([])
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok([])
   }
 
   def 'Auth: Uses no auth if no auth is provided'() {

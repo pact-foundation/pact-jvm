@@ -80,8 +80,10 @@ open class ProviderInfo @JvmOverloads constructor (
     } else {
       emptyList()
     }
+    val includePactsSince = Utils.lookupInMap(options, "includeWipPactsSince", String::class.java, "")
     val client = pactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, providerTags, enablePending)
+    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, providerTags, enablePending,
+      includePactsSince)
       .map { results -> results.map { ConsumerInfo.from(it) }
     }
     return when (consumersFromBroker) {

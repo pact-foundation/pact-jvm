@@ -76,6 +76,7 @@ interface IConsumerInfo {
   var pactFileAuthentication: List<Any?>
   val notices: List<VerificationNotice>
   val pending: Boolean
+  val wip: Boolean
 }
 
 @Suppress("LongParameterList")
@@ -88,7 +89,8 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var pactSource: Any? = null,
   override var pactFileAuthentication: List<Any?> = emptyList(),
   override val notices: List<VerificationNotice> = emptyList(),
-  override val pending: Boolean = false
+  override val pending: Boolean = false,
+  override val wip: Boolean = false
 ) : IConsumerInfo {
 
   fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
@@ -100,7 +102,7 @@ open class ConsumerInfo @JvmOverloads constructor (
   override fun toString(): String {
     return "ConsumerInfo(name='$name', stateChange=$stateChange, stateChangeUsesBody=$stateChangeUsesBody, " +
       "packagesToScan=$packagesToScan, verificationType=$verificationType, pactSource=$pactSource, " +
-      "pactFileAuthentication=$pactFileAuthentication, notices=$notices, pending=$pending)"
+      "pactFileAuthentication=$pactFileAuthentication, notices=$notices, pending=$pending, wip=$wip)"
   }
 
   override fun equals(other: Any?): Boolean {
@@ -118,6 +120,7 @@ open class ConsumerInfo @JvmOverloads constructor (
     if (pactFileAuthentication != other.pactFileAuthentication) return false
     if (notices != other.notices) return false
     if (pending != other.pending) return false
+    if (wip != other.wip) return false
 
     return true
   }
@@ -132,6 +135,7 @@ open class ConsumerInfo @JvmOverloads constructor (
     result = 31 * result + pactFileAuthentication.hashCode()
     result = 31 * result + notices.hashCode()
     result = 31 * result + pending.hashCode()
+    result = 31 * result + wip.hashCode()
     return result
   }
 
@@ -139,8 +143,8 @@ open class ConsumerInfo @JvmOverloads constructor (
     fun from(result: PactBrokerResult) =
       ConsumerInfo(name = result.name,
         pactSource = BrokerUrlSource(url = result.source, pactBrokerUrl = result.pactBrokerUrl, result = result),
-        pactFileAuthentication = result.pactFileAuthentication, notices = result.notices,
-        pending = result.pending
+        pactFileAuthentication = result.pactFileAuthentication, notices = result.notices, pending = result.pending,
+        wip = result.wip
       )
   }
 }

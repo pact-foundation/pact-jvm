@@ -76,7 +76,8 @@ interface IPactBrokerClient {
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
-    enablePending: Boolean = false
+    enablePending: Boolean = false,
+    includeWipPactsSince: String
   ): Result<List<PactBrokerResult>, Exception>
 
   fun getUrlForProvider(providerName: String, tag: String): String?
@@ -145,7 +146,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String>,
-    enablePending: Boolean
+    enablePending: Boolean,
+    includeWipPactsSince: String
   ): Result<List<PactBrokerResult>, Exception> {
     val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }
     val halClient = when (navigateResult) {
@@ -164,6 +166,9 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       if (enablePending) {
         body["providerVersionTags"] = jsonArray(providerTags)
         body["includePendingStatus"] = true
+        if (!includeWipPactsSince.isBlank()) {
+          body["includeWipPactsSince"] = includeWipPactsSince
+        }
       }
 
       return handleWith {
@@ -179,10 +184,12 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
             if (properties is JsonValue.Object && properties.has("pending") && properties["pending"].isBoolean) {
               pending = properties["pending"].asBoolean()
             }
+            val wip = if (properties.has("wip") && properties["wip"].isBoolean) properties["wip"].asBoolean()
+              else false
             if (options.containsKey("authentication")) {
-              PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending)
+              PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending, wip = wip)
             } else {
-              PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending)
+              PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending, wip = wip)
             }
           }
         }

@@ -565,7 +565,7 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
           new ConsumerVersionSelector('test', true)
-      ], [], false)
+      ], [], false, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
@@ -678,11 +678,135 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
         new ConsumerVersionSelector('test', true)
-      ], ['master'], true)
+      ], ['master'], true, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
       assert consumerPacts.value[1].pending
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+  def 'fetch pacts when wip pacts feature is on'() {
+    given:
+    pactBroker {
+      uponReceiving('a request to the root')
+      withAttributes(path: '/')
+      willRespondWith(status: 200)
+      withBody(contentType: 'application/hal+json') {
+        '_links' {
+          'pb:provider-pacts-for-verification' {
+            href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'for-verification')
+            title 'Pact versions to be verified for the specified provider'
+            templated true
+          }
+        }
+      }
+      given('Two consumer pacts exist for the provider', [
+        provider: 'Activity Service',
+        consumer1: 'Foo Web Client',
+        consumer2: 'Foo Web Client 2'
+      ])
+      given('pact for consumer2 is wip', [
+        consumer2: 'Foo Web Client 2'
+      ])
+      uponReceiving('a request for the provider pacts')
+      withAttributes(method: 'POST', path: '/pacts/provider/Activity Service/for-verification')
+      withBody(contentType: 'application/hal+json') {
+        consumerVersionSelectors([
+          {
+            tag 'test'
+            latest true
+          }
+        ])
+        providerVersionTags(['master'])
+        includePendingStatus true
+        includeWipPactsSince '2020-06-24'
+      }
+      willRespondWith(status: 200)
+      withBody(contentType: 'application/hal+json') {
+        '_embedded' {
+          pacts = [
+            {
+              shortDescription 'latest'
+              'verificationProperties' {
+                notices = [
+                  {
+                    when 'before_verification'
+                    text 'The pact at https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727 is being verified because it matches the following configured selection criterion: latest pact between a consumer and Activity Service'
+                  }
+                ]
+                noteToDevelopers 'Please print out the text from the \'notices\' rather than using the inclusionReason and the pendingReason fields. These will be removed when this API moves out of beta.'
+              }
+              '_links' {
+                self {
+                  href 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727'
+                  name 'Pact between Foo Web Client (0.0.0-TEST) and Activity Service'
+                }
+              }
+            },
+            {
+              shortDescription 'latest'
+              'verificationProperties' {
+                pending true
+                wip true
+                notices = [
+                  {
+                    when 'before_verification'
+                    text 'The pact at https://test.pact-dev.dius.com.au/pacts/provider/Bar/consumer/Foo/pact-version/dd222221d7d3d915ec6315ca3ebbd76831aab6a3  is being verified because it is a \'work in progress\' pact (ie. it is the pact for the latest versions of Foo tagged with \'feature-x\' and is still in pending state). Read more at https//pact.io/wip'
+                  },
+                  {
+                    when 'before_verification'
+                    text 'This pact is in pending state for this version of Bar because a successful verification result for Bar has not yet been published. If this verification fails, it will not cause the overall build to fail. Read more at https://pact.io/pending'
+                  },
+                  {
+                    when 'after_verification:success_true_published_false'
+                    text 'This pact is still in pending state for Bar as the successful verification results have not yet been published.'
+                  },
+                  {
+                    when 'after_verification:success_false_published_false'
+                    text 'This pact is still in pending state for Bar as a successful verification result has not yet been published'
+                  },
+                  {
+                    when 'after_verification:success_true_published_true'
+                    text 'This pact is no longer in pending state for Bar, as a successful verification result with this tag has been published. If a verification for a version with  fails in the future, it will fail the build. Read more at https//pact.io/pending'
+                  },
+                  {
+                    when 'after_verification:success_false_published_true'
+                    text 'This pact is still in pending state for Bar as the successful verification results have not yet been published.'
+                  }
+                ]
+                noteToDevelopers 'Please print out the text from the \'notices\' rather than using the inclusionReason and the pendingReason fields. These will be removed when this API moves out of beta.'
+              }
+              '_links' {
+                self {
+                  href 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/pact-version/21ac89178372169288d3f17fee9f7901d9ed5e8b'
+                  name 'Pact between Foo Web Client 2 (0.0.0-TEST) and Activity Service'
+                }
+              }
+            }
+          ]
+        }
+        '_links' {
+          self {
+            href 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/for-verification'
+            title 'Pacts to be verified'
+          }
+        }
+      }
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
+        new ConsumerVersionSelector('test', true)
+      ], ['master'], true, '2020-06-24')
+      assert consumerPacts instanceof Ok
+      assert consumerPacts.value.size == 2
+      assert !consumerPacts.value[0].wip
+      assert consumerPacts.value[1].wip
     }
 
     then:
