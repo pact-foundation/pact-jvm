@@ -570,3 +570,24 @@ public class PactJUnitTest {
 You can also use the `pactbroker.enablePending` and `pactbroker.providerTags` JVM system properties. 
 
 Then any pending pacts will not cause a build failure.
+
+# Work In Progress (WIP) Pact Support (version 4.1.5 and later)
+
+If your Pact broker supports wip pacts, you can enable support by enabling it on your Pact broker annotation, or with
+JVM system properties. You also need to enable pending pacts. Once enabled, your provider will verify any "work in progress" 
+pacts that have been published since a given date. A WIP pact is a pact that is the latest for its tag that does not have 
+any successful verification results with the provider tag. 
+
+```java
+@Provider("Activity Service")
+@PactBroker(host = "test.pactflow.io", tags = {"test"}, scheme = "https",
+  enablePendingPacts = "true",
+  providerTags = "master"
+  includeWipPactsSince = "2020-06-19"
+)
+public class PactJUnitTest {
+```
+
+You can also use the `pactbroker.includeWipPactsSince` JVM system property.
+
+Since all WIP pacts are also pending pacts, failed verifications will not cause a build failure.
