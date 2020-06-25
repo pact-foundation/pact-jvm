@@ -272,6 +272,20 @@ For any other value the latest pact tagged with the specified tag is loaded.
 
 Specifying multiple tags is an OR operation. For example if you specify `tags = {"dev", "prod"}` then both the latest pact file tagged with `dev` and the latest pact file taggged with `prod` is loaded.
 
+In 4.1.4+, tags was deprecated in favor of consumerVersionSelectors. Consumer version selectors give you the ability to 
+include pacts for the latest version of a tag, or all versions of a tag.
+
+```java
+@PactBroker(
+  host="pactbroker", 
+  port="80", 
+  consumerVersionSelectors={
+    @ConsumerVersionSelector(tag = "dev"), // Verify the latest version tagged with dev
+    @ConsumerVersionSelector(tag = "prod", latest = "false") // Verify all versions tagged with prod
+  }
+)
+```
+
 #### Using authentication with the with the pact broker
 
 You can use basic authentication with the `@PactBroker` annotation by setting the `authentication` value to a `@PactBrokerAuth`
