@@ -43,7 +43,8 @@ open class PactBrokerLoader(
   var valueResolverClass: KClass<out ValueResolver>?,
   valueResolver: ValueResolver? = null,
   val enablePendingPacts: String = "false",
-  val providerTags: List<String> = emptyList()
+  val providerTags: List<String> = emptyList(),
+  val includeWipPactsSince: String = ""
 ) : OverrideablePactLoader {
 
   private var resolver: ValueResolver? = valueResolver
@@ -64,7 +65,8 @@ open class PactBrokerLoader(
     pactBroker.valueResolver,
     null,
     pactBroker.enablePendingPacts,
-    pactBroker.providerTags.toList()
+    pactBroker.providerTags.toList(),
+    pactBroker.includeWipPactsSince
   )
 
   override fun description(): String {
@@ -157,7 +159,8 @@ open class PactBrokerLoader(
     selectors: List<ConsumerVersionSelector>,
     resolver: ValueResolver
   ): List<Pact<*>> {
-    logger.debug { "Loading pacts from pact broker for provider $providerName and consumer version selectors $selectors" }
+    logger.debug { "Loading pacts from pact broker for provider $providerName and consumer version selectors " +
+      "$selectors" }
     val pending = parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
     val providerTags = providerTags.flatMap { parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
     if (pending && providerTags.none { it.isNotEmpty() }) {
@@ -166,12 +169,14 @@ open class PactBrokerLoader(
         "provider application version with the providerTags property that will be published with the verification " +
         "results.")
     }
+    val wipSinceDate = if (pending) parseExpression(includeWipPactsSince, DataType.STRING, resolver) as String else ""
 
     val uriBuilder = brokerUrl(resolver)
     try {
       val pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver)
 
-      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, pending)
+      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, pending,
+        wipSinceDate)
       var consumers = when (result) {
         is Ok -> result.value
         is Err -> throw result.error

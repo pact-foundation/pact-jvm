@@ -73,8 +73,8 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false) >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false, null)
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false, '') >> new Ok([
+      new PactBrokerResult('consumer', '', url, [], [], false, null, false)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -96,8 +96,8 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true) >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null)
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
+      new PactBrokerResult('consumer', '', url, [], [], true, null, false)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -121,5 +121,52 @@ class ProviderInfoSpec extends Specification {
     def exception = thrown(RuntimeException)
     exception.message == 'No providerTags: To use the pending pacts feature, you need to provide the list of ' +
       'provider names for the provider application version that will be published with the verification results'
+  }
+
+  def 'does not include wip pacts if the option is not present'() {
+    given:
+    def options = [
+      enablePending: true,
+      providerTags: ['master']
+    ]
+    def url = 'http://localhost:8080'
+    def selectors = [
+      new ConsumerVersionSelector('test', true)
+    ]
+
+    when:
+    def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
+
+    then:
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
+      new PactBrokerResult('consumer', '', url, [], [], false, null, false)
+    ])
+    result.size == 1
+    result[0].name == 'consumer'
+    !result[0].pending
+  }
+
+  def 'does include wip pacts if the option is present'() {
+    given:
+    def options = [
+      enablePending: true,
+      providerTags: ['master'],
+      includeWipPactsSince: '2020-05-23'
+    ]
+    def url = 'http://localhost:8080'
+    def selectors = [
+      new ConsumerVersionSelector('test', true)
+    ]
+
+    when:
+    def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
+
+    then:
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '2020-05-23') >> new Ok([
+      new PactBrokerResult('consumer', '', url, [], [], true, null, true)
+    ])
+    result.size == 1
+    result[0].name == 'consumer'
+    result[0].pending
   }
 }

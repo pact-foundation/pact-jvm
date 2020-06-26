@@ -272,6 +272,20 @@ For any other value the latest pact tagged with the specified tag is loaded.
 
 Specifying multiple tags is an OR operation. For example if you specify `tags = {"dev", "prod"}` then both the latest pact file tagged with `dev` and the latest pact file taggged with `prod` is loaded.
 
+In 4.1.4+, tags was deprecated in favor of consumerVersionSelectors. Consumer version selectors give you the ability to 
+include pacts for the latest version of a tag, or all versions of a tag.
+
+```java
+@PactBroker(
+  host="pactbroker", 
+  port="80", 
+  consumerVersionSelectors={
+    @ConsumerVersionSelector(tag = "dev"), // Verify the latest version tagged with dev
+    @ConsumerVersionSelector(tag = "prod", latest = "false") // Verify all versions tagged with prod
+  }
+)
+```
+
 #### Using authentication with the with the pact broker
 
 You can use basic authentication with the `@PactBroker` annotation by setting the `authentication` value to a `@PactBrokerAuth`
@@ -556,3 +570,24 @@ public class PactJUnitTest {
 You can also use the `pactbroker.enablePending` and `pactbroker.providerTags` JVM system properties. 
 
 Then any pending pacts will not cause a build failure.
+
+# Work In Progress (WIP) Pact Support (version 4.1.5 and later)
+
+If your Pact broker supports wip pacts, you can enable support by enabling it on your Pact broker annotation, or with
+JVM system properties. You also need to enable pending pacts. Once enabled, your provider will verify any "work in progress" 
+pacts that have been published since a given date. A WIP pact is a pact that is the latest for its tag that does not have 
+any successful verification results with the provider tag. 
+
+```java
+@Provider("Activity Service")
+@PactBroker(host = "test.pactflow.io", tags = {"test"}, scheme = "https",
+  enablePendingPacts = "true",
+  providerTags = "master"
+  includeWipPactsSince = "2020-06-19"
+)
+public class PactJUnitTest {
+```
+
+You can also use the `pactbroker.includeWipPactsSince` JVM system property.
+
+Since all WIP pacts are also pending pacts, failed verifications will not cause a build failure.

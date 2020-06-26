@@ -48,7 +48,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).value
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false, '').value
 
     then:
     consumers != []
@@ -69,7 +69,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).value
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false, '').value
 
     then:
     consumers == []
@@ -87,7 +87,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).value
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false, '').value
 
     then:
     consumers != []
@@ -108,7 +108,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false).value
+            [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
 
     then:
     consumers != []
@@ -130,7 +130,7 @@ class PactBrokerClientSpec extends Specification {
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
             [ new ConsumerVersionSelector('tag', true),
-              new ConsumerVersionSelector('anotherTag', true) ], [], false).value
+              new ConsumerVersionSelector('anotherTag', true) ], [], false, '').value
 
     then:
     consumers.size() == 2
@@ -160,7 +160,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false).value
+            [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
 
     then:
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
@@ -179,7 +179,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false).value
+            [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
 
     then:
     consumers != []
@@ -200,7 +200,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-      [ new ConsumerVersionSelector('tag', true) ], [], false).value
+      [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
 
     then:
     consumers == []
@@ -393,7 +393,7 @@ class PactBrokerClientSpec extends Specification {
     ''')
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', selectors, [], false)
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -407,7 +407,8 @@ class PactBrokerClientSpec extends Specification {
          'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')
       ],
       false,
-      null
+      null,
+      false
     )
   }
 
@@ -427,7 +428,7 @@ class PactBrokerClientSpec extends Specification {
     ''')
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', [], [], false)
+    def result = client.fetchConsumersWithSelectors('provider', [], [], false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -445,7 +446,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', [], [], false)
+    def result = client.fetchConsumersWithSelectors('provider', [], [], false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -453,6 +454,61 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> null
     0 * halClient.postJson(_, _, _)
     1 * client.fetchConsumers('provider') >> []
+    result instanceof Ok
+  }
+
+  def 'fetching pacts with selectors does not include wip pacts when pending parameter is false'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def selectors = [ new ConsumerVersionSelector('DEV', true) ]
+    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}]}'
+    def jsonResult = JsonParser.INSTANCE.parseString('''
+    {
+      "_embedded": {
+        "pacts": [
+        ]
+      }
+    }
+    ''')
+    when:
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], false, '2020-24-06')
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> 'URL'
+    1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Ok(jsonResult)
+    result instanceof Ok
+  }
+
+  def 'fetching pacts with selectors includes wip pacts when parameter not blank'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def selectors = [ new ConsumerVersionSelector('DEV', true) ]
+    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}],' +
+      '"providerVersionTags":[],' +
+      '"includePendingStatus":true,' +
+      '"includeWipPactsSince":"2020-24-06"}'
+    def jsonResult = JsonParser.INSTANCE.parseString('''
+    {
+      "_embedded": {
+        "pacts": [
+        ]
+      }
+    }
+    ''')
+    when:
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], true, '2020-24-06')
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> 'URL'
+    1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Ok(jsonResult)
     result instanceof Ok
   }
 }

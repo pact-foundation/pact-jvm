@@ -79,4 +79,10 @@ public @interface PactBroker {
    * Provider Tags to use to evaluate pending pacts
    */
   String[] providerTags() default "${pactbroker.providerTags:}";
+
+  /**
+   * The earliest date WIP pacts should be included (ex: YYYY-MM-DD). If no date is provided, WIP pacts will not be
+   * included.
+   */
+  String includeWipPactsSince() default "${pactbroker.includeWipPactsSince:}";
 }
