@@ -147,4 +147,4 @@ Then any pending pacts will not cause a build failure.
 
 # Work In Progress (WIP) Pact Support (version 4.1.5 and later)
 
-WIP pacts work in the same way as with JUnit 4 tests, refer to the [Pact junit runner](../junit/README.md) docs.
+WIP pacts work in the same way as with JUnit 4 tests, refer to the [Pact junit runner](../junit/) docs.
