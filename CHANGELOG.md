@@ -1,5 +1,43 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.5 - consumerVersionSelectors in JUnit
+
+* 51140f684 - docs: update link to work on docs.pact.io (Beth Skurrie, Fri Jun 26 16:10:46 2020 +1000)
+* ac1865ac6 - Merge pull request #1147 from pendsley/feat/wip-pacts (Ronald Holshausen, Fri Jun 26 11:19:22 2020 +1000)
+* 2d99c5eda - docs: Update junit README for WIP pact support (Phil Endsley, Thu Jun 25 12:21:50 2020 -0500)
+* b3d6d19aa - docs: Update junit README with consumerVersionSelectors example (Phil Endsley, Thu Jun 25 12:02:36 2020 -0500)
+* 418c1d39e - feat: Add support for includeWipPactsSince parameter (Phil Endsley, Thu Jun 25 08:03:09 2020 -0500)
+* 65cb3beea - docs: add missing heading (Beth Skurrie, Thu Jun 25 12:35:55 2020 +1000)
+* f3e640446 - Update README.md (Beth Skurrie, Thu Jun 25 10:01:18 2020 +1000)
+* accce191b - docs: make link absolute (Beth Skurrie, Thu Jun 25 09:59:35 2020 +1000)
+* 5050bf3d1 - Update README.md (Beth Skurrie, Thu Jun 25 09:54:56 2020 +1000)
+* c8deaede1 - docs: move contributing info from wiki into repo (Beth Skurrie, Thu Jun 25 09:49:15 2020 +1000)
+* dd6a87081 - docs: update link to pact ruby (Beth Skurrie, Thu Jun 25 09:42:37 2020 +1000)
+* 6dce948a2 - style: whitspace (Beth Skurrie, Thu Jun 25 08:23:55 2020 +1000)
+* 3a611a54c - chore: use github's inbuilt file pattern to trigger docs update workflow (Beth Skurrie, Thu Jun 25 08:18:53 2020 +1000)
+* 94a7208a8 - docs: whitespace change to trigger build (Beth Skurrie, Thu Jun 25 07:54:17 2020 +1000)
+* d32261da1 - chore: correct expansion (Beth Skurrie, Thu Jun 25 07:48:18 2020 +1000)
+* ae55ac77f - chore: try to escape the * char so it's not expanded before passing it in to the detect changes command (Beth Skurrie, Thu Jun 25 07:45:54 2020 +1000)
+* ea9705968 - docs: change link so it works on docs.pact.io as well (Beth Skurrie, Thu Jun 25 07:33:33 2020 +1000)
+* 7634934cb - docs: change link so it works on docs.pact.io as well (Beth Skurrie, Thu Jun 25 07:32:02 2020 +1000)
+* 0c367081b - docs: update http link to https (Beth Skurrie, Wed Jun 24 20:15:41 2020 +1000)
+* 3c965112a - docs: update slack links to https (Beth Skurrie, Wed Jun 24 20:13:54 2020 +1000)
+* 42506b2e8 - chore: add workflow to trigger docs sync to docs.pact.io (Beth Skurrie, Wed Jun 24 20:11:47 2020 +1000)
+* 8eb7f1b90 - Revert "Update README.md" (Beth Skurrie, Wed Jun 24 18:50:58 2020 +1000)
+* 9570f5909 - Revert "Update README.md" (Beth Skurrie, Wed Jun 24 18:50:47 2020 +1000)
+* 19004a6a2 - Revert "Update README.md" (Beth Skurrie, Wed Jun 24 18:50:38 2020 +1000)
+* b3b6fc451 - Revert "Update README.md" (Beth Skurrie, Wed Jun 24 18:50:22 2020 +1000)
+* 829dbb0a2 - Update README.md (Beth Skurrie, Wed Jun 24 17:12:18 2020 +1000)
+* 66f9099ee - Update README.md (Beth Skurrie, Wed Jun 24 17:11:37 2020 +1000)
+* 4aa70ddf4 - Update README.md (Beth Skurrie, Wed Jun 24 17:10:27 2020 +1000)
+* e60b9df93 - Update README.md (Beth Skurrie, Wed Jun 24 17:08:26 2020 +1000)
+* 73676f96a - Merge pull request #1143 from pendsley/feat/junit-consumer-version-selectors (Ronald Holshausen, Wed Jun 24 09:15:51 2020 +1000)
+* e4dd8ea02 - Remove default value for VersionSelector tag. Set consumer version selector tag to latest if no tag is specified when fetching pacts. (Phil Endsley, Mon Jun 22 09:42:26 2020 -0500)
+* 03222ad27 - feat: Allow explicitly setting consumerVersionSelectors through PactBroker annotation. (Phil Endsley, Sun Jun 21 21:15:37 2020 -0500)
+* 7a34daeaa - Merge pull request #1135 from ivangsa/pact-jvm-provider-maven (Ronald Holshausen, Sat Jun 20 13:05:59 2020 +1000)
+* 77b9d4bf6 - bump version to 4.1.5 (anto, Fri Jun 19 17:38:34 2020 +0100)
+* c0c3fbbd0 - maven-plugin: adds support to configure pact-publish via command line options (Iván García Sainz-Aja, Thu Jun 18 10:57:37 2020 +0200)
+
 # 4.1.4 - bugfixes & enhancements
 
 * 7a9733fd4 - Merge pull request #1141 from anto-ac/add-more-backwards-compatibility-with-dates (Antonello Caboni, Fri Jun 19 13:44:54 2020 +0100)
