@@ -9,6 +9,7 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.junit5.TestTarget
 import mu.KLogging
 import org.apache.commons.lang3.StringUtils
+import org.hamcrest.core.IsAnything
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
@@ -154,7 +155,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
         val resultActions = mockMvc.perform(requestBuilder)
         return if (resultActions.andReturn().request.isAsyncStarted) {
             mockMvc.perform(MockMvcRequestBuilders.asyncDispatch(resultActions
-              .andExpect(MockMvcResultMatchers.request().asyncResult(anything()))
+              .andExpect(MockMvcResultMatchers.request().asyncResult<Any>(IsAnything()))
               .andReturn()))
         } else {
             resultActions
