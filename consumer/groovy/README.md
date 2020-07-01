@@ -486,7 +486,7 @@ withBody {
 }
 ```
 
-For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
+For an example, have a look at [WildcardPactSpec](consumer/groovy/src/test/groovy/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
 
 **NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
