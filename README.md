@@ -161,4 +161,4 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 
 ## I want to contribute
 
-[Documentation for contributors is here](CONTRIBUTING.md).
+[Documentation for contributors is here](https://github.com/DiUS/pact-jvm/blob/master/CONTRIBUTING.md).
