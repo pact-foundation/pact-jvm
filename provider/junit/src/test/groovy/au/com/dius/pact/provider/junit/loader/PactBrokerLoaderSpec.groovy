@@ -557,6 +557,73 @@ class PactBrokerLoaderSpec extends Specification {
     result.size() == 3
   }
 
+  def 'Falls back to tags when consumer version selectors are not specified'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationWithTags.getAnnotation(PactBroker)) {
+        @Override
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+          assert url.host == 'pactbroker.host'
+          assert url.port == 1000
+          brokerClient
+        }
+      }
+    }
+    def selectors = [
+      new ConsumerVersionSelector('master', true)
+    ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok([])
+  }
+
+  def 'Loads pacts with consumer version selectors when consumer version selectors and tags are both present'() {
+    given:
+    tags = ['master', 'prod']
+    consumerVersionSelectors = [createVersionSelector('demo', 'true')]
+    def expected = [
+      new PactBrokerResult('a', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('b', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('c', '', '', [], [], false, 'demo', false),
+      new PactBrokerResult('d', '', '', [], [], false, 'demo', false)
+    ]
+    def selectors = [ new ConsumerVersionSelector('demo', true) ]
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
+    0 * brokerClient._
+    result.size() == 4
+  }
+
+  def 'Loads pacts with no selectors when none are specified'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+          assert url.host == 'pactbroker.host'
+          assert url.port == 1000
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok([])
+  }
+
   def 'Does not loads wip pacts when pending is false'() {
     given:
     consumerVersionSelectors = [
@@ -847,6 +914,11 @@ class PactBrokerLoaderSpec extends Specification {
   @PactBroker(host = 'pactbroker.host',
           authentication = @PactBrokerAuth)
   static class PactBrokerAnnotationEmptyAuth {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host', port = '1000', tags = 'master')
+  static class PactBrokerAnnotationWithTags {
 
   }
 

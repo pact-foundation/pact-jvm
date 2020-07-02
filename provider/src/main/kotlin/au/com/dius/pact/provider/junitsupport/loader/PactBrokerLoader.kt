@@ -111,13 +111,13 @@ open class PactBrokerLoader(
   }
 
   private fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
-    return if (pactBrokerConsumerVersionSelectors.isEmpty()) {
+
+    return if (shouldFallBackToTags()) {
       pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }.map { ConsumerVersionSelector(it) }
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
-        val parsedTags = parseListExpression(it.tag, resolver)
+        val tags = parseListExpression(it.tag, resolver)
         val parsedLatest = parseListExpression(it.latest, resolver)
-        val tags = if (parsedTags.isEmpty()) listOf("latest") else parsedTags
         val latest = if (parsedLatest.isEmpty()) List(tags.size) { true.toString() } else parsedLatest
         if (tags.size != latest.size) {
           throw IllegalArgumentException("Invalid Consumer version selectors. Each version selector must have a tag " +
@@ -126,6 +126,11 @@ open class PactBrokerLoader(
         tags.mapIndexed { index, tag -> ConsumerVersionSelector(tag, latest[index].toBoolean()) }
       }
     }
+  }
+
+  private fun shouldFallBackToTags(): Boolean {
+    return pactBrokerConsumerVersionSelectors.isEmpty() ||
+      (pactBrokerConsumerVersionSelectors.size == 1 && parseListExpression(pactBrokerConsumerVersionSelectors[0].tag).isEmpty())
   }
 
   private fun setupValueResolver(): ValueResolver {
