@@ -46,9 +46,9 @@ open class PactPublishMojo : PactBaseMojo() {
       }
 
       val snapShotDefinitionString = "-SNAPSHOT"
-      val emptyString = ""
       if (trimSnapshot && projectVersion.contains(snapShotDefinitionString)) {
-          projectVersion = projectVersion.replaceFirst(snapShotDefinitionString, emptyString)
+        val snapshotRegex = Regex(".*($snapShotDefinitionString)")
+        projectVersion = projectVersion.removeRange(snapshotRegex.find(projectVersion)!!.groups[1]!!.range)
       }
 
       if (brokerClient == null) {

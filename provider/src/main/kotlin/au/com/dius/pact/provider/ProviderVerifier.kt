@@ -134,7 +134,7 @@ interface IProviderVerifier {
   /**
    * Callback to get the provider version
    */
-  var providerVersion: Supplier<String?>
+  var providerVersion: Supplier<String>
 
   /**
    * Callback to get the provider tag
@@ -228,13 +228,14 @@ interface IProviderVerifier {
  */
 @Suppress("TooManyFunctions")
 open class ProviderVerifier @JvmOverloads constructor (
+
   override var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
   override var executeBuildSpecificTask: BiConsumer<Any, ProviderState> = BiConsumer { _, _ -> },
   override var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
-  override var providerVersion: Supplier<String?> = Supplier { System.getProperty(PACT_PROVIDER_VERSION) },
+  override var providerVersion: Supplier<String> = ProviderVersion { System.getProperty(PACT_PROVIDER_VERSION) },
   override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) }
 ) : IProviderVerifier {
 
@@ -665,8 +666,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         publishingResultsDisabled() -> reporters.forEach {
           it.warnPublishResultsSkippedBecauseDisabled(PACT_VERIFIER_PUBLISH_RESULTS)
         }
-        else -> verificationReporter.reportResults(pact, result.toTestResult(), providerVersion.get() ?: "0.0.0",
-          client, providerTag?.get())
+        else -> verificationReporter.reportResults(pact, result.toTestResult(), providerVersion.get(), client, providerTag?.get())
       }
       result
     }

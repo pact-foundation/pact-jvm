@@ -9,6 +9,7 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.ProviderVersion
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.reporters.ReporterManager
 import org.apache.maven.plugin.MojoFailureException
@@ -62,7 +63,7 @@ open class PactProviderMojo : PactBaseMojo() {
         "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
       verifier.checkBuildSpecificTask = Function { false }
-      verifier.providerVersion = Supplier { ProviderUtils.getProviderVersion(projectVersion) }
+      verifier.providerVersion = ProviderVersion { projectVersion }
 
       verifier.projectClasspath = Supplier { classpathElements.map { File(it).toURI().toURL() } }
 
