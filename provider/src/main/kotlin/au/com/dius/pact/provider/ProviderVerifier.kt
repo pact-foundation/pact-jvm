@@ -666,7 +666,11 @@ open class ProviderVerifier @JvmOverloads constructor (
         publishingResultsDisabled() -> reporters.forEach {
           it.warnPublishResultsSkippedBecauseDisabled(PACT_VERIFIER_PUBLISH_RESULTS)
         }
-        else -> verificationReporter.reportResults(pact, result.toTestResult(), providerVersion.get(), client, providerTag?.get())
+        else -> verificationReporter.reportResults(pact,
+          result.toTestResult(),
+          providerVersion.get(),
+          client,
+          providerTag?.get())
       }
       result
     }
