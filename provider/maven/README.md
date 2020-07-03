@@ -260,7 +260,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|
-|`pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
+|`pact.content_type.override.<TYPE>.<SUBTYPE>=text\|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
 
 Example in the configuration section:
 
