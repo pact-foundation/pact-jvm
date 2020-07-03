@@ -354,9 +354,10 @@ fun <M : Mismatch> matchDateTime(
     } catch (e: DateTimeParseException) {
       try {
         logger.warn {
-          """Unable to parse ${valueOf(actual)} with $pattern using java.time.format.DateTimeFormatter.
-          Attempting to parse using org.apache.commons.lang3.time.DateUtils 
-          to guarantee backwards compatibility with versions < 4.1.1.
+          """Failed to parse ${valueOf(actual)} with '$pattern' using java.time.format.DateTimeFormatter.
+          Exception was: ${e.message}.
+          Will attempt to parse using org.apache.commons.lang3.time.DateUtils to guarantee backwards 
+          compatibility with versions < 4.1.1.
           Please update your patterns in your pact tests as this may not be supported in future versions."""
         }
         DateUtils.parseDate(safeToString(actual), pattern)
