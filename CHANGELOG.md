@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.6 - Bugfix Release
+
+* 8807d254c - fix: fix a problem where the provider version trim property is ignored (#1156) (e-ivaldi, Fri Jul 3 07:15:05 2020 +0100)
+* a5765fd76 - fix: Omitting consumer version selectors should fall back to tags (#1158) (pendsley, Fri Jul 3 00:55:59 2020 -0500)
+* 2e9b03c55 - chore: add Kotlin version of PactProviderWithMultipleFragmentsTest (Ronald Holshausen, Fri Jul 3 15:42:53 2020 +1000)
+* bba89eddd - Merge pull request #1155 from JoaoGFarias/patch-2 (Ronald Holshausen, Fri Jul 3 11:28:27 2020 +1000)
+* eb4747d06 - Merge pull request #1152 from anto-ac/show-exception-message-when-falling-back (Ronald Holshausen, Fri Jul 3 11:27:43 2020 +1000)
+* 0406b5521 - Fixing escaping typo that causes table to be misformatted (João Farias, Thu Jul 2 09:44:02 2020 +0200)
+* aa3608f2c - docs: update url to wildcard keys spec (Beth Skurrie, Wed Jul 1 21:43:34 2020 +1000)
+* c3f9b86e2 - docs: update url to wildcard keys spec (Beth Skurrie, Wed Jul 1 21:42:33 2020 +1000)
+* 1f852b048 - docs: update link to wildcard spec (Beth Skurrie, Wed Jul 1 21:21:45 2020 +1000)
+* d2579af96 - docs: update link to wildcard spec (Beth Skurrie, Wed Jul 1 21:19:00 2020 +1000)
+* c5d4e01f6 - chore: improve logging when falling back to DateUtils.parseDate (anto, Wed Jul 1 08:09:36 2020 +0100)
+* e9966cd5d - docs: make link to CONTRIBUTING absolute (Beth Skurrie, Wed Jul 1 14:14:04 2020 +1000)
+* 5a6022a10 - bump version to 4.1.6 (Ronald Holshausen, Sat Jun 27 11:53:50 2020 +1000)
+
 # 4.1.5 - consumerVersionSelectors in JUnit
 
 * 51140f684 - docs: update link to work on docs.pact.io (Beth Skurrie, Fri Jun 26 16:10:46 2020 +1000)
