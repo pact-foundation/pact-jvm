@@ -9,13 +9,13 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.junit5.TestTarget
 import mu.KLogging
 import org.apache.commons.lang3.StringUtils
+import org.hamcrest.core.IsAnything
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.test.web.client.match.MockRestRequestMatchers.anything
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.ResultActions
@@ -154,7 +154,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
         val resultActions = mockMvc.perform(requestBuilder)
         return if (resultActions.andReturn().request.isAsyncStarted) {
             mockMvc.perform(MockMvcRequestBuilders.asyncDispatch(resultActions
-              .andExpect(MockMvcResultMatchers.request().asyncResult(anything()))
+              .andExpect(MockMvcResultMatchers.request().asyncResult<Any>(IsAnything()))
               .andReturn()))
         } else {
             resultActions
