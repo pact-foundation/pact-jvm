@@ -96,7 +96,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   }
 
   fun lookupProviderVersion(): String {
-    val version = System.getProperty("pact.provider.version")
+    val version = ProviderVersion { System.getProperty("pact.provider.version") }.get()
     return if (version.isNullOrEmpty()) {
       logger.warn { "Set the provider version using the 'pact.provider.version' property. Defaulting to '0.0.0'" }
       "0.0.0"

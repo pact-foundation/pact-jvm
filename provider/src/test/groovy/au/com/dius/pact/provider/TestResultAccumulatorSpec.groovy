@@ -41,6 +41,16 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.lookupProviderVersion() == '0.0.0'
   }
 
+  @RestoreSystemProperties
+  def 'lookupProviderVersion - trims snapshot if system property is set'() {
+    given:
+    System.setProperty('pact.provider.version', '1.2.3-SNAPSHOT')
+    System.setProperty('pact.provider.version.trimSnapshot', 'true')
+
+    expect:
+    testResultAccumulator.lookupProviderVersion() == '1.2.3'
+  }
+
   @Unroll
   @SuppressWarnings('LineLength')
   def 'allInteractionsVerified returns #result when #condition'() {

@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
 import org.apache.commons.io.FilenameUtils
-import org.apache.commons.lang3.BooleanUtils
 import java.io.File
 
 /**
@@ -69,24 +68,5 @@ object ProviderUtils {
 
   fun isS3Url(pactFile: Any?): Boolean {
     return pactFile is String && pactFile.toLowerCase().startsWith("s3://")
-  }
-
-  @JvmStatic
-  fun getProviderVersion(projectVersion: String): String {
-    val trimSnapshotProperty = System.getProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT)
-    val isTrimSnapshot: Boolean = if (trimSnapshotProperty == null || trimSnapshotProperty.isBlank()) {
-      false
-    } else {
-      BooleanUtils.toBoolean(trimSnapshotProperty)
-    }
-    return if (isTrimSnapshot) trimSnapshot(projectVersion) else projectVersion
-  }
-
-  private fun trimSnapshot(providerVersion: String): String {
-    val SNAPSHOT_STRING = "-SNAPSHOT"
-    if (providerVersion.contains(SNAPSHOT_STRING)) {
-      return providerVersion.replaceFirst(SNAPSHOT_STRING, "")
-    }
-    return providerVersion
   }
 }

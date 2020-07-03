@@ -106,16 +106,22 @@ class PactPublishMojoSpec extends Specification {
         assert mojo.projectVersion == '1.0.0'
     }
 
-    def 'trimSnapshot=true removes the "-SNAPSHOT" in the middle'() {
+    def 'trimSnapshot=true removes the last occurrence of "-SNAPSHOT"'() {
         given:
-        mojo.projectVersion = '1.0.0-SNAPSHOT-3ffe453efr'
+        mojo.projectVersion = projectVersion
         mojo.trimSnapshot = true
 
         when:
         mojo.execute()
 
         then:
-        assert mojo.projectVersion == '1.0.0-3ffe453efr'
+        assert mojo.projectVersion == result
+
+        where:
+        projectVersion                              | result
+        '1.0.0-NOT-A-SNAPSHOT-abc-SNAPSHOT'         | '1.0.0-NOT-A-SNAPSHOT-abc'
+        '1.0.0-NOT-A-SNAPSHOT-abc-SNAPSHOT-re234hj' | '1.0.0-NOT-A-SNAPSHOT-abc-re234hj'
+        '1.0.0-SNAPSHOT-re234hj'                    | '1.0.0-re234hj'
     }
 
     def 'trimSnapshot=false leaves version unchanged'() {

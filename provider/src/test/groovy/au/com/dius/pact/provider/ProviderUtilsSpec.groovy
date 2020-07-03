@@ -2,7 +2,6 @@ package au.com.dius.pact.provider
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings('UnnecessaryBooleanExpression')
 class ProviderUtilsSpec extends Specification {
@@ -73,56 +72,6 @@ class ProviderUtilsSpec extends Specification {
     new ProviderInfo() | new ConsumerInfo(packagesToScan: ['a.b.c']) || ['a.b.c']
     new ProviderInfo(packagesToScan: ['d.e.f']) | new ConsumerInfo(packagesToScan: ['a.b.c']) || ['a.b.c']
     new ProviderInfo(packagesToScan: ['d.e.f']) | new ConsumerInfo() || ['d.e.f']
-  }
-
-  @RestoreSystemProperties
-  def 'provider versions with trim snapshot property true' () {
-
-    expect:
-    ProviderUtils.getProviderVersion(projectVersion) == result
-
-    where:
-    systemProperty | projectVersion || result
-    System.setProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'true') |
-            '1.0.0-SNAPSHOT-re234hj' |
-            '1.0.0-re234hj'
-  }
-
-  @RestoreSystemProperties
-  def 'provider versions with trim snapshot property false' () {
-
-    expect:
-    ProviderUtils.getProviderVersion(projectVersion) == result
-
-    where:
-    systemProperty | projectVersion || result
-    System.setProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'false') |
-            '1.0.0-SNAPSHOT-re234hj' |
-            '1.0.0-SNAPSHOT-re234hj'
-  }
-
-  @RestoreSystemProperties
-  def 'provider versions with trim snapshot property wrong value' () {
-
-    expect:
-    ProviderUtils.getProviderVersion(projectVersion) == result
-
-    where:
-    systemProperty | projectVersion || result
-    System.setProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'aweirdstring') |
-            '1.0.0-SNAPSHOT-re234hj' |
-            '1.0.0-SNAPSHOT-re234hj'
-  }
-
-  @RestoreSystemProperties
-  def 'provider versions with trim snapshot property not set' () {
-
-    expect:
-    ProviderUtils.getProviderVersion(projectVersion) == result
-
-    where:
-    systemProperty | projectVersion || result
-    _ | '1.0.0-SNAPSHOT-re234hj' | '1.0.0-SNAPSHOT-re234hj'
   }
 
 }
