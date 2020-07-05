@@ -20,8 +20,35 @@ open class PactCreateVersionTagMojo : PactBaseMojo() {
   @Parameter(property = "pacticipantVersion")
   private var pacticipantVersion: String? = ""
 
+  @Parameter(property = "tag")
+  private var tag: String? = ""
+
   override fun execute() {
-    TODO("Not yet implemented")
+    checkMandatoryArguments()
   }
+
+  private fun checkMandatoryArguments() {
+    dealWithNotProvidedPactURL()
+    dealWithNotProvidedPacticipant()
+    dealWithNotProvidedPacticipantVersion()
+    dealWithNotProvidedTag()
+  }
+
+  private fun dealWithNotProvidedTag() =
+      dealWithNotProvidedArgument(tag, "tag")
+
+  private fun dealWithNotProvidedArgument(argument: String?, argumentName: String) {
+    if (argument.isNullOrEmpty())
+      throw MojoExecutionException("$argumentName is required")
+  }
+
+  private fun dealWithNotProvidedPacticipantVersion() =
+      dealWithNotProvidedArgument(pacticipantVersion, "pacticipantVersion")
+
+  private fun dealWithNotProvidedPacticipant() =
+      dealWithNotProvidedArgument(pacticipant, "pacticipant")
+
+  private fun dealWithNotProvidedPactURL() =
+      dealWithNotProvidedArgument(pactBrokerUrl, "pactBrokerUrl")
 
 }
