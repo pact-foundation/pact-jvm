@@ -393,6 +393,8 @@ public class PactJUnitTest {
 }
 ```
 
+**NOTE!** You will only be able to publish the verification results if all interactions have been verified. If an interaction is not covered because it was filtered out, you will not be able to publish.
+
 ##### Filtering the interactions that are run
 
 **(version 4.1.2+)**
