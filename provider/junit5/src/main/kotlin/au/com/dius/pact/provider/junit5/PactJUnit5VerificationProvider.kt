@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.ProviderState
@@ -295,7 +296,11 @@ class PactVerificationExtension(
   override fun afterTestExecution(context: ExtensionContext) {
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
-    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult, pactSource)
+    if (pact is FilteredPact) {
+      testResultAccumulator.updateTestResult(pact.pact, interaction, testContext.testExecutionResult, pactSource)
+    } else {
+      testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult, pactSource)
+    }
   }
 
   companion object : KLogging()
