@@ -3,7 +3,6 @@ dependencies {
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   api "com.google.code.gson:gson:${project.gsonVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
-  compile 'org.dmfs:rfc3986-uri:0.8'
   compile('io.github.microutils:kotlin-logging:1.6.26') {
     exclude group: 'org.jetbrains.kotlin'
   }

@@ -16,7 +16,6 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.unwrap
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import mu.KLogging
-import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
 import java.util.function.Consumer
@@ -102,7 +101,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       val halClient = newHalClient()
       val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS).forAll(PACTS, Consumer { pact ->
-        val href = Precoded(pact["href"].toString()).decoded().toString()
+        val href = pact["href"].toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
@@ -127,7 +126,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider, "tag" to tag), LATEST_PROVIDER_PACTS_WITH_TAG)
         .forAll(PACTS, Consumer { pact ->
-        val href = Precoded(pact["href"].toString()).decoded().toString()
+        val href = pact["href"].toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag = tag))
@@ -174,7 +173,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
         halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.serialise()).map { result ->
           result["_embedded"]["pacts"].asArray().map { pactJson ->
             val selfLink = pactJson["_links"]["self"]
-            val href = Precoded(Json.toString(selfLink["href"])).decoded().toString()
+            val href = Json.toString(selfLink["href"])
             val name = Json.toString(selfLink["name"])
             val properties = pactJson["verificationProperties"]
             val notices = properties["notices"].asArray()

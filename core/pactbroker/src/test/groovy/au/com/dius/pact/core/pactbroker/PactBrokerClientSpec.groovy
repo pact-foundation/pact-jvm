@@ -75,7 +75,7 @@ class PactBrokerClientSpec extends Specification {
     consumers == []
   }
 
-  def 'when fetching consumers, decodes the URLs to the pacts'() {
+  def 'when fetching consumers, does not decode the URLs to the pacts'() {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate() >> halClient
@@ -92,7 +92,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     consumers != []
     consumers.first().name == 'bob'
-    consumers.first().source == 'http://bob.com/a b/100+ab'
+    consumers.first().source == 'http://bob.com/a%20b/100+ab'
   }
 
   def 'fetches consumers with specified tag successfully'() {
@@ -166,7 +166,7 @@ class PactBrokerClientSpec extends Specification {
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
   }
 
-  def 'when fetching consumers with specified tag, decodes the URLs to the pacts'() {
+  def 'when fetching consumers with specified tag, does not decode the URLs to the pacts'() {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate() >> halClient
@@ -184,7 +184,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     consumers != []
     consumers.first().name == 'bob'
-    consumers.first().source == 'http://bob.com/a b/100+ab'
+    consumers.first().source == 'http://bob.com/a%20b/100+ab'
   }
 
   def 'when fetching consumers with specified tag for an unknown provider, returns an empty pacts list'() {
@@ -401,7 +401,7 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Ok(jsonResult)
     result instanceof Ok
     result.value.first() == new PactBrokerResult('Pact between Foo Web Client (1.0.2) and Activity Service',
-      'https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727',
+      'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727',
       'baseUrl', [], [
         new VerificationNotice('before_verification',
          'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')

@@ -65,6 +65,9 @@ data class BrokerUrlSource @JvmOverloads constructor(
   val tag: String? = null,
   val result: PactBrokerResult? = null
 ) : UrlPactSource() {
+  init {
+    encodePath = false
+  }
   override fun description() = if (tag == null) "Pact Broker $url" else "Pact Broker $url (Tag $tag)"
 
   companion object {
