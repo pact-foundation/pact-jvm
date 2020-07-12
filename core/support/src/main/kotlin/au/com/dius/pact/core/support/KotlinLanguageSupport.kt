@@ -31,7 +31,7 @@ public fun String?.toUrl() = if (this.isNullOrEmpty()) {
   URL(this)
 }
 
-public fun <F> handleWith(f: () -> Any): Result<F, Exception> {
+public fun <F> handleWith(f: () -> Any?): Result<F, Exception> {
   return try {
     val result = f()
     if (result is Result<*, *>) result as Result<F, Exception> else Ok(result as F)

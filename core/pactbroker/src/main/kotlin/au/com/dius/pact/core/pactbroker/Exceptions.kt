@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
+import org.apache.http.StatusLine
+
 /**
  * This exception is thrown when we don't receive a HAL response from the broker
  */
@@ -13,7 +15,11 @@ open class NotFoundHalResponse @JvmOverloads constructor(override val message: S
 /**
   * General request failed exception
   */
-open class RequestFailedException(override val message: String) : RuntimeException(message)
+open class RequestFailedException(
+  val status: StatusLine,
+  val body: String?,
+  message: String = "Request failed with $status"
+) : RuntimeException(message)
 
 /**
  * This exception is raised when an invalid navigation is attempted

@@ -33,7 +33,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(true)
+    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -53,8 +53,8 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(true) >>
-            new Err(new RuntimeException('FAILED! Bang')) >> new Ok(true)
+    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(null) >>
+            new Err(new RuntimeException('FAILED! Bang')) >> new Ok(null)
     thrown(MojoExecutionException)
 
     cleanup:
@@ -163,7 +163,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, tags) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(_, _, tags) >> new Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -184,7 +184,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, ['1', '2', '3']) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(_, _, ['1', '2', '3']) >> new Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -209,7 +209,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(file1, _, []) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(file1, _, []) >> new Ok(null)
     0 * brokerClient.uploadPactFile(file2, _, [])
     0 * brokerClient.uploadPactFile(file3, _, [])
     0 * brokerClient.uploadPactFile(file4, _, [])

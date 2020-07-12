@@ -230,7 +230,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    result.value
+    result instanceof Ok
   }
 
   def 'uploading a JSON doc returns an error'() {
@@ -247,7 +247,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    !result.value
+    result instanceof Err
   }
 
   def 'uploading a JSON doc unsuccessful due to 409'() {
@@ -264,7 +264,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    !result.value
+    result instanceof Err
   }
 
   @Unroll

@@ -1,12 +1,13 @@
 package broker
 
-import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
-import com.github.michaelbull.result.Ok
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
 @SuppressWarnings(['UnnecessaryGetter', 'LineLength', 'NestedBlockDepth', 'AbcMetric', 'MethodSize'])
@@ -72,7 +73,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Ok
     }
 
     then:
@@ -106,7 +107,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value == false
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Err
     }
 
     then:
@@ -116,6 +117,8 @@ class PactBrokerClientPactSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'returns an error if the pact broker rejects the pact'() {
     given:
+    def body = '{"errors":{"consumer_version_number":["Consumer version number \'XXX\' cannot be parsed to a version ' +
+      'number. The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1"]}}'
     pactBroker {
       uponReceiving('a HAL navigate request')
       withAttributes(method: 'GET', path: '/')
@@ -135,22 +138,14 @@ class PactBrokerClientPactSpec extends Specification {
         path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/XXXX',
         body: pactContents
       )
-      willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'],
-        body: '''
-        |{
-        |  "errors": {
-        |    "consumer_version_number": [
-        |      "Consumer version number 'XXX' cannot be parsed to a version number. The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1"
-        |    ]
-        |  }
-        |}
-        '''.stripMargin()
-      )
+      willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'], body: body)
     }
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX').value == false
+      def result = pactBrokerClient.uploadPactFile(pactFile, 'XXXX')
+      assert result instanceof Err
+      assert result.error.body == body
     }
 
     then:
@@ -160,6 +155,14 @@ class PactBrokerClientPactSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'returns an error if the pact broker rejects the pact with a conflict'() {
     given:
+    def body = '''
+        |This is the first time a pact has been published for "Foo Consumer".
+        |The name "Foo Consumer" is very similar to the following existing consumers/providers:
+        |Consumer
+        |If you meant to specify one of the above names, please correct the pact configuration, and re-publish the pact.
+        |If the pact is intended to be for a new consumer or provider, please manually create "Foo Consumer" using the following command, and then re-publish the pact:
+        |$ curl -v -XPOST -H "Content-Type: application/json" -d "{\\"name\\": \\"Foo Consumer\\"}" %{create_pacticipant_url}
+        '''.stripMargin()
     pactBroker {
       uponReceiving('a HAL navigate request')
       withAttributes(method: 'GET', path: '/')
@@ -179,21 +182,14 @@ class PactBrokerClientPactSpec extends Specification {
         path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
-      willRespondWith(status: 409, headers: ['Content-Type': 'text/plain'],
-        body: '''
-        |This is the first time a pact has been published for "Foo Consumer".
-        |The name "Foo Consumer" is very similar to the following existing consumers/providers:
-        |Consumer
-        |If you meant to specify one of the above names, please correct the pact configuration, and re-publish the pact.
-        |If the pact is intended to be for a new consumer or provider, please manually create "Foo Consumer" using the following command, and then re-publish the pact:
-        |$ curl -v -XPOST -H "Content-Type: application/json" -d "{\\"name\\": \\"Foo Consumer\\"}" %{create_pacticipant_url}
-        '''.stripMargin()
-      )
+      willRespondWith(status: 409, headers: ['Content-Type': 'text/plain'], body: body)
     }
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value == false
+      def result = pactBrokerClient.uploadPactFile(pactFile, '10.0.0')
+      assert result instanceof Err
+      assert result.error.body == body
     }
 
     then:
@@ -229,7 +225,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = imaginaryBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value == false
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Err
     }
 
     then:

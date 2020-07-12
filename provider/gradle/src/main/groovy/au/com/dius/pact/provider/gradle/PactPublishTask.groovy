@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.RequestFailedException
 import com.github.michaelbull.result.Ok
 import groovy.io.FileType
 import org.apache.commons.io.FilenameUtils
@@ -58,14 +59,12 @@ class PactPublishTask extends DefaultTask {
             }
             result = brokerClient.uploadPactFile(pactFile, version, pactPublish.tags)
             if (result instanceof Ok) {
-              if (result.value) {
-                println('OK')
-              } else {
-                println('Failed')
-                anyFailed = true
-              }
+              println('OK')
             } else {
               println("Failed - ${result.error.message}")
+              if (result.error instanceof RequestFailedException && result.error.body) {
+                println(result.error.body)
+              }
               anyFailed = true
             }
           }

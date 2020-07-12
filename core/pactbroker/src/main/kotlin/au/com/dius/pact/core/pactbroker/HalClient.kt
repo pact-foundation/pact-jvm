@@ -114,7 +114,7 @@ interface IHalClient {
   /**
    * Upload a JSON document to the current path link, using a PUT request
    */
-  fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception>
+  fun putJson(link: String, options: Map<String, Any>, json: String): Result<String?, Exception>
 
   /**
    * Upload a JSON document to the current path link, using a POST request
@@ -293,7 +293,11 @@ open class HalClient @JvmOverloads constructor(
     } else {
       when (response.statusLine.statusCode) {
         404 -> Err(NotFoundHalResponse("No HAL document found at path '$path'"))
-        else -> Err(RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'"))
+        else -> {
+          val body = if (response.entity != null) EntityUtils.toString(response.entity) else null
+          Err(RequestFailedException(response.statusLine, body,
+            "Request to path '$path' failed with response '${response.statusLine}'"))
+        }
       }
     }
   }
@@ -435,7 +439,7 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  override fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception> {
+  override fun putJson(link: String, options: Map<String, Any>, json: String): Result<String?, Exception> {
     val href = hrefForLink(link, options)
     val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href.first, href.second)))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
@@ -444,10 +448,10 @@ open class HalClient @JvmOverloads constructor(
     return handleWith {
       httpClient!!.execute(httpPut, httpContext).use {
         when {
-          it.statusLine.statusCode < 300 -> true
+          it.statusLine.statusCode < 300 -> if (it.entity != null) EntityUtils.toString(it.entity) else null
           else -> {
             logger.error { "PUT JSON request failed with status ${it.statusLine}" }
-            false
+            Err(RequestFailedException(it.statusLine, if (it.entity != null) EntityUtils.toString(it.entity) else null))
           }
         }
       }

@@ -55,7 +55,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
   }
 
   def 'failure to publish'() {
@@ -90,7 +90,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]]) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
   }
 
   def 'passes in bearer token to the broker client'() {
@@ -108,7 +108,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']]) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
   }
 
   def 'passes in any tags to the broker client'() {
@@ -125,7 +125,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, ['tag1']) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(_, _, ['tag1']) >> new Ok(null)
   }
 
   def 'allows pact files to be excluded from publishing'() {
@@ -150,7 +150,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(pactFile, _, []) >> new Ok(true)
+    1 * brokerClient.uploadPactFile(pactFile, _, []) >> new Ok(null)
     0 * brokerClient.uploadPactFile(excluded[0], _, [])
     0 * brokerClient.uploadPactFile(excluded[1], _, [])
     0 * brokerClient.uploadPactFile(excluded[2], _, [])

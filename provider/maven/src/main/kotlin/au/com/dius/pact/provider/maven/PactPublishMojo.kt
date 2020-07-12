@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.RequestFailedException
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -73,14 +74,13 @@ open class PactPublishMojo : PactBaseMojo() {
               print("Publishing '${pactFile.name}' ... ")
             }
             when (val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tagsToPublish)) {
-                is Ok -> if (result.value) {
-                  println("OK")
-                } else {
-                  println("Failed")
-                  anyFailed = true
-                }
+                is Ok -> println("OK")
                 is Err -> {
+                  val error = result.error
                   println("Failed - ${result.error.message}")
+                  if (error is RequestFailedException && error.body.isNotEmpty()) {
+                    println(error.body)
+                  }
                   anyFailed = true
                 }
               }

@@ -213,7 +213,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     pactFile: File,
     unescapedVersion: String,
     tags: List<String> = emptyList()
-  ): Result<Boolean, Exception> {
+  ): Result<String?, Exception> {
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
