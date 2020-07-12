@@ -716,7 +716,7 @@ pact {
 ```
 
 _NOTE:_ The pact broker requires a version for all published pacts. The `pactPublish` task will use the version of the
-gradle project by default. You can override this with the `providerVersion` property. Make sure you have set one 
+gradle project by default. You can override this with the `consumerVersion` property. Make sure you have set one 
 otherwise the broker will reject the pact files.
 
 ## Publishing to an authenticated pact broker

@@ -27,7 +27,7 @@ class PactPublishTask extends DefaultTask {
         if (pactPublish.pactDirectory == null) {
             pactPublish.pactDirectory = project.file("${project.buildDir}/pacts")
         }
-        def version = pactPublish.providerVersion
+        def version = pactPublish.consumerVersion ?: pactPublish.providerVersion
         if (version == null) {
           version = project.version
         } else if (version instanceof Closure) {
