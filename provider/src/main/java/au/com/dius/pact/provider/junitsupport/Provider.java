@@ -16,5 +16,5 @@ public @interface Provider {
     /**
      * @return provider name for pact test running
      */
-    String value();
+    String value() default "";
 }

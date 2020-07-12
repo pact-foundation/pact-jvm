@@ -19,6 +19,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
+import java.util.stream.Collectors
+
 @SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
 class PactVerificationInvocationContextProviderSpec extends Specification {
 
@@ -48,6 +50,13 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @PactFolder('pacts')
   @IgnoreNoPactsToVerify
   static class TestClassWithNoPactsWithIgnore {
+    @TestTarget
+    Target target
+  }
+
+  @Provider
+  @PactFolder('pacts')
+  static class TestClassWithEmptyProvider {
     @TestTarget
     Target target
   }
@@ -226,4 +235,19 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     notThrown(UnsupportedOperationException)
   }
 
+  @Issue('#1160')
+  @RestoreSystemProperties
+  def 'supports provider name from system properties'() {
+    given:
+    System.setProperty('pact.provider.name', 'myAwesomeService')
+
+    when:
+    def extensions = provider.provideTestTemplateInvocationContexts([
+      'getTestClass': { Optional.of(TestClassWithEmptyProvider) } ] as ExtensionContext
+    ).collect(Collectors.toList())
+
+    then:
+    !extensions.empty
+    extensions.every { it.serviceName == 'myAwesomeService' }
+  }
 }

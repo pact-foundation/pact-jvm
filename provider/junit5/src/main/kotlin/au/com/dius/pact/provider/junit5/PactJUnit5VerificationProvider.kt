@@ -435,10 +435,15 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
   private fun resolvePactSources(context: ExtensionContext): Pair<List<PactVerificationExtension>, String> {
     var description = ""
     val providerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Provider::class.java)
-    if (!providerInfo.isPresent) {
-      throw UnsupportedOperationException("Provider name should be specified by using @${Provider::class.java.name} annotation")
+    val serviceName = if (providerInfo.isPresent && providerInfo.get().value.isNotEmpty()) {
+      providerInfo.get().value
+    } else {
+      System.getProperty("pact.provider.name")
     }
-    val serviceName = providerInfo.get().value
+    if (serviceName.isNullOrEmpty()) {
+      throw UnsupportedOperationException("Provider name should be specified by using either " +
+        "@${Provider::class.java.name} annotation or the 'pact.provider.name' system property")
+    }
     description += "Provider: $serviceName"
 
     val consumerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Consumer::class.java)
