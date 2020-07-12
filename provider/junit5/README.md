@@ -32,7 +32,7 @@ For details on the provider and pact source annotations, refer to the [Pact juni
 
 You can set the test target (the object that defines the target of the test, which should point to your provider) on the
 `PactVerificationContext`, but you need to do this in a before test method (annotated with `@BeforeEach`). There are three
-different test targets you can use: `HttpTestTarget`, `HttpsTestTarget` and `AmpqTestTarget`.
+different test targets you can use: `HttpTestTarget`, `HttpsTestTarget` and `MessageTestTarget`.
 
 For example:
 

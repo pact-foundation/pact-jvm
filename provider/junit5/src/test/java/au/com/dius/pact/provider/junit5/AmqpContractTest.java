@@ -26,7 +26,7 @@ public class AmqpContractTest {
 
   @BeforeEach
   void before(PactVerificationContext context) {
-    context.setTarget(new AmpqTestTarget());
+    context.setTarget(new MessageTestTarget());
   }
 
   @State("SomeProviderState")

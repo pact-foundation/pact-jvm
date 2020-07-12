@@ -148,7 +148,7 @@ open class HttpsTestTarget @JvmOverloads constructor (
  * @property packagesToScan List of packages to scan for methods with @PactVerifyProvider annotations. Defaults to the
  * full test classpath.
  */
-open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
+open class MessageTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
   override fun isHttpTarget() = false
 
   override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
@@ -196,3 +196,6 @@ open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : Test
     return emptyMap()
   }
 }
+
+@Deprecated("Use MessageTestTarget")
+open class AmpqTestTarget(packagesToScan: List<String> = emptyList()) : MessageTestTarget(packagesToScan)
