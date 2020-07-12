@@ -31,7 +31,7 @@ open class PactProviderMojo : PactBaseMojo() {
   private lateinit var classpathElements: List<String>
 
   @Parameter
-  var systemPropertyVariables: Map<String, String> = mutableMapOf()
+  var systemPropertyVariables: Map<String, String?> = mutableMapOf()
 
   @Parameter
   lateinit var serviceProviders: List<Provider>
@@ -53,7 +53,13 @@ open class PactProviderMojo : PactBaseMojo() {
 
   override fun execute() {
     systemPropertyVariables.forEach { (property, value) ->
-      System.setProperty(property, value)
+      if (value == null) {
+        log.warn("PactProviderVerifier: Can't set JVM system property '$property' to a NULL value. " +
+          "You may have invalid configuration in your POM.")
+      } else {
+        log.debug("PactProviderVerifier: Setting JVM system property $property to value '$value'")
+        System.setProperty(property, value)
+      }
     }
 
     val verifier = providerVerifier().let { verifier ->
