@@ -1,11 +1,13 @@
 package au.com.dius.pact.provider.spring.junit5
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.ProviderResponse
 import au.com.dius.pact.provider.junit5.TestTarget
 import mu.KLogging
 import org.apache.commons.lang3.StringUtils
@@ -135,7 +137,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
 
     override fun isHttpTarget() = true
 
-    override fun executeInteraction(client: Any?, request: Any?): Map<String, Any> {
+    override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
         val mockMvcClient = client as MockMvc
         val requestBuilder = request as MockHttpServletRequestBuilder
         val mvcResult = performRequest(mockMvcClient, requestBuilder).andDo {
@@ -158,26 +160,25 @@ class MockMvcTestTarget @JvmOverloads constructor(
         }
     }
 
-    private fun handleResponse(httpResponse: MockHttpServletResponse): Map<String, Any> {
-        logger.debug { "Received response: ${httpResponse.status}" }
-        val response = mutableMapOf<String, Any>("statusCode" to httpResponse.status)
+    private fun handleResponse(httpResponse: MockHttpServletResponse): ProviderResponse {
+      logger.debug { "Received response: ${httpResponse.status}" }
 
-        val headers = mutableMapOf<String, List<String>>()
-        httpResponse.headerNames.forEach { headerName ->
-            headers[headerName] = listOf(httpResponse.getHeader(headerName))
-        }
-        response["headers"] = headers
+      val headers = mutableMapOf<String, List<String>>()
+      httpResponse.headerNames.forEach { headerName ->
+          headers[headerName] = listOf(httpResponse.getHeader(headerName))
+      }
 
-        if (httpResponse.contentType.isNullOrEmpty()) {
-            response["contentType"] = org.apache.http.entity.ContentType.APPLICATION_JSON
-        } else {
-            response["contentType"] = org.apache.http.entity.ContentType.parse(httpResponse.contentType)
-        }
-        response["data"] = httpResponse.contentAsString
+      val contentType = if (httpResponse.contentType.isNullOrEmpty()) {
+          ContentType.JSON
+      } else {
+          ContentType.fromString(httpResponse.contentType)
+      }
 
-        logger.debug { "Response: $response" }
+      val response = ProviderResponse(httpResponse.status, headers, contentType, httpResponse.contentAsString)
 
-        return response
+      logger.debug { "Response: $response" }
+
+      return response
     }
 
     override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {

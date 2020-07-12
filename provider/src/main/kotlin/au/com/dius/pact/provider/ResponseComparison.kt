@@ -44,11 +44,11 @@ data class ComparisonResult(
  * Utility class to compare responses
  */
 class ResponseComparison(
-  val expectedHeaders: Map<String, List<String>>,
-  val expectedBody: OptionalBody,
-  val isJsonBody: Boolean,
-  val actualResponseContentType: ContentType,
-  val actualBody: String?
+  private val expectedHeaders: Map<String, List<String>>,
+  private val expectedBody: OptionalBody,
+  private val isJsonBody: Boolean,
+  private val actualResponseContentType: ContentType,
+  private val actualBody: String?
 ) {
 
   fun statusResult(mismatches: List<Mismatch>) = mismatches.filterIsInstance<StatusMismatch>().firstOrNull()
@@ -105,18 +105,12 @@ class ResponseComparison(
     }
 
     @JvmStatic
-    fun compareResponse(
-      response: Response,
-      actualResponse: Map<String, Any>,
-      actualStatus: Int,
-      actualHeaders: Map<String, List<String>>,
-      actualBody: String?
-    ): ComparisonResult {
-      val actualResponseContentType = ContentType.fromString(actualResponse["contentType"]?.toString())
+    fun compareResponse(response: Response, actualResponse: ProviderResponse): ComparisonResult {
+      val actualResponseContentType = actualResponse.contentType
       val comparison = ResponseComparison(response.headers, response.body, response.jsonBody(),
-        actualResponseContentType, actualBody)
-      val mismatches = ResponseMatching.responseMismatches(response, Response(actualStatus,
-        actualHeaders.toMutableMap(), OptionalBody.body(actualBody?.toByteArray(
+        actualResponseContentType, actualResponse.body)
+      val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode,
+        actualResponse.headers.toMutableMap(), OptionalBody.body(actualResponse.body?.toByteArray(
         actualResponseContentType.asCharset()))), true)
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches))

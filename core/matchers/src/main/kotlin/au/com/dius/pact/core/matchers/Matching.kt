@@ -17,7 +17,7 @@ object Matching : KLogging() {
 
   @JvmStatic
   fun matchHeaders(expected: HttpPart, actual: HttpPart): List<HeaderMismatch> =
-    matchHeaders(expected.headers.orEmpty(), actual.headers.orEmpty(), expected.matchingRules)
+    matchHeaders(expected.headers, actual.headers, expected.matchingRules)
 
   @JvmStatic
   fun matchHeaders(

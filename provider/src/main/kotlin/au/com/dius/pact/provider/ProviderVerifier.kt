@@ -23,6 +23,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
+import au.com.dius.pact.provider.PactVerification.REQUEST_RESPONSE
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Err
@@ -201,7 +202,7 @@ interface IProviderVerifier {
    */
   fun verifyRequestResponsePact(
     expectedResponse: Response,
-    actualResponse: Map<String, Any>,
+    actualResponse: ProviderResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     interactionId: String,
@@ -310,7 +311,9 @@ open class ProviderVerifier @JvmOverloads constructor (
           val expectedResponse = (interaction as RequestResponseInteraction).response
           var result: VerificationResult = VerificationResult.Ok
           methodsAnnotatedWith.forEach {
-            val actualResponse = invokeProviderMethod(it, null) as Map<String, Any>
+            val response = invokeProviderMethod(it, null) as Map<String, Any>
+            val actualResponse = ProviderResponse(response["statusCode"] as Int,
+              response["headers"] as Map<String, List<String>>, ContentType.UNKNOWN, response["data"] as String?)
             result = result.merge(this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage,
               failures, interaction.interactionId.orEmpty(), consumer.pending))
           }
@@ -471,8 +474,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         "pending" to consumer.pending
       )
 
-      val result = if (ProviderUtils.verificationType(provider, consumer) ==
-        PactVerification.REQUEST_RESPONSE) {
+      val result = if (ProviderUtils.verificationType(provider, consumer) == REQUEST_RESPONSE) {
         logger.debug { "Verifying via request/response" }
         verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interactionMessage, failures,
           providerClient, context, consumer.pending)
@@ -512,15 +514,13 @@ open class ProviderVerifier @JvmOverloads constructor (
 
   override fun verifyRequestResponsePact(
     expectedResponse: Response,
-    actualResponse: Map<String, Any>,
+    actualResponse: ProviderResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     interactionId: String,
     pending: Boolean
   ): VerificationResult {
-    val comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
-      actualResponse["statusCode"] as Int, actualResponse["headers"] as Map<String, List<String>>,
-      actualResponse["data"] as String?)
+    val comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse)
 
     reporters.forEach { it.returnsAResponseWhich() }
 

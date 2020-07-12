@@ -650,6 +650,42 @@ class ProviderClientSpec extends Specification {
     ]
   }
 
+  @Issue('#1159')
+  def 'do not split header values for known single value headers'() {
+    given:
+    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    Header[] headers = [
+      new BasicHeader('Set-Cookie', 'JSESSIONID=alphabeta120394049,baaadbeef6767676767690220; Path=/alpha'),
+      new BasicHeader('WWW-Authenticate', 'Basic realm="Access to the staging site", charset="UTF-8"'),
+      new BasicHeader('Proxy-Authenticate', 'Basic realm="Access to the internal site, A"'),
+      new BasicHeader('Date', 'Wed, 21 Oct 2015 07:28:00 GMT'),
+      new BasicHeader('Expires', 'Wed, 21 Oct 2015 07:28:00 GMT'),
+      new BasicHeader('Last-Modified', 'Wed, 21 Oct 2015 07:28:00 GMT'),
+      new BasicHeader('If-Modified-Since', 'Wed, 21 Oct 2015 07:28:00 GMT'),
+      new BasicHeader('If-Unmodified-Since', 'Wed, 21 Oct 2015 07:28:00 GMT')
+    ] as Header[]
+    HttpResponse response = Mock(HttpResponse) {
+      getStatusLine() >> statusLine
+      getAllHeaders() >> headers
+    }
+
+    when:
+    def result = client.handleResponse(response)
+
+    then:
+    result.statusCode == 200
+    result.headers == [
+      'Set-Cookie': ['JSESSIONID=alphabeta120394049,baaadbeef6767676767690220; Path=/alpha'],
+      'WWW-Authenticate': ['Basic realm="Access to the staging site", charset="UTF-8"'],
+      'Proxy-Authenticate': ['Basic realm="Access to the internal site, A"'],
+      'Date': ['Wed, 21 Oct 2015 07:28:00 GMT'],
+      'Expires': ['Wed, 21 Oct 2015 07:28:00 GMT'],
+      'Last-Modified': ['Wed, 21 Oct 2015 07:28:00 GMT'],
+      'If-Modified-Since': ['Wed, 21 Oct 2015 07:28:00 GMT'],
+      'If-Unmodified-Since': ['Wed, 21 Oct 2015 07:28:00 GMT']
+    ]
+  }
+
   @Issue('#1013')
   def 'If no content type header is present, defaults to text/plain'() {
     given:

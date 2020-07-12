@@ -1,9 +1,11 @@
 package au.com.dius.pact.provider.spring
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.ProviderResponse
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
@@ -155,8 +157,8 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     val uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
     val query = request.query
-    if (query != null && query.isNotEmpty()) {
-      query.forEach { key, value ->
+    if (query.isNotEmpty()) {
+      query.forEach { (key, value) ->
         uriBuilder.queryParam(key, *value.toTypedArray())
       }
     }
@@ -178,22 +180,21 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     return httpHeaders
   }
 
-  fun handleResponse(httpResponse: MockHttpServletResponse): Map<String, Any> {
+  fun handleResponse(httpResponse: MockHttpServletResponse): ProviderResponse {
     logger.debug { "Received response: ${httpResponse.status}" }
-    val response = mutableMapOf<String, Any>("statusCode" to httpResponse.status)
 
     val headers = mutableMapOf<String, List<String>>()
     httpResponse.headerNames.forEach { headerName ->
       headers[headerName] = listOf(httpResponse.getHeader(headerName))
     }
-    response["headers"] = headers
 
-    if (httpResponse.contentType.isNullOrEmpty()) {
-      response["contentType"] = org.apache.http.entity.ContentType.APPLICATION_JSON
+    val contentType = if (httpResponse.contentType.isNullOrEmpty()) {
+      ContentType.JSON
     } else {
-      response["contentType"] = org.apache.http.entity.ContentType.parse(httpResponse.contentType.toString())
+      ContentType.fromString(httpResponse.contentType.toString())
     }
-    response["data"] = httpResponse.contentAsString
+
+    val response = ProviderResponse(httpResponse.status, headers, contentType, httpResponse.contentAsString)
 
     logger.debug { "Response: $response" }
 

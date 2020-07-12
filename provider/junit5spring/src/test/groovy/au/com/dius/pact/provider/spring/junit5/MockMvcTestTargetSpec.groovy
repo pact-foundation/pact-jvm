@@ -82,11 +82,11 @@ class MockMvcTestTargetSpec extends Specification {
         def requestBuilder = requestAndClient.first
         def client = requestAndClient.second
         when:
-        def responseMap = mockMvcTestTarget.executeInteraction(client, requestBuilder)
+        def response = mockMvcTestTarget.executeInteraction(client, requestBuilder)
         then:
-        responseMap.statusCode == 200
-        responseMap.contentType.mimeType == 'application/json'
-        responseMap.data == 'Hello 1234'
+        response.statusCode == 200
+        response.contentType.toString() == 'application/json'
+        response.body == 'Hello 1234'
     }
 
     def 'should execute interaction with custom mockMvc'() {
@@ -103,8 +103,8 @@ class MockMvcTestTargetSpec extends Specification {
         def responseMap = mockMvcTestTarget.executeInteraction(client, requestBuilder)
         then:
         responseMap.statusCode == 200
-        responseMap.contentType.mimeType == 'application/json'
-        responseMap.data == 'Hello 1234'
+        responseMap.contentType.toString() == 'application/json'
+        responseMap.body == 'Hello 1234'
     }
 
     @RestController

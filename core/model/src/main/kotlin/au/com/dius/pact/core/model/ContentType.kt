@@ -107,7 +107,7 @@ class ContentType(val contentType: MediaType?) {
     @JvmStatic
     val UNKNOWN = ContentType(null)
     @JvmStatic
-    val TEXT_PLAIN = ContentType("text/plain")
+    val TEXT_PLAIN = ContentType("text/plain; charset=ISO-8859-1")
     @JvmStatic
     val HTML = ContentType("text/html")
     @JvmStatic

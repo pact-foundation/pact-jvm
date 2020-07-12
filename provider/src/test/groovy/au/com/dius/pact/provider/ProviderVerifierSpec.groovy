@@ -2,6 +2,7 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPathExpression
@@ -26,7 +27,6 @@ import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Ok
 import groovy.json.JsonOutput
-import org.apache.http.entity.ContentType
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -628,12 +628,7 @@ class ProviderVerifierSpec extends Specification {
       [new ProviderState('Test State')], new Request(),
       new Response(200, [:], OptionalBody.body(json.bytes), matchingRules), '1234')
     def client = Mock(ProviderClient)
-    client.makeRequest(_) >> [
-      statusCode: 200,
-      headers: [:],
-      contentType: ContentType.APPLICATION_JSON,
-      data: json
-    ]
+    client.makeRequest(_) >> new ProviderResponse(200, [:], ContentType.JSON, json)
 
     when:
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)

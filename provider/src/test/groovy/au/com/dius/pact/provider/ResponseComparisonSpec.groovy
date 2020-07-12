@@ -1,18 +1,21 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.messaging.Message
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import org.apache.http.entity.ContentType
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @SuppressWarnings('UnnecessaryGetter')
 class ResponseComparisonSpec extends Specification {
 
   private Closure<Map> subject
   private Response response
-  private actualResponse
   private int actualStatus
   private Map actualHeaders = ['A': ['B'], 'C': ['D'], 'Content-Type': ['application/json']]
   private actualBody
@@ -22,12 +25,12 @@ class ResponseComparisonSpec extends Specification {
       OptionalBody.body('{"stuff": "is good"}'.bytes))
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
-    actualResponse = [contentType: ContentType.APPLICATION_JSON]
     subject = { opts = [:] ->
       def status = opts.actualStatus ?: actualStatus
       def response = opts.response ?: response
       def actualHeaders = opts.actualHeaders ?: actualHeaders
-      ResponseComparison.compareResponse(response, actualResponse, status, actualHeaders, actualBody)
+      ResponseComparison.compareResponse(response,
+        new ProviderResponse(status, actualHeaders, ContentType.JSON, actualBody))
     }
   }
 
@@ -112,5 +115,30 @@ class ResponseComparisonSpec extends Specification {
     ]
     result.value.diff[1] == '-  "stuff": "is good"'
     result.value.diff[2] == '+  "stuff": "should make the test fail"'
+  }
+
+  @Unroll
+  def 'when comparing message bodies, handles content type #contentType'() {
+    given:
+    Message expectedMessage = new Message('test', [], OptionalBody.body(expected.bytes),
+      new MatchingRulesImpl(), new Generators(), [contentType: contentType])
+    OptionalBody actualMessage = OptionalBody.body(actual.bytes)
+
+    expect:
+    ResponseComparison.compareMessageBody(expectedMessage, actualMessage).empty
+
+    where:
+
+    contentType                                | expected                    | actual
+    'application/json'                         | '{"a": 100.0, "b": "test"}' | '{"a":100.0,"b":"test"}'
+    'application/json;charset=UTF-8'           | '{"a": 100.0, "b": "test"}' | '{"a":100.0,"b":"test"}'
+    'application/json; charset\u003dUTF-8'     | '{"a": 100.0, "b": "test"}' | '{"a":100.0,"b":"test"}'
+    'application/hal+json; charset\u003dUTF-8' | '{"a": 100.0, "b": "test"}' | '{"a":100.0,"b":"test"}'
+    'text/plain'                               | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
+    'application/octet-stream;charset=UTF-8'   | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
+    'application/octet-stream'                 | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
+    ''                                         | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
+    null                                       | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
+
   }
 }

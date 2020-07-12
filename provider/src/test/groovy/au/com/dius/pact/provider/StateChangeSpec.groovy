@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
 import com.github.michaelbull.result.Ok
@@ -32,7 +33,7 @@ class StateChangeSpec extends Specification {
         makeStateChangeRequestArgs << args
         stateChangeResponse
       }
-      makeRequest(_) >> [statusCode: 200, headers: [:], data: '{}', contentType: 'application/json']
+      makeRequest(_) >> new ProviderResponse(200, [:], ContentType.JSON, '{}')
     }
   }
 

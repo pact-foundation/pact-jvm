@@ -149,6 +149,13 @@ open class ConsumerInfo @JvmOverloads constructor (
   }
 }
 
+data class ProviderResponse(
+  val statusCode: Int,
+  val headers: Map<String, List<String>> = emptyMap(),
+  val contentType: au.com.dius.pact.core.model.ContentType = au.com.dius.pact.core.model.ContentType.UNKNOWN,
+  val body: String? = null
+)
+
 /**
  * Client HTTP utility for providers
  */
@@ -163,6 +170,9 @@ open class ProviderClient(
     const val UTF8 = "UTF-8"
     const val REQUEST = "request"
     const val ACTION = "action"
+
+    val SINGLE_VALUE_HEADERS = setOf("set-cookie", "www-authenticate", "proxy-authenticate", "date", "expires",
+      "last-modified", "if-modified-since", "if-unmodified-since", "retry-after")
 
     private fun invokeIfClosure(property: Any?) = if (property is Closure<*>) {
       property.call()
@@ -193,13 +203,13 @@ open class ProviderClient(
     }
   }
 
-  open fun makeRequest(request: Request): Map<String, Any> {
+  open fun makeRequest(request: Request): ProviderResponse {
     val httpclient = getHttpClient()
     val method = prepareRequest(request)
     return executeRequest(httpclient, method)
   }
 
-  open fun executeRequest(httpclient: CloseableHttpClient, method: HttpUriRequest): Map<String, Any> {
+  open fun executeRequest(httpclient: CloseableHttpClient, method: HttpUriRequest): ProviderResponse {
     return httpclient.execute(method).use {
       handleResponse(it)
     }
@@ -343,25 +353,35 @@ open class ProviderClient(
 
   fun getHttpClient() = httpClientFactory.newClient(provider)
 
-  fun handleResponse(httpResponse: HttpResponse): Map<String, Any> {
+  fun handleResponse(httpResponse: HttpResponse): ProviderResponse {
     logger.debug { "Received response: ${httpResponse.statusLine}" }
-    val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode,
-      "contentType" to ContentType.TEXT_PLAIN)
 
-    response["headers"] = httpResponse.allHeaders
-      .groupBy({ header -> header.name }, { header -> header.value.split(',').map { it.trim() } })
+    var contentType = PactContentType.TEXT_PLAIN
+    val headers = httpResponse.allHeaders
+      .groupBy({ header -> header.name }, { header ->
+        if (SINGLE_VALUE_HEADERS.contains(header.name.toLowerCase())) {
+          listOf(header.value.trim())
+        } else {
+          header.value.split(',').map { it.trim() }
+        }
+      })
       .mapValues { it.value.flatten() }
 
+    var body: String? = null
     val entity = httpResponse.entity
     if (entity != null) {
-      val contentType = if (entity.contentType != null) {
-        ContentType.parse(entity.contentType.value)
-      } else {
-        ContentType.TEXT_PLAIN
+      if (entity.contentType != null) {
+        contentType = PactContentType.fromString(entity.contentType.value)
       }
-      response["contentType"] = contentType
-      response["data"] = EntityUtils.toString(entity, contentType.charset?.name() ?: UTF8)
+      body = EntityUtils.toString(entity, contentType.asCharset())
     }
+
+    val response = ProviderResponse(
+      httpResponse.statusLine.statusCode,
+      headers,
+      contentType,
+      body
+    )
 
     logger.debug { "Response: $response" }
 

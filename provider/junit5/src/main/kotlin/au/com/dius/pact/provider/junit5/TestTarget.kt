@@ -12,6 +12,7 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.ProviderResponse
 import org.apache.http.client.methods.HttpUriRequest
 import java.net.URL
 import java.net.URLClassLoader
@@ -44,7 +45,7 @@ interface TestTarget {
    *
    * @return Map of failures, or an empty map if there were not any
    */
-  fun executeInteraction(client: Any?, request: Any?): Map<String, Any>
+  fun executeInteraction(client: Any?, request: Any?): ProviderResponse
 
   /**
    * Prepares the verifier for use during the test
@@ -85,7 +86,7 @@ open class HttpTestTarget @JvmOverloads constructor (
 
   override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) { }
 
-  override fun executeInteraction(client: Any?, request: Any?): Map<String, Any> {
+  override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
     val providerClient = client as ProviderClient
     val httpRequest = request as HttpUriRequest
     return providerClient.executeRequest(providerClient.getHttpClient(), httpRequest)
@@ -192,8 +193,8 @@ open class MessageTestTarget(val packagesToScan: List<String> = emptyList()) : T
     }
   }
 
-  override fun executeInteraction(client: Any?, request: Any?): Map<String, Any> {
-    return emptyMap()
+  override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
+    return ProviderResponse(200)
   }
 }
 
