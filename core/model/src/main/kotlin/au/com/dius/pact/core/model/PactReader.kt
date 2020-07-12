@@ -1,8 +1,5 @@
 package au.com.dius.pact.core.model
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
@@ -12,11 +9,15 @@ import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonException
-import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.runCatching
 import com.github.zafarkhaja.semver.Version
 import mu.KLogging
 import mu.KotlinLogging
@@ -61,9 +62,9 @@ fun loadPactFromUrl(
 
 @Suppress("ThrowsCount")
 fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
-  Result<Pair<JsonValue, UrlPactSource>, Exception> {
+  Result<Pair<JsonValue, UrlPactSource>, Throwable> {
   val url = URL(source.url)
-  return Result.of {
+  return runCatching {
     when (url.protocol) {
       "file" -> JsonParser.parseString(URL(source.url).readText()) to source
       else -> {
@@ -75,7 +76,7 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
         if (response.statusLine.statusCode < 300) {
           val contentType = ContentType.getOrDefault(response.entity)
           if (isJsonResponse(contentType)) {
-            return@of JsonParser.parseString(EntityUtils.toString(response.entity)) to source
+            JsonParser.parseString(EntityUtils.toString(response.entity)) to source
           } else {
             throw InvalidHttpResponseException("Expected a JSON response, but got '$contentType'")
           }

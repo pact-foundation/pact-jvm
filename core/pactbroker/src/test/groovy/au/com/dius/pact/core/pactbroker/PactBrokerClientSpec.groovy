@@ -219,12 +219,12 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * halClient.putJson('pb:publish-pact',
-      ['provider': 'Provider', 'consumer': 'Foo%20Consumer', 'consumerApplicationVersion': '10.0.0'],
+      ['provider': 'Provider', 'consumer': 'Foo Consumer', 'consumerApplicationVersion': '10.0.0'],
       pactContents) >> new Ok(false)
     !result.value
   }
 
-  def 'encode the provider name, consumer name, tags and version when uploading a pact'() {
+  def 'No need to encode the provider name, consumer name, tags and version when uploading a pact'() {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate() >> halClient
@@ -250,10 +250,10 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * halClient.putJson('pb:publish-pact',
-      ['provider': 'Provider%2FA', 'consumer': 'Foo%20Consumer%2FA',
-       'consumerApplicationVersion': '10.0.0%2FB'], pactContents) >> new Ok(true)
+      ['provider': 'Provider/A', 'consumer': 'Foo Consumer/A',
+       'consumerApplicationVersion': '10.0.0/B'], pactContents) >> new Ok(true)
     1 * halClient.putJson('pb:pacticipant-version-tag',
-            ['pacticipant': 'Foo%20Consumer%2FA', 'version': '10.0.0%2FB', 'tag': 'A/B'], '{}')
+            ['pacticipant': 'Foo Consumer/A', 'version': '10.0.0/B', 'tag': 'A/B'], '{}')
   }
 
   @Issue('#892')
@@ -283,12 +283,12 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * halClient.putJson('pb:pacticipant-version-tag',
-      ['pacticipant': 'Foo%20Consumer%2FA', 'version': '10.0.0%2FB', 'tag': 'A/B'], '{}') >> new Ok(true)
+      ['pacticipant': 'Foo Consumer/A', 'version': '10.0.0/B', 'tag': 'A/B'], '{}') >> new Ok(true)
 
     then:
     1 * halClient.putJson('pb:publish-pact',
-      ['provider': 'Provider%2FA', 'consumer': 'Foo%20Consumer%2FA',
-      'consumerApplicationVersion': '10.0.0%2FB'], pactContents) >> new Ok(true)
+      ['provider': 'Provider/A', 'consumer': 'Foo Consumer/A',
+      'consumerApplicationVersion': '10.0.0/B'], pactContents) >> new Ok(true)
   }
 
   @Unroll

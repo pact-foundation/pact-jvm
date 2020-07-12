@@ -149,9 +149,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     enablePending: Boolean,
     includeWipPactsSince: String
   ): Result<List<PactBrokerResult>, Exception> {
-    val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }
-    val halClient = when (navigateResult) {
-      is Err<Exception> -> return Err(navigateResult.error)
+    val halClient = when (val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }) {
+      is Err<Exception> -> return navigateResult
       is Ok<IHalClient> -> navigateResult.value
     }
     val pactsForVerification = when {
@@ -211,15 +210,14 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
   @JvmOverloads
   open fun uploadPactFile(
     pactFile: File,
-    unescapedVersion: String,
+    version: String,
     tags: List<String> = emptyList()
   ): Result<String?, Exception> {
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
-    val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].asString())
-    val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].asString())
-    val version = urlPathSegmentEscaper().escape(unescapedVersion)
+    val providerName = pact["provider"]["name"].asString()
+    val consumerName = pact["consumer"]["name"].asString()
     if (tags.isNotEmpty()) {
       uploadTags(halClient, consumerName, version, tags)
     }
