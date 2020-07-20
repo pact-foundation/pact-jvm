@@ -1,7 +1,5 @@
 package au.com.dius.pact.provider.maven
 
-import au.com.dius.pact.core.pactbroker.CanIDeployResult
-import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
@@ -14,8 +12,8 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo = new PactCreateVersionTagMojo()
     mojo.pactBrokerUrl = 'http://broker:1234'
     mojo.pacticipant = 'test'
-    mojo.pacticipantVersion = "1.0"
-    mojo.tag = "test"
+    mojo.pacticipantVersion = '1234'
+    mojo.tag = 'testTag'
   }
 
   def 'throws an exception if pactBrokerUrl is not provided'() {
@@ -112,5 +110,30 @@ class PactCreateVersionTagMojoSpec extends Specification {
     then:
     def ex = thrown(MojoExecutionException)
     ex.message == 'tag is required'
+  }
+
+  def 'creates a broker client if not specified before'() {
+    given:
+    mojo.brokerClient = null
+
+    when:
+    mojo.execute()
+
+    then:
+    mojo.brokerClient != null
+    mojo.brokerClient.pactBrokerUrl == mojo.pactBrokerUrl
+  }
+
+  def 'calls pact broker client with mandatory arguments'() {
+    given:
+    mojo.brokerClient = Mock(PactBrokerClient)
+
+    when:
+    mojo.execute()
+
+    then:
+    notThrown(MojoExecutionException)
+    1 * mojo.brokerClient.createVersionTag(
+            'test', '1234', 'testTag')
   }
 }

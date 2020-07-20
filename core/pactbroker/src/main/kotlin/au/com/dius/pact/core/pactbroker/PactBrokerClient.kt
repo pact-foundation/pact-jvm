@@ -462,6 +462,12 @@ open class PactBrokerClient(
     return base
   }
 
+  open fun createVersionTag(
+      pacticipant: String,
+      pacticipantVersion: String,
+      tag: String) {
+  }
+
   companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"

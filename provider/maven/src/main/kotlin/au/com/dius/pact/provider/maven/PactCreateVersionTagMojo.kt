@@ -14,6 +14,8 @@ import org.apache.maven.plugins.annotations.Parameter
 @Mojo(name = "create-version-tag")
 open class PactCreateVersionTagMojo : PactBaseMojo() {
 
+  private var brokerClient: PactBrokerClient? = null
+
   @Parameter(property = "pacticipant")
   private var pacticipant: String? = ""
 
@@ -25,6 +27,8 @@ open class PactCreateVersionTagMojo : PactBaseMojo() {
 
   override fun execute() {
     checkMandatoryArguments()
+    createBrokerClient()
+    createVersionTag()
   }
 
   private fun checkMandatoryArguments() {
@@ -34,21 +38,29 @@ open class PactCreateVersionTagMojo : PactBaseMojo() {
     dealWithNotProvidedTag()
   }
 
-  private fun dealWithNotProvidedTag() =
-      dealWithNotProvidedArgument(tag, "tag")
+  private fun dealWithNotProvidedPactURL() =
+      dealWithNotProvidedArgument(pactBrokerUrl, "pactBrokerUrl")
 
   private fun dealWithNotProvidedArgument(argument: String?, argumentName: String) {
     if (argument.isNullOrEmpty())
       throw MojoExecutionException("$argumentName is required")
   }
 
-  private fun dealWithNotProvidedPacticipantVersion() =
-      dealWithNotProvidedArgument(pacticipantVersion, "pacticipantVersion")
-
   private fun dealWithNotProvidedPacticipant() =
       dealWithNotProvidedArgument(pacticipant, "pacticipant")
 
-  private fun dealWithNotProvidedPactURL() =
-      dealWithNotProvidedArgument(pactBrokerUrl, "pactBrokerUrl")
+  private fun dealWithNotProvidedPacticipantVersion() =
+      dealWithNotProvidedArgument(pacticipantVersion, "pacticipantVersion")
+
+  private fun dealWithNotProvidedTag() =
+      dealWithNotProvidedArgument(tag, "tag")
+
+  private fun createBrokerClient() {
+    if (brokerClient == null)
+      brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions())
+  }
+
+  private fun createVersionTag() =
+      brokerClient!!.createVersionTag(pacticipant!!, pacticipantVersion.orEmpty(), tag.orEmpty())
 
 }
