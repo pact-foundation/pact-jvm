@@ -23,15 +23,17 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     actual: OptionalBody,
     allowUnexpectedKeys: Boolean,
     matchingRules: MatchingRules
-  ): List<BodyMismatch> {
+  ): BodyMatchResult {
     return when {
-      expected.isMissing() -> emptyList()
-      expected.isEmpty() && actual.isEmpty() -> emptyList()
+      expected.isMissing() -> BodyMatchResult(null, emptyList())
+      expected.isEmpty() && actual.isEmpty() -> BodyMatchResult(null, emptyList())
       actual.isMissing() ->
-        listOf(BodyMismatch(expected.unwrap(), null, "Expected body '${expected.value}' but was missing"))
+        BodyMatchResult(null,
+          listOf(BodyItemMatchResult("$", listOf(
+            BodyMismatch(expected.unwrap(), null, "Expected body '${expected.value}' but was missing")))))
       else -> {
-        compareNode(listOf("$"), parse(expected.valueAsString()), parse(actual.valueAsString()),
-          allowUnexpectedKeys, matchingRules)
+        BodyMatchResult(null, compareNode(listOf("$"), parse(expected.valueAsString()), parse(actual.valueAsString()),
+          allowUnexpectedKeys, matchingRules))
       }
     }
   }
@@ -65,7 +67,7 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     expected: Node,
     actual: Node,
     matchers: MatchingRules
-  ): List<BodyMismatch> {
+  ): List<BodyItemMatchResult> {
     val textpath = path + "#text"
     val expectedText = asList(expected.childNodes).filter { n ->
       n.nodeType == TEXT_NODE || n.nodeType == CDATA_SECTION_NODE
@@ -76,12 +78,14 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     return when {
       Matchers.matcherDefined("body", textpath, matchers) -> {
         logger.debug { "compareText: Matcher defined for path $textpath" }
-        Matchers.domatch(matchers, "body", textpath, expectedText, actualText, BodyMismatchFactory)
+        listOf(BodyItemMatchResult(path.joinToString("."),
+          Matchers.domatch(matchers, "body", textpath, expectedText, actualText, BodyMismatchFactory)))
       }
       expectedText != actualText ->
-        listOf(BodyMismatch(expected, actual, "Expected value '$expectedText' but received '$actualText'",
-          textpath.joinToString(".")))
-      else -> emptyList()
+        listOf(BodyItemMatchResult(path.joinToString("."),
+          listOf(BodyMismatch(expected, actual, "Expected value '$expectedText' but received '$actualText'",
+          textpath.joinToString(".")))))
+      else -> listOf(BodyItemMatchResult(path.joinToString("."), emptyList()))
     }
   }
 
@@ -103,27 +107,29 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     actual: Node,
     allowUnexpectedKeys: Boolean,
     matchers: MatchingRules
-  ): List<BodyMismatch> {
+  ): List<BodyItemMatchResult> {
     val nodePath = path + expected.nodeName
     val mismatches = when {
       Matchers.matcherDefined("body", nodePath, matchers) -> {
         logger.debug { "compareNode: Matcher defined for path $nodePath" }
-        Matchers.domatch(matchers, "body", nodePath, expected, actual, BodyMismatchFactory)
+        listOf(BodyItemMatchResult(path.joinToString("."),
+          Matchers.domatch(matchers, "body", nodePath, expected, actual, BodyMismatchFactory)))
       }
       else -> {
         val actualName = QualifiedName(actual)
         val expectedName = QualifiedName(expected)
 
         when {
-          actualName != expectedName -> listOf(BodyMismatch(expected, actual,
+          actualName != expectedName -> listOf(BodyItemMatchResult(path.joinToString("."),
+            listOf(BodyMismatch(expected, actual,
                   "Expected element $expectedName but received $actualName",
-                  nodePath.joinToString(".")))
-          else -> emptyList()
+                  nodePath.joinToString(".")))))
+          else -> listOf(BodyItemMatchResult(path.joinToString("."), emptyList()))
         }
       }
     }
 
-    return if (mismatches.isEmpty()) {
+    return if (mismatches.all { it.result.isEmpty() }) {
       compareAttributes(nodePath, expected, actual, allowUnexpectedKeys, matchers) +
         compareChildren(nodePath, expected, actual, allowUnexpectedKeys, matchers) +
         compareText(nodePath, expected, actual, matchers)
@@ -138,14 +144,15 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     actual: Node,
     allowUnexpectedKeys: Boolean,
     matchers: MatchingRules
-  ): List<BodyMismatch> {
+  ): List<BodyItemMatchResult> {
     val expectedChildren = asList(expected.childNodes).filter { n -> n.nodeType == ELEMENT_NODE }
     val actualChildren = asList(actual.childNodes).filter { n -> n.nodeType == ELEMENT_NODE }
-    val mismatches = mutableListOf<BodyMismatch>()
+    val mismatches = mutableListOf<BodyItemMatchResult>()
+    val key = path.joinToString(".")
     if (expectedChildren.isEmpty() && actualChildren.isNotEmpty() && !allowUnexpectedKeys) {
-      mismatches.add(BodyMismatch(expected, actual,
+      mismatches.add(BodyItemMatchResult(key, listOf(BodyMismatch(expected, actual,
           "Expected an empty List but received ${actualChildren.size} child nodes",
-          path.joinToString(".")))
+        key))))
     }
 
     val expectedChildrenByQName = expectedChildren.groupBy { QualifiedName(it) }.toMutableMap()
@@ -156,11 +163,12 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
         if (expectedChildrenByQName.contains(e.key)) {
           val expectedChild = expectedChildrenByQName.remove(e.key)!!
           if (Matchers.matcherDefined("body", childPath, matchers)) {
-            val list = mutableListOf<BodyMismatch>()
+            val list = mutableListOf<BodyItemMatchResult>()
             logger.debug { "compareChild: Matcher defined for path $childPath" }
             e.value.forEach { actualChild ->
-              list.addAll(Matchers.domatch(matchers, "body", childPath, actualChild, expectedChild.first(),
-                BodyMismatchFactory))
+              list.add(BodyItemMatchResult(childPath.joinToString("."),
+                Matchers.domatch(matchers, "body", childPath, actualChild, expectedChild.first(),
+                BodyMismatchFactory)))
               list.addAll(compareNode(path, expectedChild.first(), actualChild, allowUnexpectedKeys, matchers))
             }
             list
@@ -170,30 +178,31 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
               val actualNode = comp.second
               when {
                 expectedNode == null -> if (allowUnexpectedKeys || actualNode == null) {
-                  emptyList()
+                  listOf(BodyItemMatchResult(key, emptyList()))
                 } else {
-                  listOf(BodyMismatch(expected, actual,
+                  listOf(BodyItemMatchResult(key, listOf(BodyMismatch(expected, actual,
                     "Unexpected child <${e.key}/>",
-                    (path + actualNode.nodeName + index.toString()).joinToString(".")))
+                    (path + actualNode.nodeName + index.toString()).joinToString(".")))))
                 }
-                actualNode == null -> listOf(BodyMismatch(expected, actual,
+                actualNode == null -> listOf(BodyItemMatchResult(key,
+                  listOf(BodyMismatch(expected, actual,
                   "Expected child <${e.key}/> but was missing",
-                  (path + expectedNode.nodeName + index.toString()).joinToString(".")))
+                  (path + expectedNode.nodeName + index.toString()).joinToString(".")))))
                 else -> compareNode(path, expectedNode, actualNode, allowUnexpectedKeys, matchers)
               }
             }.flatten()
           }
         } else if (!allowUnexpectedKeys || Matchers.typeMatcherDefined("body", childPath, matchers)) {
-          listOf(BodyMismatch(expected, actual,
-            "Unexpected child <${e.key}/>", path.joinToString(".")))
+          listOf(BodyItemMatchResult(key, listOf(BodyMismatch(expected, actual,
+            "Unexpected child <${e.key}/>", key))))
         } else {
-          emptyList()
+          listOf(BodyItemMatchResult(key, emptyList()))
         }
       })
     if (expectedChildrenByQName.isNotEmpty()) {
       expectedChildrenByQName.keys.forEach {
-        mismatches.add(BodyMismatch(expected, actual, "Expected child <$it/> but was missing",
-          path.joinToString(".")))
+        mismatches.add(BodyItemMatchResult(key, listOf(BodyMismatch(expected, actual,
+          "Expected child <$it/> but was missing", key))))
       }
     }
     return mismatches
@@ -205,26 +214,29 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     actual: Node,
     allowUnexpectedKeys: Boolean,
     matchers: MatchingRules
-  ): List<BodyMismatch> {
+  ): List<BodyItemMatchResult> {
     val expectedAttrs = attributesToMap(expected.attributes)
     val actualAttrs = attributesToMap(actual.attributes)
 
     return if (expectedAttrs.isEmpty() && actualAttrs.isNotEmpty() && !allowUnexpectedKeys) {
-      listOf(BodyMismatch(expected, actual,
-        "Expected a Tag with at least ${expectedAttrs.size} attributes but received ${actual.attributes.length} attributes",
-        path.joinToString(".")))
+      listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expected, actual,
+        "Expected a Tag with at least ${expectedAttrs.size} attributes but " +
+          "received ${actual.attributes.length} attributes",
+        path.joinToString(".")))))
     } else {
       val mismatches = if (expectedAttrs.size > actualAttrs.size) {
-        listOf(BodyMismatch(expected, actual, "Expected a Tag with at least ${expected.attributes.length} attributes but received ${actual.attributes.length} attributes",
+        listOf(BodyMismatch(expected, actual, "Expected a Tag with at least ${expected.attributes.length} " +
+          "attributes but received ${actual.attributes.length} attributes",
           path.joinToString(".")))
       } else if (!allowUnexpectedKeys && expectedAttrs.size != actualAttrs.size) {
-        listOf(BodyMismatch(expected, actual, "Expected a Tag with ${expected.attributes.length} attributes but received ${actual.attributes.length} attributes",
+        listOf(BodyMismatch(expected, actual, "Expected a Tag with ${expected.attributes.length} " +
+          "attributes but received ${actual.attributes.length} attributes",
           path.joinToString(".")))
       } else {
         emptyList()
       }
 
-      mismatches + expectedAttrs.flatMap { attr ->
+      listOf(BodyItemMatchResult(path.joinToString("."), mismatches + expectedAttrs.flatMap { attr ->
         if (actualAttrs.contains(attr.key)) {
           val attrPath = appendAttribute(path, attr.key)
           val actualVal = actualAttrs[attr.key]
@@ -234,15 +246,17 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
               Matchers.domatch(matchers, "body", attrPath, attr.value, actualVal, BodyMismatchFactory)
             }
             attr.value.nodeValue != actualVal?.nodeValue ->
-              listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' but received ${attr.key}='${actualVal?.nodeValue}'",
+              listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' " +
+                "but received ${attr.key}='${actualVal?.nodeValue}'",
                 attrPath.joinToString(".")))
             else -> emptyList()
           }
         } else {
-          listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' but was missing",
+          listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' " +
+            "but was missing",
             appendAttribute(path, attr.key).joinToString(".")))
         }
-      }
+      }))
     }
   }
 

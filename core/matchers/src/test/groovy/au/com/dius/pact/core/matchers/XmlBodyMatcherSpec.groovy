@@ -28,7 +28,7 @@ class XmlBodyMatcherSpec extends Specification {
 
   def 'matching XML bodies - when comparing missing bodies'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - when comparing empty bodies'() {
@@ -37,7 +37,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.empty()
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - when comparing a missing body to anything'() {
@@ -46,7 +46,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.missing()
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - with equal bodies'() {
@@ -55,7 +55,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<blah/>'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - when bodies differ only in whitespace'() {
@@ -68,7 +68,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo><bar></bar></foo>'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - when allowUnexpectedKeys is true - and comparing an empty list to a non-empty one'() {
@@ -77,7 +77,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo></foo>'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - when allowUnexpectedKeys is true - and comparing a list to a super-set'() {
@@ -86,7 +86,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo><item1/></foo>'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - when allowUnexpectedKeys is true - and comparing a tags attributes to one with more entries'() {
@@ -95,7 +95,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo something="100"/>'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - returns a mismatch - when comparing anything to an empty body'() {
@@ -103,7 +103,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<blah/>'.bytes)
 
     expect:
-    !matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    !matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - returns a mismatch - when the root elements do not match'() {
@@ -112,7 +112,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -126,7 +126,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo></foo>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -140,7 +140,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo><one/><two/><three/><four/></foo>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -154,7 +154,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo><one/><two/><three/><three/></foo>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -168,7 +168,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo><one/><two/><three/></foo>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     mismatches.empty
@@ -180,7 +180,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo something="100" somethingElse="101"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -194,7 +194,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo something="100"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -207,7 +207,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo something="100" somethingElse="100"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -221,7 +221,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo something="100" somethingElse="100"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -235,7 +235,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo something="100"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -249,7 +249,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo>hello world</foo>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -264,7 +264,7 @@ class XmlBodyMatcherSpec extends Specification {
     matchers.addCategory('body').addRule("\$.foo['@something']", new RegexMatcher('\\d+'))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   @Issue('#899')
@@ -277,7 +277,7 @@ class XmlBodyMatcherSpec extends Specification {
       '<address> <city>Manchester</city>\t</address> </note>').bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
   }
 
   @Issue('#975')
@@ -301,7 +301,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body(xml.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   @Issue('#975')
@@ -343,7 +343,7 @@ class XmlBodyMatcherSpec extends Specification {
       new RegexMatcher('[a-zA-Z0-9]*'))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   @Unroll
@@ -353,7 +353,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body(expected.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
 
     where:
     actual                       | expected
@@ -370,7 +370,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body(expected.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
 
     where:
     actual                                                         | expected
@@ -387,7 +387,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<blah xmlns="urn:ns"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -401,7 +401,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<blah xmlns="urn:ns"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -415,7 +415,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<blah/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -431,7 +431,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<blah/>'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - when attribute uses different prefix'() {
@@ -440,7 +440,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo xmlns:b="urn:ns" b:something="100"/>'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - returns a mismatch - when attribute uses different namespace'() {
@@ -449,7 +449,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('<foo xmlns:ns="urn:b" ns:something="100"/>'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     !mismatches.empty
@@ -464,7 +464,7 @@ class XmlBodyMatcherSpec extends Specification {
     matchers.addCategory('body').addRule("\$.foo['@b:something']", new RegexMatcher('\\d+'))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'matching XML bodies - with namespaces and a matcher defined - delegate to the matcher'() {
@@ -474,7 +474,7 @@ class XmlBodyMatcherSpec extends Specification {
     matchers.addCategory('body').addRule("\$.foo.something", new RegexMatcher('\\d+'))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 
   def 'when an element has different types of children but we allow unexpected keys'() {
@@ -501,7 +501,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body(expected.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
   }
 
   def 'when an element has different types of children but we do not allow unexpected keys'() {
@@ -528,7 +528,7 @@ class XmlBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body(expected.bytes)
 
     when:
-    def result = matcher.matchBody(expectedBody, actualBody, false, matchers)
+    def result = matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches
 
     then:
     result.size() == 3
@@ -563,6 +563,6 @@ class XmlBodyMatcherSpec extends Specification {
          .addRule("\$.animals.*['@id']", new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.empty
   }
 }

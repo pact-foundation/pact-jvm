@@ -18,9 +18,14 @@ object ResponseMatching : KLogging() {
 
   @JvmStatic
   fun responseMismatches(expected: Response, actual: Response, allowUnexpectedKeys: Boolean): List<Mismatch> {
-    return (listOf(Matching.matchStatus(expected.status, actual.status)) +
-      Matching.matchHeaders(expected, actual) +
-      Matching.matchBody(expected, actual, allowUnexpectedKeys)
-    ).filterNotNull()
+    val bodyResults = Matching.matchBody(expected, actual, allowUnexpectedKeys)
+    val typeResult = if (bodyResults.typeMismatch != null) {
+      listOf(bodyResults.typeMismatch)
+    } else {
+      emptyList()
+    }
+    return (typeResult + Matching.matchStatus(expected.status, actual.status) +
+      Matching.matchHeaders(expected, actual).flatMap { it.result } +
+      bodyResults.bodyResults.flatMap { it.result }).filterNotNull()
   }
 }

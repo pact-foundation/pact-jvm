@@ -9,5 +9,5 @@ interface BodyMatcher {
     actual: OptionalBody,
     allowUnexpectedKeys: Boolean,
     matchingRules: MatchingRules
-  ): List<BodyMismatch>
+  ): BodyMatchResult
 }

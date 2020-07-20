@@ -16,7 +16,7 @@ object Matching : KLogging() {
     matchHeaders(expected.headersWithoutCookie(), actual.headersWithoutCookie(), expected.matchingRules)
 
   @JvmStatic
-  fun matchHeaders(expected: HttpPart, actual: HttpPart): List<HeaderMismatch> =
+  fun matchHeaders(expected: HttpPart, actual: HttpPart): List<HeaderMatchResult> =
     matchHeaders(expected.headers, actual.headers, expected.matchingRules)
 
   @JvmStatic
@@ -24,24 +24,24 @@ object Matching : KLogging() {
     expected: Map<String, List<String>>,
     actual: Map<String, List<String>>,
     matchers: MatchingRules?
-  ): List<HeaderMismatch> = compareHeaders(expected.toSortedMap(lowerCaseComparator),
+  ): List<HeaderMatchResult> = compareHeaders(expected.toSortedMap(lowerCaseComparator),
     actual.toSortedMap(lowerCaseComparator), matchers)
 
   fun compareHeaders(
     e: Map<String, List<String>>,
     a: Map<String, List<String>>,
     matchers: MatchingRules?
-  ): List<HeaderMismatch> {
+  ): List<HeaderMatchResult> {
     return e.entries.fold(listOf()) { list, values ->
       if (a.containsKey(values.key)) {
         val actual = a[values.key].orEmpty()
-        list + values.value.mapIndexed { index, headerValue ->
+        list + HeaderMatchResult(values.key, values.value.mapIndexed { index, headerValue ->
           HeaderMatcher.compareHeader(values.key, headerValue, actual.getOrElse(index) { "" },
             matchers ?: MatchingRulesImpl())
-        }.filterNotNull()
+        }.filterNotNull())
       } else {
-        list + HeaderMismatch(values.key, values.value.joinToString(separator = ", "), "",
-          "Expected a header '${values.key}' but was missing")
+        list + HeaderMatchResult(values.key, listOf(HeaderMismatch(values.key, values.value.joinToString(separator = ", "), "",
+          "Expected a header '${values.key}' but was missing")))
       }
     }
   }
@@ -54,7 +54,7 @@ object Matching : KLogging() {
     if (expected.equals(actual, ignoreCase = true)) null
     else MethodMismatch(expected, actual)
 
-  fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<Mismatch> {
+  fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): BodyMatchResult {
     val expectedContentType = expected.determineContentType()
     val actualContentType = actual.determineContentType()
     return if (expectedContentType.getBaseType() == actualContentType.getBaseType()) {
@@ -65,30 +65,34 @@ object Matching : KLogging() {
       } else {
         logger.debug { "No matcher for $actualContentType, using equality" }
         when {
-          expected.body.isMissing() -> emptyList()
-          expected.body.isNull() && actual.body.isPresent() -> listOf(BodyMismatch(null, actual.body.unwrap(),
-            "Expected an empty body but received '${actual.body.unwrap()}'"))
-          expected.body.isNull() -> emptyList()
-          actual.body.isMissing() -> listOf(BodyMismatch(expected.body.unwrap(), null,
-            "Expected body '${expected.body.unwrap()}' but was missing"))
+          expected.body.isMissing() -> BodyMatchResult(null, emptyList())
+          expected.body.isNull() && actual.body.isPresent() -> BodyMatchResult(null,
+            listOf(BodyItemMatchResult("$", listOf(BodyMismatch(null, actual.body.unwrap(),
+              "Expected an empty body but received '${actual.body.unwrap()}'")))))
+          expected.body.isNull() -> BodyMatchResult(null, emptyList())
+          actual.body.isMissing() -> BodyMatchResult(null,
+            listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expected.body.unwrap(), null,
+              "Expected body '${expected.body.unwrap()}' but was missing")))))
           else -> matchBodyContents(expected, actual)
         }
       }
     } else {
-      if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty()) emptyList()
-      else listOf(BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()))
+      if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty()) BodyMatchResult(null, emptyList())
+      else BodyMatchResult(BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()), emptyList())
     }
   }
 
-  fun matchBodyContents(expected: HttpPart, actual: HttpPart): List<BodyMismatch> {
+  fun matchBodyContents(expected: HttpPart, actual: HttpPart): BodyMatchResult {
     val matcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
     return when {
       matcher != null && matcher.canMatch(expected.determineContentType()) ->
-        domatch(matcher, listOf("$"), expected.body.unwrap(), actual.body.unwrap(), BodyMismatchFactory)
-      expected.body.unwrap().contentEquals(actual.body.unwrap()) -> emptyList()
-      else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
+        BodyMatchResult(null, listOf(BodyItemMatchResult("$",
+          domatch(matcher, listOf("$"), expected.body.unwrap(), actual.body.unwrap(), BodyMismatchFactory))))
+      expected.body.unwrap().contentEquals(actual.body.unwrap()) -> BodyMatchResult(null, emptyList())
+      else -> BodyMatchResult(null, listOf(BodyItemMatchResult("$",
+        listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
         "Actual body '${actual.body.valueAsString()}' is not equal to the expected body " +
-          "'${expected.body.valueAsString()}'"))
+          "'${expected.body.valueAsString()}'")))))
     }
   }
 
@@ -105,19 +109,19 @@ object Matching : KLogging() {
 
   fun matchStatus(expected: Int, actual: Int) = if (expected == actual) null else StatusMismatch(expected, actual)
 
-  fun matchQuery(expected: Request, actual: Request): List<QueryMismatch> {
-    return expected.query.entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
+  fun matchQuery(expected: Request, actual: Request): List<QueryMatchResult> {
+    return expected.query.entries.fold(emptyList<QueryMatchResult>()) { acc, entry ->
       when (val value = actual.query[entry.key]) {
-        null -> acc + QueryMismatch(entry.key, entry.value.joinToString(","), "",
+        null -> acc + QueryMatchResult(entry.key, listOf(QueryMismatch(entry.key, entry.value.joinToString(","), "",
           "Expected query parameter '${entry.key}' but was missing",
-          listOf("$", "query", entry.key).joinToString("."))
-        else -> acc + QueryMatcher.compareQuery(entry.key, entry.value, value, expected.matchingRules)
+          listOf("$", "query", entry.key).joinToString("."))))
+        else -> acc + QueryMatchResult(entry.key, QueryMatcher.compareQuery(entry.key, entry.value, value, expected.matchingRules))
       }
-    } + actual.query.entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
+    } + actual.query.entries.fold(emptyList<QueryMatchResult>()) { acc, entry ->
       when (expected.query[entry.key]) {
-        null -> acc + QueryMismatch(entry.key, "", entry.value.joinToString(","),
+        null -> acc + QueryMatchResult(entry.key, listOf(QueryMismatch(entry.key, "", entry.value.joinToString(","),
           "Unexpected query parameter '${entry.key}' received",
-          listOf("$", "query", entry.key).joinToString("."))
+          listOf("$", "query", entry.key).joinToString("."))))
         else -> acc
       }
     }
@@ -142,4 +146,20 @@ object Matching : KLogging() {
       }
     }
   }
+}
+
+data class QueryMatchResult(val key: String, val result: List<QueryMismatch>)
+data class HeaderMatchResult(val key: String, val result: List<HeaderMismatch>)
+data class BodyItemMatchResult(val key: String, val result: List<BodyMismatch>)
+data class BodyMatchResult(val typeMismatch: BodyTypeMismatch?, val bodyResults: List<BodyItemMatchResult>) {
+  fun matchedOk() = typeMismatch == null && bodyResults.all { it.result.isEmpty() }
+
+  val mismatches: List<Mismatch>
+    get() {
+      return if (typeMismatch != null) {
+        listOf(typeMismatch)
+      } else {
+        bodyResults.flatMap { it.result }
+      }
+    }
 }

@@ -177,7 +177,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
         val interaction = matchResult.problems.keys.first() as RequestResponseInteraction
         mismatchedRequests.putIfAbsent(interaction.request, mutableListOf())
         mismatchedRequests[interaction.request]?.add(PactVerificationResult.PartialMismatch(
-          matchResult.problems[interaction]!!))
+          matchResult.problems[interaction]!!.mismatches))
       }
       else -> {
         mismatchedRequests.putIfAbsent(request, mutableListOf())

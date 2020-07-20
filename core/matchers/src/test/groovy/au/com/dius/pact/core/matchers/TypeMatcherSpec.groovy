@@ -18,7 +18,7 @@ class TypeMatcherSpec extends Specification {
     def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
-    result.empty
+    result.mismatches.empty
   }
 
   def 'match integers should not match null values'() {
@@ -32,7 +32,7 @@ class TypeMatcherSpec extends Specification {
     def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
-    !result.empty
+    !result.mismatches.empty
   }
 
   def 'match integers should fail for non-integer values'() {
@@ -46,7 +46,7 @@ class TypeMatcherSpec extends Specification {
     def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
-    !result.empty
+    !result.mismatches.empty
   }
 
   def 'match decimal should accept decimal values'() {
@@ -60,7 +60,7 @@ class TypeMatcherSpec extends Specification {
     def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
-    result.empty
+    result.mismatches.empty
   }
 
   def 'match decimal should handle null values'() {
@@ -74,7 +74,7 @@ class TypeMatcherSpec extends Specification {
     def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
-    !result.empty
+    !result.mismatches.empty
   }
 
   def 'match decimal should fail for non-decimal values'() {
@@ -88,7 +88,6 @@ class TypeMatcherSpec extends Specification {
     def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
-    !result.empty
+    !result.mismatches.empty
   }
-
 }

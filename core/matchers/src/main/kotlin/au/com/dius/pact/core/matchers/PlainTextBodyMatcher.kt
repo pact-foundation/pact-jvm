@@ -12,40 +12,43 @@ class PlainTextBodyMatcher : BodyMatcher {
     actual: OptionalBody,
     allowUnexpectedKeys: Boolean,
     matchingRules: MatchingRules
-  ): List<BodyMismatch> {
+  ): BodyMatchResult {
     val expectedBody = expected
     val actualBody = actual
     return when {
-      expectedBody.isMissing() -> emptyList()
-      expectedBody.isNull() && actualBody.isPresent() -> listOf(
-              BodyMismatch(null, actualBody!!.value, "Expected empty body but received '${actualBody.value}'"))
-      expectedBody.isNull() -> emptyList()
-      actualBody.isMissing() -> listOf(BodyMismatch(expectedBody!!.value, null,
-              "Expected body '${expectedBody.value}' but was missing"))
-      expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
-      else -> compareText(expectedBody.valueAsString(), actualBody.valueAsString(), matchingRules)
+      expectedBody.isMissing() -> BodyMatchResult(null, emptyList())
+      expectedBody.isNull() && actualBody.isPresent() -> BodyMatchResult(null, listOf(
+        BodyItemMatchResult("$",
+          listOf(BodyMismatch(null, actualBody!!.value, "Expected empty body but received '${actualBody.value}'")))))
+      expectedBody.isNull() -> BodyMatchResult(null, emptyList())
+      actualBody.isMissing() -> BodyMatchResult(null, listOf(BodyItemMatchResult("$",
+        listOf(BodyMismatch(expectedBody!!.value, null,
+          "Expected body '${expectedBody.value}' but was missing")))))
+      expectedBody.isEmpty() && actualBody.isEmpty() -> BodyMatchResult(null, emptyList())
+      else -> BodyMatchResult(null,
+        compareText(expectedBody.valueAsString(), actualBody.valueAsString(), matchingRules))
     }
   }
 
-  fun compareText(expected: String, actual: String, matchers: MatchingRules?): List<BodyMismatch> {
+  fun compareText(expected: String, actual: String, matchers: MatchingRules?): List<BodyItemMatchResult> {
     val regexMatcher = matchers?.rulesForCategory("body")?.matchingRules?.get("$")
     val regex = regexMatcher?.rules?.first()
 
     if (regexMatcher == null || regexMatcher.rules.isEmpty() || regex !is RegexMatcher) {
       logger.debug { "No regex for '$expected', using equality" }
       return if (expected == actual) {
-        emptyList()
+        listOf(BodyItemMatchResult("$", emptyList()))
       } else {
-        listOf(BodyMismatch(expected, actual,
-                "Expected body '$expected' to match '$actual' using equality but did not match"))
+        listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expected, actual,
+          "Expected body '$expected' to match '$actual' using equality but did not match"))))
       }
     }
 
     return if (actual.matches(Regex(regex.regex))) {
       emptyList()
     } else {
-      listOf(BodyMismatch(expected, actual,
-              "Expected body '$expected' to match '$actual' using regex '${regex.regex}' but did not match"))
+      listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expected, actual,
+        "Expected body '$expected' to match '$actual' using regex '${regex.regex}' but did not match"))))
     }
   }
 

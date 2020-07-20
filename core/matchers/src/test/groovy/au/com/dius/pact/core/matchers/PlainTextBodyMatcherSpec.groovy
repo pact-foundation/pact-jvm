@@ -13,9 +13,10 @@ class PlainTextBodyMatcherSpec extends Specification {
     matcher = new PlainTextBodyMatcher()
   }
 
+  @Unroll
   def 'Compares using equality if there is no matcher defined'() {
     expect:
-    matcher.compareText(expected, actual, new MatchingRulesImpl()).empty == result
+    matcher.compareText(expected, actual, new MatchingRulesImpl()).every { it.result.empty } == result
 
     where:
 
@@ -27,7 +28,9 @@ class PlainTextBodyMatcherSpec extends Specification {
   @Unroll
   def 'Uses the matcher if there is a matcher defined'() {
     expect:
-    matcher.compareText(expected, actual, MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(rules))).empty == result
+    matcher.compareText(expected, actual, MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(rules))).every {
+      it.result.empty
+    } == result
 
     where:
 

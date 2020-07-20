@@ -26,33 +26,35 @@ class MatchingSpec extends Specification {
 
   def 'Header Matching - match same headers'() {
     expect:
-    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['B']])).empty
+    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['B']])) ==
+      [new HeaderMatchResult('A', [])]
   }
 
   def 'Header Matching - ignore additional headers'() {
     expect:
-    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['B'], C: ['D']])).empty
+    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['B'], C: ['D']])) ==
+      [new HeaderMatchResult('A', [])]
   }
 
   def 'Header Matching - complain about missing headers'() {
     expect:
     Matching.matchHeaders(new Request('', '', [:], [A: ['B'], C: ['D']]),
-      new Request('', '', [:], [A: ['B']])) == mismatch
+      new Request('', '', [:], [A: ['B']])) == [
+        new HeaderMatchResult('A', []),
+        new HeaderMatchResult('C', [mismatch])
+      ]
 
     where:
-    mismatch = [
-      new HeaderMismatch('C', 'D', '', "Expected a header 'C' but was missing")
-    ]
+    mismatch = new HeaderMismatch('C', 'D', '', "Expected a header 'C' but was missing")
   }
 
   def 'Header Matching - complain about incorrect headers'() {
     expect:
-    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['C']])) == mismatch
+    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['C']])) ==
+      [new HeaderMatchResult('A', [mismatch])]
 
     where:
-    mismatch = [
-      new HeaderMismatch('A', 'B', 'C', "Expected header 'A' to have value 'B' but was 'C'")
-    ]
+    mismatch = new HeaderMismatch('A', 'B', 'C', "Expected header 'A' to have value 'B' but was 'C'")
   }
 
   def 'Metadata Matching - match empty'() {
@@ -98,7 +100,7 @@ class MatchingSpec extends Specification {
 
   def 'Body Matching - compares the bytes of the body'() {
     expect:
-    Matching.INSTANCE.matchBody(expected, actual, false).empty
+    Matching.INSTANCE.matchBody(expected, actual, false).mismatches.empty
 
     where:
 
@@ -108,7 +110,7 @@ class MatchingSpec extends Specification {
 
   def 'Body Matching - compares the bytes of the body with text'() {
     expect:
-    Matching.INSTANCE.matchBody(expected, actual, false).empty
+    Matching.INSTANCE.matchBody(expected, actual, false).mismatches.empty
 
     where:
 
@@ -128,7 +130,7 @@ class MatchingSpec extends Specification {
     def result = Matching.INSTANCE.matchBody(expected, actual, false)
 
     then:
-    result.empty
+    result.mismatches.empty
   }
 
   def 'Body Matching - only use a matcher that can handle the body type'() {
@@ -140,7 +142,7 @@ class MatchingSpec extends Specification {
     def actual = new Response(200, [:], OptionalBody.body(MatchingSpec.getResourceAsStream('/RAT.JPG').bytes))
 
     when:
-    def result = Matching.INSTANCE.matchBody(expected, actual, false)
+    def result = Matching.INSTANCE.matchBody(expected, actual, false).mismatches
 
     then:
     !result.empty

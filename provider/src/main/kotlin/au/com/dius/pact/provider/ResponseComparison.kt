@@ -140,7 +140,7 @@ class ResponseComparison(
       var bodyMismatches = mutableListOf<BodyMismatch>()
       if (result != null) {
         bodyMismatches = result.matchBody(message.contents, actual, true, message.matchingRules)
-          .toMutableList()
+          .bodyResults.flatMap { it.result }.toMutableList()
       } else {
         val expectedBody = message.contents.valueAsString()
         if (expectedBody.isNotEmpty() && actual.isNullOrEmpty()) {

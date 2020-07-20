@@ -20,7 +20,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - when comparing empty bodies'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -30,7 +30,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - when comparing a missing body to anything'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -40,7 +40,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with equal bodies'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -50,7 +50,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with equal Maps'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -60,7 +60,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with equal Lists'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -73,7 +73,7 @@ class JsonBodyMatcherSpec extends Specification {
     matchers.addCategory('body').addRule('$.list', new MinTypeMatcher(1))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -86,7 +86,7 @@ class JsonBodyMatcherSpec extends Specification {
     matchers.addCategory('body').addRule('$.list', new MinTypeMatcher(0))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -96,7 +96,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing anything to an empty body'() {
     expect:
-    !matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    !matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -106,7 +106,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing anything to a null body'() {
     expect:
-    !matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    !matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -116,7 +116,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns no mismatch - when comparing an empty map to a non-empty one'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -127,7 +127,7 @@ class JsonBodyMatcherSpec extends Specification {
   def '''matching json bodies - returns a mismatch - when comparing an empty map to a non-empty one and we do not
          allow unexpected keys'''() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected an empty Map but received {"something":100}')
     }
@@ -140,7 +140,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing an empty list to a non-empty one'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected an empty List but received [100]')
     }
@@ -153,7 +153,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing a map to one with less entries'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected a Map with at least 2 elements but received 1 elements')
     }
@@ -170,7 +170,7 @@ class JsonBodyMatcherSpec extends Specification {
     def expectedBody = OptionalBody.body('[1,2,3,4]'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers).findAll {
+    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.findAll {
       it instanceof BodyMismatch
     }*.mismatch
 
@@ -182,7 +182,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when the actual body is missing a key'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected somethingElse=100 but was missing')
     }
@@ -195,7 +195,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when the actual body has invalid value'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected 100 (Integer) but received 101 (Integer)')
     }
@@ -208,7 +208,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing a map to a list'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Type mismatch: Expected Map {"something":100,"somethingElse":100} ' +
           'but received List [100,100]')
@@ -222,7 +222,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing list to anything'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Type mismatch: Expected List [100,100] but received Integer 100')
     }
@@ -238,7 +238,7 @@ class JsonBodyMatcherSpec extends Specification {
     matchers.addCategory('body').addRule('$.something', new RegexMatcher('\\d+'))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -253,7 +253,7 @@ class JsonBodyMatcherSpec extends Specification {
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -269,7 +269,7 @@ class JsonBodyMatcherSpec extends Specification {
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
@@ -304,7 +304,7 @@ class JsonBodyMatcherSpec extends Specification {
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'false')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).find {
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
       it instanceof BodyMismatch && it.mismatch.contains('Expected height=100 but was missing')
     }
 
@@ -321,7 +321,7 @@ class JsonBodyMatcherSpec extends Specification {
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
 
     where:
 
