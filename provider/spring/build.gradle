@@ -1,14 +1,14 @@
 dependencies {
   api project(path: ":provider:junit", configuration: 'default')
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.16.RELEASE'
-  compile group: 'org.springframework', name: 'spring-webmvc', version: '5.2.7.RELEASE'
-  compile group: 'org.springframework', name: 'spring-webflux', version: '5.2.7.RELEASE'
-  compile group: 'org.springframework', name: 'spring-test', version: '5.2.7.RELEASE'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.2.5.RELEASE'
+  compile group: 'org.springframework', name: 'spring-webmvc', version: '5.2.3.RELEASE'
+  compile group: 'org.springframework', name: 'spring-webflux', version: '5.2.3.RELEASE'
+  compile group: 'org.springframework', name: 'spring-test', version: '5.2.3.RELEASE'
   compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.11.0'
+  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.10.2'
 
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.5.16.RELEASE'
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.2.5.RELEASE'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {

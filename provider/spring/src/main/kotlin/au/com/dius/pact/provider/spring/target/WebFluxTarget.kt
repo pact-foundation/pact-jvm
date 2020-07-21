@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.spring.target;
+package au.com.dius.pact.provider.spring.target
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
@@ -21,93 +21,92 @@ import java.util.function.Consumer
 import java.util.function.Supplier
 
 class WebFluxTarget(
-        var runTimes: Int = 1
+  var runTimes: Int = 1
 ) : BaseTarget() {
 
-    lateinit var routerFunction: RouterFunction<out ServerResponse>
+  lateinit var routerFunction: RouterFunction<out ServerResponse>
 
-    override fun getProviderInfo(source: PactSource): ProviderInfo {
-        val provider = testClass.getAnnotation(Provider::class.java)
-        val providerInfo = ProviderInfo(provider.value)
+  override fun getProviderInfo(source: PactSource): ProviderInfo {
+    val provider = testClass.getAnnotation(Provider::class.java)
+    val providerInfo = ProviderInfo(provider.value)
 
-        val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
-        if (methods.isNotEmpty()) {
-            validateTargetRequestFilters(methods)
-            providerInfo.requestFilter = Consumer<Any> { httpRequest ->
-                methods.forEach { method ->
-                    try {
-                        method.invokeExplosively(testTarget, httpRequest)
-                    } catch (t: Throwable) {
-                        throw AssertionError("Request filter method ${method.name} failed with an exception", t)
-                    }
-                }
-            }
+    val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
+    if (methods.isNotEmpty()) {
+      validateTargetRequestFilters(methods)
+      providerInfo.requestFilter = Consumer<Any> { httpRequest ->
+        methods.forEach { method ->
+          try {
+            method.invokeExplosively(testTarget, httpRequest)
+          } catch (t: Throwable) {
+            throw AssertionError("Request filter method ${method.name} failed with an exception", t)
+          }
         }
-
-        return providerInfo
+      }
     }
 
-    override fun setupVerifier(
-            interaction: Interaction,
-            provider: IProviderInfo,
-            consumer: IConsumerInfo,
-            pactSource: PactSource?
-    ): IProviderVerifier {
-        var verifier = WebFluxProviderVerifier()
+    return providerInfo
+  }
 
-        setupReporters(verifier)
+  override fun setupVerifier(
+    interaction: Interaction,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    pactSource: PactSource?
+  ): IProviderVerifier {
+    var verifier = WebFluxProviderVerifier()
 
-        verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
+    setupReporters(verifier)
 
-        verifier.initialiseReporters(provider)
-        verifier.reportVerificationForConsumer(consumer, provider, pactSource)
+    verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
 
-        if (interaction.providerStates.isNotEmpty()) {
-            for ((name) in interaction.providerStates) {
-                verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
-            }
-        }
+    verifier.initialiseReporters(provider)
+    verifier.reportVerificationForConsumer(consumer, provider, pactSource)
 
-        verifier.reportInteractionDescription(interaction)
-
-        return verifier
+    if (interaction.providerStates.isNotEmpty()) {
+      for ((name) in interaction.providerStates) {
+        verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
+      }
     }
 
-    override fun testInteraction(
-            consumerName: String,
-            interaction: Interaction,
-            source: PactSource,
-            context: Map<String, Any>
-    ) {
-        val provider = getProviderInfo(source)
-        val consumer = consumerInfo(consumerName, source)
-        provider.verificationType = PactVerification.ANNOTATED_METHOD
+    verifier.reportInteractionDescription(interaction)
 
-        val verifier = setupVerifier(interaction, provider, consumer, source) as WebFluxProviderVerifier
+    return verifier
+  }
 
-        val failures = HashMap<String, Any>()
+  override fun testInteraction(
+    consumerName: String,
+    interaction: Interaction,
+    source: PactSource,
+    context: Map<String, Any>
+  ) {
+    val provider = getProviderInfo(source)
+    val consumer = consumerInfo(consumerName, source)
+    provider.verificationType = PactVerification.ANNOTATED_METHOD
 
-        val results = 1.rangeTo(runTimes).map {
-            val webTestClientBuilder = WebTestClient.bindToRouterFunction(routerFunction).build()
+    val verifier = setupVerifier(interaction, provider, consumer, source) as WebFluxProviderVerifier
 
-            verifier.verifyResponseFromProvider(
-                    provider, interaction as RequestResponseInteraction, interaction.description,
-                    failures, webTestClientBuilder, consumer.pending
-            )
-        }
-        val result = results.fold(VerificationResult.Ok) { acc: VerificationResult, r -> acc.merge(r) }
+    val failures = HashMap<String, Any>()
 
-        reportTestResult(result, verifier)
+    val results = 1.rangeTo(runTimes).map {
+      val webTestClientBuilder = WebTestClient.bindToRouterFunction(routerFunction).build()
 
-        try {
-            if (result is VerificationResult.Failed) {
-                val errors = results.filterIsInstance<VerificationResult.Failed>()
-                verifier.displayFailures(errors)
-                throw AssertionError(verifier.generateErrorStringFromVerificationResult(errors))
-            }
-        } finally {
-            verifier.finaliseReports()
-        }
+      verifier.verifyResponseFromProvider(
+        provider, interaction as RequestResponseInteraction, interaction.description,
+        failures, webTestClientBuilder, consumer.pending
+      )
     }
+    val result = results.fold(VerificationResult.Ok) { acc: VerificationResult, r -> acc.merge(r) }
 
+    reportTestResult(result, verifier)
+
+    try {
+      if (result is VerificationResult.Failed) {
+        val errors = results.filterIsInstance<VerificationResult.Failed>()
+        verifier.displayFailures(errors)
+        throw AssertionError(verifier.generateErrorStringFromVerificationResult(errors))
+      }
+    } finally {
+      verifier.finaliseReports()
+    }
+  }
 }
