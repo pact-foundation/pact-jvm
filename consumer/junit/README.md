@@ -712,7 +712,7 @@ If you are using the `PactProviderRule`, you can pass the version into the const
 For testing a consumer of messages from a message queue, the `MessagePactProviderRule` rule class works in much the
 same way as the `PactProviderRule` class for Request-Response interactions, but will generate a V3 format message pact file.
 
-For an example, look at [ExampleMessageConsumerTest](src/test/java/au/com/dius/pact/consumer/v3%2FExampleMessageConsumerTest.java)
+For an example, look at [ExampleMessageConsumerTest](src/test/java/au/com/dius/pact/consumer/junit/v3/ExampleMessageConsumerTest.java)
 
 # Having values injected from provider state callbacks (3.6.11+)
 
