@@ -77,11 +77,11 @@ You want to look at: [groovy](consumer/groovy) or [junit](consumer/junit)
 ### (Use Clojure I)
 
 Clojure can call out to Java, so have a look at [junit](consumer/junit). For an example
-look at [example_clojure_consumer_pact_test.clj](consumer/junit/src/test/clojure/au/com/dius/pact/consumer/example_clojure_consumer_pact_test.clj).
+look at [example_clojure_consumer_pact_test.clj](consumer/junit/src/test/clojure/au/com/dius/pact/consumer/junit/example_clojure_consumer_pact_test.clj).
 
 ### I Use some other jvm language or test framework
 
-You want to look at: [Consumer](consumer/consumer)
+You want to look at: [Consumer](consumer)
 
 ### My Consumer interacts with a Message Queue
 
@@ -126,7 +126,7 @@ Have a look at [spring](provider/spring) or [Spring MVC Pact Test Runner](https:
 
 #### I want to verify pacts but don't want to use sbt or gradle or leiningen
 
-You want to look at: [provider](provider/provider)
+You want to look at: [provider](provider)
 
 #### verify interactions with a message queue
 
