@@ -109,4 +109,6 @@ class WebFluxTarget(
       verifier.finaliseReports()
     }
   }
+
+  override fun getRequestClass(): Class<*> = WebTestClient.RequestHeadersSpec::class.java
 }

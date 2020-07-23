@@ -150,13 +150,13 @@ class WebFluxProviderVerifier : ProviderVerifier() {
 
   private fun invokeJavaFunctionalInterface(
     functionalInterface: Any,
-    requestBuilder: WebTestClient.RequestHeadersSpec<*>
+    headersSpec: WebTestClient.RequestHeadersSpec<*>
   ) {
     when (functionalInterface) {
       is Consumer<*> ->
-        (functionalInterface as Consumer<WebTestClient.RequestHeadersSpec<*>>).accept(requestBuilder)
+        (functionalInterface as Consumer<WebTestClient.RequestHeadersSpec<*>>).accept(headersSpec)
       is Function<*, *> ->
-        (functionalInterface as Function<WebTestClient.RequestHeadersSpec<*>, Any?>).apply(requestBuilder)
+        (functionalInterface as Function<WebTestClient.RequestHeadersSpec<*>, Any?>).apply(headersSpec)
       is Callable<*> ->
         (functionalInterface as Callable<WebTestClient.RequestHeadersSpec<*>>).call()
       else -> throw IllegalArgumentException(
