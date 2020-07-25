@@ -4,6 +4,7 @@ import au.com.dius.pact.core.support.isNotEmpty
 import mu.KLogging
 import org.apache.tika.mime.MediaType
 import org.apache.tika.mime.MediaTypeRegistry
+import org.apache.tika.mime.MimeTypes
 import java.nio.charset.Charset
 
 private val jsonRegex = Regex(".*json")
@@ -102,7 +103,7 @@ class ContentType(val contentType: MediaType?) {
 
     val JSON_TYPE = ".*json".toRegex(setOf(RegexOption.IGNORE_CASE))
 
-    val registry: MediaTypeRegistry = MediaTypeRegistry.getDefaultRegistry()
+    val registry: MediaTypeRegistry = MimeTypes.getDefaultMimeTypes(ContentType::class.java.classLoader).mediaTypeRegistry
 
     @JvmStatic
     val UNKNOWN = ContentType(null)

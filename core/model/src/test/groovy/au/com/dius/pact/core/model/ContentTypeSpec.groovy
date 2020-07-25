@@ -67,22 +67,23 @@ class ContentTypeSpec extends Specification {
 
     where:
 
-    value                      || result
-    ''                         || false
-    'text/plain'               || false
-    'application/pdf'          || true
-    'application/zip'          || true
-    'application/json'         || false
-    'application/hal+json'     || false
-    'application/HAL+JSON'     || false
-    'application/xml'          || false
-    'application/atom+xml'     || false
-    'application/octet-stream' || true
-    'image/jpeg'               || true
-    'video/H264'               || true
-    'audio/aac'                || true
-    'text/csv'                 || false
-    'multipart/form-data'      || true
+    value                               || result
+    ''                                  || false
+    'text/plain'                        || false
+    'application/pdf'                   || true
+    'application/zip'                   || true
+    'application/json'                  || false
+    'application/hal+json'              || false
+    'application/HAL+JSON'              || false
+    'application/xml'                   || false
+    'application/atom+xml'              || false
+    'application/octet-stream'          || true
+    'image/jpeg'                        || true
+    'video/H264'                        || true
+    'audio/aac'                         || true
+    'text/csv'                          || false
+    'multipart/form-data'               || true
+    'application/x-www-form-urlencoded' || false
 
     contentType = new ContentType(value)
   }
