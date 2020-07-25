@@ -125,10 +125,7 @@ an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`.
 
 # Pending Pact Support (version 4.1.0 and later)
 
-If your Pact broker supports pending pacts, you can enable support for that by enabling that on your Pact broker 
-annotation or with JVM system properties. You also need to provide the tags used to publish the providers main-line results (i.e. tags like prod or master).
-The broker will then label any pacts found that don't have a successful verification result as pending. That way, if
-they fail verification, the verifier will ignore those failures and not fail the build.
+If your Pact broker supports pending pacts, you can enable support for that by enabling that on your Pact broker annotation or with JVM system properties. You also need to provide the tags that will be published with your provider's verification results. The broker will then label any pacts found that don't have a successful verification result as pending. That way, if they fail verification, the verifier will ignore those failures and not fail the build.
 
 For example, with annotation:
 
