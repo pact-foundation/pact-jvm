@@ -87,6 +87,8 @@ class WebFluxProviderVerifier : ProviderVerifier() {
 
           bodyBuilder
             .part(name, bodyPart.content)
+            .filename(filename)
+            .contentType(MediaType.valueOf(bodyPart.contentType))
             .header("Content-Disposition", "form-data; name=$name; filename=$filename")
 
           i++
@@ -120,9 +122,9 @@ class WebFluxProviderVerifier : ProviderVerifier() {
 
     executeRequestFilter(builder, provider)
 
-    val clientResponse = builder.exchange()
+    val exchangeResult = builder.exchange()
 
-    return clientResponse.expectBody().returnResult()
+    return exchangeResult.expectBody().returnResult()
   }
 
   private fun executeRequestFilter(requestBuilder: WebTestClient.RequestHeadersSpec<*>, provider: ProviderInfo) {

@@ -88,11 +88,11 @@ class WebFluxTarget(
     val failures = HashMap<String, Any>()
 
     val results = 1.rangeTo(runTimes).map {
-      val webTestClientBuilder = WebTestClient.bindToRouterFunction(routerFunction).build()
+      val webClient = WebTestClient.bindToRouterFunction(routerFunction).build()
 
       verifier.verifyResponseFromProvider(
         provider, interaction as RequestResponseInteraction, interaction.description,
-        failures, webTestClientBuilder, consumer.pending
+        failures, webClient, consumer.pending
       )
     }
     val result = results.fold(VerificationResult.Ok) { acc: VerificationResult, r -> acc.merge(r) }
