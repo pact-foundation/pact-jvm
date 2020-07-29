@@ -46,7 +46,7 @@ class WebFluxTargetSpec extends Specification {
 
   def 'only execute the test the configured number of times'() {
     given:
-    def target = new WebFluxTarget(1)
+    def target = new WebFluxTarget()
     target.setTestClass(new TestClass(WebFluxTargetSpec), this)
     def interaction = new RequestResponseInteraction('Test Interaction')
     def handler = Spy(TestHandler)
@@ -61,7 +61,7 @@ class WebFluxTargetSpec extends Specification {
 
   def 'invokes any request filter'() {
     given:
-    def target = new WebFluxTarget(1)
+    def target = new WebFluxTarget()
     def testInstance = Spy(TestClassWithFilter)
     target.setTestClass(new TestClass(TestClassWithFilter), testInstance)
     def interaction = new RequestResponseInteraction('Test Interaction')
