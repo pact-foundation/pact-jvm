@@ -403,7 +403,6 @@ class JsonBodyMatcherSpec extends Specification {
     '[{"i":"a"},{"i":"b"},{"i":"c"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]'
   }
 
-  // @asteffey - create a MaxEqualsIgnoreOrderMatcher as test above was changed to EqualsIgnoreOrderMatcher
   @Unroll
   def 'matching json bodies - with max-equals-ignore-order - return a mismatch when actual has extra elements'() {
     given:
@@ -482,7 +481,7 @@ class JsonBodyMatcherSpec extends Specification {
     then:
     mismatches.size() == 2
     mismatches*.mismatch[0].matches(/Expected \[(.*)\] to match \[(.*)\] ignoring order of elements/)
-    mismatches*.path == ['$', '$.1']
+    mismatches*.path == ['$', '$.*']
 
     where:
 
