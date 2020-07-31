@@ -7,6 +7,8 @@ import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import org.junit.runners.model.TestClass
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.server.RouterFunctions
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -36,6 +38,16 @@ class WebFluxTargetSpec extends Specification {
     }
   }
 
+  @RestController
+  class TestController {
+
+    @GetMapping('/')
+    String test() {
+      'OK'
+    }
+
+  }
+
   @Provider('testProvider')
   class TestClassWithFilter {
     @TargetRequestFilter
@@ -44,7 +56,7 @@ class WebFluxTargetSpec extends Specification {
     }
   }
 
-  def 'only execute the test the configured number of times'() {
+  def 'execute the test against router function'() {
     given:
     def target = new WebFluxTarget()
     target.setTestClass(new TestClass(WebFluxTargetSpec), this)
@@ -57,6 +69,21 @@ class WebFluxTargetSpec extends Specification {
 
     then:
     1 * handler.test(_)
+  }
+
+  def 'execute the test against controller'() {
+    given:
+    def target = new WebFluxTarget()
+    target.setTestClass(new TestClass(WebFluxTargetSpec), this)
+    def interaction = new RequestResponseInteraction('Test Interaction')
+    def controller = Spy(TestController)
+    target.controllers = [controller]
+
+    when:
+    target.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:])
+
+    then:
+    1 * controller.test()
   }
 
   def 'invokes any request filter'() {
