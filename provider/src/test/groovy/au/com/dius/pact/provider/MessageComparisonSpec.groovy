@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class MessageComparisonSpec extends Specification {
 
   def 'compares the message contents as JSON'() {
@@ -20,7 +21,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.b': ['BodyMismatch: Expected \'2\' (String) but received \'3\' (String)']
+      '$.b': ['BodyMismatch: $.b Expected \'2\' (String) but received \'3\' (String)']
     ]
   }
 
@@ -37,7 +38,7 @@ class MessageComparisonSpec extends Specification {
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '/': [
-        'BodyMismatch: Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match'
+        'BodyMismatch: / Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match'
       ]
     ]
   }

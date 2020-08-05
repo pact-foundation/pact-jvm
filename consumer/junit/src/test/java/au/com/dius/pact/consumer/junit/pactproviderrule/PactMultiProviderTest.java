@@ -121,7 +121,7 @@ public class PactMultiProviderTest {
       mockTestProvider2.validateResultWith((result, t) -> {
         assertThat(t, is(instanceOf(AssertionError.class)));
         assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "BodyMismatch: Expected 'larry' (String) but received 'farry' (String)"));
+          "BodyMismatch: $.name Expected 'larry' (String) but received 'farry' (String)"));
         assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
         PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
         assertThat(error.getMismatches(), hasSize(1));
@@ -152,7 +152,7 @@ public class PactMultiProviderTest {
       mockTestProvider2.validateResultWith((result, t) -> {
         assertThat(t, is(instanceOf(AssertionError.class)));
         assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "BodyMismatch: Expected 'larry' (String) but received 'farry' (String)"));
+          "BodyMismatch: $.name Expected 'larry' (String) but received 'farry' (String)"));
         assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
         PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
         assertThat(error.getMismatches(), hasSize(1));

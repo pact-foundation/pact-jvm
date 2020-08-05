@@ -3,7 +3,7 @@ package au.com.dius.pact.core.model
 import org.apache.commons.collections4.iterators.PushbackIterator
 
 const val PATH_SPECIAL_CHARS = "'[].@ \t\n"
-const val EXP_ALLOWED_SPECIAL_CHARS = "-_:"
+const val EXP_ALLOWED_SPECIAL_CHARS = "-_:#@"
 
 sealed class PathToken {
   object Root : PathToken()

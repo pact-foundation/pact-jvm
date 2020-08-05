@@ -532,8 +532,9 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     result.size() == 3
-    result*.description() == ['BodyMismatch: Unexpected child <dog/>', 'BodyMismatch: Unexpected child <cat/>',
-                              'BodyMismatch: Unexpected child <cat/>']
+    result*.description() == ['BodyMismatch: $.animals.dog.1 Unexpected child <dog/>',
+                              'BodyMismatch: $.animals.cat.1 Unexpected child <cat/>',
+                              'BodyMismatch: $.animals.cat.2 Unexpected child <cat/>']
   }
 
   def 'type matcher when an element has different types of children'() {

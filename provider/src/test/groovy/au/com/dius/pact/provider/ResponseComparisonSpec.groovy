@@ -11,7 +11,7 @@ import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@SuppressWarnings('UnnecessaryGetter')
+@SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
 class ResponseComparisonSpec extends Specification {
 
   private Closure<Map> subject
@@ -111,7 +111,7 @@ class ResponseComparisonSpec extends Specification {
     expect:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.stuff': ["BodyMismatch: Expected 'is good' (String) but received 'should make the test fail' (String)"]
+      '$.stuff': ["BodyMismatch: \$.stuff Expected 'is good' (String) but received 'should make the test fail' (String)"]
     ]
     result.value.diff[1] == '-  "stuff": "is good"'
     result.value.diff[2] == '+  "stuff": "should make the test fail"'
