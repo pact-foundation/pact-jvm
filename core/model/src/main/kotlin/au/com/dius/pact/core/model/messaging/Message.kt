@@ -82,7 +82,7 @@ class Message @JvmOverloads constructor(
     return if (contents.isPresent()) {
       val contentType = contentType(metaData).or(contents.contentType)
       when {
-        contentType.isJson() -> Json.gsonPretty.toJson(JsonParser.parseString(contents.valueAsString()).toGson())
+        contentType.isJson() -> JsonParser.parseString(contents.valueAsString()).prettyPrint()
         contentType.isOctetStream() -> Base64.encodeBase64String(contentsAsBytes())
         else -> contents.valueAsString()
       }

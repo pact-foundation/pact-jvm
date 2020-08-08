@@ -57,7 +57,7 @@ public class PactDslJsonRootValue extends DslPart {
   @Override
   public Object getBody() {
     if (encodeJson) {
-      return Json.INSTANCE.getGsonPretty().toJson(value);
+      return Json.toJson(value).serialise();
     }
     return value;
   }

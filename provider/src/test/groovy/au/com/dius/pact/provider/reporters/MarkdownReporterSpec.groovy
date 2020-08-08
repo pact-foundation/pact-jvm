@@ -9,8 +9,8 @@ import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import com.github.michaelbull.result.Ok
-import com.google.gson.JsonParser
 import spock.lang.Specification
+import au.com.dius.pact.core.support.json.JsonParser
 
 @SuppressWarnings(['UnnecessaryObjectReferences', 'LineLength'])
 class MarkdownReporterSpec extends Specification {

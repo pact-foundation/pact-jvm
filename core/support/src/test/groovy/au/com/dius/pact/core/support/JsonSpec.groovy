@@ -4,6 +4,7 @@ import au.com.dius.pact.core.support.json.JsonParser
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class JsonSpec extends Specification {
 
   @Unroll
@@ -26,7 +27,7 @@ class JsonSpec extends Specification {
   @Unroll
   def 'toBoolean - #desc'() {
     expect:
-    Json.INSTANCE.toBoolean(json == null ? json : JsonParser.INSTANCE.parseString(json)) == booleanValue
+    Json.INSTANCE.toBoolean(json == null ? json : JsonParser.parseString(json)) == booleanValue
 
     where:
 
@@ -60,6 +61,26 @@ class JsonSpec extends Specification {
     '["a string value", 2]'                                 | ['a string value', 2]
     '{}'                                                    | [:]
     '{"a": "A", "b": 1, "c": [100], "d": {"href": "blah"}}' | [a: 'A', b: 1, c: [100], d: [href: 'blah']]
+  }
+
+  @Unroll
+  def 'pretty print test'() {
+    expect:
+    Json.INSTANCE.prettyPrint(json) == value
+
+    where:
+
+    json                                                    | value
+    'null'                                                  | 'null'
+    '100'                                                   | '100'
+    '100.3'                                                 | '100.3'
+    'true'                                                  | 'true'
+    '"a string value"'                                      | '"a string value"'
+    '[]'                                                    | '[\n\n]'
+    '["a string value"]'                                    | '[\n  "a string value"\n]'
+    '["a string value", 2]'                                 | '[\n  "a string value",\n  2\n]'
+    '{}'                                                    | '{\n\n}'
+    '{"a": "A", "b": 1, "c": [100], "d": {"href": "blah"}}' | '{\n  "a": "A",\n  "b": 1,\n  "c": [\n    100\n  ],\n  "d": {\n    "href": "blah"\n  }\n}'
   }
 
 }

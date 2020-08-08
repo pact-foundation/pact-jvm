@@ -24,7 +24,6 @@ dependencies {
   compile 'javax.mail:mail:1.5.0-b01'
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  api "com.google.code.gson:gson:${project.gsonVersion}"
   implementation 'org.apache.tika:tika-core:1.24.1'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
@@ -41,6 +40,7 @@ dependencies {
   testCompile "junit:junit:${project.junitVersion}"
   testCompile 'org.hamcrest:hamcrest:2.1'
   testCompile 'com.amazonaws:aws-java-sdk-s3:1.11.587'
+  testCompile "com.google.code.gson:gson:${project.gsonVersion}"
 }
 
 compileGroovy {

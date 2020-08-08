@@ -54,8 +54,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
    */
   override fun writePact(pact: Pact<*>, writer: PrintWriter, pactSpecVersion: PactSpecVersion) {
     pact.sortInteractions()
-    val jsonData = pact.toMap(pactSpecVersion)
-    Json.gsonPretty.toJson(jsonData, writer)
+    writer.println(Json.prettyPrint(pact.toMap(pactSpecVersion)))
   }
 
   /**

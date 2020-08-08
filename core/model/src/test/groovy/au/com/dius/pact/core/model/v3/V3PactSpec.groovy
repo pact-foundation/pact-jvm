@@ -92,7 +92,7 @@ class V3PactSpec extends Specification {
         given:
         def json = pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
         json.metadata['pactSpecification'].version = '2.0.0'
-        pactFile.write(Json.INSTANCE.gsonPretty.toJson(json))
+        pactFile.write(Json.INSTANCE.prettyPrint(json))
 
         def pact = new BasePact(new Consumer(), new Provider(), BasePact.DEFAULT_METADATA) {
             @Override

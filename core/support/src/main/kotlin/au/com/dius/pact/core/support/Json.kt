@@ -1,40 +1,24 @@
 package au.com.dius.pact.core.support
 
 import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonToken
 import au.com.dius.pact.core.support.json.JsonValue
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
-import com.google.gson.JsonParser
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializationContext
-import com.google.gson.JsonSerializer
-import java.lang.reflect.Type
+import org.apache.commons.lang3.text.translate.AggregateTranslator
+import org.apache.commons.lang3.text.translate.EntityArrays
+import org.apache.commons.lang3.text.translate.JavaUnicodeEscaper
+import org.apache.commons.lang3.text.translate.LookupTranslator
+import java.io.Writer
 import java.math.BigInteger
-
-open class NumberSerializer : JsonSerializer<Number> {
-  override fun serialize(src: Number, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
-    return JsonPrimitive(src)
-  }
-}
 
 /**
  * JSON support functions
  */
 object Json {
-
-  val numberAdapter = NumberSerializer()
-  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting()
-    .serializeNulls()
-    .disableHtmlEscaping()
-    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
-  val gson: Gson = GsonBuilder().serializeNulls().disableHtmlEscaping()
-    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
-
   /**
    * Converts an Object graph to a JSON Object
    */
+  @JvmStatic
   fun toJson(any: Any?): JsonValue {
     return when (any) {
       is JsonValue -> any
@@ -95,8 +79,13 @@ object Json {
     else -> json.toString()
   }
 
-  @Deprecated("")
-  fun prettyPrint(json: String): String = gsonPretty.toJson(JsonParser.parseString(json))
+  fun prettyPrint(json: String) = JsonParser.parseString(json).prettyPrint()
+
+  fun prettyPrint(json: String, writer: Writer) {
+    writer.write(JsonParser.parseString(json).prettyPrint())
+  }
+
+  fun prettyPrint(obj: Any) = toJson(obj).prettyPrint()
 
   fun exceptionToJson(exp: Exception) = JsonValue.Object(mutableMapOf("message" to toJson(exp.message),
     "exceptionClass" to toJson(exp.javaClass.name)))
@@ -106,6 +95,15 @@ object Json {
     jsonElement.isBoolean -> jsonElement.asBoolean()
     else -> false
   }
+
+  fun escape(s: String): String = ESCAPE_JSON.translate(s)
+
+  private val ESCAPE_JSON = AggregateTranslator(
+    LookupTranslator(
+      *arrayOf(arrayOf("\"", "\\\""), arrayOf("\\", "\\\\"))),
+    LookupTranslator(*EntityArrays.JAVA_CTRL_CHARS_ESCAPE()),
+    JavaUnicodeEscaper.outsideOf(32, 0x7f)
+  )
 }
 
 private fun Char.toJsonValue() = JsonValue.StringValue(JsonToken.StringValue(charArrayOf(this)))

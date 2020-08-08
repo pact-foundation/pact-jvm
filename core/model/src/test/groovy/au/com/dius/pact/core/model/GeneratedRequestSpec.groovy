@@ -61,7 +61,7 @@ class GeneratedRequestSpec extends Specification {
   def 'applies body generators for body values to the copy of the request'() {
     given:
     def body = [a: 'A', b: 'B']
-    request.body = OptionalBody.body(Json.INSTANCE.gsonPretty.toJson(body).bytes)
+    request.body = OptionalBody.body(Json.INSTANCE.prettyPrint(body).bytes)
 
     when:
     def generated = request.generatedRequest()

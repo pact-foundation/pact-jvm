@@ -1,7 +1,6 @@
 dependencies {
   api project(path: ":core:support", configuration: 'default')
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
-  api "com.google.code.gson:gson:${project.gsonVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile('io.github.microutils:kotlin-logging:1.6.26') {
     exclude group: 'org.jetbrains.kotlin'
