@@ -5,7 +5,7 @@ package au.com.dius.pact.core.model
  */
 @Suppress("EnumNaming")
 enum class PactSpecVersion {
-  UNSPECIFIED, V1, V1_1, V2, V3;
+  UNSPECIFIED, V1, V1_1, V2, V3, V4;
 
   companion object {
     @JvmStatic
@@ -13,6 +13,7 @@ enum class PactSpecVersion {
       return when (version) {
         1 -> V1
         2 -> V2
+        4 -> V4
         else -> V3
       }
     }
