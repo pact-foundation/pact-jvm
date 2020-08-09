@@ -22,8 +22,10 @@ class FormPostBodyMatcher : BodyMatcher {
               null, "Expected a form post body but was missing")))))
       expectedBody.isEmpty() && actualBody.isEmpty() -> BodyMatchResult(null, emptyList())
       else -> {
-        val expectedParameters = URLEncodedUtils.parse(expectedBody.valueAsString(), expected.contentType.asCharset(), '&')
-        val actualParameters = URLEncodedUtils.parse(actualBody.valueAsString(), actual.contentType.asCharset(), '&')
+        val expectedParameters =
+          URLEncodedUtils.parse(expectedBody.valueAsString(), expected.contentType.asCharset(), '&')
+        val actualParameters =
+        URLEncodedUtils.parse(actualBody.valueAsString(), actual.contentType.asCharset(), '&')
         BodyMatchResult(null, compareParameters(expectedParameters, actualParameters, matchingRules,
           allowUnexpectedKeys))
       }
@@ -45,8 +47,10 @@ class FormPostBodyMatcher : BodyMatcher {
           val path = listOf("$", it.key, index.toString())
           if (matchingRules != null && Matchers.matcherDefined("body", path, matchingRules)) {
             logger.debug { "Matcher defined for form post parameter '${it.key}'[$index]" }
-            result.add(BodyItemMatchResult(path.joinToString("."), Matchers.domatch(matchingRules, "body", path, valuePair.value,
-              actualMap[it.key]!![index].value, BodyMismatchFactory)))
+            result.add(
+              BodyItemMatchResult(path.joinToString("."),
+                Matchers.domatch(matchingRules, "body", path, valuePair.value,
+                  actualMap[it.key]!![index].value, BodyMismatchFactory)))
           } else {
             logger.debug { "No matcher defined for form post parameter '${it.key}'[$index], using equality" }
             val actualValues = actualMap[it.key]!!

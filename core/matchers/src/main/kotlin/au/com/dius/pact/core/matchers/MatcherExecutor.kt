@@ -3,10 +3,14 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
@@ -129,6 +133,11 @@ fun <M : Mismatch> domatch(
             matchMaxType(matcher.max, path, expected, actual, mismatchFn)
     is IncludeMatcher -> matchInclude(matcher.value, path, expected, actual, mismatchFn)
     is NullMatcher -> matchNull(path, actual, mismatchFn)
+    is EqualsIgnoreOrderMatcher -> matchEqualsIgnoreOrder(path, expected, actual, mismatchFn)
+    is MinEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn)
+    is MaxEqualsIgnoreOrderMatcher -> matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
+    is MinMaxEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn) +
+            matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
     is ContentTypeMatcher -> matchContentType(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     else -> matchEquality(path, expected, actual, mismatchFn)
   }
@@ -430,6 +439,103 @@ fun <M : Mismatch> matchMaxType(
     }
   } else {
       matchType(path, expected, actual, mismatchFactory)
+  }
+}
+
+fun <M : Mismatch> matchEqualsIgnoreOrder(
+  path: List<String>,
+  expected: Any?,
+  actual: Any?,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} with ignore-order at $path" }
+  return if (actual is JsonValue.Array && expected is JsonValue.Array) {
+    matchEqualsIgnoreOrder(path, expected, actual, expected.size(), actual.size(), mismatchFactory)
+  } else if (actual is List<*> && expected is List<*>) {
+    matchEqualsIgnoreOrder(path, expected, actual, expected.size, actual.size, mismatchFactory)
+  } else if (actual is Element && expected is Element) {
+    matchEqualsIgnoreOrder(path, expected, actual,
+      expected.childNodes.length, actual.childNodes.length, mismatchFactory)
+  } else {
+    matchEquality(path, expected, actual, mismatchFactory)
+  }
+}
+
+fun <M : Mismatch> matchEqualsIgnoreOrder(
+  path: List<String>,
+  expected: Any?,
+  actual: Any?,
+  expectedSize: Int,
+  actualSize: Int,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  return if (expectedSize == actualSize) {
+    emptyList()
+  } else {
+    listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} to have $expectedSize elements", path))
+  }
+}
+
+fun <M : Mismatch> matchMinEqualsIgnoreOrder(
+  min: Int,
+  path: List<String>,
+  expected: Any?,
+  actual: Any?,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  logger.debug { "comparing ${valueOf(actual)} with minimum $min at $path" }
+  return if (actual is List<*>) {
+    if (actual.size < min) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+    } else {
+      emptyList()
+    }
+  } else if (actual is JsonValue.Array) {
+    if (actual.size() < min) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+    } else {
+      emptyList()
+    }
+  } else if (actual is Element) {
+    if (actual.childNodes.length < min) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+    } else {
+      emptyList()
+    }
+  } else {
+    matchEquality(path, expected, actual, mismatchFactory)
+  }
+}
+
+fun <M : Mismatch> matchMaxEqualsIgnoreOrder(
+  max: Int,
+  path: List<String>,
+  expected: Any?,
+  actual: Any?,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  logger.debug { "comparing ${valueOf(actual)} with maximum $max at $path" }
+  return if (actual is List<*>) {
+    if (actual.size > max) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+    } else {
+      emptyList()
+    }
+  } else if (actual is JsonValue.Array) {
+    if (actual.size() > max) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+    } else {
+      emptyList()
+    }
+  } else if (actual is Element) {
+    if (actual.childNodes.length > max) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+    } else {
+      emptyList()
+    }
+  } else {
+    matchEquality(path, expected, actual, mismatchFactory)
   }
 }
 

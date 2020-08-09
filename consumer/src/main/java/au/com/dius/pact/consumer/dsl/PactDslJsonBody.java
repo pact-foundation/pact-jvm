@@ -15,9 +15,13 @@ import au.com.dius.pact.core.model.generators.RandomStringGenerator;
 import au.com.dius.pact.core.model.generators.RegexGenerator;
 import au.com.dius.pact.core.model.generators.TimeGenerator;
 import au.com.dius.pact.core.model.generators.UuidGenerator;
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher;
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
+import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher;
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
@@ -727,6 +731,54 @@ public class PactDslJsonBody extends DslPart {
     public PactDslJsonArray array() {
         throw new UnsupportedOperationException("use the array(String name) form");
     }
+
+  @Override
+  public PactDslJsonArray unorderedArray(String name) {
+    matchers.addRule(matcherKey(name), EqualsIgnoreOrderMatcher.INSTANCE);
+    return this.array(name);
+  }
+
+  @Override
+  public PactDslJsonArray unorderedArray() {
+    throw new UnsupportedOperationException("use the unorderedArray(String name) form");
+  }
+
+  @Override
+  public PactDslJsonArray unorderedMinArray(String name, int size) {
+    matchers.addRule(matcherKey(name), new MinEqualsIgnoreOrderMatcher(size));
+    return this.array(name);
+  }
+
+  @Override
+  public PactDslJsonArray unorderedMinArray(int size) {
+    throw new UnsupportedOperationException("use the unorderedMinArray(String name, int size) form");
+  }
+
+  @Override
+  public PactDslJsonArray unorderedMaxArray(String name, int size) {
+    matchers.addRule(matcherKey(name), new MaxEqualsIgnoreOrderMatcher(size));
+    return this.array(name);
+  }
+
+  @Override
+  public PactDslJsonArray unorderedMaxArray(int size) {
+    throw new UnsupportedOperationException("use the unorderedMaxArray(String name, int size) form");
+  }
+
+  @Override
+  public PactDslJsonArray unorderedMinMaxArray(String name, int minSize, int maxSize) {
+    if (minSize > maxSize) {
+      throw new IllegalArgumentException(String.format("The minimum size of %d is greater than the maximum of %d",
+          minSize, maxSize));
+    }
+    matchers.addRule(matcherKey(name), new MinMaxEqualsIgnoreOrderMatcher(minSize, maxSize));
+    return this.array(name);
+  }
+
+  @Override
+  public PactDslJsonArray unorderedMinMaxArray(int minSize, int maxSize) {
+    throw new UnsupportedOperationException("use the unorderedMinMaxArray(String name, int minSize, int maxSize) form");
+  }
 
     /**
      * Closes the current array

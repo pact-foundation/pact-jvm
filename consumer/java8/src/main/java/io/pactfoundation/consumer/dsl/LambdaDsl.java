@@ -50,6 +50,50 @@ public class LambdaDsl {
         return dslArray;
     }
 
+    /**
+     * New JSON array element where order is ignored
+     */
+    public static LambdaDslJsonArray newJsonArrayUnordered(final Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = PactDslJsonArray.newUnorderedArray();
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
+    /**
+     * New JSON array element of min size where order is ignored
+     * @param size
+     */
+    public static LambdaDslJsonArray newJsonArrayMinUnordered(int size, final Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = PactDslJsonArray.newUnorderedMinArray(size);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
+    /**
+     * New JSON array element of max size where order is ignored
+     * @param size
+     */
+    public static LambdaDslJsonArray newJsonArrayMaxUnordered(int size, final Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = PactDslJsonArray.newUnorderedMaxArray(size);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
+    /**
+     * New JSON array element of min and max size where order is ignored
+     * @param minSize
+     * @param maxSize
+     */
+    public static LambdaDslJsonArray newJsonArrayMinMaxUnordered(int minSize, int maxSize, final Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = PactDslJsonArray.newUnorderedMinMaxArray(minSize, maxSize);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
     public static LambdaDslJsonBody newJsonBody(Consumer<LambdaDslJsonBody> array) {
         final PactDslJsonBody pactDslJsonBody = new PactDslJsonBody();
         final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(pactDslJsonBody);

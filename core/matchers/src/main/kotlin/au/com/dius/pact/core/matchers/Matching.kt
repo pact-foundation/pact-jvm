@@ -40,7 +40,8 @@ object Matching : KLogging() {
             matchers ?: MatchingRulesImpl())
         }.filterNotNull())
       } else {
-        list + HeaderMatchResult(values.key, listOf(HeaderMismatch(values.key, values.value.joinToString(separator = ", "), "",
+        list + HeaderMatchResult(values.key,
+          listOf(HeaderMismatch(values.key, values.value.joinToString(separator = ", "), "",
           "Expected a header '${values.key}' but was missing")))
       }
     }
@@ -77,8 +78,11 @@ object Matching : KLogging() {
         }
       }
     } else {
-      if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty()) BodyMatchResult(null, emptyList())
-      else BodyMatchResult(BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()), emptyList())
+      if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty())
+        BodyMatchResult(null, emptyList())
+      else
+        BodyMatchResult(
+          BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()), emptyList())
     }
   }
 
@@ -112,10 +116,12 @@ object Matching : KLogging() {
   fun matchQuery(expected: Request, actual: Request): List<QueryMatchResult> {
     return expected.query.entries.fold(emptyList<QueryMatchResult>()) { acc, entry ->
       when (val value = actual.query[entry.key]) {
-        null -> acc + QueryMatchResult(entry.key, listOf(QueryMismatch(entry.key, entry.value.joinToString(","), "",
+        null -> acc +
+          QueryMatchResult(entry.key, listOf(QueryMismatch(entry.key, entry.value.joinToString(","), "",
           "Expected query parameter '${entry.key}' but was missing",
           listOf("$", "query", entry.key).joinToString("."))))
-        else -> acc + QueryMatchResult(entry.key, QueryMatcher.compareQuery(entry.key, entry.value, value, expected.matchingRules))
+        else -> acc +
+          QueryMatchResult(entry.key, QueryMatcher.compareQuery(entry.key, entry.value, value, expected.matchingRules))
       }
     } + actual.query.entries.fold(emptyList<QueryMatchResult>()) { acc, entry ->
       when (expected.query[entry.key]) {

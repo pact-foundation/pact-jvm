@@ -18,7 +18,8 @@ object QueryMatcher : KLogging() {
       logger.debug { "compareQueryParameterValues: Matcher defined for query parameter '$parameter'" }
       Matchers.domatch(matchers, "query", listOf(parameter), expected, actual, QueryMismatchFactory)
     } else {
-      logger.debug { "compareQueryParameterValues: No matcher defined for query parameter '$parameter', using equality" }
+      logger
+        .debug { "compareQueryParameterValues: No matcher defined for query parameter '$parameter', using equality" }
       if (expected == actual) {
         emptyList()
       } else {
