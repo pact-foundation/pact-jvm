@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
-import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.groovy.GroovyBuilder
 import au.com.dius.pact.consumer.groovy.Matcher
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
@@ -13,6 +12,7 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.support.BuiltToolConfig
 
 /**
  * Pact builder for consumer tests for messaging
@@ -127,7 +127,7 @@ class PactMessageBuilder extends GroovyBuilder {
     if (results.any { it instanceof Throwable }) {
       throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
     } else {
-      pact.write(PactConsumerConfig.pactDirectory, PactSpecVersion.V3)
+      pact.write(BuiltToolConfig.pactDirectory, PactSpecVersion.V3)
     }
   }
 

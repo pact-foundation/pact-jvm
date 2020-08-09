@@ -1,13 +1,13 @@
 package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
-import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.consumer.PactConsumerConfig;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.ProviderState;
+import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
+import au.com.dius.pact.core.support.BuiltToolConfig;
 import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression;
@@ -113,7 +113,7 @@ public class MessagePactProviderRule extends ExternalResource {
 					if (pactFolder != null) {
 						messagePact.write(pactFolder.value(), PactSpecVersion.V3);
 					} else {
-						messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+						messagePact.write(BuiltToolConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
 					}
 				} catch (Throwable t) {
 					throw t;
@@ -148,7 +148,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
 		setMessage(messagePact.getMessages().get(0), description);
 		base.evaluate();
-		messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+		messagePact.write(BuiltToolConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
 	}
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {

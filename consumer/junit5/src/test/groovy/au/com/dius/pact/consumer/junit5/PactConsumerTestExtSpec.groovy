@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.BaseMockServer
-import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.Consumer
@@ -10,6 +9,7 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.support.BuiltToolConfig
 import groovy.json.JsonSlurper
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
@@ -91,7 +91,7 @@ class PactConsumerTestExtSpec extends Specification {
     mockStore['pact'] = second  // normally set by testExt.resolveParameter()
     testExt.afterTestExecution(mockContext)
     testExt.afterAll(mockContext)
-    def pactFile = new File("${PactConsumerConfig.pactDirectory}/consumer-provider.json")
+    def pactFile = new File("${BuiltToolConfig.pactDirectory}/consumer-provider.json")
     def json = new JsonSlurper().parse(pactFile)
 
     then:
@@ -99,5 +99,4 @@ class PactConsumerTestExtSpec extends Specification {
     json.interactions[0].description == 'first'
     json.interactions[1].description == 'second'
   }
-
 }

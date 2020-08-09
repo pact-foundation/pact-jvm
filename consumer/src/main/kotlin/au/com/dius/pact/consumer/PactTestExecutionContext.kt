@@ -1,3 +1,5 @@
 package au.com.dius.pact.consumer
 
-data class PactTestExecutionContext(var pactFolder: String = PactConsumerConfig.pactDirectory)
+import au.com.dius.pact.core.support.BuiltToolConfig
+
+data class PactTestExecutionContext(var pactFolder: String = BuiltToolConfig.pactDirectory)
