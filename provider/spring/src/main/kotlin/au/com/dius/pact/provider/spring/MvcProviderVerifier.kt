@@ -50,7 +50,6 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     mockMvc: MockMvc,
-    context: Map<String, Any>,
     pending: Boolean
   ): VerificationResult {
     return try {
