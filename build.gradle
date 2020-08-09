@@ -198,13 +198,17 @@ subprojects {
     }
   }
 
-    codenarcMain {
-        configFile = rootProject.file('config/codenarc/ruleset.groovy')
-    }
+  codenarc {
+    toolVersion = "1.6.1"
+  }
 
-    codenarcTest {
-        configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
-    }
+  codenarcMain {
+      configFile = rootProject.file('config/codenarc/ruleset.groovy')
+  }
+
+  codenarcTest {
+      configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
+  }
 
     check.dependsOn << 'jacocoTestReport'
 
