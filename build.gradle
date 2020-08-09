@@ -100,7 +100,7 @@ subprojects {
             'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
             'Specification-Vendor': project.group,
             'Specification-Title': project.name,
-            'Specification-Version': version,
+            'Specification-Version': archiveVersion,
             'Automatic-Module-Name': project.group + "." + project.name.replaceAll('-', '_')
         }
     }

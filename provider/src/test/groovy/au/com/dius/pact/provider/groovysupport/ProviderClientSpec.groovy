@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.model.ContentType as PactContentType
-@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo

@@ -1,19 +1,19 @@
 dependencies {
   api project(path: ":provider:junit", configuration: 'default')
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.2.5.RELEASE'
-  compile group: 'org.springframework', name: 'spring-webmvc', version: '5.2.3.RELEASE'
-  compile group: 'org.springframework', name: 'spring-webflux', version: '5.2.3.RELEASE'
-  compile group: 'org.springframework', name: 'spring-test', version: '5.2.3.RELEASE'
-  compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.10.2'
-  runtime group: 'org.synchronoss.cloud', name: 'nio-multipart-parser', version: '1.1.0'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.2.5.RELEASE'
+  implementation group: 'org.springframework', name: 'spring-webmvc', version: '5.2.3.RELEASE'
+  implementation group: 'org.springframework', name: 'spring-webflux', version: '5.2.3.RELEASE'
+  implementation group: 'org.springframework', name: 'spring-test', version: '5.2.3.RELEASE'
+  implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.10.2'
+  runtimeOnly group: 'org.synchronoss.cloud', name: 'nio-multipart-parser', version: '1.1.0'
 
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.2.5.RELEASE'
-  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.2.5.RELEASE'
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
       exclude group: 'org.codehaus.groovy'
   }
-  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 }

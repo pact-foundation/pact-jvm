@@ -18,27 +18,27 @@ plugins {
 mainClassName = 'au.com.dius.pact.server.Server'
 
 dependencies {
-  compile project(":consumer")
-  compile "ch.qos.logback:logback-core:${project.logbackVersion}",
+  implementation project(":consumer")
+  implementation "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}",
     "com.github.scopt:scopt_2.12:3.5.0"
-  compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
+  implementation("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
       exclude group: 'org.scala-lang'
   }
-  compile "ws.unfiltered:unfiltered-netty-server_2.12:0.9.1"
+  implementation "ws.unfiltered:unfiltered-netty-server_2.12:0.9.1"
   implementation 'org.apache.commons:commons-io:1.3.2'
 
-  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 }
 
 jar {
     manifest.attributes 'Main-Class': mainClassName,
-            'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
+            'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' ')
 }
 
 import org.apache.commons.text.StringEscapeUtils
