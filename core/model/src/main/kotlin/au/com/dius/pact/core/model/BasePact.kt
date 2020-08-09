@@ -49,6 +49,12 @@ abstract class BasePact<I : Interaction> @JvmOverloads constructor(
 
   override fun toString() = "BasePact(consumer=$consumer, provider=$provider, metadata=$metadata, source=$source)"
 
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    val errors = mutableListOf<String>()
+    errors.addAll(interactions.flatMap { it.validateForVersion(pactVersion) })
+    return errors
+  }
+
   companion object : KLogging() {
     val DEFAULT_METADATA: Map<String, Map<String, Any?>> = Collections.unmodifiableMap(mapOf(
       "pactSpecification" to mapOf("version" to "3.0.0"),
@@ -63,7 +69,7 @@ abstract class BasePact<I : Interaction> @JvmOverloads constructor(
         pactJvmMetadata["features"] = updatedToggles
       }
       return Json.toMap(metadata) + mapOf(
-        "pactSpecification" to mapOf("version" to if (pactSpecVersion >= PactSpecVersion.V3) "3.0.0" else "2.0.0"),
+        "pactSpecification" to mapOf("version" to pactSpecVersion.versionString()),
         "pact-jvm" to pactJvmMetadata
       )
     }

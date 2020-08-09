@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.messaging
 
+import au.com.dius.pact.core.model.BaseInteraction
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
@@ -20,14 +21,14 @@ import org.apache.commons.lang3.StringUtils
  * Message in a Message Pact
  */
 class Message @JvmOverloads constructor(
-  override val description: String,
-  override val providerStates: List<ProviderState> = listOf(),
+  description: String,
+  providerStates: List<ProviderState> = listOf(),
   var contents: OptionalBody = OptionalBody.missing(),
   var matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators(),
   var metaData: MutableMap<String, Any?> = mutableMapOf(),
-  override val interactionId: String? = null
-) : Interaction {
+  interactionId: String? = null
+) : BaseInteraction(interactionId, description, providerStates) {
 
   fun contentsAsBytes() = contents.orEmpty()
 
@@ -130,6 +131,13 @@ class Message @JvmOverloads constructor(
   fun withMetaData(metadata: Map<String, Any>): Message {
     this.metaData = metadata.toMutableMap()
     return this
+  }
+
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    val errors = mutableListOf<String>()
+    errors.addAll(matchingRules.validateForVersion(pactVersion))
+    errors.addAll(generators.validateForVersion(pactVersion))
+    return errors
   }
 
   companion object : KLogging() {

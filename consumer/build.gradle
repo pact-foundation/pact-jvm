@@ -17,6 +17,7 @@ dependencies {
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testImplementation 'org.cthul:cthul-matchers:1.1.0'
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testImplementation "org.junit.jupiter:junit-jupiter-params:${project.junit5Version}"
   testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"

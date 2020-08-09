@@ -68,6 +68,9 @@ interface Interaction {
    * Interaction ID. Will only be populated from pacts loaded from a Pact Broker
    */
   val interactionId: String?
+
+  /** Validates if this Interaction can be used with the provided Pact specification version */
+  fun validateForVersion(pactVersion: PactSpecVersion): List<String>
 }
 
 /**
@@ -113,4 +116,7 @@ interface Pact<I : Interaction> {
    * @param interactions
    */
   fun mergeInteractions(interactions: List<*>)
+
+  /** Validates if this Pact can be used with the provided Pact specification version */
+  fun validateForVersion(pactVersion: PactSpecVersion): List<String>
 }

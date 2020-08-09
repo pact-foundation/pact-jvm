@@ -177,7 +177,7 @@ object DefaultPactReader : PactReader, KLogging() {
     val version = determineSpecVersion(pactInfo.first)
     val specVersion = Version.valueOf(version)
     return when (specVersion.majorVersion) {
-      3 -> loadV3Pact(pactInfo.second, pactInfo.first)
+      3, 4 -> loadV3Pact(pactInfo.second, pactInfo.first)
       else -> loadV2Pact(pactInfo.second, pactInfo.first)
     }
   }

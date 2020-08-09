@@ -60,6 +60,13 @@ abstract class HttpPart {
     }
   }
 
+  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    val errors = mutableListOf<String>()
+    errors.addAll(matchingRules.validateForVersion(pactVersion))
+    errors.addAll(generators.validateForVersion(pactVersion))
+    return errors
+  }
+
   companion object : KLogging() {
     private const val CONTENT_TYPE = "Content-Type"
 

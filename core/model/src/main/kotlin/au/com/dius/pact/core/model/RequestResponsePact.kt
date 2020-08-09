@@ -55,6 +55,10 @@ class RequestResponsePact @JvmOverloads constructor(
     return true
   }
 
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    return super.validateForVersion(pactVersion)
+  }
+
   override fun hashCode(): Int {
     var result = super.hashCode()
     result = 31 * result + provider.hashCode()

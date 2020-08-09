@@ -9,12 +9,12 @@ import java.net.URLEncoder
  * Interaction between a consumer and a provider
  */
 open class RequestResponseInteraction @JvmOverloads constructor(
-  override val description: String,
-  override val providerStates: List<ProviderState> = listOf(),
+  description: String,
+  providerStates: List<ProviderState> = listOf(),
   val request: Request = Request(),
   val response: Response = Response(),
-  override val interactionId: String? = null
-) : Interaction {
+  interactionId: String? = null
+) : BaseInteraction(interactionId, description, providerStates) {
 
   override fun toString() =
     "Interaction: $description\n\tin states ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"
@@ -65,6 +65,13 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     result = 31 * result + request.hashCode()
     result = 31 * result + response.hashCode()
     return result
+  }
+
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    val errors = mutableListOf<String>()
+    errors.addAll(request.validateForVersion(pactVersion))
+    errors.addAll(response.validateForVersion(pactVersion))
+    return errors
   }
 
   companion object : KLogging() {

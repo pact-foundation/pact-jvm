@@ -255,4 +255,12 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     generators.applyRootPrefix(rootPath)
     return generators
   }
+
+  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    return if (pactVersion < PactSpecVersion.V3 && categories.any { it.value.isNotEmpty() }) {
+      listOf("Generators can only be used with Pact specification versions >= V3")
+    } else {
+      listOf()
+    }
+  }
 }

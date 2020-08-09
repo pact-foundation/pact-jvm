@@ -193,4 +193,9 @@ data class Category @JvmOverloads constructor(
    * Returns the number of rules stored at the key
    */
   fun numRules(key: String) = matchingRules.getOrDefault(key, MatchingRuleGroup()).rules.size
+
+  /** Validates all the rules in this category against the Pact specification version */
+  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    return matchingRules.values.flatMap { it.validateForVersion(pactVersion) }
+  }
 }

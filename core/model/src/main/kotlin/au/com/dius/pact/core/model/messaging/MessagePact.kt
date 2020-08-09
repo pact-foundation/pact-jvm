@@ -115,6 +115,15 @@ class MessagePact @JvmOverloads constructor (
     return "MessagePact(provider=$provider, consumer=$consumer, messages=$messages, metadata=$metadata)"
   }
 
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    return if (pactVersion < PactSpecVersion.V3) {
+      super.validateForVersion(pactVersion) +
+        "Message pacts can only be used with V3 or above of the Pact specification"
+    } else {
+      super.validateForVersion(pactVersion)
+    }
+  }
+
   companion object : KLogging() {
     fun fromJson(json: JsonValue.Object, source: PactSource = UnknownPactSource): MessagePact {
       val transformedJson = DefaultPactReader.transformJson(json)

@@ -171,7 +171,6 @@ class V3PactSpec extends Specification {
 
             @Override
             Pact sortInteractions() { this }
-
         }
 
         when:

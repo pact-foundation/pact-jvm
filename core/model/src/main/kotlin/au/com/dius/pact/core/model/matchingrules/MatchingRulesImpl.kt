@@ -72,6 +72,10 @@ class MatchingRulesImpl : MatchingRules {
       }
     }
 
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    return rules.values.flatMap { it.validateForVersion(pactVersion) }
+  }
+
     companion object : KLogging() {
       @JvmStatic
       fun fromJson(json: JsonValue?): MatchingRules {
