@@ -58,9 +58,17 @@ class PactXmlBuilder @JvmOverloads constructor (
       doc.appendChild(element)
       element
     } else doc.documentElement
-    val xmlNode = XmlNode(this, root, listOf("$", rootName))
+    val xmlNode = XmlNode(this, root, listOf("$", qualifiedName(rootName)))
     cl.accept(xmlNode)
     return this
+  }
+
+  fun qualifiedName(name: String): String {
+    return if (rootNameSpace.isNullOrEmpty()) {
+      name
+    } else {
+      "ns:$name"
+    }
   }
 
   @JvmOverloads

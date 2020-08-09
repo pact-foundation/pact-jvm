@@ -86,18 +86,18 @@ class PactXmlBuilderSpec extends Specification {
     then:
     xml.@id == '1234'
     matchers.matchingRules.keySet() == [
-      "\$.projects.project",
-      "\$.projects.project['@id']",
-      "\$.projects.project['@name']",
-      "\$.projects.project['@due']",
-      "\$.projects.project.tasks.task",
-      "\$.projects.project.tasks.task['@id']",
-      "\$.projects.project.tasks.task['@name']",
-      "\$.projects.project.tasks.task['@done']"
+      "\$.ns:projects.project",
+      "\$.ns:projects.project['@id']",
+      "\$.ns:projects.project['@name']",
+      "\$.ns:projects.project['@due']",
+      "\$.ns:projects.project.tasks.task",
+      "\$.ns:projects.project.tasks.task['@id']",
+      "\$.ns:projects.project.tasks.task['@name']",
+      "\$.ns:projects.project.tasks.task['@done']"
     ] as Set
     generators.categoryFor(Category.BODY).keySet() == [
-      "\$.projects.project['@id']",
-      "\$.projects.project.tasks.task['@id']"
+      "\$.ns:projects.project['@id']",
+      "\$.ns:projects.project.tasks.task['@id']"
     ] as Set
   }
 
