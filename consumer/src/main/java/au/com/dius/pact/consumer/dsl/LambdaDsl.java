@@ -1,7 +1,5 @@
-package io.pactfoundation.consumer.dsl;
+package au.com.dius.pact.consumer.dsl;
 
-import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher;

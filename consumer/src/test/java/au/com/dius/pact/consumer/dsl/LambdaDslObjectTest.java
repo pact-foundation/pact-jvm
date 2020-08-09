@@ -1,10 +1,13 @@
-package io.pactfoundation.consumer.dsl;
+package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PM;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.core.model.PactSpecVersion;
+import au.com.dius.pact.consumer.dsl.LambdaDsl;
+import au.com.dius.pact.consumer.dsl.LambdaDslJsonBody;
+import au.com.dius.pact.consumer.dsl.LambdaDslObject;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

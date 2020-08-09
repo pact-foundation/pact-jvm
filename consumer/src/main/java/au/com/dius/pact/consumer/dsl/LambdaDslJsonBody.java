@@ -1,7 +1,4 @@
-package io.pactfoundation.consumer.dsl;
-
-import au.com.dius.pact.consumer.dsl.DslPart;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+package au.com.dius.pact.consumer.dsl;
 
 public class LambdaDslJsonBody extends LambdaDslObject {
 

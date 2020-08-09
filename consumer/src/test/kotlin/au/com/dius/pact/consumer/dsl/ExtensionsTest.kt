@@ -1,4 +1,4 @@
-package io.pactfoundation.consumer.dsl
+package au.com.dius.pact.consumer.dsl
 
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
@@ -13,8 +13,8 @@ class ExtensionsTest {
         |]""".trimMargin().replace("\n", "")
 
         val actualJson = newJsonArray {
-            newObject { stringValue("key", "value") }
-            newObject { stringValue("key_1", "value_1") }
+          newObject { stringValue("key", "value") }
+          newObject { stringValue("key_1", "value_1") }
         }.body.toString()
 
         assertThat(actualJson, equalTo(expectedJson))
@@ -28,12 +28,12 @@ class ExtensionsTest {
         |}""".trimMargin().replace("\n", "")
 
         val actualJson = newJsonObject {
-            newArray("array") {
-                newObject { stringValue("key", "value") }
-            }
-            newObject("object") {
-                stringValue("property", "value")
-            }
+          newArray("array") {
+            newObject { stringValue("key", "value") }
+          }
+          newObject("object") {
+            stringValue("property", "value")
+          }
         }.body.toString()
 
         assertThat(actualJson, equalTo(expectedJson))

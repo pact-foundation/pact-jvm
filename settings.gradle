@@ -7,7 +7,6 @@ include 'core:matchers'
 
 include 'consumer'
 include 'consumer:groovy'
-include 'consumer:java8'
 include 'consumer:junit'
 include 'consumer:junit5'
 

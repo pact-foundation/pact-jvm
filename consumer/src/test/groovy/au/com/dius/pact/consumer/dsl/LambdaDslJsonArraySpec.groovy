@@ -1,4 +1,4 @@
-package io.pactfoundation.consumer.dsl
+package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
@@ -38,5 +38,4 @@ class LambdaDslJsonArraySpec extends Specification {
     'unorderedMaxArray'    | [4]    | new MaxEqualsIgnoreOrderMatcher(4)
     'unorderedMinMaxArray' | [2, 4] | new MinMaxEqualsIgnoreOrderMatcher(2, 4)
   }
-
 }

@@ -1,6 +1,4 @@
-package io.pactfoundation.consumer.dsl
-
-import au.com.dius.pact.consumer.dsl.DslPart
+package au.com.dius.pact.consumer.dsl
 
 /**
  * DSL function to simplify creating a [DslPart] generated from a [LambdaDslJsonBody].

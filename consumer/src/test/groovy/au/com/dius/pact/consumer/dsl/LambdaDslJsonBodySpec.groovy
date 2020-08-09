@@ -1,6 +1,5 @@
-package io.pactfoundation.consumer.dsl
+package au.com.dius.pact.consumer.dsl
 
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher

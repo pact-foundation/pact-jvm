@@ -5,7 +5,7 @@ import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
-import io.pactfoundation.consumer.dsl.LambdaDslObject
+import au.com.dius.pact.consumer.dsl.LambdaDslObject
 import org.apache.http.HttpResponse
 import org.apache.http.client.fluent.Request
 import org.junit.jupiter.api.Test
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 import java.util.function.Consumer
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonArray
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'ProviderWith200Items')
