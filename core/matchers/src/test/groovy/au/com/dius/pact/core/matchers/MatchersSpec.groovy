@@ -3,10 +3,13 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
@@ -60,6 +63,106 @@ class MatchersSpec extends Specification {
     matchingRules = {
       def matchingRules = new MatchingRulesImpl()
       matchingRules.addCategory('header').addRule('something', TypeMatcher.INSTANCE)
+      matchingRules
+    }
+  }
+
+  def 'ignore-orderMatcherDefined - should be true when ignore-order matcher defined on path'() {
+    expect:
+    Matchers.isEqualsIgnoreOrderMatcherDefined(['$', 'array1'], 'body', matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+        .addRule('$.array1', new MinMaxEqualsIgnoreOrderMatcher(3, 5))
+        .addRule('$.array1[*].foo', new RegexMatcher('a|b'))
+        .addRule('$.array1[*].status', new RegexMatcher('up'))
+      matchingRules
+    }
+  }
+
+  def 'ignore-orderMatcherDefined - should be true when ignore-order matcher defined on ancestor'() {
+    expect:
+    Matchers.isEqualsIgnoreOrderMatcherDefined(['$', 'any'], 'body', matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+              .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
+      matchingRules
+    }
+  }
+
+  def 'ignore-orderMatcherDefined - should be false when ignore-order matcher not defined on path'() {
+    expect:
+    !Matchers.isEqualsIgnoreOrderMatcherDefined(['$', 'array1', '0', 'foo'], 'body', matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+        .addRule('$.array1[*].foo', new RegexMatcher('a|b'))
+        .addRule('$.array1[*].status', new RegexMatcher('up'))
+      matchingRules
+    }
+  }
+
+  def 'ignore-orderMatcherDefined - should be false when ignore-order matcher not defined on ancestor'() {
+    expect:
+    !Matchers.isEqualsIgnoreOrderMatcherDefined(['$', 'any'], 'body', matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+              .addRule('$', new MinMaxTypeMatcher(3, 5))
+      matchingRules
+    }
+  }
+
+  def 'wildcardIndexMatcherDefined - should be false when the path does not have a matcher entry'() {
+    expect:
+    !Matchers.wildcardIndexMatcherDefined(['$', '0'], 'body', new MatchingRulesImpl())
+  }
+
+  def 'wildcardIndexMatcherDefined - should be false when the path has a non-wildcard matcher entry'() {
+    expect:
+    !Matchers.wildcardIndexMatcherDefined(['$', 'arr', '0'], 'body' , matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+        .addRule('$.arr[0]', TypeMatcher.INSTANCE)
+        .addRule('$.other[*]', TypeMatcher.INSTANCE)
+      matchingRules
+    }
+  }
+
+  def 'wildcardIndexMatcherDefined - should be true when the path does have a matcher entry and it is a wildcard'() {
+    expect:
+    Matchers.wildcardIndexMatcherDefined(['$', '0'], 'body' , matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+        .addRule('$[*]', TypeMatcher.INSTANCE)
+      matchingRules
+    }
+  }
+
+  def 'wildcardIndexMatcherDefined - should be false when a parent of the path has a matcher entry'() {
+    expect:
+    !Matchers.wildcardIndexMatcherDefined(['$', 'some', 'thing'], 'body' , matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+        .addRule('$.*', TypeMatcher.INSTANCE)
       matchingRules
     }
   }

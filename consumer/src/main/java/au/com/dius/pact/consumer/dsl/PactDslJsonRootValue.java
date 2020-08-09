@@ -776,6 +776,78 @@ public class PactDslJsonRootValue extends DslPart {
   }
 
   /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedArray(String name) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedArray() {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinArray(String name, int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinArray(int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMaxArray(String name, int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMaxArray(int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinMaxArray(String name, int minSize, int maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonArray unorderedMinMaxArray(int minSize, int maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
    * Combine all the matchers using AND
    * @param example Attribute example value
    * @param rules Matching rules to apply

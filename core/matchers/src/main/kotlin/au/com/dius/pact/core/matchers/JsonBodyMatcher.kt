@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.matchers.util.IndicesCombination
+import au.com.dius.pact.core.matchers.util.LargestKeyValue
+import au.com.dius.pact.core.matchers.util.memoizeFixed
 import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -7,6 +10,7 @@ import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonArray
 import mu.KLogging
+import java.math.BigInteger
 
 object JsonBodyMatcher : BodyMatcher, KLogging() {
 
@@ -97,6 +101,131 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     return result
   }
 
+  /**
+   * Compares any "extra" actual elements to expected using wildcard
+   * matching.
+   */
+  private fun wildcardCompare(
+    basePath: List<String>,
+    expectedValues: JsonValue.Array,
+    actual: JsonValue,
+    allowUnexpectedKeys: Boolean,
+    matchers: MatchingRules
+  ): List<BodyItemMatchResult> {
+    val path = basePath + expectedValues.size.toString()
+    val pathStr = path.joinToString(".")
+    val starPathStr = (basePath + "*").joinToString(".")
+
+    return compare(path, expectedValues[0], actual, allowUnexpectedKeys, matchers)
+      .map { matchResult ->
+        // replaces index with '*' for clearer errors
+        matchResult.copy(
+          key = matchResult.key.replaceFirst(pathStr, starPathStr),
+          result = matchResult.result.map { mismatch ->
+            mismatch.copy(path = mismatch.path.replaceFirst(pathStr, starPathStr))
+          })
+      }
+  }
+
+  /**
+   * Compares every permutation of actual against expected.
+   *
+   * If actual has more elements than expected, and there is a wildcard matcher,
+   * then each extra actual element is compared to the first expected element
+   * using the wildcard matcher.
+   */
+  private fun compareListContentUnordered(
+    expectedValues: JsonValue.Array,
+    actualValues: JsonValue.Array,
+    path: List<String>,
+    allowUnexpectedKeys: Boolean,
+    matchers: MatchingRules
+  ): List<BodyItemMatchResult> {
+    val doWildCardMatching = actualValues.size > expectedValues.size &&
+      Matchers.wildcardIndexMatcherDefined(path + expectedValues.size.toString(),
+        "body", matchers)
+
+    val memoizedWildcardCompare = { actualIndex: Int ->
+      wildcardCompare(path, expectedValues, actualValues[actualIndex],
+        allowUnexpectedKeys, matchers)
+    }.memoizeFixed(actualValues.size)
+
+    val memoizedCompare = { expectedIndex: Int, actualIndex: Int ->
+      compare(path + expectedIndex.toString(),
+        expectedValues[expectedIndex], actualValues[actualIndex],
+        allowUnexpectedKeys, matchers)
+    }.memoizeFixed(expectedValues.size, actualValues.size)
+
+    val longestMatch = LargestKeyValue<Int, IndicesCombination>()
+    val examinedActualIndicesCombos = HashSet<BigInteger>()
+    /**
+     * Determines if a matching permutation exists.
+     *
+     * Note: this algorithm seems to have a worst case O(n*2^n) time and O(2^n) space complexity
+     * if a lot of the actuals match a lot of the expected (e.g., if expected uses regex matching
+     * with something like [3|2|1, 2|1, 1]). Without the caching, the time complexity jumps to
+     * around O(2^2n). Caching/memoization is also used above for compare, to effectively achieve
+     * just O(n^2) calls instead of O(2^n).
+     *
+     * For most normal cases, average performance should be closer to O(n^2) time and O(n) space
+     * complexity if there aren't many duplicate matches. Best case is O(n)/O(n) if its already
+     * in order.
+     *
+     * @param expectedIndex index of expected being compared against
+     * @param actualIndices combination of remaining actual indices to compare
+     */
+    fun hasMatchingPermutation(
+      expectedIndex: Int = 0,
+      actualIndices: IndicesCombination = IndicesCombination.of(actualValues.values)
+    ): Boolean {
+      return if (actualIndices.comboId in examinedActualIndicesCombos) {
+        false
+      } else {
+        examinedActualIndicesCombos.add(actualIndices.comboId)
+        longestMatch.useIfLarger(expectedIndex, actualIndices)
+        if (expectedIndex < expectedValues.size) {
+          actualIndices.indices().any { actualIndex ->
+            memoizedCompare(expectedIndex, actualIndex).all {
+              it.result.isEmpty()
+            } && hasMatchingPermutation(expectedIndex + 1, actualIndices - actualIndex)
+          }
+        } else if (doWildCardMatching) {
+          actualIndices.indices().all { actualIndex ->
+            memoizedWildcardCompare(actualIndex).all {
+              it.result.isEmpty()
+            }
+          }
+        } else true
+      }
+    }
+
+    return if (hasMatchingPermutation()) {
+      emptyList()
+    } else {
+      val smallestCombo = longestMatch.value ?: IndicesCombination.of(actualValues.values)
+      val longestMatch = longestMatch.key ?: 0
+
+      val remainingErrors = smallestCombo.indices().map { actualIndex ->
+        (longestMatch until expectedValues.size).map { expectedIndex ->
+          memoizedCompare(expectedIndex, actualIndex).flatMap { it.result }
+        }.flatten() + if (doWildCardMatching) {
+          memoizedWildcardCompare(actualIndex).flatMap { it.result }
+        } else emptyList()
+      }.toList().flatten()
+        .groupBy { it.path }
+        .map { (path, mismatches) -> BodyItemMatchResult(path, mismatches) }
+
+      listOf(BodyItemMatchResult(path.joinToString("."),
+        listOf(BodyMismatch(expectedValues, actualValues,
+          "Expected ${valueOf(expectedValues)} to match ${valueOf(actualValues)} " +
+            "ignoring order of elements",
+          path.joinToString("."),
+          generateJsonDiff(expectedValues, actualValues)
+        ))
+      )) + remainingErrors
+    }
+  }
+
   private fun compareLists(
     expectedValues: JsonValue.Array,
     actualValues: JsonValue.Array,
@@ -108,7 +237,17 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
   ): List<BodyItemMatchResult> {
     val expectedList = expectedValues.values
     val actualList = actualValues.values
-    return if (Matchers.matcherDefined("body", path, matchers)) {
+    return if (Matchers.isEqualsIgnoreOrderMatcherDefined(path, "body", matchers)) {
+      // match unordered list
+      logger.debug { "compareLists: ignore-order matcher defined for path $path" }
+      val result = mutableListOf(BodyItemMatchResult(path.joinToString("."),
+        Matchers.domatch(matchers, "body", path, expectedValues, actualValues, BodyMismatchFactory)))
+      if (expectedList.isNotEmpty()) {
+        // No need to pad 'expected' as we already visit all 'actual' values
+        result.addAll(compareListContentUnordered(expectedValues, actualValues, path, allowUnexpectedKeys, matchers))
+      }
+      result
+    } else if (Matchers.matcherDefined("body", path, matchers)) {
       logger.debug { "compareLists: Matcher defined for path $path" }
       val result = mutableListOf(BodyItemMatchResult(path.joinToString("."),
         Matchers.domatch(matchers, "body", path, expectedValues, actualValues, BodyMismatchFactory)))

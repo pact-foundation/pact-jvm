@@ -40,6 +40,54 @@ public class LambdaDslJsonArray {
         return this;
     }
 
+  /**
+   * Array element where order is ignored
+   */
+  public LambdaDslJsonArray unorderedArray(final Consumer<LambdaDslJsonArray> a) {
+    final PactDslJsonArray pactArray = this.pactArray.unorderedArray();
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    a.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
+
+  /**
+   * Array element of min size where order is ignored
+   * @param size
+   */
+  public LambdaDslJsonArray unorderedMinArray(int size, final Consumer<LambdaDslJsonArray> a) {
+    final PactDslJsonArray pactArray = this.pactArray.unorderedMinArray(size);
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    a.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
+
+  /**
+   * Array element of max size where order is ignored
+   * @param size
+   */
+  public LambdaDslJsonArray unorderedMaxArray(int size, final Consumer<LambdaDslJsonArray> a) {
+    final PactDslJsonArray pactArray = this.pactArray.unorderedMaxArray(size);
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    a.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
+
+  /**
+   * Array element of min and max size where order is ignored
+   * @param minSize
+   * @param maxSize
+   */
+  public LambdaDslJsonArray unorderedMinMaxArray(int minSize, int maxSize, final Consumer<LambdaDslJsonArray> a) {
+    final PactDslJsonArray pactArray = this.pactArray.unorderedMinMaxArray(minSize, maxSize);
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    a.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
+
     public LambdaDslJsonArray stringValue(final String value) {
         pactArray.stringValue(value);
         return this;
@@ -525,4 +573,5 @@ public class LambdaDslJsonArray {
     pactArray.datetimeExpression(expression, format);
     return this;
   }
+
 }

@@ -3,8 +3,12 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.core.model.generators.Generators;
 import au.com.dius.pact.core.model.matchingrules.Category;
 import au.com.dius.pact.core.model.matchingrules.DateMatcher;
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher;
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher;
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher;
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
@@ -55,6 +59,58 @@ public abstract class DslPart {
     public abstract PactDslJsonArray array();
 
     /**
+     * Array field where order is ignored
+     * @param name field name
+     */
+    public abstract PactDslJsonArray unorderedArray(String name);
+
+    /**
+     * Array element where order is ignored
+     */
+    public abstract PactDslJsonArray unorderedArray();
+
+    /**
+     * Array field of min size where order is ignored
+     * @param name field name
+     * @param size minimum size
+     */
+    public abstract PactDslJsonArray unorderedMinArray(String name, int size);
+
+    /**
+     * Array element of min size where order is ignored
+     * @param size minimum size
+     */
+    public abstract PactDslJsonArray unorderedMinArray(int size);
+
+    /**
+     * Array field of max size where order is ignored
+     * @param name field name
+     * @param size maximum size
+     */
+    public abstract PactDslJsonArray unorderedMaxArray(String name, int size);
+
+    /**
+     * Array element of max size where order is ignored
+     * @param size maximum size
+     */
+    public abstract PactDslJsonArray unorderedMaxArray(int size);
+
+    /**
+     * Array field of min and max size where order is ignored
+     * @param name field name
+     * @param minSize minimum size
+     * @param maxSize maximum size
+     */
+    public abstract PactDslJsonArray unorderedMinMaxArray(String name, int minSize, int maxSize);
+
+    /**
+     * Array element of min and max size where order is ignored
+     * @param minSize minimum size
+     * @param maxSize maximum size
+     */
+    public abstract PactDslJsonArray unorderedMinMaxArray(int minSize, int maxSize);
+
+    /**
      * Close of the previous array element
      */
     public abstract DslPart closeArray();
@@ -84,20 +140,20 @@ public abstract class DslPart {
     public abstract PactDslJsonBody eachLike(int numberExamples);
 
     /**
-     * Array field with a minumum size and each element must match the provided object
+     * Array field with a minimum size and each element must match the provided object
      * @param name field name
      * @param size minimum size
      */
     public abstract PactDslJsonBody minArrayLike(String name, Integer size);
 
     /**
-     * Array element with a minumum size and each element of the array must match the provided object
+     * Array element with a minimum size and each element of the array must match the provided object
      * @param size minimum size
      */
     public abstract PactDslJsonBody minArrayLike(Integer size);
 
     /**
-     * Array field with a minumum size and each element must match the provided object
+     * Array field with a minimum size and each element must match the provided object
      * @param name field name
      * @param size minimum size
      * @param numberExamples number of examples to generate
@@ -105,7 +161,7 @@ public abstract class DslPart {
     public abstract PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples);
 
     /**
-     * Array element with a minumum size and each element of the array must match the provided object
+     * Array element with a minimum size and each element of the array must match the provided object
      * @param size minimum size
      * @param numberExamples number of examples to generate
      */
@@ -120,7 +176,7 @@ public abstract class DslPart {
 
     /**
      * Array element with a maximum size and each element of the array must match the provided object
-     * @param size minimum size
+     * @param size maximum size
      */
     public abstract PactDslJsonBody maxArrayLike(Integer size);
 
@@ -134,7 +190,7 @@ public abstract class DslPart {
 
     /**
      * Array element with a maximum size and each element of the array must match the provided object
-     * @param size minimum size
+     * @param size maximum size
      * @param numberExamples number of examples to generate
      */
     public abstract PactDslJsonBody maxArrayLike(Integer size, int numberExamples);
@@ -336,6 +392,22 @@ public abstract class DslPart {
   protected MinMaxTypeMatcher matchMinMax(Integer minSize, Integer maxSize) {
     return new MinMaxTypeMatcher(minSize, maxSize);
   }
+
+    protected EqualsIgnoreOrderMatcher matchIgnoreOrder() {
+        return EqualsIgnoreOrderMatcher.INSTANCE;
+    }
+
+    protected MinEqualsIgnoreOrderMatcher matchMinIgnoreOrder(Integer min) {
+        return new MinEqualsIgnoreOrderMatcher(min);
+    }
+
+    protected MaxEqualsIgnoreOrderMatcher matchMaxIgnoreOrder(Integer max) {
+        return new MaxEqualsIgnoreOrderMatcher(max);
+    }
+
+    protected MinMaxEqualsIgnoreOrderMatcher matchMinMaxIgnoreOrder(Integer minSize, Integer maxSize) {
+        return new MinMaxEqualsIgnoreOrderMatcher(minSize, maxSize);
+    }
 
     protected IncludeMatcher includesMatcher(Object value) {
       return new IncludeMatcher(String.valueOf(value));

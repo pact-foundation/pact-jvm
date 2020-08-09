@@ -3,9 +3,16 @@ package io.pactfoundation.consumer.dsl
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import org.apache.commons.lang3.time.FastDateFormat
 import spock.lang.Issue
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -229,6 +236,33 @@ class LambdaDslSpec extends Specification {
 
     then:
     result.body.toString() == '{"date3":"' + date3 + '","date1":"' + date1 + '"}'
+  }
+
+  @Unroll
+  def 'generates a root array with ignore-order #expectedMatcher.class.simpleName matching'() {
+    given:
+    def subject = LambdaDsl."$method"(*params) {
+      it.stringValue('a')
+        .stringType('b')
+    }.build().close()
+
+    when:
+    def result = subject.body.toString()
+
+    then:
+    result == '["a","b"]'
+    subject.matchers.matchingRules == [
+        '$': new MatchingRuleGroup([expectedMatcher]),
+        '$[1]': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    ]
+
+    where:
+
+    method                        | params | expectedMatcher
+    'newJsonArrayUnordered'       | []     | EqualsIgnoreOrderMatcher.INSTANCE
+    'newJsonArrayMinUnordered'    | [2]    | new MinEqualsIgnoreOrderMatcher(2)
+    'newJsonArrayMaxUnordered'    | [4]    | new MaxEqualsIgnoreOrderMatcher(4)
+    'newJsonArrayMinMaxUnordered' | [2, 4] | new MinMaxEqualsIgnoreOrderMatcher(2, 4)
   }
 
 }

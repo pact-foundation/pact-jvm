@@ -829,4 +829,56 @@ public class LambdaDslObject {
     object.datetimeExpression(name, expression, format);
     return this;
   }
+
+  /**
+   * Array field where order is ignored
+   * @param name field name
+   */
+  public LambdaDslObject unorderedArray(String name, final Consumer<LambdaDslJsonArray> nestedArray) {
+    final PactDslJsonArray pactArray = object.unorderedArray(name);
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    nestedArray.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
+
+  /**
+   * Array field of min size where order is ignored
+   * @param name field name
+   * @param size minimum size
+   */
+  public LambdaDslObject unorderedMinArray(String name, int size, final Consumer<LambdaDslJsonArray> nestedArray) {
+    final PactDslJsonArray pactArray = object.unorderedMinArray(name, size);
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    nestedArray.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
+
+  /**
+   * Array field of max size where order is ignored
+   * @param name field name
+   * @param size maximum size
+   */
+  public LambdaDslObject unorderedMaxArray(String name, int size, final Consumer<LambdaDslJsonArray> nestedArray) {
+    final PactDslJsonArray pactArray = object.unorderedMaxArray(name, size);
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    nestedArray.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
+
+  /**
+   * Array field of min and max size where order is ignored
+   * @param name field name
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public LambdaDslObject unorderedMinMaxArray(String name, int minSize, int maxSize, final Consumer<LambdaDslJsonArray> nestedArray) {
+    final PactDslJsonArray pactArray = object.unorderedMinMaxArray(name, minSize, maxSize);
+    LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
+    nestedArray.accept(array);
+    pactArray.closeArray();
+    return this;
+  }
 }
