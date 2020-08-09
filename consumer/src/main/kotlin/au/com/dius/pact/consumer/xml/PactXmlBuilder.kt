@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.Matcher
 import au.com.dius.pact.core.model.generators.Category.BODY
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import org.w3c.dom.DOMImplementation
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -16,6 +17,16 @@ import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
+
+private fun matcherKey(path: List<String>, vararg key: String): String {
+  return (path + key).reduce { acc, s ->
+    if (s.startsWith('[')) {
+      acc + s
+    } else {
+      "$acc.$s"
+    }
+  }
+}
 
 class PactXmlBuilder @JvmOverloads constructor (
   val rootName: String,
@@ -79,6 +90,7 @@ class XmlNode(private val builder: PactXmlBuilder, private val element: Element,
 
   @JvmOverloads
   fun eachLike(name: String, examples: Int = 1, attributes: Map<String, Any?> = emptyMap(), cl: Consumer<XmlNode>? = null) {
+    builder.matchingRules.addRule(matcherKey(path, name), TypeMatcher)
     val element = builder.doc.createElement(name)
     attributes.forEach {
       if (it.value is Matcher) {
@@ -100,8 +112,6 @@ class XmlNode(private val builder: PactXmlBuilder, private val element: Element,
       this.element.appendChild(element.cloneNode(true))
     }
   }
-
-  private fun matcherKey(path: List<String>, vararg key: String) = (path + key).joinToString(".")
 
   @JvmOverloads
   fun appendElement(name: String, attributes: Map<String, Any?> = emptyMap(), cl: Consumer<XmlNode>? = null) {
