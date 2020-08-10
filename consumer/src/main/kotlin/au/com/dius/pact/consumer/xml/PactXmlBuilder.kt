@@ -90,30 +90,16 @@ class PactXmlBuilder @JvmOverloads constructor (
 }
 
 class XmlNode(private val builder: PactXmlBuilder, private val element: Element, private val path: List<String>) {
-  fun setAttributes(attributes: Map<String, String>) {
-    attributes.forEach {
-      element.setAttribute(it.key, it.value)
-    }
+  fun setAttributes(attributes: Map<String, Any?>) {
+    setElementAttributes(attributes, element)
   }
 
   @JvmOverloads
   fun eachLike(name: String, examples: Int = 1, attributes: Map<String, Any?> = emptyMap(), cl: Consumer<XmlNode>? = null) {
     builder.matchingRules.addRule(matcherKey(path, name), TypeMatcher)
     val element = builder.doc.createElement(name)
-    attributes.forEach {
-      if (it.value is Matcher) {
-        val matcherDef = it.value as Matcher
-        builder.matchingRules.addRule(matcherKey(path, name, "['@" + it.key + "']"), matcherDef.matcher!!)
-        if (matcherDef.generator != null) {
-          builder.generators.addGenerator(BODY, matcherKey(path, name, "['@" + it.key + "']"), matcherDef.generator!!)
-        }
-        element.setAttribute(it.key, matcherDef.value.toString())
-      } else {
-        element.setAttribute(it.key, it.value.toString())
-      }
-    }
-
     val node = XmlNode(builder, element, this.path + element.tagName)
+    node.setAttributes(attributes)
     cl?.accept(node)
     this.element.appendChild(element)
     (2..examples).forEach { _ ->
@@ -124,9 +110,8 @@ class XmlNode(private val builder: PactXmlBuilder, private val element: Element,
   @JvmOverloads
   fun appendElement(name: String, attributes: Map<String, Any?> = emptyMap(), cl: Consumer<XmlNode>? = null) {
     val element = builder.doc.createElement(name)
-    setElementAttributes(attributes, element)
-
     val node = XmlNode(builder, element, this.path + element.tagName)
+    node.setAttributes(attributes)
     cl?.accept(node)
     this.element.appendChild(element)
   }
@@ -134,7 +119,8 @@ class XmlNode(private val builder: PactXmlBuilder, private val element: Element,
   @JvmOverloads
   fun appendElement(name: String, attributes: Map<String, Any?> = emptyMap(), contents: String) {
     val element = builder.doc.createElement(name)
-    setElementAttributes(attributes, element)
+    val node = XmlNode(builder, element, this.path + element.tagName)
+    node.setAttributes(attributes)
     element.textContent = contents
     this.element.appendChild(element)
   }
@@ -155,9 +141,9 @@ class XmlNode(private val builder: PactXmlBuilder, private val element: Element,
     attributes.forEach {
       if (it.value is Matcher) {
         val matcherDef = it.value as Matcher
-        builder.matchingRules.addRule(matcherKey(path, "@" + it.key), matcherDef.matcher!!)
+        builder.matchingRules.addRule(matcherKey(path, "['@${it.key}']"), matcherDef.matcher!!)
         if (matcherDef.generator != null) {
-          builder.generators.addGenerator(BODY, matcherKey(path, "@" + it.key), matcherDef.generator!!)
+          builder.generators.addGenerator(BODY, matcherKey(path, "['@${it.key}']"), matcherDef.generator!!)
         }
         element.setAttribute(it.key, matcherDef.value.toString())
       } else {
