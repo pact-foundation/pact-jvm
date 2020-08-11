@@ -21,7 +21,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.b': ['$.b Expected \'2\' (String) but received \'3\' (String)']
+      '$.b': ['Expected \'2\' (String) but received \'3\' (String)']
     ]
   }
 
@@ -38,7 +38,7 @@ class MessageComparisonSpec extends Specification {
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '/': [
-        '/ Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match'
+        'Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match'
       ]
     ]
   }

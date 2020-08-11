@@ -171,8 +171,8 @@ class MarkdownReporterSpec extends Specification {
          |
          || Path | Failure |
          || ---- | ------- |
-         ||`$.0`|$.0 Expected doesNotExist="Test" but was missing|
-         ||`$.1`|$.1 Expected doesNotExist="Test" but was missing|
+         ||`$.0`|Expected doesNotExist="Test" but was missing|
+         ||`$.1`|Expected doesNotExist="Test" but was missing|
          |
          |
          |Diff:

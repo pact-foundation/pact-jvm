@@ -114,7 +114,7 @@ data class BodyMismatch @JvmOverloads constructor(
   val path: String = "/",
   val diff: String? = null
 ) : Mismatch() {
-  override fun description() = "$path $mismatch"
+  override fun description() = mismatch
   override fun type() = "body"
 }
 

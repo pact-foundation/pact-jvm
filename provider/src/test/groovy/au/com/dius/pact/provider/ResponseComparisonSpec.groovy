@@ -111,7 +111,7 @@ class ResponseComparisonSpec extends Specification {
     expect:
     result instanceof Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.stuff': ["\$.stuff Expected 'is good' (String) but received 'should make the test fail' (String)"]
+      '$.stuff': ["Expected 'is good' (String) but received 'should make the test fail' (String)"]
     ]
     result.value.diff[1] == '-  "stuff": "is good"'
     result.value.diff[2] == '+  "stuff": "should make the test fail"'
