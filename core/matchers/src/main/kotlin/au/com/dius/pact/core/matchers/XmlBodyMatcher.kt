@@ -222,16 +222,16 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
       listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expected, actual,
         "Expected a Tag with at least ${expectedAttrs.size} attributes but " +
           "received ${actual.attributes.length} attributes",
-        path.joinToString(".")))))
+        path.joinToString("."), generateAttrDiff(expected, actual)))))
     } else {
       val mismatches = if (expectedAttrs.size > actualAttrs.size) {
         listOf(BodyMismatch(expected, actual, "Expected a Tag with at least ${expected.attributes.length} " +
           "attributes but received ${actual.attributes.length} attributes",
-          path.joinToString(".")))
+          path.joinToString("."), generateAttrDiff(expected, actual)))
       } else if (!allowUnexpectedKeys && expectedAttrs.size != actualAttrs.size) {
         listOf(BodyMismatch(expected, actual, "Expected a Tag with ${expected.attributes.length} " +
           "attributes but received ${actual.attributes.length} attributes",
-          path.joinToString(".")))
+          path.joinToString("."), generateAttrDiff(expected, actual)))
       } else {
         emptyList()
       }
@@ -248,15 +248,32 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
             attr.value.nodeValue != actualVal?.nodeValue ->
               listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' " +
                 "but received ${attr.key}='${actualVal?.nodeValue}'",
-                attrPath.joinToString(".")))
+                attrPath.joinToString("."), generateAttrDiff(expected, actual)))
             else -> emptyList()
           }
         } else {
           listOf(BodyMismatch(expected, actual, "Expected ${attr.key}='${attr.value.nodeValue}' " +
             "but was missing",
-            appendAttribute(path, attr.key).joinToString(".")))
+            appendAttribute(path, attr.key).joinToString("."), generateAttrDiff(expected, actual)))
         }
       }))
+    }
+  }
+
+  private fun generateAttrDiff(expected: Node, actual: Node): String {
+    val expectedXml = generateXMLForNode(expected)
+    val actualXml = generateXMLForNode(actual)
+    return generateDiff(expectedXml, actualXml).joinToString(separator = "\n")
+  }
+
+  private fun generateXMLForNode(node: Node): String {
+    return if (node.hasAttributes()) {
+      val attr = attributesToMap(node.attributes).entries.sortedBy { it.key.toString() }.joinToString {
+        "  @${it.key}=\"${it.value.nodeValue}\"\n"
+      }
+      "<${node.nodeName}\n$attr>"
+    } else {
+      "<${node.nodeName}>"
     }
   }
 
