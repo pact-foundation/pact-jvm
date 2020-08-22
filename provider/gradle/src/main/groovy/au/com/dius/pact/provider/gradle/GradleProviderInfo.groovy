@@ -13,7 +13,12 @@ import org.gradle.util.ConfigureUtil
  */
 class GradleProviderInfo extends ProviderInfo {
   def providerVersion
+  /**
+   * @deprecated Use providerTags instead
+   */
+  @Deprecated
   def providerTag
+  Closure<List<String>> providerTags
   PactBrokerConsumerConfig brokerConfig
 
   GradleProviderInfo(String name) {

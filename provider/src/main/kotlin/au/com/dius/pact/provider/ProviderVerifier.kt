@@ -140,7 +140,13 @@ interface IProviderVerifier {
   /**
    * Callback to get the provider tag
    */
+  @Deprecated("Use version that returns multiple tags", replaceWith = ReplaceWith("providerTags"))
   var providerTag: Supplier<String?>?
+
+  /**
+   * Callback to get the provider tags
+   */
+  var providerTags: Supplier<List<String>>?
 
   /**
    * Run the verification for the given provider and return any failures
@@ -237,7 +243,10 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
   override var providerVersion: Supplier<String> = ProviderVersion { System.getProperty(PACT_PROVIDER_VERSION) },
-  override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) }
+  override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) },
+  override var providerTags: Supplier<List<String>>? = Supplier {
+    System.getProperty(PACT_PROVIDER_TAG).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+  }
 ) : IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
@@ -672,7 +681,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           result.toTestResult(),
           providerVersion.get(),
           client,
-          providerTag?.get())
+          providerTags?.get().orEmpty())
       }
       result
     }

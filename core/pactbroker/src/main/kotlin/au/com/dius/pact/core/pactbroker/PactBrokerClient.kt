@@ -347,14 +347,31 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     }
   }
 
+  @Deprecated("Use publishProviderTags", replaceWith = ReplaceWith("publishProviderTags"))
   fun publishProviderTag(docAttributes: Map<String, Any?>, name: String, tag: String, version: String) {
-    return try {
+    try {
       val halClient = newHalClient()
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
         is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
         is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+      }
+    } catch (e: NotFoundHalResponse) {
+      logger.error(e) { "Could not tag provider $name, link was missing" }
+    }
+  }
+
+  fun publishProviderTags(docAttributes: Map<String, Any?>, name: String, tags: List<String>, version: String) {
+    try {
+      val halClient = newHalClient()
+        .withDocContext(docAttributes)
+        .navigate(PROVIDER)
+      tags.forEach {
+        when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to it), "{}")) {
+          is Ok<*> -> logger.debug { "Pushed tag $it for provider $name and version $version" }
+          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $it for provider $name and version $version" }
+        }
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
