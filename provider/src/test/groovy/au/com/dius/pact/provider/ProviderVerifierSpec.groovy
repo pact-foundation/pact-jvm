@@ -403,11 +403,13 @@ class ProviderVerifierSpec extends Specification {
 
   @Unroll
   @SuppressWarnings('UnnecessaryGetter')
+  @RestoreSystemProperties
   def 'after verifying a pact, the results are reported back using reportVerificationResults'() {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     PactBrokerClient pactBrokerClient = Mock(PactBrokerClient, constructorArgs: [''])
+    verifier.verificationReporter = Mock(VerificationReporter)
     verifier.pactReader = Stub(PactReader)
     def statechange = Stub(StateChange) {
       executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
@@ -427,11 +429,13 @@ class ProviderVerifierSpec extends Specification {
     verifier.pactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
 
+    System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
+
     when:
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * pactBrokerClient.publishVerificationResults(_, finalResult, '0.0.0', _)
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, ['tag1', 'tag2', 'tag3'])
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
@@ -490,7 +494,7 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, null)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, [])
 
     then:
     1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Ok(true)
@@ -505,7 +509,7 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, null)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, [])
 
     then:
     0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, '0', null)

@@ -62,7 +62,8 @@ class WebFluxProviderVerifier : ProviderVerifier() {
       return VerificationResult.Failed(
         listOf(mapOf("message" to "Request to provider method failed with an exception", "exception" to e)),
         "Request to provider method failed with an exception", interactionMessage,
-        listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
+        listOf(VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e)),
+        pending, interaction.interactionId)
     }
   }
 

@@ -140,7 +140,13 @@ interface IProviderVerifier {
   /**
    * Callback to get the provider tag
    */
+  @Deprecated("Use version that returns multiple tags", replaceWith = ReplaceWith("providerTags"))
   var providerTag: Supplier<String?>?
+
+  /**
+   * Callback to get the provider tags
+   */
+  var providerTags: Supplier<List<String>>?
 
   /**
    * Run the verification for the given provider and return any failures
@@ -237,7 +243,10 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
   override var providerVersion: Supplier<String> = ProviderVersion { System.getProperty(PACT_PROVIDER_VERSION) },
-  override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) }
+  override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) },
+  override var providerTags: Supplier<List<String>>? = Supplier {
+    System.getProperty(PACT_PROVIDER_TAG).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+  }
 ) : IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
@@ -326,7 +335,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       return VerificationResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
         "exception" to e)),
         "Request to provider method failed with an exception", interactionMessage,
-        listOf(VerificationFailureType.ExceptionFailure(e)), consumer.pending, interaction.interactionId)
+        listOf(VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e)),
+        consumer.pending, interaction.interactionId)
     }
   }
 
@@ -492,7 +502,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       return VerificationResult.Failed(listOf(mapOf("message" to "State change request failed",
         "exception" to stateChangeResult.stateChangeResult.getError())), "State change request failed",
         stateChangeResult.message,
-        listOf(VerificationFailureType.StateChangeFailure(stateChangeResult)),
+        listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", stateChangeResult)),
         consumer.pending, interaction.interactionId
       )
     }
@@ -616,7 +626,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
         "exception" to e)),
         "Request to provider method failed with an exception", interactionMessage,
-        listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
+        listOf(VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e)),
+        pending, interaction.interactionId)
     }
   }
 
@@ -670,7 +681,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           result.toTestResult(),
           providerVersion.get(),
           client,
-          providerTag?.get())
+          providerTags?.get().orEmpty())
       }
       result
     }

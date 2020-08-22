@@ -98,8 +98,8 @@ The following project properties can be specified with `-Pproperty=value` on the
 |`pact.matching.wildcard`|Enables matching of map values ignoring the keys when this property is set to 'true'|
 |`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
-|`pact.provider.tag`|Sets the provider tag to push before publishing verification results|
-|`pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`|Overrides the handling of a particular content type [4.1.3+]|
+|`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|
+|`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
 
 ## Specifying the provider hostname at runtime
 
@@ -906,7 +906,7 @@ pact {
     serviceProviders {
         provider1 {
             providerVersion = { branchName() + '-' + abbreviatedId() }
-            providerTag = { branchName() }
+            providerTags = { [ branchName() ] }
             hasPactsFromPactBroker('http://pact-broker:5000/', authentication: ['Basic', pactBrokerUser, pactBrokerPassword])
         }
     }
@@ -917,7 +917,10 @@ or you can set the `pact.provider.tag` JVM system property. For example:
 
 ```console
 $ ./gradlew -d pactverify -Ppact.verifier.publishResults=true -Dpact.provider.tag=Test2
-``` 
+```
+
+From 4.1.8+, you can specify multiple tags with an array for the `providerTag` value, or a comma separated string for the `pact.provider.tag`
+system property.
 
 # Pending Pact Support (version 4.1.0 and later)
 

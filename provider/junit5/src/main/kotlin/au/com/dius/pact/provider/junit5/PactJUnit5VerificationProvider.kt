@@ -125,7 +125,8 @@ data class PactVerificationContext @JvmOverloads constructor(
         listOf(VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
           "exception" to e)),
           "Request to provider failed with an exception", interactionMessage,
-          listOf(VerificationFailureType.ExceptionFailure(e)), consumer.pending, interaction.interactionId))
+          listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e)),
+          consumer.pending, interaction.interactionId))
       }
     } else {
       return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
@@ -322,9 +323,9 @@ class PactVerificationStateChangeExtension(
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
+      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change callback failed",
         results = listOf(mapOf("exception" to e)),
-        failures = listOf(VerificationFailureType.StateChangeFailure(StateChangeResult(Err(e)))),
+        failures = listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", StateChangeResult(Err(e)))),
         pending = pending,
         interactionId = interaction.interactionId
       ))
@@ -346,7 +347,7 @@ class PactVerificationStateChangeExtension(
       logger.error(e) { "Provider state change callback failed" }
       testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
         results = listOf(mapOf("exception" to e)),
-        failures = listOf(VerificationFailureType.StateChangeFailure(StateChangeResult(Err(e)))),
+        failures = listOf(VerificationFailureType.StateChangeFailure("Provider state change teardown callback failed", StateChangeResult(Err(e)))),
         pending = pending,
         interactionId = interaction.interactionId
       ))
@@ -373,8 +374,15 @@ class PactVerificationStateChangeExtension(
           "for Interaction \"${testContext.interaction.description}\" \n" +
           "with Consumer \"${testContext.consumer.name}\"")
       } else {
-        stateChangeMethods.filter { it.second.action == action }.forEach { (method, _, instance) ->
-          logger.debug { "Invoking state change method ${method.name} for state '${state.name}' on $instance" }
+        stateChangeMethods.filter { it.second.action == action }.forEach { (method, stateAnnotation, instance) ->
+          logger.info {
+            val name = stateAnnotation.value.joinToString(", ")
+            if (stateAnnotation.comment.isNotEmpty()) {
+              "Invoking state change method '$name':${stateAnnotation.action} (${stateAnnotation.comment})"
+            } else {
+              "Invoking state change method '$name':${stateAnnotation.action}"
+            }
+          }
           val stateChangeValue = if (method.parameterCount > 0) {
             ReflectionSupport.invokeMethod(method, instance, state.params)
           } else {

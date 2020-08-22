@@ -15,12 +15,24 @@ interface VerificationReporter {
   /**
    * Publish the results to the pact broker. If the tag is given, then the provider will be tagged with that first.
    */
+  @Deprecated("Use version that takes a list of provider tags")
   fun reportResults(
     pact: Pact<out Interaction>,
     result: TestResult,
     version: String,
     client: PactBrokerClient? = null,
     tag: String? = null
+  )
+
+  /**
+   * Publish the results to the pact broker. If the tags are given, then the provider will be tagged with those first.
+   */
+  fun reportResults(
+    pact: Pact<out Interaction>,
+    result: TestResult,
+    version: String,
+    client: PactBrokerClient? = null,
+    tags: List<String> = emptyList()
   )
 
   /**
@@ -41,10 +53,24 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     client: PactBrokerClient?,
     tag: String?
   ) {
+    if (tag.isNullOrEmpty()) {
+      reportResults(pact, result, version, client, emptyList())
+    } else {
+      reportResults(pact, result, version, client, listOf(tag))
+    }
+  }
+
+  override fun reportResults(
+    pact: Pact<out Interaction>,
+    result: TestResult,
+    version: String,
+    client: PactBrokerClient?,
+    tags: List<String>
+  ) {
     when (val source = pact.source) {
       is BrokerUrlSource -> {
         val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options)
-        publishResult(brokerClient, source, result, version, pact, tag)
+        publishResult(brokerClient, source, result, version, pact, tags)
       }
       else -> logger.info { "Skipping publishing verification results for source $source" }
     }
@@ -56,10 +82,10 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     result: TestResult,
     version: String,
     pact: Pact<out I>,
-    tag: String?
+    tags: List<String>
   ) {
-    if (!tag.isNullOrEmpty()) {
-      brokerClient.publishProviderTag(source.attributes, pact.provider.name, tag, version)
+    if (tags.isNotEmpty()) {
+      brokerClient.publishProviderTags(source.attributes, pact.provider.name, tags, version)
     }
     val publishResult = brokerClient.publishVerificationResults(source.attributes, result, version)
     if (publishResult is Err) {

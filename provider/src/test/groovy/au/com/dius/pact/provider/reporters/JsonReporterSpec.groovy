@@ -183,8 +183,8 @@ class JsonReporterSpec extends Specification {
     reportJson.execution[0].interactions[0].verification.status == ['expected status of 201 but was 200']
     reportJson.execution[0].interactions[0].verification.header == ['HEADER-X': ["Expected a header 'HEADER-X' but was missing"]]
     reportJson.execution[0].interactions[0].verification.body.mismatches == [
-      '$.0': ['BodyMismatch: $.0 Expected doesNotExist="Test" but was missing'],
-      '$.1': ['BodyMismatch: $.1 Expected doesNotExist="Test" but was missing']
+      '$.0': ['Expected doesNotExist="Test" but was missing'],
+      '$.1': ['Expected doesNotExist="Test" but was missing']
     ]
   }
 

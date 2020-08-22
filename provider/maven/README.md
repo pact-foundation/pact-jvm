@@ -759,6 +759,9 @@ To turn on the verification publishing, set the system property `pact.verifier.p
 You can have a tag pushed against the provider version before the verification results are published. To do this 
 you need set the `pact.provider.tag` JVM system property to the tag value.
 
+From 4.1.8+, you can specify multiple tags with a comma separated string for the `pact.provider.tag`
+system property.
+
 # Enabling other verification reports
 
 By default the verification report is written to the console. You can also enable a JSON or Markdown report by setting

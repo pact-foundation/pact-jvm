@@ -166,13 +166,13 @@ You can leave the provider name out. It will then use the provider name of the f
     }
 ```
 
-For an example, have a look at [ExampleJavaConsumerPactRuleTest](src/test/java/au/com/dius/pact/consumer/examples/ExampleJavaConsumerPactRuleTest.java)
+For an example, have a look at [ExampleJavaConsumerPactRuleTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/examples/ExampleJavaConsumerPactRuleTest.java)
 
 ### Requiring a test with multiple providers
 
 The Pact Rule can be used to test with multiple providers. Just add a rule to the test class for each provider, and
 then include all the providers required in the `@PactVerification` annotation. For an example, look at
-[PactMultiProviderTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactMultiProviderTest.java).
+[PactMultiProviderTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/pactproviderrule/PactMultiProviderTest.java).
 
 Note that if more than one provider fails verification for the same test, you will only receive a failure for one of them.
 Also, to have multiple tests in the same test class, the providers must be setup with random ports (i.e. don't specify
@@ -192,12 +192,12 @@ E.g.:
       PactSpecVersion.V2, this);                                                                     // ^^^^
 ```
 
-For an example test doing this, see [PactProviderHttpsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsTest.java).
+For an example test doing this, see [PactProviderHttpsTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/pactproviderrule/PactProviderHttpsTest.java).
 
 **NOTE:** The provider will start handling HTTPS requests using a self-signed certificate. Most HTTP clients will not accept
 connections to a self-signed server as the certificate is untrusted. You may need to enable insecure HTTPS with your client
 for this test to work. For an example of how to enable insecure HTTPS client connections with Apache Http Client, have a
-look at [InsecureHttpsRequest](src/test/java/org/apache/http/client/fluent/InsecureHttpsRequest.java).
+look at [InsecureHttpsRequest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/org/apache/http/client/fluent/InsecureHttpsRequest.java).
 
 ### Requiring the mock server to run with HTTPS with a keystore
 
@@ -212,7 +212,7 @@ E.g.:
             "/path/to/your/keystore.jks", "your-keystore-password", PactSpecVersion.V2, this);
 ```
 
-For an example test doing this, see [PactProviderHttpsKeystoreTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsKeystoreTest.java).
+For an example test doing this, see [PactProviderHttpsKeystoreTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/pactproviderrule/PactProviderHttpsKeystoreTest.java).
 
 ### Setting default expected request and response values
 
@@ -239,7 +239,7 @@ For example:
     }
 ```
 
-For an example test that uses these, have a look at [PactProviderWithMultipleFragmentsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderWithMultipleFragmentsTest.java)
+For an example test that uses these, have a look at [PactProviderWithMultipleFragmentsTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/pactproviderrule/PactProviderWithMultipleFragmentsTest.java)
 
 ### Note on HTTP clients and persistent connections
 
@@ -347,7 +347,7 @@ is verified. It is only recorded in the consumer tests and used by the provider 
 
 ### Building JSON bodies with PactDslJsonBody DSL
 
-**NOTE:** If you are using Java 8, there is [an updated DSL for consumer tests](../java8).
+**NOTE:** If you are using Java 8, there is [an updated DSL for consumer tests](https://github.com/DiUS/pact-jvm/tree/master/consumer/java8).
 
 The body method of the ConsumerPactBuilder can accept a PactDslJsonBody, which can construct a JSON body as well as
 define regex and type matchers.
@@ -520,7 +520,7 @@ DslPart body = new PactDslJsonBody()
 
 ```
 
-For an example, have a look at [WildcardKeysTest](src/test/java/au/com/dius/pact/consumer/WildcardKeysTest.java).
+For an example, have a look at [WildcardKeysTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/WildcardKeysTest.java).
 
 **NOTE:** The `eachKeyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition
@@ -677,7 +677,7 @@ overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
 # Publishing your pact files to a pact broker
 
-If you use Gradle, you can use the [pact Gradle plugin](../../provider/gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
+If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/provider/gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
 
 # Pact Specification V3
 
@@ -712,7 +712,7 @@ If you are using the `PactProviderRule`, you can pass the version into the const
 For testing a consumer of messages from a message queue, the `MessagePactProviderRule` rule class works in much the
 same way as the `PactProviderRule` class for Request-Response interactions, but will generate a V3 format message pact file.
 
-For an example, look at [ExampleMessageConsumerTest](src/test/java/au/com/dius/pact/consumer/junit/v3/ExampleMessageConsumerTest.java)
+For an example, look at [ExampleMessageConsumerTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/v3/ExampleMessageConsumerTest.java)
 
 # Having values injected from provider state callbacks (3.6.11+)
 

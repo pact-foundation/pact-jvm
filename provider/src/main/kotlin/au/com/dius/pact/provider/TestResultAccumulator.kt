@@ -68,7 +68,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
       } else {
         verificationReporter.reportResults(pact, interactionResults.values.fold(TestResult.Ok) {
           acc: TestResult, result -> acc.merge(result)
-        }, lookupProviderVersion(), null, lookupProviderTag())
+        }, lookupProviderVersion(), null, lookupProviderTags())
       }
       testResults.remove(pactHash)
     } else {
@@ -105,7 +105,8 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     }
   }
 
-  private fun lookupProviderTag(): String? = System.getProperty("pact.provider.tag")
+  private fun lookupProviderTags() = System.getProperty("pact.provider.tag").orEmpty().split(',')
+    .map { it.trim() }.filter { it.isNotEmpty() }
 
   fun unverifiedInteractions(pact: Pact<out Interaction>, results: MutableMap<Int, TestResult>): List<Interaction> {
     logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }

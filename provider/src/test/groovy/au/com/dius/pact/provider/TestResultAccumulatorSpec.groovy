@@ -88,7 +88,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(mutablePact, interaction3, TestResult.Ok.INSTANCE, null)
 
     then:
-    1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null, null)
+    1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null, [])
 
     cleanup:
     testResultAccumulator.verificationReporter = DefaultVerificationReporter.INSTANCE
@@ -231,7 +231,32 @@ class TestResultAccumulatorSpec extends Specification {
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _,
-      'updateTestResultTag')
+      ['updateTestResultTag'])
+    testResultAccumulator.testResults.isEmpty()
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
+  }
+
+  @RestoreSystemProperties
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'updateTestResult - include all the provider tags'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1])
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+    System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
+
+    when:
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE, null)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _,
+      ['tag1', 'tag2', 'tag3'])
     testResultAccumulator.testResults.isEmpty()
 
     cleanup:

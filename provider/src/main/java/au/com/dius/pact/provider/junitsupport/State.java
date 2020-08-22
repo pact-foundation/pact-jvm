@@ -23,4 +23,9 @@ public @interface State {
    * Whether to run the method before (SETUP) or after (TEARDOWN) the interaction
    */
   StateChangeAction action() default StateChangeAction.SETUP;
+
+  /**
+   * Comment associated with the state change callback
+   */
+  String comment() default "";
 }
