@@ -374,8 +374,15 @@ class PactVerificationStateChangeExtension(
           "for Interaction \"${testContext.interaction.description}\" \n" +
           "with Consumer \"${testContext.consumer.name}\"")
       } else {
-        stateChangeMethods.filter { it.second.action == action }.forEach { (method, _, instance) ->
-          logger.debug { "Invoking state change method ${method.name} for state '${state.name}' on $instance" }
+        stateChangeMethods.filter { it.second.action == action }.forEach { (method, stateAnnotation, instance) ->
+          logger.info {
+            val name = stateAnnotation.value.joinToString(", ")
+            if (stateAnnotation.comment.isNotEmpty()) {
+              "Invoking state change method '$name':${stateAnnotation.action} (${stateAnnotation.comment})"
+            } else {
+              "Invoking state change method '$name':${stateAnnotation.action}"
+            }
+          }
           val stateChangeValue = if (method.parameterCount > 0) {
             ReflectionSupport.invokeMethod(method, instance, state.params)
           } else {

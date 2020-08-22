@@ -36,6 +36,14 @@ class RunStateChanges(
   private fun invokeStateChangeMethods(action: StateChangeAction) {
     for (method in methods) {
       if (method.second.action == action) {
+        logger.info {
+          val name = method.second.value.joinToString(", ")
+          if (method.second.comment.isNotEmpty()) {
+            "Invoking state change method '$name':${method.second.action} (${method.second.comment})"
+          } else {
+            "Invoking state change method '$name':${method.second.action}"
+          }
+        }
         val target = stateChangeHandlers.map(Supplier<out Any>::get).find {
           it::class.isSubclassOf(method.first.declaringClass.kotlin)
         }

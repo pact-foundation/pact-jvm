@@ -48,7 +48,7 @@ class InjectedHeadersContractTest {
     request.addHeader('X-ContractTest', 'true')
   }
 
-  @State('an active account exists')
+  @State(value = 'an active account exists', comment = 'I\'m a comment')
   Map<String, Object> createAccount() {
     [
       port: 8332,
