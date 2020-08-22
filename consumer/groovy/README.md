@@ -486,7 +486,7 @@ withBody {
 }
 ```
 
-For an example, have a look at [WildcardPactSpec](/consumer/groovy/src/test/groovy/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
+For an example, have a look at [WildcardPactSpec](https://github.com/DiUS/pact-jvm/blob/master/consumer/groovy/src/test/groovy/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
 
 **NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
@@ -539,7 +539,7 @@ overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
 # Publishing your pact files to a pact broker
 
-If you use Gradle, you can use the [pact Gradle plugin](../../provider/gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
+If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/provider/gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
 
 # Pact Specification V3
 
