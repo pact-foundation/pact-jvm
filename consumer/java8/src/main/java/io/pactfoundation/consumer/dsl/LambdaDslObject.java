@@ -426,6 +426,17 @@ public class LambdaDslObject {
         return this;
     }
 
+    /**
+     * Attribute that will have its value injected from the provider state
+     * @param name Attribute name
+     * @param expression Expression to be evaluated from the provider state
+     * @param example Example value to be used in the consumer test
+     */
+    public LambdaDslObject valueFromProviderState(String name, String expression, Object example) {
+        object.valueFromProviderState(name, expression, example);
+        return this;
+    }
+
     /** Combine all the matchers using AND
     * @param name  Attribute name
     * @param value Attribute example value
