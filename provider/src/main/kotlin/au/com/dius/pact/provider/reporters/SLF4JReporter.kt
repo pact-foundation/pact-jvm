@@ -5,13 +5,13 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import com.github.ajalt.mordant.TermColors
 import com.github.ajalt.mordant.TermColors.Level
-import com.google.gson.GsonBuilder
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -31,7 +31,6 @@ class SLF4JReporter(
   override lateinit var verifier: IProviderVerifier
 
   private val log = LoggerFactory.getLogger(SLF4JReporter::class.java)
-  private val gson = GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create()
 
   override var reportFile: File
     get() = TODO("not implemented")
@@ -223,7 +222,7 @@ class SLF4JReporter(
           }
         }
         else -> {
-          result.appendln(gson.toJson(err.value).prependIndent("      "))
+          result.appendln(Json.toJson(err.value).serialise().prependIndent("      "))
         }
       }
     }

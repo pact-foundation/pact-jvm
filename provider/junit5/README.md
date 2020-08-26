@@ -26,7 +26,7 @@ public class ContractVerificationTest {
 }
 ```
 
-For details on the provider and pact source annotations, refer to the [Pact junit runner](../junit/) docs.
+For details on the provider and pact source annotations, refer to the [Pact junit runner](https://github.com/DiUS/pact-jvm/tree/master/provider/junit) docs.
 
 ## Test target
 
@@ -63,13 +63,13 @@ For example, configure it by adding the following to your POM:
 
 ## Provider State Methods
 
-Provider State Methods work in the same way as with JUnit 4 tests, refer to the [Pact junit runner](../junit/) docs.
+Provider State Methods work in the same way as with JUnit 4 tests, refer to the [Pact junit runner](https://github.com/DiUS/pact-jvm/tree/master/provider/junit) docs.
 
 ### Using multiple classes for the state change methods
 
 If you have a large number of state change methods, you can split things up by moving them to other classes. You will 
 need to specify the additional classes on the test context in a `Before` method. Do this with the `withStateHandler` 
-or `setStateHandlers` methods. See [StateAnnotationsOnAdditionalClassTest](src/test/java/au/com/dius/pact/provider/junit5/StateAnnotationsOnAdditionalClassTest.java) for an example. 
+or `setStateHandlers` methods. See [StateAnnotationsOnAdditionalClassTest](https://github.com/DiUS/pact-jvm/blob/master/provider/junit5/src/test/java/au/com/dius/pact/provider/junit5/StateAnnotationsOnAdditionalClassTest.java) for an example. 
 
 ## Modifying the requests before they are sent
 

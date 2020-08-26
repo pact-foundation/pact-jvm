@@ -1,10 +1,14 @@
 package au.com.dius.pact.consumer.xml
 
+import au.com.dius.pact.core.model.generators.Category
 import groovy.xml.XmlSlurper
 import spock.lang.Specification
+import spock.lang.Unroll
 
+import static au.com.dius.pact.consumer.dsl.Matchers.bool
 import static au.com.dius.pact.consumer.dsl.Matchers.integer
 import static au.com.dius.pact.consumer.dsl.Matchers.string
+import static au.com.dius.pact.consumer.dsl.Matchers.timestamp
 
 class PactXmlBuilderSpec extends Specification {
   def 'without a namespace'() {
@@ -55,5 +59,60 @@ class PactXmlBuilderSpec extends Specification {
     result.dog.size() == 2
     result.cat.size() == 3
     result.wolf.size() == 1
+  }
+
+  def 'matching rules'() {
+    given:
+    def builder = new PactXmlBuilder('projects', 'http://some.namespace/and/more/stuff')
+      .build { root ->
+        root.setAttributes([id: '1234'])
+        root.eachLike('project', 1, [
+          id: integer(),
+          type: 'activity',
+          name: string('Project 1'),
+          due: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSSX", '2016-02-11T09:46:56.023Z')
+        ]) { project ->
+          project.appendElement('tasks', [:]) { task ->
+            task.eachLike('task', 1, [id: integer(), name: string('Task 1'), done: bool(true)])
+          }
+        }
+      }
+
+    when:
+    def xml = new XmlSlurper().parseText(builder.toString())
+    def matchers = builder.matchingRules
+    def generators = builder.generators
+
+    then:
+    xml.@id == '1234'
+    matchers.matchingRules.keySet() == [
+      "\$.ns:projects.project",
+      "\$.ns:projects.project['@id']",
+      "\$.ns:projects.project['@name']",
+      "\$.ns:projects.project['@due']",
+      "\$.ns:projects.project.tasks.task",
+      "\$.ns:projects.project.tasks.task['@id']",
+      "\$.ns:projects.project.tasks.task['@name']",
+      "\$.ns:projects.project.tasks.task['@done']"
+    ] as Set
+    generators.categoryFor(Category.BODY).keySet() == [
+      "\$.ns:projects.project['@id']",
+      "\$.ns:projects.project.tasks.task['@id']"
+    ] as Set
+  }
+
+  @Unroll
+  def 'matcher key path'() {
+    expect:
+    PactXmlBuilderKt.matcherKey(base, *keys) == path
+
+    where:
+
+    base         | keys              || path
+    ['$']        | []                 | '$'
+    ['$', 'one'] | []                 | '$.one'
+    ['$', 'one'] | ['two']            | '$.one.two'
+    ['$', 'one'] | ['two', "['@id']"] | "\$.one.two['@id']"
+    ['$', 'one'] | ['two', '#text']   | "\$.one.two.#text"
   }
 }

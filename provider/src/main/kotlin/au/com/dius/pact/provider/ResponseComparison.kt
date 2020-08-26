@@ -20,7 +20,6 @@ import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.google.gson.JsonParser
 import mu.KLogging
 
 data class BodyComparisonResult(
@@ -86,7 +85,7 @@ class ResponseComparison(
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
         actualBodyString = if (contentType.isJson()) {
-          Json.gsonPretty.toJson(JsonParser.parseString(actual))
+          Json.prettyPrint(actual)
         } else {
           actual
         }
@@ -95,7 +94,7 @@ class ResponseComparison(
       var expectedBodyString = ""
       if (response.isNotEmpty()) {
         expectedBodyString = if (jsonBody) {
-          Json.gsonPretty.toJson(JsonParser.parseString(response))
+          Json.prettyPrint(response)
         } else {
           response
         }

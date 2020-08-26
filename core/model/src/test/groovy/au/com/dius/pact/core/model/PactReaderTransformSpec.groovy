@@ -45,7 +45,7 @@ class PactReaderTransformSpec extends Specification {
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
+    Json.INSTANCE.prettyPrint(result) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -85,7 +85,7 @@ class PactReaderTransformSpec extends Specification {
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
+    Json.INSTANCE.prettyPrint(result) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -128,7 +128,7 @@ class PactReaderTransformSpec extends Specification {
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
+    Json.INSTANCE.prettyPrint(result) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -171,7 +171,7 @@ class PactReaderTransformSpec extends Specification {
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
+    Json.INSTANCE.prettyPrint(result) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -229,7 +229,7 @@ class PactReaderTransformSpec extends Specification {
     def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
-    Json.INSTANCE.gsonPretty.toJson(result.toGson()) == '''{
+    Json.INSTANCE.prettyPrint(result) == '''{
       |  "provider": {
       |    "name": "Alice Service"
       |  },
@@ -259,5 +259,4 @@ class PactReaderTransformSpec extends Specification {
       |  ]
       |}'''.stripMargin()
   }
-
 }

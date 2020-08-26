@@ -9,7 +9,7 @@ object JsonUtils {
 
   def parseJsonString(json: String): Any = {
     if (json == null || json.trim.isEmpty) null
-    else javaObjectGraphToScalaObjectGraph(Json.INSTANCE.fromJson(JsonParser.INSTANCE.parseString(json)))
+    else javaObjectGraphToScalaObjectGraph(Json.INSTANCE.fromJson(JsonParser.parseString(json)))
   }
 
   def javaObjectGraphToScalaObjectGraph(value: AnyRef): Any = {

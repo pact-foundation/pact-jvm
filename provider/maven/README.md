@@ -615,6 +615,8 @@ By default, the test classpath is scanned for annotated methods. You can overrid
 
 # Publishing pact files to a pact broker
 
+**NOTE**: There is a pact CLI that can be used to publish pacts. See https://github.com/pact-foundation/pact-ruby-cli.
+
 The pact maven plugin provides a `publish` mojo that can publish all pact files in a directory
 to a pact broker. To use it, you need to add a publish configuration to the POM that defines the
 directory where the pact files are and the URL to the pact broker.
@@ -758,6 +760,9 @@ To turn on the verification publishing, set the system property `pact.verifier.p
 
 You can have a tag pushed against the provider version before the verification results are published. To do this 
 you need set the `pact.provider.tag` JVM system property to the tag value.
+
+From 4.1.8+, you can specify multiple tags with a comma separated string for the `pact.provider.tag`
+system property.
 
 # Enabling other verification reports
 

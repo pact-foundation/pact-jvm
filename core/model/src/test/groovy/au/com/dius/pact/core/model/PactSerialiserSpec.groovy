@@ -194,7 +194,7 @@ class PactSerialiserSpec extends Specification {
     def pactJson = file.text
 
     then:
-    pactJson.contains('This is a string with letters ä, ü, ö and ß')
+    pactJson.contains('This is a string with letters \\u00E4, \\u00FC, \\u00F6 and \\u00DF')
 
     cleanup:
     file.delete()

@@ -110,7 +110,10 @@ no parameters or a single Map parameter.
 
 ### Example of Message test that verifies metadata
 
-To have the message metadata - such as the topic - also verified you need to return a `MessageAndMetadata` from the invoked method that contains the payload and metadata to be validation. For example, to verify the metadata of an integration using the Spring [Message](https://docs.spring.io/spring-integration/reference/html/message.html) interface, you can do something like the following:
+To have the message metadata - such as the topic - also verified you need to return a `MessageAndMetadata` from 
+the invoked method that contains the payload and metadata to be validation. For example, to verify the metadata of an 
+integration using the Spring [Message](https://docs.spring.io/spring-integration/reference/html/message.html) interface, 
+you can do something like the following:
 
 ```java
   ...
@@ -187,13 +190,14 @@ two ways you can do this:
 
 #### Use interfaces
 
-You can put the state change methods on interfaces and then have your test class implement those interfaces. See [StateAnnotationsOnInterfaceTest](src/test/java/au/com/dius/pact/provider/junit/StateAnnotationsOnInterfaceTest.java)
+You can put the state change methods on interfaces and then have your test class implement those interfaces. 
+See [StateAnnotationsOnInterfaceTest](https://github.com/DiUS/pact-jvm/blob/master/provider/junit/src/test/java/au/com/dius/pact/provider/junit/StateAnnotationsOnInterfaceTest.java)
 for an example.
 
 #### Specify the additional classes on the test target
 
 You can provide the additional classes to the test target with the `withStateHandler` or `setStateHandlers` methods. See
-[BooksPactProviderTest](../spring/src/test/java/au/com/dius/pact/provider/spring/BooksPactProviderTest.java) for an example. 
+[BooksPactProviderTest](https://github.com/DiUS/pact-jvm/blob/master/provider/spring/src/test/java/au/com/dius/pact/provider/spring/BooksPactProviderTest.java) for an example. 
 
 ## Pact source
 
@@ -464,7 +468,7 @@ For example, configure it by adding the following to your POM:
 
 #### Modifying the requests before they are sent
 
-**NOTE: `@TargetRequestFilter` is only for JUnit 4. For JUnit 5 see [JUnit 5 docs](../junit5#modifying-the-requests-before-they-are-sent).**
+**NOTE: `@TargetRequestFilter` is only for JUnit 4. For JUnit 5 see [JUnit 5 docs](https://github.com/DiUS/pact-jvm/tree/master/provider/junit5#modifying-the-requests-before-they-are-sent).**
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
 be authentication tokens, which have a small life span. The HttpTarget supports request filters by annotating methods
@@ -550,6 +554,9 @@ To enable publishing of results, set the Java system property or environment var
 
 You can have a tag pushed against the provider version before the verification results are published. To do this 
 you need set the `pact.provider.tag` JVM system property to the tag value.
+
+From 4.1.8+, you can specify multiple tags with a comma separated string for the `pact.provider.tag`
+system property.
 
 # Pending Pact Support (version 4.1.0 and later)
 

@@ -3,21 +3,21 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.json.JsonException
+import au.com.dius.pact.provider.junit.target.HttpTarget
+import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
+import au.com.dius.pact.provider.junitsupport.Consumer
+import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
 import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport.checkForOverriddenPactUrl
 import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport.filterPactsByAnnotations
+import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
-import au.com.dius.pact.provider.junit.target.HttpTarget
-import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
-import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
-import au.com.dius.pact.provider.junitsupport.Provider
-import com.google.gson.JsonSyntaxException
 import mu.KLogging
 import org.junit.Ignore
 import org.junit.runner.notification.RunNotifier
@@ -95,7 +95,7 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
         } else {
           throw InitializationError(e)
         }
-      } catch (e: JsonSyntaxException) {
+      } catch (e: JsonException) {
         if (ignoreIoErrors == "true") {
           logger.warn { "\n" + WARNING_ON_IGNORED_IOERROR.trimIndent() }
           logger.debug(e) { "Failed to load pact files" }

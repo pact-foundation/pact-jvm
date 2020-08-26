@@ -318,7 +318,7 @@ open class ProviderClient(
         if (stateChangeTeardown) {
           map["action"] = if (isSetup) "setup" else "teardown"
         }
-        method.entity = StringEntity(Json.gsonPretty.toJson(map), ContentType.APPLICATION_JSON)
+        method.entity = StringEntity(Json.prettyPrint(map), ContentType.APPLICATION_JSON)
       } else {
         urlBuilder.setParameter("state", state.name)
         state.params.forEach { (k, v) -> urlBuilder.setParameter(k, v.toString()) }

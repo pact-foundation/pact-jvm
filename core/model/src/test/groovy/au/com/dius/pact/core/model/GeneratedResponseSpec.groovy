@@ -48,7 +48,7 @@ class GeneratedResponseSpec extends Specification {
   def 'applies body generators for body values to the copy of the response'() {
     given:
     def body = [a: 'A', b: 'B']
-    response.body = OptionalBody.body(Json.INSTANCE.gsonPretty.toJson(body).bytes)
+    response.body = OptionalBody.body(Json.INSTANCE.prettyPrint(body).bytes)
 
     when:
     def generated = response.generatedResponse([:], GeneratorTestMode.Provider)

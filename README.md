@@ -77,7 +77,7 @@ You want to look at: [groovy](consumer/groovy) or [junit](consumer/junit)
 ### (Use Clojure I)
 
 Clojure can call out to Java, so have a look at [junit](consumer/junit). For an example
-look at [example_clojure_consumer_pact_test.clj](consumer/junit/src/test/clojure/au/com/dius/pact/consumer/junit/example_clojure_consumer_pact_test.clj).
+look at [example_clojure_consumer_pact_test.clj](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/clojure/au/com/dius/pact/consumer/junit/example_clojure_consumer_pact_test.clj).
 
 ### I Use some other jvm language or test framework
 
@@ -86,7 +86,7 @@ You want to look at: [Consumer](consumer)
 ### My Consumer interacts with a Message Queue
 
 As part of the V3 pact specification, we have defined a new pact file for interactions with message queues. For an
-  implementation of a Groovy consumer test with a message pact, have a look at [PactMessageBuilderSpec.groovy](consumer/groovy/src/test/groovy/au/com/dius/pact/consumer/groovy/messaging/PactMessageBuilderSpec.groovy).
+  implementation of a Groovy consumer test with a message pact, have a look at [PactMessageBuilderSpec.groovy](https://github.com/DiUS/pact-jvm/blob/master/consumer/groovy/src/test/groovy/au/com/dius/pact/consumer/groovy/messaging/PactMessageBuilderSpec.groovy).
 
 ## Service Providers
 

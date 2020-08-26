@@ -19,4 +19,9 @@ dependencies {
     exclude group: 'org.codehaus.groovy'
   }
   testCompile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+  testCompile 'com.jayway.restassured:rest-assured:2.9.0'
+
+  // JAX-B dependencies for JDK 9+
+  testCompile "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
+  testCompile "org.glassfish.jaxb:jaxb-runtime:2.3.2"
 }

@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.model.Request
 
@@ -13,7 +14,10 @@ sealed class PactVerificationResult {
   data class PartialMismatch(val mismatches: List<Mismatch>) : PactVerificationResult() {
     override fun getDescription(): String {
       return mismatches.joinToString("\n") {
-        it.description()
+        when (it) {
+          is BodyMismatch -> "${it.type()} - ${it.path}: ${it.description()}"
+          else -> "${it.type()} - ${it.description()}"
+        }
       }
     }
   }

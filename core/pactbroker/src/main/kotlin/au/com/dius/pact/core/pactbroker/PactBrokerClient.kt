@@ -285,45 +285,12 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
         .map { mismatches ->
           val values = mismatches.value
             .filter { !it.containsKey("exception") }
-            .flatMap { mismatch ->
-              when (mismatch["type"]) {
-                "body" -> {
-                  when (val bodyMismatches = mismatch["comparison"]) {
-                    is Map<*, *> -> bodyMismatches.entries.filter { it.key != "diff" }.flatMap { entry ->
-                      val values = entry.value as List<Map<String, Any>>
-                      values.map {
-                        jsonObject("attribute" to "body", "identifier" to entry.key, "description" to it["mismatch"],
-                          "diff" to it["diff"])
-                      }
-                    }
-                    else -> listOf(jsonObject("attribute" to "body", "description" to bodyMismatches.toString()))
-                  }
-                }
-                "status" -> listOf(jsonObject("attribute" to "status", "description" to mismatch["description"]))
-                "header" -> {
-                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
-                    .map {
-                      if (it.key == "type") {
-                        "attribute" to it.value
-                      } else {
-                        it.toPair()
-                      }
-                    }))
-                }
-                "metadata" -> {
-                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
-                    .flatMap {
-                      when (it.key) {
-                        "type" -> listOf("attribute" to it.value)
-                        else -> listOf("identifier" to it.key, "description" to it.value)
-                      }
-                    }))
-                }
-                else -> listOf(jsonObject(
-                  mismatch.filterNot { it.key == "interactionId" || it.key == "type" }.entries.map {
-                    it.toPair()
-                  }
-                ))
+            .map { mismatch ->
+              when (mismatch["attribute"]) {
+                "body-content-type" -> jsonObject("attribute" to "body", "description" to mismatch["description"])
+                else -> jsonObject(
+                  mismatch.filterNot { it.key == "interactionId" }.map { it.toPair() }
+                )
               }
             }
           val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
@@ -333,9 +300,15 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
           val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
           if (exceptionDetails != null) {
             val exception = exceptionDetails["exception"]
+            val description = exceptionDetails["description"]
             if (exception is Throwable) {
-              interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.message,
-                "exceptionClass" to exception.javaClass.name))
+              if (description != null) {
+                interactionJson["exceptions"] = jsonArray(jsonObject("message" to description.toString() + ": " + exception.message,
+                  "exceptionClass" to exception.javaClass.name))
+              } else {
+                interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.message,
+                  "exceptionClass" to exception.javaClass.name))
+              }
             } else {
               interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.toString()))
             }
@@ -374,14 +347,31 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     }
   }
 
+  @Deprecated("Use publishProviderTags", replaceWith = ReplaceWith("publishProviderTags"))
   fun publishProviderTag(docAttributes: Map<String, Any?>, name: String, tag: String, version: String) {
-    return try {
+    try {
       val halClient = newHalClient()
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
         is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
         is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+      }
+    } catch (e: NotFoundHalResponse) {
+      logger.error(e) { "Could not tag provider $name, link was missing" }
+    }
+  }
+
+  fun publishProviderTags(docAttributes: Map<String, Any?>, name: String, tags: List<String>, version: String) {
+    try {
+      val halClient = newHalClient()
+        .withDocContext(docAttributes)
+        .navigate(PROVIDER)
+      tags.forEach {
+        when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to it), "{}")) {
+          is Ok<*> -> logger.debug { "Pushed tag $it for provider $name and version $version" }
+          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $it for provider $name and version $version" }
+        }
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }

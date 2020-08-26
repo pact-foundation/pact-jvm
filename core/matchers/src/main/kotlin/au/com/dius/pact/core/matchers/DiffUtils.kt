@@ -1,6 +1,5 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 
 private const val NEW_LINE = '\n'
@@ -33,7 +32,7 @@ fun generateDiff(expectedBodyString: String, actualBodyString: String): List<Str
 }
 
 fun generateJsonDiff(expected: JsonValue, actual: JsonValue): String {
-  val actualJson = Json.gsonPretty.toJson(actual.toGson())
-  val expectedJson = Json.gsonPretty.toJson(expected.toGson())
+  val actualJson = actual.prettyPrint()
+  val expectedJson = expected.prettyPrint()
   return generateDiff(expectedJson, actualJson).joinToString(separator = NEW_LINE.toString())
 }

@@ -438,7 +438,7 @@ class ProviderClientSpec extends Specification {
     given:
     state = new ProviderState('state one', [a: 'a', b: 1])
     def stateChangeUrl = 'http://state.change:1244'
-    def exepectedBody = Json.INSTANCE.gsonPretty.toJson([
+    def exepectedBody = Json.INSTANCE.prettyPrint([
       state: 'state one',
       params: [a: 'a', b: 1],
       action: 'setup'

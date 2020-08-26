@@ -9,14 +9,14 @@ import java.util.ArrayDeque
 
 class JsonException(message: String) : RuntimeException(message)
 
-sealed class JsonToken(open val chars: CharArray) {
+sealed class JsonToken(val chars: CharArray) {
   object Whitespace : JsonToken("".toCharArray())
-  class Integer(override val chars: CharArray) : JsonToken(chars)
-  class Decimal(override val chars: CharArray) : JsonToken(chars)
+  class Integer(chars: CharArray) : JsonToken(chars)
+  class Decimal(chars: CharArray) : JsonToken(chars)
   object True : JsonToken("true".toCharArray())
   object False : JsonToken("false".toCharArray())
   object Null : JsonToken("null".toCharArray())
-  class StringValue(override val chars: CharArray) : JsonToken(chars)
+  class StringValue(chars: CharArray) : JsonToken(chars)
   object ArrayStart : JsonToken("[".toCharArray())
   object ArrayEnd : JsonToken("]".toCharArray())
   object ObjectStart : JsonToken("{".toCharArray())
@@ -125,6 +125,7 @@ class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
 object JsonParser {
 
   @Throws(JsonException::class)
+  @JvmStatic
   fun parseString(json: String): JsonValue {
     if (json.isNotEmpty()) {
       return parse(StringSource(json.toCharArray()))
@@ -134,11 +135,13 @@ object JsonParser {
   }
 
   @Throws(JsonException::class)
+  @JvmStatic
   fun parseStream(json: InputStream): JsonValue {
     return parse(InputStreamSource(json))
   }
 
   @Throws(JsonException::class)
+  @JvmStatic
   fun parseReader(reader: Reader): JsonValue {
     return parse(ReaderSource(reader))
   }

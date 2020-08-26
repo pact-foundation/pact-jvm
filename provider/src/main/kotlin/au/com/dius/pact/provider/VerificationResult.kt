@@ -1,7 +1,10 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.matchers.BodyMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
+import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.Mismatch
+import au.com.dius.pact.core.matchers.QueryMismatch
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.TestResult
@@ -57,7 +60,7 @@ sealed class VerificationFailureType {
     }
   }
 
-  data class ExceptionFailure(val e: Throwable) : VerificationFailureType() {
+  data class ExceptionFailure(val description: String, val e: Throwable) : VerificationFailureType() {
     override fun description() = e.message ?: e.javaClass.name
     override fun formatForDisplay(t: TermColors): String {
       return if (e.message.isNotEmpty()) {
@@ -71,7 +74,7 @@ sealed class VerificationFailureType {
     override fun getException() = e
   }
 
-  data class StateChangeFailure(val result: StateChangeResult) : VerificationFailureType() {
+  data class StateChangeFailure(val description: String, val result: StateChangeResult) : VerificationFailureType() {
     override fun description() = formatForDisplay(TermColors())
     override fun formatForDisplay(t: TermColors): String {
       val e = result.stateChangeResult.getError()
@@ -122,8 +125,25 @@ sealed class VerificationResult {
         interactionId ?: result.interactionId)
     }
 
-    override fun toTestResult() =
-      TestResult.Failed(results.map { it + ("interactionId" to interactionId) }, description)
+    override fun toTestResult(): TestResult {
+      return TestResult.Failed(failures.map {
+        (listOf("interactionId" to interactionId) + when (it) {
+          is VerificationFailureType.ExceptionFailure -> listOf(
+            "exception" to it.getException(), "description" to it.description)
+          is VerificationFailureType.StateChangeFailure -> listOf(
+            "exception" to it.getException(), "description" to it.description)
+          is VerificationFailureType.MismatchFailure -> listOf("attribute" to it.mismatch.type(),
+            "description" to it.mismatch.description()) + when (val mismatch = it.mismatch) {
+              is BodyMismatch -> listOf("identifier" to mismatch.path, "description" to mismatch.mismatch,
+                "diff" to mismatch.diff)
+              is HeaderMismatch -> listOf("identifier" to mismatch.headerKey, "description" to mismatch.mismatch)
+              is QueryMismatch -> listOf("identifier" to mismatch.queryParameter, "description" to mismatch.mismatch)
+              is MetadataMismatch -> listOf("identifier" to mismatch.key, "description" to mismatch.mismatch)
+              else -> listOf()
+            }
+        }).toMap()
+      }, description)
+    }
   }
 
   /**

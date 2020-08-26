@@ -50,7 +50,6 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     mockMvc: MockMvc,
-    context: Map<String, Any>,
     pending: Boolean
   ): VerificationResult {
     return try {
@@ -71,7 +70,8 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       return VerificationResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
         "exception" to e)),
         "Request to provider method failed with an exception", interactionMessage,
-        listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
+        listOf(VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e)),
+        pending, interaction.interactionId)
     }
   }
 

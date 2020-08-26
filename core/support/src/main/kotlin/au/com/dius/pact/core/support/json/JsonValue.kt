@@ -1,12 +1,6 @@
 package au.com.dius.pact.core.support.json
 
 import au.com.dius.pact.core.support.Json
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonNull
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
-import org.apache.commons.lang3.StringEscapeUtils
 
 sealed class JsonValue {
   class Integer(val value: JsonToken.Integer) : JsonValue() {
@@ -116,32 +110,11 @@ sealed class JsonValue {
       is Null -> "null"
       is Decimal -> String(this.value.chars)
       is Integer -> String(this.value.chars)
-      is StringValue -> "\"${StringEscapeUtils.escapeJson(this.asString())}\""
+      is StringValue -> "\"${Json.escape(this.asString())}\""
       is True -> "true"
       is False -> "false"
       is Array -> "[${this.values.joinToString(",") { it.serialise() }}]"
       is Object -> "{${this.entries.entries.joinToString(",") { "\"${it.key}\":" + it.value.serialise() }}}"
-    }
-  }
-
-  fun toGson(): JsonElement {
-    return when (this) {
-      is Null -> JsonNull.INSTANCE
-      is Decimal -> JsonPrimitive(this.asNumber())
-      is Integer -> JsonPrimitive(this.asNumber())
-      is StringValue -> JsonPrimitive(this.asString())
-      is True -> JsonPrimitive(true)
-      is False -> JsonPrimitive(false)
-      is Array -> {
-        val array = JsonArray()
-        this.values.forEach { array.add(it.toGson()) }
-        array
-      }
-      is Object -> {
-        val obj = JsonObject()
-        this.entries.forEach { obj.add(it.key, it.value.toGson()) }
-        obj
-      }
     }
   }
 
@@ -202,6 +175,30 @@ sealed class JsonValue {
     is False -> false.hashCode()
     is Array -> this.values.hashCode()
     is Object -> this.entries.hashCode()
+  }
+
+  fun prettyPrint(indent: Int = 0, skipIndent: Boolean = false): String {
+    val indentStr = "".padStart(indent)
+    val indentStr2 = "".padStart(indent + 2)
+    return if (skipIndent) {
+      when (this) {
+        is Array -> "[\n" + this.values.joinToString(",\n") {
+          it.prettyPrint(indent + 2) } + "\n$indentStr]"
+        is Object -> "{\n" + this.entries.entries.joinToString(",\n") {
+          "$indentStr2\"${it.key}\": ${it.value.prettyPrint(indent + 2, true)}"
+          } + "\n$indentStr}"
+        else -> this.serialise()
+      }
+    } else {
+      when (this) {
+        is Array -> "$indentStr$indentStr[\n" + this.values.joinToString(",\n") {
+          it.prettyPrint(indent + 2) } + "\n$indentStr]"
+        is Object -> "$indentStr{\n" + this.entries.entries.joinToString(",\n") {
+          "$indentStr2\"${it.key}\": ${it.value.prettyPrint(indent + 2, true)}"
+          } + "\n$indentStr}"
+        else -> indentStr + this.serialise()
+      }
+    }
   }
 
   val name: String
