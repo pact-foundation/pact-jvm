@@ -468,7 +468,7 @@ For example, configure it by adding the following to your POM:
 
 #### Modifying the requests before they are sent
 
-**NOTE: `@TargetRequestFilter` is only for JUnit 4. For JUnit 5 see [JUnit 5 docs](https://github.com/DiUS/pact-jvm/tree/master/provider/junit5#modifying-the-requests-before-they-are-sent).**
+**NOTE: `@TargetRequestFilter` is only for JUnit 4. For JUnit 5 see [JUnit 5 docs](/provider/junit5/README.md#modifying-the-requests-before-they-are-sent).**
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
 be authentication tokens, which have a small life span. The HttpTarget supports request filters by annotating methods

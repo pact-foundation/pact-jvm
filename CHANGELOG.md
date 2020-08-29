@@ -4962,7 +4962,7 @@ with previous versions with matchers defined on arrays will not be applied.**
 # 2.1.8 - fixes plus pact junit rule
 
 **NOTE: This version has a breaking change for users of the gradle plugin with request filters.
-See [Modifying The Requests Before They Are Sent](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#modifying-the-requests-before-they-are-sent)
+See [Modifying The Requests Before They Are Sent](/provider/gradle/README.md#modifying-the-requests-before-they-are-sent)
 in the gradle plugin docs for more info.**
 
 * b6b836a - fixed link in readme (Ronald Holshausen, Mon Dec 15 19:31:19 2014 +1100)
