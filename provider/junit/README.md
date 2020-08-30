@@ -1,5 +1,14 @@
 # Pact junit runner
 
+## Dependency
+
+The library is available on maven central using:
+
+* group-id = `au.com.dius.pact.provider`
+* artifact-id = `junit`
+* version-id = `4.1.x`
+
+
 ## Overview
 Library provides ability to play contract tests against a provider service in JUnit fashionable way.
 
