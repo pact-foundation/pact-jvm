@@ -1,5 +1,13 @@
 # Pact Junit 5 Extension
 
+## Dependency
+
+The library is available on maven central using:
+
+* group-id = `au.com.dius.pact.provider`
+* artifact-id = `junit5`
+* version-id = `4.1.x`
+
 ## Overview
 
 For writing Pact verification tests with JUnit 5, there is an JUnit 5 Invocation Context Provider that you can use with 
