@@ -38,31 +38,4 @@ class PublishSpec extends Specification {
         then:
         result.defined
     }
-
-    def 'successful read on valid file'() {
-        given:
-        def content = '{"consumer": "testconsumer", "provider": "testprovider"}'
-        def fileName = 'test.json'
-        def rootDir = System.getProperty('pact.rootDir', 'target/pacts')
-        def file = new File("${rootDir}/$fileName")
-        new File(rootDir).mkdirs()
-        file.write(content)
-
-        when:
-        def result = Publish.readContract(fileName)
-
-        then:
-        content == result
-
-        cleanup:
-        new File(System.getProperty('pact.rootDir', 'target')).deleteDir()
-    }
-
-    def 'unsuccessful read on invalid file'() {
-        when:
-        Publish.readContract('invalid')
-
-        then:
-        thrown(IOException)
-    }
 }

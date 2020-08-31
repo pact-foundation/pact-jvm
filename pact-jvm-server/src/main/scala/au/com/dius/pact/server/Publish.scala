@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 import scala.io.Source
 import java.io.{File, IOException}
 
-import requests.{RequestAuth, RequestFailedException, headers}
+import au.com.dius.pact.core.pactbroker.{PactBrokerClient, RequestFailedException}
 
 object Publish extends StrictLogging {
 
@@ -37,7 +37,8 @@ object Publish extends StrictLogging {
   }
 
   private def publishPact(consumer: String, consumerVersion: String, provider: String, broker: String, authToken: Option[String]) = {
-    def fileName: String = s"${consumer}-${provider}.json"
+    val fileName: String = s"${consumer}-${provider}.json"
+    val pact = new File(s"${System.getProperty("pact.rootDir", "target/pacts")}/$fileName")
 
     logger.debug("Publishing pact with following details: ")
     logger.debug("Consumer: " + consumer)
@@ -46,33 +47,28 @@ object Publish extends StrictLogging {
     logger.debug("Pact Broker: " + broker)
 
     try {
-      val content = readContract(fileName)
-      def url = s"${broker}/pacts/provider/${provider}/consumer/${consumer}/version/${consumerVersion}"
-      var auth: RequestAuth = RequestAuth.Empty
-      if (authToken.isDefined) {
-        auth = RequestAuth.Bearer(authToken.get)
+      var options: Map[String, _]= Map()
+      if(authToken.isDefined) {
+        options = Map("authentication" -> List("bearer",authToken.get).asJava)
       }
-      def response = requests.put(
-        url,
-        auth,
-        headers = Map("Content-Type" -> "application/json", "Accept" -> "application/hal+json, application/json, */*; q=0.01"),
-        data = content
-      )
-      logger.debug("Statuscode from broker: " + response.statusCode)
-      if(response.statusCode > 199 && response.statusCode < 400) {
+      val brokerClient: PactBrokerClient = new PactBrokerClient(broker, options.asJava)
+      val res = brokerClient.uploadPactFile(pact, consumerVersion)
+      if(res.component2() == null) {
         logger.debug("Pact succesfully shared. deleting file..")
-        removePact(fileName)
+        removePact(pact)
+        new Response(200, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(res.component1().getBytes()))
+      } else {
+        new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(res.component2().getLocalizedMessage.getBytes()))
       }
-      new Response(response.statusCode, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(response.data.array))
+
     } catch {
       case e: IOException => new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(s"""{"error": "Got IO Exception while reading file. ${e.getMessage}"}""".getBytes()))
-      case e: RequestFailedException => new Response(e.response.statusCode, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(e.response.data.array))
-      case _ => new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body("Something unknown happened..".getBytes()))
+      case e: RequestFailedException => new Response(e.getStatus.getStatusCode, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(e.getBody.getBytes()))
+      case t: Throwable => new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(t.getMessage.getBytes()))
     }
   }
 
-  private def removePact(fileName: String): Unit = {
-    def file = new File(s"${System.getProperty("pact.rootDir", "target/pacts")}/$fileName")
+  private def removePact(file: File): Unit = {
     if (file.exists()) {
       file.delete()
     }
@@ -96,12 +92,4 @@ object Publish extends StrictLogging {
     case _ => None
   }
 
-  def readContract(fileName: String): String = {
-    def filePath = s"${System.getProperty("pact.rootDir", "target/pacts")}/$fileName"
-    def fileReader = Source.fromFile(filePath)
-    def content = fileReader.getLines().mkString
-    fileReader.close()
-    logger.debug(content)
-    content
-  }
 }
