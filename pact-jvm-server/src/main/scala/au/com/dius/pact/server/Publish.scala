@@ -6,7 +6,6 @@ import com.typesafe.scalalogging.StrictLogging
 import scala.collection.JavaConverters._
 import java.io.{File, IOException}
 
-import au.com.dius.pact.consumer.PactVerificationResult.Ok
 import au.com.dius.pact.core.pactbroker.{PactBrokerClient, RequestFailedException}
 
 object Publish extends StrictLogging {
