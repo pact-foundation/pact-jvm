@@ -27,7 +27,10 @@ case class Config(port: Int = 29999,
                   pactVersion: Int = 2,
                   keystorePath: String = "",
                   keystorePassword: String = "",
-                  sslPort : Int = 8443)
+                  sslPort : Int = 8443,
+                  broker: String = "",
+                  authToken: String = ""
+                 )
 
 object Server extends App {
 
@@ -43,6 +46,8 @@ object Server extends App {
     opt[String]('k', "keystore-path") action { (x, c) => c.copy(keystorePath = x) } text("Path to keystore")
     opt[String]('p', "keystore-password") action { (x, c) => c.copy(keystorePassword = x) } text("Keystore password")
     opt[Int]('s', "ssl-port") action { (x, c) => c.copy(sslPort = x) } text("Ssl port the mock server should run on. lower and upper bounds are ignored")
+    opt[String]('b', "broker") action {(x, c) => c.copy(broker = x)} text("URL of broker where to publish contracts to")
+    opt[String]('t', "token") action {(x, c) => c.copy(authToken = x)} text("Auth token for publishing the pact to broker")
   }
 
   parser.parse(args, Config()) match {

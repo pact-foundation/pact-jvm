@@ -34,6 +34,7 @@ object RequestRouter {
     action match {
       case "create" => Create(request, oldState, config)
       case "complete" => Complete(request, oldState)
+      case "publish" => Publish(request, oldState, config)
       case "" => ListServers(oldState)
       case _ => Result(pactDispatch(request, oldState), oldState)
     }
