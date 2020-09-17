@@ -12,7 +12,7 @@ import org.gradle.api.invocation.Gradle
 class PactPlugin implements Plugin<Project> {
 
   private static final GROUP = 'Pact'
-  private static final String PACT_VERIFY = 'pactVerify'
+  private static final String PACT_VERIFY = 'pactverify'
   private static final String TEST_CLASSES = 'testClasses'
 
   @Override
@@ -90,7 +90,7 @@ class PactPlugin implements Plugin<Project> {
 
   @SuppressWarnings('CatchRuntimeException')
   private void setupPactConsumersFromBroker(ProviderInfo provider, Project project, PactPluginExtension ext) {
-    if (provider.brokerConfig && project.gradle.startParameter.taskNames.any { it.equalsIgnoreCase(PACT_VERIFY) }) {
+    if (provider.brokerConfig && project.gradle.startParameter.taskNames.any { it.toLowerCase().contains(PACT_VERIFY) }) {
       def options = [:]
       if (ext.broker.pactBrokerUsername) {
         options.authentication = ['basic', ext.broker.pactBrokerUsername, ext.broker.pactBrokerPassword]
