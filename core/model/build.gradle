@@ -18,29 +18,29 @@ artifacts {
 dependencies {
   api project(path: ":core:support", configuration: 'default')
   api project(path: ":core:pactbroker", configuration: 'default')
-  compile 'com.github.zafarkhaja:java-semver:0.9.0'
-  compile 'org.apache.commons:commons-collections4:4.1'
-  compile 'com.github.mifmif:generex:1.0.2'
-  compile 'javax.mail:mail:1.5.0-b01'
-  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  implementation 'com.github.zafarkhaja:java-semver:0.9.0'
+  implementation 'org.apache.commons:commons-collections4:4.1'
+  implementation 'com.github.mifmif:generex:1.0.2'
+  implementation 'javax.mail:mail:1.5.0-b01'
+  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   implementation 'org.apache.tika:tika-core:1.24.1'
 
-  testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
+  testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testImplementation "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   testRuntime project(path: project.path, configuration: 'testJars')
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}"
-  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}"
+  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
-  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+  testImplementation('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile "junit:junit:${project.junitVersion}"
-  testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile 'com.amazonaws:aws-java-sdk-s3:1.11.587'
-  testCompile "com.google.code.gson:gson:${project.gsonVersion}"
+  testImplementation "junit:junit:${project.junitVersion}"
+  testImplementation 'org.hamcrest:hamcrest:2.1'
+  testImplementation 'com.amazonaws:aws-java-sdk-s3:1.11.587'
+  testImplementation "com.google.code.gson:gson:${project.gsonVersion}"
 }
 
 compileGroovy {

@@ -6,29 +6,31 @@ buildscript {
   }
   dependencies {
     classpath 'org.apache.commons:commons-lang3:3.10'
+    classpath 'org.clojure:clojure:1.10.1'
   }
 }
 
 plugins {
-  id "nebula.clojure" version "9.4.0"
+  id "nebula.clojure" version "9.4.1"
 }
 
 import org.apache.commons.lang3.RandomStringUtils
 
 dependencies {
-  compile project(":provider")
-  compile 'org.clojure:clojure:1.10.1'
-  compile 'org.clojure:core.match:0.3.0'
-  compile 'leiningen-core:leiningen-core:2.9.3'
-  compile 'org.apache.maven:maven-aether-provider:3.0.5'
-  compile 'org.sonatype.aether:aether-connector-file:1.13.1'
-  compile 'org.sonatype.aether:aether-connector-wagon:1.13.1'
-  compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
-  compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  api project(":provider")
+  implementation 'org.clojure:clojure:1.10.1'
+  implementation 'org.clojure:core.match:1.0.0'
+  implementation 'org.clojure:core.rrb-vector:0.1.1'
+  implementation 'leiningen-core:leiningen-core:2.9.4'
+  implementation 'org.apache.maven:maven-aether-provider:3.0.5'
+  implementation 'org.sonatype.aether:aether-connector-file:1.13.1'
+  implementation 'org.sonatype.aether:aether-connector-wagon:1.13.1'
+  implementation "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+  implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
 
-  testRuntime 'org.clojure:tools.nrepl:0.2.13'
+  testImplementation 'org.clojure:tools.nrepl:0.2.13'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+  testImplementation('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
 

@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-  id "nebula.clojure" version "9.4.0"
+  id "nebula.clojure" version "9.4.1"
 }
 
 import org.apache.commons.lang3.RandomStringUtils

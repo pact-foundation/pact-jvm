@@ -16,7 +16,7 @@ class CreateSpec extends Specification {
     def result = Create.create('test state',
       JavaConverters.asScalaBuffer(['/data']).toList(),
       pact, new scala.collection.immutable.HashMap(),
-      new au.com.dius.pact.server.Config(4444, 'localhost', false, 20000, 40000, true,
+      new Config(4444, 'localhost', false, 20000, 40000, true,
               2, '', '', 8444, '', ''))
 
     then:
