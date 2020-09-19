@@ -16,6 +16,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactBrokerAuth
 import au.com.dius.pact.provider.junitsupport.loader.PactBrokerLoader
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
@@ -39,6 +40,7 @@ class PactBrokerLoaderSpec extends Specification {
   private IPactBrokerClient brokerClient
   private Pact mockPact
   private PactReader mockReader
+  private ValueResolver valueResolver
 
   void setup() {
     host = 'pactbroker'
@@ -57,11 +59,12 @@ class PactBrokerLoaderSpec extends Specification {
     mockReader = Mock(PactReader) {
       loadPact(_) >> mockPact
     }
+    valueResolver = null
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       IPactBrokerClient client = brokerClient
       def loader = new PactBrokerLoader(host, port, protocol, tags, consumerVersionSelectors, consumers,
-        failIfNoPactsFound, null, null, null, enablePendingPacts, providerTags, includeWipPactsSince) {
+        failIfNoPactsFound, null, null, valueResolver, enablePendingPacts, providerTags, includeWipPactsSince) {
         @Override
         IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           client
@@ -579,6 +582,33 @@ class PactBrokerLoaderSpec extends Specification {
     then:
     result == []
     1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok([])
+  }
+
+  @Issue('#1208')
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'When falling back to tags when consumer version selectors are not specified, use the supplied value resolver'() {
+    given:
+    valueResolver = Mock(ValueResolver)
+    valueResolver.propertyDefined(_) >> false
+    def selectors = [
+      new ConsumerVersionSelector('one', true),
+      new ConsumerVersionSelector('two', true),
+      new ConsumerVersionSelector('three', true)
+    ]
+    def expected = [
+      new PactBrokerResult('d', '', '', [], [], false, 'one', false)
+    ]
+    consumerVersionSelectors = [
+      createVersionSelector('${pactbroker.consumerversionselectors.tags}', 'true')
+    ]
+
+    when:
+    pactBrokerLoader().load('test')
+
+    then:
+    valueResolver.propertyDefined('pactbroker.consumerversionselectors.tags') >> true
+    valueResolver.resolveValue('pactbroker.consumerversionselectors.tags') >> 'one,two,three'
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
   }
 
   def 'Loads pacts with consumer version selectors when consumer version selectors and tags are both present'() {
