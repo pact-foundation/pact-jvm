@@ -119,9 +119,11 @@ open class PactBrokerLoader(
       pactBrokerConsumerVersionSelectors.flatMap {
         val tags = parseListExpression(it.tag, resolver)
         val parsedLatest = parseListExpression(it.latest, resolver)
-        val latest = if (parsedLatest.isEmpty()) List(tags.size) { true.toString() }
-          else if (parsedLatest.size == 1) parsedLatest.padTo(tags.size, parsedLatest[0])
-          else parsedLatest
+        val latest = when {
+          parsedLatest.isEmpty() -> List(tags.size) { true.toString() }
+          parsedLatest.size == 1 -> parsedLatest.padTo(tags.size, parsedLatest[0])
+          else -> parsedLatest
+        }
         if (tags.size != latest.size) {
           throw IllegalArgumentException("Invalid Consumer version selectors. Each version selector must have a tag " +
                   "and latest property")
