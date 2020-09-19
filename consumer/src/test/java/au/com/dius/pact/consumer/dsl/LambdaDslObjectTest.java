@@ -1019,4 +1019,15 @@ public class LambdaDslObjectTest {
         assertThat(lambdaPactDsl.getMatchers(), is(pactDslJson.getMatchers()));
     }
 
+
+  @Test
+  public void testValueFromProviderState() {
+    String pactDslJson = new PactDslJsonBody()
+            .valueFromProviderState("id", "id", "A1")
+            .getBody().toString();
+    String lambdaDslJson = LambdaDsl
+            .newJsonBody(body -> body.valueFromProviderState("id", "id", "A1"))
+            .build().toString();
+    assertThat(lambdaDslJson, is(pactDslJson));
+  }
 }

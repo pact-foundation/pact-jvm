@@ -36,7 +36,7 @@ class PactPlugin implements Plugin<Project> {
               "in the build, but got a ${it.pact.class.simpleName} with value '${it.pact}' instead. " +
               'Make sure there is no property that is overriding \'pact\'.', null)
           } else if (it.pact.serviceProviders.empty
-            && it.gradle.startParameter.taskNames.any { it.equalsIgnoreCase(PACT_VERIFY) }) {
+            && it.gradle.startParameter.taskNames.any { it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
             throw new GradleScriptException('No service providers are configured', null)
           }
 
@@ -90,7 +90,8 @@ class PactPlugin implements Plugin<Project> {
 
   @SuppressWarnings('CatchRuntimeException')
   private void setupPactConsumersFromBroker(ProviderInfo provider, Project project, PactPluginExtension ext) {
-    if (provider.brokerConfig && project.gradle.startParameter.taskNames.any { it.equalsIgnoreCase(PACT_VERIFY) }) {
+    if (provider.brokerConfig && project.gradle.startParameter.taskNames.any {
+      it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
       def options = [:]
       if (ext.broker.pactBrokerUsername) {
         options.authentication = ['basic', ext.broker.pactBrokerUsername, ext.broker.pactBrokerPassword]

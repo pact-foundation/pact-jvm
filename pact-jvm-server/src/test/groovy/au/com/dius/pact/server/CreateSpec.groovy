@@ -17,7 +17,7 @@ class CreateSpec extends Specification {
       JavaConverters.asScalaBuffer(['/data']).toList(),
       pact, new scala.collection.immutable.HashMap(),
       new au.com.dius.pact.server.Config(4444, 'localhost', false, 20000, 40000, true,
-              2, '', '', 8444))
+              2, '', '', 8444, '', ''))
 
     then:
     result.response().status == 201
@@ -44,7 +44,7 @@ class CreateSpec extends Specification {
       JavaConverters.asScalaBuffer([]).toList(),
       pact, new scala.collection.immutable.HashMap(),
       new au.com.dius.pact.server.Config(4444, 'localhost', false, 20000, 40000, true,
-              2, keystorePath, password, 8444))
+              2, keystorePath, password, 8444, '', ''))
 
     then:
     result.response().status == 201

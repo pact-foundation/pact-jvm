@@ -14,6 +14,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact`
 * artifact-id = `consumer`
+* version-id = `4.2.x`
 
 ## DSL Usage
 

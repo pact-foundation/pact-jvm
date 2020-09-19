@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junitsupport.loader
 
+import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
@@ -112,13 +113,17 @@ open class PactBrokerLoader(
 
   private fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
 
-    return if (shouldFallBackToTags()) {
+    return if (shouldFallBackToTags(resolver)) {
       pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }.map { ConsumerVersionSelector(it) }
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
         val tags = parseListExpression(it.tag, resolver)
         val parsedLatest = parseListExpression(it.latest, resolver)
-        val latest = if (parsedLatest.isEmpty()) List(tags.size) { true.toString() } else parsedLatest
+        val latest = when {
+          parsedLatest.isEmpty() -> List(tags.size) { true.toString() }
+          parsedLatest.size == 1 -> parsedLatest.padTo(tags.size, parsedLatest[0])
+          else -> parsedLatest
+        }
         if (tags.size != latest.size) {
           throw IllegalArgumentException("Invalid Consumer version selectors. Each version selector must have a tag " +
                   "and latest property")
@@ -128,9 +133,10 @@ open class PactBrokerLoader(
     }
   }
 
-  private fun shouldFallBackToTags(): Boolean {
+  private fun shouldFallBackToTags(resolver: ValueResolver): Boolean {
     return pactBrokerConsumerVersionSelectors.isEmpty() ||
-      (pactBrokerConsumerVersionSelectors.size == 1 && parseListExpression(pactBrokerConsumerVersionSelectors[0].tag).isEmpty())
+      (pactBrokerConsumerVersionSelectors.size == 1 &&
+        parseListExpression(pactBrokerConsumerVersionSelectors[0].tag, resolver).isEmpty())
   }
 
   private fun setupValueResolver(): ValueResolver {
