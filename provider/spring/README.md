@@ -14,6 +14,8 @@ Supports:
 
 - MockMvc debugger output
 
+- Spring WebFlux Controllers and RouterFunctions
+
 - Multiple @State runs to test a particular Provider State multiple times
 
 - **au.com.dius.pact.provider.junit.State** custom annotation - before each interaction that requires a state change,
@@ -72,6 +74,31 @@ is set with the version of your provider.
             when(awesomeBusinessLogic.getById(any(UUID.class)))
                 .then(i -> { throw new NotCoolException(i.getArgumentAt(0, UUID.class).toString()); });
         }
+    }
+```
+
+## Example of Spring WebFlux test
+
+```java
+    @RunWith(RestPactRunner.class) // Custom pact runner, child of PactRunner which runs only REST tests
+    @Provider("myAwesomeService") // Set up name of tested provider
+    @PactFolder("pacts") // Point where to find pacts (See also section Pacts source in documentation)
+    public class AwesomeRouterContractTest {
+
+        //Create a new instance of the WebFluxTarget and annotate it as the TestTarget for PactRunner
+        @TestTarget
+        public WebFluxTarget target = new WebFluxTarget();
+
+        //Create instance of your RouterFunction
+        public RouterFunction<ServerResponse> routerFunction
+              = new AwesomeRouter(new AwesomeHandler()).routes();
+
+        //Configure the WebFluxTarget with routerFunction
+        @Before
+        public void setup() {
+            target.setRouterFunction(routerFunction);
+        }
+
     }
 ```
 
