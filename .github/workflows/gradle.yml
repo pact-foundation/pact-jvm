@@ -28,7 +28,12 @@ jobs:
         restore-keys: ${{ runner.os }}-gradle
     - run: ./gradlew -v
     - name: Build with Gradle
+      if: runner.os != 'Windows'
       run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} clean build
+    - name: Build with Gradle (Windows)
+      run: gradlew -s --no-daemon -i -p ${{ matrix.module }} clean check -x ':consumer:junit:clojureTest'
+      shell: cmd
+      if: runner.os == 'Windows'
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
