@@ -31,7 +31,7 @@ jobs:
       if: runner.os != 'Windows'
       run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} clean build
     - name: Build with Gradle (Windows)
-      run: gradlew -s --no-daemon -i -p ${{ matrix.module }} clean check -x ':consumer:junit:clojureTest'
+      run: gradlew -s --no-daemon -i -p ${{ matrix.module }} clean check -x :consumer:junit:clojureTest
       shell: cmd
       if: runner.os == 'Windows'
     - name: Publish Unit Test Results
