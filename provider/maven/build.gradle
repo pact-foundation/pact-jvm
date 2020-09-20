@@ -7,6 +7,7 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'com.github.ajalt:mordant:1.2.1'
 
+  testImplementation "junit:junit:${project.junitVersion}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}"
