@@ -126,7 +126,23 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
     return mapOf("type" to "RandomDecimal", "digits" to digits)
   }
 
-  override fun generate(context: Map<String, Any?>): Any = BigDecimal(RandomStringUtils.randomNumeric(digits))
+  override fun generate(context: Map<String, Any?>): Any {
+    val sampleDigits = RandomStringUtils.randomNumeric(digits + 1)
+    val pos = RandomUtils.nextInt(1, digits - 1)
+    val selectedDigits = if (sampleDigits.startsWith("00")) {
+      RandomUtils.nextInt(1, 9).toString() + sampleDigits.substring(1, digits)
+    } else if (pos != 1 && sampleDigits.startsWith('0')) {
+      sampleDigits.substring(1)
+    } else {
+      sampleDigits.substring(0, digits)
+    }
+    val generated = "${selectedDigits.substring(0, pos)}.${selectedDigits.substring(pos)}"
+    logger.trace {
+      "RandomDecimalGenerator: sampleDigits=[$sampleDigits], pos=$pos, selectedDigits=[$selectedDigits], " +
+        "generated=[$generated]"
+    }
+    return BigDecimal(generated)
+  }
 
   companion object {
     fun fromJson(json: JsonValue.Object): RandomDecimalGenerator {
