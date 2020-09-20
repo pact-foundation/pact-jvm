@@ -23,11 +23,11 @@ class RandomDecimalGeneratorSpec extends Specification {
 
   def 'handle edge case when digits == 1'() {
     expect:
-    new RandomDecimalGenerator(1).generate([:]).toString() ==~ /^\d/
+    new RandomDecimalGenerator(1).generate([:]).toString() ==~ /^\d$/
   }
 
   def 'handle edge case when digits == 2'() {
     expect:
-    new RandomDecimalGenerator(2).generate([:]).toString() ==~ /^\d\.\d/
+    new RandomDecimalGenerator(2).generate([:]).toString() ==~ /^\d\.\d$/
   }
 }
