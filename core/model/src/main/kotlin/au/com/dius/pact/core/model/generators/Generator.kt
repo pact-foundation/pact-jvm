@@ -127,21 +127,28 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    val sampleDigits = RandomStringUtils.randomNumeric(digits + 1)
-    val pos = RandomUtils.nextInt(1, digits - 1)
-    val selectedDigits = if (sampleDigits.startsWith("00")) {
-      RandomUtils.nextInt(1, 9).toString() + sampleDigits.substring(1, digits)
-    } else if (pos != 1 && sampleDigits.startsWith('0')) {
-      sampleDigits.substring(1)
-    } else {
-      sampleDigits.substring(0, digits)
+    return when {
+      digits < 1 -> throw UnsupportedOperationException("RandomDecimalGenerator digits must be > 0, got $digits")
+      digits == 1 -> BigDecimal(RandomUtils.nextInt(0, 9))
+      digits == 2 -> BigDecimal("${RandomUtils.nextInt(0, 9)}.${RandomUtils.nextInt(0, 9)}")
+      else -> {
+        val sampleDigits = RandomStringUtils.randomNumeric(digits + 1)
+        val pos = RandomUtils.nextInt(1, digits - 1)
+        val selectedDigits = if (sampleDigits.startsWith("00")) {
+          RandomUtils.nextInt(1, 9).toString() + sampleDigits.substring(1, digits)
+        } else if (pos != 1 && sampleDigits.startsWith('0')) {
+          sampleDigits.substring(1)
+        } else {
+          sampleDigits.substring(0, digits)
+        }
+        val generated = "${selectedDigits.substring(0, pos)}.${selectedDigits.substring(pos)}"
+        logger.trace {
+          "RandomDecimalGenerator: sampleDigits=[$sampleDigits], pos=$pos, selectedDigits=[$selectedDigits], " +
+            "generated=[$generated]"
+        }
+        BigDecimal(generated)
+      }
     }
-    val generated = "${selectedDigits.substring(0, pos)}.${selectedDigits.substring(pos)}"
-    logger.trace {
-      "RandomDecimalGenerator: sampleDigits=[$sampleDigits], pos=$pos, selectedDigits=[$selectedDigits], " +
-        "generated=[$generated]"
-    }
-    return BigDecimal(generated)
   }
 
   companion object {
