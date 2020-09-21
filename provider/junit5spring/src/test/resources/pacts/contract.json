@@ -15,7 +15,19 @@
     "response" : {
       "status" : 204
     }
-  } ],
+  },
+  {
+    "description" : "Get async data",
+    "request" : {
+      "method" : "GET",
+      "path" : "/async-data",
+      "query": "ticketId=0000"
+    },
+    "response" : {
+      "status" : 204
+    }
+  }
+  ],
   "metadata" : {
     "pact-specification" : {
       "version" : "2.0.0"
