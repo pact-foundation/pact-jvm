@@ -538,6 +538,27 @@ class PactBrokerLoaderSpec extends Specification {
     result.size() == 3
   }
 
+  def 'Loads pacts for provided consumers with the specified tags despite on long pact name from the broker'() {
+    given:
+        consumers = ['foo-consumer']
+        tags = ['demo']
+        def expected = [
+                new PactBrokerResult('Pact between foo-consumer and baz-provider', '', '', [], [], false, 'demo', false),
+                new PactBrokerResult('Pact between unknown-consumer and baz-provider', '', '', [], [], false, 'demo', false),
+                new PactBrokerResult('Pact between foo-consumer and unknown-provider', '', '', [], [], false, 'demo', false)
+        ]
+        def selectors = [ new ConsumerVersionSelector('demo', true) ]
+
+    when:
+        def result = pactBrokerLoader().load('baz-provider')
+
+    then:
+        brokerClient.getOptions() >> [:]
+        1 * brokerClient.fetchConsumersWithSelectors('baz-provider', selectors, [], false, '') >> new Ok(expected)
+        0 * brokerClient._
+        result.size() == 2
+  }
+
   def 'Loads pacts only for provided consumers with the specified consumer version selectors'() {
     given:
     consumers = ['a', 'b', 'c']

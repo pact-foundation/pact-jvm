@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.support.contains
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpression
@@ -200,7 +201,9 @@ open class PactBrokerLoader(
 
       if (pactBrokerConsumers.isNotEmpty()) {
         val consumerInclusions = pactBrokerConsumers.flatMap { parseListExpression(it, resolver) }
-        consumers = consumers.filter { consumerInclusions.isEmpty() || consumerInclusions.contains(it.name) }
+        if (consumerInclusions.isNotEmpty()) {
+          consumers = consumers.filter { consumer -> consumerInclusions.any { inclusion -> consumer.name.contains(inclusion) } }
+        }
       }
 
       return consumers.map { pactReader.loadPact(it, pactBrokerClient.options) }
