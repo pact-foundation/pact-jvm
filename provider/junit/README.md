@@ -567,7 +567,7 @@ you need set the `pact.provider.tag` JVM system property to the tag value.
 From 4.1.8+, you can specify multiple tags with a comma separated string for the `pact.provider.tag`
 system property.
 
-# Pending Pact Support (version 4.1.0 and later)
+# Pending Pact Support (version 4.1.3 and later)
 
 If your Pact broker supports pending pacts, you can enable support for that by enabling that on your Pact broker annotation or with JVM system properties. You also need to provide the tags that will be published with your provider's verification results. The broker will then label any pacts found that don't have a successful verification result as pending. That way, if they fail verification, the verifier will ignore those failures and not fail the build.
 
