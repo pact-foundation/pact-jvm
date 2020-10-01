@@ -34,7 +34,7 @@ class GradleProviderInfoSpec extends Specification {
     }
 
     then:
-    provider.brokerConfig == new PactBrokerConsumerConfig([new ConsumerVersionSelector('test', true)],
+    provider.brokerConfig == new PactBrokerConsumerConfig([new ConsumerVersionSelector('test', true, null)],
       true, ['master'])
   }
 

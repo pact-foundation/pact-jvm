@@ -14,7 +14,7 @@ class PactBrokerConsumerConfig {
 
   static List<ConsumerVersionSelector> latestTags(String... tags) {
     tags.collect {
-      new ConsumerVersionSelector(it, true)
+      new ConsumerVersionSelector(it, true, null)
     }
   }
 }

@@ -11,7 +11,8 @@ data class PactBrokerResult(
   val notices: List<VerificationNotice> = listOf(),
   val pending: Boolean = false,
   val tag: String? = null,
-  val wip: Boolean = false
+  val wip: Boolean = false,
+  val usedNewEndpoint: Boolean = false
 )
 
 data class VerificationNotice(
