@@ -68,7 +68,16 @@ data class ConsumerVersionSelector(
   val latest: Boolean = true,
   val consumer: String? = null
 ) {
-  fun toJson() = JsonValue.Object("tag" to Json.toJson(tag), "latest" to Json.toJson(latest))
+  fun toJson(): JsonValue {
+    val obj = JsonValue.Object("latest" to Json.toJson(latest))
+    if (tag.isNotEmpty()) {
+      obj.add("tag", Json.toJson(tag))
+    }
+    if (consumer.isNotEmpty()) {
+      obj.add("consumer", Json.toJson(consumer))
+    }
+    return obj
+  }
 }
 
 interface IPactBrokerClient {
