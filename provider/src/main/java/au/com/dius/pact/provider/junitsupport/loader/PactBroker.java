@@ -49,13 +49,18 @@ public @interface PactBroker {
      * If you set the version selector tags or latest fields through system properties, separate values by commas
      */
     VersionSelector[] consumerVersionSelectors() default @VersionSelector(
-            tag = "${pactbroker.consumerversionselectors.tags:}",
-            latest = "${pactbroker.consumerversionselectors.latest:}");
+      tag = "${pactbroker.consumerversionselectors.tags:}",
+      latest = "${pactbroker.consumerversionselectors.latest:}",
+      consumer = "${pactbroker.consumers:}"
+    );
 
     /**
      * Consumers to fetch pacts for, defaults to all consumers
      * If you set the consumers through the `pactbroker.consumers` system property, separate the consumers by commas
+     *
+     * @deprecated Use {@link #consumerVersionSelectors} instead
      */
+    @Deprecated
     String[] consumers() default "${pactbroker.consumers:}";
 
   /**

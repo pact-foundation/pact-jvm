@@ -7,10 +7,11 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'com.github.ajalt:mordant:1.2.1'
 
+  testImplementation "junit:junit:${project.junitVersion}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+  testCompile('org.spockframework:spock-core:2.0-M3-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

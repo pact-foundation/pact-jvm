@@ -63,8 +63,21 @@ data class CanIDeployResult(val ok: Boolean, val message: String, val reason: St
 /**
  * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
  */
-data class ConsumerVersionSelector(val tag: String, val latest: Boolean = true) {
-  fun toJson() = JsonValue.Object("tag" to Json.toJson(tag), "latest" to Json.toJson(latest))
+data class ConsumerVersionSelector(
+  val tag: String? = null,
+  val latest: Boolean = true,
+  val consumer: String? = null
+) {
+  fun toJson(): JsonValue {
+    val obj = JsonValue.Object("latest" to Json.toJson(latest))
+    if (tag.isNotEmpty()) {
+      obj.add("tag", Json.toJson(tag))
+    }
+    if (consumer.isNotEmpty()) {
+      obj.add("consumer", Json.toJson(consumer))
+    }
+    return obj
+  }
 }
 
 interface IPactBrokerClient {
@@ -157,47 +170,61 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION
       else -> null
     }
-    if (pactsForVerification != null) {
-      val body = JsonValue.Object(
-        "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
-      )
-      if (enablePending) {
-        body["providerVersionTags"] = jsonArray(providerTags)
-        body["includePendingStatus"] = true
-        if (!includeWipPactsSince.isBlank()) {
-          body["includeWipPactsSince"] = includeWipPactsSince
-        }
-      }
-
-      return handleWith {
-        halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.serialise()).map { result ->
-          result["_embedded"]["pacts"].asArray().map { pactJson ->
-            val selfLink = pactJson["_links"]["self"]
-            val href = Json.toString(selfLink["href"])
-            val name = Json.toString(selfLink["name"])
-            val properties = pactJson["verificationProperties"]
-            val notices = properties["notices"].asArray()
-              .map { VerificationNotice.fromJson(it.asObject()) }
-            var pending = false
-            if (properties is JsonValue.Object && properties.has("pending") && properties["pending"].isBoolean) {
-              pending = properties["pending"].asBoolean()
-            }
-            val wip = if (properties.has("wip") && properties["wip"].isBoolean) properties["wip"].asBoolean()
-              else false
-            if (options.containsKey("authentication")) {
-              PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending, wip = wip)
-            } else {
-              PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending, wip = wip)
-            }
-          }
-        }
-      }
+    return if (pactsForVerification != null) {
+      fetchPactsUsingNewEndpoint(selectors, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
     } else {
-      return handleWith {
+      handleWith {
         if (selectors.isEmpty()) {
           fetchConsumers(providerName)
         } else {
-          selectors.flatMap { fetchConsumersWithTag(providerName, it.tag) }
+          selectors.flatMap { fetchConsumersWithTag(providerName, it.tag!!) }
+        }
+      }
+    }
+  }
+
+  private fun fetchPactsUsingNewEndpoint(
+    selectors: List<ConsumerVersionSelector>,
+    enablePending: Boolean,
+    providerTags: List<String>,
+    includeWipPactsSince: String,
+    halClient: IHalClient,
+    pactsForVerification: String,
+    providerName: String
+  ): Result<List<PactBrokerResult>, Exception> {
+    val body = JsonValue.Object(
+      "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
+    )
+    if (enablePending) {
+      body["providerVersionTags"] = jsonArray(providerTags)
+      body["includePendingStatus"] = true
+      if (!includeWipPactsSince.isBlank()) {
+        body["includeWipPactsSince"] = includeWipPactsSince
+      }
+    }
+
+    return handleWith {
+      halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.serialise()).map { result ->
+        result["_embedded"]["pacts"].asArray().map { pactJson ->
+          val selfLink = pactJson["_links"]["self"]
+          val href = Json.toString(selfLink["href"])
+          val name = Json.toString(selfLink["name"])
+          val properties = pactJson["verificationProperties"]
+          val notices = properties["notices"].asArray()
+            .map { VerificationNotice.fromJson(it.asObject()) }
+          var pending = false
+          if (properties is JsonValue.Object && properties.has("pending") && properties["pending"].isBoolean) {
+            pending = properties["pending"].asBoolean()
+          }
+          val wip = if (properties.has("wip") && properties["wip"].isBoolean) properties["wip"].asBoolean()
+          else false
+          if (options.containsKey("authentication")) {
+            PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending,
+              wip = wip, usedNewEndpoint = true)
+          } else {
+            PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending, wip = wip,
+              usedNewEndpoint = true)
+          }
         }
       }
     }

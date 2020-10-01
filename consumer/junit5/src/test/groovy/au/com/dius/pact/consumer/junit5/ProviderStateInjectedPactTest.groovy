@@ -49,6 +49,6 @@ class ProviderStateInjectedPactTest {
       .bodyString(JsonOutput.toJson([userName: 'Test', userClass: 'Shoddy']), ContentType.APPLICATION_JSON)
       .execute().returnResponse()
     assert httpResponse.statusLine.statusCode == 200
-    assert httpResponse.entity.content.text == '{"userName":"Test","userId":100}'
+    assert httpResponse.entity.content.text == '{"userId":100,"userName":"Test"}'
   }
 }

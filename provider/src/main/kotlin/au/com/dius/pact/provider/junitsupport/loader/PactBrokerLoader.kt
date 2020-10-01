@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.support.Utils.permutations
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpression
@@ -25,6 +26,11 @@ import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
 import kotlin.reflect.KClass
+
+data class SelectorResult(
+  val selectors: List<ConsumerVersionSelector>,
+  val filtered: Boolean
+)
 
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
@@ -81,7 +87,7 @@ open class PactBrokerLoader(
     if (consumers.isNotEmpty()) {
       source += " consumers=$consumers"
     }
-    return source
+  return source
   }
 
   override fun overridePactUrl(pactUrl: String, consumer: String) {
@@ -111,10 +117,11 @@ open class PactBrokerLoader(
     }
   }
 
-  private fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
-
-    return if (shouldFallBackToTags(resolver)) {
-      pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }.map { ConsumerVersionSelector(it) }
+  fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
+    return if (shouldFallBackToTags(pactBrokerConsumerVersionSelectors, resolver)) {
+      permutations(pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) },
+        pactBrokerConsumers.flatMap { parseListExpression(it, resolver) })
+        .map { ConsumerVersionSelector(it.first, consumer = it.second) }
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
         val tags = parseListExpression(it.tag, resolver)
@@ -133,10 +140,8 @@ open class PactBrokerLoader(
     }
   }
 
-  private fun shouldFallBackToTags(resolver: ValueResolver): Boolean {
-    return pactBrokerConsumerVersionSelectors.isEmpty() ||
-      (pactBrokerConsumerVersionSelectors.size == 1 &&
-        parseListExpression(pactBrokerConsumerVersionSelectors[0].tag, resolver).isEmpty())
+  fun shouldFallBackToTags(selectors: List<VersionSelector>, resolver: ValueResolver): Boolean {
+    return selectors.isEmpty() || (selectors.size == 1 && parseListExpression(selectors[0].tag, resolver).isEmpty())
   }
 
   private fun setupValueResolver(): ValueResolver {
@@ -200,7 +205,8 @@ open class PactBrokerLoader(
 
       if (pactBrokerConsumers.isNotEmpty()) {
         val consumerInclusions = pactBrokerConsumers.flatMap { parseListExpression(it, resolver) }
-        consumers = consumers.filter { consumerInclusions.isEmpty() || consumerInclusions.contains(it.name) }
+        consumers = consumers.filter { it.usedNewEndpoint || consumerInclusions.isEmpty() ||
+          consumerInclusions.contains(it.name) }
       }
 
       return consumers.map { pactReader.loadPact(it, pactBrokerClient.options) }
@@ -224,7 +230,7 @@ open class PactBrokerLoader(
     val host = parseExpression(pactBrokerHost, DataType.RAW, resolver)?.toString()
     val port = parseExpression(pactBrokerPort, DataType.RAW, resolver)?.toString()
 
-    if (host.isNullOrEmpty()) {
+    if (host.isNullOrEmpty() || !host.matches(Regex("[0-9a-zA-Z\\-.]+"))) {
       throw IllegalArgumentException(String.format("Invalid pact broker host specified ('%s'). " +
         "Please provide a valid host or specify the system property 'pactbroker.host'.", pactBrokerHost))
     }

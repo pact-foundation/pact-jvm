@@ -60,6 +60,6 @@ public class Defect1070Test {
     HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/api/test/1234").execute().returnResponse();
     assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
     assertThat(IOUtils.toString(httpResponse.getEntity().getContent()),
-      is(equalTo("[{\"size\":1445211,\"name\":\"testId254\",\"id\":32432}]")));
+      is(equalTo("[{\"id\":32432,\"name\":\"testId254\",\"size\":1445211}]")));
   }
 }

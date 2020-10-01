@@ -42,7 +42,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: [
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
       'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
       newHalClient() >> halClient
     }
@@ -64,7 +64,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> throw new NotFoundHalResponse() }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
 
@@ -82,7 +82,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b/100+ab']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
     }
 
@@ -102,13 +102,13 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
     }
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
 
     then:
     consumers != []
@@ -123,14 +123,14 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
     }
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true),
-              new ConsumerVersionSelector('anotherTag', true) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null),
+              new ConsumerVersionSelector('anotherTag', true, null) ], [], false, '').value
 
     then:
     consumers.size() == 2
@@ -153,14 +153,14 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: [
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
       'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
       newHalClient() >> halClient
     }
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
 
     then:
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
@@ -173,13 +173,13 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b/100+ab']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
     }
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
 
     then:
     consumers != []
@@ -194,13 +194,13 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> throw new NotFoundHalResponse() }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-      [ new ConsumerVersionSelector('tag', true) ], [], false, '').value
+      [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
 
     then:
     consumers == []
@@ -360,12 +360,12 @@ class PactBrokerClientSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'fetching pacts with selectors uses the provider-pacts-for-verification link and returns a list of results'() {
     given:
-    def halClient = Mock(IHalClient)
+    IHalClient halClient = Mock(IHalClient)
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def selectors = [ new ConsumerVersionSelector('DEV', true) ]
-    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}]}'
+    def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
       {
         "_embedded": {
@@ -406,9 +406,7 @@ class PactBrokerClientSpec extends Specification {
         new VerificationNotice('before_verification',
          'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')
       ],
-      false,
-      null,
-      false
+      false, null, false, true
     )
   }
 
@@ -463,8 +461,8 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def selectors = [ new ConsumerVersionSelector('DEV', true) ]
-    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}]}'
+    def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {
@@ -489,11 +487,9 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def selectors = [ new ConsumerVersionSelector('DEV', true) ]
-    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}],' +
-      '"providerVersionTags":[],' +
-      '"includePendingStatus":true,' +
-      '"includeWipPactsSince":"2020-24-06"}'
+    def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}],"includePendingStatus":true,' +
+      '"includeWipPactsSince":"2020-24-06","providerVersionTags":[]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {

@@ -104,7 +104,8 @@ class ContentType(val contentType: MediaType?) {
     val JSON_TYPE = ".*json".toRegex(setOf(RegexOption.IGNORE_CASE))
 
     val registry:
-      MediaTypeRegistry = MimeTypes.getDefaultMimeTypes(ContentType::class.java.classLoader).mediaTypeRegistry
+      MediaTypeRegistry = MimeTypes.getDefaultMimeTypes(ContentType::class.java.classLoader)
+      .mediaTypeRegistry
 
     @JvmStatic
     val UNKNOWN = ContentType(null)
