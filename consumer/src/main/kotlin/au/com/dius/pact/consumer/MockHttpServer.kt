@@ -70,7 +70,7 @@ interface MockServer {
    * This will start the mock server and execute the test function. Returns the result of running the test.
    */
   fun <R> runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>):
-          PactVerificationResult
+    PactVerificationResult
 
   /**
    * Returns the results of validating the mock server state
@@ -102,10 +102,14 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
     val sf = SSLSocketFactory(TrustSelfSignedStrategy())
     val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 500)
     val httpclient = HttpClientBuilder.create()
-      .setConnectionManager(BasicHttpClientConnectionManager(RegistryBuilder.create<ConnectionSocketFactory>()
-        .register("http", PlainConnectionSocketFactory.getSocketFactory())
-        .register("https", sf)
-        .build()))
+      .setConnectionManager(
+        BasicHttpClientConnectionManager(
+          RegistryBuilder.create<ConnectionSocketFactory>()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", sf)
+            .build()
+        )
+      )
       .setSSLSocketFactory(sf)
       .setServiceUnavailableRetryStrategy(retryStrategy)
       .build()

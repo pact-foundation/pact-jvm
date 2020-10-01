@@ -40,7 +40,7 @@ class JUnitTestSupportSpec extends Specification {
     where:
 
     method | exception | desc
-    null | IllegalArgumentException | 'Null Method'
+    null | NullPointerException | 'Null Method'
     luMethod('methodWithIncorrectReturnType') | UnsupportedOperationException | 'Incorrect Return Type'
     luMethod('methodWithIncorrectParameter') | UnsupportedOperationException | 'Incorrect Parameter Type'
     luMethod('methodWithMoreThanOneParameter') | UnsupportedOperationException | 'More than one Parameter'
