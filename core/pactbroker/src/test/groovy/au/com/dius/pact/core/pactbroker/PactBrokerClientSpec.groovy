@@ -365,7 +365,7 @@ class PactBrokerClientSpec extends Specification {
       newHalClient() >> halClient
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
-    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}]}'
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
       {
         "_embedded": {
@@ -462,7 +462,7 @@ class PactBrokerClientSpec extends Specification {
       newHalClient() >> halClient
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
-    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}]}'
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {
@@ -488,10 +488,8 @@ class PactBrokerClientSpec extends Specification {
       newHalClient() >> halClient
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
-    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}],' +
-      '"providerVersionTags":[],' +
-      '"includePendingStatus":true,' +
-      '"includeWipPactsSince":"2020-24-06"}'
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}],"includePendingStatus":true,' +
+      '"includeWipPactsSince":"2020-24-06","providerVersionTags":[]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {

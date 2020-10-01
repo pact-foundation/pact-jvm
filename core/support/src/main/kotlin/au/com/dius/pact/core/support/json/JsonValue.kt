@@ -114,7 +114,7 @@ sealed class JsonValue {
       is True -> "true"
       is False -> "false"
       is Array -> "[${this.values.joinToString(",") { it.serialise() }}]"
-      is Object -> "{${this.entries.entries.joinToString(",") { "\"${it.key}\":" + it.value.serialise() }}}"
+      is Object -> "{${this.entries.entries.sortedBy { it.key }.joinToString(",") { "\"${it.key}\":" + it.value.serialise() }}}"
     }
   }
 
