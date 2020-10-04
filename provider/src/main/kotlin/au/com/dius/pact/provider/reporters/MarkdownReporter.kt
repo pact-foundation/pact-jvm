@@ -196,7 +196,7 @@ class MarkdownReporter(
     pw.write("\n```\n\n")
     pw.close()
 
-    events.add(Event("statusComparisonFailed", pw.toString(), listOf(status, comparison)))
+    events.add(Event("statusComparisonFailed", sw.toString(), listOf(status, comparison)))
   }
 
   override fun includesHeaders() {
@@ -226,7 +226,7 @@ class MarkdownReporter(
     pw.write("\n```\n\n")
     pw.close()
 
-    events.add(Event("headerComparisonFailed", pw.toString(), listOf(key, value, comparison)))
+    events.add(Event("headerComparisonFailed", sw.toString(), listOf(key, value, comparison)))
   }
 
   override fun bodyComparisonOk() {
@@ -258,7 +258,7 @@ class MarkdownReporter(
       else -> pw.write("```\n${comparison}\n```\n")
     }
     pw.close()
-    events.add(Event("bodyComparisonFailed", pw.toString(), listOf(comparison)))
+    events.add(Event("bodyComparisonFailed", sw.toString(), listOf(comparison)))
   }
 
   private fun renderDiff(pw: PrintWriter, diff: Any?) {
@@ -280,7 +280,7 @@ class MarkdownReporter(
     e.printStackTrace(pw)
     pw.write("\n```\n\n")
     pw.close()
-    events.add(Event("verificationFailed", pw.toString(), listOf(interaction, e, printStackTrace)))
+    events.add(Event("verificationFailed", sw.toString(), listOf(interaction, e, printStackTrace)))
   }
 
   override fun generatesAMessageWhich() {
@@ -298,7 +298,7 @@ class MarkdownReporter(
       "(<span style=\'color:red\'>FAILED</span>)  \n")
     pw.write("\n```\n$comparison\n```\n\n")
     pw.close()
-    events.add(Event("metadataComparisonFailed", pw.toString(), listOf(key, value, comparison)))
+    events.add(Event("metadataComparisonFailed", sw.toString(), listOf(key, value, comparison)))
   }
 
   override fun includesMetadata() {
@@ -327,7 +327,7 @@ class MarkdownReporter(
     notices.forEachIndexed { i, notice -> pw.write("${i + 1}. ${notice.text}\n") }
     pw.write("\n")
     pw.close()
-    events.add(Event("reportVerificationNoticesForConsumer", pw.toString(), listOf(consumer, provider, notices)))
+    events.add(Event("reportVerificationNoticesForConsumer", sw.toString(), listOf(consumer, provider, notices)))
   }
 
   override fun warnPublishResultsSkippedBecauseFiltered() {
