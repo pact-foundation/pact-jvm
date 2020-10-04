@@ -95,11 +95,13 @@ class MarkdownReporter(
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
-    events.add(Event("verifyConsumerFromUrl", "From `${pactUrl.description()}`<br/>\n", listOf(pactUrl, consumer)))
+    events.add(Event("verifyConsumerFromUrl", "From `${pactUrl.description()}`<br/>\n",
+      listOf(pactUrl, consumer)))
   }
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
-    events.add(Event("verifyConsumerFromFile", "From `${pactFile.description()}`<br/>\n", listOf(pactFile, consumer)))
+    events.add(Event("verifyConsumerFromFile", "From `${pactFile.description()}`<br/>\n",
+      listOf(pactFile, consumer)))
   }
 
   override fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String) { }
@@ -113,11 +115,13 @@ class MarkdownReporter(
   }
 
   override fun stateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean) {
-    events.add(Event("stateForInteraction", "Given **$state**  \n", listOf(state, provider, consumer, isSetup)))
+    events.add(Event("stateForInteraction", "Given **$state**  \n",
+      listOf(state, provider, consumer, isSetup)))
   }
 
   override fun warnStateChangeIgnored(state: String, provider: IProviderInfo, consumer: IConsumerInfo) {
-    events.add(Event("warnStateChangeIgnored", "&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as " +
+    events.add(Event("warnStateChangeIgnored",
+      "&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as " +
       "there is no stateChange URL</span>  \n", listOf(state, provider, consumer)))
   }
 
@@ -135,7 +139,8 @@ class MarkdownReporter(
     pw.write("\n```\n\n")
     pw.close()
 
-    events.add(Event("stateChangeRequestFailedWithException", sw.toString(), listOf(state, isSetup, e, printStackTrace)))
+    events.add(Event("stateChangeRequestFailedWithException", sw.toString(),
+      listOf(state, isSetup, e, printStackTrace)))
   }
 
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
