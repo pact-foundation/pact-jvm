@@ -418,8 +418,13 @@ class MarkdownReporter(
         comparison as Ok<BodyComparisonResult>
         pw.write("| Path | Failure |\n")
         pw.write("| ---- | ------- |\n")
-        comparison.value.mismatches.forEach { entry ->
-          pw.write("|`${entry.key}`|${entry.value.joinToString("\n") { it.description() }}|\n")
+        comparison.value.mismatches.forEach { (path, mismatches) ->
+          pw.write("|`$path`|${mismatches.first().description()}|\n")
+          if (mismatches.size > 1) {
+            mismatches.drop(1).forEach {
+              pw.write("||${it.description()}|\n")
+            }
+          }
         }
         pw.write("\n\nDiff:\n\n")
         renderDiff(pw, comparison.value.diff)

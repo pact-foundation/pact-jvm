@@ -115,7 +115,19 @@ class MarkdownReporterSpec extends Specification {
               +  "documentCategoryCode": null,
               +  "contentLength": 0,
               +  "tags": null
-              }''')],
+              }'''),
+          new BodyMismatch(
+            JsonParser.parseString('{"doesNotExist":"Test","documentId":0}'),
+            JsonParser.parseString('{"documentId":0,"documentCategoryId":5,"documentCategoryCode":null,"contentLength":0,"tags":null}'),
+            'Expected doesNotExist="Test" but was missing', '$.0', '''{
+                -  "doesNotExist": "Test",
+                -  "documentId": 0
+                +  "documentId": 0,
+                +  "documentCategoryId": 5,
+                +  "documentCategoryCode": null,
+                +  "contentLength": 0,
+                +  "tags": null
+                }''')],
         '$.1': [
           new BodyMismatch(JsonParser.parseString('{"doesNotExist":"Test","documentId":0}'),
             JsonParser.parseString('{"documentId":1,"documentCategoryId":5,"documentCategoryCode":null,"contentLength":0,"tags":null}'),
@@ -172,6 +184,7 @@ class MarkdownReporterSpec extends Specification {
          || Path | Failure |
          || ---- | ------- |
          ||`$.0`|Expected doesNotExist="Test" but was missing|
+         |||Expected doesNotExist="Test" but was missing|
          ||`$.1`|Expected doesNotExist="Test" but was missing|
          |
          |
