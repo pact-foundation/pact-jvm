@@ -1,0 +1,49 @@
+{
+  "provider": {
+    "name": "xml_provider"
+  },
+  "consumer": {
+    "name": "xml_consumer"
+  },
+  "interactions": [
+    {
+      "description": "a request with xml content",
+      "request": {
+        "method": "POST",
+        "path": "/attr",
+        "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n             <providerService version=\"1.0\">\n               <attribute1>\n                 <newattribute>\n                     <date month=\"11\" year=\"2019\"/>\n                     <name><![CDATA[Surname Name]]></name>\n                 </newattribute>\n                 <newattribute2>\n                   <countryCode>RO</countryCode>\n                   <hiddenData>ABCD***************010101</hiddenData>\n                 </newattribute2>\n               </attribute1>\n             </providerService>\n        ",
+        "matchingRules": {
+          "body": {
+            "$.providerService.attribute1.newattribute.name": {
+              "matchers": [
+                {
+                  "match": "equality"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.providerService.attribute1.newattribute2.hiddenData": {
+              "matchers": [
+                {
+                  "match": "equality"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 204
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.1"
+    }
+  }
+}

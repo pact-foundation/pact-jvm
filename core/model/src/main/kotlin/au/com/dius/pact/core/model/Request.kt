@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.ContentType.Companion.UNKNOWN
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
@@ -114,7 +115,7 @@ class Request @JvmOverloads constructor(
         emptyMap()
       }
 
-      var contentType = ContentType.JSON
+      var contentType = UNKNOWN
       val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
       if (contentTypeEntry != null) {
         contentType = ContentType(contentTypeEntry.value.first())
