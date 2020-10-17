@@ -18,7 +18,7 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @RunWith(PactRunner.class)
 @Provider("xml_provider")
 @PactFolder("pacts")
-@VerificationReports({"console", "json"})
+@VerificationReports({"console", "json", "markdown"})
 public class XMLContractTest {
   @ClassRule
   public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);

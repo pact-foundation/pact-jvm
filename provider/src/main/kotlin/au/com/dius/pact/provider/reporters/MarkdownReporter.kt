@@ -17,10 +17,25 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.vladsch.flexmark.ast.Heading
+import com.vladsch.flexmark.ext.tables.TableBlock
+import com.vladsch.flexmark.ext.tables.TableBody
+import com.vladsch.flexmark.ext.tables.TableCell
+import com.vladsch.flexmark.ext.tables.TableRow
+import com.vladsch.flexmark.ext.tables.TablesExtension
+import com.vladsch.flexmark.formatter.Formatter
+import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.util.ast.Document
+import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.data.MutableDataSet
+import com.vladsch.flexmark.util.sequence.BasedSequence
+import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
+import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
+import java.io.StringReader
 import java.io.StringWriter
 import java.time.ZonedDateTime
 
@@ -62,21 +77,165 @@ class MarkdownReporter(
   }
 
   override fun finaliseReport() {
-    val pw = PrintWriter(BufferedWriter(FileWriter(reportFile, false)))
-    pw.write("""
-      # ${provider.name}
-    
-      | Description    | Value |
-      | -------------- | ----- |
-      | Date Generated | ${ZonedDateTime.now()} |
-      | Pact Version   | ${BasePact.lookupVersion()} |
-    
-    """.trimIndent())
-
-    for (event in events) {
-      pw.write(event.contents)
+    if (reportFile.exists()) {
+      updateReportFile()
+    } else {
+      generateReportFile()
     }
-    pw.close()
+  }
+
+  private fun generateReportFile() {
+    PrintWriter(BufferedWriter(FileWriter(reportFile, true))).use { pw ->
+      pw.write("""
+        # ${provider.name}
+      
+        | Description    | Value |
+        | -------------- | ----- |
+        | Date Generated | ${ZonedDateTime.now()} |
+        | Pact Version   | ${BasePact.lookupVersion()} |
+        
+        ## Summary
+        
+        | Consumer    | Result |
+        | ----------- | ------ |
+        
+      """.trimIndent())
+
+      var consumer: IConsumerInfo? = null
+      var state = "OK"
+      for (event in events) {
+        when (event.type) {
+          "reportVerificationForConsumer" -> {
+            if (consumer != null) {
+              val pending = if (consumer.pending) " [Pending]" else ""
+              pw.println("| ${consumer.name}$pending | $state |")
+            }
+
+            consumer = event.data[0] as IConsumerInfo
+          }
+          "stateChangeRequestFailedWithException", "stateChangeRequestFailed" -> state = "State change call failed"
+          "requestFailed" -> state = "Request failed"
+          "statusComparisonFailed", "headerComparisonFailed", "bodyComparisonFailed", "verificationFailed",
+          "metadataComparisonFailed" -> state = "Failed"
+        }
+      }
+
+      if (consumer != null) {
+        val pending = if (consumer.pending) " [Pending]" else ""
+        pw.println("| ${consumer.name}$pending | $state |")
+      }
+
+      pw.println()
+      for (event in events) {
+        pw.write(event.contents)
+      }
+    }
+  }
+
+  private fun updateReportFile() {
+    val options = parserOptions()
+    val parser = Parser.builder(options).build()
+    val document = parser.parseReader(BufferedReader(FileReader(reportFile)))
+
+    val (consumer: IConsumerInfo?, state) = consumerAndStatus(document)
+
+    if (consumer != null) {
+      var consumerSection: Node? = null
+      for (child in document.children) {
+        if (child is Heading && child.text.unescape() == "Summary") {
+          updateSummary(child.next, consumer, state)
+        }
+
+        if (child is Heading && child.text.startsWith("Verifying a pact between _" + consumer.name)) {
+          consumerSection = child
+        }
+      }
+
+      if (consumerSection == null) {
+        for (event in events) {
+          val section = parser.parseReader(StringReader(event.contents))
+          document.appendChild(section)
+        }
+      } else {
+        val prevChild = consumerSection.previous
+        var child = consumerSection.next
+        consumerSection.unlink()
+        while (child != null && child !is Heading) {
+          val currentChild = child
+          child = child.next
+          currentChild.unlink()
+        }
+
+        child = prevChild
+        for (event in events) {
+          val section = parser.parseReader(StringReader(event.contents))
+          child!!.insertAfter(section)
+          child = section
+        }
+      }
+    }
+
+    val formatter = Formatter.builder(options).build()
+    BufferedWriter(FileWriter(reportFile)).use { w -> w.write(formatter.render(document)) }
+  }
+
+  private fun consumerAndStatus(document: Document): Pair<IConsumerInfo?, String> {
+    var consumer: IConsumerInfo? = null
+    var state = "OK"
+    for (event in events) {
+      when (event.type) {
+        "reportVerificationForConsumer" -> {
+          if (consumer != null) {
+            for (child in document.children) {
+              if (child is Heading && child.text.unescape() == "Summary") {
+                updateSummary(child.next, consumer, state)
+              }
+            }
+          }
+
+          consumer = event.data[0] as IConsumerInfo
+        }
+        "stateChangeRequestFailedWithException", "stateChangeRequestFailed" -> state = "State change call failed"
+        "requestFailed" -> state = "Request failed"
+        "statusComparisonFailed", "headerComparisonFailed", "bodyComparisonFailed", "verificationFailed",
+        "metadataComparisonFailed" -> state = "Failed"
+      }
+    }
+    return Pair(consumer, state)
+  }
+
+  private fun parserOptions(): MutableDataSet {
+    val options = MutableDataSet().set(Parser.EXTENSIONS, listOf(TablesExtension.create()))
+      .set(TablesExtension.WITH_CAPTION, false)
+      .set(TablesExtension.COLUMN_SPANS, false)
+      .set(TablesExtension.MIN_HEADER_ROWS, 1)
+      .set(TablesExtension.MAX_HEADER_ROWS, 1)
+      .set(TablesExtension.APPEND_MISSING_COLUMNS, true)
+      .set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
+      .set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
+    return options
+  }
+
+  private fun updateSummary(table: Node?, consumer: IConsumerInfo, state: String) {
+    if (table is TableBlock) {
+      for (child in table.children) {
+        if (child is TableBody) {
+          val consumerRow = child.children.find {
+            it is TableRow && it.firstChild is TableCell && (it.firstChild as TableCell).text.startsWith(consumer.name)
+          }
+          if (consumerRow != null) {
+            val stateCell = consumerRow.lastChild as TableCell
+            stateCell.text = BasedSequence.of(state)
+          } else {
+            val row = TableRow()
+            val pending = if (consumer.pending) " [Pending]" else ""
+            row.appendChild(TableCell(BasedSequence.of(consumer.name + pending)))
+            row.appendChild(TableCell(BasedSequence.of(state)))
+            child.appendChild(row)
+          }
+        }
+      }
+    }
   }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
@@ -111,18 +270,18 @@ class MarkdownReporter(
   override fun warnPactFileHasNoInteractions(pact: Pact<Interaction>) { }
 
   override fun interactionDescription(interaction: Interaction) {
-    events.add(Event("interactionDescription", "${interaction.description}  \n", listOf(interaction)))
+    events.add(Event("interactionDescription", "${interaction.description}  <br/>\n", listOf(interaction)))
   }
 
   override fun stateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean) {
-    events.add(Event("stateForInteraction", "Given **$state**  \n",
+    events.add(Event("stateForInteraction", "Given **$state**  <br/>\n",
       listOf(state, provider, consumer, isSetup)))
   }
 
   override fun warnStateChangeIgnored(state: String, provider: IProviderInfo, consumer: IConsumerInfo) {
     events.add(Event("warnStateChangeIgnored",
       "&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as " +
-      "there is no stateChange URL</span>  \n", listOf(state, provider, consumer)))
+        "there is no stateChange URL</span>  <br/>\n", listOf(state, provider, consumer)))
   }
 
   override fun stateChangeRequestFailedWithException(
@@ -146,7 +305,7 @@ class MarkdownReporter(
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
     events.add(Event("stateChangeRequestFailedWithException",
       "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $httpStatus" +
-      "</span>  \n", listOf(state, provider, isSetup, httpStatus)))
+        "</span>  \n", listOf(state, provider, isSetup, httpStatus)))
   }
 
   override fun warnStateChangeIgnoredDueToInvalidUrl(
@@ -157,7 +316,7 @@ class MarkdownReporter(
   ) {
     events.add(Event("warnStateChangeIgnoredDueToInvalidUrl",
       "&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as " +
-        "there is no stateChange URL, received `$stateChangeHandler`</span>  \n",
+        "there is no stateChange URL, received `$stateChangeHandler`</span>  <br/>\n",
       listOf(state, provider, isSetup, stateChangeHandler)))
   }
 
@@ -180,12 +339,12 @@ class MarkdownReporter(
   }
 
   override fun returnsAResponseWhich() {
-    events.add(Event("returnsAResponseWhich", "&nbsp;&nbsp;returns a response which  \n", listOf()))
+    events.add(Event("returnsAResponseWhich", "&nbsp;&nbsp;returns a response which  <br/>\n", listOf()))
   }
 
   override fun statusComparisonOk(status: Int) {
     events.add(Event("statusComparisonOk", "&nbsp;&nbsp;&nbsp;&nbsp;has status code **$status** " +
-      "(<span style='color:green'>OK</span>)  \n", listOf(status)))
+      "(<span style='color:green'>OK</span>)  <br/>\n", listOf(status)))
   }
 
   override fun statusComparisonFailed(status: Int, comparison: Any) {
@@ -205,13 +364,13 @@ class MarkdownReporter(
   }
 
   override fun includesHeaders() {
-    events.add(Event("includesHeaders", "&nbsp;&nbsp;&nbsp;&nbsp;includes headers  \n", listOf()))
+    events.add(Event("includesHeaders", "&nbsp;&nbsp;&nbsp;&nbsp;includes headers  <br/>\n", listOf()))
   }
 
   override fun headerComparisonOk(key: String, value: List<String>) {
     events.add(Event("headerComparisonOk",
       "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
-      "(<span style=\'color:green\'>OK</span>)  \n", listOf(key, value)))
+        "(<span style=\'color:green\'>OK</span>)  <br/>\n", listOf(key, value)))
   }
 
   override fun headerComparisonFailed(key: String, value: List<String>, comparison: Any) {
@@ -236,7 +395,7 @@ class MarkdownReporter(
 
   override fun bodyComparisonOk() {
     events.add(Event("bodyComparisonOk",
-      "&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:green'>OK</span>)  \n", listOf()))
+      "&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:green'>OK</span>)  <br/>\n", listOf()))
   }
 
   override fun bodyComparisonFailed(comparison: Any) {
@@ -289,7 +448,7 @@ class MarkdownReporter(
   }
 
   override fun generatesAMessageWhich() {
-    events.add(Event("generatesAMessageWhich", "&nbsp;&nbsp;generates a message which  \n", listOf()))
+    events.add(Event("generatesAMessageWhich", "&nbsp;&nbsp;generates a message which  <br/>\n", listOf()))
   }
 
   override fun displayFailures(failures: Map<String, Any>) { }
@@ -307,18 +466,18 @@ class MarkdownReporter(
   }
 
   override fun includesMetadata() {
-    events.add(Event("includesMetadata", "&nbsp;&nbsp;&nbsp;&nbsp;includes metadata  \n", listOf()))
+    events.add(Event("includesMetadata", "&nbsp;&nbsp;&nbsp;&nbsp;includes metadata  <br/>\n", listOf()))
   }
 
   override fun metadataComparisonOk(key: String, value: Any?) {
     events.add(Event("metadataComparisonOk",
       "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
-      "(<span style=\'color:green\'>OK</span>)  \n", listOf(key, value)))
+        "(<span style=\'color:green\'>OK</span>)  <br/>\n", listOf(key, value)))
   }
 
   override fun metadataComparisonOk() {
     events.add(Event("metadataComparisonOk",
-      "&nbsp;&nbsp;&nbsp;&nbsp;has matching metadata (<span style='color:green'>OK</span>)\n", listOf()))
+      "&nbsp;&nbsp;&nbsp;&nbsp;has matching metadata (<span style='color:green'>OK</span>)<br/>\n", listOf()))
   }
 
   override fun reportVerificationNoticesForConsumer(
@@ -337,12 +496,12 @@ class MarkdownReporter(
 
   override fun warnPublishResultsSkippedBecauseFiltered() {
     events.add(Event("warnPublishResultsSkippedBecauseFiltered",
-      "NOTE: Skipping publishing of verification results as the interactions have been filtered\n", listOf()))
+      "NOTE: Skipping publishing of verification results as the interactions have been filtered<br/>\n", listOf()))
   }
 
   override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
     events.add(Event("warnPublishResultsSkippedBecauseDisabled",
-      "NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')\n",
+      "NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')<br/>\n",
       listOf(envVar)))
   }
 }
