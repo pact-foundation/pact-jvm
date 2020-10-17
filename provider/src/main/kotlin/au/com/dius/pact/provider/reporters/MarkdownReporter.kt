@@ -74,6 +74,7 @@ class MarkdownReporter(
     this.provider = provider
     reportDir!!.mkdirs()
     reportFile = File(reportDir, provider.name + ext)
+    events.clear()
   }
 
   override fun finaliseReport() {
@@ -138,7 +139,7 @@ class MarkdownReporter(
     val document = parser.parseReader(BufferedReader(FileReader(reportFile)))
 
     val (consumer: IConsumerInfo?, state) = consumerAndStatus(document)
-
+    val header = events.find { it.type == "reportVerificationForConsumer" }?.contents?.substring(2)?.trim()
     if (consumer != null) {
       var consumerSection: Node? = null
       for (child in document.children) {
@@ -146,7 +147,7 @@ class MarkdownReporter(
           updateSummary(child.next, consumer, state)
         }
 
-        if (child is Heading && child.text.startsWith("Verifying a pact between _" + consumer.name)) {
+        if (child is Heading && child.text.contains(header.toString())) {
           consumerSection = child
         }
       }
@@ -157,20 +158,25 @@ class MarkdownReporter(
           document.appendChild(section)
         }
       } else {
-        val prevChild = consumerSection.previous
         var child = consumerSection.next
-        consumerSection.unlink()
         while (child != null && child !is Heading) {
-          val currentChild = child
           child = child.next
-          currentChild.unlink()
         }
 
-        child = prevChild
-        for (event in events) {
-          val section = parser.parseReader(StringReader(event.contents))
-          child!!.insertAfter(section)
-          child = section
+        if (child == null) {
+          for (event in events) {
+            if (event.type != "reportVerificationForConsumer") {
+              val section = parser.parseReader(StringReader(event.contents))
+              document.appendChild(section)
+            }
+          }
+        } else {
+          for (event in events) {
+            if (event.type != "reportVerificationForConsumer") {
+              val section = parser.parseReader(StringReader(event.contents))
+              child.insertBefore(section)
+            }
+          }
         }
       }
     }
