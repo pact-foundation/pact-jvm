@@ -2,7 +2,7 @@ dependencies {
   api project(path: ":core:support", configuration: 'default')
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   compile "com.google.guava:guava:${project.guavaVersion}"
-  compile('io.github.microutils:kotlin-logging:1.6.26') {
+  implementation('io.github.microutils:kotlin-logging:2.0.3') {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
