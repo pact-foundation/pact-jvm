@@ -334,10 +334,24 @@ you don't need to provide `pact.filter.consumers`.
 To use pacts from urls annotate the test class with
 
 ```java
-@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"} )
+@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"})
 ```
 
 If you need to load a single pact file from the file system, you can use the `PactUrl` with the URL set to the file path.
+
+For authenticated URLs, specify the authentication on the annotation
+
+```java
+@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"}, authentication = @Authentication(token = "1234ABCD"))
+```
+
+You can use either bearer token scheme (by setting the `token`), or basic auth by setting the `username` and `password`.
+
+JVM system properties or environment variables can also be used by placing the property/variable name in `${}` expressions.
+
+```java
+@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"}, authentication = @Authentication(token = "${TOKEN}"))
+```
 
 ### Pact folder
 
