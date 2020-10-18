@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.gradle
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.zafarkhaja.semver.Version
 import org.apache.commons.io.IOUtils
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
@@ -156,4 +157,20 @@ class PactPublishTaskSpec extends Specification {
     0 * brokerClient.uploadPactFile(excluded[2], _, [])
   }
 
+  def 'supports versions that are not string values'() {
+    given:
+    project.pact {
+      publish {
+        pactBrokerUrl = 'pactBrokerUrl'
+        consumerVersion = Version.valueOf('1.2.3')
+      }
+    }
+    project.evaluate()
+
+    when:
+    task.publishPacts()
+
+    then:
+    1 * brokerClient.uploadPactFile(_, '1.2.3', _) >> new Ok(null)
+  }
 }
