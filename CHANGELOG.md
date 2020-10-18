@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.9 - Bugfix Release
+
+* 1b36668b4 - fix: handle null tag values in selectors #1227 (Ronald Holshausen, Sun Oct 18 14:47:16 2020 +1100)
+* d27d690e1 - fix: when loading pacts, only swallow exceptions if annotation ignoreIoErrors == "true" #1225 (Ronald Holshausen, Sun Oct 18 14:28:41 2020 +1100)
+* 473bf1ce2 - fix: when request to the broker fails with an exception, propogate the original exception #1225 (Ronald Holshausen, Sun Oct 18 14:06:56 2020 +1100)
+* d31931403 - Merge pull request #1229 from sneufeind/fix/version-as-string (Ronald Holshausen, Sun Oct 18 13:34:40 2020 +1100)
+* 4f231f680 - fix: suport versions that are not string values #1228 (Ronald Holshausen, Sun Oct 18 13:33:57 2020 +1100)
+* 12348efb2 - feat: Update documentation on PactUrl authentication #1224 (Ronald Holshausen, Sun Oct 18 12:51:22 2020 +1100)
+* 63d19cfb0 - feat: support system properties with PactUrl authentication #1224 (Ronald Holshausen, Sun Oct 18 12:40:04 2020 +1100)
+* be912c995 - feat: add authentication to PactUrl annotation #1224 (Ronald Holshausen, Sun Oct 18 12:23:35 2020 +1100)
+* 8621b7f15 - fix: Java DSL must not generate invalid matcher paths #1220 (Ronald Holshausen, Sat Oct 17 17:21:55 2020 +1100)
+* 8c64f6dd8 - fix(MarkdownReporter): correctly align body mismatches when there are multiple per path #1219 (Ronald Holshausen, Sat Oct 17 16:33:54 2020 +1100)
+* 7f34c22b8 - fix: merge in results so we don't lose results with multiple interactions #1128 (Ronald Holshausen, Sat Oct 17 15:55:45 2020 +1100)
+* 7a775976b - feat: add summary to markdown report #1128 (Ronald Holshausen, Sat Oct 17 15:34:59 2020 +1100)
+* d4488d55f - fix: don't default the content type to JSON when the content-type header is missing #1218 (Ronald Holshausen, Sat Oct 17 13:49:56 2020 +1100)
+* 06c5b50f0 - fix: handle version as string (sneufeind, Thu Oct 15 16:31:16 2020 +0200)
+* 503856e9f - bump version to 4.1.9 (anto, Wed Oct 14 15:09:25 2020 +0100)
+
 # 4.1.8 - Bugfix Release
 
 * c16b4876c - fix: detek violations #1128 (Ronald Holshausen, Sun Oct 4 15:12:19 2020 +1100)
