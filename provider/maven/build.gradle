@@ -3,7 +3,7 @@ dependencies {
   compile 'org.apache.maven:maven-plugin-api:3.6.0',
     'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0'
   compile 'org.apache.maven:maven-core:3.6.0'
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'com.github.ajalt:mordant:1.2.1'
 

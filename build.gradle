@@ -13,8 +13,8 @@ plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.4.10'
 //  id 'org.jmailen.kotlinter' version '3.2.0'
   id 'io.gitlab.arturbosch.detekt' version '1.14.1'
-  id 'org.jetbrains.dokka' version '0.10.1' apply false
-  id 'org.javamodularity.moduleplugin' version '1.6.0' apply false
+  id 'org.jetbrains.dokka' version '1.4.10' apply false
+  id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
 }
 
 import org.apache.commons.text.StringEscapeUtils
@@ -31,8 +31,8 @@ allprojects {
     jcenter()
   }
 
-  targetCompatibility = '1.9'
-  sourceCompatibility = '1.9'
+  targetCompatibility = '11'
+  sourceCompatibility = '11'
 }
 
 subprojects {
@@ -65,7 +65,16 @@ subprojects {
   if (System.env.TRAVIS != 'true') {
     apply plugin: 'org.jetbrains.dokka'
   }
-  //apply plugin: "org.javamodularity.moduleplugin"
+  apply plugin: "org.javamodularity.moduleplugin"
+
+  dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  }
+
+  java {
+    modularity.inferModulePath = true
+  }
 
     compileTestGroovy {
       classpath = classpath.plus(files(compileTestKotlin.destinationDir))
@@ -82,16 +91,9 @@ subprojects {
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
       kotlinOptions {
-        jvmTarget = "9"
+        jvmTarget = "11"
       }
     }
-
-  if (System.env.TRAVIS != 'true') {
-    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-      outputFormat = 'javadoc'
-      outputDirectory = "$buildDir/docs/dokkaJavadoc"
-    }
-  }
 
     jar {
         manifest {
@@ -132,7 +134,7 @@ subprojects {
         showExceptions true
         showStackTraces true
         showStandardStreams false
-        events "passed", "skipped", "failed" //, "standardOut", "standardError"
+        events "passed", "skipped", "failed"
       }
     } else {
       // Show test results.

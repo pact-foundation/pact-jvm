@@ -42,7 +42,7 @@ def javaVersion
 executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") {
   javaVersion = Version.valueOf(it.trim().replace('_', '+b'))
 }
-if (!javaVersion?.satisfies('^9')) {
+if (!javaVersion?.satisfies('^11')) {
   ask("You are building against Java $javaVersion. Do you want to exit?: [Y]") {
     System.exit(1)
   }
