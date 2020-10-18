@@ -52,10 +52,14 @@ data class UrlSource<I> @JvmOverloads constructor(override val url: String, val 
   override fun description() = "URL $url"
 }
 
-data class UrlsSource<I> @JvmOverloads constructor(
+data class UrlsSource<I : Interaction> @JvmOverloads constructor(
   val url: List<String>,
   val pacts: MutableMap<String, Pact<I>> = mutableMapOf()
-) : PactSource() where I : Interaction
+) : PactSource() {
+  fun addPact(url: String, pact: Pact<I>) {
+    pacts[url] = pact
+  }
+}
 
 data class BrokerUrlSource @JvmOverloads constructor(
   override val url: String,

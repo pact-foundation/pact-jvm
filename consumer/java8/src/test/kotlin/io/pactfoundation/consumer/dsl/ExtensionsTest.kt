@@ -1,7 +1,7 @@
 package io.pactfoundation.consumer.dsl
 
 import org.hamcrest.CoreMatchers.equalTo
-import org.junit.Assert.assertThat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 
 class ExtensionsTest {

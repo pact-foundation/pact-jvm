@@ -17,7 +17,7 @@ open class TestApplication
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Provider("Animal Profile Service")
 @PactBroker
-@IgnoreNoPactsToVerify
+@IgnoreNoPactsToVerify(ignoreIoErrors = "true")
 internal class PactVerificationSpringProviderTest {
   @TestTemplate
   @ExtendWith(PactVerificationSpringProvider::class)

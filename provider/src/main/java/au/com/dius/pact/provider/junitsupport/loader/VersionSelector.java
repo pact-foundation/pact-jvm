@@ -13,13 +13,18 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface VersionSelector {
-    /**
-     * @return Tags to use to fetch pacts for
-     */
-    String tag();
+  /**
+   * Tags to use to fetch pacts for. Empty string represents all tags.
+   */
+  String tag() default "";
 
-    /**
-     * @return "true" to fetch the latest version of the pact, or "false" to fetch all versions
-     */
-    String latest() default "true";
+  /**
+   * "true" to fetch the latest version of the pact, or "false" to fetch all versions
+   */
+  String latest() default "true";
+
+  /**
+   * Consumer name to fetch pacts for. Empty string represents all consumers
+   */
+  String consumer() default "";
 }

@@ -1,5 +1,59 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.8 - Bugfix Release
+
+* c16b4876c - fix: detek violations #1128 (Ronald Holshausen, Sun Oct 4 15:12:19 2020 +1100)
+* a0b1ed705 - fix: was calling toString on the print writer and not the underlying string writer #1128 (Ronald Holshausen, Sun Oct 4 15:04:38 2020 +1100)
+* e3a43e118 - refactor: update MarkdownReporter to accumulate all events and generate the report at the end #1128 (Ronald Holshausen, Sun Oct 4 14:12:53 2020 +1100)
+* 358a76d1d - fix: include the consumer name in the selectors sent to the broker #1193 (Ronald Holshausen, Thu Oct 1 14:39:18 2020 +1000)
+* 8d40c923f - chore: when generating JSON, sort the keys in the maps (Ronald Holshausen, Thu Oct 1 14:38:23 2020 +1000)
+* 677cc2d25 - fix: include consumer in the selectors; only filter by consumer if using old endpoint #1193 (Ronald Holshausen, Thu Oct 1 14:02:31 2020 +1000)
+* 1e2fb65b0 - chore: upgrade netty to latest #1215 (Ronald Holshausen, Wed Sep 30 15:10:26 2020 +1000)
+* 53f67ea03 - Merge pull request #1216 from rejeeshg/patch-1 (Ronald Holshausen, Wed Sep 30 15:00:19 2020 +1000)
+* 20d2b6a70 - doc: update the minimum version for pending pact support #1214 (Ronald Holshausen, Wed Sep 30 14:55:00 2020 +1000)
+* 4782ff837 - Update gradle.properties (rejeeshg, Tue Sep 29 15:57:23 2020 +0530)
+* 4250577ab - Merge pull request #1210 from filipamb/spring-async-mvc-fix (Ronald Holshausen, Tue Sep 22 09:45:22 2020 +1000)
+* 49cae2313 - Fixed performing async requests for MockMvc (Filip Ambroziak, Mon Sep 21 19:31:19 2020 +0200)
+* 4259e5694 - fix: correct regex in test (Ronald Holshausen, Sun Sep 20 14:46:21 2020 +1000)
+* 2a1cdf5f9 - chore: handle edge cases with RandomDecimalGenerator (Ronald Holshausen, Sun Sep 20 13:42:02 2020 +1000)
+* 6e0b29311 - feat: generate random decimals with decimal points (Ronald Holshausen, Sun Sep 20 13:29:26 2020 +1000)
+* 62bdb1e26 - fix: after upgrade of Spock (Ronald Holshausen, Sun Sep 20 13:27:51 2020 +1000)
+* 4165ca831 - chore: upgrade to Spock 2.0-M3 (Ronald Holshausen, Sun Sep 20 12:43:57 2020 +1000)
+* 776e7ca2c - refactor: replace if with when #1208 (Ronald Holshausen, Sat Sep 19 14:36:00 2020 +1000)
+* d802e09bd - Merge pull request #1209 from paweusz/docs/webflux-support (Ronald Holshausen, Sat Sep 19 14:27:17 2020 +1000)
+* 0f76d7178 - fix: use the supplied value resolver when working out if we should fall back to tags #1208 (Ronald Holshausen, Sat Sep 19 14:19:32 2020 +1000)
+* 87cf3164c - Add Spring WebFlux example (Pawel Pelczar, Thu Sep 17 17:46:25 2020 +0200)
+* 7841232ea - fix: pactverify check in Gradle plugin does not work with multi-projects (Ronald Holshausen, Thu Sep 17 10:50:45 2020 +1000)
+* 8bf4b6806 - fix: pactverify check in Gradle plugin does not work with multi-projects (Ronald Holshausen, Thu Sep 17 10:35:10 2020 +1000)
+* ec3c777f6 - Merge pull request #1199 from markozz/feature/publish-to-broker (Ronald Holshausen, Sat Sep 5 13:53:29 2020 +1000)
+* ddb76001c - docs: Updated readme with note about module names (Ronald Holshausen, Thu Sep 3 09:15:38 2020 +1000)
+* f1c8d6c82 - Removed unused import (Mark Abrahams, Wed Sep 2 21:52:37 2020 +0200)
+* 16f1bb1f9 - Added logics for publishing a pact with tags. (Mark Abrahams, Wed Sep 2 21:41:34 2020 +0200)
+* 1fa7ad7c0 - Changed logics for publishing pact to broker. Now using PactBrokerClient. (Mark Abrahams, Mon Aug 31 15:36:00 2020 +0200)
+* 000cfe78d - Merge pull request #1200 from tinexw/patch-3 (Ronald Holshausen, Sun Aug 30 10:49:25 2020 +1000)
+* 6fb094080 - Merge pull request #1201 from tinexw/patch-4 (Ronald Holshausen, Sun Aug 30 10:49:06 2020 +1000)
+* 63a928059 - Merge pull request #1202 from tinexw/patch-5 (Ronald Holshausen, Sun Aug 30 10:48:43 2020 +1000)
+* 67709526c - Merge pull request #1196 from diana-zaharia/lambda-value-from-provider (Ronald Holshausen, Sun Aug 30 10:48:17 2020 +1000)
+* 4e3bb9081 - docs: fix links so that they point to the same relative location within the repository as they do in docs.pact.io (Beth Skurrie, Sun Aug 30 09:56:58 2020 +1000)
+* 25e47b53d - docs: fix links in readme (Beth Skurrie, Sun Aug 30 09:41:56 2020 +1000)
+* bb86eba38 - Add dependency info to README (Kristine Jetzke, Thu Aug 27 15:39:51 2020 +0200)
+* ba90d1003 - Add dependency info to README (Kristine Jetzke, Thu Aug 27 15:30:06 2020 +0200)
+* e67069b80 - Add dependency info to README (Kristine Jetzke, Thu Aug 27 15:28:15 2020 +0200)
+* b6e81b71a - fixed code formatting (Mark Abrahams, Wed Aug 26 13:50:08 2020 +0200)
+* 34cbb0c5c - Merge branch 'master' of https://github.com/DiUS/pact-jvm into feature/publish-to-broker (Mark Abrahams, Wed Aug 26 13:17:22 2020 +0200)
+* db8edb239 - Added functionality to publish a created contract on disk to a broker. Verified with both pactflow as open source pact broker (Mark Abrahams, Wed Aug 26 13:14:47 2020 +0200)
+* 8fd75bbbf - added valueFromProviderState on LambdaDslObject (Zaharia, Tue Aug 25 22:22:40 2020 +0300)
+* 9c592ff92 - chore: add note about using Pact CLI to publish pact files (Ronald Holshausen, Mon Aug 24 09:58:24 2020 +1000)
+* 7a4bd3baa - chore: make links to exammples absolute for docosaurus site #1189 (Ronald Holshausen, Sat Aug 22 15:29:19 2020 +1000)
+* 979a7dbe4 - feat: allow multiple provider tags when publishing results #1187 (Ronald Holshausen, Sat Aug 22 13:59:44 2020 +1000)
+* 1f0e8f078 - feat: add comment to state change annotation and log it out when executed #1177 (Ronald Holshausen, Sat Aug 22 12:32:41 2020 +1000)
+* 577223b4f - docs: fix corrupted formatting due to mix of backticks and pipe characters (Beth Skurrie, Sat Aug 15 11:44:47 2020 +1000)
+* afbb2e19c - feat: generate mismatch diffs for XML attributes (Ronald Holshausen, Tue Aug 11 13:53:47 2020 +1000)
+* 7c1bf90c0 - fix: removed double path in body mismatch descriptions (Ronald Holshausen, Tue Aug 11 12:09:27 2020 +1000)
+* d0330b025 - fix: regression with publishing verification results (Ronald Holshausen, Tue Aug 11 11:35:44 2020 +1000)
+* ff62a8df9 - fix: allow matchers to be used on the root node with XML builder (Ronald Holshausen, Mon Aug 10 12:22:46 2020 +1000)
+* 9cfe5759c - bump version to 4.1.8 (Ronald Holshausen, Sun Aug 9 17:33:04 2020 +1000)
+
 # 4.1.7 - Bugfix Release
 
 * 119421456 - fix: the matcher paths generated by the XML builder should take into account namespaces #1186 (Ronald Holshausen, Sun Aug 9 17:00:04 2020 +1000)
@@ -4962,7 +5016,7 @@ with previous versions with matchers defined on arrays will not be applied.**
 # 2.1.8 - fixes plus pact junit rule
 
 **NOTE: This version has a breaking change for users of the gradle plugin with request filters.
-See [Modifying The Requests Before They Are Sent](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#modifying-the-requests-before-they-are-sent)
+See [Modifying The Requests Before They Are Sent](/provider/gradle/README.md#modifying-the-requests-before-they-are-sent)
 in the gradle plugin docs for more info.**
 
 * b6b836a - fixed link in readme (Ronald Holshausen, Mon Dec 15 19:31:19 2014 +1100)

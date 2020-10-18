@@ -2,7 +2,7 @@
 
 ## Overview
 Library provides ability to play contract tests against a provider using Spring & JUnit.
-This library is based on and references the JUnit package, so see the [Pact JUnit 4](https://github.com/DiUS/pact-jvm/tree/master/provider/junit) or [Pact JUnit 5](https://github.com/DiUS/pact-jvm/tree/master/provider/junit5) providers for more details regarding configuration using JUnit.
+This library is based on and references the JUnit package, so see the [Pact JUnit 4](/provider/junit/README.md) or [Pact JUnit 5](/provider/junit5/README.md) providers for more details regarding configuration using JUnit.
 
 Supports:
 
@@ -13,6 +13,8 @@ Supports:
 - Spring Test MockMVC Controllers and ControllerAdvice using MockMvc standalone setup.
 
 - MockMvc debugger output
+
+- Spring WebFlux Controllers and RouterFunctions
 
 - Multiple @State runs to test a particular Provider State multiple times
 
@@ -72,6 +74,31 @@ is set with the version of your provider.
             when(awesomeBusinessLogic.getById(any(UUID.class)))
                 .then(i -> { throw new NotCoolException(i.getArgumentAt(0, UUID.class).toString()); });
         }
+    }
+```
+
+## Example of Spring WebFlux test
+
+```java
+    @RunWith(RestPactRunner.class) // Custom pact runner, child of PactRunner which runs only REST tests
+    @Provider("myAwesomeService") // Set up name of tested provider
+    @PactFolder("pacts") // Point where to find pacts (See also section Pacts source in documentation)
+    public class AwesomeRouterContractTest {
+
+        //Create a new instance of the WebFluxTarget and annotate it as the TestTarget for PactRunner
+        @TestTarget
+        public WebFluxTarget target = new WebFluxTarget();
+
+        //Create instance of your RouterFunction
+        public RouterFunction<ServerResponse> routerFunction
+              = new AwesomeRouter(new AwesomeHandler()).routes();
+
+        //Configure the WebFluxTarget with routerFunction
+        @Before
+        public void setup() {
+            target.setRouterFunction(routerFunction);
+        }
+
     }
 ```
 

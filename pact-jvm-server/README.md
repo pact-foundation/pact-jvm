@@ -12,6 +12,7 @@ The server implements a `JSON` `REST` Admin API with the following endpoints.
     /         -> For diagnostics, currently returns a list of ports of the running mock servers.
     /create   -> For initialising a test server and submitting the JSON interactions. It returns a port
     /complete -> For finalising and verifying the interactions with the server.  It writes the `JSON` pact file to disk.
+    /publish  -> For publishing contracts. It takes a contract from disk and publishes it to the configured broker
 
 ## Running the server
 
@@ -40,6 +41,10 @@ Usage: pact-jvm-server [options] [port]
         Keystore password
   -s <value> | --ssl-port <value>   
         Ssl port the mock server should run on. lower and upper bounds are ignored
+  -b <value> | --broker <value>
+        The baseUrl of the broker to publish contracts to (for example https://organization.broker.com
+  -t <value | --token <value>
+        API token for authentication to the pact broker 
   --debug
         run with debug logging
 ```
@@ -87,6 +92,7 @@ The following actions are expected to occur
  * Once finished, the client will call `/complete' on the Admin API, posting the port number
  * The pact server will verify the interactions and write the `JSON` `pact` file to disk under `/target`
  * The mock server running on the supplied port will be shutdown.
+ * The client will call `/publish` to publish the created contract to the configured pact broker
 
 ## Endpoints
 
@@ -119,6 +125,19 @@ For example:
 
 This will cause the Pact server to verify the interactions, shutdown the mock server running on that port and writing
 the pact `JSON` file to disk under the `target` directory.
+
+### /publish
+
+Once all interactions have been tested the `/publish` endpoint can be called to publish the created pact to the pact broker
+For this it is required to run the pact-jvm-server with the -b parameter to configure the pact broker to publish the pacts to.
+Optionaly an authentication token can be used for authentication against the broker.
+
+For example:
+
+    POST http://localhost:29999/publish '{ "consumer": "Zoo", "consumerVersion": "0.0.1", "provider": "Animal_Service" }'
+
+This will cause the Pact server to check for the pact `Zoo-Animal_Service.json` on disk under `target` and publish it to
+the configured pact broker. After a successful publish the pact will be removed from disk.
 
 ### /
 

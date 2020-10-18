@@ -34,7 +34,7 @@ class Defect221Test {
     @Test
     @PactVerification('221_provider')
     void runTest() {
-        assert '{"responsetest":true,"name":"harry","data":1234.0}' ==
+        assert '{"data":1234.0,"name":"harry","responsetest":true}' ==
           Request.Put('http://localhost:8112/numbertest')
             .addHeader('Accept', APPLICATION_JSON)
             .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)

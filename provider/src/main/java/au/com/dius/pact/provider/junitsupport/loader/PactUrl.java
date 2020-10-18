@@ -16,8 +16,14 @@ import java.lang.annotation.Target;
 @PactSource(PactUrlLoader.class)
 @Inherited
 public @interface PactUrl {
-    /**
-     * @return a list of urls to pact files
-     */
-    String[] urls();
+  /**
+   * @return a list of urls to pact files
+   */
+  String[] urls();
+
+  /**
+   * Authentication to use, if needed. For basic auth, set the username and password. For bearer tokens, use the
+   * token attribute.
+   */
+  Authentication auth() default @Authentication();
 }

@@ -31,7 +31,7 @@ public class PactDslJsonBodyTest {
     private static final String THIRD = "@third";
 
     @Test
-    public void noSpecialHandlingForObjectNamesFormerlyNotConformingToGatling() {
+    public void noSpecialHandlingForObjectNames() {
         DslPart body = new PactDslJsonBody()
             .id()
             .object("2")
@@ -71,20 +71,20 @@ public class PactDslJsonBodyTest {
     }
 
     @Test
-    public void guardAgainstFieldNamesThatDontConformToGatlingFields() {
-        DslPart body = new PactDslJsonBody()
-          .id("1")
-          .stringType("@field")
-          .hexValue("200", "abc")
-          .integerType(K_DEPRECIATION_BIPS);
+    public void matcherPathTest() {
+      DslPart body = new PactDslJsonBody()
+        .id("1")
+        .stringType("@field")
+        .hexValue("200", "abc")
+        .integerType(K_DEPRECIATION_BIPS);
 
-        Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-          ".200", ".1", "['@field']", ".10k-depreciation-bips"
-        ));
-        assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
+      Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
+        ".200", ".1", ".@field", ".10k-depreciation-bips"
+      ));
+      assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
-        assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
-                new HashSet(Arrays.asList("200", K_DEPRECIATION_BIPS, "1", "@field")))));
+      assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
+              new HashSet(Arrays.asList("200", K_DEPRECIATION_BIPS, "1", "@field")))));
     }
 
     @Test
@@ -123,11 +123,11 @@ public class PactDslJsonBodyTest {
           .closeObject();
 
         Set<String> expectedMatchers = new HashSet<>(Arrays.asList(
-          ".first.second['@third'].fourth.level4",
-          ".first.second['@third'].level3",
+          ".first.second.@third.fourth.level4",
+          ".first.second.@third.level3",
           ".first.second.level2",
           ".first.level1",
-          ".first['@level1']"
+          ".first.@level1"
         ));
 
         assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));

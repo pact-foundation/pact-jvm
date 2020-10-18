@@ -62,4 +62,18 @@ object Utils {
       } catch (_: Throwable) { }
     }
   }
+
+  fun <T1, T2> permutations(list1: List<T1>, list2: List<T2>): List<Pair<T1?, T2?>> {
+    val result = mutableListOf<Pair<T1?, T2?>>()
+    if (list1.isNotEmpty() || list2.isNotEmpty()) {
+      val firstList = if (list1.isEmpty()) listOf<T1?>(null) else list1
+      val secondList = if (list2.isEmpty()) listOf<T2?>(null) else list2
+      for (item1 in firstList) {
+        for (item2 in secondList) {
+          result.add(item1 to item2)
+        }
+      }
+    }
+    return result
+  }
 }

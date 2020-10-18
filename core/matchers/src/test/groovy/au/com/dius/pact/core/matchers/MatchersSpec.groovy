@@ -123,8 +123,8 @@ class MatchersSpec extends Specification {
   @Unroll
   def 'wildcardMatchingEnabled - #enabledOrDisabled when pact.matching.wildcard = "#value"'() {
     given:
-    def testInvocation = { String value ->
-      System.setProperty('pact.matching.wildcard', value)
+    def testInvocation = { String v ->
+      System.setProperty('pact.matching.wildcard', v)
       Matchers.wildcardMatchingEnabled()
     }
 

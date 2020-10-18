@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class LambdaDslObjectTest {
 
@@ -989,5 +989,16 @@ public class LambdaDslObjectTest {
     assertThat(rule.get("max"), is(10));
     arrayObjectRule = actualPactDsl.getMatchers().allMatchingRules().get(5).toMap(PactSpecVersion.V3);
     assertThat(arrayObjectRule.get("match"), is("type"));
+  }
+
+  @Test
+  public void testValueFromProviderState() {
+    String pactDslJson = new PactDslJsonBody()
+            .valueFromProviderState("id", "id", "A1")
+            .getBody().toString();
+    String lambdaDslJson = LambdaDsl
+            .newJsonBody(body -> body.valueFromProviderState("id", "id", "A1"))
+            .build().toString();
+    assertThat(lambdaDslJson, is(pactDslJson));
   }
 }

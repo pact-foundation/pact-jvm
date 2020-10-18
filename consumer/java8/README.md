@@ -1,6 +1,15 @@
 # pact-jvm-consumer-java8
 Provides a Java8 lambda based DSL for use with Junit to build consumer tests.
 
+## Dependency
+
+The library is available on maven central using:
+
+* group-id = `au.com.dius.pact.consumer`
+* artifact-id = `java8`
+* version-id = `4.1.x`
+
+
 # A Lambda DSL for Pact
 
 This is an extension for the pact DSL provided by [consumer](../consumer). The difference between

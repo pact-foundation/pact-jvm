@@ -1,5 +1,14 @@
 # Pact junit runner
 
+## Dependency
+
+The library is available on maven central using:
+
+* group-id = `au.com.dius.pact.provider`
+* artifact-id = `junit`
+* version-id = `4.1.x`
+
+
 ## Overview
 Library provides ability to play contract tests against a provider service in JUnit fashionable way.
 
@@ -325,10 +334,24 @@ you don't need to provide `pact.filter.consumers`.
 To use pacts from urls annotate the test class with
 
 ```java
-@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"} )
+@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"})
 ```
 
 If you need to load a single pact file from the file system, you can use the `PactUrl` with the URL set to the file path.
+
+For authenticated URLs, specify the authentication on the annotation
+
+```java
+@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"}, authentication = @Authentication(token = "1234ABCD"))
+```
+
+You can use either bearer token scheme (by setting the `token`), or basic auth by setting the `username` and `password`.
+
+JVM system properties or environment variables can also be used by placing the property/variable name in `${}` expressions.
+
+```java
+@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"}, authentication = @Authentication(token = "${TOKEN}"))
+```
 
 ### Pact folder
 
@@ -468,7 +491,7 @@ For example, configure it by adding the following to your POM:
 
 #### Modifying the requests before they are sent
 
-**NOTE: `@TargetRequestFilter` is only for JUnit 4. For JUnit 5 see [JUnit 5 docs](https://github.com/DiUS/pact-jvm/tree/master/provider/junit5#modifying-the-requests-before-they-are-sent).**
+**NOTE: `@TargetRequestFilter` is only for JUnit 4. For JUnit 5 see [JUnit 5 docs](/provider/junit5/README.md#modifying-the-requests-before-they-are-sent).**
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
 be authentication tokens, which have a small life span. The HttpTarget supports request filters by annotating methods
@@ -558,7 +581,7 @@ you need set the `pact.provider.tag` JVM system property to the tag value.
 From 4.1.8+, you can specify multiple tags with a comma separated string for the `pact.provider.tag`
 system property.
 
-# Pending Pact Support (version 4.1.0 and later)
+# Pending Pact Support (version 4.1.3 and later)
 
 If your Pact broker supports pending pacts, you can enable support for that by enabling that on your Pact broker annotation or with JVM system properties. You also need to provide the tags that will be published with your provider's verification results. The broker will then label any pacts found that don't have a successful verification result as pending. That way, if they fail verification, the verifier will ignore those failures and not fail the build.
 

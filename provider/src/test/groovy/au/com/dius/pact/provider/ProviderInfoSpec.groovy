@@ -66,7 +66,7 @@ class ProviderInfoSpec extends Specification {
     def options = [:]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true)
+      new ConsumerVersionSelector('test', true, null)
     ]
 
     when:
@@ -74,7 +74,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false, '') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false, null, false)
+      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -89,7 +89,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true)
+      new ConsumerVersionSelector('test', true, null)
     ]
 
     when:
@@ -97,7 +97,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, false)
+      new PactBrokerResult('consumer', '', url, [], [], true, null, false, false)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -111,7 +111,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true)
+      new ConsumerVersionSelector('test', true, null)
     ]
 
     when:
@@ -131,7 +131,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true)
+      new ConsumerVersionSelector('test', true, null)
     ]
 
     when:
@@ -139,7 +139,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false, null, false)
+      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -155,7 +155,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true)
+      new ConsumerVersionSelector('test', true, null)
     ]
 
     when:
@@ -163,7 +163,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '2020-05-23') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, true)
+      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false)
     ])
     result.size == 1
     result[0].name == 'consumer'

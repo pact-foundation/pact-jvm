@@ -56,6 +56,34 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 | [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
 | [2.4.x](https://github.com/DiUS/pact-jvm/blob/v2.x/README.md) | V2 | 6 | 2.10, 2.11 | 2.4.20 |
 
+**NOTE:** The JARs produced by this project have changed with 4.1.x to better align with Java 9 JPMS. The artefacts are now:
+
+```
+au.com.dius.pact:consumer
+au.com.dius.pact.consumer:groovy
+au.com.dius.pact.consumer:junit
+au.com.dius.pact.consumer:junit5
+au.com.dius.pact.consumer:java8
+au.com.dius.pact.consumer:specs2_2.13
+au.com.dius.pact:pact-jvm-server
+au.com.dius.pact:provider
+au.com.dius.pact.provider:scalatest_2.13
+au.com.dius.pact.provider:spring
+au.com.dius.pact.provider:maven
+au.com.dius.pact:provider
+au.com.dius.pact.provider:junit
+au.com.dius.pact.provider:junit5
+au.com.dius.pact.provider:scalasupport_2.13
+au.com.dius.pact.provider:lein
+au.com.dius.pact.provider:gradle
+au.com.dius.pact.provider:specs2_2.13
+au.com.dius.pact.provider:junit5spring
+au.com.dius.pact.core:support
+au.com.dius.pact.core:model
+au.com.dius.pact.core:matchers
+au.com.dius.pact.core:pactbroker
+```
+
 ## Service Consumers
 
 Pact-JVM has a number of ways you can write your service consumer tests.

@@ -560,7 +560,7 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
-          new ConsumerVersionSelector('test', true)
+          new ConsumerVersionSelector('test', true, null)
       ], [], false, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
@@ -673,7 +673,7 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
-        new ConsumerVersionSelector('test', true)
+        new ConsumerVersionSelector('test', true, null)
       ], ['master'], true, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
@@ -797,7 +797,7 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
-        new ConsumerVersionSelector('test', true)
+        new ConsumerVersionSelector('test', true, null)
       ], ['master'], true, '2020-06-24')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2

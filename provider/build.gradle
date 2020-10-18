@@ -15,6 +15,8 @@ dependencies {
     implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
     api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
     implementation 'com.github.ajalt:mordant:1.2.1'
+    implementation 'com.vladsch.flexmark:flexmark:0.62.2'
+    implementation 'com.vladsch.flexmark:flexmark-ext-tables:0.62.2'
 
     testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
     testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
@@ -23,7 +25,7 @@ dependencies {
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testCompile 'org.mockito:mockito-core:2.28.2'
     testCompile 'javax.xml.bind:jaxb-api:2.3.1'
-    testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    testCompile('org.spockframework:spock-core:2.0-M3-groovy-3.0') {
         exclude group: 'org.codehaus.groovy'
     }
     testCompile 'org.hamcrest:hamcrest:2.1'
