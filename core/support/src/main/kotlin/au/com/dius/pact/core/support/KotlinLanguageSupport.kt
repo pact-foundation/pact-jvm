@@ -37,6 +37,8 @@ public fun <F> handleWith(f: () -> Any?): Result<F, Exception> {
     if (result is Result<*, *>) result as Result<F, Exception> else Ok(result as F)
   } catch (ex: Exception) {
     Err(ex)
+  } catch (ex: Throwable) {
+    Err(RuntimeException(ex))
   }
 }
 

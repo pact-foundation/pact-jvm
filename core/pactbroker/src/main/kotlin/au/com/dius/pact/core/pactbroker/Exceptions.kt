@@ -24,4 +24,4 @@ open class RequestFailedException(
 /**
  * This exception is raised when an invalid navigation is attempted
  */
-open class InvalidNavigationRequest(override val message: String) : RuntimeException(message)
+open class InvalidNavigationRequest(override val message: String, cause: Throwable? = null) : RuntimeException(message, cause)

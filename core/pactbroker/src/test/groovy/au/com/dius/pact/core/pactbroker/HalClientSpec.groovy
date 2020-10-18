@@ -23,6 +23,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
+import javax.net.ssl.SSLHandshakeException
 import java.util.function.Consumer
 
 @SuppressWarnings(['LineLength', 'UnnecessaryGetter', 'ClosureAsLastMethodParameter'])
@@ -118,6 +119,18 @@ class HalClientSpec extends Specification {
     then:
     1 * mockClient.execute(_, _) >> mockResponse
     thrown(NotFoundHalResponse)
+  }
+
+  def 'throws an exception if the request fails'() {
+    given:
+    client.httpClient = mockClient
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    1 * mockClient.execute(_, _) >> { throw new SSLHandshakeException('PKIX path building failed')  }
+    thrown(SSLHandshakeException)
   }
 
   def 'throws an exception if the response is not JSON'() {
