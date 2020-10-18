@@ -90,7 +90,7 @@ class Response @JvmOverloads constructor(
         emptyMap()
       }
 
-      var contentType = ContentType.JSON
+      var contentType = ContentType.UNKNOWN
       val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
       if (contentTypeEntry != null) {
         contentType = ContentType(contentTypeEntry.value.first())

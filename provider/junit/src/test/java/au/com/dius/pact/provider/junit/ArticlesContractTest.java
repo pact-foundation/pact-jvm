@@ -5,6 +5,7 @@ import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.StateChangeAction;
+import au.com.dius.pact.provider.junitsupport.VerificationReports;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import au.com.dius.pact.provider.junitsupport.target.Target;
 import au.com.dius.pact.provider.junitsupport.target.TestTarget;
@@ -26,6 +27,7 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @RunWith(PactRunner.class)
 @Provider("ArticlesProvider")
 @PactFolder("src/test/resources/wildcards")
+@VerificationReports({"console", "markdown"})
 public class ArticlesContractTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ArticlesContractTest.class);

@@ -68,7 +68,7 @@ fun identifier(ch: Char, chars: PushbackIterator<IndexedValue<Char>>, tokens: Mu
   var id = String() + ch
   while (chars.hasNext()) {
     val c = chars.next()
-    if (c.value.isLetterOrDigit() || EXP_ALLOWED_SPECIAL_CHARS.contains(c.value)) {
+    if (validPathCharacter(c.value)) {
       id += c.value
     } else if (c.value == '.' || c.value == '\'' || c.value == '[') {
       chars.pushback(c)
@@ -92,7 +92,7 @@ fun pathIdentifier(
     val ch = chars.next()
     when {
       ch.value == '*' -> tokens.add(PathToken.Star)
-      ch.value.isLetterOrDigit() || EXP_ALLOWED_SPECIAL_CHARS.contains(ch.value) ->
+      validPathCharacter(ch.value) ->
         identifier(ch.value, chars, tokens, path)
       else -> throw InvalidPathExpression("Expected either a \"*\" or path identifier in path expression \"$path\"" +
         " at index ${ch.index}")
@@ -101,6 +101,8 @@ fun pathIdentifier(
     throw InvalidPathExpression("Expected a path after \".\" in path expression \"$path\" at index $index")
   }
 }
+
+fun validPathCharacter(c: Char) = c.isLetterOrDigit() || EXP_ALLOWED_SPECIAL_CHARS.contains(c)
 
 // bracket_path -> (string_path | index | *) ]
 fun bracketPath(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<PathToken>, path: String, index: Int) {

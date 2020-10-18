@@ -507,4 +507,25 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Ok(jsonResult)
     result instanceof Ok
   }
+
+  @Issue('#1227')
+  def 'when falling back to the previous implementation, filter out null tag values from the selectors'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def result = client.fetchConsumersWithSelectors('provider',
+      [ new ConsumerVersionSelector(null, true, 'consumer') ], [], false, '')
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> null
+    1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> null
+    0 * halClient.postJson(_, _, _)
+    1 * client.fetchConsumers('provider') >> []
+    result instanceof Ok
+  }
 }

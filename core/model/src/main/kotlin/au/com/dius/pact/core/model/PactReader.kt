@@ -5,6 +5,7 @@ import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
@@ -27,7 +28,9 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.HttpClients
+import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
 import java.io.File
 import java.io.InputStream
@@ -92,31 +95,48 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
   }
 }
 
+@Deprecated("Use HttpClient.newHttpClient instead")
 fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClient {
   val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
   val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
 
-  if (options["authentication"] is List<*>) {
-    val authentication = options["authentication"] as List<*>
-    when (val scheme = authentication.first().toString().toLowerCase()) {
-      "basic" -> {
-        if (authentication.size > 2) {
-          val credsProvider = BasicCredentialsProvider()
-          val uri = URI(baseUrl)
-          credsProvider.setCredentials(AuthScope(uri.host, uri.port),
-            UsernamePasswordCredentials(authentication[1].toString(), authentication[2].toString()))
-          builder.setDefaultCredentialsProvider(credsProvider)
-        } else {
-          logger.warn { "Basic authentication requires a username and password, ignoring." }
+  when {
+    options["authentication"] is Auth -> {
+      when (val auth = options["authentication"] as Auth) {
+        is Auth.BasicAuthentication -> basicAuth(baseUrl, auth.username, auth.password, builder)
+        is Auth.BearerAuthentication -> {
+          builder.setDefaultHeaders(listOf(BasicHeader("Authorization", "Bearer " + auth.token)))
         }
       }
-      else -> logger.warn { "Only supports basic authentication, got '$scheme', ignoring." }
     }
-  } else if (options.containsKey("authentication")) {
-    logger.warn { "Authentication options needs to be a list of values, got '${options["authentication"]}', ignoring." }
+    options["authentication"] is List<*> -> {
+      val authentication = options["authentication"] as List<*>
+      when (val scheme = authentication.first().toString().toLowerCase()) {
+        "basic" -> {
+          if (authentication.size > 2) {
+            basicAuth(baseUrl, authentication[1].toString(), authentication[2].toString(), builder)
+          } else {
+            logger.warn { "Basic authentication requires a username and password, ignoring." }
+          }
+        }
+        else -> logger.warn { "Only supports basic authentication, got '$scheme', ignoring." }
+      }
+    }
+    options.containsKey("authentication") -> {
+      logger.warn { "Authentication options needs to be a Auth class or a list of values, " +
+        "got '${options["authentication"]}', ignoring." }
+    }
   }
 
   return builder.build()
+}
+
+private fun basicAuth(baseUrl: String, username: String, password: String, builder: HttpClientBuilder) {
+  val credsProvider = BasicCredentialsProvider()
+  val uri = URI(baseUrl)
+  credsProvider.setCredentials(AuthScope(uri.host, uri.port),
+    UsernamePasswordCredentials(username, password))
+  builder.setDefaultCredentialsProvider(credsProvider)
 }
 
 /**

@@ -57,7 +57,7 @@ class PactPublishTask extends DefaultTask {
             } else {
               print "Publishing '${pactFile.name}' ... "
             }
-            result = brokerClient.uploadPactFile(pactFile, version, pactPublish.tags)
+            result = brokerClient.uploadPactFile(pactFile, version.toString(), pactPublish.tags)
             if (result instanceof Ok) {
               println('OK')
             } else {

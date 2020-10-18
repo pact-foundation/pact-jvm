@@ -36,7 +36,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.reporters.ReporterManager
 import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.getOr
+import com.github.michaelbull.result.getOrElse
 import mu.KLogging
 import org.apache.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -464,13 +464,20 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
 
     logger.debug { "Verifying pacts for provider '$serviceName' and consumer '$consumerName'" }
 
-    val pactSources = findPactSources(context).flatMap {
+    val pactSources = findPactSources(context).flatMap { loader ->
       val valueResolver = getValueResolver(context)
       if (valueResolver != null) {
-        it.setValueResolver(valueResolver)
+        loader.setValueResolver(valueResolver)
       }
-      description += "\nSource: ${it.description()}"
-      val pacts = handleWith<List<Pact<Interaction>>> { it.load(serviceName) }.getOr { emptyList() }
+      description += "\nSource: ${loader.description()}"
+      val pacts = handleWith<List<Pact<Interaction>>> { loader.load(serviceName) }.getOrElse {
+        val ignoreAnnotation = AnnotationSupport.findAnnotation(context.requiredTestClass, IgnoreNoPactsToVerify::class.java)
+        if (ignoreAnnotation.isPresent && ignoreAnnotation.get().ignoreIoErrors == "true") {
+          emptyList()
+        } else {
+          throw it
+        }
+      }
       filterPactsByAnnotations(pacts, context.requiredTestClass)
     }.filter { p -> consumerName == null || p.consumer.name == consumerName }
 

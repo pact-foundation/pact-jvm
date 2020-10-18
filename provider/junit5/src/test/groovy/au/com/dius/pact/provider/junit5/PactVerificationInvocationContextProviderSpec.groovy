@@ -11,6 +11,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactFolder
 import au.com.dius.pact.provider.junitsupport.loader.PactFolderLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
+import au.com.dius.pact.provider.junitsupport.loader.PactUrl
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -57,6 +58,13 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @Provider
   @PactFolder('pacts')
   static class TestClassWithEmptyProvider {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('someone')
+  @PactUrl(urls = [ 'http://localhost.dev.somewhere:9765' ])
+  static class TestClassWithInvalidUrl {
     @TestTarget
     Target target
   }
@@ -249,5 +257,16 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     then:
     !extensions.empty
     extensions.every { it.serviceName == 'myAwesomeService' }
+  }
+
+  @Issue('#1225')
+  def 'provideTestTemplateInvocationContexts throws an exception if load request fails with an exception'() {
+    when:
+    provider.provideTestTemplateInvocationContexts(['getTestClass': {
+      Optional.of(TestClassWithInvalidUrl)
+    } ] as ExtensionContext)
+
+    then:
+    thrown(UnknownHostException)
   }
 }

@@ -174,10 +174,11 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       fetchPactsUsingNewEndpoint(selectors, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
     } else {
       handleWith {
-        if (selectors.isEmpty()) {
+        val tags = selectors.mapNotNull { it.tag }
+        if (tags.isEmpty()) {
           fetchConsumers(providerName)
         } else {
-          selectors.flatMap { fetchConsumersWithTag(providerName, it.tag!!) }
+          tags.flatMap { fetchConsumersWithTag(providerName, it) }
         }
       }
     }
