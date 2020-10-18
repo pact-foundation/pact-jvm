@@ -1,11 +1,10 @@
 language: java
 jdk:
-  - openjdk9
-  - openjdk10
   - openjdk11
   - openjdk12
   - openjdk13
   - openjdk14
+  - openjdk15
 env:
   - PROJECT='-p core' JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
   - PROJECT='-p consumer' JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
