@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.support.Auth
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings('LineLength')
 class PactUrlLoaderSpec extends Specification {
@@ -19,6 +20,9 @@ class PactUrlLoaderSpec extends Specification {
 
   @PactUrl(urls = ['http://localhost:1234'], auth = @Authentication(token = '1234abcd'))
   static class TestClass3 { }
+
+  @PactUrl(urls = ['http://localhost:1234'], auth = @Authentication(token = '${my.token}'))
+  static class TestClass4 { }
 
   def 'loads a pact from each URL'() {
     given:
@@ -85,6 +89,22 @@ class PactUrlLoaderSpec extends Specification {
 
     then:
     loader.pactReader.loadPact(new UrlSource('http://localhost:1234'), [authentication: new Auth.BearerAuthentication('1234abcd')]) >> pact1
+    pacts == [pact1]
+  }
+
+  @RestoreSystemProperties
+  def 'loads the auth values from system properties'() {
+    given:
+    def loader = new PactUrlLoader(TestClass4.getAnnotation(PactUrl))
+    System.setProperty('my.token', '1234567890')
+    loader.pactReader = Mock(PactReader)
+    def pact1 = new RequestResponsePact(new Provider('bob'), new Consumer('consumer1'))
+
+    when:
+    def pacts = loader.load('bob')
+
+    then:
+    loader.pactReader.loadPact(new UrlSource('http://localhost:1234'), [authentication: new Auth.BearerAuthentication('1234567890')]) >> pact1
     pacts == [pact1]
   }
 }

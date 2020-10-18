@@ -8,6 +8,8 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.UrlsSource
 import au.com.dius.pact.core.support.Auth
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 
 /**
  * Implementation of [PactLoader] that downloads pacts from given urls
@@ -15,6 +17,7 @@ import au.com.dius.pact.core.support.Auth
 open class PactUrlLoader(val urls: Array<String>, val authentication: Auth? = null) : PactLoader {
   lateinit var pactSource: UrlsSource<Interaction>
   var pactReader: PactReader = DefaultPactReader
+  var resolver: ValueResolver = SystemPropertyResolver()
 
   constructor(pactUrl: PactUrl) : this(pactUrl.urls, when {
     pactUrl.auth.token.isNotEmpty() -> Auth.BearerAuthentication(pactUrl.auth.token)
@@ -30,7 +33,7 @@ open class PactUrlLoader(val urls: Array<String>, val authentication: Auth? = nu
     return urls.map { url ->
       val options = mutableMapOf<String, Any>()
       if (authentication != null) {
-        options["authentication"] = authentication
+        options["authentication"] = authentication.resolveProperties(resolver)
       }
       val pact = pactReader.loadPact(UrlSource<Interaction>(url), options)
       pactSource.addPact(url, pact as Pact<Interaction>)

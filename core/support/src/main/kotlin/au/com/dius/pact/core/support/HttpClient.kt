@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.support
 
+import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import mu.KLogging
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
@@ -15,6 +18,14 @@ import java.net.URI
 sealed class Auth {
   data class BasicAuthentication(val username: String, val password: String) : Auth()
   data class BearerAuthentication(val token: String) : Auth()
+
+  fun resolveProperties(resolver: ValueResolver): Auth {
+    return when (this) {
+      is BasicAuthentication -> BasicAuthentication(parseExpression(this.username, DataType.RAW, resolver).toString(),
+          parseExpression(this.password, DataType.RAW, resolver).toString())
+      is BearerAuthentication -> BearerAuthentication(parseExpression(this.token, DataType.RAW, resolver).toString())
+    }
+  }
 }
 
 /**
