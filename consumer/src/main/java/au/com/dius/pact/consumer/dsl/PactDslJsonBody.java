@@ -718,7 +718,7 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray unorderedArray(String name) {
-    matchers.addRule(matcherKey(name), EqualsIgnoreOrderMatcher.INSTANCE);
+    matchers.addRule(matcherKey(name, rootPath), EqualsIgnoreOrderMatcher.INSTANCE);
     return this.array(name);
   }
 
@@ -729,7 +729,7 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray unorderedMinArray(String name, int size) {
-    matchers.addRule(matcherKey(name), new MinEqualsIgnoreOrderMatcher(size));
+    matchers.addRule(matcherKey(name, rootPath), new MinEqualsIgnoreOrderMatcher(size));
     return this.array(name);
   }
 
@@ -740,7 +740,7 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray unorderedMaxArray(String name, int size) {
-    matchers.addRule(matcherKey(name), new MaxEqualsIgnoreOrderMatcher(size));
+    matchers.addRule(matcherKey(name, rootPath), new MaxEqualsIgnoreOrderMatcher(size));
     return this.array(name);
   }
 
@@ -755,7 +755,7 @@ public class PactDslJsonBody extends DslPart {
       throw new IllegalArgumentException(String.format("The minimum size of %d is greater than the maximum of %d",
           minSize, maxSize));
     }
-    matchers.addRule(matcherKey(name), new MinMaxEqualsIgnoreOrderMatcher(minSize, maxSize));
+    matchers.addRule(matcherKey(name, rootPath), new MinMaxEqualsIgnoreOrderMatcher(minSize, maxSize));
     return this.array(name);
   }
 
