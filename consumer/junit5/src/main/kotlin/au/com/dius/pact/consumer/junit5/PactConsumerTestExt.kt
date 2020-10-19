@@ -220,7 +220,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   override fun beforeAll(context: ExtensionContext) {
     val store = context.getStore(NAMESPACE)
     store.put("executedFragments", ConcurrentHashMap.newKeySet<Method>())
-    store.put("pactsToWrite", mutableMapOf<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>())
+    store.put("pactsToWrite", ConcurrentHashMap<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>())
   }
 
   override fun beforeTestExecution(context: ExtensionContext) {
