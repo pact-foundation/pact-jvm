@@ -40,6 +40,7 @@ import org.junit.platform.commons.support.ReflectionSupport
 import org.junit.platform.commons.util.AnnotationUtils.isAnnotated
 import java.lang.annotation.Inherited
 import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * The type of provider (synchronous or asynchronous)
@@ -218,7 +219,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
   override fun beforeAll(context: ExtensionContext) {
     val store = context.getStore(NAMESPACE)
-    store.put("executedFragments", mutableListOf<Method>())
+    store.put("executedFragments", ConcurrentHashMap.newKeySet<Method>())
     store.put("pactsToWrite", mutableMapOf<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>())
   }
 
@@ -341,7 +342,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
           MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
       }
-      val executedFragments = store["executedFragments"] as MutableList<Method>
+      val executedFragments = store["executedFragments"] as MutableSet<Method>
       executedFragments.add(method)
       store.put("pact", pact)
       return pact
@@ -411,7 +412,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           pact.write(pactDirectory, version)
         }
 
-      val executedFragments = store["executedFragments"] as MutableList<Method>
+      val executedFragments = store["executedFragments"] as MutableSet<Method>
       val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
         HierarchyTraversalMode.TOP_DOWN)
       if (executedFragments.size < methods.size) {
