@@ -12,9 +12,9 @@ class PactBrokerConsumerConfig {
   Boolean enablePending = false
   List<String> providerTags = []
 
-  static List<ConsumerVersionSelector> latestTags(String... tags) {
+  static List<ConsumerVersionSelector> latestTags(Map options = [:], String... tags) {
     tags.collect {
-      new ConsumerVersionSelector(it, true, null)
+      new ConsumerVersionSelector(it, true, null, options.fallbackTag?.toString())
     }
   }
 }

@@ -122,7 +122,22 @@ class PactProviderMojoSpec extends Specification {
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
       new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null)))
     def list = []
-    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null) }
+    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null, null) }
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', selectors) >> [new Consumer()]
+    list.size() == 1
+  }
+
+  def 'Includes the fallback tag if specified'() {
+    given:
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null, null, 'fallback')))
+    def list = []
+    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null, 'fallback') }
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
@@ -178,7 +193,7 @@ class PactProviderMojoSpec extends Specification {
       new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null,
         new EnablePending(['master']))))
     def list = []
-    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null) }
+    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null, null) }
     def map = [enablePending: true, providerTags: ['master']]
 
     when:

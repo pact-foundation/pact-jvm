@@ -125,6 +125,7 @@ open class PactBrokerLoader(
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
         val tags = parseListExpression(it.tag, resolver)
+        val fallbackTag = parseExpression(it.fallbackTag, DataType.STRING, resolver) as String?
         val parsedLatest = parseListExpression(it.latest, resolver)
         val latest = when {
           parsedLatest.isEmpty() -> List(tags.size) { true.toString() }
@@ -135,7 +136,8 @@ open class PactBrokerLoader(
           throw IllegalArgumentException("Invalid Consumer version selectors. Each version selector must have a tag " +
                   "and latest property")
         }
-        tags.mapIndexed { index, tag -> ConsumerVersionSelector(tag, latest[index].toBoolean()) }
+        tags.mapIndexed { index, tag ->
+          ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag) }
       }
     }
   }

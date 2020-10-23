@@ -245,9 +245,9 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     tags = ['a', 'b', 'c']
     def selectors = [
-      new ConsumerVersionSelector('a', true, null),
-      new ConsumerVersionSelector('b', true, null),
-      new ConsumerVersionSelector('c', true, null)
+      new ConsumerVersionSelector('a', true, null, null),
+      new ConsumerVersionSelector('b', true, null, null),
+      new ConsumerVersionSelector('c', true, null, null)
     ]
     def expected = [
       new PactBrokerResult('test', 'a', '', [], [], false, null, false, true),
@@ -273,9 +273,9 @@ class PactBrokerLoaderSpec extends Specification {
       createVersionSelector(tag: 'c', latest: 'true')
     ]
     def selectors = [
-      new ConsumerVersionSelector('a', true, null),
-      new ConsumerVersionSelector('b', false, null),
-      new ConsumerVersionSelector('c', true, null)
+      new ConsumerVersionSelector('a', true, null, null),
+      new ConsumerVersionSelector('b', false, null, null),
+      new ConsumerVersionSelector('c', true, null, null)
     ]
     def expected = [
       new PactBrokerResult('test', 'a', '', [], [], false, null, false, true),
@@ -300,8 +300,8 @@ class PactBrokerLoaderSpec extends Specification {
     System.setProperty('composite', "one${VALUES_SEPARATOR}two")
     tags = ['${composite}']
     def selectors = [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('two', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('two', true, null, null)
     ]
     def expected = [
       new PactBrokerResult('test', 'one', '', [], [], false, null, false, true),
@@ -324,8 +324,8 @@ class PactBrokerLoaderSpec extends Specification {
     System.setProperty('compositeLatest', "true${VALUES_SEPARATOR}false")
     consumerVersionSelectors = [createVersionSelector(tag: '${compositeTag}', latest: '${compositeLatest}')]
     def selectors = [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('two', false, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('two', false, null, null)
     ]
     def expected = [
       new PactBrokerResult('test', 'one', '', [], [], false, null, false, true),
@@ -361,9 +361,9 @@ class PactBrokerLoaderSpec extends Specification {
     loader.valueResolver = [resolveValue: { val -> 'X' } ] as ValueResolver
     def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null, false, true) ]
     def selectors = [
-      new ConsumerVersionSelector('X', true, null),
-      new ConsumerVersionSelector('X', true, null),
-      new ConsumerVersionSelector('X', true, null)
+      new ConsumerVersionSelector('X', true, null, null),
+      new ConsumerVersionSelector('X', true, null, null),
+      new ConsumerVersionSelector('X', true, null, null)
     ]
 
     when:
@@ -383,15 +383,15 @@ class PactBrokerLoaderSpec extends Specification {
     consumerVersionSelectors = [
       createVersionSelector(tag: '${a}', latest: 'true'),
       createVersionSelector(tag: '${latest}', latest: 'false'),
-      createVersionSelector(tag: '${c}', latest: 'true')
+      createVersionSelector(tag: '${c}', latest: 'true', fallbackTag: '${d}')
     ]
     def newLoader = pactBrokerLoader()
-    newLoader.valueResolver = [resolveValue: { val -> 'X' }] as ValueResolver
+    newLoader.valueResolver = [resolveValue: { val -> val == 'd' ? 'D' : 'X' }] as ValueResolver
     def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null, false, true) ]
     def selectors = [
-      new ConsumerVersionSelector('X', true, null),
-      new ConsumerVersionSelector('X', false, null),
-      new ConsumerVersionSelector('X', true, null)
+      new ConsumerVersionSelector('X', true, null, null),
+      new ConsumerVersionSelector('X', false, null, null),
+      new ConsumerVersionSelector('X', true, null, 'D')
     ]
 
     when:
@@ -406,14 +406,14 @@ class PactBrokerLoaderSpec extends Specification {
 
   @RestoreSystemProperties
   @SuppressWarnings('GStringExpressionWithinString')
-  def 'Ues true for latest when only tags are specified for consumer version selector'() {
+  def 'Uses true for latest when only tags are specified for consumer version selector'() {
     given:
     System.setProperty('compositeTag', "one${VALUES_SEPARATOR}two${VALUES_SEPARATOR}three")
     consumerVersionSelectors = [createVersionSelector(tag: '${compositeTag}')]
     def selectors = [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('two', true, null),
-      new ConsumerVersionSelector('three', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('two', true, null, null),
+      new ConsumerVersionSelector('three', true, null, null)
     ]
     def expected = [
       new PactBrokerResult('test', 'one', '', [], [], false, null, false, true),
@@ -447,9 +447,9 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = ['a', 'b', 'c']
     def selectors = [
-      new ConsumerVersionSelector(null, true, 'a'),
-      new ConsumerVersionSelector(null, true, 'b'),
-      new ConsumerVersionSelector(null, true, 'c')
+      new ConsumerVersionSelector(null, true, 'a', null),
+      new ConsumerVersionSelector(null, true, 'b', null),
+      new ConsumerVersionSelector(null, true, 'c', null)
     ]
     def expected = [
       new PactBrokerResult('a', '', '', [], [], false, null, false, false),
@@ -499,9 +499,9 @@ class PactBrokerLoaderSpec extends Specification {
     System.setProperty('composite', "a${VALUES_SEPARATOR}b${VALUES_SEPARATOR}c")
     consumers = ['${composite}']
     def selectors = [
-      new ConsumerVersionSelector(null, true, 'a'),
-      new ConsumerVersionSelector(null, true, 'b'),
-      new ConsumerVersionSelector(null, true, 'c')
+      new ConsumerVersionSelector(null, true, 'a', null),
+      new ConsumerVersionSelector(null, true, 'b', null),
+      new ConsumerVersionSelector(null, true, 'c', null)
     ]
     def expected = [
       new PactBrokerResult('a', '', '', [], [], false, null, false, false),
@@ -573,9 +573,9 @@ class PactBrokerLoaderSpec extends Specification {
       new PactBrokerResult('d', '', '', [], [], false, 'demo', false, false)
     ]
     def selectors = [
-      new ConsumerVersionSelector('demo', true, 'a'),
-      new ConsumerVersionSelector('demo', true, 'b'),
-      new ConsumerVersionSelector('demo', true, 'c')
+      new ConsumerVersionSelector('demo', true, 'a', null),
+      new ConsumerVersionSelector('demo', true, 'b', null),
+      new ConsumerVersionSelector('demo', true, 'c', null)
     ]
 
     when:
@@ -598,7 +598,7 @@ class PactBrokerLoaderSpec extends Specification {
       new PactBrokerResult('c', '', '', [], [], false, 'demo', false, false),
       new PactBrokerResult('d', '', '', [], [], false, 'demo', false, false)
     ]
-    def selectors = [ new ConsumerVersionSelector('demo', true, null) ]
+    def selectors = [ new ConsumerVersionSelector('demo', true, null, null) ]
 
     when:
     def result = pactBrokerLoader().load('test')
@@ -623,7 +623,7 @@ class PactBrokerLoaderSpec extends Specification {
       }
     }
     def selectors = [
-      new ConsumerVersionSelector('master', true, null)
+      new ConsumerVersionSelector('master', true, null, null)
     ]
 
     when:
@@ -641,9 +641,9 @@ class PactBrokerLoaderSpec extends Specification {
     valueResolver = Mock(ValueResolver)
     valueResolver.propertyDefined(_) >> false
     def selectors = [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('two', true, null),
-      new ConsumerVersionSelector('three', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('two', true, null, null),
+      new ConsumerVersionSelector('three', true, null, null)
     ]
     def expected = [
       new PactBrokerResult('d', '', '', [], [], false, 'one', false, false)
@@ -671,7 +671,7 @@ class PactBrokerLoaderSpec extends Specification {
       new PactBrokerResult('c', '', '', [], [], false, 'demo', false, false),
       new PactBrokerResult('d', '', '', [], [], false, 'demo', false, false)
     ]
-    def selectors = [ new ConsumerVersionSelector('demo', true, null) ]
+    def selectors = [ new ConsumerVersionSelector('demo', true, null, null) ]
 
     when:
     def result = pactBrokerLoader().load('test')
@@ -712,8 +712,8 @@ class PactBrokerLoaderSpec extends Specification {
     ]
     includeWipPactsSince = '2020-06-25'
     def selectors = [
-      new ConsumerVersionSelector('a', true, null),
-      new ConsumerVersionSelector('b', false, null),
+      new ConsumerVersionSelector('a', true, null, null),
+      new ConsumerVersionSelector('b', false, null, null),
     ]
     def expected = [
       new PactBrokerResult('test', 'a', '', [], [], false, null, false, false),
@@ -741,8 +741,8 @@ class PactBrokerLoaderSpec extends Specification {
     providerTags = ['dev']
     includeWipPactsSince = '2020-06-25'
     def selectors = [
-      new ConsumerVersionSelector('a', true, null),
-      new ConsumerVersionSelector('b', false, null),
+      new ConsumerVersionSelector('a', true, null, null),
+      new ConsumerVersionSelector('b', false, null, null),
     ]
     def expected = [
       new PactBrokerResult('test', 'a', '', [], [], false, null, false, false),
@@ -967,10 +967,10 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('2', true, null),
-      new ConsumerVersionSelector('3', true, null),
-      new ConsumerVersionSelector('three', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('2', true, null, null),
+      new ConsumerVersionSelector('3', true, null, null),
+      new ConsumerVersionSelector('three', true, null, null)
     ]
   }
 
@@ -986,12 +986,12 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == [
-      new ConsumerVersionSelector('one', true, 'bob'),
-      new ConsumerVersionSelector('one', true, 'fred'),
-      new ConsumerVersionSelector('two', true, 'bob'),
-      new ConsumerVersionSelector('two', true, 'fred'),
-      new ConsumerVersionSelector('three', true, 'bob'),
-      new ConsumerVersionSelector('three', true, 'fred')
+      new ConsumerVersionSelector('one', true, 'bob', null),
+      new ConsumerVersionSelector('one', true, 'fred', null),
+      new ConsumerVersionSelector('two', true, 'bob', null),
+      new ConsumerVersionSelector('two', true, 'fred', null),
+      new ConsumerVersionSelector('three', true, 'bob', null),
+      new ConsumerVersionSelector('three', true, 'fred', null)
     ]
   }
 
@@ -1010,7 +1010,7 @@ class PactBrokerLoaderSpec extends Specification {
     consumerVersionSelectors = [
       createVersionSelector(tag: 'one'),
       createVersionSelector(tag: 'two'),
-      createVersionSelector(tag: 'three')
+      createVersionSelector(tag: 'three', fallbackTag: 'four')
     ]
 
     when:
@@ -1018,19 +1018,21 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('two', true, null),
-      new ConsumerVersionSelector('three', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('two', true, null, null),
+      new ConsumerVersionSelector('three', true, null, 'four')
     ]
   }
 
   def 'building the list of selectors expands any expressions'() {
     given:
     valueResolver = Mock(ValueResolver) {
-      it.propertyDefined(_) >> { it[0] == 'two' }
+      it.propertyDefined(_) >> { it[0] == 'two' || it[0] == 'X' }
       it.resolveValue(_) >> {
         if (it[0] == 'two') {
           '2,3'
+        } else if (it[0] == 'X') {
+          'Y'
         } else {
           null
         }
@@ -1039,7 +1041,7 @@ class PactBrokerLoaderSpec extends Specification {
     consumerVersionSelectors = [
       createVersionSelector(tag: 'one'),
       createVersionSelector(tag: '${two}'),
-      createVersionSelector(tag: 'three')
+      createVersionSelector(tag: 'three', fallbackTag: '${X}')
     ]
 
     when:
@@ -1047,10 +1049,10 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('2', true, null),
-      new ConsumerVersionSelector('3', true, null),
-      new ConsumerVersionSelector('three', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('2', true, null, null),
+      new ConsumerVersionSelector('3', true, null, null),
+      new ConsumerVersionSelector('three', true, null, 'Y')
     ]
   }
 
@@ -1079,10 +1081,10 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('2', true, null),
-      new ConsumerVersionSelector('3', false, null),
-      new ConsumerVersionSelector('three', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('2', true, null, null),
+      new ConsumerVersionSelector('3', false, null, null),
+      new ConsumerVersionSelector('three', true, null, null)
     ]
   }
 
@@ -1111,10 +1113,10 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == [
-      new ConsumerVersionSelector('one', true, null),
-      new ConsumerVersionSelector('2', false, null),
-      new ConsumerVersionSelector('3', false, null),
-      new ConsumerVersionSelector('three', true, null)
+      new ConsumerVersionSelector('one', true, null, null),
+      new ConsumerVersionSelector('2', false, null, null),
+      new ConsumerVersionSelector('3', false, null, null),
+      new ConsumerVersionSelector('three', true, null, null)
     ]
   }
 
@@ -1133,6 +1135,11 @@ class PactBrokerLoaderSpec extends Specification {
       @Override
       String consumer() {
         args.consumer ?: ''
+      }
+
+      @Override
+      String fallbackTag() {
+        args.fallbackTag
       }
 
       @Override

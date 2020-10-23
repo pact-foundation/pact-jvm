@@ -66,7 +66,8 @@ data class CanIDeployResult(val ok: Boolean, val message: String, val reason: St
 data class ConsumerVersionSelector(
   val tag: String? = null,
   val latest: Boolean = true,
-  val consumer: String? = null
+  val consumer: String? = null,
+  val fallbackTag: String? = null
 ) {
   fun toJson(): JsonValue {
     val obj = JsonValue.Object("latest" to Json.toJson(latest))
@@ -75,6 +76,9 @@ data class ConsumerVersionSelector(
     }
     if (consumer.isNotEmpty()) {
       obj.add("consumer", Json.toJson(consumer))
+    }
+    if (fallbackTag.isNotEmpty()) {
+      obj.add("fallbackTag", Json.toJson(fallbackTag))
     }
     return obj
   }

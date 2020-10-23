@@ -34,7 +34,7 @@ class GradleProviderInfoSpec extends Specification {
     }
 
     then:
-    provider.brokerConfig == new PactBrokerConsumerConfig([new ConsumerVersionSelector('test', true, null)],
+    provider.brokerConfig == new PactBrokerConsumerConfig([new ConsumerVersionSelector('test', true, null, null)],
       true, ['master'])
   }
 
@@ -60,4 +60,21 @@ class GradleProviderInfoSpec extends Specification {
     tags << [null, [], ['']]
   }
 
+  def 'supports specifying a fallback tag'() {
+    given:
+    def provider = new GradleProviderInfo('provider')
+
+    when:
+    provider.fromPactBroker {
+      selectors = latestTags(fallbackTag: 'A', 'test', 'test2')
+      enablePending = true
+      providerTags = ['master']
+    }
+
+    then:
+    provider.brokerConfig == new PactBrokerConsumerConfig([
+      new ConsumerVersionSelector('test', true, null, 'A'),
+      new ConsumerVersionSelector('test2', true, null, 'A')
+    ], true, ['master'])
+  }
 }
