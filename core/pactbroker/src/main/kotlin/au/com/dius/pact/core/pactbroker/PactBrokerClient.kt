@@ -395,12 +395,16 @@ open class PactBrokerClient(
       val halClient = newHalClient()
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
-      when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
-        is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
-        is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
-      }
+      logPublishingResults(halClient, version, tag, name)
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
+    }
+  }
+
+  private fun logPublishingResults(halClient: IHalClient, version: String, tag: String, name: String) {
+    when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
+      is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+      is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
     }
   }
 
@@ -410,10 +414,7 @@ open class PactBrokerClient(
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       tags.forEach {
-        when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to it), "{}")) {
-          is Ok<*> -> logger.debug { "Pushed tag $it for provider $name and version $version" }
-          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $it for provider $name and version $version" }
-        }
+        logPublishingResults(halClient, version, it, name)
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
@@ -465,8 +466,7 @@ open class PactBrokerClient(
   open fun createVersionTag(
       pacticipant: String,
       pacticipantVersion: String,
-      tag: String) {
-  }
+      tag: String) = uploadTags(newHalClient(), pacticipant, pacticipantVersion, listOf(tag))
 
   companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
@@ -479,18 +479,24 @@ open class PactBrokerClient(
     const val PACTS = "pb:pacts"
     const val UTF8 = "UTF-8"
 
-    fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) {
+    fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) : Result<String?,
+     Exception> {
       halClient.navigate()
+      var mainResult = Ok("") as Result<String, Exception>
       tags.forEach {
-        val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
+         val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
           "pacticipant" to consumerName,
           "version" to version,
           "tag" to it
         ), "{}")
+
         if (result is Err<Exception>) {
+          mainResult = result
           logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
         }
+
       }
+      return mainResult
     }
 
     fun <T> retryWith(

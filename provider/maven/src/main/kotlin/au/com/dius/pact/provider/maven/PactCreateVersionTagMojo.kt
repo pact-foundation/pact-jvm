@@ -1,9 +1,6 @@
 package au.com.dius.pact.provider.maven
 
-import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import au.com.dius.pact.core.support.isNotEmpty
-import com.github.ajalt.mordant.TermColors
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
@@ -61,6 +58,6 @@ open class PactCreateVersionTagMojo : PactBaseMojo() {
   }
 
   private fun createVersionTag() =
-      brokerClient!!.createVersionTag(pacticipant!!, pacticipantVersion.orEmpty(), tag.orEmpty())
+      brokerClient!!.createVersionTag(pacticipant!!, pacticipantVersion!!, tag!!)
 
 }
