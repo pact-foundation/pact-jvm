@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
-
+import java.lang.reflect.Method
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.jupiter.api.Assertions.assertThrows
 
@@ -28,7 +28,7 @@ class PactConsumerTestExtTest {
     mockStore = [
       'get': { param ->
         switch (param) {
-          case 'executedFragments': []; break
+          case 'executedFragments': [] as Set<Method>; break
           default: null
         }
       },
