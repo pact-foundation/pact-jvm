@@ -66,7 +66,7 @@ class ProviderInfoSpec extends Specification {
     def options = [:]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true, null)
+      new ConsumerVersionSelector('test', true, null, null)
     ]
 
     when:
@@ -89,7 +89,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true, null)
+      new ConsumerVersionSelector('test', true, null, null)
     ]
 
     when:
@@ -111,7 +111,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true, null)
+      new ConsumerVersionSelector('test', true, null, null)
     ]
 
     when:
@@ -131,7 +131,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true, null)
+      new ConsumerVersionSelector('test', true, null, null)
     ]
 
     when:
@@ -155,7 +155,7 @@ class ProviderInfoSpec extends Specification {
     ]
     def url = 'http://localhost:8080'
     def selectors = [
-      new ConsumerVersionSelector('test', true, null)
+      new ConsumerVersionSelector('test', true, null, null)
     ]
 
     when:

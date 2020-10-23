@@ -172,13 +172,15 @@ open class PactProviderMojo : PactBaseMojo() {
             |</enablePending>
           """.trimMargin())
         }
-        val selectors = pactBroker.tags?.map { ConsumerVersionSelector(it, true) } ?: emptyList()
+        val selectors = pactBroker.tags?.map {
+          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) } ?: emptyList()
         consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options +
           mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags),
           pactBrokerUrl.toString(), selectors))
       }
       pactBroker?.tags != null && pactBroker.tags.isNotEmpty() -> {
-        val selectors = pactBroker.tags.map { ConsumerVersionSelector(it, true) }
+        val selectors = pactBroker.tags.map {
+          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) }
         consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors))
       }
       else -> consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), emptyList()))

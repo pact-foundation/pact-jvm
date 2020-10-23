@@ -12,7 +12,8 @@ data class PactBroker @JvmOverloads constructor(
   val tags: List<String>? = emptyList(),
   val authentication: PactBrokerAuth? = null,
   val serverId: String? = null,
-  var enablePending: EnablePending? = null
+  var enablePending: EnablePending? = null,
+  val fallbackTag: String? = null
 )
 
 /**
