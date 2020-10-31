@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Utils.jsonSafeValue
 import au.com.dius.pact.core.support.json.JsonValue
 
 /**
@@ -14,7 +15,9 @@ data class ProviderState @JvmOverloads constructor(val name: String?, val params
   fun toMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>("name" to name.toString())
     if (params.isNotEmpty()) {
-      map["params"] = params
+      map["params"] = params.entries.associate {
+        it.key to jsonSafeValue(it.value)
+      }
     }
     return map
   }
