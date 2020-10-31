@@ -1,16 +1,10 @@
-package au.com.dius.pact.core.model.v3
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.BasePact
-import au.com.dius.pact.core.model.Consumer
-import au.com.dius.pact.core.model.DefaultPactReader
-import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.InvalidPactException
-import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.Provider
-import au.com.dius.pact.core.model.UnknownPactSource
+import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
 import org.jetbrains.annotations.NotNull
 import spock.lang.Specification
 
@@ -124,7 +118,22 @@ class V3PactSpec extends Specification {
             Pact sortInteractions() { this }
 
             @Override
-            void mergeInteractions(@NotNull List interactions) { }
+            Pact mergeInteractions(@NotNull List interactions) { }
+
+            @Override
+            Result<RequestResponsePact, String> asRequestResponsePact() {
+              new Err('Not implemented')
+            }
+
+            @Override
+            Result<MessagePact, String> asMessagePact() {
+              new Err('Not implemented')
+            }
+
+            @Override
+            Result<V4Pact, String> asV4Pact() {
+              new Err('Not implemented')
+            }
         }
 
         when:
@@ -161,7 +170,7 @@ class V3PactSpec extends Specification {
             }
 
             @Override
-            void mergeInteractions(@NotNull List interactions) { }
+            Pact mergeInteractions(@NotNull List interactions) { }
 
             @SuppressWarnings('UnusedMethodParameter')
             @Override
@@ -171,6 +180,21 @@ class V3PactSpec extends Specification {
 
             @Override
             Pact sortInteractions() { this }
+
+          @Override
+          Result<RequestResponsePact, String> asRequestResponsePact() {
+            new Err('Not implemented')
+          }
+
+          @Override
+          Result<MessagePact, String> asMessagePact() {
+            new Err('Not implemented')
+          }
+
+          @Override
+          Result<V4Pact, String> asV4Pact() {
+            new Err('Not implemented')
+          }
         }
 
         when:
@@ -180,5 +204,4 @@ class V3PactSpec extends Specification {
         InvalidPactException e = thrown()
         e.message.contains('Cannot merge pacts as they are not compatible')
     }
-
 }

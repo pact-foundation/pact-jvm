@@ -93,6 +93,10 @@ class Request @JvmOverloads constructor(
     return result
   }
 
+  fun asV4Request(): HttpRequest {
+    return HttpRequest(method, path, query, headers, body, matchingRules, generators)
+  }
+
   companion object : KLogging() {
     const val COOKIE_KEY = "cookie"
     const val DEFAULT_METHOD = "GET"

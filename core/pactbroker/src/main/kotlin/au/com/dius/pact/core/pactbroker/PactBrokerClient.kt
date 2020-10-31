@@ -247,8 +247,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
-    val providerName = pact["provider"]["name"].asString()
-    val consumerName = pact["consumer"]["name"].asString()
+    val providerName = Json.toString(pact["provider"]["name"])
+    val consumerName = Json.toString(pact["consumer"]["name"])
     if (tags.isNotEmpty()) {
       uploadTags(halClient, consumerName, version, tags)
     }

@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.model.MockProviderConfig;
+import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.fluent.Request;
@@ -25,7 +26,7 @@ public class PactQueryParameterTest {
         String encodedValue = "simple";
         String encodedFullPath = path + "?" + parameterName + "=" + encodedValue;
 
-        RequestResponsePact pact = ConsumerPactBuilder
+        Pact pact = ConsumerPactBuilder
             .consumer("Some Consumer")
             .hasPactWith("Some Provider")
             .uponReceiving(encodedFullPath)
@@ -50,7 +51,7 @@ public class PactQueryParameterTest {
         String encodedValue = "query%20containing%20%26%20and%20%3F%20characters";
         String encodedFullPath = path + "?" + parameterName + "=" + encodedValue;
 
-        RequestResponsePact pact = ConsumerPactBuilder
+        Pact pact = ConsumerPactBuilder
             .consumer("Some Consumer")
             .hasPactWith("Some Provider")
             .uponReceiving(encodedFullPath)
@@ -74,7 +75,7 @@ public class PactQueryParameterTest {
         String encodedQuery = parameterName + "=" + encodedValue;
         String encodedFullPath = path + "?" + encodedQuery;
 
-        RequestResponsePact pact = ConsumerPactBuilder
+        Pact pact = ConsumerPactBuilder
             .consumer("Some Consumer")
             .hasPactWith("Some Provider")
             .uponReceiving(encodedFullPath)
@@ -99,7 +100,7 @@ public class PactQueryParameterTest {
         String encodedQuery = parameterName + "=" + encodedValue;
         String encodedFullPath = path + "?" + encodedQuery;
 
-        RequestResponsePact pact = ConsumerPactBuilder
+        Pact pact = ConsumerPactBuilder
             .consumer("Some Consumer")
             .hasPactWith("Some Provider")
             .uponReceiving(encodedFullPath)
@@ -114,7 +115,7 @@ public class PactQueryParameterTest {
         verifyRequestMatches(pact, encodedFullPath);
     }
 
-    private void verifyRequestMatches(RequestResponsePact pact, String fullPath) {
+    private void verifyRequestMatches(Pact pact, String fullPath) {
         MockProviderConfig config = MockProviderConfig.createDefault();
         PactVerificationResult result = runConsumerTest(pact, config, (mockServer, context) -> {
             String uri = mockServer.getUrl() + "/" + fullPath;

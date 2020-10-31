@@ -1,7 +1,9 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.michaelbull.result.Result
 
 /**
  * Pact Provider
@@ -57,7 +59,7 @@ interface Interaction {
   /**
    * Converts this interaction to a Map
    */
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<*, *>
+  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *>
 
   /**
    * Generates a unique key for this interaction
@@ -71,52 +73,72 @@ interface Interaction {
 
   /** Validates if this Interaction can be used with the provided Pact specification version */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+
+  /** Converts this interaction to a V4 format */
+  fun asV4Interaction(): V4Interaction
 }
 
 /**
  * Interface to a pact
  */
-interface Pact<I : Interaction> {
+interface Pact {
   /**
    * Returns the provider of the service for the pact
    */
   val provider: Provider
+
   /**
    * Returns the consumer of the service for the pact
    */
   val consumer: Consumer
+
   /**
    * Returns all the interactions of the pact
    */
-  val interactions: List<I>
+  val interactions: List<Interaction>
 
   /**
    * The source that this pact was loaded from
    */
   val source: PactSource
 
+  /** Metadata associated with this Pact */
+  val metadata: Map<String, Any?>
+
   /**
    * Returns a pact with the interactions sorted
    */
-  fun sortInteractions(): Pact<I>
+  fun sortInteractions(): Pact
 
   /**
    * Returns a Map representation of this pact for the purpose of generating a JSON document.
    */
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *>
+  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?>
 
   /**
    * If this pact is compatible with the other pact. Pacts are compatible if they have the
    * same provider and they are the same type
    */
-  fun compatibleTo(other: Pact<*>): Boolean
+  fun compatibleTo(other: Pact): Boolean
 
   /**
    * Merges all the interactions into this Pact
    * @param interactions
    */
-  fun mergeInteractions(interactions: List<*>)
+  fun mergeInteractions(interactions: List<Interaction>): Pact
 
   /** Validates if this Pact can be used with the provided Pact specification version */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+
+  /** Converts this Pact into a concrete V3 HTTP Pact, if able to */
+  fun asRequestResponsePact() : Result<RequestResponsePact, String>
+
+  /** Converts this Pact into a concrete V3 Message Pact, if able to */
+  fun asMessagePact() : Result<MessagePact, String>
+
+  /** Converts this Pact into a concrete V4 Pact */
+  fun asV4Pact() : Result<V4Pact, String>
+
+  /** Write this Pact out to the provided file for the Pact specification version */
+  fun write(pactDir: String, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable>
 }

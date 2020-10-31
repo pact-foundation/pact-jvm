@@ -219,7 +219,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   override fun beforeAll(context: ExtensionContext) {
     val store = context.getStore(NAMESPACE)
     store.put("executedFragments", mutableListOf<Method>())
-    store.put("pactsToWrite", mutableMapOf<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>())
+    store.put("pactsToWrite", mutableMapOf<Pair<Consumer, Provider>, Pair<BasePact, PactSpecVersion>>())
   }
 
   override fun beforeTestExecution(context: ExtensionContext) {
@@ -290,7 +290,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     providerInfo: ProviderInfo,
     pactMethod: String,
     context: ExtensionContext
-  ): BasePact<out Interaction> {
+  ): BasePact {
     val store = context.getStore(NAMESPACE)
     if (store["pact"] == null) {
       val providerName = if (providerInfo.providerName.isEmpty()) "default" else providerInfo.providerName
@@ -337,16 +337,16 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       val providerNameToUse = if (provider.isNullOrEmpty()) providerName else provider
       val pact = when (providerType) {
         ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-          ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
+          ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact
         ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-          MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
+          MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact
       }
       val executedFragments = store["executedFragments"] as MutableList<Method>
       executedFragments.add(method)
       store.put("pact", pact)
       return pact
     } else {
-      return store["pact"] as BasePact<out Interaction>
+      return store["pact"] as BasePact
     }
   }
 
@@ -372,8 +372,8 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
   private fun storePactForWrite(store: ExtensionContext.Store) {
     @Suppress("UNCHECKED_CAST")
-    val pactsToWrite = store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>
-    val pact = store["pact"] as BasePact<*>
+    val pactsToWrite = store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact, PactSpecVersion>>
+    val pact = store["pact"] as BasePact
     val providerInfo = store["providerInfo"] as ProviderInfo
     val version = providerInfo.pactVersion ?: PactSpecVersion.V3
 
@@ -401,7 +401,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
       @Suppress("UNCHECKED_CAST")
       val pactsToWrite =
-        store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact<*>, PactSpecVersion>>
+        store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact, PactSpecVersion>>
       pactsToWrite.values
         .forEach { (pact, version) ->
           logger.debug {

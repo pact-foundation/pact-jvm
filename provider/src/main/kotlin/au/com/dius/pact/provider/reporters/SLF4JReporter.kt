@@ -84,7 +84,7 @@ class SLF4JReporter(
     log.warn("         There are no consumers to verify for provider '${provider.name}'")
   }
 
-  override fun warnPactFileHasNoInteractions(pact: Pact<Interaction>) {
+  override fun warnPactFileHasNoInteractions(pact: Pact) {
     log.warn("         Pact file has no interactions")
   }
 

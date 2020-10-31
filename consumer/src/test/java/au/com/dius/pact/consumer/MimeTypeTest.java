@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
+import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import org.apache.http.entity.ContentType;
@@ -63,7 +64,7 @@ public class MimeTypeTest {
             body, responseBody, ContentType.APPLICATION_XML);
     }
 
-    private void runTest(RequestResponsePact pact, final String body, final String expectedResponse, final ContentType mimeType) {
+    private void runTest(Pact pact, final String body, final String expectedResponse, final ContentType mimeType) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
         PactVerificationResult result = runConsumerTest(pact, config, (mockServer, context) -> {
             try {
@@ -81,7 +82,7 @@ public class MimeTypeTest {
         assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
     }
 
-    private RequestResponsePact buildPact(String body, String responseBody, String description, ContentType contentType) {
+    private Pact buildPact(String body, String responseBody, String description, ContentType contentType) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", contentType.toString());
         return ConsumerPactBuilder

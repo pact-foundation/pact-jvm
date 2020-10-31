@@ -44,7 +44,7 @@ object ProviderUtils {
       if (providerName == provider.name) {
         consumers.add(ConsumerInfo(pact.consumer.name,
           stateChange, stateChangeUsesBody, packagesToScan, verificationType,
-          FileSource<Interaction>(f), pactFileAuthentication))
+          FileSource(f), pactFileAuthentication))
       } else {
         println("Skipping $f as the provider names don't match provider.name: " +
           "${provider.name} vs pactJson.provider.name: $providerName")
@@ -54,7 +54,7 @@ object ProviderUtils {
     return consumers
   }
 
-  fun pactFileExists(pactFile: FileSource<Interaction>) = pactFile.file.exists()
+  fun pactFileExists(pactFile: FileSource) = pactFile.file.exists()
 
   @JvmStatic
   fun verificationType(provider: IProviderInfo, consumer: IConsumerInfo): PactVerification {

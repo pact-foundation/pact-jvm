@@ -95,7 +95,7 @@ open class PactBrokerLoader(
     overriddenConsumer = consumer
   }
 
-  override fun load(providerName: String): List<Pact<*>> {
+  override fun load(providerName: String): List<Pact> {
     val resolver = setupValueResolver()
     return when {
       overriddenPactUrl.isNotEmpty() -> {
@@ -111,7 +111,7 @@ open class PactBrokerLoader(
           loadPactsForProvider(providerName, consumerVersionSelectors, resolver)
         } catch (e: NoPactsFoundException) {
           // Ignoring exception at this point, it will be handled at a higher level
-          emptyList<Pact<Interaction>>()
+          emptyList()
         }
       }
     }
@@ -176,7 +176,7 @@ open class PactBrokerLoader(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     resolver: ValueResolver
-  ): List<Pact<*>> {
+  ): List<Pact> {
     logger.debug { "Loading pacts from pact broker for provider $providerName and consumer version selectors " +
       "$selectors" }
     val pending = parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean

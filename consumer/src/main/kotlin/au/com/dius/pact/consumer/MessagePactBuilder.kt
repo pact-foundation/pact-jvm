@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.messaging.Message
@@ -149,7 +150,9 @@ class MessagePactBuilder(
   /**
    * Convert this builder into a Pact
    */
-  fun toPact() = MessagePact(provider, consumer, messages)
+  fun <P: Pact> toPact(): P {
+    return MessagePact(provider, consumer, messages) as P
+  }
 
   companion object {
     /**

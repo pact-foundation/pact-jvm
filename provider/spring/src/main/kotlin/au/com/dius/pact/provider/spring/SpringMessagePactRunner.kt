@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestClassCall
 /**
  * Pact runner for Async message providers that boots up the spring context
  */
-open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner<Message>(clazz) {
+open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner(clazz) {
 
   private var testContextManager: TestContextManager? = null
 
@@ -41,7 +41,7 @@ open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner<Message>
     return testContextManager!!
   }
 
-  override fun newInteractionRunner(testClass: TestClass, pact: Pact<Message>, pactSource: PactSource): InteractionRunner<Message> {
+  override fun newInteractionRunner(testClass: TestClass, pact: Pact, pactSource: PactSource): InteractionRunner {
     return SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
   }
 

@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.junit.Test;
@@ -18,7 +19,7 @@ public class MessageConsumerPactRunnerTest {
         PactDslJsonBody content = new PactDslJsonBody();
         content.stringType("sampleContentFieldName", "exampleValue");
 
-        MessagePact pact = MessagePactBuilder
+        Pact pact = MessagePactBuilder
                 .consumer("async_ping_consumer")
                 .hasPactWith("async_ping_provider")
                 .expectsToReceive("a message")
@@ -43,7 +44,7 @@ public class MessageConsumerPactRunnerTest {
         PactDslJsonBody content = new PactDslJsonBody();
         content.stringType("sampleContentFieldName", "exampleValue");
 
-        MessagePact pact = MessagePactBuilder
+        Pact pact = MessagePactBuilder
                 .consumer("async_ping_consumer")
                 .hasPactWith("async_ping_provider")
                 .expectsToReceive("another message")

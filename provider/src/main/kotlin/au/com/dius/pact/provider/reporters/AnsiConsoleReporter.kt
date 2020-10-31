@@ -12,7 +12,6 @@ import au.com.dius.pact.provider.VerificationResult
 import com.github.ajalt.mordant.TermColors
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
-import java.lang.StringBuilder
 
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
@@ -82,7 +81,7 @@ class AnsiConsoleReporter(
     println("         ${t.yellow("WARNING: There are no consumers to verify for provider '${provider.name}'")}")
   }
 
-  override fun warnPactFileHasNoInteractions(pact: Pact<Interaction>) {
+  override fun warnPactFileHasNoInteractions(pact: Pact) {
     println("         ${t.yellow("WARNING: Pact file has no interactions")}")
   }
 

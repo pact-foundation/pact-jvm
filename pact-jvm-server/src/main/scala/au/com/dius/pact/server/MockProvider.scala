@@ -1,17 +1,17 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.consumer.model.{MockHttpsKeystoreProviderConfig, MockHttpsProviderConfig, MockProviderConfig}
-import au.com.dius.pact.core.model.{Interaction, PactSpecVersion, Request, RequestResponseInteraction, Response, Pact => PactModel}
+import au.com.dius.pact.core.model.{PactSpecVersion, Request, Response, Pact => PactModel}
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.util.Try
 
-trait MockProvider[I <: Interaction] {
+trait MockProvider {
   def config: MockProviderConfig
   def session: PactSession
-  def start(pact: PactModel[I]): Unit
+  def start(pact: PactModel): Unit
   def run[T](code: => T): Try[T]
-  def runAndClose[T](pact: PactModel[I])(code: => T): Try[(T, PactSessionResults)]
+  def runAndClose[T](pact: PactModel)(code: => T): Try[(T, PactSessionResults)]
   def stop(): Unit
 }
 
@@ -22,7 +22,7 @@ object DefaultMockProvider {
 
   // Constructor providing a default implementation of StatefulMockProvider.
   // Users should not explicitly be forced to choose a variety.
-  def apply(config: MockProviderConfig): StatefulMockProvider[RequestResponseInteraction] =
+  def apply(config: MockProviderConfig): StatefulMockProvider =
     config match {
       case httpsConfig: MockHttpsProviderConfig => new UnfilteredHttpsMockProvider(httpsConfig)
       case httpsKeystoreConfig: MockHttpsKeystoreProviderConfig => new UnfilteredHttpsKeystoreMockProvider(httpsKeystoreConfig)
@@ -31,18 +31,18 @@ object DefaultMockProvider {
 }
 
 // TODO: eliminate horrid state mutation and synchronisation.  Reactive stuff to the rescue?
-abstract class StatefulMockProvider[I <: Interaction] extends MockProvider[I] with StrictLogging {
+abstract class StatefulMockProvider extends MockProvider with StrictLogging {
   private var sessionVar = PactSession.empty
-  private var pactVar: Option[PactModel[I]] = None
+  private var pactVar: Option[PactModel] = None
 
   private def waitForRequestsToFinish() = Thread.sleep(100)
 
   def session: PactSession  = sessionVar
-  def pact: Option[PactModel[I]] = pactVar
+  def pact: Option[PactModel] = pactVar
 
   def start(): Unit
 
-  override def start(pact: PactModel[I]): Unit = synchronized {
+  override def start(pact: PactModel): Unit = synchronized {
     pactVar = Some(pact)
     sessionVar = PactSession.forPact(pact)
     start()
@@ -56,7 +56,7 @@ abstract class StatefulMockProvider[I <: Interaction] extends MockProvider[I] wi
     }
   }
 
-  override def runAndClose[T](pact: PactModel[I])(code: => T): Try[(T, PactSessionResults)] = {
+  override def runAndClose[T](pact: PactModel)(code: => T): Try[(T, PactSessionResults)] = {
     Try {
       try {
         start(pact)

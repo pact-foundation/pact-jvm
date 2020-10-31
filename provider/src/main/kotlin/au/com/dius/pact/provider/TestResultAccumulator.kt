@@ -16,12 +16,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
  */
 interface TestResultAccumulator {
   fun updateTestResult(
-    pact: Pact<out Interaction>,
+    pact: Pact,
     interaction: Interaction,
     testExecutionResult: TestResult,
     source: PactSource?
   )
-  fun clearTestResult(pact: Pact<out Interaction>, source: PactSource?)
+  fun clearTestResult(pact: Pact, source: PactSource?)
 }
 
 object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
@@ -30,7 +30,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
   fun updateTestResult(
-    pact: Pact<Interaction>,
+    pact: Pact,
     interaction: Interaction,
     testExecutionResult: List<VerificationResult.Failed>,
     source: PactSource
@@ -41,7 +41,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   }
 
   override fun updateTestResult(
-    pact: Pact<out Interaction>,
+    pact: Pact,
     interaction: Interaction,
     testExecutionResult: TestResult,
     source: PactSource?
@@ -85,7 +85,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     return builder.toHashCode()
   }
 
-  fun calculatePactHash(pact: Pact<out Interaction>, source: PactSource?): Int {
+  fun calculatePactHash(pact: Pact, source: PactSource?): Int {
     val builder = HashCodeBuilder().append(pact.consumer.name).append(pact.provider.name)
 
     if (source is BrokerUrlSource && source.tag.isNotEmpty()) {
@@ -108,12 +108,12 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   private fun lookupProviderTags() = System.getProperty("pact.provider.tag").orEmpty().split(',')
     .map { it.trim() }.filter { it.isNotEmpty() }
 
-  fun unverifiedInteractions(pact: Pact<out Interaction>, results: MutableMap<Int, TestResult>): List<Interaction> {
+  fun unverifiedInteractions(pact: Pact, results: MutableMap<Int, TestResult>): List<Interaction> {
     logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }
     return pact.interactions.filter { !results.containsKey(calculateInteractionHash(it)) }
   }
 
-  override fun clearTestResult(pact: Pact<out Interaction>, source: PactSource?) {
+  override fun clearTestResult(pact: Pact, source: PactSource?) {
     val pactHash = calculatePactHash(pact, source)
     testResults.remove(pactHash)
   }

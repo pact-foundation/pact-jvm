@@ -40,7 +40,7 @@ public class PactDslRootValueTest {
                 .headers(headers)
                 .status(200)
                 .body(rootValueBody)
-            .toPact();
+            .toPact().asRequestResponsePact().component1();
 
         Assert.assertEquals(1, frag.getInteractions().size());
         Map<String, MatchingRuleGroup> matchingGroups = frag.getInteractions()

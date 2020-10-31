@@ -2,12 +2,16 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.xml.PactXmlBuilder;
+import au.com.dius.pact.core.model.BasePact;
 import au.com.dius.pact.core.model.OptionalBody;
+import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.Request;
 import au.com.dius.pact.core.model.RequestResponseInteraction;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.Response;
+import au.com.dius.pact.core.model.UnknownPactSource;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.Generators;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
@@ -30,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import static au.com.dius.pact.consumer.Headers.MULTIPART_HEADER_REGEX;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class PactDslResponse {
@@ -325,9 +329,24 @@ public class PactDslResponse {
     /**
      * Terminates the DSL and builds a pact to represent the interactions
      */
+    public <P extends Pact> P toPact(Class<P> pactClass) {
+      addInteraction();
+      if (pactClass.isAssignableFrom(V4Pact.class)) {
+        return (P) new V4Pact(request.consumer, request.provider, consumerPactBuilder.getInteractions()
+          .stream().map(RequestResponseInteraction::asV4Interaction).collect(Collectors.toList()), BasePact.getDEFAULT_METADATA(),
+          UnknownPactSource.INSTANCE);
+      } else if (pactClass.isAssignableFrom(RequestResponsePact.class)) {
+        return (P) new RequestResponsePact(request.provider, request.consumer, consumerPactBuilder.getInteractions());
+      } else {
+        throw new IllegalArgumentException(pactClass.getSimpleName() + " is not a valid Pact class");
+      }
+    }
+
+    /**
+     * Terminates the DSL and builds a pact to represent the interactions
+     */
     public RequestResponsePact toPact() {
-        addInteraction();
-        return new RequestResponsePact(request.provider, request.consumer, consumerPactBuilder.getInteractions());
+      return toPact(RequestResponsePact.class);
     }
 
     /**

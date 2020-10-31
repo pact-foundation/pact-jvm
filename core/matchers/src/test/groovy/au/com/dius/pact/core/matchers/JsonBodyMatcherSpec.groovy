@@ -715,7 +715,7 @@ class JsonBodyMatcherSpec extends Specification {
     when:
     def results = matcher.matchBody(expectedBody, actualBody, true, matchers)
         .bodyResults.collect {
-      [it.key, it.result[0]?.expected?.asString(), (it.result*.actual)*.asString()]
+      [it.key, it.result[0]?.expected?.toString(), (it.result*.actual)*.toString()]
     }
 
     then:

@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
+import au.com.dius.pact.core.support.unwrap
 import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
@@ -150,7 +151,12 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       val pactDirectory = context.pactFolder
       val pactFile = pact.fileForPact(pactDirectory)
       logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $pactFile" }
-      DefaultPactWriter.writePact(pactFile, pact, pactVersion)
+      val pactToWrite = if (pactVersion == PactSpecVersion.V4) {
+        pact.asV4Pact().unwrap()
+      } else {
+        pact
+      }
+      DefaultPactWriter.writePact(pactFile, pactToWrite, pactVersion)
     }
 
     return result

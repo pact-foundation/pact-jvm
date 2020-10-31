@@ -1,6 +1,10 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonException
+import au.com.dius.pact.core.support.json.JsonParser
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import mu.KLogging
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -23,14 +27,14 @@ interface PactWriter {
    * @param writer Writer to write out with
    * @param pactSpecVersion Pact version to use to control writing
    */
-  fun writePact(pact: Pact<*>, writer: PrintWriter, pactSpecVersion: PactSpecVersion)
+  fun writePact(pact: Pact, writer: PrintWriter, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable>
 
   /**
    * Writes out the pact to the provided pact file
    * @param pact Pact to write
    * @param writer Writer to write out with
    */
-  fun writePact(pact: Pact<*>, writer: PrintWriter)
+  fun writePact(pact: Pact, writer: PrintWriter) : Result<Int, Throwable>
 
   /**
    * Writes out the pact to the provided pact file in a manor that is safe for parallel execution
@@ -38,7 +42,7 @@ interface PactWriter {
    * @param pact Pact to write
    * @param pactSpecVersion Pact version to use to control writing
    */
-  fun writePact(pactFile: File, pact: Pact<*>, pactSpecVersion: PactSpecVersion)
+  fun writePact(pactFile: File, pact: Pact, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable>
 }
 
 /**
@@ -52,9 +56,11 @@ object DefaultPactWriter : PactWriter, KLogging() {
    * @param writer Writer to write out with
    * @param pactSpecVersion Pact version to use to control writing
    */
-  override fun writePact(pact: Pact<*>, writer: PrintWriter, pactSpecVersion: PactSpecVersion) {
+  override fun writePact(pact: Pact, writer: PrintWriter, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable> {
     pact.sortInteractions()
-    writer.println(Json.prettyPrint(pact.toMap(pactSpecVersion)))
+    val json = Json.prettyPrint(pact.toMap(pactSpecVersion))
+    writer.println(json)
+    return Ok(json.toByteArray().size)
   }
 
   /**
@@ -62,8 +68,8 @@ object DefaultPactWriter : PactWriter, KLogging() {
    * @param pact Pact to write
    * @param writer Writer to write out with
    */
-  override fun writePact(pact: Pact<*>, writer: PrintWriter) {
-    writePact(pact, writer, PactSpecVersion.V3)
+  override fun writePact(pact: Pact, writer: PrintWriter) : Result<Int, Throwable> {
+    return writePact(pact, writer, PactSpecVersion.V3)
   }
 
   /**
@@ -73,12 +79,14 @@ object DefaultPactWriter : PactWriter, KLogging() {
    * @param pactSpecVersion Pact version to use to control writing
    */
   @Synchronized
-  override fun writePact(pactFile: File, pact: Pact<*>, pactSpecVersion: PactSpecVersion) {
-    if (pactWriteMode() == PactWriteMode.MERGE && pactFile.exists() && pactFile.length() > 0) {
+  override fun writePact(pactFile: File, pact: Pact, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable> {
+    return if (pactWriteMode() == PactWriteMode.MERGE && pactFile.exists() && pactFile.length() > 0) {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
-        val existingPact = DefaultPactReader.loadPact(readFileUtf8(raf))
+        val source = FileSource(pactFile)
+        val json = JsonParser.parseString(readFileUtf8(raf)).asObject()
+        val existingPact = DefaultPactReader.pactFromJson(json, source)
         val result = PactMerge.merge(existingPact, pact)
         if (!result.ok) {
           throw InvalidPactException(result.message)
@@ -90,6 +98,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
         val bytes = swriter.toString().toByteArray()
         raf.setLength(bytes.size.toLong())
         raf.write(bytes)
+        Ok(bytes.size)
       } finally {
         lock.release()
         raf.close()

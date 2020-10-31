@@ -74,11 +74,24 @@ sealed class JsonValue {
     }
   }
 
-  fun asString(): String {
+  fun asString(): String? {
     return if (this is StringValue) {
       String(value.chars)
     } else {
-      serialise()
+      null
+    }
+  }
+
+  override fun toString(): String {
+    return when (this) {
+      is Null -> "null"
+      is Decimal -> String(this.value.chars)
+      is Integer -> String(this.value.chars)
+      is StringValue -> this.value.toString()
+      is True -> "true"
+      is False -> "false"
+      is Array -> "[${this.values.joinToString(",")}]"
+      is Object -> "{${this.entries.entries.sortedBy { it.key }.joinToString(",") { "\"${it.key}\":" + it.value }}}"
     }
   }
 
@@ -110,7 +123,7 @@ sealed class JsonValue {
       is Null -> "null"
       is Decimal -> String(this.value.chars)
       is Integer -> String(this.value.chars)
-      is StringValue -> "\"${Json.escape(this.asString())}\""
+      is StringValue -> "\"${Json.escape(this.asString()!!)}\""
       is True -> "true"
       is False -> "false"
       is Array -> "[${this.values.joinToString(",") { it.serialise() }}]"
@@ -170,7 +183,7 @@ sealed class JsonValue {
     is Null -> 0.hashCode()
     is Decimal -> this.toBigDecimal().hashCode()
     is Integer -> this.toBigInteger().hashCode()
-    is StringValue -> this.asString().hashCode()
+    is StringValue -> this.asString()!!.hashCode()
     is True -> true.hashCode()
     is False -> false.hashCode()
     is Array -> this.values.hashCode()

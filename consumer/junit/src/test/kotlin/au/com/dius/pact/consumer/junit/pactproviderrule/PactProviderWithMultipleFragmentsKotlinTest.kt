@@ -11,6 +11,7 @@ import au.com.dius.pact.consumer.junit.PactVerifications
 import au.com.dius.pact.consumer.junit.exampleclients.ConsumerClient
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
+import au.com.dius.pact.core.support.unwrap
 import org.apache.http.client.HttpResponseException
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers
@@ -56,7 +57,7 @@ class PactProviderWithMultipleFragmentsKotlinTest {
       .willRespondWith()
         .status(200)
         .body("")
-      .toPact()
+      .toPact().asRequestResponsePact().unwrap()
   }
 
   @Pact(consumer = "test_consumer", provider = "test_provider2")
@@ -69,7 +70,7 @@ class PactProviderWithMultipleFragmentsKotlinTest {
       .willRespondWith()
         .status(200)
         .body("{\"responsetest\": true, \"name\": \"fred\"}")
-      .toPact()
+      .toPact().asRequestResponsePact().unwrap()
   }
 
   @Pact(consumer = "test_consumer", provider = "test_provider2")
@@ -82,7 +83,7 @@ class PactProviderWithMultipleFragmentsKotlinTest {
       .willRespondWith()
         .status(404)
         .body("{\"error\": \"ID 2 does not exist\"}")
-      .toPact()
+      .toPact().asRequestResponsePact().unwrap()
   }
 
   @Test

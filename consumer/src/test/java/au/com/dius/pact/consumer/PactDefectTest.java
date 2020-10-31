@@ -63,7 +63,7 @@ public class PactDefectTest {
             .willRespondWith()
             .status(200)
             .body(expectedResponseBody, contentType)
-            .toPact();
+            .toPact().asRequestResponsePact().component1();
 
         PactVerificationResult result = runConsumerTest(pact, new MockProviderConfig("localhost", 0, PactSpecVersion.V3), (mockServer, context) -> {
           try {

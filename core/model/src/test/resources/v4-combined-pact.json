@@ -1,0 +1,62 @@
+{
+  "provider": {
+    "name": "test_provider"
+  },
+  "consumer": {
+    "name": "test_consumer"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "001",
+      "description": "test interaction with a binary body",
+      "request": {
+        "method": "GET",
+        "path": "/"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": ["image/gif"]
+        },
+        "body": {
+          "contentType": "image/gif",
+          "encoded": "base64",
+          "content": "R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs="
+        }
+      }
+    }, {
+      "type": "Asynchronous/Messages",
+      "key": "m_001",
+      "metadata": {
+        "contentType": "application/json",
+        "destination": "a/b/c"
+      },
+      "providerStates": [
+        {
+          "name": "message exists"
+        }
+      ],
+      "contents": {
+        "contentType": "application/json",
+        "encoded": false,
+        "content": {
+          "a": "1234-1234"
+        }
+      },
+      "generators": {
+        "body": {
+          "a": {
+            "type": "Uuid"
+          }
+        }
+      },
+      "description": "Test Message"
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  }
+}

@@ -2,6 +2,9 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.jsonObject
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 
 /**
  * Pact between a consumer and a provider
@@ -12,11 +15,11 @@ class RequestResponsePact @JvmOverloads constructor(
   interactions: List<RequestResponseInteraction> = listOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
-) : BasePact<RequestResponseInteraction>(consumer, provider, metadata, source) {
+) : BasePact(consumer, provider, metadata, source) {
 
   override var interactions = interactions.toMutableList()
 
-  override fun sortInteractions(): Pact<RequestResponseInteraction> {
+  override fun sortInteractions(): Pact {
     interactions.sortBy { interaction -> interaction.providerStates.joinToString { it.name.toString() } +
       interaction.description }
     return this
@@ -29,10 +32,19 @@ class RequestResponsePact @JvmOverloads constructor(
     "metadata" to metaData(jsonObject(metadata.entries.map { it.key to Json.toJson(it.value) }), pactSpecVersion)
   )
 
-  override fun mergeInteractions(interactions: List<*>) {
+  override fun mergeInteractions(interactions: List<Interaction>): Pact {
     interactions as List<RequestResponseInteraction>
     this.interactions = (this.interactions + interactions).distinctBy { it.uniqueKey() }.toMutableList()
     sortInteractions()
+    return this
+  }
+
+  override fun asRequestResponsePact() = Ok(this)
+
+  override fun asMessagePact() = Err("A V3 Request/Response Pact can not be converted to a Message Pact")
+
+  override fun asV4Pact(): Result<V4Pact, String> {
+    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }, metadata))
   }
 
   fun interactionFor(description: String, providerState: String): RequestResponseInteraction? {
@@ -53,10 +65,6 @@ class RequestResponsePact @JvmOverloads constructor(
     if (interactions != other.interactions) return false
 
     return true
-  }
-
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return super.validateForVersion(pactVersion)
   }
 
   override fun hashCode(): Int {

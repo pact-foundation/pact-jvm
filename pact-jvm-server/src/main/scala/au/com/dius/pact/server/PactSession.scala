@@ -1,8 +1,9 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.core.matchers.{FullRequestMatch, PartialRequestMatch, RequestMismatch, RequestMatching}
+import au.com.dius.pact.core.matchers.{FullRequestMatch, PartialRequestMatch, RequestMatching, RequestMismatch}
 import au.com.dius.pact.core.model.{Interaction, OptionalBody, Request, RequestResponseInteraction, Response, Pact => PactModel}
 import org.apache.commons.lang3.StringEscapeUtils
+
 import scala.collection.JavaConverters._
 
 object PactSessionResults {
@@ -26,7 +27,7 @@ case class PactSessionResults(
 object PactSession {
   val empty = PactSession(Seq(), PactSessionResults.empty)
 
-  def forPact[I <: Interaction](pact: PactModel[I]) = PactSession(pact.getInteractions.asScala, PactSessionResults.empty)
+  def forPact(pact: PactModel) = PactSession(pact.getInteractions.asScala, PactSessionResults.empty)
 }
 
 case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {

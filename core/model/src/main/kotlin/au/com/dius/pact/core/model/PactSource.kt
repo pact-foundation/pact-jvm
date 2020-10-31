@@ -19,11 +19,10 @@ sealed class UrlPactSource : PactSource() {
   var encodePath: Boolean = true
 }
 
-data class DirectorySource<I> @JvmOverloads constructor(
+data class DirectorySource @JvmOverloads constructor(
   val dir: File,
-  val pacts: MutableMap<File, Pact<I>> = mutableMapOf()
-) : PactSource()
-  where I : Interaction {
+  val pacts: MutableMap<File, Pact> = mutableMapOf()
+) : PactSource() {
   override fun description() = "Directory $dir"
 }
 
@@ -31,7 +30,7 @@ data class PactBrokerSource<I> @JvmOverloads constructor(
   val host: String,
   val port: String?,
   val scheme: String = "http",
-  val pacts: MutableMap<Consumer, MutableList<Pact<I>>> = mutableMapOf()
+  val pacts: MutableMap<Consumer, MutableList<Pact>> = mutableMapOf()
 ) : PactSource()
   where I : Interaction {
   override fun description() =
@@ -42,21 +41,19 @@ data class PactBrokerSource<I> @JvmOverloads constructor(
     }
 }
 
-data class FileSource<I> @JvmOverloads constructor(val file: File, val pact: Pact<I>? = null) :
-  PactSource() where I : Interaction {
+data class FileSource @JvmOverloads constructor(val file: File, val pact: Pact? = null) : PactSource() {
   override fun description() = "File $file"
 }
 
-data class UrlSource<I> @JvmOverloads constructor(override val url: String, val pact: Pact<I>? = null) :
-  UrlPactSource() where I : Interaction {
+data class UrlSource @JvmOverloads constructor(override val url: String, val pact: Pact? = null) : UrlPactSource() {
   override fun description() = "URL $url"
 }
 
-data class UrlsSource<I : Interaction> @JvmOverloads constructor(
+data class UrlsSource @JvmOverloads constructor(
   val url: List<String>,
-  val pacts: MutableMap<String, Pact<I>> = mutableMapOf()
+  val pacts: MutableMap<String, Pact> = mutableMapOf()
 ) : PactSource() {
-  fun addPact(url: String, pact: Pact<I>) {
+  fun addPact(url: String, pact: Pact) {
     pacts[url] = pact
   }
 }

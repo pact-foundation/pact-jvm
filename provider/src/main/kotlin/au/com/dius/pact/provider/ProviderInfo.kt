@@ -2,7 +2,6 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.Utils
@@ -117,7 +116,7 @@ open class ProviderInfo @JvmOverloads constructor (
           consumersGroup.stateChangeUsesBody,
           emptyList(),
           null,
-          FileSource<Interaction>(file)
+          FileSource(file)
         ))
       }
     }

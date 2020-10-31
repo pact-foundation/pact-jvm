@@ -273,7 +273,7 @@ class MarkdownReporter(
 
   override fun warnProviderHasNoConsumers(provider: IProviderInfo) { }
 
-  override fun warnPactFileHasNoInteractions(pact: Pact<Interaction>) { }
+  override fun warnPactFileHasNoInteractions(pact: Pact) { }
 
   override fun interactionDescription(interaction: Interaction) {
     events.add(Event("interactionDescription", "${interaction.description}  <br/>\n", listOf(interaction)))

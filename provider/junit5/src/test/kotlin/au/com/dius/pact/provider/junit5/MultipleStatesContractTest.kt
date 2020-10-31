@@ -11,7 +11,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import mu.KLogging
-import org.apache.http.HttpRequest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
@@ -32,7 +31,7 @@ import java.net.URL
 class MultipleStatesContractTest {
   @TestTemplate
   @ExtendWith(PactVerificationInvocationContextProvider::class)
-  internal fun testTemplate(pact: Pact<*>, interaction: Interaction, request: HttpRequest, context: PactVerificationContext) {
+  internal fun testTemplate(pact: Pact, interaction: Interaction, context: PactVerificationContext) {
     logger.info("testTemplate called: " + pact.provider.name + ", " + interaction.description)
     context.verifyInteraction()
   }

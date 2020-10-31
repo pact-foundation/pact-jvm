@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider
 
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
@@ -28,6 +27,7 @@ import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.getError
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
@@ -666,7 +666,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       Predicate { filterInteractions(it) })
     reportVerificationForConsumer(consumer, provider, pact.source)
     return if (pact.interactions.isEmpty()) {
-      reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact<Interaction>) }
+      reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact) }
       VerificationResult.Ok
     } else {
       val result = pact.interactions.map {
@@ -711,7 +711,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")
-  fun loadPactFileForConsumer(consumer: IConsumerInfo): Pact<out Interaction> {
+  fun loadPactFileForConsumer(consumer: IConsumerInfo): Pact {
     var pactSource = consumer.pactSource
     if (pactSource is Callable<*>) {
       pactSource = pactSource.call()
@@ -722,7 +722,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       pactSource = if (pactSource is BrokerUrlSource) {
         pactSource.copy(url = pactUrl)
       } else {
-        UrlSource<Interaction>(projectGetProperty.apply(PACT_FILTER_PACTURL)!!)
+        UrlSource(projectGetProperty.apply(PACT_FILTER_PACTURL)!!)
       }
       pactSource.encodePath = false
     }

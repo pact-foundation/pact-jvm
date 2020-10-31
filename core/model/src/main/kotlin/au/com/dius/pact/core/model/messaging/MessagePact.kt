@@ -9,13 +9,18 @@ import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UnknownPactSource
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.extractFromJson
 import au.com.dius.pact.core.support.Utils.extractFromMap
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonObject
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import mu.KLogging
 import java.io.File
 
@@ -28,7 +33,7 @@ class MessagePact @JvmOverloads constructor (
   var messages: MutableList<Message> = mutableListOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
-) : BasePact<Message>(consumer, provider, metadata, source) {
+) : BasePact(consumer, provider, metadata, source) {
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     if (pactSpecVersion < PactSpecVersion.V3) {
@@ -67,21 +72,31 @@ class MessagePact @JvmOverloads constructor (
     return newPact
   }
 
-  override fun mergeInteractions(interactions: List<*>) {
+  override fun mergeInteractions(interactions: List<Interaction>): Pact {
     interactions as List<Message>
     messages = (messages + interactions).distinctBy { it.uniqueKey() }.toMutableList()
     sortInteractions()
+    return this
+  }
+
+  override fun asRequestResponsePact() =
+    Err("A V3 Message Pact can not be converted to a V3 Request/Response Pact")
+
+  override fun asMessagePact() = Ok(this)
+
+  override fun asV4Pact(): Result<V4Pact, String> {
+    TODO("Not yet implemented")
   }
 
   override val interactions: List<Message>
     get() = messages
 
-  override fun sortInteractions(): Pact<Message> {
+  override fun sortInteractions(): Pact {
     messages.sortBy { message -> message.providerStates.joinToString { it.name.toString() } + message.description }
     return this
   }
 
-  fun mergePact(other: Pact<out Interaction>): MessagePact {
+  fun mergePact(other: Pact): MessagePact {
     if (other !is MessagePact) {
       throw InvalidPactException("Unable to merge pact $other as it is not a MessagePact")
     }

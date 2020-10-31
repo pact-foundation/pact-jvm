@@ -40,7 +40,7 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
     ProviderUtils.loadPactFiles(new ProviderInfo(provider), new File(uri)).asScala
       .filter(consumer.filter)
       .flatMap(c => verifier.loadPactFileForConsumer(c)
-        .asInstanceOf[PactForConsumer[RequestResponseInteraction]]
+        .asInstanceOf[PactForConsumer]
         .getInteractions.asScala.map(i => (c.getName, i)))
       .foreach { case (consumerName, interaction) =>
         val description = new StringBuilder(s"${interaction.getDescription} for '$consumerName'")

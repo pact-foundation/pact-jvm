@@ -18,16 +18,16 @@ data class Address @JvmOverloads constructor (
   companion object {
     fun from(json: JsonValue): Address {
       val host = if (json.has("host")) {
-        json["host"].asString()
+        json["host"].toString()
       } else null
       val port = if (json.has("port")) {
         json["port"].asNumber().toInt()
       } else null
       val path = if (json.has("path")) {
-        json["path"].asString()
+        json["path"].toString()
       } else ""
       val scheme = if (json.has("scheme")) {
-        json["scheme"].asString()
+        json["scheme"].toString()
       } else "http"
       return Address(host, port, path, scheme)
     }

@@ -50,11 +50,11 @@ import org.apache.commons.lang3.tuple.Pair as TuplePair
  *
  * Developed with [org.junit.runners.BlockJUnit4ClassRunner] in mind
  */
-open class InteractionRunner<I>(
+open class InteractionRunner(
   protected val testClass: TestClass,
-  private val pact: Pact<I>,
+  private val pact: Pact,
   private val pactSource: PactSource
-) : Runner() where I : Interaction {
+) : Runner() {
 
   private val results = ConcurrentHashMap<String, Pair<VerificationResult, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()

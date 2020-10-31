@@ -330,9 +330,8 @@ class PactReaderSpec extends Specification {
     '{"metadata":{"pactSpecification":"1.2.3"}}'              | '2.0.0'
     '{"metadata":{"pactSpecification":{}}}'                   | '2.0.0'
     '{"metadata":{"pactSpecification":{"version":"1.2.3"}}}'  | '1.2.3'
-    '{"metadata":{"pactSpecification":{"version":"3.0"}}}'    | '3.0.0'
+    '{"metadata":{"pactSpecification":{"version":"3.0"}}}'    | '3.0'
     '{"metadata":{"pact-specification":{"version":"1.2.3"}}}' | '1.2.3'
-
   }
 
   @Issue('#1031')

@@ -69,12 +69,12 @@ open class SpringAfterRunner(
   }
 }
 
-open class SpringInteractionRunner<I>(
+open class SpringInteractionRunner(
   testClass: TestClass,
-  pact: Pact<I>,
+  pact: Pact,
   pactSource: PactSource?,
   private val testContextManager: TestContextManager
-) : InteractionRunner<I>(testClass, pact, pactSource ?: UnknownPactSource) where I : Interaction {
+) : InteractionRunner(testClass, pact, pactSource ?: UnknownPactSource) {
 
   override fun withBefores(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
     val befores = testClass.getAnnotatedMethods(Before::class.java)

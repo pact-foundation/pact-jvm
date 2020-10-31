@@ -20,7 +20,7 @@ import org.springframework.test.context.web.ServletTestExecutionListener
 /**
  * Pact runner for REST providers that boots up the spring context
  */
-open class SpringRestPactRunner(clazz: Class<*>) : RestPactRunner<RequestResponseInteraction>(clazz) {
+open class SpringRestPactRunner(clazz: Class<*>) : RestPactRunner(clazz) {
 
   private var testContextManager: TestContextManager? = null
 
@@ -48,7 +48,7 @@ open class SpringRestPactRunner(clazz: Class<*>) : RestPactRunner<RequestRespons
     return testContextManager!!
   }
 
-  override fun newInteractionRunner(testClass: TestClass, pact: Pact<RequestResponseInteraction>, pactSource: PactSource): InteractionRunner<RequestResponseInteraction> {
+  override fun newInteractionRunner(testClass: TestClass, pact: Pact, pactSource: PactSource): InteractionRunner {
     return SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
   }
 

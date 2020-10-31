@@ -37,7 +37,7 @@ class ReadmeExamplePactJVMProviderJUnitTest {
     TestDropwizardApplication, ResourceHelpers.resourceFilePath('dropwizard/test-config.yaml'))
 
   private static ProviderInfo serviceProvider
-  private static Pact<RequestResponseInteraction> testConsumerPact
+  private static Pact testConsumerPact
   private static ConsumerInfo consumer
 
   @BeforeClass

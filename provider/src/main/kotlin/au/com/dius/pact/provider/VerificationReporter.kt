@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
@@ -17,7 +16,7 @@ interface VerificationReporter {
    */
   @Deprecated("Use version that takes a list of provider tags")
   fun reportResults(
-    pact: Pact<out Interaction>,
+    pact: Pact,
     result: TestResult,
     version: String,
     client: PactBrokerClient? = null,
@@ -28,7 +27,7 @@ interface VerificationReporter {
    * Publish the results to the pact broker. If the tags are given, then the provider will be tagged with those first.
    */
   fun reportResults(
-    pact: Pact<out Interaction>,
+    pact: Pact,
     result: TestResult,
     version: String,
     client: PactBrokerClient? = null,
@@ -47,7 +46,7 @@ interface VerificationReporter {
 object DefaultVerificationReporter : VerificationReporter, KLogging() {
 
   override fun reportResults(
-    pact: Pact<out Interaction>,
+    pact: Pact,
     result: TestResult,
     version: String,
     client: PactBrokerClient?,
@@ -61,7 +60,7 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
   }
 
   override fun reportResults(
-    pact: Pact<out Interaction>,
+    pact: Pact,
     result: TestResult,
     version: String,
     client: PactBrokerClient?,
@@ -76,12 +75,12 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     }
   }
 
-  private fun <I : Interaction> publishResult(
+  private fun publishResult(
     brokerClient: PactBrokerClient,
     source: BrokerUrlSource,
     result: TestResult,
     version: String,
-    pact: Pact<out I>,
+    pact: Pact,
     tags: List<String>
   ) {
     if (tags.isNotEmpty()) {

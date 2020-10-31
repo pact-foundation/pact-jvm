@@ -62,6 +62,10 @@ class Response @JvmOverloads constructor(
     return result
   }
 
+  fun asV4Response(): HttpResponse {
+    return HttpResponse(status, headers, body, matchingRules, generators)
+  }
+
   companion object : KLogging() {
     const val DEFAULT_STATUS = 200
 
@@ -72,7 +76,7 @@ class Response @JvmOverloads constructor(
           val statusJson = json["status"]
           when {
             statusJson.isNumber -> statusJson.asNumber().toInt()
-            statusJson is JsonValue.StringValue -> statusJson.asString().toInt()
+            statusJson is JsonValue.StringValue -> statusJson.asString()?.toInt() ?: DEFAULT_STATUS
             else -> DEFAULT_STATUS
           }
         }

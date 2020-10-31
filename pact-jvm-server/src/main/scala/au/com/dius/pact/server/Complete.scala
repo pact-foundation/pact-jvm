@@ -49,7 +49,7 @@ object Complete {
     result getOrElse clientError
   }
 
-  def writeIfMatching(pact: Pact[RequestResponseInteraction], results: PactSessionResults, pactVersion: PactSpecVersion) = {
+  def writeIfMatching(pact: Pact, results: PactSessionResults, pactVersion: PactSpecVersion) = {
     if (results.allMatched) {
       val pactFile = destinationFileForPact(pact)
       DefaultPactWriter.INSTANCE.writePact(pactFile, pact, pactVersion)
@@ -57,10 +57,9 @@ object Complete {
     VerificationResult(Success(results))
   }
 
-  def defaultFilename[I <: Interaction](pact: Pact[RequestResponseInteraction]): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
+  def defaultFilename[I <: Interaction](pact: Pact): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
 
-  def destinationFileForPact[I <: Interaction](pact: Pact[RequestResponseInteraction]): File = destinationFile(defaultFilename(pact))
+  def destinationFileForPact[I <: Interaction](pact: Pact): File = destinationFile(defaultFilename(pact))
 
   def destinationFile(filename: String) = new File(s"${System.getProperty("pact.rootDir", "target/pacts")}/$filename")
-
 }

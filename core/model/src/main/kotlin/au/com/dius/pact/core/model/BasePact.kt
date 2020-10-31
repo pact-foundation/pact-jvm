@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.michaelbull.result.Result
 import mu.KLogging
 import java.io.File
 import java.io.IOException
@@ -13,27 +14,27 @@ import kotlin.reflect.full.memberProperties
 /**
  * Base Pact class
  */
-abstract class BasePact<I : Interaction> @JvmOverloads constructor(
+abstract class BasePact @JvmOverloads constructor(
   override var consumer: Consumer,
   override var provider: Provider,
-  open val metadata: Map<String, Any?> = DEFAULT_METADATA,
+  override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
-) : Pact<I> {
+) : Pact {
 
-  fun write(pactDir: String, pactSpecVersion: PactSpecVersion) {
-    DefaultPactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
+  override fun write(pactDir: String, pactSpecVersion: PactSpecVersion): Result<Int, Throwable> {
+    return DefaultPactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
   }
 
   open fun fileForPact(pactDir: String) = File(pactDir, "${consumer.name}-${provider.name}.json")
 
-  override fun compatibleTo(other: Pact<*>) = provider == other.provider &&
+  override fun compatibleTo(other: Pact) = provider == other.provider &&
     this::class.java.isAssignableFrom(other::class.java)
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false
 
-    other as BasePact<*>
+    other as BasePact
 
     if (consumer != other.consumer) return false
     if (provider != other.provider) return false
@@ -56,10 +57,13 @@ abstract class BasePact<I : Interaction> @JvmOverloads constructor(
   }
 
   companion object : KLogging() {
-    val DEFAULT_METADATA: Map<String, Map<String, Any?>> = Collections.unmodifiableMap(mapOf(
-      "pactSpecification" to mapOf("version" to "3.0.0"),
-      "pact-jvm" to mapOf("version" to lookupVersion())
-    ))
+    @JvmStatic
+    val DEFAULT_METADATA: Map<String, Map<String, Any?>> by lazy {
+      Collections.unmodifiableMap(mapOf(
+        "pactSpecification" to mapOf("version" to "3.0.0"),
+        "pact-jvm" to mapOf("version" to lookupVersion())
+      ))
+    }
 
     @JvmStatic
     fun metaData(metadata: JsonValue?, pactSpecVersion: PactSpecVersion): Map<String, Any?> {

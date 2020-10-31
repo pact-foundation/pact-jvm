@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.maven
 
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.PactVerification
@@ -19,13 +18,13 @@ class Consumer(
   override var pactFileAuthentication: List<Any?> = emptyList()
 ) : ConsumerInfo(name, stateChange, stateChangeUsesBody, packagesToScan, verificationType, pactSource, pactFileAuthentication) {
 
-  fun getPactUrl() = if (pactSource is UrlSource<*>) {
-    URL((pactSource as UrlSource<*>).url)
+  fun getPactUrl() = if (pactSource is UrlSource) {
+    URL((pactSource as UrlSource).url)
   } else {
     URL(pactSource.toString())
   }
 
   fun setPactUrl(pactUrl: URL) {
-    pactSource = UrlSource<Interaction>(pactUrl.toString())
+    pactSource = UrlSource(pactUrl.toString())
   }
 }

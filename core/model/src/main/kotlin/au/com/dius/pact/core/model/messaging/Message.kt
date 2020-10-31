@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -140,6 +141,10 @@ class Message @JvmOverloads constructor(
     return errors
   }
 
+  override fun asV4Interaction(): V4Interaction {
+    TODO("Not yet implemented")
+  }
+
   companion object : KLogging() {
 
     /**
@@ -162,7 +167,7 @@ class Message @JvmOverloads constructor(
       val contents = if (json.has("contents")) {
         when (val contents = json["contents"]) {
           is JsonValue.Null -> OptionalBody.nullBody()
-          is JsonValue.StringValue -> OptionalBody.body(contents.asString().toByteArray(contentType.asCharset()),
+          is JsonValue.StringValue -> OptionalBody.body(contents.asString()!!.toByteArray(contentType.asCharset()),
             contentType)
           else -> OptionalBody.body(contents.serialise().toByteArray(contentType.asCharset()), contentType)
         }

@@ -148,7 +148,7 @@ data class PactVerificationContext @JvmOverloads constructor(
  * JUnit 5 test extension class used to inject parameters and execute the test for a Pact interaction.
  */
 class PactVerificationExtension(
-  private val pact: Pact<Interaction>,
+  private val pact: Pact,
   private val pactSource: au.com.dius.pact.core.model.PactSource,
   private val interaction: Interaction,
   private val serviceName: String,
@@ -470,7 +470,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
         loader.setValueResolver(valueResolver)
       }
       description += "\nSource: ${loader.description()}"
-      val pacts = handleWith<List<Pact<Interaction>>> { loader.load(serviceName) }.getOrElse {
+      val pacts = handleWith<List<Pact>> { loader.load(serviceName) }.getOrElse {
         val ignoreAnnotation = AnnotationSupport.findAnnotation(context.requiredTestClass, IgnoreNoPactsToVerify::class.java)
         if (ignoreAnnotation.isPresent && ignoreAnnotation.get().ignoreIoErrors == "true") {
           emptyList()

@@ -106,7 +106,7 @@ class JsonReporter(
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
     jsonData["execution"].asArray().last()["consumer"].asObject()["source"] = jsonObject(
-      "file" to if (pactFile is FileSource<*>) pactFile.file.toString() else pactFile.description()
+      "file" to if (pactFile is FileSource) pactFile.file.toString() else pactFile.description()
     )
   }
 
@@ -125,7 +125,7 @@ class JsonReporter(
 
   override fun warnProviderHasNoConsumers(provider: IProviderInfo) { }
 
-  override fun warnPactFileHasNoInteractions(pact: Pact<Interaction>) { }
+  override fun warnPactFileHasNoInteractions(pact: Pact) { }
 
   override fun interactionDescription(interaction: Interaction) {
     jsonData["execution"].asArray().last()["interactions"].asArray().add(jsonObject(

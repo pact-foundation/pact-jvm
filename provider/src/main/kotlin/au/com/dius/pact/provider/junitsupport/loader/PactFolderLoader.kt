@@ -2,7 +2,6 @@ package au.com.dius.pact.provider.junitsupport.loader
 
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.DirectorySource
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import java.io.File
 import java.net.URLDecoder
@@ -11,8 +10,8 @@ import java.net.URLDecoder
  * Out-of-the-box implementation of [PactLoader]
  * that loads pacts from either a subfolder of project resource folder or a directory
  */
-class PactFolderLoader<I>(private val path: File) : PactLoader where I : Interaction {
-  private val pactSource: DirectorySource<I> = DirectorySource(path)
+class PactFolderLoader(private val path: File) : PactLoader {
+  private val pactSource: DirectorySource = DirectorySource(path)
 
   constructor(path: String) : this(File(path))
 
@@ -20,15 +19,15 @@ class PactFolderLoader<I>(private val path: File) : PactLoader where I : Interac
 
   override fun description() = "Directory(${pactSource.dir})"
 
-  override fun load(providerName: String): List<Pact<I>> {
-    val pacts = mutableListOf<Pact<I>>()
+  override fun load(providerName: String): List<Pact> {
+    val pacts = mutableListOf<Pact>()
     val pactFolder = resolvePath()
     val files = pactFolder.listFiles { _, name -> name.endsWith(".json") }
     if (files != null) {
       for (file in files) {
         val pact = DefaultPactReader.loadPact(file)
         if (pact.provider.name == providerName) {
-          pacts.add(pact as Pact<I>)
+          pacts.add(pact)
           this.pactSource.pacts.put(file, pact)
         }
       }

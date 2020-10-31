@@ -15,11 +15,11 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import kotlin.reflect.full.createInstance
 
 object JUnitProviderTestSupport : KLogging() {
-  fun <I> filterPactsByAnnotations(pacts: List<Pact<I>>, testClass: Class<*>): List<Pact<I>> where I : Interaction {
+  fun filterPactsByAnnotations(pacts: List<Pact>, testClass: Class<*>): List<Pact> {
     val pactFilter = testClass.getAnnotation(PactFilter::class.java) ?: return pacts
     if (pactFilter.value.all { it.isEmpty() }) return pacts
 
-    val interactionFilter = pactFilter.filter.createInstance() as InteractionFilter<I>
+    val interactionFilter = pactFilter.filter.createInstance() as InteractionFilter
     return pacts.map { pact ->
       FilteredPact(pact, interactionFilter.buildPredicate(pactFilter.value))
     }.filter { pact -> pact.interactions.isNotEmpty() }

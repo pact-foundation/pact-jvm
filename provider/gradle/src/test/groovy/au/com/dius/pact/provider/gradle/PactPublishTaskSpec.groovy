@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.gradle
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.github.zafarkhaja.semver.Version
+import au.com.dius.pact.core.support.Version
 import org.apache.commons.io.IOUtils
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
@@ -162,7 +162,7 @@ class PactPublishTaskSpec extends Specification {
     project.pact {
       publish {
         pactBrokerUrl = 'pactBrokerUrl'
-        consumerVersion = Version.valueOf('1.2.3')
+        consumerVersion = Version.parse('1.2.3').component1()
       }
     }
     project.evaluate()

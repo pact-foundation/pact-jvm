@@ -1,0 +1,35 @@
+{
+  "provider": {
+    "name": "test_provider"
+  },
+  "consumer": {
+    "name": "test_consumer"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "001",
+      "description": "test interaction with a binary body",
+      "request": {
+        "method": "GET",
+        "path": "/"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": ["image/gif"]
+        },
+        "body": {
+          "contentType": "image/gif",
+          "encoded": "base64",
+          "content": "R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs="
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  }
+}

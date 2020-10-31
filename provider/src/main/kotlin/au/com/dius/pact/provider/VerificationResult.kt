@@ -27,7 +27,7 @@ sealed class VerificationFailureType {
   data class MismatchFailure(
     val mismatch: Mismatch,
     val interaction: Interaction? = null,
-    val pact: Pact<Interaction>? = null
+    val pact: Pact? = null
   ) : VerificationFailureType() {
     override fun description() = formatForDisplay(TermColors())
     override fun formatForDisplay(t: TermColors): String {

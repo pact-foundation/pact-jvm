@@ -1,14 +1,13 @@
 package au.com.dius.pact.server
 
 import java.util
-import java.util.Collections
 
 import au.com.dius.pact.core.model.{Request, Response, _}
 
 import scala.collection.JavaConverters._
 
 object RequestRouter {
-  def matchPath(request: Request, oldState: ServerState): Option[StatefulMockProvider[RequestResponseInteraction]] =
+  def matchPath(request: Request, oldState: ServerState): Option[StatefulMockProvider] =
     (for {
       k <- oldState.keys if request.getPath.startsWith(k)
       pact <- oldState.get(k)

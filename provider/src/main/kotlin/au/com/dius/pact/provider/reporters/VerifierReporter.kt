@@ -32,7 +32,7 @@ interface VerifierReporter {
   fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo)
   fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String)
   fun warnProviderHasNoConsumers(provider: IProviderInfo)
-  fun warnPactFileHasNoInteractions(pact: Pact<Interaction>)
+  fun warnPactFileHasNoInteractions(pact: Pact)
   fun interactionDescription(interaction: Interaction)
   fun stateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean)
   fun warnStateChangeIgnored(state: String, provider: IProviderInfo, consumer: IConsumerInfo)

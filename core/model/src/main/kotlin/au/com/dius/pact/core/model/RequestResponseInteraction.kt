@@ -74,6 +74,11 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     return errors
   }
 
+  override fun asV4Interaction(): V4Interaction {
+    return V4Interaction.SynchronousHttp("", description, request.asV4Request(), response.asV4Response(),
+      interactionId, providerStates).withGeneratedKey()
+  }
+
   companion object : KLogging() {
     const val COMMA = ", "
 

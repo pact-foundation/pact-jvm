@@ -161,6 +161,21 @@ data class OptionalBody(
     }
   }
 
+  fun toV4Format(): Map<String, Any?> {
+    return when (state) {
+      State.PRESENT -> if (value!!.isEmpty()) {
+        if (contentType.isBinaryType()) {
+          mapOf("content" to valueAsBase64(), "contentType" to contentType.toString(), "encoded" to "base64")
+        } else {
+          mapOf("content" to valueAsString(), "contentType" to contentType.toString(), "encoded" to false)
+        }
+      } else {
+        mapOf("content" to "")
+      }
+      else -> mapOf()
+    }
+  }
+
   companion object : KLogging() {
 
     @JvmStatic fun missing(): OptionalBody {
