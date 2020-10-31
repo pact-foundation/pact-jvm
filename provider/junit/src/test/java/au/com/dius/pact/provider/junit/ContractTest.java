@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter;
+import au.com.dius.pact.provider.junitsupport.VerificationReports;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.target.Target;
@@ -24,6 +25,7 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @RunWith(PactRunner.class)
 @Provider("myAwesomeService")
 @PactFolder("pacts")
+@VerificationReports(value = {"console", "json", "markdown"}, reportDir = "build/pacts/reports")
 public class ContractTest {
     // NOTE: this is just an example of embedded service that listens to requests, you should start here real service
     @ClassRule

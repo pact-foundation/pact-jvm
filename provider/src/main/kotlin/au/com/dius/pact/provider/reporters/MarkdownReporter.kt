@@ -235,8 +235,13 @@ class MarkdownReporter(
           } else {
             val row = TableRow()
             val pending = if (consumer.pending) " [Pending]" else ""
-            row.appendChild(TableCell(BasedSequence.of(consumer.name + pending)))
-            row.appendChild(TableCell(BasedSequence.of(state)))
+            val tableCellText = BasedSequence.of(consumer.name + pending)
+            val tableCell = TableCell(tableCellText)
+            tableCell.text = tableCellText
+            row.appendChild(tableCell)
+            val statusCell = TableCell(BasedSequence.of(state))
+            statusCell.text = BasedSequence.of(state)
+            row.appendChild(statusCell)
             child.appendChild(row)
           }
         }
