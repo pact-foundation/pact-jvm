@@ -117,5 +117,4 @@ class RequestResponsePactSpec extends Specification {
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction, interaction2 ])
   }
-
 }

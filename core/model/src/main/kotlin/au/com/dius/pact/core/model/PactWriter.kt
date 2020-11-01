@@ -5,6 +5,7 @@ import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.expect
 import mu.KLogging
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -58,7 +59,11 @@ object DefaultPactWriter : PactWriter, KLogging() {
    */
   override fun writePact(pact: Pact, writer: PrintWriter, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable> {
     pact.sortInteractions()
-    val json = Json.prettyPrint(pact.toMap(pactSpecVersion))
+    val json = if (pactSpecVersion == PactSpecVersion.V4) {
+      Json.prettyPrint(pact.asV4Pact().expect { "Failed to upcast to a V4 pact" }.toMap(pactSpecVersion))
+    } else {
+      Json.prettyPrint(pact.toMap(pactSpecVersion))
+    }
     writer.println(json)
     return Ok(json.toByteArray().size)
   }

@@ -85,7 +85,7 @@ class MessagePact @JvmOverloads constructor (
   override fun asMessagePact() = Ok(this)
 
   override fun asV4Pact(): Result<V4Pact, String> {
-    TODO("Not yet implemented")
+    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }, metadata))
   }
 
   override val interactions: List<Message>

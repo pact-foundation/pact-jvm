@@ -5,10 +5,9 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.V4PactFeaturesException
 import org.apache.http.entity.ContentType
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
@@ -88,17 +87,16 @@ class V4FeaturesPactTest {
   }
 
   @Test
-  @Disabled('Not implemented')
   void testRunMessageConsumerPassesIfV4FeaturesUsedWithV4Spec() {
     PactDslJsonBody content = new PactDslJsonBody()
     content.unorderedArray('items').string('harry')
 
-    MessagePact pact = MessagePactBuilder
+    Pact pact = MessagePactBuilder
       .consumer('v4_async_ping_consumer')
       .hasPactWith('v4_async_ping_provider')
       .expectsToReceive('a message')
       .withContent(content)
-      .toPact()
+      .toPact(V4Pact)
 
     PactVerificationResult result = runMessageConsumerTest(pact, PactSpecVersion.V4) { messages, context ->
       true

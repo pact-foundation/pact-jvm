@@ -141,8 +141,10 @@ class Message @JvmOverloads constructor(
     return errors
   }
 
+  @ExperimentalUnsignedTypes
   override fun asV4Interaction(): V4Interaction {
-    TODO("Not yet implemented")
+    return V4Interaction.AsynchronousMessage("", description, contents, metaData, matchingRules, generators,
+      interactionId, providerStates).withGeneratedKey()
   }
 
   companion object : KLogging() {

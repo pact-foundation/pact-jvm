@@ -115,5 +115,4 @@ class RequestResponseInteractionSpec extends Specification {
       'include[]=needs_grading_count&include[]=permissions&include[]=current_grading_period_scores&' +
       'include[]=course_image&include[]=favorites'
   }
-
 }

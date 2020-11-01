@@ -1,5 +1,9 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
@@ -40,11 +44,16 @@ enum class V4InteractionType {
   }
 }
 
-fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, List<String>>): OptionalBody {
+fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): OptionalBody {
   var contentType = ContentType.UNKNOWN
   val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
   if (contentTypeEntry != null) {
-    contentType = ContentType(contentTypeEntry.value.first())
+    val value = contentTypeEntry.value
+    contentType = if (value is List<*>) {
+      ContentType(value.first().toString())
+    } else {
+      ContentType(value.toString())
+    }
   }
 
   return if (json.has(field)) {
@@ -135,14 +144,18 @@ sealed class V4Interaction(
         .build().toUInt().toString(16)
     }
 
-    override fun toMap(_pactSpecVersion: PactSpecVersion): Map<String, *> {
-      return mapOf(
+    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+      val map = mutableMapOf(
         "type" to V4InteractionType.SynchronousHTTP.toString(),
         "key" to uniqueKey(),
         "description" to description,
         "request" to request.toMap(),
         "response" to response.toMap()
       )
+      if (providerStates.isNotEmpty()) {
+        map["providerStates"] = providerStates.map { it.toMap() }
+      }
+      return map
     }
 
     override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
@@ -152,12 +165,74 @@ sealed class V4Interaction(
       return errors
     }
 
-    override fun asV4Interaction(): V4Interaction {
-      return this
-    }
+    override fun asV4Interaction() = this
 
     fun asV3Interaction(): RequestResponseInteraction {
       return RequestResponseInteraction(description, providerStates, request.toV3Request(), response.toV3Response(),
+        interactionId)
+    }
+  }
+
+  class AsynchronousMessage(
+    key: String,
+    description: String,
+    val contents: OptionalBody,
+    var metadata: Map<String, Any?>,
+    val matchingRules: MatchingRules,
+    val generators: Generators,
+    interactionId: String? = null,
+    providerStates: List<ProviderState> = listOf()
+  ) : V4Interaction(key, description, interactionId, providerStates) {
+    @ExperimentalUnsignedTypes
+    override fun withGeneratedKey(): V4Interaction {
+      return AsynchronousMessage(generateKey(), description, contents, metadata, matchingRules, generators,
+        interactionId, providerStates)
+    }
+
+    @ExperimentalUnsignedTypes
+    override fun generateKey(): String {
+      return HashCodeBuilder(33, 7)
+        .append(description)
+        .append(contents.hashCode())
+        .append(matchingRules.hashCode())
+        .append(generators.hashCode())
+        .append(providerStates.hashCode())
+        .build().toUInt().toString(16)
+    }
+
+    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+      val map = mutableMapOf(
+        "type" to V4InteractionType.AsynchronousMessages.toString(),
+        "key" to key,
+        "description" to description,
+        "contents" to contents.toV4Format()
+      )
+      if (metadata.isNotEmpty()) {
+        map["metadata"] = metadata
+      }
+      if (providerStates.isNotEmpty()) {
+        map["providerStates"] = providerStates.map { it.toMap() }
+      }
+      if (matchingRules.isNotEmpty()) {
+        map["matchingRules"] = matchingRules.toMap(PactSpecVersion.V4)
+      }
+      if (generators.isNotEmpty()) {
+        map["generators"] = generators.toMap(PactSpecVersion.V4)
+      }
+      return map
+    }
+
+    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+      val errors = mutableListOf<String>()
+      errors.addAll(matchingRules.validateForVersion(pactVersion))
+      errors.addAll(generators.validateForVersion(pactVersion))
+      return errors
+    }
+
+    override fun asV4Interaction() = this
+
+    fun asV3Interaction(): Message {
+      return Message(description, providerStates, contents, matchingRules, generators, metadata.toMutableMap(),
         interactionId)
     }
   }
@@ -181,7 +256,28 @@ sealed class V4Interaction(
                 Ok(SynchronousHttp(key, description, HttpRequest.fromJson(json["request"]),
                   HttpResponse.fromJson(json["response"]), id, providerStates))
               }
-              V4InteractionType.AsynchronousMessages -> TODO()
+              V4InteractionType.AsynchronousMessages -> {
+                val metadata = if (json.has("metadata")) {
+                  val jsonValue = json["metadata"]
+                  if (jsonValue is JsonValue.Object) {
+                    jsonValue.entries
+                  } else {
+                    logger.warn { "Ignoring invalid message metadata ${jsonValue.serialise()}" }
+                    mapOf()
+                  }
+                } else {
+                  mapOf()
+                }
+                val contents = bodyFromJson("body", json, metadata)
+                val matchingRules = if (json.has("matchingRules") && json["matchingRules"] is JsonValue.Object)
+                  MatchingRulesImpl.fromJson(json["matchingRules"])
+                else MatchingRulesImpl()
+                val generators = if (json.has("generators") && json["generators"] is JsonValue.Object)
+                  Generators.fromJson(json["generators"])
+                else Generators()
+                Ok(AsynchronousMessage(key, description, contents, metadata, matchingRules, generators, id,
+                  providerStates))
+              }
               V4InteractionType.SynchronousMessages -> {
                 val message = "Interaction type '$type' is currently unimplemented. It will be ignored. Source: $source"
                 logger.warn(message)
@@ -200,40 +296,6 @@ sealed class V4Interaction(
         logger.warn(message)
         Err(message)
       }
-
-      /*
-        match i_type {
-          V4InteractionType::Synchronous_HTTP => {
-            let request = ijson.get("request").cloned().unwrap_or_default();
-            let response = ijson.get("response").cloned().unwrap_or_default();
-            Ok(V4Interaction::SynchronousHttp {
-              id,
-              key,
-              description,
-              provider_states,
-              request: HttpRequest::from_json(&request),
-              response: HttpResponse::from_json(&response)
-            })
-          }
-          V4InteractionType::Asynchronous_Messages => {
-            let metadata = match ijson.get("metadata") {
-              Some(&Value::Object(ref v)) => v.iter().map(|(k, v)| {
-                (k.clone(), v.clone())
-              }).collect(),
-              _ => hashmap!{}
-            };
-            let as_headers = metadata_to_headers(&metadata);
-            Ok(V4Interaction::AsynchronousMessages {
-              id,
-              key,
-              description,
-              provider_states,
-              metadata,
-              contents: body_from_json(ijson, "contents", &as_headers),
-              matching_rules: matchingrules::matchers_from_json(ijson, &None),
-              generators: generators::generators_from_json(ijson)
-            })
-          }*/
     }
   }
 }
@@ -272,10 +334,9 @@ open class V4Pact(
   }
 
   override fun asMessagePact(): Result<MessagePact, String> {
-//    return Ok(MessagePact(provider, consumer,
-//      interactions.filterIsInstance<V4Interaction.>()
-//        .map { it.toV3Interaction() }))
-    TODO("Not yet implemented")
+    return Ok(MessagePact(provider, consumer,
+      interactions.filterIsInstance<V4Interaction.AsynchronousMessage>()
+        .map { it.asV3Interaction() }.toMutableList()))
   }
 
   override fun asV4Pact() = Ok(this)

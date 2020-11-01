@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.Matcher
+import au.com.dius.pact.core.model.BasePact.Companion.DEFAULT_METADATA
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.InvalidPactException
@@ -9,8 +10,14 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.UnknownPactSource
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
+import java.util.function.Function
+import java.util.stream.Collectors
 
 /**
  * PACT DSL builder for v3 specification
@@ -148,9 +155,26 @@ class MessagePactBuilder(
   }
 
   /**
+   * Terminates the DSL and builds a pact to represent the interactions
+   */
+  fun <P : Pact?> toPact(pactClass: Class<P>): P {
+    return when {
+      pactClass.isAssignableFrom(V4Pact::class.java) -> {
+        V4Pact(consumer, provider, messages.map { it.asV4Interaction() }) as P
+      }
+      pactClass.isAssignableFrom(MessagePact::class.java) -> {
+        return MessagePact(provider, consumer, messages) as P
+      }
+      else -> {
+        throw IllegalArgumentException(pactClass.simpleName + " is not a valid Pact class")
+      }
+    }
+  }
+
+  /**
    * Convert this builder into a Pact
    */
-  fun <P: Pact> toPact(): P {
+  fun <P : Pact> toPact(): P {
     return MessagePact(provider, consumer, messages) as P
   }
 
