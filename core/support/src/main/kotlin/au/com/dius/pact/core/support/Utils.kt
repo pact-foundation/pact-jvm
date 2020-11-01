@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomUtils
 import java.io.IOException
 import java.net.ServerSocket
 import kotlin.reflect.full.cast
+import kotlin.reflect.full.declaredMemberProperties
 
 object Utils {
   fun extractFromMap(json: Map<String, Any>, vararg s: String): Any? {
@@ -75,5 +76,32 @@ object Utils {
       }
     }
     return result
+  }
+
+  fun objectToJsonMap(obj: Any?): Map<String, Any?>? {
+    return if (obj != null) {
+      obj::class.declaredMemberProperties.associate { prop ->
+        val key = prop.name
+        val value = prop.getter.call(obj)
+        key to jsonSafeValue(value)
+      }
+    } else {
+      null
+    }
+  }
+
+  fun jsonSafeValue(value: Any?): Any? {
+    return if (value != null) {
+      when (value) {
+        is Boolean -> value
+        is String -> value
+        is Number -> value
+        is Map<*, *> -> value.entries.associate { it.key.toString() to jsonSafeValue(it.value) }
+        is Collection<*> -> value.map { jsonSafeValue(it) }
+        else -> objectToJsonMap(value)
+      }
+    } else {
+      null
+    }
   }
 }
