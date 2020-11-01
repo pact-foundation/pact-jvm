@@ -58,7 +58,9 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
   apply plugin: 'codenarc'
-  apply plugin: 'jacoco'
+  if (!System.env.TRAVIS) {
+    apply plugin: 'jacoco'
+  }
   apply plugin: 'org.jetbrains.kotlin.jvm'
 //  apply plugin: 'org.jmailen.kotlinter'
   apply plugin: 'io.gitlab.arturbosch.detekt'
@@ -212,7 +214,9 @@ subprojects {
       configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
   }
 
+  if (!System.env.TRAVIS) {
     check.dependsOn << 'jacocoTestReport'
+  }
 
 //  kotlinter {
 //    indentSize = 2
