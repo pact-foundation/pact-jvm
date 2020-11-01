@@ -39,7 +39,7 @@ object Matchers : KLogging() {
       }
     }
     return if (filter.isNotEmpty()) {
-      filter.maxBy { seq -> seq.size }?.size ?: 0
+      filter.maxByOrNull { seq -> seq.size }?.size ?: 0
     } else {
       0
     }

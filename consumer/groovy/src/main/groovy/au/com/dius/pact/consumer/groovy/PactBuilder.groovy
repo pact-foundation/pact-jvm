@@ -14,7 +14,7 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import groovy.transform.CompileStatic
@@ -282,12 +282,12 @@ class PactBuilder extends GroovyBuilder {
     if (requestState) {
       currentInteraction.request.body = OptionalBody.body(os.toByteArray())
       currentInteraction.request.headers[CONTENT_TYPE] = [ multipart.contentType.value ]
-      Category category  = currentInteraction.request.matchingRules.addCategory(HEADER)
+      MatchingRuleCategory category  = currentInteraction.request.matchingRules.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     } else {
       currentInteraction.response.body = OptionalBody.body(os.toByteArray())
       currentInteraction.response.headers[CONTENT_TYPE] = [ multipart.contentType.value ]
-      Category category  = currentInteraction.response.matchingRules.addCategory(HEADER)
+      MatchingRuleCategory category  = currentInteraction.response.matchingRules.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     }
   }

@@ -42,14 +42,14 @@ class MatchingRulesSpec extends Specification {
     then:
     !matchingRules.empty
     matchingRules.categories == ['path', 'query', 'header', 'body'] as Set
-    matchingRules.rulesForCategory('path') == new Category('path', [
+    matchingRules.rulesForCategory('path') == new MatchingRuleCategory('path', [
       '': new MatchingRuleGroup([new RegexMatcher('\\w+') ]) ])
-    matchingRules.rulesForCategory('query') == new Category('query', [
+    matchingRules.rulesForCategory('query') == new MatchingRuleCategory('query', [
       Q1: new MatchingRuleGroup([ new RegexMatcher('\\d+') ]) ])
-    matchingRules.rulesForCategory('header') == new Category('header', [
+    matchingRules.rulesForCategory('header') == new MatchingRuleCategory('header', [
       HEADERX: new MatchingRuleGroup([ new IncludeMatcher('ValueA') ]),
       HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA') ]) ])
-    matchingRules.rulesForCategory('body') == new Category('body', [
+    matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body', [
       '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
       '$.animals[*].*': new MatchingRuleGroup([TypeMatcher.INSTANCE ]),
       '$.animals[*].children': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
@@ -107,15 +107,15 @@ class MatchingRulesSpec extends Specification {
     then:
     !matchingRules.empty
     matchingRules.categories == ['path', 'query', 'header', 'body'] as Set
-    matchingRules.rulesForCategory('path') == new Category('path', [
+    matchingRules.rulesForCategory('path') == new MatchingRuleCategory('path', [
       '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ], RuleLogic.OR) ])
-    matchingRules.rulesForCategory('query') == new Category('query', [
+    matchingRules.rulesForCategory('query') == new MatchingRuleCategory('query', [
       Q1: new MatchingRuleGroup([ new RegexMatcher('\\d+') ]) ])
-    matchingRules.rulesForCategory('header') == new Category('header', [
+    matchingRules.rulesForCategory('header') == new MatchingRuleCategory('header', [
       HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA'), new IncludeMatcher('ValueB') ],
         RuleLogic.OR)
     ])
-    matchingRules.rulesForCategory('body') == new Category('body', [
+    matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body', [
       '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ], RuleLogic.OR),
       '$.animals[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
       '$.animals[*].children': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
@@ -142,7 +142,7 @@ class MatchingRulesSpec extends Specification {
     then:
     !matchingRules.empty
     matchingRules.categories == ['path'] as Set
-    matchingRules.rulesForCategory('path') == new Category('path', [
+    matchingRules.rulesForCategory('path') == new MatchingRuleCategory('path', [
       '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ]) ])
   }
 

@@ -167,7 +167,7 @@ class PactBrokerResultSpec extends Specification {
                 |\tpath: /path
                 |\tquery: {}
                 |\theaders: {Content-Type=[application/json]}
-                |\tmatchers: MatchingRules(rules={body=Category(name=body, matchingRules={}), path=Category(name=path, matchingRules={}), header=Category(name=header, matchingRules={})})
+                |\tmatchers: MatchingRules(rules={body=MatchingRuleCategory(name=body, matchingRules={}), path=MatchingRuleCategory(name=path, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})})
                 |\tgenerators: Generators(categories={})
                 |\tbody: PRESENT({
                 |    "status": "isGood"

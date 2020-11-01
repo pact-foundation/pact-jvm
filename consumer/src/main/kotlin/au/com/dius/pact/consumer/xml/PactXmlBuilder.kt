@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.xml
 import au.com.dius.pact.consumer.dsl.Matcher
 import au.com.dius.pact.core.model.generators.Category.BODY
 import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import org.w3c.dom.DOMImplementation
 import org.w3c.dom.Document
@@ -36,7 +36,7 @@ class PactXmlBuilder @JvmOverloads constructor (
   val charset: String? = null
 ) {
   val generators: Generators = Generators()
-  val matchingRules: Category = Category("body")
+  val matchingRules: MatchingRuleCategory = MatchingRuleCategory("body")
 
   lateinit var doc: Document
   private lateinit var dom: DOMImplementation

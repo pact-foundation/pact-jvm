@@ -2,7 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
@@ -379,7 +379,7 @@ class MatchersSpec extends Specification {
     matchers.addCategory('body')
       .addRule('$.X', new IncludeMatcher('A'))
       .addRule('$.Y', EqualsMatcher.INSTANCE)
-    def expected = new Category('body')
+    def expected = new MatchingRuleCategory('body')
       .addRule('$.X', new IncludeMatcher('A'))
 
     expect:

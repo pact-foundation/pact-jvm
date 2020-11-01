@@ -52,6 +52,8 @@ data class PartialRequestMatch(val problems: Map<Interaction, RequestMatchResult
 
 object RequestMismatch : RequestMatch()
 
+//data class MatchingContext(val matchers: MatchingRuleCategory, val config: DiffConfig)
+
 class RequestMatching(private val expectedInteractions: List<RequestResponseInteraction>) {
 
     fun matchInteraction(actual: Request): RequestMatch {
@@ -89,6 +91,19 @@ class RequestMatching(private val expectedInteractions: List<RequestResponseInte
     @JvmStatic
     fun requestMismatches(expected: Request, actual: Request): RequestMatchResult {
       logger.debug { "comparing to expected request: \n$expected" }
+
+      /*
+      let path_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
+                                          &expected.matching_rules.rules_for_category("path").unwrap_or_default());
+  let body_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
+                                          &expected.matching_rules.rules_for_category("body").unwrap_or_default());
+  let query_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
+                                          &expected.matching_rules.rules_for_category("query").unwrap_or_default());
+  let header_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
+                                          &expected.matching_rules.rules_for_category("header").unwrap_or_default());
+
+       */
+
       return RequestMatchResult(Matching.matchMethod(expected.method, actual.method),
         Matching.matchPath(expected, actual),
         Matching.matchQuery(expected, actual),

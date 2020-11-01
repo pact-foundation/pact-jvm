@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.core.model.generators.Generators;
-import au.com.dius.pact.core.model.matchingrules.Category;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory;
 import au.com.dius.pact.core.model.matchingrules.DateMatcher;
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher;
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher;
@@ -27,7 +27,7 @@ public abstract class DslPart {
     protected final DslPart parent;
     protected final String rootPath;
     protected final String rootName;
-    protected Category matchers = new Category("body");
+    protected MatchingRuleCategory matchers = new MatchingRuleCategory("body");
     protected Generators generators = new Generators();
     protected boolean closed = false;
 
@@ -357,11 +357,11 @@ public abstract class DslPart {
      */
     public abstract DslPart closeObject();
 
-    public Category getMatchers() {
+    public MatchingRuleCategory getMatchers() {
         return matchers;
     }
 
-    public void setMatchers(Category matchers) {
+    public void setMatchers(MatchingRuleCategory matchers) {
         this.matchers = matchers;
     }
 

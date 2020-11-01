@@ -6,12 +6,12 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @SuppressWarnings(['LineLength', 'SpaceAroundMapEntryColon'])
-class CategorySpec extends Specification {
+class MatchingRuleCategorySpec extends Specification {
 
   @Unroll
   def 'generate #spec format body matchers'() {
     given:
-    def category = new Category('body', [
+    def category = new MatchingRuleCategory('body', [
       '$[0]'      : new MatchingRuleGroup([new MaxTypeMatcher(5)]),
       '$[0][*].id': new MatchingRuleGroup([new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')])
     ])
@@ -33,7 +33,7 @@ class CategorySpec extends Specification {
   @Issue('#743')
   def 'writes path matchers in the correct format'() {
     given:
-    def category = new Category('path', [
+    def category = new MatchingRuleCategory('path', [
       '': new MatchingRuleGroup([new RegexMatcher('\\w+')])
     ])
 
@@ -45,7 +45,7 @@ class CategorySpec extends Specification {
   @Issue(['#786', '#882'])
   def 'writes header matchers in the correct format'() {
     given:
-    def category = new Category('header', [
+    def category = new MatchingRuleCategory('header', [
       'Content-Type': new MatchingRuleGroup([new RegexMatcher('application/json;\\s?charset=(utf|UTF)-8')])
     ])
 
@@ -57,7 +57,7 @@ class CategorySpec extends Specification {
   @Issue(['#895'])
   def 'when re-keying the matchers, drop any dollar from the start'() {
     given:
-    def category = new Category('body', [
+    def category = new MatchingRuleCategory('body', [
       '$.bestandstype': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '$.bestandsid': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ])
@@ -78,7 +78,7 @@ class CategorySpec extends Specification {
   def 'when re-keying the matchers, always prepend prefix to existing key'() {
     given:
     def matchingRule = new MatchingRuleGroup([TypeMatcher.INSTANCE])
-    def category = new Category('body', [
+    def category = new MatchingRuleCategory('body', [
             '.blueberry': matchingRule
     ])
     category.applyMatcherRootPrefix('blue')
@@ -103,7 +103,7 @@ class CategorySpec extends Specification {
       ],
       combine: 'OR'
     ]
-    def category = new Category('path')
+    def category = new MatchingRuleCategory('path')
 
     when:
     category.fromMap(matcherDefinition)

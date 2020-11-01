@@ -416,17 +416,17 @@ interface MatchingRules {
   /**
    * Get all the rules for a given category
    */
-  fun rulesForCategory(category: String): Category
+  fun rulesForCategory(category: String): MatchingRuleCategory
 
   /**
    * Adds a new category with the given name to the collection
    */
-  fun addCategory(category: String): Category
+  fun addCategory(category: String): MatchingRuleCategory
 
   /**
    * Adds the category to the collection
    */
-  fun addCategory(category: Category): Category
+  fun addCategory(category: MatchingRuleCategory): MatchingRuleCategory
 
   /**
    * If the matching rules are empty

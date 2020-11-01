@@ -4,7 +4,7 @@ import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
-import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.expressions.DataType
@@ -19,7 +19,7 @@ open class BaseBuilder : Matchers() {
       val body = data[BODY]
       val contentType = httpPart.determineContentType()
       if (body != null && body::class.qualifiedName == "au.com.dius.pact.consumer.groovy.PactBodyBuilder") {
-        httpPart.matchingRules.addCategory(body::class.property("matchers")?.get(body) as Category)
+        httpPart.matchingRules.addCategory(body::class.property("matchers")?.get(body) as MatchingRuleCategory)
         httpPart.generators.addGenerators(body::class.property("generators")?.get(body) as Generators)
         OptionalBody.body(body::class.property(BODY)?.get(body).toString().toByteArray(contentType.asCharset()))
       } else if (body != null && body !is String) {

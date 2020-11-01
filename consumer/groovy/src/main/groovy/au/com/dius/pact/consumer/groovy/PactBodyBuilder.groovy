@@ -4,7 +4,7 @@ import au.com.dius.pact.core.model.Feature
 import au.com.dius.pact.core.model.FeatureToggles
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
-import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.support.expressions.DataType
@@ -27,7 +27,7 @@ class PactBodyBuilder extends GroovyBuilder {
   public static final int TWO = 2
   public static final String STAR = '*'
 
-  def matchers = new Category('body')
+  def matchers = new MatchingRuleCategory('body')
   def generators = new Generators().addCategory(au.com.dius.pact.core.model.generators.Category.BODY)
   def mimetype = null
   Boolean prettyPrintBody = null

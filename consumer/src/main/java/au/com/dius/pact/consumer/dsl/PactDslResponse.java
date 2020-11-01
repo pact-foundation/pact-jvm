@@ -400,7 +400,7 @@ public class PactDslResponse {
    * @param example Example value
    */
   public PactDslResponse matchSetCookie(String cookie, String regex, String example) {
-    au.com.dius.pact.core.model.matchingrules.Category header = responseMatchers.addCategory("header");
+    au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory header = responseMatchers.addCategory("header");
     if (header.numRules("set-cookie") > 0) {
       header.addRule("set-cookie", new RegexMatcher(Pattern.quote(cookie + "=") + regex));
     } else {

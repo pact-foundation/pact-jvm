@@ -8,7 +8,7 @@ import java.util.function.Predicate
 /**
  * Matching rules category
  */
-data class Category @JvmOverloads constructor(
+data class MatchingRuleCategory @JvmOverloads constructor(
   val name: String,
   var matchingRules: MutableMap<String, MatchingRuleGroup> = mutableMapOf()
 ) {
@@ -19,7 +19,7 @@ data class Category @JvmOverloads constructor(
    * Add a rule by key to the given category
    */
   @JvmOverloads
-  fun addRule(item: String, matchingRule: MatchingRule, ruleLogic: RuleLogic = RuleLogic.AND): Category {
+  fun addRule(item: String, matchingRule: MatchingRule, ruleLogic: RuleLogic = RuleLogic.AND): MatchingRuleCategory {
     if (!matchingRules.containsKey(item)) {
       matchingRules[item] = MatchingRuleGroup(mutableListOf(matchingRule), ruleLogic)
     } else {
@@ -125,7 +125,7 @@ data class Category @JvmOverloads constructor(
   /**
    * Create a copy of the category with all rules re-keyed with the prefix
    */
-  fun copyWithUpdatedMatcherRootPrefix(prefix: String): Category {
+  fun copyWithUpdatedMatcherRootPrefix(prefix: String): MatchingRuleCategory {
     val category = copy()
     category.applyMatcherRootPrefix(prefix)
     return category

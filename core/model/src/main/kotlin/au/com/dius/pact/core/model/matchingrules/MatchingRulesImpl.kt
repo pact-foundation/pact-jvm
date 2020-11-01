@@ -7,16 +7,16 @@ import mu.KLogging
 
 class MatchingRulesImpl : MatchingRules {
 
-    val rules = mutableMapOf<String, Category>()
+    val rules = mutableMapOf<String, MatchingRuleCategory>()
 
-    override fun rulesForCategory(category: String): Category = addCategory(category)
+    override fun rulesForCategory(category: String): MatchingRuleCategory = addCategory(category)
 
-    override fun addCategory(category: Category): Category {
+    override fun addCategory(category: MatchingRuleCategory): MatchingRuleCategory {
         rules[category.name] = category
         return category
     }
 
-    override fun addCategory(category: String): Category = rules.getOrPut(category, { Category(category) })
+    override fun addCategory(category: String): MatchingRuleCategory = rules.getOrPut(category, { MatchingRuleCategory(category) })
 
     override fun copy(): MatchingRules {
         val copy = MatchingRulesImpl()
