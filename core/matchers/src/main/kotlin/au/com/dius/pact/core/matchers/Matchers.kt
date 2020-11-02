@@ -1,6 +1,10 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.matchers.util.IndicesCombination
+import au.com.dius.pact.core.matchers.util.LargestKeyValue
 import au.com.dius.pact.core.matchers.util.corresponds
+import au.com.dius.pact.core.matchers.util.memoizeFixed
+import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
@@ -12,8 +16,8 @@ import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.parsePath
-import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
+import java.math.BigInteger
 import java.util.Comparator
 import java.util.function.Predicate
 
@@ -207,6 +211,181 @@ object Matchers : KLogging() {
         if (actualEntries.containsKey(key)) {
           result.addAll(callback(path + key, value, actualEntries[key]))
         }
+      }
+    }
+    return result
+  }
+
+  fun <T> compareLists(
+    path: List<String>,
+    matcher: MatchingRule,
+    expectedList: List<T>,
+    actualList: List<T>,
+    context: MatchingContext,
+    generateDiff: () -> String,
+    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+  ): List<BodyItemMatchResult> {
+    val result = mutableListOf<BodyItemMatchResult>()
+    val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory)
+    if (matchResult.isNotEmpty()) {
+      result.add(BodyItemMatchResult(path.joinToString("."), matchResult))
+    }
+    if (expectedList.isNotEmpty()) {
+      when (matcher) {
+        is EqualsIgnoreOrderMatcher,
+        is MinEqualsIgnoreOrderMatcher,
+        is MaxEqualsIgnoreOrderMatcher,
+        is MinMaxEqualsIgnoreOrderMatcher -> {
+          // match unordered list
+          logger.debug { "compareLists: ignore-order matcher defined for path $path" }
+          // No need to pad 'expected' as we already visit all 'actual' values
+          result.addAll(compareListContentUnordered(expectedList, actualList, path, context, generateDiff, callback))
+        }
+        else -> {
+          result.addAll(compareListContent(expectedList.padTo(actualList.size, expectedList.first()),
+            actualList, path, context, generateDiff, callback))
+        }
+      }
+    }
+    return result
+  }
+
+  /**
+   * Compares any "extra" actual elements to expected using wildcard
+   * matching.
+   */
+  private fun <T> wildcardCompare(
+    basePath: List<String>,
+    expectedValues: List<T>,
+    actual: T,
+    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+  ): List<BodyItemMatchResult> {
+    val path = basePath + expectedValues.size.toString()
+    val pathStr = path.joinToString(".")
+    val starPathStr = (basePath + "*").joinToString(".")
+
+    return callback(path, expectedValues[0], actual)
+      .map { matchResult ->
+        // replaces index with '*' for clearer errors
+        matchResult.copy(
+          key = matchResult.key.replaceFirst(pathStr, starPathStr),
+          result = matchResult.result.map { mismatch ->
+            mismatch.copy(path = mismatch.path.replaceFirst(pathStr, starPathStr))
+          })
+      }
+  }
+
+  /**
+   * Compares every permutation of actual against expected.
+   *
+   * If actual has more elements than expected, and there is a wildcard matcher,
+   * then each extra actual element is compared to the first expected element
+   * using the wildcard matcher.
+   */
+  fun <T> compareListContentUnordered(
+    expectedList: List<T>,
+    actualList: List<T>,
+    path: List<String>,
+    context: MatchingContext,
+    generateDiff: () -> String,
+    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+  ): List<BodyItemMatchResult> {
+    val doWildCardMatching = actualList.size > expectedList.size &&
+      context.wildcardIndexMatcherDefined(path + expectedList.size.toString())
+
+    val memoizedWildcardCompare = { actualIndex: Int ->
+      wildcardCompare(path, expectedList, actualList[actualIndex], callback)
+    }.memoizeFixed(actualList.size)
+
+    val memoizedCompare = { expectedIndex: Int, actualIndex: Int ->
+      callback(path + expectedIndex.toString(), expectedList[expectedIndex], actualList[actualIndex])
+    }.memoizeFixed(expectedList.size, actualList.size)
+
+    val longestMatch = LargestKeyValue<Int, IndicesCombination>()
+    val examinedActualIndicesCombos = HashSet<BigInteger>()
+    /**
+     * Determines if a matching permutation exists.
+     *
+     * Note: this algorithm seems to have a worst case O(n*2^n) time and O(2^n) space complexity
+     * if a lot of the actuals match a lot of the expected (e.g., if expected uses regex matching
+     * with something like [3|2|1, 2|1, 1]). Without the caching, the time complexity jumps to
+     * around O(2^2n). Caching/memoization is also used above for compare, to effectively achieve
+     * just O(n^2) calls instead of O(2^n).
+     *
+     * For most normal cases, average performance should be closer to O(n^2) time and O(n) space
+     * complexity if there aren't many duplicate matches. Best case is O(n)/O(n) if its already
+     * in order.
+     *
+     * @param expectedIndex index of expected being compared against
+     * @param actualIndices combination of remaining actual indices to compare
+     */
+    fun hasMatchingPermutation(
+      expectedIndex: Int = 0,
+      actualIndices: IndicesCombination = IndicesCombination.of(actualList.size)
+    ): Boolean {
+      return if (actualIndices.comboId in examinedActualIndicesCombos) {
+        false
+      } else {
+        examinedActualIndicesCombos.add(actualIndices.comboId)
+        longestMatch.useIfLarger(expectedIndex, actualIndices)
+        if (expectedIndex < expectedList.size) {
+          actualIndices.indices().any { actualIndex ->
+            memoizedCompare(expectedIndex, actualIndex).all {
+              it.result.isEmpty()
+            } && hasMatchingPermutation(expectedIndex + 1, actualIndices - actualIndex)
+          }
+        } else if (doWildCardMatching) {
+          actualIndices.indices().all { actualIndex ->
+            memoizedWildcardCompare(actualIndex).all {
+              it.result.isEmpty()
+            }
+          }
+        } else true
+      }
+    }
+
+    return if (hasMatchingPermutation()) {
+      emptyList()
+    } else {
+      val smallestCombo = longestMatch.value ?: IndicesCombination.of(actualList.size)
+      val longestMatch = longestMatch.key ?: 0
+
+      val remainingErrors = smallestCombo.indices().map { actualIndex ->
+        (longestMatch until expectedList.size).map { expectedIndex ->
+          memoizedCompare(expectedIndex, actualIndex).flatMap { it.result }
+        }.flatten() + if (doWildCardMatching) {
+          memoizedWildcardCompare(actualIndex).flatMap { it.result }
+        } else emptyList()
+      }.toList().flatten()
+        .groupBy { it.path }
+        .map { (path, mismatches) -> BodyItemMatchResult(path, mismatches) }
+
+      listOf(BodyItemMatchResult(path.joinToString("."),
+        listOf(BodyMismatch(expectedList, actualList,
+          "Expected $expectedList to match $actualList ignoring order of elements",
+          path.joinToString("."), generateDiff()
+        ))
+      )) + remainingErrors
+    }
+  }
+
+  fun <T> compareListContent(
+    expectedList: List<T>,
+    actualList: List<T>,
+    path: List<String>,
+    context: MatchingContext,
+    generateDiff: () -> String,
+    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+  ): List<BodyItemMatchResult> {
+    val result = mutableListOf<BodyItemMatchResult>()
+    for ((index, value) in expectedList.withIndex()) {
+      if (index < actualList.size) {
+        result.addAll(callback(path + index.toString(), value, actualList[index]))
+      } else if (!context.matcherDefined(path)) {
+        result.add(BodyItemMatchResult(path.joinToString("."),
+          listOf(BodyMismatch(expectedList, actualList,
+            "Expected $value but was missing",
+            path.joinToString("."), generateDiff()))))
       }
     }
     return result

@@ -393,6 +393,7 @@ class JsonBodyMatcherSpec extends Specification {
   }
 
   @Unroll
+  @SuppressWarnings('LineLength')
   def 'matching json bodies - return a mismatch - with ignore-order - when actual has extra elements'() {
     given:
     def actualBody = OptionalBody.body(actual.bytes)
@@ -406,14 +407,14 @@ class JsonBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ["Expected $actual to have 3 elements"]
+    mismatches*.mismatch == ["Expected $message to have 3 elements"]
     mismatches*.path == ['$']
 
     where:
 
-    expected                          | actual
-    '[1,2,3]'                         | '[1,2,3,4]'
-    '[{"i":"a"},{"i":"b"},{"i":"c"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]'
+    expected                          | actual                                      | message
+    '[1,2,3]'                         | '[1,2,3,4]'                                 | '[1, 2, 3, 4]'
+    '[{"i":"a"},{"i":"b"},{"i":"c"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":a}, {"i":b}, {"i":c}, {"i":d}]'
   }
 
   @Unroll
@@ -431,14 +432,14 @@ class JsonBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ["Expected $actual to have maximum $maxSize"]
+    mismatches*.mismatch == ["Expected $message to have maximum $maxSize"]
     mismatches*.path == ['$']
 
     where:
 
-    expected                | actual
-    '[1,2]'                 | '[1,2,3,4,5,6]'
-    '[{"i":"a"},{"i":"b"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]'
+    expected                | actual                                      | message
+    '[1,2]'                 | '[1,2,3,4,5,6]'                             | '[1, 2, 3, 4, 5, 6]'
+    '[{"i":"a"},{"i":"b"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":a}, {"i":b}, {"i":c}, {"i":d}]'
   }
 
   @Unroll
@@ -620,7 +621,7 @@ class JsonBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected ["red","blue"] to match ["blue","seven"] ignoring order of elements',
+    mismatches*.mismatch == ['Expected [red, blue] to match [blue, seven] ignoring order of elements',
                              'Expected "seven" to match \'red|blue\'']
     mismatches*.path == ['$', '$.1']
   }
@@ -717,8 +718,8 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - with ignore-order - return mismatches on nested lists when overriding equality'() {
     given:
-    def expected = '[[1,2,3],[4,5,6]]'
-    def actual = '[[6,4,5],[2,3,1]]'
+    def expected = '[[1,2,3], [4,5,6]]'
+    def actual = '[[6,4,5], [2,3,1]]'
     def expectedBody = OptionalBody.body(expected.bytes)
     def actualBody = OptionalBody.body(actual.bytes)
     context.matchers
@@ -733,13 +734,12 @@ class JsonBodyMatcherSpec extends Specification {
 
     then:
     [ //[path, expected, [...actual]]
-        ['$', null, []],
         ['$', expected, [actual]],
-        ['$.0', '[1,2,3]', ['[6,4,5]', '[2,3,1]']],
+        ['$.0', '[1, 2, 3]', ['[6, 4, 5]', '[2, 3, 1]']],
         ['$.0.0', '1', ['6', '2']],
         ['$.0.1', '2', ['4', '3']],
         ['$.0.2', '3', ['5', '1']],
-        ['$.1', '[4,5,6]', ['[2,3,1]']],
+        ['$.1', '[4, 5, 6]', ['[2, 3, 1]']],
         ['$.1.0', '4', ['2', '3', '1']],
         ['$.1.1', '5', ['2', '3', '1']],
         ['$.1.2', '6', ['2', '3', '1']]

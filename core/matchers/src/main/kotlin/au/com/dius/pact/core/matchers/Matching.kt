@@ -56,16 +56,6 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
     return resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith(".*") }
   }
 
-  fun isEqualsIgnoreOrderMatcherDefined(path: List<String>): Boolean {
-    val matcherDef = selectBestMatcher(path)
-    return matcherDef.rules.any {
-      it is EqualsIgnoreOrderMatcher ||
-        it is MinEqualsIgnoreOrderMatcher ||
-        it is MaxEqualsIgnoreOrderMatcher ||
-        it is MinMaxEqualsIgnoreOrderMatcher
-    }
-  }
-
   fun wildcardIndexMatcherDefined(path: List<String>): Boolean {
     val resolvedMatchers = matchers.filter {
       Matchers.matchesPath(it, path) == path.size
