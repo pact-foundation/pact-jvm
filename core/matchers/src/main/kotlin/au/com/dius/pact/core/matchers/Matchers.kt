@@ -4,6 +4,7 @@ import au.com.dius.pact.core.matchers.util.corresponds
 import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
@@ -11,6 +12,7 @@ import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.parsePath
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import java.util.Comparator
 import java.util.function.Predicate
@@ -176,5 +178,37 @@ object Matchers : KLogging() {
   fun typeMatcherDefined(category: String, path: List<String>, matchingRules: MatchingRules): Boolean {
     val resolvedMatchers = resolveMatchers(matchingRules, category, path, Comparator.naturalOrder())
     return resolvedMatchers.allMatchingRules().any { it is TypeMatcher }
+  }
+
+  /**
+   * Compares the expected and actual maps using the provided matching rule
+   */
+  fun <T> compareMaps(
+    path: List<String>,
+    matcher: MatchingRule,
+    expectedEntries: Map<String, T>,
+    actualEntries: Map<String, T>,
+    context: MatchingContext,
+    generateDiff: () -> String,
+    callback: (List<String>, T?, T?) -> List<BodyItemMatchResult>
+  ): List<BodyItemMatchResult> {
+    val result = mutableListOf<BodyItemMatchResult>()
+    if (wildcardMatchingEnabled() && context.wildcardMatcherDefined(path + "any")) {
+      actualEntries.entries.forEach { (key, value) ->
+        if (expectedEntries.containsKey(key)) {
+          result.addAll(callback(path + key, expectedEntries[key]!!, value))
+        } else {
+          result.addAll(callback(path + key, expectedEntries.values.firstOrNull(), value))
+        }
+      }
+    } else {
+      result.addAll(context.matchKeys(path, expectedEntries, actualEntries, generateDiff))
+      expectedEntries.entries.forEach { (key, value) ->
+        if (actualEntries.containsKey(key)) {
+          result.addAll(callback(path + key, value, actualEntries[key]))
+        }
+      }
+    }
+    return result
   }
 }

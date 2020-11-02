@@ -77,6 +77,35 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
     val resolvedMatchers = resolveMatchers(path, Comparator.naturalOrder())
     return resolvedMatchers.allMatchingRules().any { it is TypeMatcher }
   }
+
+  fun <T> matchKeys(
+    path: List<String>,
+    expectedEntries: Map<String, T>,
+    actualEntries: Map<String, T>,
+    generateDiff: () -> String
+  ): List<BodyItemMatchResult> {
+    val p = path + "any"
+    return if (!Matchers.wildcardMatchingEnabled() || !wildcardMatcherDefined(p)) {
+      val expectedKeys = expectedEntries.keys.sorted()
+      val actualKeys = actualEntries.keys
+      val actualKeysSorted = actualKeys.sorted()
+      val missingKeys = expectedKeys.filter { key -> !actualKeys.contains(key) }
+      if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
+        listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
+          "Actual map is missing the following keys: ${missingKeys.joinToString(", ")}",
+          path.joinToString("."), generateDiff()))))
+      } else if (!allowUnexpectedKeys && expectedKeys != actualKeysSorted) {
+        listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
+          "Expected a Map with keys $expectedKeys " +
+            "but received one with keys $actualKeysSorted",
+          path.joinToString("."), generateDiff()))))
+      } else {
+        emptyList()
+      }
+    } else {
+      emptyList()
+    }
+  }
 }
 
 object Matching : KLogging() {

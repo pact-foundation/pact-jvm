@@ -3,7 +3,6 @@ package au.com.dius.pact.core.model.matchingrules
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.PactSpecVersion
 import mu.KLogging
-import java.lang.IllegalArgumentException
 
 /**
  * Logic to use to combine rules

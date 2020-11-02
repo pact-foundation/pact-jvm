@@ -278,33 +278,21 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
         path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
     } else {
       val result = mutableListOf<BodyItemMatchResult>()
-      if (context.allowUnexpectedKeys && expectedValues.size > actualValues.size) {
-        result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(a, b,
-          "Expected a Map with at least ${expectedValues.size} elements but received " +
-            "${actualValues.size} elements", path.joinToString("."),
-          generateJsonDiff(expectedValues, actualValues)))))
-      } else if (!context.allowUnexpectedKeys && expectedValues.size != actualValues.size) {
-        result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(a, b,
-          "Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements",
-          path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
-      }
-      if (Matchers.wildcardMatchingEnabled() && context.wildcardMatcherDefined(path + "any")) {
-        actualValues.entries.forEach { (key, value) ->
-          if (expectedValues.has(key)) {
-            result.addAll(compare(path + key, expectedValues[key], value, context))
-          } else if (!context.allowUnexpectedKeys) {
-            result.addAll(compare(path + key, expectedValues.entries.values.firstOrNull()
-              ?: JsonValue.Null, value, context))
-          }
+      val generateDiff = { generateJsonDiff(expectedValues, actualValues) }
+      val expectedEntries = expectedValues.entries
+      val actualEntries = actualValues.entries
+      if (context.matcherDefined(path)) {
+        for (matcher in context.selectBestMatcher(path).rules) {
+          result.addAll(Matchers.compareMaps(path, matcher, expectedEntries, actualEntries, context, generateDiff) {
+            p, expected, actual -> compare(p, expected ?: JsonValue.Null, actual ?: JsonValue.Null, context)
+          })
         }
       } else {
-        expectedValues.entries.forEach { (key, value) ->
-          if (actualValues.has(key)) {
-            result.addAll(compare(path + key, value, actualValues[key], context))
-          } else {
-            result.add(BodyItemMatchResult(path.joinToString("."),
-              listOf(BodyMismatch(a, b, "Expected $key=${valueOf(value)} but was missing",
-              path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
+        result.addAll(context.matchKeys(path, expectedEntries, actualEntries, generateDiff))
+        for ((key, value) in expectedEntries) {
+          val p = path + key
+          if (actualEntries.containsKey(key)) {
+            result.addAll(compare(p, value, actualEntries[key]!!, context))
           }
         }
       }

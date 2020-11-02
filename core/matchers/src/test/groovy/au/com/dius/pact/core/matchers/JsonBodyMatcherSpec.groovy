@@ -10,6 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Ignore
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -163,7 +164,7 @@ class JsonBodyMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Expected a Map with at least 2 elements but received 1 elements')
+        it.mismatch.contains('Actual map is missing the following keys: somethingElse')
     }
 
     where:
@@ -192,7 +193,7 @@ class JsonBodyMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Expected somethingElse=100 but was missing')
+        it.mismatch.contains('Actual map is missing the following keys: somethingElse')
     }
 
     where:
@@ -269,15 +270,23 @@ class JsonBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('{"somethingElse": 100}'.bytes)
   }
 
+  @Issue('#562')
   @RestoreSystemProperties
-  def 'matching json bodies - with a matcher defined - defect 562: matching a list at the root with extra fields'() {
+  def 'matching json bodies - with a matcher defined - matching a list at the root with extra fields'() {
     given:
     context.matchers.addRule('$', new MinTypeMatcher(1))
     context.matchers.addRule('$[*].*', TypeMatcher.INSTANCE)
-    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
+    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'false')
 
-    expect:
-    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
+    when:
+    def result = matcher.matchBody(expectedBody, actualBody, context)
+
+    then:
+    result.mismatches.size() == 2
+    result.mismatches*.description() == [
+      'Actual map is missing the following keys: name',
+      'Actual map is missing the following keys: name'
+    ]
 
     where:
 
@@ -308,12 +317,14 @@ class JsonBodyMatcherSpec extends Specification {
   @RestoreSystemProperties
   def 'returns a mismatch - when comparing maps with different keys and wildcard matching is disabled'() {
     given:
+    context = new MatchingContext(new MatchingRuleCategory('body'), false)
     context.matchers.addRule('$.*', new MinTypeMatcher(0))
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'false')
 
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
-      it instanceof BodyMismatch && it.mismatch.contains('Expected height=100 but was missing')
+      it instanceof BodyMismatch && it.mismatch.contains(
+        'Expected a Map with keys [height, id] but received one with keys [id, width]')
     }
 
     where:
