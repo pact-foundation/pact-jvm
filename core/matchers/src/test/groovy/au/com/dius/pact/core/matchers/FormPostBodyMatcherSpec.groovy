@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 
@@ -9,16 +9,16 @@ import spock.lang.Specification
 class FormPostBodyMatcherSpec extends Specification {
 
   private FormPostBodyMatcher matcher
-  private MatchingRulesImpl matchers
+  private MatchingContext context
 
   def setup() {
     matcher = new FormPostBodyMatcher()
-    matchers = new MatchingRulesImpl()
+    context = new MatchingContext(new MatchingRuleCategory('body'), true)
   }
 
   def 'returns no mismatches - when the expected body is missing'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     actualBody = OptionalBody.empty()
@@ -27,7 +27,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns no mismatches - when the expected body and actual bodies are empty'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     actualBody = OptionalBody.empty()
@@ -36,7 +36,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns no mismatches - when the expected body and actual bodies are equal'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     actualBody = OptionalBody.body('a=b&c=d'.bytes)
@@ -45,7 +45,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns no mismatches - when the actual body has extra keys and we allow unexpected keys'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     actualBody = OptionalBody.body('a=b&c=d'.bytes)
@@ -54,7 +54,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns no mismatches - when the keys are in different order'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     actualBody = OptionalBody.body('a=b&c=d'.bytes)
@@ -63,7 +63,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns mismatches - when the expected body contains keys that are not in the actual body'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches*.mismatch ==
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
       ['Expected form post parameter \'c\' but was missing']
 
     where:
@@ -73,8 +73,11 @@ class FormPostBodyMatcherSpec extends Specification {
 
   @SuppressWarnings('LineLength')
   def 'returns mismatches - when the actual body contains keys that are not in the expected body and we do not allow extra keys'() {
+    given:
+    context = new MatchingContext(new MatchingRuleCategory('body'), false)
+
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches*.mismatch ==
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
       ['Received unexpected form post parameter \'a\'=[\'b\']']
 
     where:
@@ -84,7 +87,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns mismatches - when the expected body is present but there is no actual body'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches*.mismatch ==
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
       ['Expected a form post body but was missing']
 
     where:
@@ -94,7 +97,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns mismatches - if the same key is repeated with values in different order'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches*.mismatch ==
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
       [
         'Expected form post parameter \'a\'[0] with value \'1\' but was \'2\'',
         'Expected form post parameter \'a\'[1] with value \'2\' but was \'1\''
@@ -107,7 +110,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns mismatches - if the same key is repeated with values missing'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches*.mismatch ==
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
       [
         'Expected form post parameter \'a\'=\'3\' but was missing'
       ]
@@ -119,7 +122,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'returns mismatches - when the actual body contains values that are not the same as the expected body'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches*.mismatch ==
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
       ['Expected form post parameter \'c\'[0] with value \'d\' but was \'1\'']
 
     where:
@@ -129,7 +132,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'handles delimiters in the values'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches*.mismatch ==
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
       ['Expected form post parameter \'c\'[0] with value \'1\' but was \'1=2\'']
 
     where:
@@ -139,10 +142,10 @@ class FormPostBodyMatcherSpec extends Specification {
 
   def 'delegates to any defined matcher'() {
     given:
-    matchers.addCategory('body').addRule('$.c', TypeMatcher.INSTANCE)
+    context.matchers.addRule('$.c', TypeMatcher.INSTANCE)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     actualBody = OptionalBody.body('a=b&c=2'.bytes)

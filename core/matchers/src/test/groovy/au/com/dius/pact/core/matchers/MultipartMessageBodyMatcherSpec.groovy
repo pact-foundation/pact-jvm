@@ -2,20 +2,22 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import spock.lang.Specification
 
 class MultipartMessageBodyMatcherSpec extends Specification {
 
   private MultipartMessageBodyMatcher matcher
+  private MatchingContext context
 
   def setup() {
     matcher = new MultipartMessageBodyMatcher()
+    context = new MatchingContext(new MatchingRuleCategory('body'), true)
   }
 
   def 'return no mismatches - when comparing empty bodies'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -25,7 +27,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'return no mismatches - when comparing a missing body to anything'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -35,7 +37,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when comparing anything to an empty body'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).mismatches*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
       'Expected a multipart body but was missing'
     ]
 
@@ -47,7 +49,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when the actual body is missing a header'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).mismatches*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
       'Expected a multipart header \'Test\', but was missing'
     ]
 
@@ -59,7 +61,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when the headers do not match'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).mismatches*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
       'Expected a multipart header \'Content-Type\' with value \'text/html\', but was \'text/plain\''
     ]
 
@@ -71,7 +73,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when the actual body is empty'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).mismatches*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
       'Expected content with the multipart, but received no bytes of content'
     ]
 

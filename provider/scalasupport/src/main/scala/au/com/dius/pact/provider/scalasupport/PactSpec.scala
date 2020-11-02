@@ -12,8 +12,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 
-//@Ignore
-// Ignored as it seems to be failing on travis
 class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit timeout: Duration = 10.seconds) extends AnyFreeSpec with Assertions {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
@@ -35,7 +33,7 @@ class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit ti
 
         val actualResponse = Await.result(pactResponseFuture, timeout)
 
-      val responseMismatches = ResponseMatching.responseMismatches(interaction.getResponse, actualResponse, true)
+      val responseMismatches = ResponseMatching.responseMismatches(interaction.getResponse, actualResponse)
       if (!responseMismatches.isEmpty) {
           throw new TestFailedException(s"There were response mismatches: \n${responseMismatches.asScala.mkString("\n")}", 10)
         }

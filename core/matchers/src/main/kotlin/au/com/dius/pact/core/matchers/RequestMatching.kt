@@ -52,8 +52,6 @@ data class PartialRequestMatch(val problems: Map<Interaction, RequestMatchResult
 
 object RequestMismatch : RequestMatch()
 
-//data class MatchingContext(val matchers: MatchingRuleCategory, val config: DiffConfig)
-
 class RequestMatching(private val expectedInteractions: List<RequestResponseInteraction>) {
 
     fun matchInteraction(actual: Request): RequestMatch {
@@ -73,8 +71,6 @@ class RequestMatching(private val expectedInteractions: List<RequestResponseInte
     }
 
   companion object : KLogging() {
-    var allowUnexpectedKeys = false
-
     private fun decideRequestMatch(expected: RequestResponseInteraction, result: RequestMatchResult) =
       when {
         result.matchedOk() -> FullRequestMatch(expected, result)
@@ -92,24 +88,17 @@ class RequestMatching(private val expectedInteractions: List<RequestResponseInte
     fun requestMismatches(expected: Request, actual: Request): RequestMatchResult {
       logger.debug { "comparing to expected request: \n$expected" }
 
-      /*
-      let path_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
-                                          &expected.matching_rules.rules_for_category("path").unwrap_or_default());
-  let body_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
-                                          &expected.matching_rules.rules_for_category("body").unwrap_or_default());
-  let query_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
-                                          &expected.matching_rules.rules_for_category("query").unwrap_or_default());
-  let header_context = MatchingContext::new(DiffConfig::NoUnexpectedKeys,
-                                          &expected.matching_rules.rules_for_category("header").unwrap_or_default());
-
-       */
+      val pathContext = MatchingContext(expected.matchingRules.rulesForCategory("path"), false)
+      val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), false)
+      val queryContext = MatchingContext(expected.matchingRules.rulesForCategory("query"), false)
+      val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), false)
 
       return RequestMatchResult(Matching.matchMethod(expected.method, actual.method),
-        Matching.matchPath(expected, actual),
-        Matching.matchQuery(expected, actual),
-        Matching.matchCookie(expected.cookie(), actual.cookie()),
-        Matching.matchRequestHeaders(expected, actual),
-        Matching.matchBody(expected, actual, allowUnexpectedKeys))
+        Matching.matchPath(expected, actual, pathContext),
+        Matching.matchQuery(expected, actual, queryContext),
+        Matching.matchCookies(expected.cookie(), actual.cookie(), headerContext),
+        Matching.matchRequestHeaders(expected, actual, headerContext),
+        Matching.matchBody(expected, actual, bodyContext))
     }
   }
 }

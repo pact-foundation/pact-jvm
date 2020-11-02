@@ -1,7 +1,5 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import mu.KLogging
 import org.atteo.evo.inflector.English
 
@@ -9,14 +7,13 @@ object QueryMatcher : KLogging() {
 
   private fun compare(
     parameter: String,
-    path: List<String>,
     expected: String,
     actual: String,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<QueryMismatch> {
-    return if (Matchers.matcherDefined("query", listOf(parameter), matchers)) {
+    return if (context.matcherDefined(listOf(parameter))) {
       logger.debug { "compareQueryParameterValues: Matcher defined for query parameter '$parameter'" }
-      Matchers.domatch(matchers, "query", listOf(parameter), expected, actual, QueryMismatchFactory)
+      Matchers.domatch(context, listOf(parameter), expected, actual, QueryMismatchFactory)
     } else {
       logger
         .debug { "compareQueryParameterValues: No matcher defined for query parameter '$parameter', using equality" }
@@ -34,13 +31,13 @@ object QueryMatcher : KLogging() {
     expected: List<String>,
     actual: List<String>,
     path: List<String>,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<QueryMismatch> {
     return expected.mapIndexed { index, value -> index to value }
       .flatMap { (index, value) ->
         when {
-          index < actual.size -> compare(parameter, path + index.toString(), value, actual[index], matchers)
-          !Matchers.matcherDefined("query", path, matchers) ->
+          index < actual.size -> compare(parameter, value, actual[index], context)
+          !context.matcherDefined(path) ->
             listOf(QueryMismatch(parameter, expected.toString(), actual.toString(),
               "Expected query parameter '$parameter' with value '$value' but was missing",
               path.joinToString(".")))
@@ -54,14 +51,13 @@ object QueryMatcher : KLogging() {
     parameter: String,
     expected: List<String>,
     actual: List<String>,
-    matchingRules: MatchingRules?
+    context: MatchingContext
   ): List<QueryMismatch> {
     val path = listOf(parameter)
-    val matchers = matchingRules ?: MatchingRulesImpl()
-    return if (Matchers.matcherDefined("query", path, matchers)) {
+    return if (context.matcherDefined(path)) {
       logger.debug { "compareQuery: Matcher defined for query parameter '$parameter'" }
-      Matchers.domatch(matchers, "query", path, expected, actual, QueryMismatchFactory) +
-        compareQueryParameterValues(parameter, expected, actual, path, matchers)
+      Matchers.domatch(context, path, expected, actual, QueryMismatchFactory) +
+        compareQueryParameterValues(parameter, expected, actual, path, context)
     } else {
       if (expected.isEmpty() && actual.isNotEmpty()) {
         listOf(QueryMismatch(parameter, expected.toString(), actual.toString(),
@@ -76,7 +72,7 @@ object QueryMatcher : KLogging() {
               English.plural("value", actual.size),
             path.joinToString(".")))
         }
-        mismatches + compareQueryParameterValues(parameter, expected, actual, path, matchers)
+        mismatches + compareQueryParameterValues(parameter, expected, actual, path, context)
       }
     }
   }

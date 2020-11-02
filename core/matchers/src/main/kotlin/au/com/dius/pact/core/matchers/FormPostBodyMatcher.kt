@@ -10,8 +10,7 @@ class FormPostBodyMatcher : BodyMatcher {
   override fun matchBody(
     expected: OptionalBody,
     actual: OptionalBody,
-    allowUnexpectedKeys: Boolean,
-    matchingRules: MatchingRules
+    context: MatchingContext
   ): BodyMatchResult {
     val expectedBody = expected
     val actualBody = actual
@@ -26,8 +25,7 @@ class FormPostBodyMatcher : BodyMatcher {
           URLEncodedUtils.parse(expectedBody.valueAsString(), expected.contentType.asCharset(), '&')
         val actualParameters =
         URLEncodedUtils.parse(actualBody.valueAsString(), actual.contentType.asCharset(), '&')
-        BodyMatchResult(null, compareParameters(expectedParameters, actualParameters, matchingRules,
-          allowUnexpectedKeys))
+        BodyMatchResult(null, compareParameters(expectedParameters, actualParameters, context))
       }
     }
   }
@@ -35,8 +33,7 @@ class FormPostBodyMatcher : BodyMatcher {
   private fun compareParameters(
     expectedParameters: List<NameValuePair>,
     actualParameters: List<NameValuePair>,
-    matchingRules: MatchingRules?,
-    allowUnexpectedKeys: Boolean
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
     val expectedMap = expectedParameters.groupBy { it.name }
     val actualMap = actualParameters.groupBy { it.name }
@@ -45,11 +42,11 @@ class FormPostBodyMatcher : BodyMatcher {
       if (actualMap.containsKey(it.key)) {
         it.value.forEachIndexed { index, valuePair ->
           val path = listOf("$", it.key, index.toString())
-          if (matchingRules != null && Matchers.matcherDefined("body", path, matchingRules)) {
+          if (context.matcherDefined(path)) {
             logger.debug { "Matcher defined for form post parameter '${it.key}'[$index]" }
             result.add(
               BodyItemMatchResult(path.joinToString("."),
-                Matchers.domatch(matchingRules, "body", path, valuePair.value,
+                Matchers.domatch(context, path, valuePair.value,
                   actualMap[it.key]!![index].value, BodyMismatchFactory)))
           } else {
             logger.debug { "No matcher defined for form post parameter '${it.key}'[$index], using equality" }
@@ -72,7 +69,7 @@ class FormPostBodyMatcher : BodyMatcher {
       }
     }
 
-    if (!allowUnexpectedKeys) {
+    if (!context.allowUnexpectedKeys) {
       actualMap.entries.forEach { entry ->
         if (!expectedMap.containsKey(entry.key)) {
           val values = entry.value.map { it.value }

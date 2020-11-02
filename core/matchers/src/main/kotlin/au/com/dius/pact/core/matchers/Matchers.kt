@@ -52,6 +52,7 @@ object Matchers : KLogging() {
     }.reduce { acc, i -> acc * i }
   }
 
+  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   fun resolveMatchers(
     matchers: MatchingRules,
     category: String,
@@ -67,6 +68,7 @@ object Matchers : KLogging() {
       })
     else matchers.rulesForCategory(category)
 
+  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   @JvmStatic
   @JvmOverloads
   fun matcherDefined(
@@ -82,6 +84,7 @@ object Matchers : KLogging() {
   /**
    * Determines if a matcher of the form '[*]' exists for the path
    */
+  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   @JvmStatic
   fun wildcardIndexMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
     if (matchers != null) {
@@ -94,6 +97,7 @@ object Matchers : KLogging() {
   /**
    * Determines if any ignore-order matcher is defined for path or ancestor of path.
    */
+  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   @JvmStatic
   fun isEqualsIgnoreOrderMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
     if (matchers != null) {
@@ -110,6 +114,7 @@ object Matchers : KLogging() {
    * Determines if a matcher of the form '.*' exists for the path
    */
   @JvmStatic
+  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   fun wildcardMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
     if (matchers != null) {
       val resolvedMatchers = matchers.rulesForCategory(category).filter(Predicate {
@@ -127,18 +132,18 @@ object Matchers : KLogging() {
   @JvmStatic
   @JvmOverloads
   fun <M : Mismatch> domatch(
-    matchers: MatchingRules,
-    category: String,
+    context: MatchingContext,
     path: List<String>,
     expected: Any?,
     actual: Any?,
     mismatchFn: MismatchFactory<M>,
     pathComparator: Comparator<String> = Comparator.naturalOrder()
   ): List<M> {
-    val matcherDef = selectBestMatcher(matchers, category, path, pathComparator)
+    val matcherDef = context.selectBestMatcher(path, pathComparator)
     return domatch(matcherDef, path, expected, actual, mismatchFn)
   }
 
+  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   @JvmStatic
   @JvmOverloads
   fun selectBestMatcher(
@@ -167,6 +172,7 @@ object Matchers : KLogging() {
     }
   }
 
+  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   fun typeMatcherDefined(category: String, path: List<String>, matchingRules: MatchingRules): Boolean {
     val resolvedMatchers = resolveMatchers(matchingRules, category, path, Comparator.naturalOrder())
     return resolvedMatchers.allMatchingRules().any { it is TypeMatcher }

@@ -10,28 +10,25 @@ class PlainTextBodyMatcher : BodyMatcher {
   override fun matchBody(
     expected: OptionalBody,
     actual: OptionalBody,
-    allowUnexpectedKeys: Boolean,
-    matchingRules: MatchingRules
+    context: MatchingContext
   ): BodyMatchResult {
-    val expectedBody = expected
-    val actualBody = actual
     return when {
-      expectedBody.isMissing() -> BodyMatchResult(null, emptyList())
-      expectedBody.isNull() && actualBody.isPresent() -> BodyMatchResult(null, listOf(
+      expected.isMissing() -> BodyMatchResult(null, emptyList())
+      expected.isNull() && actual.isPresent() -> BodyMatchResult(null, listOf(
         BodyItemMatchResult("$",
-          listOf(BodyMismatch(null, actualBody!!.value, "Expected empty body but received '${actualBody.value}'")))))
-      expectedBody.isNull() -> BodyMatchResult(null, emptyList())
-      actualBody.isMissing() -> BodyMatchResult(null, listOf(BodyItemMatchResult("$",
-        listOf(BodyMismatch(expectedBody!!.value, null,
-          "Expected body '${expectedBody.value}' but was missing")))))
-      expectedBody.isEmpty() && actualBody.isEmpty() -> BodyMatchResult(null, emptyList())
+          listOf(BodyMismatch(null, actual!!.value, "Expected empty body but received '${actual.value}'")))))
+      expected.isNull() -> BodyMatchResult(null, emptyList())
+      actual.isMissing() -> BodyMatchResult(null, listOf(BodyItemMatchResult("$",
+        listOf(BodyMismatch(expected!!.value, null,
+          "Expected body '${expected.value}' but was missing")))))
+      expected.isEmpty() && actual.isEmpty() -> BodyMatchResult(null, emptyList())
       else -> BodyMatchResult(null,
-        compareText(expectedBody.valueAsString(), actualBody.valueAsString(), matchingRules))
+        compareText(expected.valueAsString(), actual.valueAsString(), context))
     }
   }
 
-  fun compareText(expected: String, actual: String, matchers: MatchingRules?): List<BodyItemMatchResult> {
-    val regexMatcher = matchers?.rulesForCategory("body")?.matchingRules?.get("$")
+  fun compareText(expected: String, actual: String, context: MatchingContext): List<BodyItemMatchResult> {
+    val regexMatcher = context.matchers.matchingRules["$"]
     val regex = regexMatcher?.rules?.first()
 
     if (regexMatcher == null || regexMatcher.rules.isEmpty() || regex !is RegexMatcher) {

@@ -40,13 +40,13 @@ object HeaderMatcher : KLogging() {
    * Compares the expected header value to the actual, delegating to any matching rules if present
    */
   @JvmStatic
-  fun compareHeader(headerKey: String, expected: String, actual: String, matchers: MatchingRules): HeaderMismatch? {
+  fun compareHeader(headerKey: String, expected: String, actual: String, context: MatchingContext): HeaderMismatch? {
     logger.debug { "Comparing header '$headerKey': '$actual' to '$expected'" }
 
     val comparator = Comparator<String> { a, b -> a.compareTo(b, ignoreCase = true) }
     return when {
-      Matchers.matcherDefined("header", listOf(headerKey), matchers, comparator) -> {
-        val matchResult = Matchers.domatch(matchers, "header", listOf(headerKey), expected, actual,
+      context.matcherDefined(listOf(headerKey), comparator) -> {
+        val matchResult = Matchers.domatch(context, listOf(headerKey), expected, actual,
           HeaderMismatchFactory, comparator)
         return matchResult.fold(null as HeaderMismatch?) { acc, item -> acc?.merge(item) ?: item }
       }

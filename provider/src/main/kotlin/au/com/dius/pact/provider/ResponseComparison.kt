@@ -5,6 +5,7 @@ import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.Matching
 import au.com.dius.pact.core.matchers.MatchingConfig
+import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.ResponseMatching
@@ -110,7 +111,7 @@ class ResponseComparison(
         actualResponseContentType, actualResponse.body)
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode,
         actualResponse.headers.toMutableMap(), OptionalBody.body(actualResponse.body?.toByteArray(
-        actualResponseContentType.asCharset()))), true)
+        actualResponseContentType.asCharset()))))
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches))
     }
@@ -118,11 +119,14 @@ class ResponseComparison(
     @JvmStatic
     @JvmOverloads
     fun compareMessage(message: Message, actual: OptionalBody, metadata: Map<String, Any>? = null): ComparisonResult {
-      val bodyMismatches = compareMessageBody(message, actual)
+      val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body"), true)
+      val metadataContext = MatchingContext(message.matchingRules.rulesForCategory("metadata"), true)
+
+      val bodyMismatches = compareMessageBody(message, actual, bodyContext)
 
       val metadataMismatches = when (metadata) {
         null -> emptyList()
-        else -> Matching.compareMessageMetadata(message.metaData, metadata, message.matchingRules)
+        else -> Matching.compareMessageMetadata(message.metaData, metadata, metadataContext)
       }
 
       val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
@@ -134,11 +138,11 @@ class ResponseComparison(
     }
 
     @JvmStatic
-    private fun compareMessageBody(message: Message, actual: OptionalBody): MutableList<BodyMismatch> {
+    private fun compareMessageBody(message: Message, actual: OptionalBody, context: MatchingContext): MutableList<BodyMismatch> {
       val result = MatchingConfig.lookupBodyMatcher(message.getContentType().getBaseType())
       var bodyMismatches = mutableListOf<BodyMismatch>()
       if (result != null) {
-        bodyMismatches = result.matchBody(message.contents, actual, true, message.matchingRules)
+        bodyMismatches = result.matchBody(message.contents, actual, context)
           .bodyResults.flatMap { it.result }.toMutableList()
       } else {
         val expectedBody = message.contents.valueAsString()

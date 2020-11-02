@@ -1,9 +1,11 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import com.github.michaelbull.result.Err
@@ -123,9 +125,10 @@ class ResponseComparisonSpec extends Specification {
     Message expectedMessage = new Message('test', [], OptionalBody.body(expected.bytes),
       new MatchingRulesImpl(), new Generators(), [contentType: contentType])
     OptionalBody actualMessage = OptionalBody.body(actual.bytes)
+    def bodyContext = new MatchingContext(new MatchingRuleCategory('body'), true)
 
     expect:
-    ResponseComparison.compareMessageBody(expectedMessage, actualMessage).empty
+    ResponseComparison.compareMessageBody(expectedMessage, actualMessage, bodyContext).empty
 
     where:
 

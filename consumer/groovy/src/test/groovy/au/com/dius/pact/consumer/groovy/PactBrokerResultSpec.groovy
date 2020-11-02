@@ -162,15 +162,15 @@ class PactBrokerResultSpec extends Specification {
       then:
         def e = thrown(PactFailedException)
         e.message.contains(
-              '''The following requests were not received:
-                |\tmethod: post
-                |\tpath: /path
-                |\tquery: {}
-                |\theaders: {Content-Type=[application/json]}
-                |\tmatchers: MatchingRules(rules={body=MatchingRuleCategory(name=body, matchingRules={}), path=MatchingRuleCategory(name=path, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})})
-                |\tgenerators: Generators(categories={})
-                |\tbody: PRESENT({
-                |    "status": "isGood"
-})'''.stripMargin())
+          '''|The following requests were not received:
+             |\tmethod: post
+             |\tpath: /path
+             |\tquery: {}
+             |\theaders: {Content-Type=[application/json]}
+             |\tmatchers: MatchingRules(rules={body=MatchingRuleCategory(name=body, matchingRules={}), path=MatchingRuleCategory(name=path, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})})
+             |\tgenerators: Generators(categories={})
+             |\tbody: PRESENT({
+             |    "status": "isGood"
+             |})'''.stripMargin())
     }
 }

@@ -17,8 +17,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
   override fun matchBody(
     expected: OptionalBody,
     actual: OptionalBody,
-    allowUnexpectedKeys: Boolean,
-    matchingRules: MatchingRules
+    context: MatchingContext
   ): BodyMatchResult {
     return when {
       expected.isMissing() -> BodyMatchResult(null, emptyList())
@@ -35,7 +34,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
           listOf(BodyMismatch(expected.valueAsString(), null, "Expected body '${expected.value}' but was missing")))))
       else -> {
         BodyMatchResult(null, compare(listOf("$"), JsonParser.parseString(expected.valueAsString()),
-          JsonParser.parseString(actual.valueAsString()), allowUnexpectedKeys, matchingRules))
+          JsonParser.parseString(actual.valueAsString()), context))
       }
     }
   }
@@ -63,21 +62,20 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     path: List<String>,
     expected: JsonValue,
     actual: JsonValue,
-    allowUnexpectedKeys: Boolean,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
     return when {
       expected is JsonValue.Object && actual is JsonValue.Object ->
-        compareMaps(expected, actual, expected, actual, path, allowUnexpectedKeys, matchers)
+        compareMaps(expected, actual, expected, actual, path, context)
       expected is JsonValue.Array && actual is JsonValue.Array ->
-        compareLists(expected, actual, expected, actual, path, allowUnexpectedKeys, matchers)
+        compareLists(expected, actual, expected, actual, path, context)
       expected is JsonValue.Object && actual !is JsonValue.Object ||
         expected is JsonValue.Array && actual !is JsonValue.Array ->
         listOf(BodyItemMatchResult(path.joinToString("."),
           listOf(BodyMismatch(expected, actual, "Type mismatch: Expected ${typeOf(expected)} " +
           "${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}", path.joinToString("."),
           generateJsonDiff(expected, actual)))))
-      else -> compareValues(path, expected, actual, matchers)
+      else -> compareValues(path, expected, actual, context)
     }
   }
 
@@ -85,14 +83,13 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     expectedValues: List<JsonValue>,
     actualValues: List<JsonValue>,
     path: List<String>,
-    allowUnexpectedKeys: Boolean,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
     for ((index, value) in expectedValues.withIndex()) {
       if (index < actualValues.size) {
-        result.addAll(compare(path + index.toString(), value, actualValues[index], allowUnexpectedKeys, matchers))
-      } else if (!Matchers.matcherDefined("body", path, matchers)) {
+        result.addAll(compare(path + index.toString(), value, actualValues[index], context))
+      } else if (!context.matcherDefined(path)) {
         result.add(BodyItemMatchResult(path.joinToString("."),
           listOf(BodyMismatch(expectedValues, actualValues, "Expected ${valueOf(value)} but was missing",
           path.joinToString("."), generateJsonDiff(jsonArray(expectedValues), jsonArray(actualValues))))))
@@ -109,14 +106,13 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     basePath: List<String>,
     expectedValues: JsonValue.Array,
     actual: JsonValue,
-    allowUnexpectedKeys: Boolean,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
     val path = basePath + expectedValues.size.toString()
     val pathStr = path.joinToString(".")
     val starPathStr = (basePath + "*").joinToString(".")
 
-    return compare(path, expectedValues[0], actual, allowUnexpectedKeys, matchers)
+    return compare(path, expectedValues[0], actual, context)
       .map { matchResult ->
         // replaces index with '*' for clearer errors
         matchResult.copy(
@@ -138,22 +134,18 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     expectedValues: JsonValue.Array,
     actualValues: JsonValue.Array,
     path: List<String>,
-    allowUnexpectedKeys: Boolean,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
     val doWildCardMatching = actualValues.size > expectedValues.size &&
-      Matchers.wildcardIndexMatcherDefined(path + expectedValues.size.toString(),
-        "body", matchers)
+      context.wildcardIndexMatcherDefined(path + expectedValues.size.toString())
 
     val memoizedWildcardCompare = { actualIndex: Int ->
-      wildcardCompare(path, expectedValues, actualValues[actualIndex],
-        allowUnexpectedKeys, matchers)
+      wildcardCompare(path, expectedValues, actualValues[actualIndex], context)
     }.memoizeFixed(actualValues.size)
 
     val memoizedCompare = { expectedIndex: Int, actualIndex: Int ->
       compare(path + expectedIndex.toString(),
-        expectedValues[expectedIndex], actualValues[actualIndex],
-        allowUnexpectedKeys, matchers)
+        expectedValues[expectedIndex], actualValues[actualIndex], context)
     }.memoizeFixed(expectedValues.size, actualValues.size)
 
     val longestMatch = LargestKeyValue<Int, IndicesCombination>()
@@ -232,28 +224,27 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     a: JsonValue,
     b: JsonValue,
     path: List<String>,
-    allowUnexpectedKeys: Boolean,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
     val expectedList = expectedValues.values
     val actualList = actualValues.values
-    return if (Matchers.isEqualsIgnoreOrderMatcherDefined(path, "body", matchers)) {
+    return if (context.isEqualsIgnoreOrderMatcherDefined(path)) {
       // match unordered list
       logger.debug { "compareLists: ignore-order matcher defined for path $path" }
       val result = mutableListOf(BodyItemMatchResult(path.joinToString("."),
-        Matchers.domatch(matchers, "body", path, expectedValues, actualValues, BodyMismatchFactory)))
+        Matchers.domatch(context, path, expectedValues, actualValues, BodyMismatchFactory)))
       if (expectedList.isNotEmpty()) {
         // No need to pad 'expected' as we already visit all 'actual' values
-        result.addAll(compareListContentUnordered(expectedValues, actualValues, path, allowUnexpectedKeys, matchers))
+        result.addAll(compareListContentUnordered(expectedValues, actualValues, path, context))
       }
       result
-    } else if (Matchers.matcherDefined("body", path, matchers)) {
+    } else if (context.matcherDefined(path)) {
       logger.debug { "compareLists: Matcher defined for path $path" }
       val result = mutableListOf(BodyItemMatchResult(path.joinToString("."),
-        Matchers.domatch(matchers, "body", path, expectedValues, actualValues, BodyMismatchFactory)))
+        Matchers.domatch(context, path, expectedValues, actualValues, BodyMismatchFactory)))
       if (expectedList.isNotEmpty()) {
         result.addAll(compareListContent(expectedList.padTo(actualList.size, expectedList.first()),
-          actualList, path, allowUnexpectedKeys, matchers))
+          actualList, path, context))
       }
       result
     } else {
@@ -262,7 +253,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
           listOf(BodyMismatch(a, b, "Expected an empty List but received ${valueOf(actualValues)}",
           path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
       } else {
-        val result = compareListContent(expectedList, actualList, path, allowUnexpectedKeys, matchers).toMutableList()
+        val result = compareListContent(expectedList, actualList, path, context).toMutableList()
         if (expectedList.size != actualList.size) {
           result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(a, b,
             "Expected a List with ${expectedList.size} elements but received ${actualList.size} elements",
@@ -279,39 +270,37 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     a: JsonValue,
     b: JsonValue,
     path: List<String>,
-    allowUnexpectedKeys: Boolean,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
-    return if (expectedValues.isEmpty() && actualValues.isNotEmpty() && !allowUnexpectedKeys) {
+    return if (expectedValues.isEmpty() && actualValues.isNotEmpty() && !context.allowUnexpectedKeys) {
       listOf(BodyItemMatchResult(path.joinToString("."),
         listOf(BodyMismatch(a, b, "Expected an empty Map but received ${valueOf(actualValues)}",
         path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
     } else {
       val result = mutableListOf<BodyItemMatchResult>()
-      if (allowUnexpectedKeys && expectedValues.size > actualValues.size) {
+      if (context.allowUnexpectedKeys && expectedValues.size > actualValues.size) {
         result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(a, b,
           "Expected a Map with at least ${expectedValues.size} elements but received " +
             "${actualValues.size} elements", path.joinToString("."),
           generateJsonDiff(expectedValues, actualValues)))))
-      } else if (!allowUnexpectedKeys && expectedValues.size != actualValues.size) {
+      } else if (!context.allowUnexpectedKeys && expectedValues.size != actualValues.size) {
         result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(a, b,
           "Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements",
           path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
       }
-      if (Matchers.wildcardMatchingEnabled() && Matchers.wildcardMatcherDefined(path + "any", "body", matchers)) {
+      if (Matchers.wildcardMatchingEnabled() && context.wildcardMatcherDefined(path + "any")) {
         actualValues.entries.forEach { (key, value) ->
           if (expectedValues.has(key)) {
-            result.addAll(compare(path + key, expectedValues[key], value, allowUnexpectedKeys, matchers))
-          } else if (!allowUnexpectedKeys) {
+            result.addAll(compare(path + key, expectedValues[key], value, context))
+          } else if (!context.allowUnexpectedKeys) {
             result.addAll(compare(path + key, expectedValues.entries.values.firstOrNull()
-              ?: JsonValue.Null, value, allowUnexpectedKeys, matchers))
+              ?: JsonValue.Null, value, context))
           }
         }
       } else {
         expectedValues.entries.forEach { (key, value) ->
           if (actualValues.has(key)) {
-            result.addAll(compare(path + key, value, actualValues[key]!!, allowUnexpectedKeys,
-              matchers))
+            result.addAll(compare(path + key, value, actualValues[key], context))
           } else {
             result.add(BodyItemMatchResult(path.joinToString("."),
               listOf(BodyMismatch(a, b, "Expected $key=${valueOf(value)} but was missing",
@@ -327,12 +316,12 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     path: List<String>,
     expected: JsonValue,
     actual: JsonValue,
-    matchers: MatchingRules
+    context: MatchingContext
   ): List<BodyItemMatchResult> {
-    return if (Matchers.matcherDefined("body", path, matchers)) {
+    return if (context.matcherDefined(path)) {
       logger.debug { "compareValues: Matcher defined for path $path" }
       listOf(BodyItemMatchResult(path.joinToString("."),
-        Matchers.domatch(matchers, "body", path, expected, actual, BodyMismatchFactory)))
+        Matchers.domatch(context, path, expected, actual, BodyMismatchFactory)))
     } else {
       logger.debug { "compareValues: No matcher defined for path $path, using equality" }
       if (expected == actual) {

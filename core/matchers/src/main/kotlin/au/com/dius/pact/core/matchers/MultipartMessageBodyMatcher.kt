@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import java.util.Enumeration
 import javax.mail.BodyPart
 import javax.mail.Header
@@ -13,8 +12,7 @@ class MultipartMessageBodyMatcher : BodyMatcher {
   override fun matchBody(
     expected: OptionalBody,
     actual: OptionalBody,
-    allowUnexpectedKeys: Boolean,
-    matchingRules: MatchingRules
+    context: MatchingContext
   ): BodyMatchResult {
     return when {
       expected.isMissing() -> BodyMatchResult(null, emptyList())
@@ -25,13 +23,17 @@ class MultipartMessageBodyMatcher : BodyMatcher {
       else -> {
         val expectedMultipart = parseMultipart(expected.valueAsString(), expected.contentType.toString())
         val actualMultipart = parseMultipart(actual.valueAsString(), actual.contentType.toString())
-        BodyMatchResult(null, compareHeaders(expectedMultipart, actualMultipart) +
-          compareContents(expectedMultipart, actualMultipart))
+        BodyMatchResult(null, compareHeaders(expectedMultipart, actualMultipart, context) +
+          compareContents(expectedMultipart, actualMultipart, context))
       }
     }
   }
 
-  private fun compareContents(expectedMultipart: BodyPart, actualMultipart: BodyPart): List<BodyItemMatchResult> {
+  private fun compareContents(
+    expectedMultipart: BodyPart,
+    actualMultipart: BodyPart,
+    context: MatchingContext
+  ): List<BodyItemMatchResult> {
     val expectedContents = expectedMultipart.content.toString().trim()
     val actualContents = actualMultipart.content.toString().trim()
     return when {
@@ -45,7 +47,11 @@ class MultipartMessageBodyMatcher : BodyMatcher {
     }
   }
 
-  private fun compareHeaders(expectedMultipart: BodyPart, actualMultipart: BodyPart): List<BodyItemMatchResult> {
+  private fun compareHeaders(
+    expectedMultipart: BodyPart,
+    actualMultipart: BodyPart,
+    context: MatchingContext
+  ): List<BodyItemMatchResult> {
     val mismatches = mutableListOf<BodyItemMatchResult>()
     (expectedMultipart.allHeaders as Enumeration<Header>).asSequence().forEach {
       val header = actualMultipart.getHeader(it.name)

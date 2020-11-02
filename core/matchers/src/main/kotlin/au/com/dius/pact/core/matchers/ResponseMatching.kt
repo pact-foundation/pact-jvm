@@ -11,21 +11,24 @@ object ResponseMatching : KLogging() {
 
   @JvmStatic
   fun matchRules(expected: Response, actual: Response): ResponseMatch {
-    val mismatches = responseMismatches(expected, actual, true)
+    val mismatches = responseMismatches(expected, actual)
     return if (mismatches.isEmpty()) FullResponseMatch
     else ResponseMismatch(mismatches)
   }
 
   @JvmStatic
-  fun responseMismatches(expected: Response, actual: Response, allowUnexpectedKeys: Boolean): List<Mismatch> {
-    val bodyResults = Matching.matchBody(expected, actual, allowUnexpectedKeys)
+  fun responseMismatches(expected: Response, actual: Response): List<Mismatch> {
+    val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), true)
+    val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), true)
+
+    val bodyResults = Matching.matchBody(expected, actual, bodyContext)
     val typeResult = if (bodyResults.typeMismatch != null) {
       listOf(bodyResults.typeMismatch)
     } else {
       emptyList()
     }
     return (typeResult + Matching.matchStatus(expected.status, actual.status) +
-      Matching.matchHeaders(expected, actual).flatMap { it.result } +
+      Matching.matchHeaders(expected, actual, headerContext).flatMap { it.result } +
       bodyResults.bodyResults.flatMap { it.result }).filterNotNull()
   }
 }

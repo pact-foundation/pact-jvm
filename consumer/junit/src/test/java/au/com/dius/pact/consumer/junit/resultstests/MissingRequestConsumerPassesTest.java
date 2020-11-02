@@ -73,9 +73,8 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
               "\tpath: /second\n" +
               "\tquery: {}\n" +
               "\theaders: {testreqheader=[testreqheadervalue]}\n" +
-              "\tmatchers: MatchingRules(rules={path=MatchingRuleCategory(name=path, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={}), body=MatchingRuleCategory(name=body, matchingRules={})})\n" +
+              "\tmatchers: MatchingRules(rules={path=MatchingRuleCategory(name=path, matchingRules={}), body=MatchingRuleCategory(name=body, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})})\n" +
               "\tgenerators: Generators(categories={})\n" +
               "\tbody: EMPTY"));
-
     }
 }

@@ -8,7 +8,7 @@ class ResponseSpecificationV3Spec extends BaseResponseSpec {
   @Unroll
   def '#type/#name - #test #matchDesc'() {
     expect:
-    ResponseMatching.responseMismatches(expected, actual, true).empty == match
+    ResponseMatching.responseMismatches(expected, actual).empty == match
 
     where:
     [type, name, test, match, matchDesc, expected, actual] << loadTestCases('/v3/response/')

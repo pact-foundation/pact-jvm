@@ -1,10 +1,9 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
@@ -18,16 +17,16 @@ import spock.util.environment.RestoreSystemProperties
 @SuppressWarnings(['BracesForMethod', 'PrivateFieldCouldBeFinal'])
 class JsonBodyMatcherSpec extends Specification {
 
-  MatchingRules matchers
+  private MatchingContext context
   private JsonBodyMatcher matcher = new JsonBodyMatcher()
 
   def setup() {
-    matchers = new MatchingRulesImpl()
+    context = new MatchingContext(new MatchingRuleCategory('body'), true)
   }
 
   def 'matching json bodies - return no mismatches - when comparing empty bodies'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -37,7 +36,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - when comparing a missing body to anything'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -47,7 +46,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with equal bodies'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -57,7 +56,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with equal Maps'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -67,7 +66,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with equal Lists'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -77,10 +76,10 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with each like matcher on unequal lists'() {
     given:
-    matchers.addCategory('body').addRule('$.list', new MinTypeMatcher(1))
+    context.matchers.addRule('$.list', new MinTypeMatcher(1))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -90,10 +89,10 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with each like matcher on empty list'() {
     given:
-    matchers.addCategory('body').addRule('$.list', new MinTypeMatcher(0))
+    context.matchers.addRule('$.list', new MinTypeMatcher(0))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -103,7 +102,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing anything to an empty body'() {
     expect:
-    !matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    !matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -113,7 +112,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing anything to a null body'() {
     expect:
-    !matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    !matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -123,7 +122,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns no mismatch - when comparing an empty map to a non-empty one'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -133,8 +132,11 @@ class JsonBodyMatcherSpec extends Specification {
 
   def '''matching json bodies - returns a mismatch - when comparing an empty map to a non-empty one and we do not
          allow unexpected keys'''() {
+    given:
+    context = new MatchingContext(new MatchingRuleCategory('body'), false)
+
     expect:
-    matcher.matchBody(expectedBody, actualBody, false, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected an empty Map but received {"something":100}')
     }
@@ -147,7 +149,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing an empty list to a non-empty one'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected an empty List but received [100]')
     }
@@ -159,7 +161,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing a map to one with less entries'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected a Map with at least 2 elements but received 1 elements')
     }
@@ -176,7 +178,7 @@ class JsonBodyMatcherSpec extends Specification {
     def expectedBody = OptionalBody.body('[1,2,3,4]'.bytes)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.findAll {
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context).mismatches.findAll {
       it instanceof BodyMismatch
     }*.mismatch
 
@@ -188,7 +190,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when the actual body is missing a key'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected somethingElse=100 but was missing')
     }
@@ -201,7 +203,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when the actual body has invalid value'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Expected 100 (Integer) but received 101 (Integer)')
     }
@@ -214,7 +216,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing a map to a list'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Type mismatch: Expected Map {"something":100,"somethingElse":100} ' +
           'but received List [100,100]')
@@ -228,7 +230,7 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - returns a mismatch - when comparing list to anything'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
         it.mismatch.contains('Type mismatch: Expected List [100,100] but received Integer 100')
     }
@@ -241,10 +243,10 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - with a matcher defined - delegate to the matcher'() {
     given:
-    matchers.addCategory('body').addRule('$.something', new RegexMatcher('\\d+'))
+    context.matchers.addRule('$.something', new RegexMatcher('\\d+'))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -255,11 +257,11 @@ class JsonBodyMatcherSpec extends Specification {
   @RestoreSystemProperties
   def 'matching json bodies - with a matcher defined - and when the actual body is missing a key, not be a mismatch'() {
     given:
-    matchers.addCategory('body').addRule('$.*', TypeMatcher.INSTANCE)
+    context.matchers.addRule('$.*', TypeMatcher.INSTANCE)
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -270,12 +272,12 @@ class JsonBodyMatcherSpec extends Specification {
   @RestoreSystemProperties
   def 'matching json bodies - with a matcher defined - defect 562: matching a list at the root with extra fields'() {
     given:
-    matchers.addCategory('body').addRule('$', new MinTypeMatcher(1))
-    matchers.addCategory('body').addRule('$[*].*', TypeMatcher.INSTANCE)
+    context.matchers.addRule('$', new MinTypeMatcher(1))
+    context.matchers.addRule('$[*].*', TypeMatcher.INSTANCE)
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -306,11 +308,11 @@ class JsonBodyMatcherSpec extends Specification {
   @RestoreSystemProperties
   def 'returns a mismatch - when comparing maps with different keys and wildcard matching is disabled'() {
     given:
-    matchers.addCategory('body').addRule('$.*', new MinTypeMatcher(0))
+    context.matchers.addRule('$.*', new MinTypeMatcher(0))
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'false')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.find {
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch && it.mismatch.contains('Expected height=100 but was missing')
     }
 
@@ -323,11 +325,11 @@ class JsonBodyMatcherSpec extends Specification {
   @RestoreSystemProperties
   def 'returns no mismatch - when comparing maps with different keys and wildcard matching is enabled'() {
     given:
-    matchers.addCategory('body').addRule('$.*', new MinTypeMatcher(0))
+    context.matchers.addRule('$.*', new MinTypeMatcher(0))
     System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -340,11 +342,11 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     def expectedBody = OptionalBody.body(expected.bytes)
     def actualBody = OptionalBody.body(actual.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -360,11 +362,11 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context)
       .bodyResults.collectMany { it.result }
 
     then:
@@ -384,11 +386,11 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context)
       .bodyResults.collectMany { it.result }
 
     then:
@@ -409,11 +411,11 @@ class JsonBodyMatcherSpec extends Specification {
     def maxSize = 3
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', new MaxEqualsIgnoreOrderMatcher(maxSize))
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context)
       .bodyResults.collectMany { it.result }
 
     then:
@@ -433,11 +435,11 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    matchers.addCategory('body')
+    context.matchers
             .addRule('$', new MinEqualsIgnoreOrderMatcher(3))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty == match
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty == match
 
     where:
 
@@ -453,13 +455,13 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
       .addRule('$[0]', new RegexMatcher('[a-z]'))
       .addRule('$[1]', new RegexMatcher('[A-Z]'))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
@@ -470,12 +472,12 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - with min-equals-ignore-order - return type mismatch on bad type'() {
     given:
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', new MinEqualsIgnoreOrderMatcher(1))
       .addRule('$[*]', TypeMatcher.INSTANCE)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context)
       .bodyResults.collectMany { it.result }
 
     then:
@@ -491,13 +493,13 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - with min-equals-ignore-order - specific index matcher overrides wildcard'() {
     given:
-    matchers.addCategory('body')
+    context.matchers
         .addRule('$', new MinEqualsIgnoreOrderMatcher(3))
         .addRule('$[*]', TypeMatcher.INSTANCE)
         .addRule('$[1]', EqualsMatcher.INSTANCE)
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context).mismatches
 
     then:
     mismatches.empty
@@ -510,11 +512,11 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - with min-equals-ignore-order - return equality mismatch'() {
     given:
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', new MinEqualsIgnoreOrderMatcher(1))
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context)
      .bodyResults.collectMany { it.result }
 
     then:
@@ -533,11 +535,11 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    matchers.addCategory('body')
+    context.matchers
             .addRule(item, EqualsIgnoreOrderMatcher.INSTANCE)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     item        | actual                                     | expected
@@ -547,11 +549,11 @@ class JsonBodyMatcherSpec extends Specification {
 
   def 'matching json bodies - with ignore-order - return a mismatch when inorder defaults on other list'() {
     given:
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$.array1', EqualsIgnoreOrderMatcher.INSTANCE)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers)
+    matcher.matchBody(expectedBody, actualBody, context)
       .bodyResults.collectMany { it.result }.find {
         it instanceof BodyMismatch && it.mismatch.contains('Expected 1 (Integer) but received 2 (Integer)')
       }
@@ -573,11 +575,11 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', new MinEqualsIgnoreOrderMatcher(min))
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty == matches
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty == matches
 
     where:
 
@@ -597,12 +599,12 @@ class JsonBodyMatcherSpec extends Specification {
     def actual = '["blue", "seven"]'
     def expectedBody = OptionalBody.body(expected.bytes)
     def actualBody = OptionalBody.body(actual.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
       .addRule('$[*]', new RegexMatcher('red|blue'))
 
     when:
-    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def mismatches = matcher.matchBody(expectedBody, actualBody, context)
       .bodyResults.collectMany { it.result }
 
     then:
@@ -615,7 +617,7 @@ class JsonBodyMatcherSpec extends Specification {
   @Unroll
   def 'matching json bodies - with ignore-order, addtnl matchers - and elements with unique ids'() {
     given:
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
       .addRule('$[*].id', new EqualsMatcher())
       .addRule('$[0].status', new EqualsMatcher())
@@ -624,7 +626,7 @@ class JsonBodyMatcherSpec extends Specification {
     def actualBody = OptionalBody.body(actual.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty == matches
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty == matches
 
     where:
 
@@ -638,7 +640,7 @@ class JsonBodyMatcherSpec extends Specification {
   @Unroll
   def 'matching json bodies - with ignore-order, addtnl matchers - and elements with unique ids plus numbers'() {
     given:
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
       .addRule('$[*].id', new EqualsMatcher())
       .addRule('$[0].status', new EqualsMatcher())
@@ -648,7 +650,7 @@ class JsonBodyMatcherSpec extends Specification {
     def expectedBody = OptionalBody.body('[{"id":"a", "status":"up"}, 4, {"id":"b", "status":"down"}]'.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty == matches
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty == matches
 
     where:
 
@@ -664,7 +666,7 @@ class JsonBodyMatcherSpec extends Specification {
   @Unroll
   def 'matching json bodies - with ignore-order, addtnl matchers - and elements without unique ids'() {
     given:
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
       .addRule('$[0].id', new RegexMatcher('a|b'))
       .addRule('$[0].status', new EqualsMatcher())
@@ -674,7 +676,7 @@ class JsonBodyMatcherSpec extends Specification {
     def actualBody = OptionalBody.body(actual.bytes)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty == matches
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty == matches
 
     where:
 
@@ -695,11 +697,11 @@ class JsonBodyMatcherSpec extends Specification {
     def actual = '[[6,4,5],[2,3,1]]'
     def expectedBody = OptionalBody.body(expected.bytes)
     def actualBody = OptionalBody.body(actual.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
   }
 
   def 'matching json bodies - with ignore-order - return mismatches on nested lists when overriding equality'() {
@@ -708,12 +710,12 @@ class JsonBodyMatcherSpec extends Specification {
     def actual = '[[6,4,5],[2,3,1]]'
     def expectedBody = OptionalBody.body(expected.bytes)
     def actualBody = OptionalBody.body(actual.bytes)
-    matchers.addCategory('body')
+    context.matchers
       .addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
       .addRule('$[0]', EqualsMatcher.INSTANCE)
 
     when:
-    def results = matcher.matchBody(expectedBody, actualBody, true, matchers)
+    def results = matcher.matchBody(expectedBody, actualBody, context)
         .bodyResults.collect {
       [it.key, it.result[0]?.expected?.toString(), (it.result*.actual)*.toString()]
     }
@@ -744,7 +746,7 @@ class JsonBodyMatcherSpec extends Specification {
     def expectedBody = OptionalBody.body(expected.toString().bytes)
     def actualBody = OptionalBody.body(actual.toString().bytes)
 
-    def cat = matchers.addCategory('body')
+    def cat = context.matchers
     cat.addRule('$', EqualsIgnoreOrderMatcher.INSTANCE)
     for (i in 1..(n - 1)) {
       def pos = i - 1
@@ -754,7 +756,7 @@ class JsonBodyMatcherSpec extends Specification {
     }
 
     expect:
-    matcher.matchBody(expectedBody, actualBody, true, matchers).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
     n << [16, 18, 20, 22]

@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
@@ -16,7 +17,8 @@ class PlainTextBodyMatcherSpec extends Specification {
   @Unroll
   def 'Compares using equality if there is no matcher defined'() {
     expect:
-    matcher.compareText(expected, actual, new MatchingRulesImpl()).every { it.result.empty } == result
+    matcher.compareText(expected, actual, new MatchingContext(new MatchingRuleCategory('header'),
+      true)).every { it.result.empty } == result
 
     where:
 
@@ -28,9 +30,9 @@ class PlainTextBodyMatcherSpec extends Specification {
   @Unroll
   def 'Uses the matcher if there is a matcher defined'() {
     expect:
-    matcher.compareText(expected, actual, MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(rules))).every {
-      it.result.empty
-    } == result
+    matcher.compareText(expected, actual, new MatchingContext(
+      MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(rules)).rulesForCategory('body'), true)
+    ).every { it.result.empty } == result
 
     where:
 
@@ -39,5 +41,4 @@ class PlainTextBodyMatcherSpec extends Specification {
     'expected' | 'actual'   | [body: ['$': [matchers: [[match: 'regex', regex: '\\w+']]]]] | true
     'expected' | '12324'    | [body: ['$': [matchers: [[match: 'integer']]]]]              | false
   }
-
 }

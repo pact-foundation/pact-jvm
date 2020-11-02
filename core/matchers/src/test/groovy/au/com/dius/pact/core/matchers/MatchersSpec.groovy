@@ -278,13 +278,13 @@ class MatchersSpec extends Specification {
 
   def 'type matcher - match on type - list elements should inherit the matcher from the parent'() {
     given:
-    def matchingRules = new MatchingRulesImpl()
-    matchingRules.addCategory('body').addRule('$.value', TypeMatcher.INSTANCE)
+    def context = new MatchingContext(new MatchingRuleCategory('body'), true)
+    context.matchers.addRule('$.value', TypeMatcher.INSTANCE)
     def expected = OptionalBody.body('{"value": [100]}'.bytes)
     def actual = OptionalBody.body('{"value": ["200.3"]}'.bytes)
 
     when:
-    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules).mismatches
+    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, context).mismatches
 
     then:
     !mismatches.empty
@@ -293,13 +293,13 @@ class MatchersSpec extends Specification {
 
   def 'type matcher - match on type - map elements should inherit the matchers from the parent'() {
     given:
-    def matchingRules = new MatchingRulesImpl()
-    matchingRules.addCategory('body').addRule('$.value', TypeMatcher.INSTANCE)
+    def context = new MatchingContext(new MatchingRuleCategory('body'), true)
+    context.matchers.addRule('$.value', TypeMatcher.INSTANCE)
     def expected = OptionalBody.body('{"value": {"a": 100}}'.bytes)
     def actual = OptionalBody.body('{"value": {"a": "200.3", "b": 200, "c": 300} }'.bytes)
 
     when:
-    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules).mismatches
+    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, context).mismatches
 
     then:
     !mismatches.empty
