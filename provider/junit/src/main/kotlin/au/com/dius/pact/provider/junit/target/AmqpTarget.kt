@@ -10,6 +10,7 @@ import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.ProviderUtils.findAnnotation
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.Provider
@@ -91,7 +92,7 @@ open class AmqpTarget @JvmOverloads constructor(
   }
 
   override fun getProviderInfo(source: PactSource): ProviderInfo {
-    val provider = testClass.getAnnotation(Provider::class.java)
+    val provider = findAnnotation(testClass.javaClass, Provider::class.java)!!
     val providerInfo = ProviderInfo(provider.value)
     providerInfo.verificationType = PactVerification.ANNOTATED_METHOD
     providerInfo.packagesToScan = packagesToScan

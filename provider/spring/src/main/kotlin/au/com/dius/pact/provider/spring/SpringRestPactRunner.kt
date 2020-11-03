@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.junit.InteractionRunner
 import au.com.dius.pact.provider.junit.RestPactRunner
+import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
@@ -20,6 +21,7 @@ import org.springframework.test.context.web.ServletTestExecutionListener
 /**
  * Pact runner for REST providers that boots up the spring context
  */
+@ExperimentalStdlibApi
 open class SpringRestPactRunner(clazz: Class<*>) : RestPactRunner<RequestResponseInteraction>(clazz) {
 
   private var testContextManager: TestContextManager? = null
@@ -52,10 +54,10 @@ open class SpringRestPactRunner(clazz: Class<*>) : RestPactRunner<RequestRespons
     return SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
   }
 
-  override fun getPactSource(clazz: TestClass): PactLoader {
+  override fun getPactSource(clazz: TestClass, consumerInfo: Consumer?): PactLoader {
     initTestContextManager(clazz.javaClass)
     val environment = testContextManager!!.testContext.applicationContext.environment
-    val pactSource = super.getPactSource(clazz)
+    val pactSource = super.getPactSource(clazz, consumerInfo)
     pactSource.setValueResolver(SpringEnvironmentResolver(environment))
     return pactSource
   }

@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.junit.InteractionRunner
 import au.com.dius.pact.provider.junit.MessagePactRunner
+import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
@@ -45,10 +46,10 @@ open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner<Message>
     return SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
   }
 
-  override fun getPactSource(clazz: TestClass): PactLoader {
+  override fun getPactSource(clazz: TestClass, consumerInfo: Consumer?): PactLoader {
     initTestContextManager(clazz.javaClass)
     val environment = testContextManager!!.testContext.applicationContext.environment
-    val pactSource = super.getPactSource(clazz)
+    val pactSource = super.getPactSource(clazz, consumerInfo)
     pactSource.setValueResolver(SpringEnvironmentResolver(environment))
     return pactSource
   }

@@ -3,8 +3,11 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import org.apache.commons.io.FilenameUtils
 import java.io.File
+import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 
 /**
  * Common provider utils
@@ -68,5 +71,61 @@ object ProviderUtils {
 
   fun isS3Url(pactFile: Any?): Boolean {
     return pactFile is String && pactFile.toLowerCase().startsWith("s3://")
+  }
+
+  @JvmStatic
+  fun <T : Annotation> findAnnotation(clazz: Class<*>, annotation: Class<T>): T? {
+    var value = clazz.getAnnotation(annotation)
+    if (value == null) {
+      for (anno in clazz.kotlin.annotations) {
+        val annotationClass = anno.annotationClass
+        if (!annotationClass.qualifiedName.toString().startsWith("java.lang.annotation.") &&
+          !annotationClass.qualifiedName.toString().startsWith("kotlin.annotation.")) {
+          val valueAnnotation = findAnnotation(annotationClass.java, annotation)
+          if (valueAnnotation != null) {
+            value = valueAnnotation
+          }
+        }
+      }
+    }
+    return value
+  }
+
+  @JvmStatic
+  fun findAllPactSources(clazz: KClass<*>): List<Pair<PactSource, Annotation?>> {
+    val result = mutableListOf<Pair<PactSource, Annotation?>>()
+
+    val annotationOnClass = clazz.findAnnotation<PactSource>()
+    if (annotationOnClass != null) {
+      result.add(annotationOnClass to null)
+    }
+
+    for (anno in clazz.annotations) {
+      result.addAll(findPactSourceOnAnnotations(anno, null))
+    }
+
+    return result
+  }
+
+  private fun findPactSourceOnAnnotations(
+    annotation: Annotation,
+    parent: Annotation?
+  ): List<Pair<PactSource, Annotation?>> {
+    val result = mutableListOf<Pair<PactSource, Annotation?>>()
+
+    if (annotation is PactSource && parent != null) {
+      result.add(annotation to parent)
+    }
+
+    for (anno in annotation.annotationClass.annotations) {
+      val annotationClass = anno.annotationClass
+      if (!annotationClass.qualifiedName.toString().startsWith("java.lang.annotation.") &&
+        !annotationClass.qualifiedName.toString().startsWith("kotlin.annotation.") &&
+        anno != annotation) {
+        result.addAll(findPactSourceOnAnnotations(anno, annotation))
+      }
+    }
+
+    return result
   }
 }
