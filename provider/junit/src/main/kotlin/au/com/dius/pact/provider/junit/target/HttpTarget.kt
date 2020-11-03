@@ -9,6 +9,7 @@ import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.Provider
@@ -104,7 +105,7 @@ open class HttpTarget
   }
 
   override fun getProviderInfo(source: PactSource): ProviderInfo {
-    val provider = testClass.getAnnotation(Provider::class.java)
+    val provider = ProviderUtils.findAnnotation(testClass.javaClass, Provider::class.java)!!
     val providerInfo = ProviderInfo(provider.value)
     providerInfo.port = port
     providerInfo.host = host

@@ -3,14 +3,21 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.provider.junitsupport.loader.PactLoader
+import au.com.dius.pact.provider.junitsupport.loader.PactSource
+import mu.KLogging
 import org.apache.commons.io.FilenameUtils
 import java.io.File
+import kotlin.reflect.KClass
+import kotlin.reflect.full.allSuperclasses
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.memberProperties
 
 /**
  * Common provider utils
  */
 @Suppress("ThrowsCount")
-object ProviderUtils {
+object ProviderUtils : KLogging() {
 
   @JvmStatic
   @JvmOverloads
@@ -68,5 +75,99 @@ object ProviderUtils {
 
   fun isS3Url(pactFile: Any?): Boolean {
     return pactFile is String && pactFile.toLowerCase().startsWith("s3://")
+  }
+
+  @JvmStatic
+  fun <T : Annotation> findAnnotation(clazz: Class<*>, annotation: Class<T>): T? {
+    var value = clazz.getAnnotation(annotation)
+    if (value == null) {
+      for (anno in clazz.kotlin.annotations) {
+        val annotationClass = anno.annotationClass
+        if (!annotationClass.qualifiedName.toString().startsWith("java.lang.annotation.") &&
+          !annotationClass.qualifiedName.toString().startsWith("kotlin.annotation.")) {
+          val valueAnnotation = findAnnotation(annotationClass.java, annotation)
+          if (valueAnnotation != null) {
+            value = valueAnnotation
+          }
+        }
+      }
+    }
+    return value
+  }
+
+  @JvmStatic
+  fun findAllPactSources(clazz: KClass<*>): List<Pair<PactSource, Annotation?>> {
+    val result = mutableListOf<Pair<PactSource, Annotation?>>()
+
+    (listOf(clazz) + clazz.allSuperclasses).forEach {
+      val annotationOnClass = it.annotations.find { annotation -> annotation is PactSource }
+      if (annotationOnClass is PactSource) {
+        result.add(annotationOnClass to null)
+      }
+      for (anno in it.annotations) {
+        result.addAll(findPactSourceOnAnnotations(anno, null))
+      }
+    }
+
+    return result
+  }
+
+  private fun findPactSourceOnAnnotations(
+    annotation: Annotation,
+    parent: Annotation?
+  ): List<Pair<PactSource, Annotation?>> {
+    val result = mutableListOf<Pair<PactSource, Annotation?>>()
+
+    if (annotation is PactSource && parent != null) {
+      result.add(annotation to parent)
+    }
+
+    for (anno in annotation.annotationClass.annotations) {
+      val annotationClass = anno.annotationClass
+      if (!annotationClass.qualifiedName.toString().startsWith("java.lang.annotation.") &&
+        !annotationClass.qualifiedName.toString().startsWith("kotlin.annotation.") &&
+        anno != annotation) {
+        result.addAll(findPactSourceOnAnnotations(anno, annotation))
+      }
+    }
+
+    return result
+  }
+
+  fun instantiatePactLoader(pactSource: PactSource, clazz: Class<*>, annotation: Annotation?): PactLoader {
+    val pactLoaderClass = pactSource.value
+    return try {
+      // Checks if there is a constructor with one argument of type Class.
+      val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
+      constructorWithClass.isAccessible = true
+      constructorWithClass.newInstance(clazz)
+    } catch (e: NoSuchMethodException) {
+      logger.debug { "Pact source does not have a constructor with one argument of type Class" }
+      if (annotation != null) {
+        try {
+          // Check for a constructor with one argument with the type from the annotation with the PactSource
+          val constructor = pactLoaderClass.java.getDeclaredConstructor(annotation.annotationClass.java)
+          constructor.isAccessible = true
+          constructor.newInstance(annotation)
+        } catch (e: NoSuchMethodException) {
+          logger.debug {
+            "Pact loader does not have a constructor with one argument of type $pactSource"
+          }
+          try {
+            // Check for a constructor with one argument with the type from the PactSource annotation value
+            val annotationValueProp = annotation.annotationClass.memberProperties.find { it.name == "value" }
+            val annotationValue = annotationValueProp!!.getter.call(annotation)!!
+            pactLoaderClass.java.getDeclaredConstructor(annotationValue.javaClass).newInstance(annotationValue)
+          } catch (e: NoSuchMethodException) {
+            logger.debug {
+              "Pact loader does not have a constructor with one argument of type ${pactSource.value}"
+            }
+            pactLoaderClass.createInstance()
+          }
+        }
+      } else {
+        pactLoaderClass.createInstance()
+      }
+    }
   }
 }

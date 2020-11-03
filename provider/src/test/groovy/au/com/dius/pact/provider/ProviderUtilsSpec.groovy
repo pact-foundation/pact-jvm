@@ -1,9 +1,11 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.provider.junitsupport.Provider
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 @SuppressWarnings('UnnecessaryBooleanExpression')
+@Provider('Test')
 class ProviderUtilsSpec extends Specification {
 
   private ProviderInfo providerInfo
@@ -74,4 +76,26 @@ class ProviderUtilsSpec extends Specification {
     new ProviderInfo(packagesToScan: ['d.e.f']) | new ConsumerInfo() || ['d.e.f']
   }
 
+  def 'find annotation - can find an annotation on the test class'() {
+    expect:
+    ProviderUtils.findAnnotation(ProviderUtilsSpec, Provider).value() == 'Test'
+  }
+
+  @Provider('Parent')
+  static class ParentClass { }
+
+  static class TestClass extends ParentClass { }
+
+  def 'find annotation - can find an annotation on the parent class'() {
+    expect:
+    ProviderUtils.findAnnotation(TestClass, Provider).value() == 'Parent'
+  }
+
+  @IsTestConsumer
+  static class TestClass2 { }
+
+  def 'find annotation - can find an annotation on annotations on the test class'() {
+    expect:
+    ProviderUtils.findAnnotation(TestClass2, Provider).value() == 'TestConsumer'
+  }
 }

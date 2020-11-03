@@ -75,30 +75,28 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   }
 
   static class InvalidStateChangeTestClass2 extends InvalidStateChangeTestClass {
-
     @State('two')
     void incorrectStateChangeParameter(List list) {
-
     }
-
   }
 
   static class ValidStateChangeTestClass {
-
     @State('three')
     void correctStateChange() {
-
     }
 
     @State('three')
     void correctStateChange2(Map parameters) {
-
     }
+  }
 
+  @IsContractTest
+  static class TestClassWithPactSourceOnAnnotation {
+    @TestTarget
+    Target target
   }
 
   static class TestPactLoader implements PactLoader {
-
     private final Class clazz
 
     TestPactLoader(Class clazz) {
@@ -140,7 +138,7 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
 
     then:
     def exp = thrown(UnsupportedOperationException)
-    exp.message == 'At least one pact source must be present on the test class'
+    exp.message == 'Did not find any PactSource annotations. At least one pact source must be set'
   }
 
   def 'findPactSources returns a pact loader for each discovered pact source annotation'() {
@@ -157,10 +155,21 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     sources.first() instanceof PactFolderLoader
     sources.first().path.toString() == 'pacts'
     childSources.size() == 2
-    childSources.first() instanceof PactFolderLoader
-    childSources.first().path.toString() == 'pacts'
-    childSources[1] instanceof TestPactLoader
-    childSources[1].clazz == ChildClass
+    childSources[0] instanceof TestPactLoader
+    childSources[0].clazz == ChildClass
+    childSources[1] instanceof PactFolderLoader
+    childSources[1].path.toString() == 'pacts'
+  }
+
+  def 'findPactSources returns a pact loader for each discovered pact source on any annotations'() {
+    when:
+    def sources = provider.findPactSources([
+      'getTestClass': { Optional.of(TestClassWithPactSourceOnAnnotation) } ] as ExtensionContext
+    )
+    then:
+    sources.size() == 1
+    sources.first() instanceof PactFolderLoader
+    sources.first().path.toString() == 'pacts'
   }
 
   def 'returns a junit extension for each interaction in all the discovered pact files'() {

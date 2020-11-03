@@ -1,7 +1,5 @@
 package au.com.dius.pact.provider.junitsupport.loader;
 
-import au.com.dius.pact.provider.junitsupport.loader.PactFolderLoader;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
