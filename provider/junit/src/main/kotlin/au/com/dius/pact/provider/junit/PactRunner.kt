@@ -6,6 +6,7 @@ import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderUtils.findAnnotation
+import au.com.dius.pact.provider.ProviderUtils.instantiatePactLoader
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
 import au.com.dius.pact.provider.junitsupport.Consumer
@@ -27,8 +28,6 @@ import org.junit.runners.ParentRunner
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.TestClass
 import java.io.IOException
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.memberProperties
 
 /**
  * JUnit Runner runs pacts against provider
@@ -171,44 +170,9 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
 
     val (pactSource, annotation) = pactSources.first()
     return try {
-      val pactLoaderClass = pactSource.value
-      val loader = try {
-        // Checks if there is a constructor with one argument of type Class.
-        val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
-        constructorWithClass.isAccessible = true
-        constructorWithClass.newInstance(clazz.javaClass)
-      } catch (e: NoSuchMethodException) {
-        logger.debug { "Pact source does not have a constructor with one argument of type Class" }
-        if (annotation != null) {
-          try {
-            // Check for a constructor with one argument with the type from the annotation with the PactSource
-            val constructor = pactLoaderClass.java.getDeclaredConstructor(annotation.annotationClass.java)
-            constructor.isAccessible = true
-            constructor.newInstance(annotation)
-          } catch (e: NoSuchMethodException) {
-            logger.debug {
-              "Pact loader does not have a constructor with one argument of type $pactSource"
-            }
-            try {
-              // Check for a constructor with one argument with the type from the PactSource annotation value
-              val annotationValueProp = annotation.annotationClass.memberProperties.find { it.name == "value" }
-              val annotationValue = annotationValueProp!!.getter.call(annotation)!!
-              pactLoaderClass.java.getDeclaredConstructor(annotationValue.javaClass).newInstance(annotationValue)
-            } catch (e: NoSuchMethodException) {
-              logger.debug {
-                "Pact loader does not have a constructor with one argument of type ${pactSource.value}"
-              }
-              pactLoaderClass.createInstance()
-            }
-          }
-        } else {
-          pactLoaderClass.createInstance()
-        }
-      }
-
+      val loader = instantiatePactLoader(pactSource, clazz.javaClass, annotation)
       checkForOverriddenPactUrl(loader, findAnnotation(clazz.javaClass, AllowOverridePactUrl::class.java),
         consumerInfo)
-
       loader
     } catch (e: ReflectiveOperationException) {
       logger.error(e) { "Error while creating pact source" }
