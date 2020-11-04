@@ -163,7 +163,7 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   /**
    * Deserialise the category from the Map
    */
-  fun fromMap(map: Map<String, Any?>) {
+  fun fromMap(map: Map<String, Any?>): MatchingRuleCategory {
     if (categoryRequiresSubkeys()) {
       map.forEach { (key, value) ->
         if (value is Map<*, *>) {
@@ -185,6 +185,7 @@ data class MatchingRuleCategory @JvmOverloads constructor(
         setRules("", MatchingRuleGroup.fromMap(map))
       }
     }
+    return this
   }
 
   private fun categoryRequiresSubkeys() = name != "path"

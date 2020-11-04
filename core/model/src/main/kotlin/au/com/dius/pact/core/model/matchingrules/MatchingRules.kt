@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model.matchingrules
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.PactSpecVersion
 import mu.KLogging
+import java.lang.RuntimeException
 
 /**
  * Logic to use to combine rules
@@ -273,6 +274,24 @@ data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : Matching
   }
 }
 
+/**
+ * Match array items in any order against a list of variants
+ */
+data class ArrayContainsMatcher(val variants: List<MatchingRuleCategory>) : MatchingRule {
+  override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
+    return mapOf("variants" to variants.map { it.toMap(spec) })
+  }
+
+  override fun canMatch(contentType: ContentType) = true
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    return if (pactVersion < PactSpecVersion.V4) {
+      listOf("Array contains matchers can only be used with Pact specification versions >= V4")
+    } else {
+      listOf()
+    }
+  }
+}
+
 data class MatchingRuleGroup @JvmOverloads constructor(
   val rules: MutableList<MatchingRule> = mutableListOf(),
   val ruleLogic: RuleLogic = RuleLogic.AND
@@ -364,6 +383,16 @@ data class MatchingRuleGroup @JvmOverloads constructor(
           "values" -> ValuesMatcher
           "ignore-order" -> ruleForIgnoreOrder(map)
           "contentType" -> ContentTypeMatcher(map["value"].toString())
+          "arrayContains" -> when(val variants = map["variants"]) {
+            is List<*> -> ArrayContainsMatcher(variants.mapIndexed { index, variant ->
+              when (variant) {
+                is Map<*, *> -> MatchingRuleCategory("Variant $index").fromMap(variant as Map<String, Any?>)
+                else ->
+                  throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
+              }
+            })
+            else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
+          }
           else -> {
             logger.warn { "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
             EqualsMatcher
@@ -407,6 +436,8 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     }
   }
 }
+
+class InvalidMatcherJsonException(message: String) : RuntimeException(message)
 
 /**
  * Collection of all matching rules
