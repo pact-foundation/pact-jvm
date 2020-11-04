@@ -279,7 +279,9 @@ data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : Matching
  */
 data class ArrayContainsMatcher(val variants: List<MatchingRuleCategory>) : MatchingRule {
   override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
-    return mapOf("variants" to variants.map { it.toMap(spec) })
+    return mapOf("variants" to variants.mapIndexed { index, rules ->
+      mapOf("index" to index, "rules" to rules.toMap(spec))
+    })
   }
 
   override fun canMatch(contentType: ContentType) = true
@@ -386,7 +388,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
           "arrayContains" -> when(val variants = map["variants"]) {
             is List<*> -> ArrayContainsMatcher(variants.mapIndexed { index, variant ->
               when (variant) {
-                is Map<*, *> -> MatchingRuleCategory("Variant $index").fromMap(variant as Map<String, Any?>)
+                is Map<*, *> -> MatchingRuleCategory("Variant $index").fromMap(variant["rules"] as Map<String, Any?>)
                 else ->
                   throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
               }

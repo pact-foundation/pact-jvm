@@ -22,7 +22,6 @@ fun <R> runConsumerTest(pact: Pact, config: MockProviderConfig, test: PactTestRu
         "${config.pactVersion} - ${errors.joinToString(", ")}"), PactVerificationResult.Ok())
   }
 
-
   val requestResponsePact = pact.asRequestResponsePact().expect { "Expected an HTTP Request/Response Pact" }
   val server = mockServer(requestResponsePact, config)
   return server.runAndWritePact(requestResponsePact, config.pactVersion, test)

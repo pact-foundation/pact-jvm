@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.matchingrules
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Issue
@@ -182,4 +183,62 @@ class MatchingRulesSpec extends Specification {
     ]
   }
 
+  def 'Array contains matcher to map for JSON'() {
+    expect:
+    new ArrayContainsMatcher([ new MatchingRuleCategory('Variant 1', [
+      '$.index': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)])
+    ])]).toMap(PactSpecVersion.V4) == [
+      variants: [
+        [index: 0, rules: [
+          '$.index': [matchers: [[match: 'integer']], combine: 'AND']]
+        ]
+      ]
+    ]
+  }
+
+  def 'Load array contains matcher from json'() {
+    given:
+    def matchingRulesMap = [
+      body: [
+        '$': [
+          matchers: [
+            [
+              match: 'arrayContains',
+              variants: [
+                [
+                  index: 0,
+                  rules: [
+                    '$.href': [
+                      combine: 'AND',
+                      matchers: [
+                        [
+                          match: 'regex',
+                          regex: '.*\\/orders\\/\\d+$'
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+
+    when:
+    def matchingRules = MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(matchingRulesMap))
+
+    then:
+    !matchingRules.empty
+    matchingRules.categories == ['body'] as Set
+    matchingRules.rulesForCategory('body').matchingRules.size() == 1
+    matchingRules.rulesForCategory('body').matchingRules['$'] == new MatchingRuleGroup([
+      new ArrayContainsMatcher([
+        new MatchingRuleCategory('Variant 0', [
+          '$.href': new MatchingRuleGroup([new RegexMatcher('.*\\/orders\\/\\d+$')])
+        ])
+      ])]
+    )
+  }
 }
