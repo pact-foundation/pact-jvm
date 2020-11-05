@@ -28,4 +28,17 @@ class ProviderStateSpec extends Specification {
     new ProviderState('test', [a: [b: ['B', 'C']]])    | [name: 'test', params: [a: [b: ['B', 'C']]]]
     new ProviderState('test', [a: new Pojo()])         | [name: 'test', params: [a: [v: 1, s: 'one', b: false, vals: [1, 2, 'three']]]]
   }
+
+  def 'uniqueKey should only include parameter keys'() {
+    given:
+    def state1 = new ProviderState('test', [a: 'B', b: 1, c: '2020-03-04'])
+    def state2 = new ProviderState('test', [a: 'B', b: 1, c: '2020-03-03'])
+    def state3 = new ProviderState('test', [a: 'B', b: 1])
+    def state4 = new ProviderState('test', [a: 'B', b: 1, d: '2020-03-04'])
+
+    expect:
+    state1.uniqueKey() == state2.uniqueKey()
+    state1.uniqueKey() != state3.uniqueKey()
+    state1.uniqueKey() != state4.uniqueKey()
+  }
 }

@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Utils.jsonSafeValue
 import au.com.dius.pact.core.support.json.JsonValue
+import org.apache.commons.lang3.builder.HashCodeBuilder
 
 /**
  * Class that encapsulates all the info about a provider state
@@ -34,4 +35,12 @@ data class ProviderState @JvmOverloads constructor(val name: String?, val params
   }
 
   fun matches(state: String) = name?.matches(Regex(state)) ?: false
+
+  fun uniqueKey(): Int {
+    val builder = HashCodeBuilder().append(name)
+    for (param in params) {
+      builder.append(param.key)
+    }
+    return builder.toHashCode()
+  }
 }

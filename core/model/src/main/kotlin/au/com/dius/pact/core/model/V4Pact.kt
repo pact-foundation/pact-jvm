@@ -138,8 +138,6 @@ sealed class V4Interaction(
     override fun generateKey(): String {
       return HashCodeBuilder(57, 11)
         .append(description)
-        .append(request.hashCode())
-        .append(response.hashCode())
         .append(providerStates.hashCode())
         .build().toUInt().toString(16)
     }
@@ -191,13 +189,12 @@ sealed class V4Interaction(
 
     @ExperimentalUnsignedTypes
     override fun generateKey(): String {
-      return HashCodeBuilder(33, 7)
+      val builder = HashCodeBuilder(33, 7)
         .append(description)
-        .append(contents.hashCode())
-        .append(matchingRules.hashCode())
-        .append(generators.hashCode())
-        .append(providerStates.hashCode())
-        .build().toUInt().toString(16)
+      for (state in providerStates) {
+        builder.append(state.uniqueKey())
+      }
+      return builder.build().toUInt().toString(16)
     }
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
