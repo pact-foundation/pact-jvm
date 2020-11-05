@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.ContentType.Companion.HTMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.JSONREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
+import au.com.dius.pact.core.support.json.JsonParser
 import mu.KLogging
 import org.apache.commons.codec.binary.Hex
 import org.apache.tika.config.TikaConfig
@@ -163,9 +164,11 @@ data class OptionalBody(
 
   fun toV4Format(): Map<String, Any?> {
     return when (state) {
-      State.PRESENT -> if (value!!.isEmpty()) {
+      State.PRESENT -> if (value!!.isNotEmpty()) {
         if (contentType.isBinaryType()) {
           mapOf("content" to valueAsBase64(), "contentType" to contentType.toString(), "encoded" to "base64")
+        } else if (contentType.isJson()) {
+          mapOf("content" to JsonParser.parseString(valueAsString()), "contentType" to contentType.toString(), "encoded" to false)
         } else {
           mapOf("content" to valueAsString(), "contentType" to contentType.toString(), "encoded" to false)
         }
