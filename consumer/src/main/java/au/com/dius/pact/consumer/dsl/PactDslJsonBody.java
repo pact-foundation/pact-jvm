@@ -1250,6 +1250,13 @@ public class PactDslJsonBody extends DslPart {
   }
 
   @Override
+  public DslPart matchUrl(String basePath, Object... pathFragments) {
+    throw new UnsupportedOperationException(
+      "URL matcher without an attribute name is not supported for objects. " +
+        "Use matchUrl(String name, String basePath, Object... pathFragments)");
+  }
+
+  @Override
   public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize) {
     return minMaxArrayLike(name, minSize, maxSize, minSize);
   }
@@ -1409,5 +1416,10 @@ public class PactDslJsonBody extends DslPart {
     body.put(name, instance.format(new Date(DATE_2000)));
     matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format));
     return this;
+  }
+
+  @Override
+  public DslPart arrayContaining(String name) {
+    return new PactDslJsonArrayContaining(matcherKey(name, rootPath), name, this);
   }
 }

@@ -892,6 +892,13 @@ public class PactDslJsonRootValue extends DslPart {
     return value;
   }
 
+  @Override
+  public DslPart matchUrl(String name, String basePath, Object... pathFragments) {
+    throw new UnsupportedOperationException(
+      "URL matcher with an attribute name is not supported. " +
+        "Use matchUrl(String basePath, Object... pathFragments)");
+  }
+
   /**
    * Adds a value that will have it's value injected from the provider state
    * @param expression Expression to be evaluated from the provider state
@@ -971,4 +978,8 @@ public class PactDslJsonRootValue extends DslPart {
     return value;
   }
 
+  @Override
+  public DslPart arrayContaining(String name) {
+    throw new UnsupportedOperationException("arrayContaining is not supported for PactDslJsonRootValue");
+  }
 }

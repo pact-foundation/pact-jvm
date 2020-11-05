@@ -557,6 +557,12 @@ public class PactDslJsonArray extends DslPart {
     return parentToReturn;
   }
 
+  @Override
+  public DslPart arrayContaining(String name) {
+    throw new UnsupportedOperationException(
+      "arrayContaining is not currently supported for arrays");
+  }
+
   public PactDslJsonArray array(String name) {
         throw new UnsupportedOperationException("use the array() form");
     }
@@ -1199,6 +1205,13 @@ public class PactDslJsonArray extends DslPart {
     body.put(urlMatcher.getExampleValue());
     matchers.addRule(rootPath + appendArrayIndex(0), regexp(urlMatcher.getRegexExpression()));
     return this;
+  }
+
+  @Override
+  public DslPart matchUrl(String name, String basePath, Object... pathFragments) {
+    throw new UnsupportedOperationException(
+      "URL matcher with an attribute name is not supported for arrays. " +
+        "Use matchUrl(String base, Object... fragments)");
   }
 
   @Override

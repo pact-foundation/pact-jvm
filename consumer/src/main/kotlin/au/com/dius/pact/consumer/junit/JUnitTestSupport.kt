@@ -17,13 +17,13 @@ object JUnitTestSupport {
   fun conformsToSignature(m: Method): Boolean {
     val pact = m.getAnnotation(Pact::class.java)
     val conforms = (pact != null &&
-      RequestResponsePact::class.java.isAssignableFrom(m.returnType) &&
+      au.com.dius.pact.core.model.Pact::class.java.isAssignableFrom(m.returnType) &&
       m.parameterTypes.size == 1 &&
       m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.PactDslWithProvider")))
 
     if (!conforms && pact != null) {
       throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +
-        "'public RequestResponsePact xxx(PactDslWithProvider builder)'")
+        "'public au.com.dius.pact.core.model.Pact xxx(PactDslWithProvider builder)'")
     }
 
     return conforms

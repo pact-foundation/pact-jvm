@@ -67,6 +67,5 @@ public class ArrayExampleTest {
         final Map<String, Object> object = secondSubArray.get(0);
         assertThat(object, hasKey("id"));
         assertThat(object, hasKey("bar"));
-        System.out.println(response);
     }
 }

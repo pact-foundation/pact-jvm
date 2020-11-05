@@ -31,7 +31,7 @@ public class BaseProviderRule extends ExternalResource {
   protected final String provider;
   protected final Object target;
   protected MockProviderConfig config;
-  private Map<String, RequestResponsePact> pacts;
+  private Map<String, au.com.dius.pact.core.model.Pact> pacts;
   private MockServer mockServer;
 
   public BaseProviderRule(Object target, String provider, String hostInterface, Integer port, PactSpecVersion pactVersion) {
@@ -68,15 +68,15 @@ public class BaseProviderRule extends ExternalResource {
                   return;
               }
 
-              Map<String, RequestResponsePact> pacts = getPacts(pactDef.fragment());
-              Optional<RequestResponsePact> pact;
+              Map<String, au.com.dius.pact.core.model.Pact> pacts = getPacts(pactDef.fragment());
+              Optional<au.com.dius.pact.core.model.Pact> pact;
               if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
                   pact = pacts.values().stream().findFirst();
               } else {
                   pact = Arrays.stream(pactDef.value()).map(pacts::get)
                           .filter(Objects::nonNull).findFirst();
               }
-              if (!pact.isPresent()) {
+              if (pact.isEmpty()) {
                   base.evaluate();
                   return;
               }
@@ -162,7 +162,7 @@ public class BaseProviderRule extends ExternalResource {
       }
   }
 
-  private PactVerificationResult runPactTest(final Statement base, RequestResponsePact pact, PactFolder pactFolder) {
+  private PactVerificationResult runPactTest(final Statement base, au.com.dius.pact.core.model.Pact pact, PactFolder pactFolder) {
       return runConsumerTest(pact, config, (mockServer, context) -> {
         this.mockServer = mockServer;
         base.evaluate();
@@ -184,7 +184,7 @@ public class BaseProviderRule extends ExternalResource {
    * scan all methods for @Pact annotation and execute them, if not already initialized
    * @param fragment
    */
-  protected Map<String, RequestResponsePact> getPacts(String fragment) {
+  protected Map<String, au.com.dius.pact.core.model.Pact> getPacts(String fragment) {
       if (pacts == null) {
         pacts = new HashMap<>();
           for (Method m: target.getClass().getMethods()) {
@@ -197,7 +197,8 @@ public class BaseProviderRule extends ExternalResource {
                           .hasPactWith(this.provider);
                       updateAnyDefaultValues(dslBuilder);
                       try {
-                        RequestResponsePact pact = (RequestResponsePact) m.invoke(target, dslBuilder);
+                        au.com.dius.pact.core.model.Pact pact = (au.com.dius.pact.core.model.Pact)
+                          m.invoke(target, dslBuilder);
                         pacts.put(this.provider, pact);
                       } catch (Exception e) {
                           throw new RuntimeException("Failed to invoke pact method", e);

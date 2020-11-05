@@ -442,4 +442,45 @@ public abstract class DslPart {
   public DslPart getParent() {
     return parent;
   }
+
+  /**
+   * Returns a regular expression matcher
+   * @param regex Regex to match with
+   * @param example Example value to use
+   * @return
+   */
+  public static RegexMatcher regex(String regex, String example) {
+    return new RegexMatcher(regex, example);
+  }
+
+  /**
+   * Returns a regular expression matcher. Will generate random examples from the regex.
+   * @param regex Regex to match with
+   * @return
+   */
+  public static RegexMatcher regex(String regex) {
+    return new RegexMatcher(regex);
+  }
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions
+   * @param name Attribute name
+   * @param basePath The base path for the URL (like "http://localhost:8080/") which will be excluded from the matching
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public abstract DslPart matchUrl(String name, String basePath, Object... pathFragments);
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions
+   * @param basePath The base path for the URL (like "http://localhost:8080/") which will be excluded from the matching
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public abstract DslPart matchUrl(String basePath, Object... pathFragments);
+
+  /**
+   * Matches the items in an array against a number of variants. Matching is successful if each variant
+   * occurs once in the array. Variants may be objects containing matching rules.
+   * @param name Attribute name
+   */
+  public abstract DslPart arrayContaining(String name);
 }
