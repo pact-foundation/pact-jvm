@@ -279,7 +279,7 @@ data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : Matching
  */
 data class ArrayContainsMatcher(val variants: List<MatchingRuleCategory>) : MatchingRule {
   override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
-    return mapOf("variants" to variants.mapIndexed { index, rules ->
+    return mapOf("match" to "arrayContains", "variants" to variants.mapIndexed { index, rules ->
       mapOf("index" to index, "rules" to rules.toMap(spec))
     })
   }

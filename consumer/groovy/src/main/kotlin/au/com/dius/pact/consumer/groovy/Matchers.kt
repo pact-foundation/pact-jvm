@@ -13,6 +13,7 @@ import au.com.dius.pact.core.model.generators.RegexGenerator
 import au.com.dius.pact.core.model.generators.TimeGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
@@ -20,6 +21,7 @@ import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.isNotEmpty
 import com.mifmif.common.regex.Generex
+import groovy.lang.Closure
 import mu.KLogging
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.DateUtils
@@ -226,7 +228,36 @@ class UrlMatcher @JvmOverloads constructor(
   private val urlMatcherSupport: UrlMatcherSupport = UrlMatcherSupport(basePath, pathFragments.map {
     if (it is RegexpMatcher) it.matcher!! else it
   })
-) : Matcher(urlMatcherSupport.getExampleValue(), RegexMatcher(urlMatcherSupport.getRegexExpression()))
+) : Matcher(urlMatcherSupport.getExampleValue(), RegexMatcher(urlMatcherSupport.getRegexExpression())) {
+  override val value: Any?
+    get() = urlMatcherSupport.getExampleValue()
+}
+
+/**
+ * Array contains matcher for arrays
+ */
+class ArrayContainsMatcher(
+  private val variants: List<Pair<Any, MatchingRuleCategory>>
+) : Matcher(
+  buildExample(variants),
+  au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher(buildVariants(variants))
+) {
+  companion object {
+    fun buildExample(variants: List<Pair<Any, MatchingRuleCategory>>): List<Any?> {
+      return variants.map { (value, _) ->
+        if (value is Matcher) {
+          value.value
+        } else {
+          value
+        }
+      }
+    }
+
+    fun buildVariants(variants: List<Pair<Any, MatchingRuleCategory>>): List<MatchingRuleCategory> {
+      return variants.map { (_, variant) -> variant }
+    }
+  }
+}
 
 /**
  * Base class for DSL matcher methods

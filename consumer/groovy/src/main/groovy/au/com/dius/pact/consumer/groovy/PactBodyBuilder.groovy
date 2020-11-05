@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.core.model.Feature
 import au.com.dius.pact.core.model.FeatureToggles
+import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
@@ -9,6 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.support.expressions.DataType
 import groovy.json.JsonBuilder
+import kotlin.Pair
 import org.apache.commons.lang3.StringUtils
 
 import java.util.regex.Pattern
@@ -24,16 +26,16 @@ class PactBodyBuilder extends GroovyBuilder {
   public static final String START_LIST = '['
   public static final String END_LIST = ']'
   public static final String ALL_LIST_ITEMS = '[*]'
-  public static final int TWO = 2
   public static final String STAR = '*'
+  public static final String DOLLAR = '$'
 
-  def matchers = new MatchingRuleCategory('body')
+  def matchers = new MatchingRuleCategory(BODY)
   def generators = new Generators().addCategory(au.com.dius.pact.core.model.generators.Category.BODY)
   def mimetype = null
   Boolean prettyPrintBody = null
 
   private bodyRepresentation = [:]
-  private path = '$'
+  private path = DOLLAR
   private final bodyStack = []
 
   String getBody() {
@@ -102,64 +104,70 @@ class PactBodyBuilder extends GroovyBuilder {
   }
 
   private void addAttribute(String name, String matcherName, def value, def value2 = null) {
+    def attributeVal = calculateAttributeValue(value, value2, matcherName, name)
+    bodyRepresentation[name] = attributeVal
+  }
+
+  private Object calculateAttributeValue(def value, def value2, String matcherName, String name) {
+    def attributeVal = value
     if (value instanceof Pattern) {
       def matcher = regexp(value as Pattern, value2)
-      bodyRepresentation[name] = setMatcherAttribute(matcher, path + buildPath(matcherName))
+      attributeVal = setMatcherAttribute(matcher, path + buildPath(matcherName))
     } else if (value instanceof LikeMatcher) {
-      setupLikeMatcherAttribute(value, matcherName, name)
+      attributeVal = setupLikeMatcherAttribute(value, matcherName)
     } else if (value instanceof OrMatcher) {
-      bodyRepresentation[name] = value.value
+      attributeVal = value.value
       matchers.setRules(path + buildPath(matcherName), new MatchingRuleGroup(value.matchers*.matcher, RuleLogic.OR))
     } else if (value instanceof AndMatcher) {
-      bodyRepresentation[name] = value.value
+      attributeVal = value.value
       matchers.setRules(path + buildPath(matcherName), new MatchingRuleGroup(value.matchers*.matcher, RuleLogic.AND))
     } else if (value instanceof Matcher) {
-      bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(matcherName))
+      attributeVal = setMatcherAttribute(value, path + buildPath(matcherName))
     } else if (value instanceof List) {
-      setupListAttribute(name, value, matcherName)
+      attributeVal = setupListAttribute(value, matcherName)
     } else if (value instanceof Closure) {
       if (matcherName == STAR) {
         setMatcherAttribute(new TypeMatcher(), path + buildPath(matcherName))
       }
-      bodyRepresentation[name] = invokeClosure(value, buildPath(matcherName))
+      attributeVal = invokeClosure(value, buildPath(matcherName))
     } else if (value instanceof GeneratedValue) {
-      bodyRepresentation[name] = value.exampleValue
-      this.generators.addGenerator(au.com.dius.pact.core.model.generators.Category.BODY, path + buildPath(name),
+      attributeVal = value.exampleValue
+      this.generators.addGenerator(Category.BODY, path + buildPath(name),
         new ProviderStateGenerator(value.expression, DataType.from(value.exampleValue)))
       setMatcherAttribute(new TypeMatcher(), path + buildPath(matcherName))
-    } else {
-      bodyRepresentation[name] = value
     }
+    attributeVal
   }
 
-  private void setupListAttribute(String name, List value, String matcherName) {
-    bodyRepresentation[name] = []
+  private List setupListAttribute(List value, String matcherName) {
+    def attributeValue = []
     value.eachWithIndex { entry, i ->
       if (entry instanceof Matcher) {
-        bodyRepresentation[name] << setMatcherAttribute(entry, path + buildPath(matcherName,
+        attributeValue << setMatcherAttribute(entry, path + buildPath(matcherName,
           START_LIST + i + END_LIST))
       } else if (entry instanceof Closure) {
-        bodyRepresentation[name] << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
+        attributeValue << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
       } else {
-        bodyRepresentation[name] << entry
+        attributeValue << entry
       }
     }
+    attributeValue
   }
 
-  private void setupLikeMatcherAttribute(LikeMatcher value, String matcherName, String name) {
+  private List setupLikeMatcherAttribute(LikeMatcher value, String matcherName) {
     setMatcherAttribute(value, path + buildPath(matcherName))
-    bodyRepresentation[name] = []
+    def attributeValue = []
     value.numberExamples.times { index ->
       def exampleValue = value.value
       if (exampleValue instanceof Closure) {
-        bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
+        attributeValue << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
       } else if (exampleValue instanceof LikeMatcher) {
-        bodyRepresentation[name] << invoke(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
+        attributeValue << invoke(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
       } else if (exampleValue instanceof Matcher) {
-        bodyRepresentation[name] << setMatcherAttribute(exampleValue, path + buildPath(matcherName, ALL_LIST_ITEMS))
+        attributeValue << setMatcherAttribute(exampleValue, path + buildPath(matcherName, ALL_LIST_ITEMS))
       } else if (exampleValue instanceof Pattern) {
         def matcher = regexp(exampleValue as Pattern, null)
-        bodyRepresentation[name] << setMatcherAttribute(matcher, path + buildPath(matcherName, ALL_LIST_ITEMS))
+        attributeValue << setMatcherAttribute(matcher, path + buildPath(matcherName, ALL_LIST_ITEMS))
       } else if (exampleValue instanceof List) {
         def list = []
         exampleValue.eachWithIndex { entry, i ->
@@ -171,19 +179,24 @@ class PactBodyBuilder extends GroovyBuilder {
             list << entry
           }
         }
-        bodyRepresentation[name] << list
+        attributeValue << list
       } else {
-        bodyRepresentation[name] << exampleValue
+        attributeValue << exampleValue
       }
     }
+    attributeValue
   }
 
   private String buildPath(String name, String children = '') {
-    def key = PATH_SEP + name
-    if (name != STAR && StringUtils.containsAny(name, PATH_SPECIAL_CHARS)) {
-      key = "['" + name + "']"
+    if (name.empty && children.empty) {
+      ''
+    } else {
+      def key = PATH_SEP + name
+      if (name != STAR && StringUtils.containsAny(name, PATH_SPECIAL_CHARS)) {
+        key = "['" + name + "']"
+      }
+      key + children
     }
-    key + children
   }
 
   private invokeClosure(Closure entry, String subPath) {
@@ -309,5 +322,19 @@ class PactBodyBuilder extends GroovyBuilder {
   @SuppressWarnings('UnnecessaryOverridingMethod')
   def build(@DelegatesTo(value = PactBodyBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
     super.build(closure)
+  }
+
+  Matcher arrayContaining(List args) {
+    new ArrayContainsMatcher(args.withIndex().collect { v, index ->
+      def variant = new MatchingRuleCategory(BODY)
+      def matchers = this.matchers
+      def path = this.path
+      this.path = DOLLAR
+      this.matchers = variant
+      def val = calculateAttributeValue(v, null, '', '')
+      this.matchers = matchers
+      this.path = path
+      new Pair(val, variant)
+    })
   }
 }

@@ -188,6 +188,7 @@ class MatchingRulesSpec extends Specification {
     new ArrayContainsMatcher([ new MatchingRuleCategory('Variant 1', [
       '$.index': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)])
     ])]).toMap(PactSpecVersion.V4) == [
+      match: 'arrayContains',
       variants: [
         [index: 0, rules: [
           '$.index': [matchers: [[match: 'integer']], combine: 'AND']]
