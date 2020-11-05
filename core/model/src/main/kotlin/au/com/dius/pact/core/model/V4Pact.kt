@@ -320,8 +320,13 @@ open class V4Pact(
   }
 
   override fun mergeInteractions(interactions: List<Interaction>): Pact {
-    return V4Pact(consumer, provider, this.interactions + interactions.map { it.asV4Interaction() },
-      metadata, source)
+    return V4Pact(consumer, provider, merge(interactions), metadata, source)
+  }
+
+  private fun merge(interactions: List<Interaction>): List<V4Interaction> {
+    val mergedResult = this.interactions.associateBy { it.generateKey() } +
+      interactions.map { it.asV4Interaction() }.associateBy { it.generateKey() }
+    return mergedResult.values.toList()
   }
 
   override fun asRequestResponsePact(): Result<RequestResponsePact, String> {

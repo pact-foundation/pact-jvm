@@ -92,14 +92,14 @@ object DefaultPactWriter : PactWriter, KLogging() {
         val source = FileSource(pactFile)
         val json = JsonParser.parseString(readFileUtf8(raf)).asObject()
         val existingPact = DefaultPactReader.pactFromJson(json, source)
-        val result = PactMerge.merge(existingPact, pact)
+        val result = PactMerge.merge(pact, existingPact)
         if (!result.ok) {
           throw InvalidPactException(result.message)
         }
         raf.seek(0)
         val swriter = StringWriter()
         val writer = PrintWriter(swriter)
-        writePact(pact, writer, pactSpecVersion)
+        writePact(result.result!!, writer, pactSpecVersion)
         val bytes = swriter.toString().toByteArray()
         raf.setLength(bytes.size.toLong())
         raf.write(bytes)

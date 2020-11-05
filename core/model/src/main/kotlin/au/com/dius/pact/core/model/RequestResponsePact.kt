@@ -34,7 +34,7 @@ class RequestResponsePact @JvmOverloads constructor(
 
   override fun mergeInteractions(interactions: List<Interaction>): Pact {
     interactions as List<RequestResponseInteraction>
-    this.interactions = (this.interactions + interactions).distinctBy { it.uniqueKey() }.toMutableList()
+    this.interactions = (interactions + this.interactions).distinctBy { it.uniqueKey() }.toMutableList()
     sortInteractions()
     return this
   }
