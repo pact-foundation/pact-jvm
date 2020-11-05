@@ -286,8 +286,8 @@ data class ArrayContainsMatcher(val variants: List<MatchingRuleCategory>) : Matc
 
   override fun canMatch(contentType: ContentType) = true
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V4) {
-      listOf("Array contains matchers can only be used with Pact specification versions >= V4")
+    return if (pactVersion < PactSpecVersion.V3) {
+      listOf("Array contains matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
     }

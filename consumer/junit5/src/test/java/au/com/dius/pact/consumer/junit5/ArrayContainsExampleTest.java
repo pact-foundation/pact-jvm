@@ -1,15 +1,14 @@
-package au.com.dius.pact.consumer.junit;
+package au.com.dius.pact.consumer.junit5;
 
+import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.core.model.PactSpecVersion;
-import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import groovy.json.JsonSlurper;
 import org.apache.http.client.fluent.Request;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,16 +16,15 @@ import java.util.Map;
 import java.util.Set;
 
 import static au.com.dius.pact.consumer.dsl.DslPart.regex;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
+@ExtendWith(PactConsumerTestExt.class)
+@PactTestFor(providerName = "Siren Order Service")
 public class ArrayContainsExampleTest {
-  @Rule
-  public PactProviderRule provider = new PactProviderRule("Siren Order Service", PactSpecVersion.V4, this);
-
   @Pact(consumer = "Order Processor")
-  public V4Pact createFragment(PactDslWithProvider builder) {
+  public au.com.dius.pact.core.model.Pact articles(PactDslWithProvider builder) {
     final DslPart body = new PactDslJsonBody()
       .array("class")
         .stringValue("entity")
@@ -78,13 +76,13 @@ public class ArrayContainsExampleTest {
       .status(200)
       .headers(Map.of("Content-Type", "application/vnd.siren+json"))
       .body(body)
-      .toPact(V4Pact.class);
+      .toPact();
   }
 
   @Test
-  @PactVerification
-  public void exampleWithArrayContains() throws IOException {
-    final String response = Request.Get(provider.getUrl() + "/orders")
+  @PactTestFor
+  void testArticles(MockServer mockServer) throws IOException {
+    final String response = Request.Get(mockServer.getUrl() + "/orders")
       .addHeader("Accept", "application/vnd.siren+json")
       .execute()
       .returnContent()
