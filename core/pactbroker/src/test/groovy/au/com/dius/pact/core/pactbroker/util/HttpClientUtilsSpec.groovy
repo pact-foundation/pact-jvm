@@ -24,5 +24,4 @@ class HttpClientUtilsSpec extends Specification {
     'no port'                 | 'http://localhost'      | '/path/with spaces'                      | 'http://localhost/path/with%20spaces'
     'Extra path'              | 'http://localhost/sub'  | '/extraPath/with spaces'                 | 'http://localhost/sub/extraPath/with%20spaces'
   }
-
 }

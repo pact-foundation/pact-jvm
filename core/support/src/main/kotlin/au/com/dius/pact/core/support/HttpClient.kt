@@ -39,19 +39,19 @@ object HttpClient : KLogging() {
   fun newHttpClient(
     authentication: Any?,
     uri: URI,
-    defaultHeaderStore: MutableMap<String, String>,
     maxPublishRetries: Int = 5,
     publishRetryInterval: Int = 3000
   ): Pair<CloseableHttpClient, CredentialsProvider?> {
     val retryStrategy = CustomServiceUnavailableRetryStrategy(maxPublishRetries, publishRetryInterval)
     val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
 
+    val defaultHeaders = mutableMapOf<String, String>()
     val credsProvider = when (authentication) {
       is Auth -> {
         when (authentication) {
           is Auth.BasicAuthentication -> basicAuth(uri, authentication.username, authentication.password, builder)
           is Auth.BearerAuthentication -> {
-            defaultHeaderStore["Authorization"] = "Bearer " + authentication.token
+            defaultHeaders["Authorization"] = "Bearer " + authentication.token
             SystemDefaultCredentialsProvider()
           }
         }
@@ -68,7 +68,7 @@ object HttpClient : KLogging() {
           }
           "bearer" -> {
             if (authentication.size > 1) {
-              defaultHeaderStore["Authorization"] = "Bearer " + authentication[1].toString()
+              defaultHeaders["Authorization"] = "Bearer " + authentication[1].toString()
             } else {
               logger.warn { "Bearer token authentication requires a token, ignoring." }
             }
@@ -83,7 +83,7 @@ object HttpClient : KLogging() {
       else -> SystemDefaultCredentialsProvider()
     }
 
-    builder.setDefaultHeaders(defaultHeaderStore.map { BasicHeader(it.key, it.value) })
+    builder.setDefaultHeaders(defaultHeaders.map { BasicHeader(it.key, it.value) })
     return builder.build() to credsProvider
   }
 

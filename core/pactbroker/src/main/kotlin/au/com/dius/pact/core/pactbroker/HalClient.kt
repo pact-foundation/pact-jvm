@@ -196,8 +196,8 @@ open class HalClient @JvmOverloads constructor(
         HttpClient.logger.warn { "Authentication options needs to be a list of values, ignoring." }
       }
       val uri = URI(baseUrl)
-      val result = HttpClient.newHttpClient(options["authentication"], uri, defaultHeaders,
-        this.maxPublishRetries, this.publishRetryInterval)
+      val result = HttpClient.newHttpClient(options["authentication"], uri, this.maxPublishRetries,
+        this.publishRetryInterval)
       httpClient = result.first
 
       if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {
