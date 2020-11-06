@@ -38,8 +38,13 @@ object HttpClientUtils {
   }
 
   fun pathCombiner(builder: URIBuilder, url: String): URI {
-    return if (builder.getPath() != null) {
-      builder.setPath(builder.getPath() + url).build()
+    val path = builder.path
+    return if (path != null) {
+      if (path.endsWith("/") && url.startsWith("/")) {
+        builder.setPath(path.trimEnd('/') + url).build()
+      } else {
+        builder.setPath(path + url).build()
+      }
     } else {
       builder.setPath(url).build()
     }
