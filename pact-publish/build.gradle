@@ -22,6 +22,11 @@ dependencies {
   }
 }
 
+project.afterEvaluate {
+  project.tasks.publishMavenPublicationPublicationToMavenLocal.enabled = false
+  project.tasks.publishMavenPublicationPublicationToMavenRepository.enabled = false
+}
+
 if (System.env.PACT_PUBLISH == 'true') {
   pact {
     publish {
