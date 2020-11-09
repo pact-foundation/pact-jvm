@@ -236,7 +236,7 @@ class MatchingRulesSpec extends Specification {
     matchingRules.rulesForCategory('body').matchingRules.size() == 1
     matchingRules.rulesForCategory('body').matchingRules['$'] == new MatchingRuleGroup([
       new ArrayContainsMatcher([
-        new MatchingRuleCategory('Variant 0', [
+        new MatchingRuleCategory('body', [
           '$.href': new MatchingRuleGroup([new RegexMatcher('.*\\/orders\\/\\d+$')])
         ])
       ])]

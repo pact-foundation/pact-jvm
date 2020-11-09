@@ -50,7 +50,7 @@ class PerfTest {
     stopWatch.split()
     log.info("Setup Fragment: ${stopWatch.splitTime}")
 
-    MockProviderConfig config = new MockProviderConfig('127.0.0.1', 8080, PactSpecVersion.V3, 'http', impl)
+    MockProviderConfig config = new MockProviderConfig('127.0.0.1', 5555, PactSpecVersion.V3, 'http', impl)
     assert runConsumerTest(pact, config) { mockServer, context ->
       stopWatch.split()
       log.info("In Test: ${stopWatch.splitTime}")

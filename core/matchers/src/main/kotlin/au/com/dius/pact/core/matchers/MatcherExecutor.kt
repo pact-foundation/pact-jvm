@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
@@ -139,6 +140,7 @@ fun <M : Mismatch> domatch(
     is MinMaxEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn) +
             matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
     is ContentTypeMatcher -> matchContentType(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
+    is ArrayContainsMatcher -> listOf()
     else -> matchEquality(path, expected, actual, mismatchFn)
   }
 }

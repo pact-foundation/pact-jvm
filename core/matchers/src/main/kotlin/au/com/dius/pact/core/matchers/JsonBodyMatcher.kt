@@ -92,7 +92,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
       logger.debug { "compareLists: Matcher defined for path $path" }
       for (matcher in context.selectBestMatcher(path).rules) {
         result.addAll(compareLists(path, matcher, expectedList, actualList, context, generateDiff) {
-          p, expected, actual -> compare(p, expected, actual, context)
+          p, expected, actual, context -> compare(p, expected, actual, context)
         })
       }
     } else {
@@ -103,7 +103,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
           path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
       } else {
         result.addAll(compareListContent(expectedList, actualList, path, context, generateDiff) {
-          p, expected, actual -> compare(p, expected, actual, context)
+          p, expected, actual, context -> compare(p, expected, actual, context)
         })
         if (expectedList.size != actualList.size) {
           result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedList, actualList,

@@ -388,7 +388,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
           "arrayContains" -> when(val variants = map["variants"]) {
             is List<*> -> ArrayContainsMatcher(variants.mapIndexed { index, variant ->
               when (variant) {
-                is Map<*, *> -> MatchingRuleCategory("Variant $index").fromMap(variant["rules"] as Map<String, Any?>)
+                is Map<*, *> -> MatchingRuleCategory("body").fromMap(variant["rules"] as Map<String, Any?>)
                 else ->
                   throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
               }

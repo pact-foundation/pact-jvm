@@ -197,7 +197,7 @@ sealed class JsonValue {
       when (this) {
         is Array -> "[\n" + this.values.joinToString(",\n") {
           it.prettyPrint(indent + 2) } + "\n$indentStr]"
-        is Object -> "{\n" + this.entries.entries.joinToString(",\n") {
+        is Object -> "{\n" + this.entries.entries.sortedBy { it.key }.joinToString(",\n") {
           "$indentStr2\"${it.key}\": ${it.value.prettyPrint(indent + 2, true)}"
           } + "\n$indentStr}"
         else -> this.serialise()
@@ -206,7 +206,7 @@ sealed class JsonValue {
       when (this) {
         is Array -> "$indentStr$indentStr[\n" + this.values.joinToString(",\n") {
           it.prettyPrint(indent + 2) } + "\n$indentStr]"
-        is Object -> "$indentStr{\n" + this.entries.entries.joinToString(",\n") {
+        is Object -> "$indentStr{\n" + this.entries.entries.sortedBy { it.key }.joinToString(",\n") {
           "$indentStr2\"${it.key}\": ${it.value.prettyPrint(indent + 2, true)}"
           } + "\n$indentStr}"
         else -> indentStr + this.serialise()

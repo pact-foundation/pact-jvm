@@ -89,7 +89,13 @@ data class MatchingRuleCategory @JvmOverloads constructor(
     copy(matchingRules = matchingRules.filter { predicate.test(it.key) }.toMutableMap())
 
   fun maxBy(comparator: Comparator<String>): MatchingRuleGroup {
-    val max = matchingRules.maxWith(Comparator { a, b -> comparator.compare(a.key, b.key) })
+    val max = matchingRules.entries.fold(matchingRules.entries.firstOrNull()) { acc, entry ->
+      if (acc != null && comparator.compare(acc.key, entry.key) >= 0) {
+        acc
+      } else {
+        entry
+      }
+    }
     return max?.value ?: MatchingRuleGroup()
   }
 

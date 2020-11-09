@@ -7,8 +7,11 @@ import au.com.dius.pact.core.matchers.util.memoizeFixed
 import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
@@ -223,7 +226,7 @@ object Matchers : KLogging() {
     actualList: List<T>,
     context: MatchingContext,
     generateDiff: () -> String,
-    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+    callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
     val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory)
@@ -240,6 +243,45 @@ object Matchers : KLogging() {
           logger.debug { "compareLists: ignore-order matcher defined for path $path" }
           // No need to pad 'expected' as we already visit all 'actual' values
           result.addAll(compareListContentUnordered(expectedList, actualList, path, context, generateDiff, callback))
+        }
+        is ArrayContainsMatcher -> {
+          val variants = if (matcher.variants.isEmpty()) {
+            expectedList.map {
+              MatchingRuleCategory("body", mutableMapOf("" to MatchingRuleGroup(mutableListOf(EqualsMatcher))))
+            }
+          } else {
+            matcher.variants
+          }
+          for ((index, variant) in variants.withIndex()) {
+            if (index < expectedList.size) {
+              val expectedValue = expectedList[index]
+              val newContext = MatchingContext(variant, context.allowUnexpectedKeys)
+              val noneMatched = actualList.withIndex().all { (actualIndex, value) ->
+                val variantResult = callback(listOf("$"), expectedValue, value, newContext)
+                val mismatches = variantResult.flatMap { it.result }
+                logger.debug {
+                  "Comparing list item $actualIndex with value '$value' to '$expectedValue' -> " +
+                    "${mismatches.size} mismatches"
+                }
+                mismatches.isNotEmpty()
+              }
+              if (noneMatched) {
+                result.add(BodyItemMatchResult(path.joinToString("."),
+                  listOf(BodyMismatch(expectedValue, actualList,
+                    "Variant at index $index ($expectedValue) was not found in the actual list",
+                    path.joinToString("."), generateDiff()
+                  ))
+                ))
+              }
+            } else {
+              result.add(BodyItemMatchResult(path.joinToString("."),
+                listOf(BodyMismatch(expectedList, actualList,
+                  "ArrayContains: variant $index is missing from the expected list, which has " +
+                    "${expectedList.size} items", path.joinToString("."), generateDiff()
+                ))
+              ))
+            }
+          }
         }
         else -> {
           result.addAll(compareListContent(expectedList.padTo(actualList.size, expectedList.first()),
@@ -258,13 +300,14 @@ object Matchers : KLogging() {
     basePath: List<String>,
     expectedValues: List<T>,
     actual: T,
-    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+    context: MatchingContext,
+    callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val path = basePath + expectedValues.size.toString()
     val pathStr = path.joinToString(".")
     val starPathStr = (basePath + "*").joinToString(".")
 
-    return callback(path, expectedValues[0], actual)
+    return callback(path, expectedValues[0], actual, context)
       .map { matchResult ->
         // replaces index with '*' for clearer errors
         matchResult.copy(
@@ -288,17 +331,17 @@ object Matchers : KLogging() {
     path: List<String>,
     context: MatchingContext,
     generateDiff: () -> String,
-    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+    callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val doWildCardMatching = actualList.size > expectedList.size &&
       context.wildcardIndexMatcherDefined(path + expectedList.size.toString())
 
     val memoizedWildcardCompare = { actualIndex: Int ->
-      wildcardCompare(path, expectedList, actualList[actualIndex], callback)
+      wildcardCompare(path, expectedList, actualList[actualIndex], context, callback)
     }.memoizeFixed(actualList.size)
 
     val memoizedCompare = { expectedIndex: Int, actualIndex: Int ->
-      callback(path + expectedIndex.toString(), expectedList[expectedIndex], actualList[actualIndex])
+      callback(path + expectedIndex.toString(), expectedList[expectedIndex], actualList[actualIndex], context)
     }.memoizeFixed(expectedList.size, actualList.size)
 
     val longestMatch = LargestKeyValue<Int, IndicesCombination>()
@@ -375,12 +418,12 @@ object Matchers : KLogging() {
     path: List<String>,
     context: MatchingContext,
     generateDiff: () -> String,
-    callback: (List<String>, T, T) -> List<BodyItemMatchResult>
+    callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
     for ((index, value) in expectedList.withIndex()) {
       if (index < actualList.size) {
-        result.addAll(callback(path + index.toString(), value, actualList[index]))
+        result.addAll(callback(path + index.toString(), value, actualList[index], context))
       } else if (!context.matcherDefined(path)) {
         result.add(BodyItemMatchResult(path.joinToString("."),
           listOf(BodyMismatch(expectedList, actualList,

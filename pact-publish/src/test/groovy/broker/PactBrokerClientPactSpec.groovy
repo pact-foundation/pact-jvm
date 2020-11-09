@@ -19,7 +19,7 @@ class PactBrokerClientPactSpec extends Specification {
   private PactBuilder pactBroker, imaginaryBroker
 
   def setup() {
-    pactBrokerClient = new PactBrokerClient('http://localhost:8080', [halClient: [maxPublishRetries: 0]])
+    pactBrokerClient = new PactBrokerClient('http://localhost:9876', [halClient: [maxPublishRetries: 0]])
     pactFile = File.createTempFile('pact', '.json')
     pactContents = '''
       {
@@ -37,14 +37,14 @@ class PactBrokerClientPactSpec extends Specification {
     pactBroker {
       serviceConsumer 'JVM Pact Broker Client'
       hasPactWith 'Pact Broker'
-      port 8080
+      port 9876
     }
 
     imaginaryBroker = new PactBuilder()
     imaginaryBroker {
       serviceConsumer 'JVM Pact Broker Client'
       hasPactWith 'Imaginary Pact Broker'
-      port 8080
+      port 9876
     }
   }
 
@@ -57,7 +57,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimetype: 'application/json') {
         _links {
           'pb:publish-pact' {
-            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
             title 'Publish a pact'
             templated true
           }
@@ -89,7 +89,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimetype: 'application/json') {
         _links {
           'pb:publish-pact' {
-            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
             title 'Publish a pact'
             templated true
           }
@@ -126,7 +126,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimetype: 'application/json') {
         _links {
           'pb:publish-pact' {
-            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
             title 'Publish a pact'
             templated true
           }
@@ -170,7 +170,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimetype: 'application/json') {
         _links {
           'pb:publish-pact' {
-            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
             title 'Publish a pact'
             templated true
           }
@@ -206,7 +206,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimetype: 'application/json') {
         _links {
           'pb:publish-pact' {
-            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
             title 'Publish a pact'
             templated true
           }
@@ -246,7 +246,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(contentType: 'application/hal+json') {
         '_links' {
           'pb:latest-provider-pacts' {
-            href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'latest')
+            href url('http://localhost:9876', 'pacts', 'provider', '{provider}', 'latest')
             title 'Latest pacts by provider'
             templated true
           }
@@ -258,11 +258,11 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(contentType: 'application/hal+json') {
         '_links' {
           'pb:provider' {
-            href url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity Service'))
+            href url('http://localhost:9876', 'pacticipants', regexp('[^\\/]+', 'Activity Service'))
             title string('Activity Service')
           }
           'pb:pacts' eachLike(2) {
-            href url('http://localhost:8080', 'pacts', 'provider', regexp('[^\\/]+', 'Activity Service'),
+            href url('http://localhost:9876', 'pacts', 'provider', regexp('[^\\/]+', 'Activity Service'),
               'consumer', regexp('[^\\/]+', 'Foo Web Client'),
               'version', regexp('\\d+\\.\\d+\\.\\d+', '0.1.380'))
             title string('Pact between Foo Web Client (v0.1.380) and Activity Service')
@@ -297,7 +297,7 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.publishVerificationResults([
         'pb:publish-verification-results': [
-          href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
+          href: 'http://localhost:9876/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
       ], TestResult.Ok.INSTANCE, '10.0.0').value
@@ -314,7 +314,7 @@ class PactBrokerClientPactSpec extends Specification {
       uponReceiving('a pact publish verification request with build info')
       withAttributes(method: 'POST',
         path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
-        body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:8080/build']
+        body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:9876/build']
       )
       willRespondWith(status: 201)
     }
@@ -323,10 +323,10 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.publishVerificationResults([
         'pb:publish-verification-results': [
-          href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
+          href: 'http://localhost:9876/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build').value
+      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:9876/build').value
     }
 
     then:
@@ -343,7 +343,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimeType: 'application/json') {
         success false
         providerApplicationVersion '10.0.0'
-        buildUrl 'http://localhost:8080/build'
+        buildUrl 'http://localhost:9876/build'
         testResults eachLike {
           interactionId string('12345678')
           success false
@@ -374,10 +374,10 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       pactBrokerClient.publishVerificationResults([
         'pb:publish-verification-results': [
-          href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
+          href: 'http://localhost:9876/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], failure, '10.0.0', 'http://localhost:8080/build')
+      ], failure, '10.0.0', 'http://localhost:9876/build')
     }
 
     then:
@@ -482,7 +482,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(contentType: 'application/hal+json') {
         '_links' {
           'pb:provider-pacts-for-verification' {
-            href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'for-verification')
+            href url('http://localhost:9876', 'pacts', 'provider', '{provider}', 'for-verification')
             title 'Pact versions to be verified for the specified provider'
             templated true
           }
@@ -581,7 +581,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(contentType: 'application/hal+json') {
         '_links' {
           'pb:provider-pacts-for-verification' {
-            href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'for-verification')
+            href url('http://localhost:9876', 'pacts', 'provider', '{provider}', 'for-verification')
             title 'Pact versions to be verified for the specified provider'
             templated true
           }
@@ -694,7 +694,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(contentType: 'application/hal+json') {
         '_links' {
           'pb:provider-pacts-for-verification' {
-            href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'for-verification')
+            href url('http://localhost:9876', 'pacts', 'provider', '{provider}', 'for-verification')
             title 'Pact versions to be verified for the specified provider'
             templated true
           }
