@@ -145,8 +145,7 @@ one will be generated.
 | uuid | Will match strings containing UUIDs |
 | includesStr | Will match strings containing the provided string |
 | equalsTo | Will match using equals |
-| matchUrl | Defines a matcher for URLs, given the base URL path and a sequence of path fragments. The path fragments could be
-             strings or regular expression matchers |
+| matchUrl | Defines a matcher for URLs, given the base URL path and a sequence of path fragments. The path fragments could be strings or regular expression matchers |
 | nullValue | Matches the JSON Null value |
 
 _\* Note:_ JSON only supports double precision floating point values. Depending on the language implementation, they

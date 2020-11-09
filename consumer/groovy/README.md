@@ -394,7 +394,7 @@ You can specify the number of example items to generate in the array. The defaul
 
 This will create an example user list with 3 users.
 
-The each like matchers have been updated to work with primitive types.
+The "each like" matchers have been updated to work with primitive types.
 
 ```groovy
 withBody {
@@ -454,6 +454,30 @@ An `eachArrayLike` method has been added to handle matching of arrays of arrays.
 ```
 
 This will generate an array of arrays for the `answer` attribute.
+
+#### Array contains matcher (V4 specification)
+
+The array contains matcher functions allow you to match the actual list against a list of required variants. These work
+by matching each item against the variants, and the matching succeeds if each variant matches at least one item. Order of
+items in the list is not important.
+
+The variants can have a totally different structure, and can have their own matching rules to apply. For an example of how
+these can be used to match a hypermedia format like Siren, see [Example Pact + Siren project](https://github.com/pactflow/example-siren).
+
+```groovy
+actions arrayContaining([
+    {
+      name 'update'
+      method 'PUT'
+      href url('http://localhost:9000', 'orders', regexp('\\d+', '1234'))
+    },
+    {
+      name 'delete'
+      method 'DELETE'
+      href url('http://localhost:9000', 'orders', regexp('\\d+', '1234'))
+    }
+])
+```
 
 ### Matching any key in a map
 

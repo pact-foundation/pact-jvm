@@ -324,6 +324,11 @@ class PactBodyBuilder extends GroovyBuilder {
     super.build(closure)
   }
 
+  /**
+   * Matches the items in an array against a number of variants. Matching is successful if each variant
+   * occurs once in the array. Variants may be objects containing matching rules.
+   * @param args List of variants to match
+   */
   Matcher arrayContaining(List args) {
     new ArrayContainsMatcher(args.withIndex().collect { v, index ->
       def variant = new MatchingRuleCategory(BODY)
