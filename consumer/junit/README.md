@@ -458,6 +458,21 @@ these can be used to match a hypermedia format like Siren, see [Example Pact + S
 |----------|-------------|
 | `arrayContaining` | Matches the items in an array against a number of variants. Matching is successful if each variant occurs once in the array. Variants may be objects containing matching rules. |
 
+```java
+.arrayContaining("actions")
+  .object()
+    .stringValue("name", "update")
+    .stringValue("method", "PUT")
+    .matchUrl("href", "http://localhost:9000", "orders", regex("\\d+", "1234"))
+  .closeObject()
+  .object()
+    .stringValue("name", "delete")
+    .stringValue("method", "DELETE")
+    .matchUrl("href", "http://localhost:9000", "orders", regex("\\d+", "1234"))
+  .closeObject()
+.closeArray()
+```
+
 #### Root level arrays that match all items
 
 If the root of the body is an array, you can create PactDslJsonArray classes with the following methods:

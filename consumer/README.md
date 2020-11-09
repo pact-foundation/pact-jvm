@@ -147,9 +147,10 @@ one will be generated.
 | equalsTo | Will match using equals |
 | matchUrl | Defines a matcher for URLs, given the base URL path and a sequence of path fragments. The path fragments could be
              strings or regular expression matchers |
+| nullValue | Matches the JSON Null value |
 
 _\* Note:_ JSON only supports double precision floating point values. Depending on the language implementation, they
-may parsed as integer, floating point or decimal numbers.
+may be parsed as integer, floating point or decimal numbers.
 
 #### Ensuring all items in a list match an example
 
@@ -176,6 +177,45 @@ For example:
 
 This will ensure that the users list is never empty and that each user has an identifier that is a number and a name that is a string.
 
+#### Ignoring the list order (V4 specification)
+
+If the order of the list items is not known, you can use the `unorderedArray` matcher functions. These will match the 
+actual list against the expected one, except will match the items in any order.
+
+| function | description |
+|----------|-------------|
+| `unorderedArray` | Ensure that the list matches the provided example, ignoring the order |
+| `unorderedMinArray` | Ensure that the list matches the provided example and the list is not smaller than the provided min |
+| `unorderedMaxArray` | Ensure that the list matches the provided example and the list is no bigger than the provided max |
+| `unorderedMinMaxArray` | Ensure that the list matches the provided example and the list is constrained to the provided min and max |
+
+#### Array contains matcher (V4 specification)
+
+The array contains matcher functions allow you to match the actual list against a list of required variants. These work
+by matching each item against the variants, and the matching succeeds if each variant matches at least one item. Order of
+items in the list is not important.
+
+The variants can have a totally different structure, and can have their own matching rules to apply. For an example of how
+these can be used to match a hypermedia format like Siren, see [Example Pact + Siren project](https://github.com/pactflow/example-siren).
+
+| function | description |
+|----------|-------------|
+| `arrayContaining` | Matches the items in an array against a number of variants. Matching is successful if each variant occurs once in the array. Variants may be objects containing matching rules. |
+
+```java
+.arrayContaining("actions")
+  .object()
+    .stringValue("name", "update")
+    .stringValue("method", "PUT")
+    .matchUrl("href", "http://localhost:9000", "orders", regex("\\d+", "1234"))
+  .closeObject()
+  .object()
+    .stringValue("name", "delete")
+    .stringValue("method", "DELETE")
+    .matchUrl("href", "http://localhost:9000", "orders", regex("\\d+", "1234"))
+  .closeObject()
+.closeArray()
+```
 
 #### Matching JSON values at the root
 
