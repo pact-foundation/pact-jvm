@@ -3,7 +3,13 @@ Maven plugin to verify a provider
 
 Maven plugin for verifying pacts against a provider.
 
-**NOTE: If you are running your tests with the JUnit runners, you do not need this plugin.**
+<hr/>
+
+**![stop](stop.jpg) If you are running your tests with the JUnit runners, you do not need this plugin**
+
+**This plugin is for verifying a running provider. For verifying your provider using unit tests, refer to the [JUnit 4](../junit) or [JUnit 5](../junit5) docs.**
+
+<hr/> 
 
 The Maven plugin provides a `verify` goal which will verify all configured pacts against your provider.
 
