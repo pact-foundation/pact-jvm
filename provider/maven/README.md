@@ -5,7 +5,7 @@ Maven plugin for verifying pacts against a provider.
 
 <hr/>
 
-**![stop](stop.jpg) If you are running your tests with the JUnit runners, you do not need this plugin**
+**![stop](https://raw.githubusercontent.com/pact-foundation/pact-jvm/master/provider/maven/stop.jpg) If you are running your tests with the JUnit runners, you do not need this plugin**
 
 **This plugin is for verifying a running provider. For verifying your provider using unit tests, refer to the [JUnit 4](../junit) or [JUnit 5](../junit5) docs.**
 
