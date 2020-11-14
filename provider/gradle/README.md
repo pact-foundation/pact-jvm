@@ -956,8 +956,6 @@ There is a `canIDeploy` Gradle task that you can use to preform a deployment saf
 parameters: `pacticipant` and either `pacticipantVersion` or `latest=true`. It will use the configuration from the 
 `broker` section of your Gradle build. 
 
-**NOTE:** from version 4.1.11 the parameters have been renamed to `application` and `applicationVersion`.
-
 ```console
 $ ./gradlew canideploy -Ppacticipant='Activity Service' -Platest=true
 
