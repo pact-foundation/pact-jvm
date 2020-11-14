@@ -1,45 +1,34 @@
 package au.com.dius.pact.provider.gradle
 
-import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 
 /**
  * Extension object for pact plugin
  */
-@CompileStatic
-class PactPluginExtension {
+open class PactPluginExtension(
+  val serviceProviders: NamedDomainObjectContainer<GradleProviderInfo>
+) {
+  var publish: PactPublish? = null
+  var reports: VerificationReports? = null
+  var broker: Broker? = null
 
-    final NamedDomainObjectContainer<GradleProviderInfo> serviceProviders
+  open fun serviceProviders(configureAction: Action<NamedDomainObjectContainer<GradleProviderInfo>>) {
+    configureAction.execute(serviceProviders)
+  }
 
-    PactPublish publish
-    VerificationReports reports
-    Broker broker
+  open fun publish(configureAction: Action<PactPublish>) {
+    publish = PactPublish()
+    configureAction.execute(publish!!)
+  }
 
-    PactPluginExtension(NamedDomainObjectContainer<GradleProviderInfo> serviceProviders) {
-        this.serviceProviders = serviceProviders
-    }
+  open fun reports(configureAction: Action<VerificationReports>) {
+    reports = VerificationReports()
+    configureAction.execute(reports!!)
+  }
 
-    @SuppressWarnings('ConfusingMethodName')
-    void serviceProviders(Action<? extends NamedDomainObjectContainer<GradleProviderInfo>> configureAction) {
-        configureAction.execute(serviceProviders)
-    }
-
-    @SuppressWarnings('ConfusingMethodName')
-    void publish(Action<? extends PactPublish> configureAction) {
-        publish = new PactPublish()
-        configureAction.execute(publish)
-    }
-
-    @SuppressWarnings('ConfusingMethodName')
-    void reports(Action<? extends VerificationReports> configureAction) {
-        reports = new VerificationReports()
-        configureAction.execute(reports)
-    }
-
-    @SuppressWarnings('ConfusingMethodName')
-    void broker(Action<? extends Broker> configureAction) {
-      broker = new Broker()
-      configureAction.execute(broker)
-    }
+  fun broker(configureAction: Action<Broker>) {
+    broker = Broker()
+    configureAction.execute(broker!!)
+  }
 }

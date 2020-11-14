@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.StrictLogging
 import scala.collection.JavaConverters._
 import java.io.{File, IOException}
 
-import au.com.dius.pact.core.pactbroker.{PactBrokerClient, RequestFailedException}
+import au.com.dius.pact.core.pactbroker.{PactBrokerClient, PactBrokerClientConfig, RequestFailedException}
 
 object Publish extends StrictLogging {
 
@@ -49,10 +49,10 @@ object Publish extends StrictLogging {
 
     try {
       val options = getOptions(authToken)
-      val brokerClient: PactBrokerClient = new PactBrokerClient(broker, options.asJava)
+      val brokerClient: PactBrokerClient = new PactBrokerClient(broker, options.asJava, new PactBrokerClientConfig())
       val res = brokerClient.uploadPactFile(pact, consumerVersion, tags.getOrElse(List()).asJava)
       if( res.component2() == null) {
-        logger.debug("Pact succesfully shared. deleting file..")
+        logger.debug("Pact successfully shared. deleting file..")
         removePact(pact)
         new Response(200, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(res.component1().getBytes()))
       } else {
@@ -66,15 +66,13 @@ object Publish extends StrictLogging {
     }
   }
 
-  private def getOptions(authToken: Option[String]): Map[String, _] = {
-    var options: Map[String, _]= Map()
+  private def getOptions(authToken: Option[String]): Map[String, Object] = {
+    var options: Map[String, Object]= Map()
     if(authToken.isDefined) {
       options = Map("authentication" -> List("bearer",authToken.get).asJava)
     }
     options
   }
-
-
 
   private def removePact(file: File): Unit = {
     if (file.exists()) {

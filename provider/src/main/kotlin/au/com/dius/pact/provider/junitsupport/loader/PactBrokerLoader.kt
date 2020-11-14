@@ -262,7 +262,7 @@ open class PactBrokerLoader(
   open fun newPactBrokerClient(url: URI, resolver: ValueResolver): IPactBrokerClient {
     if (authentication == null) {
       logger.debug { "Authentication: None" }
-      return PactBrokerClient(url.toString(), emptyMap())
+      return PactBrokerClient(url.toString(), mutableMapOf())
     }
 
     val username = parseExpression(authentication!!.username, DataType.RAW, resolver)?.toString()
@@ -273,18 +273,18 @@ open class PactBrokerLoader(
       logger.debug { "Authentication: Basic" }
       val options = mapOf("authentication" to listOf("basic", username,
         parseExpression(authentication!!.password, DataType.RAW, resolver)))
-      return PactBrokerClient(url.toString(), options)
+      return PactBrokerClient(url.toString(), options.toMutableMap())
     }
 
     // Check if token is set. If yes, use bearer auth.
     if (token.isNotEmpty()) {
       logger.debug { "Authentication: Bearer" }
       val options = mapOf("authentication" to listOf("bearer", token))
-      return PactBrokerClient(url.toString(), options)
+      return PactBrokerClient(url.toString(), options.toMutableMap())
     }
 
     logger.debug { "Authentication: None" }
-    return PactBrokerClient(url.toString(), emptyMap())
+    return PactBrokerClient(url.toString(), mutableMapOf())
   }
 
   companion object : KLogging()

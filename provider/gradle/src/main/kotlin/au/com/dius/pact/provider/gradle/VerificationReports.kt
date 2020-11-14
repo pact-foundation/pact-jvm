@@ -2,35 +2,36 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.reporters.ReporterManager
-import groovy.transform.ToString
+import au.com.dius.pact.provider.reporters.VerifierReporter
+import groovy.lang.GroovyObjectSupport
 import org.gradle.api.GradleScriptException
+import java.io.File
 
 /**
  * Reports configuration object
  */
-@ToString
-class VerificationReports {
-  Map reports = [:]
-
-  def defaultReports() {
-    reports.console = ReporterManager.createReporter('console')
+open class VerificationReports @JvmOverloads constructor(
+  var reports: MutableMap<String, VerifierReporter> = mutableMapOf()
+) : GroovyObjectSupport() {
+  open fun defaultReports() {
+    reports["console"] = ReporterManager.createReporter("console")
   }
 
-  List toVerifierReporters(File reportDir, IProviderVerifier verifier) {
-    reports.values().collect {
+  open fun toVerifierReporters(reportDir: File, verifier: IProviderVerifier): List<VerifierReporter> {
+    return reports.values.map {
       it.reportDir = reportDir
       it.verifier = verifier
       it
     }
   }
 
-  def propertyMissing(String name) {
+  open fun propertyMissing(name: String): Any? {
     if (ReporterManager.reporterDefined(name)) {
       reports[name] = ReporterManager.createReporter(name)
+      return reports[name]
     } else {
-      throw new GradleScriptException("There is no defined reporter named '$name'. Available reporters are: " +
+      throw GradleScriptException("There is no defined reporter named '$name'. Available reporters are: " +
         "${ReporterManager.availableReporters()}", null)
     }
   }
-
 }

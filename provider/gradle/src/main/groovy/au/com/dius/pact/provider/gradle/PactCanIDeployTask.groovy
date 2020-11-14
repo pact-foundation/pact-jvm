@@ -2,17 +2,15 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import org.apache.commons.lang3.StringUtils
-import org.gradle.api.DefaultTask
+import com.github.ajalt.mordant.TermColors
 import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.TaskAction
-import com.github.ajalt.mordant.TermColors
 
 /**
  * Task to push pact files to a pact broker
  */
 @SuppressWarnings(['Println', 'DuplicateStringLiteral'])
-class PactCanIDeployTask extends DefaultTask {
+class PactCanIDeployTask extends PactCanIDeployBaseTask {
 
   private static final String PACTICIPANT = 'pacticipant'
   private static final String PACTICIPANT_VERSION = 'pacticipantVersion'
@@ -73,17 +71,5 @@ class PactCanIDeployTask extends DefaultTask {
       }
     }
     latest
-  }
-
-  private static PactBrokerClient setupBrokerClient(Broker config) {
-    def options = [:]
-    if (StringUtils.isNotEmpty(config.pactBrokerToken)) {
-      options.authentication = [config.pactBrokerAuthenticationScheme ?: 'bearer',
-                                config.pactBrokerToken]
-    } else if (StringUtils.isNotEmpty(config.pactBrokerUsername)) {
-      options.authentication = [config.pactBrokerAuthenticationScheme ?: 'basic',
-                                config.pactBrokerUsername, config.pactBrokerPassword]
-    }
-    new PactBrokerClient(config.pactBrokerUrl, options)
   }
 }

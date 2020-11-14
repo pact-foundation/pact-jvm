@@ -1,15 +1,22 @@
 package au.com.dius.pact.provider.gradle
 
-import groovy.transform.ToString
-
 /**
  * Config for pact broker
  */
-@ToString
-class Broker {
-  String pactBrokerUrl
-  String pactBrokerToken
-  String pactBrokerUsername
-  String pactBrokerPassword
-  String pactBrokerAuthenticationScheme
+data class Broker(
+  var pactBrokerUrl: String? = null,
+  var pactBrokerToken: String? = null,
+  var pactBrokerUsername: String? = null,
+  var pactBrokerPassword: String? = null,
+  var pactBrokerAuthenticationScheme: String? = null,
+  var retryCountWhileUnknown: Int? = null,
+  var retryWhileUnknownInterval: Int? = null
+) {
+  override fun toString(): String {
+    val password = if (pactBrokerPassword != null) "".padEnd(pactBrokerPassword!!.length, '*') else null
+    return "Broker(pactBrokerUrl=$pactBrokerUrl, pactBrokerToken=$pactBrokerToken, " +
+      "pactBrokerUsername=$pactBrokerUsername, pactBrokerPassword=$password, " +
+      "pactBrokerAuthenticationScheme=$pactBrokerAuthenticationScheme, " +
+      "retryCountWhileUnknown=$retryCountWhileUnknown, retryWhileUnknownInterval=$retryWhileUnknownInterval)"
+  }
 }

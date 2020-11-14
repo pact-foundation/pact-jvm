@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.groovy.PactBuilder
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -19,7 +20,8 @@ class PactBrokerClientPactSpec extends Specification {
   private PactBuilder pactBroker, imaginaryBroker
 
   def setup() {
-    pactBrokerClient = new PactBrokerClient('http://localhost:8080', [halClient: [maxPublishRetries: 0]])
+    pactBrokerClient = new PactBrokerClient('http://localhost:8080', [halClient: [maxPublishRetries: 0]],
+      new PactBrokerClientConfig())
     pactFile = File.createTempFile('pact', '.json')
     pactContents = '''
       {

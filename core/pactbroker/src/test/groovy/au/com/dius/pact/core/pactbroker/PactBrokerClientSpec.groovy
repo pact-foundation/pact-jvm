@@ -43,7 +43,8 @@ class PactBrokerClientSpec extends Specification {
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
-      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
+      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2'])),
+      new PactBrokerClientConfig()]) {
       newHalClient() >> halClient
     }
 
@@ -154,7 +155,8 @@ class PactBrokerClientSpec extends Specification {
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
-      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
+      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2'])),
+      new PactBrokerClientConfig()]) {
       newHalClient() >> halClient
     }
 
@@ -527,5 +529,38 @@ class PactBrokerClientSpec extends Specification {
     0 * halClient.postJson(_, _, _)
     1 * client.fetchConsumers('provider') >> []
     result instanceof Ok
+  }
+
+  @Issue('#1241')
+  def 'can i deploy - should retry when there are unknown results'() {
+    given:
+    def halClient = Mock(IHalClient)
+    def config = new PactBrokerClientConfig(10, 0)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl', [:], config]) {
+      newHalClient() >> halClient
+    }
+    def json1 = JsonParser.parseString('''
+    |{
+    |  "summary": {
+    |      "deployable": true,
+    |      "reason": "some text",
+    |      "unknown": 1
+    |  }
+    |}'''.stripMargin())
+    def json2 = JsonParser.parseString('''
+    |{
+    |  "summary": {
+    |      "deployable": true,
+    |      "reason": "some text",
+    |      "unknown": 0
+    |  }
+    |}'''.stripMargin())
+
+    when:
+    def result = client.canIDeploy('test', '1.2.3', new Latest.UseLatest(true), '')
+
+    then:
+    3 * halClient.getJson(_, _) >> new Ok(json1) >> new Ok(json1) >> new Ok(json2)
+    result.ok
   }
 }

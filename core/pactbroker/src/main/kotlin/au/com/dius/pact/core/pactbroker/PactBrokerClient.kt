@@ -58,7 +58,7 @@ sealed class Latest {
   data class UseLatestTag(val latestTag: String) : Latest()
 }
 
-data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String)
+data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String, val unknown: Int? = null)
 
 /**
  * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
@@ -101,12 +101,22 @@ interface IPactBrokerClient {
   val options: Map<String, Any>
 }
 
+data class PactBrokerClientConfig(
+  val retryCountWhileUnknown: Int = 0,
+  val retryWhileUnknownInterval: Int = 10
+)
+
 /**
  * Client for the pact broker service
  */
-open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map<String, Any>) : IPactBrokerClient {
+open class PactBrokerClient(
+  val pactBrokerUrl: String,
+  @Deprecated("Move use of options to PactBrokerClientConfig")
+  override val options: MutableMap<String, Any>,
+  val config: PactBrokerClientConfig = PactBrokerClientConfig()
+) : IPactBrokerClient {
 
-  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mapOf())
+  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mutableMapOf())
 
   /**
    * Fetches all consumers for the given provider
@@ -412,16 +422,23 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
 
   open fun canIDeploy(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): CanIDeployResult {
     val halClient = newHalClient()
-    val result = halClient.getJson("/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to),
-      false)
-    return when (result) {
-      is Ok<JsonValue> -> {
-        val summary = result.value["summary"].asObject()
-        CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]))
-      }
-      is Err<Exception> -> {
-        logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
-        CanIDeployResult(false, result.error.message.toString(), "")
+    val path = "/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to)
+    return retryWith(
+      "canIDeploy: Retrying request as there are unknown results",
+      config.retryCountWhileUnknown,
+      config.retryWhileUnknownInterval,
+      { result -> result.ok && result.unknown != null && result.unknown > 0 }
+    ) {
+      when (val result = halClient.getJson(path, false)) {
+        is Ok<JsonValue> -> {
+          val summary = result.value["summary"].asObject()
+          CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
+            Json.toInteger(summary["unknown"]))
+        }
+        is Err<Exception> -> {
+          logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
+          CanIDeployResult(false, result.error.message.toString(), "")
+        }
       }
     }
   }
@@ -468,6 +485,24 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
           logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
         }
       }
+    }
+
+    fun <T> retryWith(
+      message: String,
+      count: Int,
+      interval: Int,
+      predicate: (T) -> Boolean,
+      function: () -> T
+    ): T {
+      var counter = 1
+      var result = function()
+      while (counter < count && predicate(result)) {
+        counter += 1
+        logger.info { "$message [$counter/$count]" }
+        Thread.sleep((interval * 1000).toLong())
+        result = function()
+      }
+      return result
     }
   }
 }

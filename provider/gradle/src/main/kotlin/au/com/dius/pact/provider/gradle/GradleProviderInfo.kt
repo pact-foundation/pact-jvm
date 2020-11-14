@@ -5,69 +5,72 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ConsumersGroup
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
+import groovy.lang.Closure
 import org.gradle.api.GradleScriptException
 import org.gradle.util.ConfigureUtil
+import java.net.URL
 
 /**
  * Extends the provider info to be setup in a gradle build
  */
-class GradleProviderInfo extends ProviderInfo {
-  def providerVersion
-  /**
-   * @deprecated Use providerTags instead
-   */
-  @Deprecated
-  def providerTag
-  Closure<List<String>> providerTags
-  PactBrokerConsumerConfig brokerConfig
+open class GradleProviderInfo(name: String) : ProviderInfo(name) {
+  var providerVersion: Any? = null
+  @Deprecated("Use providerTags instead")
+  var providerTag: String? = null
+  var providerTags: Closure<List<String>>? = null
+  var brokerConfig: PactBrokerConsumerConfig? = null
 
-  GradleProviderInfo(String name) {
-    super(name)
-  }
-
-  IConsumerInfo hasPactWith(String consumer, Closure closure) {
-    def consumerInfo = new ConsumerInfo(consumer, null, true, [], this.verificationType)
-    consumers << consumerInfo
+  open fun hasPactWith(consumer: String, closure: Closure<*>): IConsumerInfo {
+    val consumerInfo = ConsumerInfo(consumer, null, true, listOf(), this.verificationType)
+    consumers.add(consumerInfo)
     ConfigureUtil.configure(closure, consumerInfo)
-    consumerInfo
+    return consumerInfo
   }
 
-  List<IConsumerInfo> hasPactsWith(String consumersGroupName, Closure closure) {
-    def consumersGroup = new ConsumersGroup(consumersGroupName)
+  open fun hasPactsWith(consumersGroupName: String, closure: Closure<*>): List<IConsumerInfo> {
+    val consumersGroup = ConsumersGroup(consumersGroupName)
     ConfigureUtil.configure(closure, consumersGroup)
-    setupConsumerListFromPactFiles(consumersGroup)
+    return setupConsumerListFromPactFiles(consumersGroup)
   }
 
-  List hasPactsFromPactBroker(Map options = [:], String pactBrokerUrl, Closure closure) {
-    def fromPactBroker = super.hasPactsFromPactBroker(options, pactBrokerUrl)
-    fromPactBroker.each {
+  @JvmOverloads
+  open fun hasPactsFromPactBroker(
+    options: Map<String, Any> = mapOf(),
+    pactBrokerUrl: String,
+    closure: Closure<*>
+  ): List<ConsumerInfo> {
+    val fromPactBroker = super.hasPactsFromPactBroker(options, pactBrokerUrl)
+    fromPactBroker.forEach {
       ConfigureUtil.configure(closure, it)
     }
-    fromPactBroker
+    return fromPactBroker
   }
 
-  List hasPactsFromPactBrokerWithSelectors(Map options = [:], String pactBrokerUrl,
-                                           List<ConsumerVersionSelector> selectors, Closure closure) {
-    def fromPactBroker = super.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
-    fromPactBroker.each {
+  @JvmOverloads
+  open fun hasPactsFromPactBrokerWithSelectors(
+    options: Map<String, Any> = mapOf(),
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelector>,
+    closure: Closure<*>
+  ): List<ConsumerInfo> {
+    val fromPactBroker = super.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
+    fromPactBroker.forEach {
       ConfigureUtil.configure(closure, it)
     }
-    fromPactBroker
+    return fromPactBroker
   }
 
-  def url(String path) {
-    new URL(path)
-  }
+  open fun url(path: String) = URL(path)
 
-  @SuppressWarnings('LineLength')
-  def fromPactBroker(Closure closure) {
-    brokerConfig = new PactBrokerConsumerConfig()
-    ConfigureUtil.configure(closure, brokerConfig)
+  open fun fromPactBroker(closure: Closure<*>) {
+    brokerConfig = PactBrokerConsumerConfig()
+    ConfigureUtil.configure(closure, brokerConfig!!)
 
-    if (brokerConfig.enablePending && (!brokerConfig.providerTags ||
-      brokerConfig.providerTags.findAll { !it.trim().empty }.empty)) {
-      throw new GradleScriptException(
-        '''
+    val pending = brokerConfig!!.enablePending ?: false
+    if (pending && (brokerConfig!!.providerTags.isNullOrEmpty() ||
+      brokerConfig!!.providerTags!!.any { it.trim().isEmpty() })) {
+      throw GradleScriptException(
+        """
         |No providerTags: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results.
         |
         |For instance:
@@ -77,7 +80,7 @@ class GradleProviderInfo extends ProviderInfo {
         |    enablePending = true
         |    providerTags = ['master']
         |}
-        '''.stripMargin(), null)
+        """.trimMargin("|"), null)
     }
   }
 }
