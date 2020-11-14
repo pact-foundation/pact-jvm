@@ -15,4 +15,12 @@ data class PactPublish @JvmOverloads constructor(
   var pactBrokerAuthenticationScheme: String? = null,
   var tags: List<String> = listOf(),
   var excludes: List<String> = listOf()
-)
+) {
+  override fun toString(): String {
+    val password = if (pactBrokerPassword != null) "".padEnd(pactBrokerPassword!!.length, '*') else null
+    return "PactPublish(pactDirectory=$pactDirectory, pactBrokerUrl=$pactBrokerUrl, " +
+      "providerVersion=$providerVersion, consumerVersion=$consumerVersion, pactBrokerToken=$pactBrokerToken, " +
+      "pactBrokerUsername=$pactBrokerUsername, pactBrokerPassword=$password, " +
+      "pactBrokerAuthenticationScheme=$pactBrokerAuthenticationScheme, tags=$tags, excludes=$excludes)"
+  }
+}
