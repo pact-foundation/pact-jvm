@@ -137,7 +137,7 @@ open class PactBrokerLoader(
                   "and latest property")
         }
         tags.mapIndexed { index, tag ->
-          ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag) }
+          ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag, consumer = it.consumer) }
       }
     }
   }
