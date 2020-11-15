@@ -119,7 +119,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
         "At least one pact source must be set")
     }
 
-    logger.debug { "Pact sources on test class: $pactSources" }
+    logger.debug { "Pact sources on test class:\n ${pactSources.joinToString("\n") { it.first.toString() }}" }
     return pactSources.map { (pactSource, annotation) ->
       instantiatePactLoader(pactSource, context.requiredTestClass, annotation)
     }.map {
