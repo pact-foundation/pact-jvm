@@ -42,7 +42,7 @@ class PactBrokerClientTest {
       counter += 1
       counter
     }
-    assertThat(result, equalTo(10))
+    assertThat(result, equalTo(11))
   }
 
   @Test

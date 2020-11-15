@@ -494,7 +494,7 @@ open class PactBrokerClient(
       predicate: (T) -> Boolean,
       function: () -> T
     ): T {
-      var counter = 1
+      var counter = 0
       var result = function()
       while (counter < count && predicate(result)) {
         counter += 1
