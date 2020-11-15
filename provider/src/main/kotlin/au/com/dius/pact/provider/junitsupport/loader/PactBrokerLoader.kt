@@ -118,13 +118,14 @@ open class PactBrokerLoader(
   }
 
   fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
-    return if (shouldFallBackToTags(pactBrokerConsumerVersionSelectors, resolver)) {
-      permutations(pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) },
-        pactBrokerConsumers.flatMap { parseListExpression(it, resolver) })
+    val tags = pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }
+    return if (shouldFallBackToTags(tags, pactBrokerConsumerVersionSelectors, resolver)) {
+      permutations(tags, pactBrokerConsumers.flatMap { parseListExpression(it, resolver) })
         .map { ConsumerVersionSelector(it.first, consumer = it.second) }
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
         val tags = parseListExpression(it.tag, resolver)
+        val consumer = parseExpression(it.consumer, DataType.STRING, resolver) as String?
         val fallbackTag = parseExpression(it.fallbackTag, DataType.STRING, resolver) as String?
         val parsedLatest = parseListExpression(it.latest, resolver)
         val latest = when {
@@ -132,18 +133,30 @@ open class PactBrokerLoader(
           parsedLatest.size == 1 -> parsedLatest.padTo(tags.size, parsedLatest[0])
           else -> parsedLatest
         }
+
         if (tags.size != latest.size) {
           throw IllegalArgumentException("Invalid Consumer version selectors. Each version selector must have a tag " +
                   "and latest property")
         }
-        tags.mapIndexed { index, tag ->
-          ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag, consumer = it.consumer) }
+
+        when {
+          tags.isNotEmpty() -> {
+            tags.mapIndexed { index, tag ->
+              ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag, consumer = consumer)
+            }
+          }
+          consumer.isNotEmpty() -> {
+            listOf(ConsumerVersionSelector(null, true, fallbackTag = fallbackTag, consumer = consumer))
+          }
+          else -> listOf()
+        }
       }
     }
   }
 
-  fun shouldFallBackToTags(selectors: List<VersionSelector>, resolver: ValueResolver): Boolean {
-    return selectors.isEmpty() || (selectors.size == 1 && parseListExpression(selectors[0].tag, resolver).isEmpty())
+  fun shouldFallBackToTags(tags: List<String>, selectors: List<VersionSelector>, resolver: ValueResolver): Boolean {
+    return selectors.isEmpty() || (selectors.size == 1 && parseListExpression(selectors[0].tag, resolver).isEmpty() &&
+      tags.isNotEmpty())
   }
 
   private fun setupValueResolver(): ValueResolver {

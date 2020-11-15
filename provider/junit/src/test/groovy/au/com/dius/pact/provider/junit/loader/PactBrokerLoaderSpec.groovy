@@ -481,13 +481,18 @@ class PactBrokerLoaderSpec extends Specification {
       new PactBrokerResult('c', '', '', [], [], false, null, false, true),
       new PactBrokerResult('d', '', '', [], [], false, null, false, true)
     ]
+    def selectors = [
+      new ConsumerVersionSelector(null, true, 'a', null),
+      new ConsumerVersionSelector(null, true, 'b', null),
+      new ConsumerVersionSelector(null, true, 'c', null)
+    ]
 
     when:
     def result = pactBrokerLoader.call().load('test')
 
     then:
     brokerClient.getOptions() >> [:]
-    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> new Ok(expected)
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false, '') >> new Ok(expected)
     0 * brokerClient._
     result.size() == 4
   }
@@ -929,13 +934,13 @@ class PactBrokerLoaderSpec extends Specification {
         } else if (it[0] == 'tag2') {
           'value'
         } else {
-          null
+          it[0]
         }
       }
     }
 
     expect:
-    pactBrokerLoader.call().shouldFallBackToTags(values, valueResolver) == result
+    pactBrokerLoader.call().shouldFallBackToTags(['one'], values, valueResolver) == result
 
     where:
 
@@ -945,6 +950,15 @@ class PactBrokerLoaderSpec extends Specification {
     'selectors has one item that resolves to an empty string'         | [createVersionSelector(tag: '${tag}')]                                 | true
     'selectors has more than one item'                                | [createVersionSelector(tag: 'one'), createVersionSelector(tag: 'two')] | false
     'selectors has one item that does not resolve to an empty string' | [createVersionSelector(tag: '${tag2}')]                                | false
+  }
+
+  def 'do not fall back to tags if there is a selector but not any tags'() {
+    given:
+    valueResolver = Mock(ValueResolver)
+    consumerVersionSelectors = [createVersionSelector(consumer: 'bob')]
+
+    expect:
+    !pactBrokerLoader.call().shouldFallBackToTags([], consumerVersionSelectors, valueResolver)
   }
 
   def 'when building the list of selectors, if falling back to tags create a selector for each tag'() {
@@ -1137,6 +1151,22 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelector('one', true, '', null),
       new ConsumerVersionSelector('two', false, '', null),
       new ConsumerVersionSelector('three', true, 'test', null)
+    ]
+  }
+
+  def 'building the list of selectors supports a consumer name but no tags'() {
+    given:
+    valueResolver = Mock(ValueResolver)
+    consumerVersionSelectors = [
+      createVersionSelector(consumer: 'test')
+    ]
+
+    when:
+    def result = pactBrokerLoader.call().buildConsumerVersionSelectors(valueResolver)
+
+    then:
+    result == [
+      new ConsumerVersionSelector(null, true, 'test', null)
     ]
   }
 
