@@ -813,3 +813,53 @@ For example:
 ```
 
 Then any pending pacts will not cause a build failure.
+
+# Can I Deploy check
+
+There is a `can-i-deploy` goal that you can use to preform a deployment safety check. This task requires two
+parameters: `pacticipant` and either `pacticipantVersion` or `latest=true`. It will use the broker configuration values 
+from the your POM. 
+
+```console
+$ mvn pact:can-i-deploy -Dpacticipant='Activity Service' -Dlatest=true
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< au.com.dius.pact:pact-gradle-test >------------------
+[INFO] Building pact-gradle-test 1.0.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven:4.1.11:can-i-deploy (default-cli) @ pact-gradle-test ---
+Computer says no ¯\_(ツ)_/¯ 
+
+The verification between the latest version of Foo Web Client 2 (1.2.3/AB) and the latest version of Activity Service (0.0.3) failed
+There is no verified pact between the latest version of Foo Web Client (1.2.3/AB) and the latest version of Activity Service (0.0.3)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1.276 s
+[INFO] Finished at: 2020-11-15T11:04:51+11:00
+[INFO] ------------------------------------------------------------------------
+```
+
+## Enabling retry when there are unknown results (4.1.11+)
+
+It can happen that there are still unknown results in the Pact broker because the provider verification is still running.
+You can enable a retry with a wait interval to poll for the results to become available. There are two settings that can
+be added to the configuration in the POM to enable this: `retriesWhenUnknown` and `retryInterval`.
+
+|Field|Description|Default|
+|-----|-----------|-------|
+|retriesWhenUnknown|The amount of times to retry while there are unknown results|0|
+|retryInterval|The number of seconds to wait between retries|10|
+
+Example use:
+
+```groovy
+pact {
+  broker {
+      pactBrokerUrl = 'http://localhost:1234/'
+      retryCountWhileUnknown = 3
+      retryWhileUnknownInterval = 120 // 2 minutes between retries
+  }
+}
+```
