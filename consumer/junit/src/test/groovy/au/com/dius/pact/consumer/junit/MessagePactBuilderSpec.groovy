@@ -3,9 +3,13 @@ package au.com.dius.pact.consumer.junit
 import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.dsl.Matchers
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
+import au.com.dius.pact.consumer.xml.PactXmlBuilder
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.ProviderState
 import groovy.json.JsonSlurper
+import groovy.xml.XmlParser
+import groovy.xml.XmlSlurper
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -147,5 +151,38 @@ class MessagePactBuilderSpec extends Specification {
 
     then:
     pact.providerStates.last() == expectedProviderState
+  }
+
+  def 'should support XML content'() {
+    given:
+    def xmlContent = new PactXmlBuilder("root")
+    .build(root -> {
+      root.appendElement("element1", Matchers.string("value1"))
+    })
+    Map<String, String> metadata = [
+            'contentType': 'application/xml',
+            'destination': Matchers.regexp(~/\w+\d+/, 'X001')
+    ]
+    def builder = MessagePactBuilder
+            .consumer("MessagePactBuilderSpec")
+            .given('srm.countries.get_message')
+            .expectsToReceive('srm.countries.get')
+            .withContent(xmlContent)
+            .withMetadata(metadata)
+
+    when:
+    def pact = builder.toPact()
+    Message message = pact.interactions.first()
+    def messageBody = new XmlParser().parseText(message.contents.valueAsString())
+    def messageMetadata = message.metaData
+
+    then:
+    messageBody.element1.text() == 'value1'
+    messageMetadata == [contentType: 'application/xml', destination: 'X001']
+    message.matchingRules.rules.body.matchingRules.keySet() == [ '$.root.element1.#text' ] as Set
+    message.matchingRules.rules.metadata.matchingRules.keySet() == [
+            'destination'
+    ] as Set
+
   }
 }
