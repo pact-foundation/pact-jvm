@@ -23,9 +23,13 @@ open class PactCreateVersionTagMojo : PactBaseMojo() {
   private var tag: String? = ""
 
   override fun execute() {
+    prepare()
+    createVersionTag()
+  }
+
+  fun prepare() {
     checkMandatoryArguments()
     createBrokerClient()
-    createVersionTag()
   }
 
   private fun checkMandatoryArguments() {

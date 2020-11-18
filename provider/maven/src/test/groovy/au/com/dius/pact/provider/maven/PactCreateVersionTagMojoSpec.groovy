@@ -21,7 +21,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.pactBrokerUrl = null
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -33,7 +33,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.pactBrokerUrl = ""
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -45,7 +45,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.pacticipant = null
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -57,7 +57,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.pacticipant = ""
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -69,7 +69,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.pacticipantVersion = null
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -81,7 +81,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.pacticipantVersion = ""
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -93,7 +93,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.tag = null
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -105,7 +105,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.tag = ""
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     def ex = thrown(MojoExecutionException)
@@ -117,7 +117,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
     mojo.brokerClient = null
 
     when:
-    mojo.execute()
+    mojo.prepare()
 
     then:
     mojo.brokerClient != null
