@@ -30,7 +30,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
 
   def 'throws an exception if pactBrokerUrl is empty'() {
     given:
-    mojo.pactBrokerUrl = ""
+    mojo.pactBrokerUrl = ''
 
     when:
     mojo.prepare()
@@ -54,7 +54,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
 
   def 'throws an exception if pacticipant is empty'() {
     given:
-    mojo.pacticipant = ""
+    mojo.pacticipant = ''
 
     when:
     mojo.prepare()
@@ -78,7 +78,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
 
   def 'throws an exception if pacticipantVersion is empty'() {
     given:
-    mojo.pacticipantVersion = ""
+    mojo.pacticipantVersion = ''
 
     when:
     mojo.prepare()
@@ -102,7 +102,7 @@ class PactCreateVersionTagMojoSpec extends Specification {
 
   def 'throws an exception if tag is empty'() {
     given:
-    mojo.tag = ""
+    mojo.tag = ''
 
     when:
     mojo.prepare()
