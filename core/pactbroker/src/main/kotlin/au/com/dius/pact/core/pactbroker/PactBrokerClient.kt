@@ -482,21 +482,25 @@ open class PactBrokerClient(
     fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) : Result<String?,
      Exception> {
       halClient.navigate()
-      var mainResult = Ok("") as Result<String, Exception>
+      var mainResult = Ok("") as Result<String?, Exception>
       tags.forEach {
-         val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
+        mainResult = uploadTag(halClient, consumerName, version, it)
+      }
+      return mainResult
+    }
+
+    private fun uploadTag(halClient: IHalClient, consumerName: String, version: String, it: String): Result<String?, Exception> {
+      val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
           "pacticipant" to consumerName,
           "version" to version,
           "tag" to it
-        ), "{}")
+      ), "{}")
 
-        if (result is Err<Exception>) {
-          mainResult = result
-          logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
-        }
-
+      if (result is Err<Exception>) {
+        logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
       }
-      return mainResult
+
+      return result
     }
 
     fun <T> retryWith(
