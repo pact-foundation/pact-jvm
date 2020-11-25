@@ -63,5 +63,4 @@ open class PactCreateVersionTagMojo : PactBaseMojo() {
 
   private fun createVersionTag() =
       brokerClient!!.createVersionTag(pacticipant!!, pacticipantVersion!!, tag!!)
-
 }

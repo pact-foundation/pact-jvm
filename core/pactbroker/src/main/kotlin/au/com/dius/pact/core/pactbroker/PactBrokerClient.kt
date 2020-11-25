@@ -464,9 +464,16 @@ open class PactBrokerClient(
   }
 
   open fun createVersionTag(
-      pacticipant: String,
-      pacticipantVersion: String,
-      tag: String) = uploadTags(newHalClient(), pacticipant, pacticipantVersion, listOf(tag))
+    pacticipant: String,
+    pacticipantVersion: String,
+    tag: String
+  ) =
+      uploadTags(
+          newHalClient(),
+          pacticipant,
+          pacticipantVersion,
+          listOf(tag)
+      )
 
   companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
@@ -479,14 +486,18 @@ open class PactBrokerClient(
     const val PACTS = "pb:pacts"
     const val UTF8 = "UTF-8"
 
-    fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) : Result<String?,
-     Exception> {
+    fun uploadTags(
+      halClient: IHalClient,
+      consumerName: String,
+      version: String,
+      tags: List<String>
+    ): Result<String?, Exception> {
       halClient.navigate()
-      var mainResult = Ok("") as Result<String?, Exception>
+      var result = Ok("") as Result<String?, Exception>
       tags.forEach {
-        mainResult = uploadTag(halClient, consumerName, version, it)
+        result = uploadTag(halClient, consumerName, version, it)
       }
-      return mainResult
+      return result
     }
 
     private fun uploadTag(halClient: IHalClient, consumerName: String, version: String, it: String): Result<String?, Exception> {
