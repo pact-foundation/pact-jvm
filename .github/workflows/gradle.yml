@@ -28,4 +28,4 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: ${{ runner.os }}-gradle
     - name: Build with Gradle
-      run: gradlew -s --no-daemon -i -p ${{ matrix.module }} build
+      run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
