@@ -21,9 +21,7 @@ import org.apache.commons.text.StringEscapeUtils
 
 allprojects {
   apply plugin: 'maven-publish'
-  if (System.env.CI != 'true') {
-    apply plugin: 'signing'
-  }
+  apply plugin: 'signing'
 
   repositories {
     mavenLocal()
@@ -125,7 +123,7 @@ subprojects {
   test {
     useJUnitPlatform()
 
-    if (System.env.TRAVIS == 'true') {
+    if (System.env.CI == 'true') {
       testLogging {
         exceptionFormat "full"
         showCauses true
