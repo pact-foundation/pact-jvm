@@ -82,6 +82,70 @@ class PactBrokerClientPactSpec extends Specification {
     result instanceof PactVerificationResult.Ok
   }
 
+  def 'returns success when creating a tag for a pact is ok'() {
+    given:
+    pactBroker {
+        uponReceiving('a HAL navigate request')
+        withAttributes(method: 'GET', path: '/', body: '')
+        willRespondWith(status: 200)
+        withBody(mimetype: 'application/json') {
+          _links {
+            'pb:pacticipant-version-tag' {
+              href url('http://localhost:8080', '/pacticipants/{pacticipant}/versions/{version}/tags/{tag}')
+              title 'Create a tag'
+              templated true
+            }
+          }
+        }
+        uponReceiving('a tag create request')
+        withAttributes(method: 'PUT',
+                path: '/pacticipants/Foo Consumer/versions/10.0.0/tags/A',
+                body: '{}'
+        )
+        willRespondWith(status: 201)
+      }
+
+    when:
+      def result = pactBroker.runTest { server, context ->
+        assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Ok
+      }
+
+    then:
+      result instanceof PactVerificationResult.Ok
+  }
+
+  def 'returns an error when creating a tag for a pact fails'() {
+    given:
+    pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/', body: '')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:pacticipant-version-tag' {
+            href url('http://localhost:8080', '/pacticipants/{pacticipant}/versions/{version}/tags/{tag}')
+            title 'Create a tag'
+            templated true
+          }
+        }
+      }
+      uponReceiving('a tag create request')
+      withAttributes(method: 'PUT',
+              path: '/pacticipants/Foo Consumer/versions/10.0.0/tags/A',
+              body: '{}'
+      )
+      willRespondWith(status: 500)
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Err<Exception>
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
   def 'returns an error when forbidden to publish the pact'() {
     given:
     pactBroker {
@@ -99,11 +163,11 @@ class PactBrokerClientPactSpec extends Specification {
       }
       uponReceiving('a pact publish request which will be forbidden')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
-        body: pactContents
+              path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+              body: pactContents
       )
       willRespondWith(status: 401, headers: [
-        'Content-Type': 'application/json'
+              'Content-Type': 'application/json'
       ])
     }
 
