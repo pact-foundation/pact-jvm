@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderClient
@@ -36,7 +37,8 @@ open class HttpTarget
     val host: String = "127.0.0.1",
     open val port: Int = 8080,
     val path: String = "/",
-    val insecure: Boolean = false
+    val insecure: Boolean = false,
+    val httpClientFactory: () -> IHttpClientFactory = { HttpClientFactory() }
   ) : BaseTarget() {
 
   /**
@@ -67,7 +69,7 @@ open class HttpTarget
     source: PactSource,
     context: Map<String, Any>
   ) {
-    val client = ProviderClient(provider, HttpClientFactory())
+    val client = ProviderClient(provider, this.httpClientFactory.invoke())
     val result = verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction,
       interaction.description, mutableMapOf(), client, context, consumer.pending)
     reportTestResult(result, verifier)
