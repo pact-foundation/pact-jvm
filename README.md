@@ -1,8 +1,7 @@
 pact-jvm
 ========
 
-[![Build Status](https://travis-ci.com/pact-foundation/pact-jvm.svg?branch=master)](https://travis-ci.com/pact-foundation/pact-jvm)
-[![Windows Build](https://github.com/pact-foundation/pact-jvm/workflows/Windows%20Build/badge.svg)](https://github.com/pact-foundation/pact-jvm/actions?query=workflow%3A%22Windows+Build%22)
+![Pact-JVM Build](https://github.com/pact-foundation/pact-jvm/workflows/Pact-JVM%20Build/badge.svg)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius.pact.core/model/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius.pact.core/model)
 
 JVM implementation of the consumer driven contract library [pact](https://github.com/pact-foundation/pact-specification).
