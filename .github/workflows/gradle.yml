@@ -1,4 +1,4 @@
-name: Windows Build
+name: Pact-JVM Build
 
 on:
   push:
