@@ -21,7 +21,7 @@ import org.apache.commons.text.StringEscapeUtils
 
 allprojects {
   apply plugin: 'maven-publish'
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     apply plugin: 'signing'
   }
 
@@ -86,7 +86,7 @@ subprojects {
       }
     }
 
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
       outputFormat = 'javadoc'
       outputDirectory = "$buildDir/docs/dokkaJavadoc"
@@ -105,7 +105,7 @@ subprojects {
         }
     }
 
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
       archiveClassifier = 'javadoc'
       from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
@@ -192,7 +192,7 @@ subprojects {
     }
   }
 
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     signing {
       sign publishing.publications.mavenPublication
     }
@@ -219,16 +219,4 @@ subprojects {
   }
 
   task allDeps(type: DependencyReportTask) {}
-}
-
-if (System.env.TRAVIS == 'true') {
-    allprojects {
-        tasks.withType(GroovyCompile) {
-            groovyOptions.fork = false
-        }
-        tasks.withType(Test) {
-            minHeapSize = '128m'
-            maxHeapSize = '768m'
-        }
-    }
 }
