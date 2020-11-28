@@ -27,10 +27,9 @@ jobs:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: ${{ runner.os }}-gradle
+    - run: ./gradlew -v
     - name: Build with Gradle
-      run:
-        - ./gradlew -v
-        - ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
+      run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
 
   supported_jdks:
     runs-on: ubuntu-latest
@@ -49,8 +48,7 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+      - run: ./gradlew -v
       - name: Build with Gradle
-        run:
-          - ./gradlew -v
-          - ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
+        run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
   
