@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.Matcher
+import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.InvalidPactException
@@ -142,6 +143,37 @@ class MessagePactBuilder(
     message.contents = OptionalBody.body(parent.toString().toByteArray(contentType.asCharset()), contentType)
     message.metaData = metadata
     message.matchingRules.addCategory(parent.matchers)
+
+    return this
+  }
+
+  /**
+   * Adds the XML body as the message content
+   */
+  fun withContent(xmlBuilder: PactXmlBuilder): MessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before withMetaData")
+    }
+
+    val message = messages.last()
+    val metadata = message.metaData.toMutableMap()
+    val contentTypeEntry = metadata.entries.find {
+      it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
+    }
+
+    var contentType = ContentType.XML
+    if (contentTypeEntry == null) {
+      metadata["contentType"] = contentType.toString()
+    } else {
+      contentType = ContentType(contentTypeEntry.value.toString())
+      metadata.remove(contentTypeEntry.key)
+      metadata["contentType"] = contentTypeEntry.value
+    }
+
+    message.contents = OptionalBody.body(xmlBuilder.asBytes(contentType.asCharset()), contentType)
+    message.metaData = metadata
+    message.matchingRules.addCategory(xmlBuilder.matchingRules)
+    message.generators.addGenerators(xmlBuilder.generators)
 
     return this
   }
