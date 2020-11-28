@@ -33,9 +33,10 @@ jobs:
 
   supported_jdks:
     runs-on: ubuntu-latest
-    matrix:
-      module: [ core, consumer, provider, pact-specification-test ]
-      jdk: [ 8, 9, 10, 11, 12, 13, 14 ]
+    strategy:
+      matrix:
+        module: [ core, consumer, provider, pact-specification-test ]
+        jdk: [ 8, 9, 10, 11, 12, 13, 14 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
@@ -51,4 +52,3 @@ jobs:
       - run: ./gradlew -v
       - name: Build with Gradle
         run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
-  
