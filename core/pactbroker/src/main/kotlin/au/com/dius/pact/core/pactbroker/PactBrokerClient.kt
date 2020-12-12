@@ -39,7 +39,14 @@ sealed class TestResult {
     override fun toBoolean() = false
 
     override fun merge(result: TestResult) = when (result) {
-      is Ok -> this
+      is Ok -> if (result.interactionId != null)
+        if (results.find { it["interactionId"] == result.interactionId } != null) {
+          this
+        } else {
+          this.copy(results = results + mapOf("interactionId" to result.interactionId))
+        }
+      else
+        this
       is Failed -> Failed(results + result.results, when {
         description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
           "$description, ${result.description}"
