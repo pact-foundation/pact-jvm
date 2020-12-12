@@ -328,34 +328,45 @@ open class PactBrokerClient(
           val values = mismatches.value
             .filter { !it.containsKey("exception") }
             .map { mismatch ->
+              val remainingAttributes = mismatch.filterNot { it.key == "interactionId" }
               when (mismatch["attribute"]) {
-                "body-content-type" -> jsonObject("attribute" to "body", "description" to mismatch["description"])
-                else -> jsonObject(
-                  mismatch.filterNot { it.key == "interactionId" }.map { it.toPair() }
-                )
+                "body-content-type" -> listOf("attribute" to "body", "description" to mismatch["description"])
+                else -> remainingAttributes.map { it.toPair() }
               }
-            }
-          val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
-            "mismatches" to jsonArray(values)
-          )
+            }.filter { it.isNotEmpty() }
+            .map { jsonObject(it) }
 
           val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
-          if (exceptionDetails != null) {
+          val exceptions = if (exceptionDetails != null) {
             val exception = exceptionDetails["exception"]
             val description = exceptionDetails["description"]
             if (exception is Throwable) {
               if (description != null) {
-                interactionJson["exceptions"] = jsonArray(jsonObject("message" to description.toString() + ": " + exception.message,
+                jsonArray(jsonObject("message" to description.toString() + ": " + exception.message,
                   "exceptionClass" to exception.javaClass.name))
               } else {
-                interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.message,
+                jsonArray(jsonObject("message" to exception.message,
                   "exceptionClass" to exception.javaClass.name))
               }
             } else {
-              interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.toString()))
+              jsonArray(jsonObject("message" to exception.toString()))
             }
+          } else {
+            null
           }
 
+          val interactionJson = if (values.isEmpty() && exceptions == null) {
+            jsonObject("interactionId" to mismatches.key, "success" to true)
+          } else {
+            val json = jsonObject(
+              "interactionId" to mismatches.key, "success" to false,
+              "mismatches" to jsonArray(values)
+            )
+            if (exceptions != null) {
+              json["exceptions"] = exceptions
+            }
+            json
+          }
           interactionJson
         }
       jsonObject["testResults"] = jsonArray(values)

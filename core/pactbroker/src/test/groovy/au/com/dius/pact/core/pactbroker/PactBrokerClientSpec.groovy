@@ -259,7 +259,7 @@ class PactBrokerClientSpec extends Specification {
   }
 
   @Issue('#892')
-  def 'when uploading a pact a pact with tags, publish the tags first'() {
+  def 'when uploading a pact with tags, publish the tags first'() {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate() >> halClient
