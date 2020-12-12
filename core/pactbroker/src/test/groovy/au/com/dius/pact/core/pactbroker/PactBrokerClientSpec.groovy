@@ -304,7 +304,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.postJson('URL', _) >> new Ok(true)
 
     expect:
-    client.publishVerificationResults(attributes, new TestResult.Ok([]), '0', null).class.simpleName == result
+    client.publishVerificationResults(attributes, new TestResult.Ok(null), '0', null).class.simpleName == result
 
     where:
 

@@ -319,8 +319,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         } else {
           val expectedResponse = (interaction as RequestResponseInteraction).response
           val interactionId = interaction.interactionId
-          var result: VerificationResult = VerificationResult.Ok(if (interactionId != null)
-            listOf(interactionId) else listOf())
+          var result: VerificationResult = VerificationResult.Ok(interactionId)
           methodsAnnotatedWith.forEach {
             val response = invokeProviderMethod(it, null) as Map<String, Any>
             val actualResponse = ProviderResponse(response["statusCode"] as Int,
@@ -351,7 +350,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (comparison is Ok && comparison.value.mismatches.isEmpty()) {
       reporters.forEach { it.bodyComparisonOk() }
-      VerificationResult.Ok(listOf(interactionId))
+      VerificationResult.Ok(interactionId)
     } else {
       reporters.forEach { it.bodyComparisonFailed(comparison) }
       when (comparison) {
@@ -427,7 +426,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (comparison.isEmpty()) {
       reporters.forEach { it.metadataComparisonOk() }
-      VerificationResult.Ok(listOf(interactionId))
+      VerificationResult.Ok(interactionId)
     } else {
       reporters.forEach { it.includesMetadata() }
       var result: VerificationResult = VerificationResult.Failed(emptyList(), "Metadata had differences",
@@ -554,7 +553,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (mismatch == null) {
       reporters.forEach { it.statusComparisonOk(status) }
-      VerificationResult.Ok(listOf(interactionId))
+      VerificationResult.Ok(interactionId)
     } else {
       reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
       failures["$comparisonDescription has status code $status"] = mismatch.description()
@@ -572,7 +571,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionId: String,
     pending: Boolean
   ): VerificationResult {
-    val ok = VerificationResult.Ok(listOf(interactionId))
+    val ok = VerificationResult.Ok(interactionId)
     return if (headers.isEmpty()) {
       ok
     } else {

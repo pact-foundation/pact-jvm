@@ -62,7 +62,7 @@ class PactVerificationTaskSpec extends Specification {
 
     then:
     noExceptionThrown()
-    1 * verifier.verifyProvider(_) >> [ new VerificationResult.Ok([]) ]
+    1 * verifier.verifyProvider(_) >> [ new VerificationResult.Ok(null) ]
   }
 
   def 'does not raise an exception if the pact is pending'() {

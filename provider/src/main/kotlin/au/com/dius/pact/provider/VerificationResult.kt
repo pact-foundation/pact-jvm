@@ -93,13 +93,13 @@ sealed class VerificationResult {
   /**
    * Result was successful
    */
-  data class Ok(val interactionIds: List<String> = listOf()) : VerificationResult() {
+  data class Ok(val interactionId: String? = null) : VerificationResult() {
     override fun merge(result: VerificationResult) = when (result) {
-      is Ok -> this
-      is Failed -> result
+      is Ok -> this.copy(interactionId = interactionId ?: result.interactionId)
+      is Failed -> result.merge(this)
     }
 
-    override fun toTestResult() = TestResult.Ok(interactionIds)
+    override fun toTestResult() = TestResult.Ok(interactionId)
   }
 
   /**
@@ -115,7 +115,7 @@ sealed class VerificationResult {
     val interactionId: String? = null
   ) : VerificationResult() {
     override fun merge(result: VerificationResult) = when (result) {
-      is Ok -> this
+      is Ok -> this.copy(interactionId = interactionId ?: result.interactionId)
       is Failed -> Failed(results + result.results, when {
         description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
           "$description, ${result.description}"

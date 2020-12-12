@@ -442,9 +442,9 @@ class ProviderVerifierSpec extends Specification {
     where:
 
     result1                         | result2                         | finalResult
-    new VerificationResult.Ok([])   | new VerificationResult.Ok([])   | new TestResult.Ok([])
-    new VerificationResult.Ok([])   | new VerificationResult.Failed() | new TestResult.Failed()
-    new VerificationResult.Failed() | new VerificationResult.Ok([])   | new TestResult.Failed()
+    new VerificationResult.Ok(null) | new VerificationResult.Ok(null) | new TestResult.Ok(null)
+    new VerificationResult.Ok(null) | new VerificationResult.Failed() | new TestResult.Failed()
+    new VerificationResult.Failed() | new VerificationResult.Ok(null) | new TestResult.Failed()
     new VerificationResult.Failed() | new VerificationResult.Failed() | new TestResult.Failed()
   }
 
@@ -494,10 +494,10 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok([]), '0', client, [])
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(null), '0', client, [])
 
     then:
-    1 * client.publishVerificationResults(links, new TestResult.Ok([]), '0', null) >> new Ok(true)
+    1 * client.publishVerificationResults(links, new TestResult.Ok(null), '0', null) >> new Ok(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -509,10 +509,10 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok([]), '0', client, [])
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(null), '0', client, [])
 
     then:
-    0 * client.publishVerificationResults(_, new TestResult.Ok([]), '0', null)
+    0 * client.publishVerificationResults(_, new TestResult.Ok(null), '0', null)
   }
 
   @SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
@@ -547,8 +547,8 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.pactReader.loadPact(_) >> pact
     1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
-    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> new VerificationResult.Ok([])
-    0 * client.publishVerificationResults(_, new TestResult.Ok([]), _, _)
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> new VerificationResult.Ok(null)
+    0 * client.publishVerificationResults(_, new TestResult.Ok(null), _, _)
   }
 
   @Unroll

@@ -147,7 +147,7 @@ open class InteractionRunner<I>(
     for (interaction in pact.interactions) {
       val description = describeChild(interaction)
       val interactionId = interaction.interactionId
-      var testResult: VerificationResult = VerificationResult.Ok(if (interactionId != null) listOf(interactionId) else listOf())
+      var testResult: VerificationResult = VerificationResult.Ok(interactionId)
       val pending = pact.source is BrokerUrlSource && (pact.source as BrokerUrlSource).result?.pending == true
       val included = interactionIncluded(interaction)
       if (!pending && included) {

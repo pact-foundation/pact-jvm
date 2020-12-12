@@ -26,12 +26,12 @@ import java.util.function.Consumer
 data class PactResponse(val pactFile: JsonValue.Object, val links: Map<String, Any?>)
 
 sealed class TestResult {
-  data class Ok(val interactionIds: List<String> = listOf()) : TestResult() {
+  data class Ok(val interactionId: String? = null) : TestResult() {
     override fun toBoolean() = true
 
     override fun merge(result: TestResult) = when (result) {
-      is Ok -> this
-      is Failed -> result
+      is Ok -> this.copy(interactionId = interactionId ?: result.interactionId)
+      is Failed -> result.merge(this)
     }
   }
 
