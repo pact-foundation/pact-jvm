@@ -19,9 +19,9 @@ class VerificationResultSpec extends Specification {
     where:
 
     result1                             | result2                               | result3
-    VerificationResult.Ok.INSTANCE      | VerificationResult.Ok.INSTANCE        | VerificationResult.Ok.INSTANCE
-    VerificationResult.Ok.INSTANCE      | failed([[error: 'Bang']], '')         | failed([[error: 'Bang']], '')
-    failed([[error: 'Bang']], '')       | VerificationResult.Ok.INSTANCE        | failed([[error: 'Bang']], '')
+    new VerificationResult.Ok([])       | new VerificationResult.Ok([])         | new VerificationResult.Ok([])
+    new VerificationResult.Ok([])       | failed([[error: 'Bang']], '')         | failed([[error: 'Bang']], '')
+    failed([[error: 'Bang']], '')       | new VerificationResult.Ok([])         | failed([[error: 'Bang']], '')
     failed([[error: 'Bang']], '')       | failed([[Boom: 'Splat']], '')         | failed([[error: 'Bang'], [Boom: 'Splat']], '')
     failed([[error: 'Bang']], 'A')      | failed([[Boom: 'Splat']], '')         | failed([[error: 'Bang'], [Boom: 'Splat']], 'A')
     failed([[error: 'Bang']], '')       | failed([[Boom: 'Splat']], 'B')        | failed([[error: 'Bang'], [Boom: 'Splat']], 'B')

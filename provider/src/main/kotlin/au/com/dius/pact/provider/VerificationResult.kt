@@ -93,13 +93,13 @@ sealed class VerificationResult {
   /**
    * Result was successful
    */
-  object Ok : VerificationResult() {
+  data class Ok(val interactionIds: List<String> = listOf()) : VerificationResult() {
     override fun merge(result: VerificationResult) = when (result) {
       is Ok -> this
       is Failed -> result
     }
 
-    override fun toTestResult() = TestResult.Ok
+    override fun toTestResult() = TestResult.Ok(interactionIds)
   }
 
   /**

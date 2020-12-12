@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider
 
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
@@ -28,6 +27,7 @@ import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.getError
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
@@ -318,7 +318,9 @@ open class ProviderVerifier @JvmOverloads constructor (
             consumer.pending)
         } else {
           val expectedResponse = (interaction as RequestResponseInteraction).response
-          var result: VerificationResult = VerificationResult.Ok
+          val interactionId = interaction.interactionId
+          var result: VerificationResult = VerificationResult.Ok(if (interactionId != null)
+            listOf(interactionId) else listOf())
           methodsAnnotatedWith.forEach {
             val response = invokeProviderMethod(it, null) as Map<String, Any>
             val actualResponse = ProviderResponse(response["statusCode"] as Int,
@@ -349,7 +351,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (comparison is Ok && comparison.value.mismatches.isEmpty()) {
       reporters.forEach { it.bodyComparisonOk() }
-      VerificationResult.Ok
+      VerificationResult.Ok(listOf(interactionId))
     } else {
       reporters.forEach { it.bodyComparisonFailed(comparison) }
       when (comparison) {
@@ -376,7 +378,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     failures: MutableMap<String, Any>,
     pending: Boolean
   ): VerificationResult {
-    var result: VerificationResult = VerificationResult.Ok
+    var result: VerificationResult = VerificationResult.Ok()
     methods.forEach { method ->
       reporters.forEach { it.generatesAMessageWhich() }
       val messageResult = invokeProviderMethod(method, providerMethodInstance.apply(method))
@@ -425,7 +427,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (comparison.isEmpty()) {
       reporters.forEach { it.metadataComparisonOk() }
-      VerificationResult.Ok
+      VerificationResult.Ok(listOf(interactionId))
     } else {
       reporters.forEach { it.includesMetadata() }
       var result: VerificationResult = VerificationResult.Failed(emptyList(), "Metadata had differences",
@@ -552,7 +554,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (mismatch == null) {
       reporters.forEach { it.statusComparisonOk(status) }
-      VerificationResult.Ok
+      VerificationResult.Ok(listOf(interactionId))
     } else {
       reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
       failures["$comparisonDescription has status code $status"] = mismatch.description()
@@ -570,11 +572,12 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionId: String,
     pending: Boolean
   ): VerificationResult {
+    val ok = VerificationResult.Ok(listOf(interactionId))
     return if (headers.isEmpty()) {
-      VerificationResult.Ok
+      ok
     } else {
       reporters.forEach { it.includesHeaders() }
-      var result: VerificationResult = VerificationResult.Ok
+      var result: VerificationResult = ok
       headers.forEach { (key, headerComparison) ->
         val expectedHeaderValue = expected[key]
         if (headerComparison.isEmpty()) {
@@ -667,7 +670,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     reportVerificationForConsumer(consumer, provider, pact.source)
     return if (pact.interactions.isEmpty()) {
       reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact<Interaction>) }
-      VerificationResult.Ok
+      VerificationResult.Ok()
     } else {
       val result = pact.interactions.map {
         verifyInteraction(provider, consumer, failures, it)
