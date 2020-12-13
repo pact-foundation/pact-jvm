@@ -81,14 +81,14 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = mockVerificationReporter
 
     when:
-    testResultAccumulator.updateTestResult(mutablePact, interaction1, new TestResult.Ok(null), null)
-    testResultAccumulator.updateTestResult(mutablePact, interaction2, new TestResult.Ok(null), null)
+    testResultAccumulator.updateTestResult(mutablePact, interaction1, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(mutablePact, interaction2, new TestResult.Ok(), null)
     testResultAccumulator.updateTestResult(mutablePact2, interaction, new TestResult.Failed(), null)
     mutablePact.interactions.first().request.matchingRules.rulesForCategory('body')
-    testResultAccumulator.updateTestResult(mutablePact, interaction3, new TestResult.Ok(null), null)
+    testResultAccumulator.updateTestResult(mutablePact, interaction3, new TestResult.Ok(), null)
 
     then:
-    1 * mockVerificationReporter.reportResults(_, new TestResult.Ok(null), _, null, [])
+    1 * mockVerificationReporter.reportResults(_, new TestResult.Ok(), _, null, [])
 
     cleanup:
     testResultAccumulator.verificationReporter = DefaultVerificationReporter.INSTANCE
@@ -104,7 +104,7 @@ class TestResultAccumulatorSpec extends Specification {
     }
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(null), UnknownPactSource.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), UnknownPactSource.INSTANCE)
 
     then:
     0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _)
@@ -134,7 +134,7 @@ class TestResultAccumulatorSpec extends Specification {
 
     where:
 
-    result << [new TestResult.Ok(null), new TestResult.Failed()]
+    result << [new TestResult.Ok(), new TestResult.Failed()]
   }
 
   @Unroll
@@ -161,9 +161,9 @@ class TestResultAccumulatorSpec extends Specification {
     where:
 
     interaction1Result      | interaction2Result      | result
-    new TestResult.Ok(null) | new TestResult.Ok(null) | new TestResult.Ok(null)
-    new TestResult.Ok(null) | new TestResult.Failed() | new TestResult.Failed()
-    new TestResult.Failed() | new TestResult.Ok(null) | new TestResult.Failed()
+    new TestResult.Ok()     | new TestResult.Ok()     | new TestResult.Ok()
+    new TestResult.Ok()     | new TestResult.Failed() | new TestResult.Failed()
+    new TestResult.Failed() | new TestResult.Ok()     | new TestResult.Failed()
     new TestResult.Failed() | new TestResult.Failed() | new TestResult.Failed()
   }
 
@@ -180,8 +180,8 @@ class TestResultAccumulatorSpec extends Specification {
 
     when:
     testResultAccumulator.updateTestResult(pact, interaction1, failedResult, null)
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(null), null)
-    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(null), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _, _)
@@ -202,11 +202,11 @@ class TestResultAccumulatorSpec extends Specification {
     }
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(null), null)
-    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(null), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(null), _, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _)
     testResultAccumulator.testResults.isEmpty()
 
     cleanup:
@@ -227,10 +227,10 @@ class TestResultAccumulatorSpec extends Specification {
     System.setProperty('pact.provider.tag', 'updateTestResultTag')
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(null), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(null), _, _,
+    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _,
       ['updateTestResultTag'])
     testResultAccumulator.testResults.isEmpty()
 
@@ -252,10 +252,10 @@ class TestResultAccumulatorSpec extends Specification {
     System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(null), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(null), _, _,
+    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _,
       ['tag1', 'tag2', 'tag3'])
     testResultAccumulator.testResults.isEmpty()
 

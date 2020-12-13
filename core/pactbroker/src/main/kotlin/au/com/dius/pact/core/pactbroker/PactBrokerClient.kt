@@ -26,11 +26,14 @@ import java.util.function.Consumer
 data class PactResponse(val pactFile: JsonValue.Object, val links: Map<String, Any?>)
 
 sealed class TestResult {
-  data class Ok(val interactionId: String? = null) : TestResult() {
+  data class Ok(val interactionIds: Set<String> = emptySet()) : TestResult() {
+    constructor(interactionId: String?) : this(if (interactionId.isNullOrEmpty())
+      emptySet() else setOf(interactionId))
+
     override fun toBoolean() = true
 
     override fun merge(result: TestResult) = when (result) {
-      is Ok -> this.copy(interactionId = interactionId ?: result.interactionId)
+      is Ok -> this.copy(interactionIds = interactionIds + result.interactionIds)
       is Failed -> result.merge(this)
     }
   }
@@ -39,14 +42,29 @@ sealed class TestResult {
     override fun toBoolean() = false
 
     override fun merge(result: TestResult) = when (result) {
-      is Ok -> if (result.interactionId != null)
-        if (results.find { it["interactionId"] == result.interactionId } != null) {
-          this
-        } else {
-          this.copy(results = results + mapOf("interactionId" to result.interactionId))
-        }
-      else
+      is Ok -> if (result.interactionIds.isEmpty()) {
         this
+        } else {
+          val allResults = results + result.interactionIds.associateBy { "interactionId" }
+          val grouped = allResults.groupBy { it["interactionId"] }
+          val filtered = grouped.mapValues { entry ->
+            val interactionId = entry.key as String?
+            if (entry.value.size == 1) {
+              entry.value
+            } else {
+              entry.value.map { map -> map.filterKeys { it != "interactionId" } }
+                .filter { it.isNotEmpty() }
+                .map { map ->
+                  if (interactionId.isNullOrEmpty()) {
+                    map
+                  } else {
+                    map + ("interactionId" to interactionId)
+                  }
+                }
+            }
+          }
+          this.copy(results = filtered.values.flatten())
+        }
       is Failed -> Failed(results + result.results, when {
         description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
           "$description, ${result.description}"

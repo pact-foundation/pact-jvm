@@ -59,11 +59,10 @@ class WebFluxProviderVerifier : ProviderVerifier() {
           e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)
         )
       }
-      return VerificationResult.Failed(
-        listOf(mapOf("message" to "Request to provider method failed with an exception", "exception" to e)),
-        "Request to provider method failed with an exception", interactionMessage,
-        listOf(VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e)),
-        pending, interaction.interactionId)
+      return VerificationResult.Failed("Request to provider method failed with an exception", interactionMessage,
+        mapOf(interaction.interactionId.orEmpty() to listOf(
+          VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e))),
+        pending)
     }
   }
 

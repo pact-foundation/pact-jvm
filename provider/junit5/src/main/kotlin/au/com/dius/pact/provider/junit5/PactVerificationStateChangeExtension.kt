@@ -41,11 +41,12 @@ class PactVerificationStateChangeExtension(
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change callback failed",
-        results = listOf(mapOf("exception" to e)),
-        failures = listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", StateChangeResult(Err(e)))),
-        pending = pending,
-        interactionId = interaction.interactionId
+      val error = StateChangeResult(Err(e))
+      testContext.testExecutionResult.add(VerificationResult.Failed(
+        description = "Provider state change callback failed",
+        failures = mapOf(interaction.interactionId.orEmpty() to
+          listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", error))),
+        pending = pending
       ))
       if (!pending) {
         throw AssertionError("Provider state change callback failed", e)
@@ -63,11 +64,12 @@ class PactVerificationStateChangeExtension(
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
-        results = listOf(mapOf("exception" to e)),
-        failures = listOf(VerificationFailureType.StateChangeFailure("Provider state change teardown callback failed", StateChangeResult(Err(e)))),
-        pending = pending,
-        interactionId = interaction.interactionId
+      val error = StateChangeResult(Err(e))
+      testContext.testExecutionResult.add(VerificationResult.Failed(
+        description = "Provider state change teardown callback failed",
+        failures = mapOf(interaction.interactionId.orEmpty() to listOf(
+          VerificationFailureType.StateChangeFailure("Provider state change teardown callback failed", error))),
+        pending = pending
       ))
       if (!pending) {
         throw AssertionError("Provider state change callback failed", e)

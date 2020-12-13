@@ -50,10 +50,10 @@ class PactVerificationTaskSpec extends Specification {
     then:
     def ex = thrown(GradleScriptException)
     ex.message == 'There were 1 non-pending pact failures for provider Test Service'
-    1 * verifier.verifyProvider(_) >> [new VerificationResult.Failed([], '', '', [
+    1 * verifier.verifyProvider(_) >> [new VerificationResult.Failed('', '', ['': [
       new VerificationFailureType.MismatchFailure(new StatusMismatch(200, 400),
         new RequestResponseInteraction('Test'), new RequestResponsePact(provider, consumer))
-    ], false, null) ]
+    ]], false) ]
   }
 
   def 'does not raise an exception if the verification passed'() {
@@ -62,7 +62,7 @@ class PactVerificationTaskSpec extends Specification {
 
     then:
     noExceptionThrown()
-    1 * verifier.verifyProvider(_) >> [ new VerificationResult.Ok(null) ]
+    1 * verifier.verifyProvider(_) >> [ new VerificationResult.Ok() ]
   }
 
   def 'does not raise an exception if the pact is pending'() {
@@ -71,6 +71,6 @@ class PactVerificationTaskSpec extends Specification {
 
     then:
     noExceptionThrown()
-    1 * verifier.verifyProvider(_) >> [new VerificationResult.Failed([], '', '', [], true, null) ]
+    1 * verifier.verifyProvider(_) >> [new VerificationResult.Failed('', '', [:], true) ]
   }
 }

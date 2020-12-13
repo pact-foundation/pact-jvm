@@ -76,11 +76,10 @@ data class PactVerificationContext @JvmOverloads constructor(
           it.requestFailed(providerInfo, interaction, interactionMessage, e,
             verifier!!.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
         }
-        listOf(VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-          "exception" to e)),
-          "Request to provider failed with an exception", interactionMessage,
-          listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e)),
-          consumer.pending, interaction.interactionId))
+        listOf(VerificationResult.Failed("Request to provider failed with an exception", interactionMessage,
+          mapOf(interaction.interactionId.orEmpty() to
+            listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
+          consumer.pending))
       }
     } else {
       return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,

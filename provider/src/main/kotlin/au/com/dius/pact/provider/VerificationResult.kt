@@ -86,6 +86,8 @@ sealed class VerificationFailureType {
   }
 }
 
+typealias VerificationFailures = Map<String, List<VerificationFailureType>>
+
 /**
  * Result of verifying an interaction
  */
@@ -93,55 +95,71 @@ sealed class VerificationResult {
   /**
    * Result was successful
    */
-  data class Ok(val interactionId: String? = null) : VerificationResult() {
+  data class Ok @JvmOverloads constructor(val interactionIds: Set<String> = emptySet()) : VerificationResult() {
+
+    constructor(interactionId: String?) : this(if (interactionId.isNullOrEmpty())
+      emptySet() else setOf(interactionId))
+
     override fun merge(result: VerificationResult) = when (result) {
-      is Ok -> this.copy(interactionId = interactionId ?: result.interactionId)
+      is Ok -> this.copy(interactionIds = interactionIds + result.interactionIds)
       is Failed -> result.merge(this)
     }
 
-    override fun toTestResult() = TestResult.Ok(interactionId)
+    override fun toTestResult() = TestResult.Ok(interactionIds)
   }
 
   /**
    * Result failed
    */
-  data class Failed(
-    @Deprecated("use failures instead")
-    var results: List<Map<String, Any?>> = emptyList(),
+  data class Failed @JvmOverloads constructor(
     val description: String = "",
     val verificationDescription: String = "",
-    val failures: List<VerificationFailureType> = emptyList(),
+    val failures: VerificationFailures = mapOf(),
     val pending: Boolean = false,
-    val interactionId: String? = null
+    @Deprecated("use failures instead")
+    var results: List<Map<String, Any?>> = emptyList()
   ) : VerificationResult() {
     override fun merge(result: VerificationResult) = when (result) {
-      is Ok -> this.copy(interactionId = interactionId ?: result.interactionId)
-      is Failed -> Failed(results + result.results, when {
+      is Ok -> this.copy(failures = failures + result.interactionIds
+        .associateWith { emptyList<VerificationFailureType>() })
+      is Failed -> Failed(when {
         description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
           "$description, ${result.description}"
         description.isNotEmpty() -> description
         else -> result.description
-      }, verificationDescription, failures + result.failures, pending && result.pending,
-        interactionId ?: result.interactionId)
+      }, verificationDescription, mergeFailures(failures, result.failures), pending && result.pending)
+    }
+
+    private fun mergeFailures(failures: VerificationFailures, other: VerificationFailures): VerificationFailures {
+      return (failures.entries + other.entries).groupBy { it.key }
+        .mapValues { entry -> entry.value.flatMap { it.value } }
     }
 
     override fun toTestResult(): TestResult {
-      return TestResult.Failed(failures.map {
-        (listOf("interactionId" to interactionId) + when (it) {
-          is VerificationFailureType.ExceptionFailure -> listOf(
-            "exception" to it.getException(), "description" to it.description)
-          is VerificationFailureType.StateChangeFailure -> listOf(
-            "exception" to it.getException(), "description" to it.description)
-          is VerificationFailureType.MismatchFailure -> listOf("attribute" to it.mismatch.type(),
-            "description" to it.mismatch.description()) + when (val mismatch = it.mismatch) {
-              is BodyMismatch -> listOf("identifier" to mismatch.path, "description" to mismatch.mismatch,
-                "diff" to mismatch.diff)
+      return TestResult.Failed(failures.flatMap { entry ->
+        entry.value.map { failure ->
+          (listOf("interactionId" to entry.key) + when (failure) {
+            is VerificationFailureType.ExceptionFailure -> listOf(
+              "exception" to failure.getException(), "description" to failure.description
+            )
+            is VerificationFailureType.StateChangeFailure -> listOf(
+              "exception" to failure.getException(), "description" to failure.description
+            )
+            is VerificationFailureType.MismatchFailure -> listOf(
+              "attribute" to failure.mismatch.type(),
+              "description" to failure.mismatch.description()
+            ) + when (val mismatch = failure.mismatch) {
+              is BodyMismatch -> listOf(
+                "identifier" to mismatch.path, "description" to mismatch.mismatch,
+                "diff" to mismatch.diff
+              )
               is HeaderMismatch -> listOf("identifier" to mismatch.headerKey, "description" to mismatch.mismatch)
               is QueryMismatch -> listOf("identifier" to mismatch.queryParameter, "description" to mismatch.mismatch)
               is MetadataMismatch -> listOf("identifier" to mismatch.key, "description" to mismatch.mismatch)
               else -> listOf()
             }
-        }).toMap()
+          }).toMap()
+        }
       }, description)
     }
   }

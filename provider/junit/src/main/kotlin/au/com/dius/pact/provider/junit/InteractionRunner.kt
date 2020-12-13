@@ -169,11 +169,10 @@ open class InteractionRunner<I>(
             notifier.fireTestFailure(Failure(description, e))
             notifier.fireTestFinished(description)
           }
-          testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-            "exception" to e)),
-            "Request to provider failed with an exception", description.displayName,
-            listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e)),
-            pending, interaction.interactionId)
+          testResult = VerificationResult.Failed("Request to provider failed with an exception", description.displayName,
+            mapOf(interaction.interactionId.orEmpty() to
+              listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
+            pending)
         } finally {
           if (pact is FilteredPact) {
             testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource)
