@@ -136,31 +136,37 @@ sealed class VerificationResult {
     }
 
     override fun toTestResult(): TestResult {
-      return TestResult.Failed(failures.flatMap { entry ->
-        entry.value.map { failure ->
-          (listOf("interactionId" to entry.key) + when (failure) {
-            is VerificationFailureType.ExceptionFailure -> listOf(
-              "exception" to failure.getException(), "description" to failure.description
-            )
-            is VerificationFailureType.StateChangeFailure -> listOf(
-              "exception" to failure.getException(), "description" to failure.description
-            )
-            is VerificationFailureType.MismatchFailure -> listOf(
-              "attribute" to failure.mismatch.type(),
-              "description" to failure.mismatch.description()
-            ) + when (val mismatch = failure.mismatch) {
-              is BodyMismatch -> listOf(
-                "identifier" to mismatch.path, "description" to mismatch.mismatch,
-                "diff" to mismatch.diff
+      val failures = failures.flatMap { entry ->
+        if (entry.value.isNotEmpty()) {
+          entry.value.map { failure ->
+            val errorMap = when (failure) {
+              is VerificationFailureType.ExceptionFailure -> listOf(
+                "exception" to failure.getException(), "description" to failure.description
               )
-              is HeaderMismatch -> listOf("identifier" to mismatch.headerKey, "description" to mismatch.mismatch)
-              is QueryMismatch -> listOf("identifier" to mismatch.queryParameter, "description" to mismatch.mismatch)
-              is MetadataMismatch -> listOf("identifier" to mismatch.key, "description" to mismatch.mismatch)
-              else -> listOf()
+              is VerificationFailureType.StateChangeFailure -> listOf(
+                "exception" to failure.getException(), "description" to failure.description
+              )
+              is VerificationFailureType.MismatchFailure -> listOf(
+                "attribute" to failure.mismatch.type(),
+                "description" to failure.mismatch.description()
+              ) + when (val mismatch = failure.mismatch) {
+                is BodyMismatch -> listOf(
+                  "identifier" to mismatch.path, "description" to mismatch.mismatch,
+                  "diff" to mismatch.diff
+                )
+                is HeaderMismatch -> listOf("identifier" to mismatch.headerKey, "description" to mismatch.mismatch)
+                is QueryMismatch -> listOf("identifier" to mismatch.queryParameter, "description" to mismatch.mismatch)
+                is MetadataMismatch -> listOf("identifier" to mismatch.key, "description" to mismatch.mismatch)
+                else -> listOf()
+              }
             }
-          }).toMap()
+            (listOf("interactionId" to entry.key) + errorMap).toMap()
+          }
+        } else {
+          listOf(mapOf("interactionId" to entry.key))
         }
-      }, description)
+      }
+      return TestResult.Failed(failures, description)
     }
   }
 
