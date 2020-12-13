@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonParser
@@ -340,7 +341,12 @@ open class PactBrokerClient(
   }
 
   fun buildPayload(result: TestResult, version: String, buildUrl: String?): JsonValue.Object {
-    val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
+    val jsonObject = jsonObject("success" to result.toBoolean(),
+      "providerApplicationVersion" to version,
+      "verifiedBy" to mapOf(
+        "implementation" to "Pact-JVM", "version" to Utils.lookupVersion(PactBrokerClient::class.java)
+      )
+    )
     if (buildUrl != null) {
       jsonObject["buildUrl"] = buildUrl
     }

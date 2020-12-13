@@ -353,9 +353,16 @@ class PactBrokerClientPactSpec extends Specification {
       given('A pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish verification request')
       withAttributes(method: 'POST',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
-        body: [success: true, providerApplicationVersion: '10.0.0']
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results'
       )
+      withBody {
+        success true
+        providerApplicationVersion '10.0.0'
+        verifiedBy {
+          implementation 'Pact-JVM'
+          version PactBuilder.string('4.1.12')
+        }
+      }
       willRespondWith(status: 201)
     }
 
@@ -379,9 +386,17 @@ class PactBrokerClientPactSpec extends Specification {
       given('A pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish verification request with build info')
       withAttributes(method: 'POST',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
-        body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:8080/build']
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results'
       )
+      withBody {
+        success true
+        providerApplicationVersion '10.0.0'
+        buildUrl 'http://localhost:8080/build'
+        verifiedBy {
+          implementation 'Pact-JVM'
+          version PactBuilder.string('4.1.12')
+        }
+      }
       willRespondWith(status: 201)
     }
 
@@ -410,6 +425,10 @@ class PactBrokerClientPactSpec extends Specification {
         success false
         providerApplicationVersion '10.0.0'
         buildUrl 'http://localhost:8080/build'
+        verifiedBy {
+          implementation 'Pact-JVM'
+          version PactBuilder.string('4.1.12')
+        }
         testResults eachLike {
           interactionId string('12345678')
           success false
