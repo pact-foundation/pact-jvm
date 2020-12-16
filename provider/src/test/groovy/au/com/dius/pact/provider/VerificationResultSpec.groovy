@@ -21,18 +21,22 @@ class VerificationResultSpec extends Specification {
 
     where:
 
-    result1                     | result2                      | result3
-    new VerificationResult.Ok() | new VerificationResult.Ok()  | new VerificationResult.Ok()
-    new VerificationResult.Ok() | failed([error1], '')         | failed([error1], '')
-    failed([error1], '')        | new VerificationResult.Ok()  | failed([error1], '')
-    failed([error1], '')        | failed([error2], '')         | failed([error1, error2], '')
-    failed([error1], 'A')       | failed([error2], '')         | failed([error1, error2], 'A')
-    failed([error1], '')        | failed([error2], 'B')        | failed([error1, error2], 'B')
-    failed([error1], 'A')       | failed([error2], 'B')        | failed([error1, error2], 'A, B')
-    failed([error1], 'A')       | failed([error2], 'A')        | failed([error1, error2], 'A')
-    failed([error1], 'A')       | failed([error2], 'A')        | failed([error1, error2], 'A')
-    failed([error1], '', true)  | failed([error2], 'A', true)  | failed([error1, error2], 'A', true)
-    failed([error1], '', true)  | failed([error2], 'A', false) | failed([error1, error2], 'A', false)
+    result1                        | result2                        | result3
+    new VerificationResult.Ok()    | new VerificationResult.Ok()    | new VerificationResult.Ok()
+    new VerificationResult.Ok()    | failed([error1], '')           | failed([error1], '')
+    failed([error1], '')           | new VerificationResult.Ok()    | failed([error1], '')
+    failed([error1], '')           | failed([error2], '')           | failed([error1, error2], '')
+    failed([error1], 'A')          | failed([error2], '')           | failed([error1, error2], 'A')
+    failed([error1], '')           | failed([error2], 'B')          | failed([error1, error2], 'B')
+    failed([error1], 'A')          | failed([error2], 'B')          | failed([error1, error2], 'A, B')
+    failed([error1], 'A')          | failed([error2], 'A')          | failed([error1, error2], 'A')
+    failed([error1], 'A')          | failed([error2], 'A')          | failed([error1, error2], 'A')
+    failed([error1], '', true)     | failed([error2], 'A', true)    | failed([error1, error2], 'A', true)
+    failed([error1], '', true)     | failed([error2], 'A', false)   | failed([error1, error2], 'A', false)
+    failed(['1': [error1]], '')    | new VerificationResult.Ok('1') | failed(['1': [error1]], '')
+    failed(['1': [error1]], '')    | new VerificationResult.Ok('2') | failed(['1': [error1], '2': []], '')
+    new VerificationResult.Ok('1') | failed(['1': [error1]], '')    | failed(['1': [error1]], '')
+    new VerificationResult.Ok('2') | failed(['1': [error1]], '')    | failed(['1': [error1], '2': []], '')
   }
 
   def 'convert to TestResult - Exception'() {
@@ -118,6 +122,10 @@ class VerificationResultSpec extends Specification {
   }
 
   private static VerificationResult.Failed failed(List errors, String s, pending = false) {
-    new VerificationResult.Failed(s, '', ['': errors], pending)
+    failed(['': errors], s, pending)
+  }
+
+  private static VerificationResult.Failed failed(Map<String, List> interactionIdsToErrors, String s, pending = false) {
+    new VerificationResult.Failed(s, '', interactionIdsToErrors, pending)
   }
 }
