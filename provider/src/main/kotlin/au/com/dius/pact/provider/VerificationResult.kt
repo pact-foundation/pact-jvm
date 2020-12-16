@@ -121,7 +121,9 @@ sealed class VerificationResult {
   ) : VerificationResult() {
     override fun merge(result: VerificationResult) = when (result) {
       is Ok -> this.copy(failures = failures + result.interactionIds
-        .associateWith { emptyList<VerificationFailureType>() })
+        .associateWith {
+          (if (failures.containsKey(it)) failures[it] else emptyList<VerificationFailureType>())!!
+        })
       is Failed -> Failed(when {
         description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
           "$description, ${result.description}"
