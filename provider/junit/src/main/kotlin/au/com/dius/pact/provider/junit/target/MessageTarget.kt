@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
@@ -13,6 +14,7 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
+import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
 import au.com.dius.pact.provider.junitsupport.Provider
 import mu.KLogging
 import java.net.URLClassLoader
@@ -46,7 +48,9 @@ open class MessageTarget @JvmOverloads constructor(
     try {
       if (result is VerificationResult.Failed) {
         verifier.displayFailures(listOf(result))
-        throw AssertionError(verifier.generateErrorStringFromVerificationResult(listOf(result)))
+        val descriptionGenerator = DescriptionGenerator<Message>(testClass, null, source, consumerName)
+        val description = descriptionGenerator.generate(interaction).methodName
+        throw AssertionError(description + verifier.generateErrorStringFromVerificationResult(listOf(result)))
       }
     } finally {
       verifier.finaliseReports()

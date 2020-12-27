@@ -353,15 +353,16 @@ open class ProviderVerifier @JvmOverloads constructor (
       VerificationResult.Ok(interactionId)
     } else {
       reporters.forEach { it.bodyComparisonFailed(comparison) }
+      val description = "$comparisonDescription has a matching body"
       when (comparison) {
         is Err -> {
-          failures["$comparisonDescription has a matching body"] = comparison.error.description()
-          VerificationResult.Failed("Body had differences", comparisonDescription,
+          failures[description] = comparison.error.description()
+          VerificationResult.Failed("Body had differences", description,
             mapOf(interactionId to listOf(VerificationFailureType.MismatchFailure(comparison.error))), pending)
         }
         is Ok -> {
-          failures["$comparisonDescription has a matching body"] = comparison.value
-          VerificationResult.Failed("Body had differences", comparisonDescription,
+          failures[description] = comparison.value
+          VerificationResult.Failed("Body had differences", description,
             mapOf(interactionId to comparison.value.mismatches.values.flatten()
               .map { VerificationFailureType.MismatchFailure(it) }), pending)
         }
@@ -406,7 +407,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       }
       val comparison = ResponseComparison.compareMessage(message,
         OptionalBody.body(actualMessage, contentType), messageMetadata)
-      val s = " generates a message which"
+      val s = ": generates a message which"
       result = result.merge(displayBodyResult(failures, comparison.bodyMismatches,
         interactionMessage + s, interactionId.orEmpty(), pending))
         .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures,
@@ -437,9 +438,9 @@ open class ProviderVerifier @JvmOverloads constructor (
           reporters.forEach { it.metadataComparisonOk(key, expectedValue) }
         } else {
           reporters.forEach { it.metadataComparisonFailed(key, expectedValue, metadataComparison) }
-          failures["$comparisonDescription includes metadata \"$key\" with value \"$expectedValue\""] =
-            metadataComparison
-          result = result.merge(VerificationResult.Failed("", comparisonDescription,
+          val description = "$comparisonDescription includes metadata \"$key\" with value \"$expectedValue\""
+          failures[description] = metadataComparison
+          result = result.merge(VerificationResult.Failed("", description,
             mapOf(interactionId to metadataComparison.map { VerificationFailureType.MismatchFailure(it) }), pending))
         }
       }
@@ -551,8 +552,9 @@ open class ProviderVerifier @JvmOverloads constructor (
       VerificationResult.Ok(interactionId)
     } else {
       reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
-      failures["$comparisonDescription has status code $status"] = mismatch.description()
-      VerificationResult.Failed("Response status did not match", comparisonDescription,
+      val description = "$comparisonDescription: has status code $status"
+      failures[description] = mismatch.description()
+      VerificationResult.Failed("Response status did not match", description,
         mapOf(interactionId to listOf(VerificationFailureType.MismatchFailure(mismatch))), pending)
     }
   }
@@ -577,9 +579,9 @@ open class ProviderVerifier @JvmOverloads constructor (
           reporters.forEach { it.headerComparisonOk(key, expectedHeaderValue!!) }
         } else {
           reporters.forEach { it.headerComparisonFailed(key, expectedHeaderValue!!, headerComparison) }
-          failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
-            headerComparison.joinToString(", ") { it.description() }
-          result = result.merge(VerificationResult.Failed("Headers had differences", comparisonDescription,
+          val description = "$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""
+          failures[description] = headerComparison.joinToString(", ") { it.description() }
+          result = result.merge(VerificationResult.Failed("Headers had differences", description,
             mapOf(interactionId to headerComparison.map {
               VerificationFailureType.MismatchFailure(it)
             }), pending))

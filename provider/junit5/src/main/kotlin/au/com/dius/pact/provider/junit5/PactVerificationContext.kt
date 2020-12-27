@@ -48,7 +48,11 @@ data class PactVerificationContext @JvmOverloads constructor(
       if (testExecutionResult.isNotEmpty()) {
         verifier!!.displayFailures(testExecutionResult)
         if (testExecutionResult.any { !it.pending }) {
-          throw AssertionError(verifier!!.generateErrorStringFromVerificationResult(testExecutionResult))
+          throw AssertionError(verifier!!.generateErrorStringFromVerificationResult(
+            testExecutionResult,
+            consumerName,
+            source
+          ))
         }
       }
     } finally {
