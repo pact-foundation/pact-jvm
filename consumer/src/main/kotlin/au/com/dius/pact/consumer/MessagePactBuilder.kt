@@ -143,6 +143,7 @@ class MessagePactBuilder(
     message.contents = OptionalBody.body(parent.toString().toByteArray(contentType.asCharset()), contentType)
     message.metaData = metadata
     message.matchingRules.addCategory(parent.matchers)
+    message.generators.addGenerators(parent.generators)
 
     return this
   }

@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.dsl.Matchers
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.ProviderState
 import groovy.json.JsonSlurper
@@ -153,7 +154,7 @@ class MessagePactBuilderSpec extends Specification {
     pact.providerStates.last() == expectedProviderState
   }
 
-  def 'should support XML content'() {
+  def 'supports XML content'() {
     given:
     def xmlContent = new PactXmlBuilder("root")
     .build(root -> {
@@ -184,5 +185,24 @@ class MessagePactBuilderSpec extends Specification {
             'destination'
     ] as Set
 
+  }
+
+  @Issue('#1278')
+  def 'Include any generators defined for the message contents'() {
+    given:
+    def body = new PactDslJsonBody()
+      .datetime('DT')
+    def category = au.com.dius.pact.core.model.generators.Category.BODY
+
+    when:
+    def pact = MessagePactBuilder
+      .consumer('MessagePactBuilderSpec')
+      .expectsToReceive('a message with generators')
+      .withContent(body).toPact()
+    Message message = pact.interactions.first()
+    def generators = message.generators
+
+    then:
+    generators.categories[category] == ['$.DT': new DateTimeGenerator("yyyy-MM-dd'T'HH:mm:ss")]
   }
 }
