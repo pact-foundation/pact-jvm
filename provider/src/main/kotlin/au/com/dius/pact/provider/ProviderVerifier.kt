@@ -35,7 +35,6 @@ import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
-import java.util.concurrent.Callable
 import java.util.function.BiConsumer
 import java.util.function.Function
 import java.util.function.Predicate
@@ -708,19 +707,19 @@ open class ProviderVerifier @JvmOverloads constructor (
 
   @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")
   fun loadPactFileForConsumer(consumer: IConsumerInfo): Pact<out Interaction> {
-    var pactSource = consumer.pactSource
-    if (pactSource is Callable<*>) {
-      pactSource = pactSource.call()
-    }
+    var pactSource = consumer.resolvePactSource()
 
     if (projectHasProperty.apply(PACT_FILTER_PACTURL)) {
       val pactUrl = projectGetProperty.apply(PACT_FILTER_PACTURL)!!
       pactSource = if (pactSource is BrokerUrlSource) {
-        pactSource.copy(url = pactUrl)
+        val source = pactSource.copy(url = pactUrl)
+        source.encodePath = false
+        source
       } else {
-        UrlSource<Interaction>(projectGetProperty.apply(PACT_FILTER_PACTURL)!!)
+        val source = UrlSource<Interaction>(projectGetProperty.apply(PACT_FILTER_PACTURL)!!)
+        source.encodePath = false
+        source
       }
-      pactSource.encodePath = false
     }
 
     return if (pactSource is UrlPactSource) {

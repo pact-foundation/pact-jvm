@@ -100,7 +100,7 @@ abstract class MockTestingTarget(
       if (result is VerificationResult.Failed) {
         val errors = results.filterIsInstance<VerificationResult.Failed>()
         verifier.displayFailures(errors)
-        throw AssertionError(verifier.generateErrorStringFromVerificationResult(errors, consumerName, source))
+        throw AssertionError(verifier.generateErrorStringFromVerificationResult(errors))
       }
     } finally {
       verifier.finaliseReports()

@@ -1,11 +1,9 @@
 package au.com.dius.pact.provider.junit.descriptions
 
-import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.provider.junitsupport.TestDescription
 import org.junit.runner.Description
 import org.junit.runners.model.TestClass
 
@@ -28,44 +26,7 @@ class DescriptionGenerator<I : Interaction>(
    * @param interaction the Interaction under test
    */
   fun generate(interaction: Interaction): Description {
-    val messagePrefix = if (interaction is Message) {
-      "Generates message '${interaction.description}' ${pending()}"
-    } else {
-      "Upon ${interaction.description}${pending()}"
-    }
-    return Description.createTestDescription(testClass.javaClass,
-      "${consumerName()} ${getTagDescription()}- $messagePrefix ")
-  }
-
-  private fun consumerName(): String {
-    val source = pactSource ?: pact?.source
-    val name = when {
-      source is BrokerUrlSource -> source.result?.name ?: pact?.consumer?.name
-      consumerName.isNotEmpty() -> consumerName
-      else -> pact?.consumer?.name
-    }
-    return name ?: "Unknown consumer"
-  }
-
-  private fun pending(): String {
-    val source = pactSource ?: pact?.source
-    return if (source is BrokerUrlSource) {
-      if (source.result != null && source.result!!.pending) {
-        " <PENDING>"
-      } else {
-        ""
-      }
-    } else {
-      ""
-    }
-  }
-
-  private fun getTagDescription(): String {
-    val source = pactSource ?: pact?.source
-    if (source is BrokerUrlSource) {
-      val tag = source.tag
-      return if (tag.isNotEmpty()) "[tag:${source.tag}] " else ""
-    }
-    return ""
+    val generator = TestDescription(interaction, pactSource ?: pact?.source, consumerName, pact?.consumer)
+    return Description.createTestDescription(testClass.javaClass, generator.generateDescription())
   }
 }
