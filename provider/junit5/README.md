@@ -53,8 +53,41 @@ For example:
   }
 ```
 
-**Note for Maven users:** If you use Maven to run your tests, you will have to make sure that the Maven Surefire plugin is at least
-  version 2.22.1 uses an isolated classpath.
+### HttpTestTarget
+
+`HttpTestTarget` accepts the following options:
+
+| Option | Type | Default | Description |
+| ------ | ---- | ------- | ----------- |
+| host | String | localhost | The hostname to use to access the provider |
+| port | Int | 8080 | The port the provider is running on |
+| path | String | "/" | The base path the provider is mounted on |
+| httpClientFactory | () -> IHttpClientFactory | Default Factory | Callback used to override the HTTP client factory |
+
+### HttpsTestTarget
+
+`HttpsTestTarget` accepts the following options:
+
+| Option | Type | Default | Description |
+| ------ | ---- | ------- | ----------- |
+| host | String | localhost | The hostname to use to access the provider |
+| port | Int | 8443 | The port the provider is running on |
+| path | String | "/" | The base path the provider is mounted on |
+| insecure | Boolean | false | Disables the standard TLS verification used with HTTPS connections |
+| httpClientFactory | () -> IHttpClientFactory | Default Factory | Callback used to override the HTTP client factory |
+
+### MessageTestTarget
+
+`MessageTestTarget` accepts the following options:
+
+| Option | Type | Default | Description |
+| ------ | ---- | ------- | ----------- |
+| packagesToScan | List<String> | empty List | The Java packages to scan to find classes with annotated methods. If your methods are on your test class, you don't need to supply a value for this. | 
+| classLoader | ClassLoader? | null | Class loader to use to load the classes with annotated methods | 
+
+## !! Important note for Maven users !! 
+If you use Maven to run your tests, you will have to make sure that the Maven Surefire plugin is at least version 
+2.22.1 and configured to use an isolated classpath.
 
 For example, configure it by adding the following to your POM: 
 
@@ -68,6 +101,14 @@ For example, configure it by adding the following to your POM:
     </configuration>
 </plugin>
 ```
+
+### For Message Tests and Spring and Maven
+
+If you are using Spring (or Springboot), and want to have values injected into your test, you need to ensure 
+that the same class loader is used to execute your annotated test method as Spring is using to inject the values. 
+In particular, options like the Maven Surefire plugin's `forkCount == 0` can impact this. Either don't supply any 
+packages to scan (this will use the default class loader and the annotated methods **have** to be on your test class), 
+or you can provide the classloader to use as the second parameter to `MessageTestTarget`.
 
 ## Provider State Methods
 
