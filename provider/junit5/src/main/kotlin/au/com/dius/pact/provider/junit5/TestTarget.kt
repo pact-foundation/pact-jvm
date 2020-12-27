@@ -183,9 +183,7 @@ open class MessageTestTarget @JvmOverloads constructor(
   }
 
   override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {
-    verifier.projectClassLoader = Supplier {
-      classLoader ?: testInstance.javaClass.classLoader
-    }
+    verifier.projectClassLoader = Supplier { classLoader }
     verifier.projectClasspath = Supplier {
       when (val classLoader = classLoader ?: testInstance.javaClass.classLoader) {
         is URLClassLoader -> classLoader.urLs.toList()
