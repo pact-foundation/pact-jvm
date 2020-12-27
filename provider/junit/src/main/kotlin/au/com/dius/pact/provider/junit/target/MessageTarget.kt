@@ -64,6 +64,7 @@ open class MessageTarget @JvmOverloads constructor(
     pactSource: PactSource?
   ): IProviderVerifier {
     val verifier = ProviderVerifier()
+    verifier.projectClassLoader = Supplier { this.classLoader }
     verifier.projectClasspath = Supplier {
       logger.debug { "Classloader = ${this.classLoader}" }
       when (this.classLoader) {

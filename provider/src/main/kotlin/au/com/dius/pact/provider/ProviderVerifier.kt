@@ -121,6 +121,11 @@ interface IProviderVerifier {
   var providerMethodInstance: Function<Method, Any>
 
   /**
+   * Callback to return the project classloader to use for looking up methods
+   */
+  var projectClassLoader: Supplier<ClassLoader?>?
+
+  /**
    * Callback to return the project classpath to use for looking up methods
    */
   var projectClasspath: Supplier<List<URL>>
@@ -233,7 +238,6 @@ interface IProviderVerifier {
  */
 @Suppress("TooManyFunctions")
 open class ProviderVerifier @JvmOverloads constructor (
-
   override var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
   override var executeBuildSpecificTask: BiConsumer<Any, ProviderState> = BiConsumer { _, _ -> },
@@ -244,7 +248,8 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) },
   override var providerTags: Supplier<List<String>>? = Supplier {
     System.getProperty(PACT_PROVIDER_TAG).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
-  }
+  },
+  override var projectClassLoader: Supplier<ClassLoader?>? = null
 ) : IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
@@ -273,16 +278,20 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     val interactionId = interaction.interactionId
     try {
-      val urls = projectClasspath.get()
-      logger.debug { "projectClasspath = $urls" }
-
       val classGraph = ClassGraph().enableAllInfo()
       if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
         classGraph.verbose()
       }
 
-      if (urls.isNotEmpty()) {
-        classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
+      val classLoader = projectClassLoader?.get()
+      if (classLoader == null) {
+        val urls = projectClasspath.get()
+        logger.debug { "projectClasspath = $urls" }
+        if (urls.isNotEmpty()) {
+          classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
+        }
+      } else {
+        classGraph.overrideClassLoaders(classLoader)
       }
 
       val scan = ProviderUtils.packagesToScan(providerInfo, consumer)

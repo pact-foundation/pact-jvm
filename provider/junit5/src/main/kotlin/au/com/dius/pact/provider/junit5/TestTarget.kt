@@ -152,7 +152,10 @@ open class HttpsTestTarget @JvmOverloads constructor (
  * @property packagesToScan List of packages to scan for methods with @PactVerifyProvider annotations. Defaults to the
  * full test classpath.
  */
-open class MessageTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
+open class MessageTestTarget @JvmOverloads constructor(
+  private val packagesToScan: List<String> = emptyList(),
+  private val classLoader: ClassLoader? = null
+) : TestTarget {
   override fun isHttpTarget() = false
 
   override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
@@ -180,8 +183,11 @@ open class MessageTestTarget(val packagesToScan: List<String> = emptyList()) : T
   }
 
   override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {
+    verifier.projectClassLoader = Supplier {
+      classLoader ?: testInstance.javaClass.classLoader
+    }
     verifier.projectClasspath = Supplier {
-      when (val classLoader = testInstance.javaClass.classLoader) {
+      when (val classLoader = classLoader ?: testInstance.javaClass.classLoader) {
         is URLClassLoader -> classLoader.urLs.toList()
         else -> emptyList()
       }
