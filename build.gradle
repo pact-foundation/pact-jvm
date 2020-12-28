@@ -56,7 +56,9 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
   apply plugin: 'codenarc'
-  apply plugin: 'jacoco'
+  if (!System.env.CI) {
+    apply plugin: 'jacoco'
+  }
   apply plugin: 'org.jetbrains.kotlin.jvm'
 //  apply plugin: 'org.jmailen.kotlinter'
   apply plugin: 'io.gitlab.arturbosch.detekt'
