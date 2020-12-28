@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
+
 public class PactDslRequestWithPath extends PactDslRequestBase {
 
   private final ConsumerPactBuilder consumerPactBuilder;
@@ -612,4 +614,16 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
     return queryMatchingISODatetime(field, null);
   }
 
+  /**
+   * Sets the body to be an application/x-www-form-urlencoded body using the buidler
+   * @param builder Form Post Builder
+   */
+  public PactDslRequestWithPath urlEncodedFormPost(FormPostBuilder builder) {
+    requestMatchers.addCategory(builder.getMatchers());
+    requestGenerators.addGenerators(builder.getGenerators());
+    au.com.dius.pact.core.model.ContentType contentType = builder.getContentType();
+    requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
+    requestBody = OptionalBody.body(builder.buildBody().getBytes(contentType.asCharset()), contentType);
+    return this;
+  }
 }
