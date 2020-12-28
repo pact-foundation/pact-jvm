@@ -39,7 +39,7 @@ subprojects {
     return
   }
 
-  version = '4.2.0-beta.2'
+  version = '4.2.0-beta.3'
   
   buildscript {
     repositories {
@@ -62,7 +62,7 @@ subprojects {
   apply plugin: 'org.jetbrains.kotlin.jvm'
 //  apply plugin: 'org.jmailen.kotlinter'
   apply plugin: 'io.gitlab.arturbosch.detekt'
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     apply plugin: 'org.jetbrains.dokka'
   }
   apply plugin: "org.javamodularity.moduleplugin"
