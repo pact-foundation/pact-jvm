@@ -2,22 +2,16 @@ package au.com.dius.pact.consumer.junit5;
 
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.FormPostBuilder;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.message.BasicNameValuePair;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,7 +28,7 @@ public class UrlEncocdedFormPostTest {
       .uponReceiving("FORM POST request")
         .path("/form")
         .method("POST")
-        .urlEncodedFormPost(
+        .body(
           new FormPostBuilder()
             .uuid("id")
             .stringMatcher("value", "\\d+", "1", "2", "3"))

@@ -615,15 +615,15 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
   }
 
   /**
-   * Sets the body to be an application/x-www-form-urlencoded body using the buidler
-   * @param builder Form Post Builder
+   * Sets the body using the buidler
+   * @param builder Body Builder
    */
-  public PactDslRequestWithPath urlEncodedFormPost(FormPostBuilder builder) {
+  public PactDslRequestWithPath body(BodyBuilder builder) {
     requestMatchers.addCategory(builder.getMatchers());
     requestGenerators.addGenerators(builder.getGenerators());
     au.com.dius.pact.core.model.ContentType contentType = builder.getContentType();
     requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
-    requestBody = OptionalBody.body(builder.buildBody().getBytes(contentType.asCharset()), contentType);
+    requestBody = OptionalBody.body(builder.buildBody(), contentType);
     return this;
   }
 }

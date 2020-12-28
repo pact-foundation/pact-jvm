@@ -28,10 +28,10 @@ import java.util.UUID
  */
 class FormPostBuilder(
   val body: MutableMap<String, List<String>> = mutableMapOf(),
-  val contentType: ContentType = ContentType(APPLICATION_FORM_URLENCODED),
-  val matchers: Category = Category("body"),
-  val generators: Generators = Generators()
-) {
+  private val contentType: ContentType = ContentType(APPLICATION_FORM_URLENCODED),
+  private val matchers: Category = Category("body"),
+  private val generators: Generators = Generators()
+) : BodyBuilder {
 
   /**
    * Attribute that must be have the specified value
@@ -414,13 +414,18 @@ class FormPostBuilder(
     return this
   }
 
-  fun buildBody(): String {
-    val charset = contentType.asCharset().toString()
+  override fun getMatchers() = matchers
+  override fun getGenerators() = generators
+  override fun getContentType() = contentType
+
+  override fun buildBody(): ByteArray {
+    val charset = contentType.asCharset()
+    val charsetStr = charset.toString()
     return body.entries.flatMap { entry ->
       entry.value.map {
-        URLEncoder.encode(entry.key, charset) + "=" + URLEncoder.encode(it, charset)
+        URLEncoder.encode(entry.key, charsetStr) + "=" + URLEncoder.encode(it, charsetStr)
       }
-    }.joinToString("&")
+    }.joinToString("&").toByteArray(charset)
   }
 
   companion object {
