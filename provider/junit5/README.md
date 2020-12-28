@@ -82,7 +82,7 @@ For example:
 
 | Option | Type | Default | Description |
 | ------ | ---- | ------- | ----------- |
-| packagesToScan | List<String> | empty List | The Java packages to scan to find classes with annotated methods. If your methods are on your test class, you don't need to supply a value for this. | 
+| packagesToScan | List&lt;String&gt; | empty List | The Java packages to scan to find classes with annotated methods. If your methods are on your test class, you don't need to supply a value for this. | 
 | classLoader | ClassLoader? | null | Class loader to use to load the classes with annotated methods | 
 
 ## !! Important note for Maven users !! 
