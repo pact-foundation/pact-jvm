@@ -76,7 +76,7 @@ class PactCanIDeployTaskSpec extends Specification {
     project.evaluate()
 
     task.brokerClient = Mock(PactBrokerClient) {
-      canIDeploy(_, _, _, _) >> new CanIDeployResult(true, '', '')
+      canIDeploy(_, _, _, _) >> new CanIDeployResult(true, '', '', null)
     }
 
     when:
@@ -105,7 +105,7 @@ class PactCanIDeployTaskSpec extends Specification {
     then:
     notThrown(GradleScriptException)
     1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0', _, _) >>
-      new CanIDeployResult(true, '', '')
+      new CanIDeployResult(true, '', '', null)
   }
 
   def 'passes optional parameters to the pact broker client'() {
@@ -129,7 +129,7 @@ class PactCanIDeployTaskSpec extends Specification {
     then:
     notThrown(GradleScriptException)
     1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0',
-      new Latest.UseLatest(true), 'prod') >> new CanIDeployResult(true, '', '')
+      new Latest.UseLatest(true), 'prod') >> new CanIDeployResult(true, '', '', null)
   }
 
   def 'throws an exception if the pact broker client says no'() {
@@ -150,9 +150,8 @@ class PactCanIDeployTaskSpec extends Specification {
 
     then:
     1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0', _, _) >>
-      new CanIDeployResult(false, 'Bad version', 'Bad version')
+      new CanIDeployResult(false, 'Bad version', 'Bad version', null)
     def ex = thrown(GradleScriptException)
     ex.message == 'Can you deploy? Computer says no ¯\\_(ツ)_/¯ Bad version'
   }
-
 }

@@ -4,6 +4,9 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.json.JsonException
+import au.com.dius.pact.provider.ProviderUtils
+import au.com.dius.pact.provider.ProviderUtils.findAnnotation
+import au.com.dius.pact.provider.ProviderUtils.instantiatePactLoader
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
 import au.com.dius.pact.provider.junitsupport.Consumer
@@ -25,8 +28,6 @@ import org.junit.runners.ParentRunner
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.TestClass
 import java.io.IOException
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.findAnnotation
 
 /**
  * JUnit Runner runs pacts against provider
@@ -67,15 +68,22 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
     if (clazz.getAnnotation(Ignore::class.java) != null) {
       logger.info("Ignore annotation detected, exiting")
     } else {
-      val providerInfo = clazz.getAnnotation(Provider::class.java) ?: throw InitializationError(
+      val providerInfo = findAnnotation(clazz, Provider::class.java) ?: throw InitializationError(
               "Provider name should be specified by using ${Provider::class.java.simpleName} annotation")
+      logger.debug { "Found annotation $providerInfo" }
       val serviceName = providerInfo.value
 
-      val consumerInfo = clazz.getAnnotation(Consumer::class.java)
+      val consumerInfo = findAnnotation(clazz, Consumer::class.java)
+      if (consumerInfo != null) {
+        logger.debug { "Found annotation $consumerInfo" }
+      }
       val consumerName = consumerInfo?.value
 
       val testClass = TestClass(clazz)
-      val ignoreNoPactsToVerify = clazz.getAnnotation(IgnoreNoPactsToVerify::class.java)
+      val ignoreNoPactsToVerify = findAnnotation(clazz, IgnoreNoPactsToVerify::class.java)
+      if (ignoreNoPactsToVerify != null) {
+        logger.debug { "Found annotation $ignoreNoPactsToVerify" }
+      }
       val ignoreIoErrors = try {
         valueResolver.resolveValue(ignoreNoPactsToVerify?.ignoreIoErrors)
       } catch (e: RuntimeException) {
@@ -83,7 +91,7 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
         ignoreNoPactsToVerify?.ignoreIoErrors
       } ?: "false"
 
-      val pactLoader = getPactSource(testClass)
+      val pactLoader = getPactSource(testClass, consumerInfo)
       val pacts = try {
         filterPacts(pactLoader.load(serviceName)
           .filter { p -> consumerName == null || p.consumer.name == consumerName } as List<Pact<I>>)
@@ -150,40 +158,22 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
     interaction.run(notifier)
   }
 
-  protected open fun getPactSource(clazz: TestClass): PactLoader {
-    val pactSource = clazz.getAnnotation(PactSource::class.java)
-    val pactLoaders = clazz.annotations
-      .filter { annotation -> annotation.annotationClass.findAnnotation<PactSource>() != null }
-    if ((if (pactSource == null) 0 else 1) + pactLoaders.size != 1) {
-      throw InitializationError("Exactly one pact source should be set")
+  protected open fun getPactSource(clazz: TestClass, consumerInfo: Consumer?): PactLoader {
+    val pactSources = ProviderUtils.findAllPactSources(clazz.javaClass.kotlin)
+    if (pactSources.size > 1) {
+      throw InitializationError(
+        "Exactly one pact source should be set, found ${pactSources.size}: " +
+          pactSources.map { it.first }.joinToString(", "))
+    } else if (pactSources.isEmpty()) {
+      throw InitializationError("Did not find any PactSource annotations. Exactly one pact source should be set")
     }
 
-    try {
-      val loader = if (pactSource != null) {
-        val pactLoaderClass = pactSource.value
-        try {
-          // Checks if there is a constructor with one argument of type Class.
-          val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
-          if (constructorWithClass != null) {
-            constructorWithClass.isAccessible = true
-            constructorWithClass.newInstance(clazz.javaClass)
-          } else {
-            pactLoaderClass.createInstance()
-          }
-        } catch (e: NoSuchMethodException) {
-          logger.error(e) { e.message }
-          pactLoaderClass.createInstance()
-        }
-      } else {
-        val annotation = pactLoaders.first()
-        annotation.annotationClass.findAnnotation<PactSource>()!!.value.java
-          .getConstructor(annotation.annotationClass.java).newInstance(annotation)
-      }
-
-      checkForOverriddenPactUrl(loader, clazz.getAnnotation(AllowOverridePactUrl::class.java),
-        clazz.getAnnotation(Consumer::class.java))
-
-      return loader
+    val (pactSource, annotation) = pactSources.first()
+    return try {
+      val loader = instantiatePactLoader(pactSource, clazz.javaClass, annotation)
+      checkForOverriddenPactUrl(loader, findAnnotation(clazz.javaClass, AllowOverridePactUrl::class.java),
+        consumerInfo)
+      loader
     } catch (e: ReflectiveOperationException) {
       logger.error(e) { "Error while creating pact source" }
       throw InitializationError(e)

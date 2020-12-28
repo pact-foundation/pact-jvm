@@ -132,7 +132,7 @@ class PactRunnerSpec extends Specification {
 
     then:
     InitializationError e = thrown()
-    e.causes*.message == ['Exactly one pact source should be set']
+    e.causes*.message == ['Did not find any PactSource annotations. Exactly one pact source should be set']
   }
 
   def 'PactRunner throws an exception if the pact source throws an IO exception'() {
@@ -189,7 +189,7 @@ class PactRunnerSpec extends Specification {
 
     then:
     InitializationError e = thrown()
-    e.causes*.message == ['Exactly one pact source should be set']
+    e.causes[0].message.startsWith('Exactly one pact source should be set, found 2: ')
   }
 
   def 'PactRunner handles a pact source with a pact loader that takes a class parameter'() {

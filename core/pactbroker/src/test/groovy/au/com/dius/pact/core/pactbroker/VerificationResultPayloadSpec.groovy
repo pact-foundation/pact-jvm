@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 
 class VerificationResultPayloadSpec extends Specification {
@@ -78,7 +79,42 @@ class VerificationResultPayloadSpec extends Specification {
         [attribute: 'status', description: 'Expected status code of 200 but got 500']
       ]
     ]
+  }
 
+  @Issue('1266')
+  def 'include any successful interactions'() {
+    given:
+    result = new TestResult.Failed([
+            [description: 'Expected status code of 400 but got 500', interactionId: 'ABC', attribute: 'status'],
+            [message: 'test failed', 'exception': new IOException('Boom'), interactionId: '123'],
+            [interactionId: '456']
+    ], 'Test failed')
+
+    when:
+    def result = buildPayload()
+
+    then:
+    result.testResults.size() == 3
+    result.testResults.find { it.interactionId == '123' } == [
+      interactionId: '123',
+      success: false,
+      exceptions: [[
+       message: 'Boom',
+       exceptionClass: 'java.io.IOException'
+      ]],
+      mismatches: []
+    ]
+    result.testResults.find { it.interactionId == 'ABC' } == [
+      interactionId: 'ABC',
+      success: false,
+      mismatches: [
+        [attribute: 'status', description: 'Expected status code of 400 but got 500']
+      ]
+    ]
+    result.testResults.find { it.interactionId == '456' } == [
+      interactionId: '456',
+      success: true
+    ]
   }
 
   def 'handle body mismatches'() {

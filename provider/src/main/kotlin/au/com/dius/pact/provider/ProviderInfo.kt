@@ -100,7 +100,7 @@ open class ProviderInfo @JvmOverloads constructor (
   }
 
   open fun pactBrokerClient(pactBrokerUrl: String, options: Map<String, Any>) =
-    PactBrokerClient(pactBrokerUrl, options)
+    PactBrokerClient(pactBrokerUrl, options.toMutableMap())
 
   @Suppress("TooGenericExceptionThrown")
   open fun setupConsumerListFromPactFiles(consumersGroup: ConsumersGroup): MutableList<IConsumerInfo> {

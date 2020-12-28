@@ -8,12 +8,14 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVersion
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
+import au.com.dius.pact.provider.junitsupport.IgnoreMissingStateChange
 import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
@@ -144,7 +146,8 @@ open class InteractionRunner<I>(
   override fun run(notifier: RunNotifier) {
     for (interaction in pact.interactions) {
       val description = describeChild(interaction)
-      var testResult: VerificationResult = VerificationResult.Ok
+      val interactionId = interaction.interactionId
+      var testResult: VerificationResult = VerificationResult.Ok(interactionId)
       val pending = pact.source is BrokerUrlSource && (pact.source as BrokerUrlSource).result?.pending == true
       val included = interactionIncluded(interaction)
       if (!pending && included) {
@@ -166,11 +169,10 @@ open class InteractionRunner<I>(
             notifier.fireTestFailure(Failure(description, e))
             notifier.fireTestFinished(description)
           }
-          testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-            "exception" to e)),
-            "Request to provider failed with an exception", description.displayName,
-            listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e)),
-            pending, interaction.interactionId)
+          testResult = VerificationResult.Failed("Request to provider failed with an exception", description.displayName,
+            mapOf(interaction.interactionId.orEmpty() to
+              listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
+            pending)
         } finally {
           if (pact is FilteredPact) {
             testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource)
@@ -255,10 +257,18 @@ open class InteractionRunner<I>(
       for (state in interaction.providerStates.reversed()) {
         val methods = findStateChangeMethod(state, testTarget.getStateHandlers())
         if (methods.isEmpty()) {
-          return Fail(MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated " +
-            "with @State(\"${state.name}\") " +
-            "for Interaction (\"${interaction.description}\") " +
-            "and Consumer ${pact.consumer.name}"))
+          return if (ignoreMissingStateChangeMethod()) {
+            MissingStateChangeMethodStatement(state, interaction, pact.consumer.name)
+          } else {
+            Fail(
+              MissingStateChangeMethod(
+                "MissingStateChangeMethod: Did not find a test class method annotated " +
+                  "with @State(\"${state.name}\") " +
+                  "for Interaction (\"${interaction.description}\") " +
+                  "and Consumer ${pact.consumer.name}"
+              )
+            )
+          }
         } else {
           stateChange = RunStateChanges(stateChange, methods, listOf(Supplier { target }) +
             testTarget.getStateHandlers().map { it.right }, state, testContext, testTarget.verifier)
@@ -268,6 +278,10 @@ open class InteractionRunner<I>(
     } else {
       statement
     }
+  }
+
+  private fun ignoreMissingStateChangeMethod(): Boolean {
+    return ProviderUtils.findAnnotation(testClass.javaClass, IgnoreMissingStateChange::class.java) != null
   }
 
   private fun findStateChangeMethod(
@@ -335,4 +349,19 @@ open class InteractionRunner<I>(
       return stateMethods
     }
   }
+}
+
+class MissingStateChangeMethodStatement(
+  val state: ProviderState,
+  val interaction: Interaction,
+  val consumerName: String
+) : Statement() {
+  override fun evaluate() {
+    logger.warn { "MissingStateChangeMethod: Did not find a test class method annotated " +
+      "with @State(\"${state.name}\") " +
+      "for Interaction (\"${interaction.description}\") " +
+      "and Consumer $consumerName" }
+  }
+
+  companion object : KLogging()
 }

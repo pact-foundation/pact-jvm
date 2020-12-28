@@ -9,6 +9,7 @@ import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import com.github.michaelbull.result.Ok
+import spock.lang.Issue
 import spock.lang.Specification
 import au.com.dius.pact.core.support.json.JsonParser
 
@@ -211,4 +212,34 @@ class MarkdownReporterSpec extends Specification {
     )
   }
 
+  @Issue('#1128')
+  def 'updates the summary with the status of each consumer'() {
+    given:
+    def reporter = new MarkdownReporter('test', reportDir)
+    def provider1 = new ProviderInfo(name: 'provider1')
+    def consumer = new ConsumerInfo(name: 'Consumer')
+    def consumer2 = new ConsumerInfo(name: 'Consumer2')
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
+    def interaction2 = new RequestResponseInteraction('Interaction 2', [], new Request(), new Response())
+
+    when:
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer, provider1, 'master')
+    reporter.interactionDescription(interaction1)
+    reporter.finaliseReport()
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer2, provider1, 'master')
+    reporter.interactionDescription(interaction2)
+    reporter.finaliseReport()
+
+    def results = new File(reportDir, 'provider1.md').text
+
+    then:
+    results.contains(
+      '''|| Consumer  | Result |
+         ||-----------|--------|
+         || Consumer  | OK     |
+         || Consumer2 | OK     |'''.stripMargin()
+    )
+  }
 }

@@ -8,14 +8,15 @@ class ConsumerVersionSelectorSpec extends Specification {
   @Unroll
   def 'convert to JSON'() {
     expect:
-    new ConsumerVersionSelector(tag, latest, consumer).toJson().serialise() == json
+    new ConsumerVersionSelector(tag, latest, consumer, fallback).toJson().serialise() == json
 
     where:
 
-    tag  | latest | consumer | json
-    'A'  | true   | null     | '{"latest":true,"tag":"A"}'
-    'A'  | false  | null     | '{"latest":false,"tag":"A"}'
-    'A'  | false  | 'Bob'    | '{"consumer":"Bob","latest":false,"tag":"A"}'
-    null | false  | 'Bob'    | '{"consumer":"Bob","latest":false}'
+    tag  | latest | consumer | fallback | json
+    'A'  | true   | null     | null     | '{"latest":true,"tag":"A"}'
+    'A'  | true   | null     | 'B'      | '{"fallbackTag":"B","latest":true,"tag":"A"}'
+    'A'  | false  | null     | null     | '{"latest":false,"tag":"A"}'
+    'A'  | false  | 'Bob'    | null     | '{"consumer":"Bob","latest":false,"tag":"A"}'
+    null | false  | 'Bob'    | null     | '{"consumer":"Bob","latest":false}'
   }
 }

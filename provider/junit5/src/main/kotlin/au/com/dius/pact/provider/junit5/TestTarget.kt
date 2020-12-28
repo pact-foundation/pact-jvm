@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
+import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderClient
@@ -63,7 +64,8 @@ interface TestTarget {
 open class HttpTestTarget @JvmOverloads constructor (
   val host: String = "localhost",
   val port: Int = 8080,
-  val path: String = "/"
+  val path: String = "/",
+  val httpClientFactory: () -> IHttpClientFactory = { HttpClientFactory() }
 ) : TestTarget {
   override fun isHttpTarget() = true
 
@@ -77,7 +79,7 @@ open class HttpTestTarget @JvmOverloads constructor (
   }
 
   override fun prepareRequest(interaction: Interaction, context: Map<String, Any>): Pair<Any, Any>? {
-    val providerClient = ProviderClient(getProviderInfo("provider"), HttpClientFactory())
+    val providerClient = ProviderClient(getProviderInfo("provider"), this.httpClientFactory.invoke())
     if (interaction is RequestResponseInteraction) {
       return providerClient.prepareRequest(interaction.request.generatedRequest(context)) to providerClient
     }
@@ -116,8 +118,9 @@ open class HttpsTestTarget @JvmOverloads constructor (
   host: String = "localhost",
   port: Int = 8443,
   path: String = "",
-  val insecure: Boolean = false
-) : HttpTestTarget(host, port, path) {
+  val insecure: Boolean = false,
+  httpClientFactory: () -> IHttpClientFactory = { HttpClientFactory() }
+) : HttpTestTarget(host, port, path, httpClientFactory) {
 
   override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
     val providerInfo = super.getProviderInfo(serviceName, pactSource)
@@ -149,7 +152,10 @@ open class HttpsTestTarget @JvmOverloads constructor (
  * @property packagesToScan List of packages to scan for methods with @PactVerifyProvider annotations. Defaults to the
  * full test classpath.
  */
-open class MessageTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
+open class MessageTestTarget @JvmOverloads constructor(
+  private val packagesToScan: List<String> = emptyList(),
+  private val classLoader: ClassLoader? = null
+) : TestTarget {
   override fun isHttpTarget() = false
 
   override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
@@ -177,8 +183,9 @@ open class MessageTestTarget(val packagesToScan: List<String> = emptyList()) : T
   }
 
   override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {
+    verifier.projectClassLoader = Supplier { classLoader }
     verifier.projectClasspath = Supplier {
-      when (val classLoader = testInstance.javaClass.classLoader) {
+      when (val classLoader = classLoader ?: testInstance.javaClass.classLoader) {
         is URLClassLoader -> classLoader.urLs.toList()
         else -> emptyList()
       }

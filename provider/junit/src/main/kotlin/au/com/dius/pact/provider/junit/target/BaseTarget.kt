@@ -22,6 +22,7 @@ import java.io.File
 import java.util.function.BiConsumer
 import java.util.function.Supplier
 import au.com.dius.pact.core.support.BuiltToolConfig.detectedBuildToolPactDirectory
+import au.com.dius.pact.provider.ProviderUtils
 import org.apache.commons.io.FilenameUtils
 
 /**
@@ -54,8 +55,8 @@ abstract class BaseTarget : TestClassAwareTarget {
     var reportDirectory = FilenameUtils.concat(detectedBuildToolPactDirectory(), "reports")
     var reportingEnabled = false
 
-    val verificationReports = testClass.getAnnotation(VerificationReports::class.java)
-    val reports: List<String> = when {
+    val verificationReports = ProviderUtils.findAnnotation(testClass.javaClass, VerificationReports::class.java)
+      val reports: List<String> = when {
       verificationReports != null -> {
         reportingEnabled = true
         if (verificationReports.reportDir.isNotEmpty()) {

@@ -949,3 +949,54 @@ pact {
 ```
 
 Then any pending pacts will not cause a build failure.
+
+# Can I Deploy check
+
+There is a `canIDeploy` Gradle task that you can use to preform a deployment safety check. This task requires two
+parameters: `pacticipant` and either `pacticipantVersion` or `latest=true`. It will use the configuration from the 
+`broker` section of your Gradle build. 
+
+```console
+$ ./gradlew canideploy -Ppacticipant='Activity Service' -Platest=true
+
+> Task :canIDeploy FAILED
+Computer says no ¯\_(ツ)_/¯ 
+
+The verification between the latest version of Foo Web Client 2 (1.2.3/AB) and the latest version of Activity Service (0.0.3) failed
+There is no verified pact between the latest version of Foo Web Client (1.2.3/AB) and the latest version of Activity Service (0.0.3)
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Can you deploy? Computer says no ¯\_(ツ)_/¯ 
+
+* Try:
+Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output. Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 1s
+```
+
+## Enabling retry when there are unknown results (4.1.11+)
+
+It can happen that there are still unknown results in the Pact broker because the provider verification is still running.
+You can enable a retry with a wait interval to poll for the results to become available. There are two settings that can
+be added to the `broker` configuration to enable this: `retryCountWhileUnknown` and `retryWhileUnknownInterval`.
+
+|Field|Description|Default|
+|-----|-----------|-------|
+|retryCountWhileUnknown|The amount of times to retry while there are unknown results|0|
+|retryWhileUnknownInterval|The number of seconds to wait between retries|10|
+
+Example use:
+
+```groovy
+pact {
+  broker {
+      pactBrokerUrl = 'http://localhost:1234/'
+      retryCountWhileUnknown = 3
+      retryWhileUnknownInterval = 120 // 2 minutes between retries
+  }
+}
+```

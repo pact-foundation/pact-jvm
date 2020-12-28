@@ -54,8 +54,7 @@ class PactVerificationContextSpec extends Specification {
     context.testExecutionResult[0] instanceof VerificationResult.Failed
     context.testExecutionResult[0].description == 'Request to provider failed with an exception'
     context.testExecutionResult[0].failures.size() == 1
-    context.testExecutionResult[0].failures[0] instanceof VerificationFailureType.ExceptionFailure
-    context.testExecutionResult[0].interactionId == '12345'
+    context.testExecutionResult[0].failures['12345'][0] instanceof VerificationFailureType.ExceptionFailure
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -99,7 +98,6 @@ class PactVerificationContextSpec extends Specification {
     context.testExecutionResult[0] instanceof VerificationResult.Failed
     context.testExecutionResult[0].description == 'Request to provider failed with an exception'
     context.testExecutionResult[0].failures.size() == 1
-    context.testExecutionResult[0].failures[0] instanceof VerificationFailureType.ExceptionFailure
-    context.testExecutionResult[0].interactionId == '12345'
+    context.testExecutionResult[0].failures['12345'][0] instanceof VerificationFailureType.ExceptionFailure
   }
 }

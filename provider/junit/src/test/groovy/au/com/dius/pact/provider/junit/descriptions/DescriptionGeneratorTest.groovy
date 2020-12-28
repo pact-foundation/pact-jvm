@@ -43,14 +43,14 @@ class DescriptionGeneratorTest extends Specification {
     )
 
     expect:
-    def generator = new DescriptionGenerator(clazz, pact)
+    def generator = new DescriptionGenerator(clazz, pact, null, null)
     description == generator.generate(interaction).methodName
 
     where:
     tag      | description
-    'master' | 'the-consumer-name [tag:master] - Upon Interaction 1'
-    null     | 'the-consumer-name - Upon Interaction 1'
-    ''       | 'the-consumer-name - Upon Interaction 1'
+    'master' | 'the-consumer-name [tag:master] - Upon Interaction 1 '
+    null     | 'the-consumer-name - Upon Interaction 1 '
+    ''       | 'the-consumer-name - Upon Interaction 1 '
   }
 
   def 'when non broker pact source tests name are built correctly'() {
@@ -64,8 +64,8 @@ class DescriptionGeneratorTest extends Specification {
     )
 
     expect:
-    def generator = new DescriptionGenerator(clazz, pact)
-    'consumer - Upon Interaction 1' == generator.generate(interaction).methodName
+    def generator = new DescriptionGenerator(clazz, pact, null, null)
+    'consumer - Upon Interaction 1 ' == generator.generate(interaction).methodName
   }
 
   @Unroll
@@ -77,14 +77,14 @@ class DescriptionGeneratorTest extends Specification {
       new PactBrokerResult('test', 'test', 'test', [], [], pending == 'enabled', null, false, true))
     def pact = new RequestResponsePact(new Provider(), new Consumer('the-consumer-name'), [ interaction ],
       [:], pactSource)
-    def generator = new DescriptionGenerator(clazz, pact)
+    def generator = new DescriptionGenerator(clazz, pact, null, null)
 
     expect:
     description == generator.generate(interaction).methodName
 
     where:
     pending    | description
-    'enabled'  | 'test [tag:master] - Upon Interaction 1 <PENDING>'
-    'disabled' | 'test [tag:master] - Upon Interaction 1'
+    'enabled'  | 'test [tag:master] - Upon Interaction 1 <PENDING> '
+    'disabled' | 'test [tag:master] - Upon Interaction 1 '
   }
 }

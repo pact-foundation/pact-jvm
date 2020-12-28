@@ -32,10 +32,11 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   fun updateTestResult(
     pact: Pact<Interaction>,
     interaction: Interaction,
-    testExecutionResult: List<VerificationResult.Failed>,
+    testExecutionResult: List<VerificationResult>,
     source: PactSource
   ) {
-    updateTestResult(pact, interaction, testExecutionResult.fold(TestResult.Ok) {
+    val initial = TestResult.Ok(interaction.interactionId)
+    updateTestResult(pact, interaction, testExecutionResult.fold(initial) {
       acc: TestResult, r -> acc.merge(r.toTestResult())
     }, source)
   }
@@ -66,7 +67,8 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
       } else {
-        verificationReporter.reportResults(pact, interactionResults.values.fold(TestResult.Ok) {
+        val initial = TestResult.Ok(interaction.interactionId)
+        verificationReporter.reportResults(pact, interactionResults.values.fold(initial) {
           acc: TestResult, result -> acc.merge(result)
         }, lookupProviderVersion(), null, lookupProviderTags())
       }

@@ -43,7 +43,8 @@ class PactBrokerClientSpec extends Specification {
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
-      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
+      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2'])),
+      new PactBrokerClientConfig()]) {
       newHalClient() >> halClient
     }
 
@@ -108,7 +109,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null, null) ], [], false, '').value
 
     then:
     consumers != []
@@ -129,8 +130,8 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true, null),
-              new ConsumerVersionSelector('anotherTag', true, null) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null, null),
+              new ConsumerVersionSelector('anotherTag', true, null, null) ], [], false, '').value
 
     then:
     consumers.size() == 2
@@ -154,13 +155,14 @@ class PactBrokerClientSpec extends Specification {
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
-      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
+      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2'])),
+      new PactBrokerClientConfig()]) {
       newHalClient() >> halClient
     }
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null, null) ], [], false, '').value
 
     then:
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
@@ -179,7 +181,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null, null) ], [], false, '').value
 
     then:
     consumers != []
@@ -200,7 +202,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-      [ new ConsumerVersionSelector('tag', true, null) ], [], false, '').value
+      [ new ConsumerVersionSelector('tag', true, null, null) ], [], false, '').value
 
     then:
     consumers == []
@@ -257,7 +259,7 @@ class PactBrokerClientSpec extends Specification {
   }
 
   @Issue('#892')
-  def 'when uploading a pact a pact with tags, publish the tags first'() {
+  def 'when uploading a pact with tags, publish the tags first'() {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate() >> halClient
@@ -302,7 +304,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.postJson('URL', _) >> new Ok(true)
 
     expect:
-    client.publishVerificationResults(attributes, TestResult.Ok.INSTANCE, '0', null).class.simpleName == result
+    client.publishVerificationResults(attributes, new TestResult.Ok(), '0', null).class.simpleName == result
 
     where:
 
@@ -364,7 +366,7 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
+    def selectors = [ new ConsumerVersionSelector('DEV', true, null, null) ]
     def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
       {
@@ -461,7 +463,7 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
+    def selectors = [ new ConsumerVersionSelector('DEV', true, null, null) ]
     def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
@@ -487,7 +489,7 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def selectors = [ new ConsumerVersionSelector('DEV', true, null) ]
+    def selectors = [ new ConsumerVersionSelector('DEV', true, null, null) ]
     def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}],"includePendingStatus":true,' +
       '"includeWipPactsSince":"2020-24-06","providerVersionTags":[]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
@@ -518,7 +520,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def result = client.fetchConsumersWithSelectors('provider',
-      [ new ConsumerVersionSelector(null, true, 'consumer') ], [], false, '')
+      [ new ConsumerVersionSelector(null, true, 'consumer', null) ], [], false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -527,5 +529,38 @@ class PactBrokerClientSpec extends Specification {
     0 * halClient.postJson(_, _, _)
     1 * client.fetchConsumers('provider') >> []
     result instanceof Ok
+  }
+
+  @Issue('#1241')
+  def 'can i deploy - should retry when there are unknown results'() {
+    given:
+    def halClient = Mock(IHalClient)
+    def config = new PactBrokerClientConfig(10, 0)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl', [:], config]) {
+      newHalClient() >> halClient
+    }
+    def json1 = JsonParser.parseString('''
+    |{
+    |  "summary": {
+    |      "deployable": true,
+    |      "reason": "some text",
+    |      "unknown": 1
+    |  }
+    |}'''.stripMargin())
+    def json2 = JsonParser.parseString('''
+    |{
+    |  "summary": {
+    |      "deployable": true,
+    |      "reason": "some text",
+    |      "unknown": 0
+    |  }
+    |}'''.stripMargin())
+
+    when:
+    def result = client.canIDeploy('test', '1.2.3', new Latest.UseLatest(true), '')
+
+    then:
+    3 * halClient.getJson(_, _) >> new Ok(json1) >> new Ok(json1) >> new Ok(json2)
+    result.ok
   }
 }

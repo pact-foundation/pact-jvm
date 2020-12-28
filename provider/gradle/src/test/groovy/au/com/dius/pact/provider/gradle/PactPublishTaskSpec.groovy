@@ -90,7 +90,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]]) >> brokerClient
+    1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]], _) >> brokerClient
     1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
   }
 
@@ -108,7 +108,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']]) >> brokerClient
+    1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']], _) >> brokerClient
     1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
   }
 

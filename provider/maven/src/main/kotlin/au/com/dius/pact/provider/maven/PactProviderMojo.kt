@@ -66,7 +66,7 @@ open class PactProviderMojo : PactBaseMojo() {
       verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
       verifier.projectGetProperty = Function { p: String -> this.property(p) }
       verifier.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
-        "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
+        "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactSource> or <pactUrl>)"
       }
       verifier.checkBuildSpecificTask = Function { false }
       verifier.providerVersion = ProviderVersion { projectVersion }
@@ -172,13 +172,15 @@ open class PactProviderMojo : PactBaseMojo() {
             |</enablePending>
           """.trimMargin())
         }
-        val selectors = pactBroker.tags?.map { ConsumerVersionSelector(it, true) } ?: emptyList()
+        val selectors = pactBroker.tags?.map {
+          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) } ?: emptyList()
         consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options +
           mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags),
           pactBrokerUrl.toString(), selectors))
       }
       pactBroker?.tags != null && pactBroker.tags.isNotEmpty() -> {
-        val selectors = pactBroker.tags.map { ConsumerVersionSelector(it, true) }
+        val selectors = pactBroker.tags.map {
+          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) }
         consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors))
       }
       else -> consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), emptyList()))

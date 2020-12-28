@@ -1,12 +1,11 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import java.io.File
-import java.io.IOException
 import java.util.Collections
-import java.util.jar.JarInputStream
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.memberProperties
 
@@ -70,21 +69,7 @@ abstract class BasePact<I : Interaction> @JvmOverloads constructor(
 
     @JvmStatic
     fun lookupVersion(): String {
-      val url = BasePact::class.java.protectionDomain?.codeSource?.location
-      return if (url != null) {
-        val openStream = url.openStream()
-        try {
-          val jarStream = JarInputStream(openStream)
-          jarStream.manifest?.mainAttributes?.getValue("Implementation-Version") ?: ""
-        } catch (e: IOException) {
-          logger.warn(e) { "Could not load pact-jvm manifest" }
-          ""
-        } finally {
-          openStream.close()
-        }
-      } else {
-        ""
-      }
+      return Utils.lookupVersion(BasePact::class.java)
     }
 
     fun objectToMap(obj: Any?): Map<String, Any?> {

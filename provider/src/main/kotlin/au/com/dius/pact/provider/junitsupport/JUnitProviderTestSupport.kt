@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.junitsupport.filter.InteractionFilter
 import au.com.dius.pact.provider.junitsupport.loader.OverrideablePactLoader
@@ -16,7 +17,7 @@ import kotlin.reflect.full.createInstance
 
 object JUnitProviderTestSupport : KLogging() {
   fun <I> filterPactsByAnnotations(pacts: List<Pact<I>>, testClass: Class<*>): List<Pact<I>> where I : Interaction {
-    val pactFilter = testClass.getAnnotation(PactFilter::class.java) ?: return pacts
+    val pactFilter = ProviderUtils.findAnnotation(testClass, PactFilter::class.java) ?: return pacts
     if (pactFilter.value.all { it.isEmpty() }) return pacts
 
     val interactionFilter = pactFilter.filter.createInstance() as InteractionFilter<I>
