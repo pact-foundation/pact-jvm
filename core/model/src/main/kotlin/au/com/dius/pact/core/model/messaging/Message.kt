@@ -147,6 +147,8 @@ class Message @JvmOverloads constructor(
       interactionId, providerStates).withGeneratedKey()
   }
 
+  override fun isAsynchronousMessage() = true
+
   companion object : KLogging() {
 
     /**

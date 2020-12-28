@@ -76,6 +76,11 @@ interface Interaction {
 
   /** Converts this interaction to a V4 format */
   fun asV4Interaction(): V4Interaction
+
+  /** If this interaction represents an asynchronous message */
+  fun isAsynchronousMessage(): Boolean {
+    return false
+  }
 }
 
 /**

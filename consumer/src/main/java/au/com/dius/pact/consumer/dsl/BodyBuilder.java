@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.core.model.ContentType;
 import au.com.dius.pact.core.model.generators.Generators;
-import au.com.dius.pact.core.model.matchingrules.Category;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory;
 
 /**
  * Interface to a builder that constructs a body, including matchers and generators
@@ -11,7 +11,7 @@ public interface BodyBuilder {
   /**
    * Returns the matchers for the body
    */
-  Category getMatchers();
+  MatchingRuleCategory getMatchers();
 
   /**
    * Returns the generators for the body

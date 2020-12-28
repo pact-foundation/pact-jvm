@@ -232,6 +232,8 @@ sealed class V4Interaction(
       return Message(description, providerStates, contents, matchingRules, generators, metadata.toMutableMap(),
         interactionId)
     }
+
+    override fun isAsynchronousMessage() = true
   }
 
   companion object : KLogging() {

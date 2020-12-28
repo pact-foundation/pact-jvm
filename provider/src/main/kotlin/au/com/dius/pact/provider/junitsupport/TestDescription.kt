@@ -14,7 +14,7 @@ class TestDescription(
   val consumer: Consumer?
 ) {
   fun generateDescription(): String {
-    val messagePrefix = if (interaction is Message) {
+    val messagePrefix = if (interaction.isAsynchronousMessage()) {
       "Generates message '${interaction.description}' ${pending()}"
     } else {
       "Upon ${interaction.description}${pending()}"

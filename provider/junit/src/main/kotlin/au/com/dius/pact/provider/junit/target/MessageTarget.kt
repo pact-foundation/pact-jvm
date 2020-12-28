@@ -48,7 +48,7 @@ open class MessageTarget @JvmOverloads constructor(
     try {
       if (result is VerificationResult.Failed) {
         verifier.displayFailures(listOf(result))
-        val descriptionGenerator = DescriptionGenerator<Message>(testClass, null, source, consumerName)
+        val descriptionGenerator = DescriptionGenerator(testClass, null, source, consumerName)
         val description = descriptionGenerator.generate(interaction).methodName
         throw AssertionError(description + verifier.generateErrorStringFromVerificationResult(listOf(result)))
       }
