@@ -1,6 +1,8 @@
 #!/usr/bin/env groovy
 @Grab(group = 'com.github.zafarkhaja', module = 'java-semver', version = '0.9.0')
+@Grab(group = 'com.vdurmont', module = 'semver4j', version = '3.1.0')
 import com.github.zafarkhaja.semver.Version
+import com.vdurmont.semver4j.Semver
 
 def executeOnShell(String command, Closure closure = null) {
   executeOnShell(command, new File(System.properties.'user.dir'), closure)
@@ -40,9 +42,10 @@ executeOnShell 'git pull'
 
 def javaVersion
 executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") {
-  javaVersion = Version.valueOf(it.trim().replace('_', '+b'))
+  javaVersion = new Semver(it.trim().replace('_', '+b'), Semver.SemverType.NPM)
 }
-if (!javaVersion?.satisfies('^11')) {
+
+if (!javaVersion?.satisfies('^11.0.0')) {
   ask("You are building against Java $javaVersion. Do you want to exit?: [Y]") {
     System.exit(1)
   }
