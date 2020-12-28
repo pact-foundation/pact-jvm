@@ -21,9 +21,7 @@ import org.apache.commons.text.StringEscapeUtils
 
 allprojects {
   apply plugin: 'maven-publish'
-  if (System.env.TRAVIS != 'true') {
-    apply plugin: 'signing'
-  }
+  apply plugin: 'signing'
 
   repositories {
     mavenLocal()
@@ -58,9 +56,7 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
   apply plugin: 'codenarc'
-  if (!System.env.TRAVIS) {
-    apply plugin: 'jacoco'
-  }
+  apply plugin: 'jacoco'
   apply plugin: 'org.jetbrains.kotlin.jvm'
 //  apply plugin: 'org.jmailen.kotlinter'
   apply plugin: 'io.gitlab.arturbosch.detekt'
@@ -109,7 +105,7 @@ subprojects {
         }
     }
 
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
       archiveClassifier = 'javadoc'
       from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
@@ -129,7 +125,7 @@ subprojects {
   test {
     useJUnitPlatform()
 
-    if (System.env.TRAVIS == 'true') {
+    if (System.env.CI == 'true') {
       testLogging {
         exceptionFormat "full"
         showCauses true
@@ -196,7 +192,7 @@ subprojects {
     }
   }
 
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     signing {
       sign publishing.publications.mavenPublication
     }
@@ -214,7 +210,7 @@ subprojects {
       configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
   }
 
-  if (!System.env.TRAVIS) {
+  if (!System.env.CI) {
     check.dependsOn << 'jacocoTestReport'
   }
 
@@ -229,16 +225,4 @@ subprojects {
   }
 
   task allDeps(type: DependencyReportTask) {}
-}
-
-if (System.env.TRAVIS == 'true') {
-    allprojects {
-        tasks.withType(GroovyCompile) {
-            groovyOptions.fork = false
-        }
-        tasks.withType(Test) {
-            minHeapSize = '128m'
-            maxHeapSize = '768m'
-        }
-    }
 }

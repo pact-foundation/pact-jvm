@@ -4,9 +4,11 @@ import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.StateChangeResult
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
+import au.com.dius.pact.provider.junitsupport.IgnoreMissingStateChange
 import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
@@ -39,11 +41,12 @@ class PactVerificationStateChangeExtension(
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change callback failed",
-        results = listOf(mapOf("exception" to e)),
-        failures = listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", StateChangeResult(Err(e)))),
-        pending = pending,
-        interactionId = interaction.interactionId
+      val error = StateChangeResult(Err(e))
+      testContext.testExecutionResult.add(VerificationResult.Failed(
+        description = "Provider state change callback failed",
+        failures = mapOf(interaction.interactionId.orEmpty() to
+          listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", error))),
+        pending = pending
       ))
       if (!pending) {
         throw AssertionError("Provider state change callback failed", e)
@@ -61,11 +64,12 @@ class PactVerificationStateChangeExtension(
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
-        results = listOf(mapOf("exception" to e)),
-        failures = listOf(VerificationFailureType.StateChangeFailure("Provider state change teardown callback failed", StateChangeResult(Err(e)))),
-        pending = pending,
-        interactionId = interaction.interactionId
+      val error = StateChangeResult(Err(e))
+      testContext.testExecutionResult.add(VerificationResult.Failed(
+        description = "Provider state change teardown callback failed",
+        failures = mapOf(interaction.interactionId.orEmpty() to listOf(
+          VerificationFailureType.StateChangeFailure("Provider state change teardown callback failed", error))),
+        pending = pending
       ))
       if (!pending) {
         throw AssertionError("Provider state change callback failed", e)
@@ -86,9 +90,14 @@ class PactVerificationStateChangeExtension(
       val stateChangeMethods = findStateChangeMethods(context.requiredTestInstance,
         testContext.stateChangeHandlers, state)
       if (stateChangeMethods.isEmpty()) {
-        errors.add("Did not find a test class method annotated with @State(\"${state.name}\") \n" +
+        val message = "Did not find a test class method annotated with @State(\"${state.name}\") \n" +
           "for Interaction \"${testContext.interaction.description}\" \n" +
-          "with Consumer \"${testContext.consumer.name}\"")
+          "with Consumer \"${testContext.consumer.name}\""
+        if (ignoreMissingStateChangeMethod(context.requiredTestClass)) {
+          logger.warn { message }
+        } else {
+          errors.add(message)
+        }
       } else {
         stateChangeMethods.filter { it.second.action == action }.forEach { (method, stateAnnotation, instance) ->
           logger.info {
@@ -134,6 +143,10 @@ class PactVerificationStateChangeExtension(
     return stateChangeClasses
       .map { Triple(it.first, it.first.getAnnotation(State::class.java), it.second) }
       .filter { it.second.value.any { s -> state.name == s } }
+  }
+
+  private fun ignoreMissingStateChangeMethod(testClass: Class<*>): Boolean {
+    return ProviderUtils.findAnnotation(testClass, IgnoreMissingStateChange::class.java) != null
   }
 
   companion object : KLogging()

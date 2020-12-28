@@ -5,10 +5,10 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
-import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.PactVerification
+import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderUtils
+import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junit.target.BaseTarget
 import au.com.dius.pact.provider.junitsupport.Provider
@@ -91,7 +91,8 @@ abstract class MockTestingTarget(
       callVerifierFn(provider, consumer, verifier, failures)
     }
 
-    val result = results.fold(VerificationResult.Ok) { acc: VerificationResult, r -> acc.merge(r) }
+    val initial = VerificationResult.Ok(interaction.interactionId)
+    val result = results.fold(initial) { acc: VerificationResult, r -> acc.merge(r) }
 
     reportTestResult(result, verifier)
 

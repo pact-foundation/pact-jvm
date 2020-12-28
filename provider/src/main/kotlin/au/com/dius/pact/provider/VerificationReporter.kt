@@ -68,7 +68,7 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
   ) {
     when (val source = pact.source) {
       is BrokerUrlSource -> {
-        val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options)
+        val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options.toMutableMap())
         publishResult(brokerClient, source, result, version, pact, tags)
       }
       else -> logger.info { "Skipping publishing verification results for source $source" }

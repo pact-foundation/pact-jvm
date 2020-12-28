@@ -227,7 +227,7 @@ class AnsiConsoleReporter(
     val s = StringBuilder()
 
     s.append("${i + 1}) ${err.verificationDescription}\n\n")
-    err.failures.forEachIndexed { index, failure ->
+    err.failures.values.flatten().forEachIndexed { index, failure ->
       s.append("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n\n")
 
       if (failure.hasException() && verifier.projectHasProperty.apply("pact.showStacktrace")) {

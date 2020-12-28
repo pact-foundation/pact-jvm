@@ -45,10 +45,12 @@ import org.apache.commons.text.StringEscapeUtils
 publishing {
   publications {
     serverDistribution(MavenPublication) {
+      from components.java
       artifact distZip
       artifact distTar
       pom {
         name = project.name
+        packaging = 'jar'
         description = StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url = 'https://github.com/DiUS/pact-jvm'
         licenses {

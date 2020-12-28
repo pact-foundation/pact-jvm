@@ -66,7 +66,7 @@ open class PactProviderMojo : PactBaseMojo() {
       verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
       verifier.projectGetProperty = Function { p: String -> this.property(p) }
       verifier.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
-        "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
+        "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactSource> or <pactUrl>)"
       }
       verifier.checkBuildSpecificTask = Function { false }
       verifier.providerVersion = ProviderVersion { projectVersion }

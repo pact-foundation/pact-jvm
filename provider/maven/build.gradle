@@ -49,7 +49,7 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:publishToMavenLo
     }
 }
 
-if (System.env.TRAVIS != 'true') {
+if (System.env.CI != 'true') {
   task pluginDescriptor(type: Exec, dependsOn: generatePom) {
     if (isWindows()) {
       commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',

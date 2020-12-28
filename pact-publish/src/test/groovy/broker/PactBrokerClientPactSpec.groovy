@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.groovy.PactBuilder
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -19,7 +20,8 @@ class PactBrokerClientPactSpec extends Specification {
   private PactBuilder pactBroker, imaginaryBroker
 
   def setup() {
-    pactBrokerClient = new PactBrokerClient('http://localhost:9876', [halClient: [maxPublishRetries: 0]])
+    pactBrokerClient = new PactBrokerClient('http://localhost:9876', [halClient: [maxPublishRetries: 0]],
+      new PactBrokerClientConfig())
     pactFile = File.createTempFile('pact', '.json')
     pactContents = '''
       {
@@ -80,6 +82,70 @@ class PactBrokerClientPactSpec extends Specification {
     result instanceof PactVerificationResult.Ok
   }
 
+  def 'returns success when creating a tag for a pact is ok'() {
+    given:
+    pactBroker {
+        uponReceiving('a HAL navigate request')
+        withAttributes(method: 'GET', path: '/', body: '')
+        willRespondWith(status: 200)
+        withBody(mimetype: 'application/json') {
+          _links {
+            'pb:pacticipant-version-tag' {
+              href url('http://localhost:9876', '/pacticipants/{pacticipant}/versions/{version}/tags/{tag}')
+              title 'Create a tag'
+              templated true
+            }
+          }
+        }
+        uponReceiving('a tag create request')
+        withAttributes(method: 'PUT',
+                path: '/pacticipants/Foo Consumer/versions/10.0.0/tags/A',
+                body: '{}'
+        )
+        willRespondWith(status: 201)
+      }
+
+    when:
+      def result = pactBroker.runTest { server, context ->
+        assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Ok
+      }
+
+    then:
+      result instanceof PactVerificationResult.Ok
+  }
+
+  def 'returns an error when creating a tag for a pact fails'() {
+    given:
+    pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/', body: '')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:pacticipant-version-tag' {
+            href url('http://localhost:9876', '/pacticipants/{pacticipant}/versions/{version}/tags/{tag}')
+            title 'Create a tag'
+            templated true
+          }
+        }
+      }
+      uponReceiving('a tag create request')
+      withAttributes(method: 'PUT',
+              path: '/pacticipants/Foo Consumer/versions/10.0.0/tags/A',
+              body: '{}'
+      )
+      willRespondWith(status: 500)
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Err<Exception>
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
   def 'returns an error when forbidden to publish the pact'() {
     given:
     pactBroker {
@@ -97,11 +163,11 @@ class PactBrokerClientPactSpec extends Specification {
       }
       uponReceiving('a pact publish request which will be forbidden')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
-        body: pactContents
+              path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+              body: pactContents
       )
       willRespondWith(status: 401, headers: [
-        'Content-Type': 'application/json'
+              'Content-Type': 'application/json'
       ])
     }
 
@@ -287,9 +353,16 @@ class PactBrokerClientPactSpec extends Specification {
       given('A pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish verification request')
       withAttributes(method: 'POST',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
-        body: [success: true, providerApplicationVersion: '10.0.0']
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results'
       )
+      withBody {
+        success true
+        providerApplicationVersion '10.0.0'
+        verifiedBy {
+          implementation 'Pact-JVM'
+          version PactBuilder.string('4.1.12')
+        }
+      }
       willRespondWith(status: 201)
     }
 
@@ -300,7 +373,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:9876/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], TestResult.Ok.INSTANCE, '10.0.0').value
+      ], new TestResult.Ok([] as Set), '10.0.0').value
     }
 
     then:
@@ -313,9 +386,17 @@ class PactBrokerClientPactSpec extends Specification {
       given('A pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish verification request with build info')
       withAttributes(method: 'POST',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
-        body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:9876/build']
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results'
       )
+      withBody {
+        success true
+        providerApplicationVersion '10.0.0'
+        buildUrl 'http://localhost:9876/build'
+        verifiedBy {
+          implementation 'Pact-JVM'
+          version PactBuilder.string('4.1.12')
+        }
+      }
       willRespondWith(status: 201)
     }
 
@@ -326,7 +407,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:9876/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:9876/build').value
+      ], new TestResult.Ok([] as Set), '10.0.0', 'http://localhost:9876/build').value
     }
 
     then:
@@ -344,6 +425,10 @@ class PactBrokerClientPactSpec extends Specification {
         success false
         providerApplicationVersion '10.0.0'
         buildUrl 'http://localhost:9876/build'
+        verifiedBy {
+          implementation 'Pact-JVM'
+          version PactBuilder.string('4.1.12')
+        }
         testResults eachLike {
           interactionId string('12345678')
           success false

@@ -54,7 +54,7 @@ fun loadPactFromUrl(
 ): Pair<JsonValue.Object, PactSource> {
   return when (source) {
     is BrokerUrlSource -> {
-      val brokerClient = PactBrokerClient(source.pactBrokerUrl, options)
+      val brokerClient = PactBrokerClient(source.pactBrokerUrl, options.toMutableMap())
       val pactResponse = brokerClient.fetchPact(source.url, source.encodePath)
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options, tag = source.tag)
     }

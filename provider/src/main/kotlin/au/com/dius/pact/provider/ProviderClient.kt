@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
@@ -77,6 +78,9 @@ interface IConsumerInfo {
   val notices: List<VerificationNotice>
   val pending: Boolean
   val wip: Boolean
+
+  fun toPactConsumer(): au.com.dius.pact.core.model.Consumer
+  fun resolvePactSource(): PactSource?
 }
 
 @Suppress("LongParameterList")
@@ -93,7 +97,21 @@ open class ConsumerInfo @JvmOverloads constructor (
   override val wip: Boolean = false
 ) : IConsumerInfo {
 
-  fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
+  override fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
+  override fun resolvePactSource(): PactSource? {
+    val source = pactSource
+    val result = if (source is Callable<*>) {
+      source.call()
+    } else {
+      source
+    }
+    return if (result is PactSource) {
+      result
+    } else {
+      logger.warn { "Expected a PactSource, but got $source" }
+      null
+    }
+  }
 
   var stateChangeUrl: URL?
     get() = if (stateChange != null) URL(stateChange.toString()) else null

@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonParser
@@ -26,12 +27,15 @@ import java.util.function.Consumer
 data class PactResponse(val pactFile: JsonValue.Object, val links: Map<String, Any?>)
 
 sealed class TestResult {
-  object Ok : TestResult() {
+  data class Ok(val interactionIds: Set<String> = emptySet()) : TestResult() {
+    constructor(interactionId: String?) : this(if (interactionId.isNullOrEmpty())
+      emptySet() else setOf(interactionId))
+
     override fun toBoolean() = true
 
     override fun merge(result: TestResult) = when (result) {
-      is Ok -> this
-      is Failed -> result
+      is Ok -> this.copy(interactionIds = interactionIds + result.interactionIds)
+      is Failed -> result.merge(this)
     }
   }
 
@@ -39,7 +43,29 @@ sealed class TestResult {
     override fun toBoolean() = false
 
     override fun merge(result: TestResult) = when (result) {
-      is Ok -> this
+      is Ok -> if (result.interactionIds.isEmpty()) {
+        this
+        } else {
+          val allResults = results + result.interactionIds.associateBy { "interactionId" }
+          val grouped = allResults.groupBy { it["interactionId"] }
+          val filtered = grouped.mapValues { entry ->
+            val interactionId = entry.key as String?
+            if (entry.value.size == 1) {
+              entry.value
+            } else {
+              entry.value.map { map -> map.filterKeys { it != "interactionId" } }
+                .filter { it.isNotEmpty() }
+                .map { map ->
+                  if (interactionId.isNullOrEmpty()) {
+                    map
+                  } else {
+                    map + ("interactionId" to interactionId)
+                  }
+                }
+            }
+          }
+          this.copy(results = filtered.values.flatten())
+        }
       is Failed -> Failed(results + result.results, when {
         description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
           "$description, ${result.description}"
@@ -58,7 +84,7 @@ sealed class Latest {
   data class UseLatestTag(val latestTag: String) : Latest()
 }
 
-data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String)
+data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String, val unknown: Int? = null)
 
 /**
  * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
@@ -101,12 +127,22 @@ interface IPactBrokerClient {
   val options: Map<String, Any>
 }
 
+data class PactBrokerClientConfig(
+  val retryCountWhileUnknown: Int = 0,
+  val retryWhileUnknownInterval: Int = 10
+)
+
 /**
  * Client for the pact broker service
  */
-open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map<String, Any>) : IPactBrokerClient {
+open class PactBrokerClient(
+  val pactBrokerUrl: String,
+  @Deprecated("Move use of options to PactBrokerClientConfig")
+  override val options: MutableMap<String, Any>,
+  val config: PactBrokerClientConfig = PactBrokerClientConfig()
+) : IPactBrokerClient {
 
-  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mapOf())
+  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mutableMapOf())
 
   /**
    * Fetches all consumers for the given provider
@@ -305,7 +341,12 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
   }
 
   fun buildPayload(result: TestResult, version: String, buildUrl: String?): JsonValue.Object {
-    val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
+    val jsonObject = jsonObject("success" to result.toBoolean(),
+      "providerApplicationVersion" to version,
+      "verifiedBy" to mapOf(
+        "implementation" to "Pact-JVM", "version" to Utils.lookupVersion(PactBrokerClient::class.java)
+      )
+    )
     if (buildUrl != null) {
       jsonObject["buildUrl"] = buildUrl
     }
@@ -318,34 +359,45 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
           val values = mismatches.value
             .filter { !it.containsKey("exception") }
             .map { mismatch ->
+              val remainingAttributes = mismatch.filterNot { it.key == "interactionId" }
               when (mismatch["attribute"]) {
-                "body-content-type" -> jsonObject("attribute" to "body", "description" to mismatch["description"])
-                else -> jsonObject(
-                  mismatch.filterNot { it.key == "interactionId" }.map { it.toPair() }
-                )
+                "body-content-type" -> listOf("attribute" to "body", "description" to mismatch["description"])
+                else -> remainingAttributes.map { it.toPair() }
               }
-            }
-          val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
-            "mismatches" to jsonArray(values)
-          )
+            }.filter { it.isNotEmpty() }
+            .map { jsonObject(it) }
 
           val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
-          if (exceptionDetails != null) {
+          val exceptions = if (exceptionDetails != null) {
             val exception = exceptionDetails["exception"]
             val description = exceptionDetails["description"]
             if (exception is Throwable) {
               if (description != null) {
-                interactionJson["exceptions"] = jsonArray(jsonObject("message" to description.toString() + ": " + exception.message,
+                jsonArray(jsonObject("message" to description.toString() + ": " + exception.message,
                   "exceptionClass" to exception.javaClass.name))
               } else {
-                interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.message,
+                jsonArray(jsonObject("message" to exception.message,
                   "exceptionClass" to exception.javaClass.name))
               }
             } else {
-              interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.toString()))
+              jsonArray(jsonObject("message" to exception.toString()))
             }
+          } else {
+            null
           }
 
+          val interactionJson = if (values.isEmpty() && exceptions == null) {
+            jsonObject("interactionId" to mismatches.key, "success" to true)
+          } else {
+            val json = jsonObject(
+              "interactionId" to mismatches.key, "success" to false,
+              "mismatches" to jsonArray(values)
+            )
+            if (exceptions != null) {
+              json["exceptions"] = exceptions
+            }
+            json
+          }
           interactionJson
         }
       jsonObject["testResults"] = jsonArray(values)
@@ -385,12 +437,16 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
       val halClient = newHalClient()
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
-      when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
-        is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
-        is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
-      }
+      logPublishingResults(halClient, version, tag, name)
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
+    }
+  }
+
+  private fun logPublishingResults(halClient: IHalClient, version: String, tag: String, name: String) {
+    when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
+      is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+      is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
     }
   }
 
@@ -400,10 +456,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       tags.forEach {
-        when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to it), "{}")) {
-          is Ok<*> -> logger.debug { "Pushed tag $it for provider $name and version $version" }
-          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $it for provider $name and version $version" }
-        }
+        logPublishingResults(halClient, version, it, name)
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
@@ -412,16 +465,23 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
 
   open fun canIDeploy(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): CanIDeployResult {
     val halClient = newHalClient()
-    val result = halClient.getJson("/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to),
-      false)
-    return when (result) {
-      is Ok<JsonValue> -> {
-        val summary = result.value["summary"].asObject()
-        CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]))
-      }
-      is Err<Exception> -> {
-        logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
-        CanIDeployResult(false, result.error.message.toString(), "")
+    val path = "/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to)
+    return retryWith(
+      "canIDeploy: Retrying request as there are unknown results",
+      config.retryCountWhileUnknown,
+      config.retryWhileUnknownInterval,
+      { result -> result.ok && result.unknown != null && result.unknown > 0 }
+    ) {
+      when (val result = halClient.getJson(path, false)) {
+        is Ok<JsonValue> -> {
+          val summary = result.value["summary"].asObject()
+          CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
+            Json.toInteger(summary["unknown"]))
+        }
+        is Err<Exception> -> {
+          logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
+          CanIDeployResult(false, result.error.message.toString(), "")
+        }
       }
     }
   }
@@ -445,6 +505,18 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     return base
   }
 
+  open fun createVersionTag(
+    pacticipant: String,
+    pacticipantVersion: String,
+    tag: String
+  ) =
+      uploadTags(
+          newHalClient(),
+          pacticipant,
+          pacticipantVersion,
+          listOf(tag)
+      )
+
   companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"
@@ -456,18 +528,50 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     const val PACTS = "pb:pacts"
     const val UTF8 = "UTF-8"
 
-    fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) {
+    fun uploadTags(
+      halClient: IHalClient,
+      consumerName: String,
+      version: String,
+      tags: List<String>
+    ): Result<String?, Exception> {
       halClient.navigate()
+      var result = Ok("") as Result<String?, Exception>
       tags.forEach {
-        val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
+        result = uploadTag(halClient, consumerName, version, it)
+      }
+      return result
+    }
+
+    private fun uploadTag(halClient: IHalClient, consumerName: String, version: String, it: String): Result<String?, Exception> {
+      val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
           "pacticipant" to consumerName,
           "version" to version,
           "tag" to it
-        ), "{}")
-        if (result is Err<Exception>) {
-          logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
-        }
+      ), "{}")
+
+      if (result is Err<Exception>) {
+        logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
       }
+
+      return result
+    }
+
+    fun <T> retryWith(
+      message: String,
+      count: Int,
+      interval: Int,
+      predicate: (T) -> Boolean,
+      function: () -> T
+    ): T {
+      var counter = 0
+      var result = function()
+      while (counter < count && predicate(result)) {
+        counter += 1
+        logger.info { "$message [$counter/$count]" }
+        Thread.sleep((interval * 1000).toLong())
+        result = function()
+      }
+      return result
     }
   }
 }

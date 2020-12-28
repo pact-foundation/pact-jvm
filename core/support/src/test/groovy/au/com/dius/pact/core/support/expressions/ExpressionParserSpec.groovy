@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.support.expressions
 
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -123,5 +124,18 @@ class ExpressionParserSpec extends Specification {
     100      | DataType.INTEGER || 100L
     100      | DataType.FLOAT   || 100.0f
     100      | DataType.DECIMAL || 100.0
+  }
+
+  @Issue('#1262')
+  def 'parseListExpression - trims whitespace from list items'() {
+    given:
+    ValueResolver valueResolver = [ resolveValue: { it } ] as ValueResolver
+    List<String> expectedValues = ['one', 'two']
+
+    when:
+    def values = ExpressionParser.parseListExpression("\${one}$VALUES_SEPARATOR \${two}",  valueResolver)
+
+    then:
+    values == expectedValues
   }
 }

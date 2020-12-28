@@ -96,6 +96,12 @@ object Json {
     else -> false
   }
 
+  fun toInteger(value: JsonValue?) = when {
+    value == null -> null
+    value.isNumber -> value.asNumber().toInt()
+    else -> null
+  }
+
   fun escape(s: String): String = ESCAPE_JSON.translate(s)
 
   private val ESCAPE_JSON = AggregateTranslator(

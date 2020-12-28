@@ -11,6 +11,9 @@ import spock.lang.Unroll
 @SuppressWarnings('LineLength')
 class VerificationResultSpec extends Specification {
 
+  static error1 = new VerificationFailureType.ExceptionFailure('Boom', new RuntimeException())
+  static error2 = new VerificationFailureType.ExceptionFailure('Splat', new RuntimeException())
+
   @Unroll
   def 'merging results test'() {
     expect:
@@ -18,27 +21,31 @@ class VerificationResultSpec extends Specification {
 
     where:
 
-    result1                             | result2                               | result3
-    VerificationResult.Ok.INSTANCE      | VerificationResult.Ok.INSTANCE        | VerificationResult.Ok.INSTANCE
-    VerificationResult.Ok.INSTANCE      | failed([[error: 'Bang']], '')         | failed([[error: 'Bang']], '')
-    failed([[error: 'Bang']], '')       | VerificationResult.Ok.INSTANCE        | failed([[error: 'Bang']], '')
-    failed([[error: 'Bang']], '')       | failed([[Boom: 'Splat']], '')         | failed([[error: 'Bang'], [Boom: 'Splat']], '')
-    failed([[error: 'Bang']], 'A')      | failed([[Boom: 'Splat']], '')         | failed([[error: 'Bang'], [Boom: 'Splat']], 'A')
-    failed([[error: 'Bang']], '')       | failed([[Boom: 'Splat']], 'B')        | failed([[error: 'Bang'], [Boom: 'Splat']], 'B')
-    failed([[error: 'Bang']], 'A')      | failed([[Boom: 'Splat']], 'B')        | failed([[error: 'Bang'], [Boom: 'Splat']], 'A, B')
-    failed([[error: 'Bang']], 'A')      | failed([[Boom: 'Splat']], 'A')        | failed([[error: 'Bang'], [Boom: 'Splat']], 'A')
-    failed([[error: 'Bang']], 'A')      | failed([[Boom: 'Splat']], 'A')        | failed([[error: 'Bang'], [Boom: 'Splat']], 'A')
-    failed([[error: 'Bang']], '', true) | failed([[Boom: 'Splat']], 'A', true)  | failed([[error: 'Bang'], [Boom: 'Splat']], 'A', true)
-    failed([[error: 'Bang']], '', true) | failed([[Boom: 'Splat']], 'A', false) | failed([[error: 'Bang'], [Boom: 'Splat']], 'A', false)
+    result1                        | result2                        | result3
+    new VerificationResult.Ok()    | new VerificationResult.Ok()    | new VerificationResult.Ok()
+    new VerificationResult.Ok()    | failed([error1], '')           | failed([error1], '')
+    failed([error1], '')           | new VerificationResult.Ok()    | failed([error1], '')
+    failed([error1], '')           | failed([error2], '')           | failed([error1, error2], '')
+    failed([error1], 'A')          | failed([error2], '')           | failed([error1, error2], 'A')
+    failed([error1], '')           | failed([error2], 'B')          | failed([error1, error2], 'B')
+    failed([error1], 'A')          | failed([error2], 'B')          | failed([error1, error2], 'A, B')
+    failed([error1], 'A')          | failed([error2], 'A')          | failed([error1, error2], 'A')
+    failed([error1], 'A')          | failed([error2], 'A')          | failed([error1, error2], 'A')
+    failed([error1], '', true)     | failed([error2], 'A', true)    | failed([error1, error2], 'A', true)
+    failed([error1], '', true)     | failed([error2], 'A', false)   | failed([error1, error2], 'A', false)
+    failed(['1': [error1]], '')    | new VerificationResult.Ok('1') | failed(['1': [error1]], '')
+    failed(['1': [error1]], '')    | new VerificationResult.Ok('2') | failed(['1': [error1], '2': []], '')
+    new VerificationResult.Ok('1') | failed(['1': [error1]], '')    | failed(['1': [error1]], '')
+    new VerificationResult.Ok('2') | failed(['1': [error1]], '')    | failed(['1': [error1], '2': []], '')
   }
 
   def 'convert to TestResult - Exception'() {
     given:
     def description = 'Request to provider failed with an exception'
     def failures = [
-      new VerificationFailureType.ExceptionFailure('Request to provider method failed with an exception', new RuntimeException('Boom'))
+      '1234ABCD': [new VerificationFailureType.ExceptionFailure('Request to provider method failed with an exception', new RuntimeException('Boom'))]
     ]
-    def verification = new VerificationResult.Failed([], description, '', failures, false, '1234ABCD')
+    def verification = new VerificationResult.Failed(description, '', failures, false)
 
     when:
     def result = verification.toTestResult()
@@ -55,9 +62,9 @@ class VerificationResultSpec extends Specification {
     given:
     def description = 'Provider state change callback failed'
     def failures = [
-      new VerificationFailureType.StateChangeFailure(description, new StateChangeResult(new Err(new RuntimeException('Boom'))))
+      '1234ABCD': [new VerificationFailureType.StateChangeFailure(description, new StateChangeResult(new Err(new RuntimeException('Boom'))))]
     ]
-    def verification = new VerificationResult.Failed([], description, '', failures, false, '1234ABCD')
+    def verification = new VerificationResult.Failed(description, '', failures, false)
 
     when:
     def result = verification.toTestResult()
@@ -93,7 +100,7 @@ class VerificationResultSpec extends Specification {
       new VerificationFailureType.MismatchFailure(new HeaderMismatch('X', 'A', 'B', 'Expected a header X with value A but was B'), null, null),
       new VerificationFailureType.MismatchFailure(new BodyMismatch(null, null, 'Expected id=\'1234\' but received id=\'9905\'', '$.ns:projects.@id', diff), null, null),
     ]
-    def verification = new VerificationResult.Failed([], '', '', failures, false, '1234ABCD')
+    def verification = new VerificationResult.Failed('', '', ['1234ABCD': failures], false)
 
     when:
     def result = verification.toTestResult()
@@ -114,7 +121,11 @@ class VerificationResultSpec extends Specification {
     result.results[2].diff == diff
   }
 
-  private static VerificationResult.Failed failed(List<LinkedHashMap<String, String>> details, String s, pending = false) {
-    new VerificationResult.Failed(details, s, '', [], pending, null)
+  private static VerificationResult.Failed failed(List errors, String s, pending = false) {
+    failed(['': errors], s, pending)
+  }
+
+  private static VerificationResult.Failed failed(Map<String, List> interactionIdsToErrors, String s, pending = false) {
+    new VerificationResult.Failed(s, '', interactionIdsToErrors, pending)
   }
 }

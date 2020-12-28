@@ -3,7 +3,13 @@ Maven plugin to verify a provider
 
 Maven plugin for verifying pacts against a provider.
 
-**NOTE: If you are running your tests with the JUnit runners, you do not need this plugin.**
+<hr/>
+
+**![stop](https://raw.githubusercontent.com/pact-foundation/pact-jvm/master/provider/maven/stop.jpg) If you are running your tests with the JUnit runners, you do not need this plugin**
+
+**This plugin is for verifying a running provider. For verifying your provider using unit tests, refer to the [JUnit 4](../junit) or [JUnit 5](../junit5) docs.**
+
+<hr/> 
 
 The Maven plugin provides a `verify` goal which will verify all configured pacts against your provider.
 
@@ -19,7 +25,7 @@ The Maven plugin provides a `verify` goal which will verify all configured pacts
       <plugin>
         <groupId>au.com.dius.pact.provider</groupId>
         <artifactId>maven</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.11</version>
       </plugin>
       [...]
     </plugins>
@@ -50,8 +56,8 @@ You define all the providers and consumers within the configuration element of t
             <!-- Again, you can define as many consumers for each provider as you need, but each must have a unique name -->
             <consumer>
               <name>consumer1</name>
-              <!--  currently supports a file path using pactFile or a URL using pactUrl -->
-              <pactFile>path/to/provider1-consumer1-pact.json</pactFile>
+              <!--  currently supports a file path using pactSource or a URL using pactUrl -->
+              <pactSource>path/to/provider1-consumer1-pact.json</pactSource>
             </consumer>
           </consumers>
         </serviceProvider>
@@ -73,7 +79,7 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -100,7 +106,7 @@ no pact files are loaded after processing all the directories in the list.
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -124,7 +130,7 @@ For providers that are running on SSL with self-signed certificates, you need to
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -145,7 +151,7 @@ For environments that are running their own certificate chains:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -174,7 +180,7 @@ bound to a variable named `request` prior to it being executed.
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -208,7 +214,7 @@ For example:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -226,7 +232,7 @@ For example:
           <consumers>
             <consumer>
               <name>consumer1</name>
-              <pactFile>path/to/provider1-consumer1-pact.json</pactFile>
+              <pactSource>path/to/provider1-consumer1-pact.json</pactSource>
             </consumer>
           </consumers>
         </serviceProvider>
@@ -268,7 +274,7 @@ Example in the configuration section:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -276,7 +282,7 @@ Example in the configuration section:
           <consumers>
             <consumer>
               <name>consumer1</name>
-              <pactFile>path/to/provider1-consumer1-pact.json</pactFile>
+              <pactSource>path/to/provider1-consumer1-pact.json</pactSource>
             </consumer>
           </consumers>
         </serviceProvider>
@@ -300,7 +306,7 @@ These values can be set at the provider level, or for a specific consumer. Consu
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -310,7 +316,7 @@ These values can be set at the provider level, or for a specific consumer. Consu
           <consumers>
             <consumer>
               <name>consumer1</name>
-              <pactFile>path/to/provider1-consumer1-pact.json</pactFile>
+              <pactSource>path/to/provider1-consumer1-pact.json</pactSource>
               <stateChangeUrl>http://localhost:8080/tasks/pactStateChangeForConsumer1</stateChangeUrl>
               <stateChangeUsesBody>false</stateChangeUsesBody> <!-- defaults to true -->
             </consumer>
@@ -356,7 +362,7 @@ For example:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -380,7 +386,7 @@ For example, here is how you configure the plugin to use basic authentication fo
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -406,7 +412,7 @@ Here is how you configure the plugin to use bearer token authentication for veri
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -452,7 +458,7 @@ configuration in your POM.
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -479,7 +485,7 @@ For example:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -528,7 +534,7 @@ Add something like the following to your maven pom file:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -543,7 +549,7 @@ Add something like the following to your maven pom file:
           <consumers>
             <consumer>
               <name>consumer1</name>
-              <pactFile>path/to/messageprovider-consumer1-pact.json</pactFile>
+              <pactSource>path/to/messageprovider-consumer1-pact.json</pactSource>
             </consumer>
           </consumers>
         </serviceProvider>
@@ -590,7 +596,7 @@ By default, the test classpath is scanned for annotated methods. You can overrid
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -599,7 +605,7 @@ By default, the test classpath is scanned for annotated methods. You can overrid
           <consumers>
             <consumer>
               <name>consumer1</name>
-              <pactFile>path/to/messageprovider-consumer1-pact.json</pactFile>
+              <pactSource>path/to/messageprovider-consumer1-pact.json</pactSource>
             </consumer>
           </consumers>
         </serviceProvider>
@@ -627,7 +633,7 @@ For example:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
@@ -652,7 +658,7 @@ is setting the tag to the current source control branch. This supports using pac
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
@@ -677,7 +683,7 @@ For example:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerUsername>USERNAME</pactBrokerUsername>
@@ -692,7 +698,7 @@ Or to use a bearer token:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.0.1</version>
+    <version>4.1.11</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerToken>TOKEN</pactBrokerToken> <!-- Replace TOKEN with the actual token -->
@@ -711,7 +717,7 @@ configuration in your POM.
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerServerId>test-pact-broker</pactBrokerServerId>  <!-- This must match the server id in the maven settings -->
@@ -730,7 +736,7 @@ For example:
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <excludes>
@@ -773,7 +779,7 @@ the `reports` configuration list.
 <plugin>
     <groupId>au.com.dius.pact.provider</groupId>
     <artifactId>maven</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.11</version>
     <configuration>
       <reports>
           <report>console</report>
@@ -807,3 +813,41 @@ For example:
 ```
 
 Then any pending pacts will not cause a build failure.
+
+# Can I Deploy check
+
+There is a `can-i-deploy` goal that you can use to preform a deployment safety check. This task requires two
+parameters: `pacticipant` and either `pacticipantVersion` or `latest=true`. It will use the broker configuration values 
+from the your POM. 
+
+```console
+$ mvn pact:can-i-deploy -Dpacticipant='Activity Service' -Dlatest=true
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< au.com.dius.pact:pact-gradle-test >------------------
+[INFO] Building pact-gradle-test 1.0.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven:4.1.11:can-i-deploy (default-cli) @ pact-gradle-test ---
+Computer says no ¯\_(ツ)_/¯ 
+
+The verification between the latest version of Foo Web Client 2 (1.2.3/AB) and the latest version of Activity Service (0.0.3) failed
+There is no verified pact between the latest version of Foo Web Client (1.2.3/AB) and the latest version of Activity Service (0.0.3)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1.276 s
+[INFO] Finished at: 2020-11-15T11:04:51+11:00
+[INFO] ------------------------------------------------------------------------
+```
+
+## Enabling retry when there are unknown results (4.1.11+)
+
+It can happen that there are still unknown results in the Pact broker because the provider verification is still running.
+You can enable a retry with a wait interval to poll for the results to become available. There are two settings that can
+be added to the configuration in the POM to enable this: `retriesWhenUnknown` and `retryInterval`.
+
+|Field|Description|Default|
+|-----|-----------|-------|
+|retriesWhenUnknown|The amount of times to retry while there are unknown results|0|
+|retryInterval|The number of seconds to wait between retries|10|

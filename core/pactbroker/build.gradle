@@ -9,6 +9,8 @@ dependencies {
   api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"

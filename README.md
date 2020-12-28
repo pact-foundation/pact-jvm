@@ -1,8 +1,7 @@
 pact-jvm
 ========
 
-[![Build Status](https://travis-ci.com/pact-foundation/pact-jvm.svg?branch=master)](https://travis-ci.com/pact-foundation/pact-jvm)
-[![Windows Build](https://github.com/pact-foundation/pact-jvm/workflows/Windows%20Build/badge.svg)](https://github.com/pact-foundation/pact-jvm/actions?query=workflow%3A%22Windows+Build%22)
+[![Pact-JVM Build](https://github.com/pact-foundation/pact-jvm/workflows/Pact-JVM%20Build/badge.svg)](https://github.com/pact-foundation/pact-jvm/actions?query=workflow%3A%22Pact-JVM+Build%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius.pact.core/model/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius.pact.core/model)
 
 JVM implementation of the consumer driven contract library [pact](https://github.com/pact-foundation/pact-specification).
@@ -49,8 +48,8 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch | Specification | JDK | Kotlin Version | Scala Versions | Latest Version |
 | ------ | ------------- | --- | -------------- | -------------- | -------------- |
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) | V4* | 11+ | 1.4.10 | N/A | 4.2.0-beta.0 |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-14 | 1.3.72 | N/A | 4.1.9 |
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) | V4* | 11+ | 1.4.10 | N/A | 4.2.0-beta.1 |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | N/A | 4.1.12 |
 | [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md) | V3 | 8-12 | 1.3.71 | N/A | 4.0.10 |
 | [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md) | V3 | 8 | 1.3.71 | 2.12 | 3.6.15 |
 | [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md) | V3 | 8 | 1.1.4-2 | 2.12, 2.11 | 3.5.25 |

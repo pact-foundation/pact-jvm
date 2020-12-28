@@ -10,6 +10,7 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
+import java.lang.RuntimeException
 import java.util.Base64
 
 /**
@@ -115,12 +116,16 @@ data class OptionalBody(
 
   fun detectContentType(): ContentType? = when {
     this.isPresent() -> {
-      val metadata = Metadata()
-      val mimetype = tika.detector.detect(TikaInputStream.get(value!!), metadata)
-      if (mimetype.baseType.type == "text") {
-        detectStandardTextContentType() ?: ContentType(mimetype)
+      if (tika != null) {
+        val metadata = Metadata()
+        val mimetype = tika.detector.detect(TikaInputStream.get(value!!), metadata)
+        if (mimetype.baseType.type == "text") {
+          detectStandardTextContentType() ?: ContentType(mimetype)
+        } else {
+          ContentType(mimetype)
+        }
       } else {
-        ContentType(mimetype)
+        detectStandardTextContentType()
       }
     }
     else -> null
@@ -203,7 +208,10 @@ data class OptionalBody(
       }
     }
 
-    private val tika = TikaConfig()
+    private val tika = try { TikaConfig() } catch (e: RuntimeException) {
+      logger.warn(e) { "Could not initialise Tika, detecting content types will be disabled" }
+      null
+    }
   }
 }
 

@@ -1,7 +1,9 @@
 package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.IConsumerInfo
@@ -11,6 +13,7 @@ import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
+import au.com.dius.pact.provider.junitsupport.TestDescription
 import org.junit.jupiter.api.extension.ExtensionContext
 
 /**
@@ -48,7 +51,15 @@ data class PactVerificationContext @JvmOverloads constructor(
       if (testExecutionResult.isNotEmpty()) {
         verifier!!.displayFailures(testExecutionResult)
         if (testExecutionResult.any { !it.pending }) {
-          throw AssertionError(verifier!!.generateErrorStringFromVerificationResult(testExecutionResult))
+          val pactSource = consumer.resolvePactSource()
+          val source = if (pactSource is PactSource) {
+            pactSource
+          } else {
+            UnknownPactSource
+          }
+          val description = TestDescription(interaction, source, null, consumer.toPactConsumer())
+          throw AssertionError(description.generateDescription() +
+            verifier!!.generateErrorStringFromVerificationResult(testExecutionResult))
         }
       }
     } finally {
@@ -76,11 +87,10 @@ data class PactVerificationContext @JvmOverloads constructor(
           it.requestFailed(providerInfo, interaction, interactionMessage, e,
             verifier!!.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
         }
-        listOf(VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-          "exception" to e)),
-          "Request to provider failed with an exception", interactionMessage,
-          listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e)),
-          consumer.pending, interaction.interactionId))
+        listOf(VerificationResult.Failed("Request to provider failed with an exception", interactionMessage,
+          mapOf(interaction.interactionId.orEmpty() to
+            listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
+          consumer.pending))
       }
     } else {
       return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,

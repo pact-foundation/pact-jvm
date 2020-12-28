@@ -25,6 +25,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import groovy.json.JsonOutput
 import spock.lang.Specification
@@ -442,9 +443,9 @@ class ProviderVerifierSpec extends Specification {
     where:
 
     result1                         | result2                         | finalResult
-    VerificationResult.Ok.INSTANCE  | VerificationResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE
-    VerificationResult.Ok.INSTANCE  | new VerificationResult.Failed() | new TestResult.Failed()
-    new VerificationResult.Failed() | VerificationResult.Ok.INSTANCE  | new TestResult.Failed()
+    new VerificationResult.Ok()     | new VerificationResult.Ok()     | new TestResult.Ok()
+    new VerificationResult.Ok()     | new VerificationResult.Failed() | new TestResult.Failed()
+    new VerificationResult.Failed() | new VerificationResult.Ok()     | new TestResult.Failed()
     new VerificationResult.Failed() | new VerificationResult.Failed() | new TestResult.Failed()
   }
 
@@ -494,10 +495,10 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, [])
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(), '0', client, [])
 
     then:
-    1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Ok(true)
+    1 * client.publishVerificationResults(links, new TestResult.Ok(), '0', null) >> new Ok(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -509,10 +510,10 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, [])
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(), '0', client, [])
 
     then:
-    0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, '0', null)
+    0 * client.publishVerificationResults(_, new TestResult.Ok(), '0', null)
   }
 
   @SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
@@ -547,8 +548,8 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.pactReader.loadPact(_) >> pact
     1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
-    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> VerificationResult.Ok.INSTANCE
-    0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, _, _)
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> new VerificationResult.Ok()
+    0 * client.publishVerificationResults(_, new TestResult.Ok(), _, _)
   }
 
   @Unroll
@@ -603,10 +604,10 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     result instanceof VerificationResult.Failed
-    result.results.size() == 1
-    result.results[0].message == 'State change request failed'
-    result.results[0].exception instanceof IOException
-    result.interactionId == '1234'
+    result.description == 'State change request failed'
+    result.failures.size() == 1
+    result.failures['1234'][0].description == 'Provider state change callback failed'
+    result.failures['1234'][0].result.stateChangeResult instanceof Err
   }
 
   def 'verifyInteraction returns an error result if any matcher paths are invalid'() {
@@ -639,9 +640,10 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     result instanceof VerificationResult.Failed
-    result.results.size() == 1
-    result.results[0].message == 'Request to provider failed with an exception'
-    result.results[0].exception instanceof InvalidPathExpression
+    result.description == 'Request to provider method failed with an exception'
+    result.failures.size() == 1
+    result.failures['1234'][0].description == 'Request to provider method failed with an exception'
+    result.failures['1234'][0].e instanceof InvalidPathExpression
   }
 
   def 'verifyResponseFromProvider returns an error result if the request to the provider fails with an exception'() {
@@ -658,10 +660,10 @@ class ProviderVerifierSpec extends Specification {
     then:
     client.makeRequest(_) >> { throw new IOException('Boom!') }
     result instanceof VerificationResult.Failed
-    result.results.size() == 1
-    result.results[0].message == 'Request to provider failed with an exception'
-    result.results[0].exception instanceof IOException
-    result.interactionId == '12345678'
+    result.description == 'Request to provider method failed with an exception'
+    result.failures.size() == 1
+    result.failures['12345678'][0].description == 'Request to provider method failed with an exception'
+    result.failures['12345678'][0].e instanceof IOException
   }
 
   def 'verifyResponseByInvokingProviderMethods returns an error result if the method fails with an exception'() {
@@ -679,9 +681,9 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     result instanceof VerificationResult.Failed
-    result.results.size() == 1
-    result.results[0].message == 'Request to provider method failed with an exception'
-    result.results[0].exception instanceof Exception
-    result.interactionId == 'abc123'
+    result.description == 'Request to provider method failed with an exception'
+    result.failures.size() == 1
+    result.failures['abc123'][0].description == 'Request to provider method failed with an exception'
+    result.failures['abc123'][0].e instanceof RuntimeException
   }
 }

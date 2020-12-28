@@ -247,7 +247,7 @@ class SLF4JReporter(
   private fun displayFailure(i: Int, err: VerificationResult.Failed) {
     val t = TermColors(Level.NONE)
     log.error("${i + 1}) ${err.verificationDescription}\n")
-    err.failures.forEachIndexed { index, failure ->
+    err.failures.values.flatten().forEachIndexed { index, failure ->
       val message = "    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}"
 
       if (failure.hasException() && verifier.projectHasProperty.apply("pact.showStacktrace")) {

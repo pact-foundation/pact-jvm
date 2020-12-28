@@ -707,7 +707,7 @@ javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
 ### Using `@PactFolder` annotation
 
 You can override the directory the pacts are written in a test by adding the `@PactFolder` annotation to the test
-class.
+class. Be sure to import the correct annotation from `au.com.dius.pact.provider.junitsupport.loader.PactFolder`.
 
 ## Forcing pact files to be overwritten (3.6.5+)
 

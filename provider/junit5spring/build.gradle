@@ -1,10 +1,10 @@
 dependencies {
-  implementation project(path: ":provider:junit5", configuration: 'default')
-  implementation 'org.springframework:spring-context:5.2.3.RELEASE'
-  implementation 'org.springframework:spring-test:5.2.3.RELEASE'
-  implementation 'org.springframework:spring-web:5.2.3.RELEASE'
-  implementation 'javax.servlet:javax.servlet-api:3.1.0'
-  implementation 'org.hamcrest:hamcrest:2.1'
+  api project(path: ":provider:junit5", configuration: 'default')
+  api 'org.springframework:spring-context:5.2.3.RELEASE'
+  api 'org.springframework:spring-test:5.2.3.RELEASE'
+  api 'org.springframework:spring-web:5.2.3.RELEASE'
+  api 'javax.servlet:javax.servlet-api:3.1.0'
+  api 'org.hamcrest:hamcrest:2.1'
 
   testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.5.RELEASE'
   testImplementation 'org.springframework.boot:spring-boot-starter-web:2.2.5.RELEASE'
