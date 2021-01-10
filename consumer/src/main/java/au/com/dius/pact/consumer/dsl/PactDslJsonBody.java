@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -1159,11 +1160,7 @@ public class PactDslJsonBody extends DslPart {
    * @param rules Matching rules to apply
    */
   public PactDslJsonBody and(String name, Object value, MatchingRule... rules) {
-    if (value != null) {
-      body.put(name, value);
-    } else {
-      body.put(name, JSONObject.NULL);
-    }
+    body.put(name, Objects.requireNonNullElse(value, JSONObject.NULL));
     matchers.setRules(matcherKey(name, rootPath), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
     return this;
   }
@@ -1175,11 +1172,7 @@ public class PactDslJsonBody extends DslPart {
    * @param rules Matching rules to apply
    */
   public PactDslJsonBody or(String name, Object value, MatchingRule... rules) {
-    if (value != null) {
-      body.put(name, value);
-    } else {
-      body.put(name, JSONObject.NULL);
-    }
+    body.put(name, Objects.requireNonNullElse(value, JSONObject.NULL));
     matchers.setRules(matcherKey(name, rootPath), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
     return this;
   }
