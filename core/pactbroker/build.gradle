@@ -14,7 +14,7 @@ dependencies {
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-M3-groovy-3.0') {
+  testCompile('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

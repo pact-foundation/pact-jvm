@@ -23,7 +23,7 @@ dependencies {
   testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}"
   testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile('org.spockframework:spock-core:2.0-M3-groovy-3.0') {
+  testCompile('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
     }
   testCompile 'com.fasterxml.jackson.core:jackson-databind:2.11.0.rc1'
