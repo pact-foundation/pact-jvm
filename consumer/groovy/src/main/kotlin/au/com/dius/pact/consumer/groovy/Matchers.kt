@@ -207,12 +207,12 @@ class IncludeMatcher(value: String) : Matcher(value, au.com.dius.pact.core.model
 /**
  * Matcher that matches if any provided matcher matches
  */
-class OrMatcher(example: Any, val matchers: List<Matcher>) : Matcher(example)
+class OrMatcher(example: Any?, val matchers: List<Matcher>) : Matcher(example)
 
 /**
  * Matches if all provided matches match
  */
-class AndMatcher(example: Any, val matchers: List<Matcher>) : Matcher(example)
+class AndMatcher(example: Any?, val matchers: List<Matcher>) : Matcher(example)
 
 /**
  * Matcher to match null values
@@ -595,7 +595,7 @@ open class Matchers {
      * @param example Example value to use
      */
     @JvmStatic
-    fun or(example: Any, vararg values: Any): Matcher {
+    fun or(example: Any?, vararg values: Any): Matcher {
       return OrMatcher(example, values.map {
         if (it is Matcher) {
           it
@@ -610,7 +610,7 @@ open class Matchers {
      * @param example Example value to use
      */
     @JvmStatic
-    fun and(example: Any, vararg values: Any): Matcher {
+    fun and(example: Any?, vararg values: Any): Matcher {
       return AndMatcher(example, values.map {
         if (it is Matcher) {
           it

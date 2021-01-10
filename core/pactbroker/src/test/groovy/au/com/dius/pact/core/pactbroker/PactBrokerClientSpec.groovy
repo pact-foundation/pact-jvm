@@ -563,4 +563,28 @@ class PactBrokerClientSpec extends Specification {
     3 * halClient.getJson(_, _) >> new Ok(json1) >> new Ok(json1) >> new Ok(json2)
     result.ok
   }
+
+  @Issue('#1264')
+  def 'fetching pacts with selectors when falling back to the previous implementation, use fallback tags if present'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def selectors = [
+      new ConsumerVersionSelector('DEV', true, null, 'MASTER')
+    ]
+
+    when:
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], false, '')
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> null
+    1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> null
+    0 * halClient.postJson(_, _, _)
+    1 * client.fetchConsumersWithTag('provider', 'DEV') >> []
+    1 * client.fetchConsumersWithTag('provider', 'MASTER') >> []
+    result instanceof Ok
+  }
 }

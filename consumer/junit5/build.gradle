@@ -14,7 +14,7 @@ dependencies {
   testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testCompile 'org.mockito:mockito-core:2.28.2'
   testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile('org.spockframework:spock-core:2.0-M3-groovy-3.0') {
+  testCompile('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testCompile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"

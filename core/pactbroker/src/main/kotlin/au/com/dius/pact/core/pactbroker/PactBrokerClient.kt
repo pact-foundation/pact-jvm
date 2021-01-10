@@ -214,11 +214,18 @@ open class PactBrokerClient(
       fetchPactsUsingNewEndpoint(selectors, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
     } else {
       handleWith {
-        val tags = selectors.mapNotNull { it.tag }
+        val tags = selectors.filter { it.tag.isNotEmpty() }.map { it.tag to it.fallbackTag }
         if (tags.isEmpty()) {
           fetchConsumers(providerName)
         } else {
-          tags.flatMap { fetchConsumersWithTag(providerName, it) }
+          tags.flatMap { (tag, fallbacktag) ->
+            val tagResult = fetchConsumersWithTag(providerName, tag!!)
+            if (tagResult.isEmpty() && fallbacktag != null) {
+              fetchConsumersWithTag(providerName, fallbacktag)
+            } else {
+              tagResult
+            }
+          }
         }
       }
     }
@@ -233,6 +240,7 @@ open class PactBrokerClient(
     pactsForVerification: String,
     providerName: String
   ): Result<List<PactBrokerResult>, Exception> {
+    logger.debug { "Fetching pacts using the pactsForVerification endpoint" }
     val body = JsonValue.Object(
       "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
     )
