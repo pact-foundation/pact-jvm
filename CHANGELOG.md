@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.14 - Bugfix Release
+
+* 19c9d66f9 - chore: add test for updating markdown summary with a failed interaction #1128 (Ronald Holshausen, Sun Jan 10 12:44:00 2021 +1100)
+* 1c7af0efb - fix(regression): previous change fails on JDK 8 #1281 (Ronald Holshausen, Sun Jan 10 12:28:41 2021 +1100)
+* a2472c7a7 - fix(regression): aupport null example values with OR matcher #1281 (Ronald Holshausen, Sun Jan 10 12:10:57 2021 +1100)
+* a4d497dca - chore: upgrade spock framework to 2.0-M4 (Ronald Holshausen, Sun Jan 10 11:43:30 2021 +1100)
+* c64739185 - feat: when using old pact broker endpoints, take fall back tag value into consideration #1264 (Ronald Holshausen, Sun Jan 10 11:36:46 2021 +1100)
+* fe3ad3bdd - Update README.md (Ronald Holshausen, Mon Dec 28 18:46:50 2020 +1100)
+* d11e17428 - fix: readme not rendering with docosaurus (Ronald Holshausen, Mon Dec 28 14:40:32 2020 +1100)
+* 02fc3d3b9 - chore: update release script (Ronald Holshausen, Mon Dec 28 14:15:03 2020 +1100)
+* fd1b98ba8 - bump version to 4.1.14 (Ronald Holshausen, Mon Dec 28 14:14:22 2020 +1100)
+
 # 4.1.13 - Bugfix Release
 
 * 1ac76719e - refactor: extract interface from FormPostBuilder #1277 (Ronald Holshausen, Mon Dec 28 12:43:12 2020 +1100)

@@ -242,4 +242,40 @@ class MarkdownReporterSpec extends Specification {
          || Consumer2 | OK     |'''.stripMargin()
     )
   }
+
+  @Issue('#1128')
+  def 'updates the summary with interaction failure'() {
+    given:
+    def reporter = new MarkdownReporter('test', reportDir)
+    def provider1 = new ProviderInfo(name: 'provider1')
+    def consumer = new ConsumerInfo(name: 'Consumer')
+    def consumer2 = new ConsumerInfo(name: 'Consumer2')
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
+    def interaction2 = new RequestResponseInteraction('Interaction 2', [], new Request(), new Response())
+
+    when:
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer, provider1, 'master')
+    reporter.interactionDescription(interaction1)
+    reporter.finaliseReport()
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer2, provider1, 'master')
+    reporter.interactionDescription(interaction2)
+    reporter.finaliseReport()
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer2, provider1, 'master')
+    reporter.interactionDescription(interaction2)
+    reporter.statusComparisonFailed(200, 'expected status of 201 but was 200')
+    reporter.finaliseReport()
+
+    def results = new File(reportDir, 'provider1.md').text
+
+    then:
+    results.contains(
+      '''|| Consumer  | Result |
+         ||-----------|--------|
+         || Consumer  | OK     |
+         || Consumer2 | Failed |'''.stripMargin()
+    )
+  }
 }
