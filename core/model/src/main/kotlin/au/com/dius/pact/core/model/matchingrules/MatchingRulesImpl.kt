@@ -16,7 +16,9 @@ class MatchingRulesImpl : MatchingRules {
         return category
     }
 
-    override fun addCategory(category: String): MatchingRuleCategory = rules.getOrPut(category, { MatchingRuleCategory(category) })
+    override fun addCategory(category: String): MatchingRuleCategory = rules.getOrPut(category, {
+      MatchingRuleCategory(category)
+    })
 
     override fun copy(): MatchingRules {
         val copy = MatchingRulesImpl()

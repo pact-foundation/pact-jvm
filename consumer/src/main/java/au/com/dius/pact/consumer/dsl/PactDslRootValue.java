@@ -833,6 +833,16 @@ public class PactDslRootValue extends DslPart {
   }
 
   @Override
+  public DslPart matchUrl2(String name, Object... pathFragments) {
+    throw new UnsupportedOperationException("matchUrl2 is not currently supported for PactDslRootValue");
+  }
+
+  @Override
+  public DslPart matchUrl2(Object... pathFragments) {
+    throw new UnsupportedOperationException("matchUrl2 is not currently supported for PactDslRootValue");
+  }
+
+  @Override
   public DslPart arrayContaining(String name) {
     throw new UnsupportedOperationException("arrayContaining is not currently supported for PactDslRootValue");
   }

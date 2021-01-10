@@ -204,6 +204,16 @@ class DslPartSpec extends Specification {
     DslPart arrayContaining(String name) {
       null
     }
+
+    @Override
+    DslPart matchUrl2(String name, Object... pathFragments) {
+      null
+    }
+
+    @Override
+    DslPart matchUrl2(Object... pathFragments) {
+      null
+    }
   }
 
   @Unroll

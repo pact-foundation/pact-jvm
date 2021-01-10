@@ -1,14 +1,18 @@
 package au.com.dius.pact.consumer.dsl;
 
+import au.com.dius.pact.core.matchers.UrlMatcherSupport;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import static au.com.dius.pact.consumer.dsl.Dsl.matcherKey;
 
 public class LambdaDslObject {
 
@@ -887,6 +891,28 @@ public class LambdaDslObject {
     LambdaDslJsonArray array = new LambdaDslJsonArray(pactArray);
     nestedArray.accept(array);
     pactArray.closeArray();
+    return this;
+  }
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions
+   * @param name Attribute name
+   * @param basePath The base path for the URL (like "http://localhost:8080/") which will be excluded from the matching
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public LambdaDslObject matchUrl(String name, String basePath, Object... pathFragments) {
+    object.matchUrl(name, basePath, pathFragments);
+    return this;
+  }
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions. The base path of the
+   * mock server will be used.
+   * @param name Attribute name
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public LambdaDslObject matchUrl2(String name, Object... pathFragments) {
+    object.matchUrl2(name, pathFragments);
     return this;
   }
 }

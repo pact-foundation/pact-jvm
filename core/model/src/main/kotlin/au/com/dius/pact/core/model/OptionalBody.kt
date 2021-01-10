@@ -173,7 +173,11 @@ data class OptionalBody(
         if (contentType.isBinaryType()) {
           mapOf("content" to valueAsBase64(), "contentType" to contentType.toString(), "encoded" to "base64")
         } else if (contentType.isJson()) {
-          mapOf("content" to JsonParser.parseString(valueAsString()), "contentType" to contentType.toString(), "encoded" to false)
+          mapOf(
+            "content" to JsonParser.parseString(valueAsString()),
+            "contentType" to contentType.toString(),
+            "encoded" to false
+          )
         } else {
           mapOf("content" to valueAsString(), "contentType" to contentType.toString(), "encoded" to false)
         }

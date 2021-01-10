@@ -5,6 +5,7 @@ import au.com.dius.pact.core.matchers.UrlMatcherSupport;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.DateGenerator;
 import au.com.dius.pact.core.model.generators.DateTimeGenerator;
+import au.com.dius.pact.core.model.generators.MockServerURLGenerator;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.generators.RandomBooleanGenerator;
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator;
@@ -25,6 +26,7 @@ import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
@@ -35,6 +37,8 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
+
+import static au.com.dius.pact.consumer.dsl.Dsl.matcherKey;
 
 /**
  * DSL to define a JSON array
@@ -1202,8 +1206,14 @@ public class PactDslJsonArray extends DslPart {
    */
   public PactDslJsonArray matchUrl(String basePath, Object... pathFragments) {
     UrlMatcherSupport urlMatcher = new UrlMatcherSupport(basePath, Arrays.asList(pathFragments));
-    body.put(urlMatcher.getExampleValue());
-    matchers.addRule(rootPath + appendArrayIndex(0), regexp(urlMatcher.getRegexExpression()));
+    String exampleValue = urlMatcher.getExampleValue();
+    body.put(exampleValue);
+    String regexExpression = urlMatcher.getRegexExpression();
+    matchers.addRule(rootPath + appendArrayIndex(0), regexp(regexExpression));
+    if (StringUtils.isEmpty(basePath)) {
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0),
+        new MockServerURLGenerator(exampleValue, regexExpression));
+    }
     return this;
   }
 
@@ -1212,6 +1222,23 @@ public class PactDslJsonArray extends DslPart {
     throw new UnsupportedOperationException(
       "URL matcher with an attribute name is not supported for arrays. " +
         "Use matchUrl(String base, Object... fragments)");
+  }
+
+  @Override
+  public PactDslJsonBody matchUrl2(String name, Object... pathFragments) {
+    throw new UnsupportedOperationException(
+      "URL matcher with an attribute name is not supported for arrays. " +
+        "Use matchUrl2(Object... pathFragments)");
+  }
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions. Base path from the mock server
+   * will be used.
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  @Override
+  public DslPart matchUrl2(Object... pathFragments) {
+    return matchUrl(null, pathFragments);
   }
 
   @Override

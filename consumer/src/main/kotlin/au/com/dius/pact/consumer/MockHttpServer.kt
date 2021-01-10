@@ -181,7 +181,9 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       is FullRequestMatch -> {
         val interaction = matchResult.interaction as RequestResponseInteraction
         matchedRequests.add(interaction.request)
-        return interaction.response.generatedResponse(emptyMap(), GeneratorTestMode.Consumer)
+        return interaction.response.generatedResponse(mapOf(
+          "mockServer" to mapOf("href" to getUrl(), "port" to getPort())
+        ), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
         val interaction = matchResult.problems.keys.first() as RequestResponseInteraction

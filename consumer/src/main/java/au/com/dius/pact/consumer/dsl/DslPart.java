@@ -478,6 +478,21 @@ public abstract class DslPart {
   public abstract DslPart matchUrl(String basePath, Object... pathFragments);
 
   /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions. Base path from the mock server
+   * will be used.
+   * @param name Attribute name
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public abstract DslPart matchUrl2(String name, Object... pathFragments);
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions. Base path from the mock server
+   *    * will be used.
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public abstract DslPart matchUrl2(Object... pathFragments);
+
+  /**
    * Matches the items in an array against a number of variants. Matching is successful if each variant
    * occurs once in the array. Variants may be objects containing matching rules.
    * @param name Attribute name

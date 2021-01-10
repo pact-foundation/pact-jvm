@@ -11,6 +11,6 @@ class UrlMatcherSpec extends Specification {
       ['a', new RegexpMatcher('\\d+', '123'), 'b'])
 
     then:
-    matcher.matcher.toMap(PactSpecVersion.V3) == [match: 'regex', regex: '.*\\Qa\\E\\/\\d+\\/\\Qb\\E$' ]
+    matcher.matcher.toMap(PactSpecVersion.V3) == [match: 'regex', regex: '.*\\/(\\Qa\\E\\/\\d+\\/\\Qb\\E)$' ]
   }
 }

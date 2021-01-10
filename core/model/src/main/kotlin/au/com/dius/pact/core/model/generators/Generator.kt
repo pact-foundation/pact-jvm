@@ -9,6 +9,7 @@ import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpressio
 import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.json.JsonValue
 import com.mifmif.common.regex.Generex
+import mu.KLogging
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
@@ -18,6 +19,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
+import java.util.regex.PatternSyntaxException
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberFunctions
@@ -414,5 +416,67 @@ data class ProviderStateGenerator @JvmOverloads constructor (
       Json.toString(json["expression"]),
       if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
     )
+  }
+}
+
+/**
+ * Generates a URL with the mock server as the base URL.
+ */
+data class MockServerURLGenerator(
+  val example: String,
+  val regex: String
+) : Generator {
+  override fun toMap(pactSpecVersion: PactSpecVersion) = mutableMapOf(
+    "type" to "MockServerURL",
+    "example" to example,
+    "regex" to regex
+  )
+
+  override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Consumer
+
+  override fun generate(context: Map<String, Any?>): Any? {
+    logger.debug { "context = $context" }
+    val mockServerDetails = context.get("mockServer")
+    return if (mockServerDetails != null) {
+      if (mockServerDetails is Map<*, *>) {
+        val href = mockServerDetails["href"]
+        if (href is String && href.isNotEmpty()) {
+          try {
+            val regex = Regex(regex)
+            val match = regex.matchEntire(example)
+            if (match != null) {
+              if (href.endsWith('/')) {
+                href + match.groupValues[1]
+              } else {
+                href + "/" + match.groupValues[1]
+              }
+            } else {
+              logger.error { "MockServerURL: can not generate a value as the regex did not match the example" }
+              null
+            }
+          } catch (err: PatternSyntaxException) {
+            logger.error(err) { "MockServerURL: can not generate a value as the regex is invalid" }
+            null
+          }
+        } else {
+          logger.error { "MockServerURL: can not generate a value as there is no mock server URL in the test context" }
+          null
+        }
+      } else {
+        logger.error {
+          "MockServerURL: can not generate a value as the mock server details in the test context is not an Object"
+        }
+        null
+      }
+    } else {
+      logger.error { "MockServerURL: can not generate a value as there is no mock server details in the test context" }
+      null
+    }
+  }
+
+  companion object: KLogging() {
+    fun fromJson(json: JsonValue.Object): MockServerURLGenerator {
+      return MockServerURLGenerator(Json.toString(json["example"]), Json.toString(json["regex"]))
+    }
   }
 }

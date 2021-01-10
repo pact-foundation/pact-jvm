@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.FeatureToggles;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.DateGenerator;
 import au.com.dius.pact.core.model.generators.DateTimeGenerator;
+import au.com.dius.pact.core.model.generators.MockServerURLGenerator;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator;
@@ -1242,10 +1243,17 @@ public class PactDslJsonBody extends DslPart {
    * @param basePath The base path for the URL (like "http://localhost:8080/") which will be excluded from the matching
    * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
    */
+  @Override
   public PactDslJsonBody matchUrl(String name, String basePath, Object... pathFragments) {
     UrlMatcherSupport urlMatcher = new UrlMatcherSupport(basePath, Arrays.asList(pathFragments));
-    body.put(name, urlMatcher.getExampleValue());
-    matchers.addRule(matcherKey(name, rootPath), regexp(urlMatcher.getRegexExpression()));
+    String exampleValue = urlMatcher.getExampleValue();
+    body.put(name, exampleValue);
+    String regexExpression = urlMatcher.getRegexExpression();
+    matchers.addRule(matcherKey(name, rootPath), regexp(regexExpression));
+    if (StringUtils.isEmpty(basePath)) {
+      generators.addGenerator(Category.BODY, matcherKey(name, rootPath),
+        new MockServerURLGenerator(exampleValue, regexExpression));
+    }
     return this;
   }
 
@@ -1254,6 +1262,24 @@ public class PactDslJsonBody extends DslPart {
     throw new UnsupportedOperationException(
       "URL matcher without an attribute name is not supported for objects. " +
         "Use matchUrl(String name, String basePath, Object... pathFragments)");
+  }
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions. Base path from the mock server
+   * will be used.
+   * @param name Attribute name
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  @Override
+  public PactDslJsonBody matchUrl2(String name, Object... pathFragments) {
+    return matchUrl(name, null, pathFragments);
+  }
+
+  @Override
+  public DslPart matchUrl2(Object... pathFragments) {
+    throw new UnsupportedOperationException(
+      "URL matcher without an attribute name is not supported for objects. " +
+        "Use matchUrl2(Object... pathFragments)");
   }
 
   @Override
