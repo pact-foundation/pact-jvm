@@ -22,6 +22,7 @@ import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.support.Json;
 import au.com.dius.pact.core.support.expressions.DataType;
+import au.com.dius.pact.core.support.json.JsonValue;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -33,8 +34,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
-import static au.com.dius.pact.consumer.dsl.Dsl.matcherKey;
-
 public class PactDslJsonRootValue extends DslPart {
 
   private static final String USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS = "Use PactDslJsonArray for arrays";
@@ -42,7 +41,6 @@ public class PactDslJsonRootValue extends DslPart {
   private static final String EXAMPLE = "Example \"";
 
   private Object value;
-  private boolean encodeJson = false;
 
   public PactDslJsonRootValue() {
     super("", "");
@@ -59,25 +57,8 @@ public class PactDslJsonRootValue extends DslPart {
   }
 
   @Override
-  public Object getBody() {
-    if (encodeJson) {
-      return Json.toJson(value).serialise();
-    }
-    return value;
-  }
-
-  /**
-   * If the value should be encoded to be safe as JSON
-   */
-  public boolean isEncodeJson() {
-    return encodeJson;
-  }
-
-  /**
-   * If the value should be encoded to be safe as JSON
-   */
-  public void setEncodeJson(boolean encodeJson) {
-    this.encodeJson = encodeJson;
+  public JsonValue getBody() {
+    return Json.toJson(value);
   }
 
   /**

@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.support.Json
 import com.mifmif.common.regex.Generex
 import org.json.JSONArray
 
@@ -100,7 +101,7 @@ class ArrayOfPrimitivesBuilder {
       array.getGenerators().addGenerator(Category.BODY, "[*]", generator!!)
     }
     for (i in 0 until this.examples) {
-      (array.body as JSONArray).put(this.value)
+      array.body.add(Json.toJson(this.value))
     }
 
     return array

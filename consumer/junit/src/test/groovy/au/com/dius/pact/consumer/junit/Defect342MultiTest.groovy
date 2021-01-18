@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovyx.net.http.FromServer
 import groovyx.net.http.HttpBuilder
 import org.apache.http.client.fluent.Request
@@ -101,10 +102,11 @@ class Defect342MultiTest {
   @Test
   @PactVerification(fragment = 'createFragment2')
   void runTest2() {
-    assert Request.Put(mockProvider.url + '/numbertest')
+    def result = new JsonSlurper().parseText(Request.Put(mockProvider.url + '/numbertest')
       .addHeader('Accept', 'application/json')
       .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
-      .execute().returnContent().asString() == '{"data":1234.0,"name":"harry","responsetest":true}'
+      .execute().returnContent().asString())
+    assert result == [data: 1234.0, name: 'harry', responsetest: true]
   }
 
   @Pact(provider = 'multitest_provider', consumer = 'test_consumer')

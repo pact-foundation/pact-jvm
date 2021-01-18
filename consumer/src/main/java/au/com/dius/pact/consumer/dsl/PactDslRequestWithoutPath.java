@@ -239,7 +239,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
         String contentType = getContentTypeHeader();
         ContentType ct = ContentType.parse(contentType);
         Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
-        requestBody = OptionalBody.body(parent.toString().getBytes(charset),
+        requestBody = OptionalBody.body(parent.getBody().serialise().getBytes(charset),
           new au.com.dius.pact.core.model.ContentType(contentType));
       }
       return this;

@@ -71,6 +71,16 @@ public class LambdaDslObject {
         return this;
     }
 
+    public LambdaDslObject integerType(final String name, final Integer example) {
+      object.integerType(name, example);
+      return this;
+    }
+
+    public LambdaDslObject integerType(final String... names) {
+      object.integerType(names);
+      return this;
+    }
+
     public LambdaDslObject decimalType(final String name, final BigDecimal value) {
         object.decimalType(name, value);
         return this;
@@ -913,6 +923,19 @@ public class LambdaDslObject {
    */
   public LambdaDslObject matchUrl2(String name, Object... pathFragments) {
     object.matchUrl2(name, pathFragments);
+    return this;
+  }
+
+  /**
+   * Matches the items in an array against a number of variants. Matching is successful if each variant
+   * occurs once in the array. Variants may be objects containing matching rules.
+   * @param name Attribute name
+   */
+  public LambdaDslObject arrayContaining(String name, Consumer<LambdaDslJsonArray> nestedArray) {
+    PactDslJsonArray arrayContaining = (PactDslJsonArray) object.arrayContaining(name);
+    final LambdaDslJsonArray dslObject = new LambdaDslJsonArray(arrayContaining);
+    nestedArray.accept(dslObject);
+    arrayContaining.closeArray();
     return this;
   }
 }

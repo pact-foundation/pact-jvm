@@ -21,7 +21,7 @@ sealed class JsonValue {
   object False : JsonValue()
   object Null : JsonValue()
 
-  class Array(val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
+  class Array @JvmOverloads constructor (val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
     fun find(function: (JsonValue) -> Boolean) = values.find(function)
     operator fun set(i: Int, value: JsonValue) {
       values[i] = value
@@ -39,7 +39,7 @@ sealed class JsonValue {
     fun last() = values.last()
   }
 
-  class Object(val entries: MutableMap<String, JsonValue>) : JsonValue() {
+  class Object @JvmOverloads constructor (val entries: MutableMap<String, JsonValue> = mutableMapOf()) : JsonValue() {
     constructor(vararg values: Pair<String, JsonValue>) : this(values.associate { it }.toMutableMap())
     operator fun get(name: String) = entries[name] ?: Null
     override fun has(field: String) = entries.containsKey(field)
@@ -56,6 +56,8 @@ sealed class JsonValue {
     fun add(key: String, value: JsonValue) {
       entries[key] = value
     }
+
+    fun keys(): Set<String> = entries.keys
   }
 
   fun asObject(): Object {
@@ -90,8 +92,10 @@ sealed class JsonValue {
       is StringValue -> this.value.toString()
       is True -> "true"
       is False -> "false"
-      is Array -> "[${this.values.joinToString(",")}]"
-      is Object -> "{${this.entries.entries.sortedBy { it.key }.joinToString(",") { "\"${it.key}\":" + it.value }}}"
+      is Array -> "[${this.values.joinToString(",") { it.serialise() }}]"
+      is Object -> "{${this.entries.entries.sortedBy { it.key }.joinToString(",") { 
+        "\"${it.key}\":" + it.value.serialise() 
+      }}}"
     }
   }
 

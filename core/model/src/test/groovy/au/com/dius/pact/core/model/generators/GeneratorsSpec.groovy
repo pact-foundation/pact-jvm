@@ -82,6 +82,7 @@ class GeneratorsSpec extends Specification {
     GeneratorsKt.contentTypeHandlers['application/xml'] = Stub(ContentTypeHandler) {
       processBody(_, _) >> OptionalBody.body('XML'.bytes)
     }
+    generators.addGenerator(Category.BODY, '$', mockGenerator)
 
     expect:
     generators.applyBodyGenerators(body, new ContentType(contentType), [:], GeneratorTestMode.Provider) == returnedBody

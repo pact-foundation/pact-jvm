@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher;
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher;
+import au.com.dius.pact.core.support.json.JsonValue;
 
 /**
  * Abstract base class to support Object and Array JSON DSL builders
@@ -45,7 +46,7 @@ public abstract class DslPart {
 
     protected abstract void putObject(DslPart object);
     protected abstract void putArray(DslPart object);
-    public abstract Object getBody();
+    public abstract JsonValue getBody();
 
     /**
      * Field which is an array

@@ -16,25 +16,25 @@ import static org.junit.Assert.assertEquals;
 
 public class SpecialCharsTest {
 
-    @Rule
-    public PactProviderRule provider = new PactProviderRule("specialchars_provider", this);
+  @Rule
+  public PactProviderRule provider = new PactProviderRule("specialchars_provider", this);
 
-    @Pact(provider="specialchars_provider", consumer="test_consumer")
-    public RequestResponsePact createFragment(PactDslWithProvider builder) {
-        return builder
-          .uponReceiving("Request für ping")
-          .path("/ping")
-          .method("GET")
-          .willRespondWith()
-          .status(200)
-          .body(PactDslJsonRootValue.stringType("Pong"))
-          .toPact();
-    }
+  @Pact(provider = "specialchars_provider", consumer = "test_consumer")
+  public RequestResponsePact createFragment(PactDslWithProvider builder) {
+    return builder
+      .uponReceiving("Request für ping")
+      .path("/ping")
+      .method("GET")
+      .willRespondWith()
+      .status(200)
+      .body(PactDslJsonRootValue.stringType("Pong"))
+      .toPact();
+  }
 
-    @Test
-    @PactVerification("specialchars_provider")
-    public void runTest() throws IOException {
-        assertEquals("\"Pong\"", Request.Get(provider.getUrl() + "/ping")
-            .execute().returnContent().asString());
-    }
+  @Test
+  @PactVerification("specialchars_provider")
+  public void runTest() throws IOException {
+    assertEquals("\"Pong\"", Request.Get(provider.getUrl() + "/ping")
+      .execute().returnContent().asString());
+  }
 }

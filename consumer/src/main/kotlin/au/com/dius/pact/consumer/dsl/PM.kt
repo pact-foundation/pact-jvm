@@ -50,7 +50,8 @@ object PM {
    * @param regex regular expression
    */
   @JvmStatic
-  fun stringMatcher(regex: String) = RegexMatcher(regex)
+  @JvmOverloads
+  fun stringMatcher(regex: String, example: String? = null) = RegexMatcher(regex, example)
 
   /**
    * Attribute that must be an ISO formatted timestamp

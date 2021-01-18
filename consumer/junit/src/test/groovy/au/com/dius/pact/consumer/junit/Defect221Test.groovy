@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
+import groovy.json.JsonSlurper
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
 import org.junit.Rule
@@ -34,10 +35,10 @@ class Defect221Test {
     @Test
     @PactVerification('221_provider')
     void runTest() {
-        assert '{"data":1234.0,"name":"harry","responsetest":true}' ==
-          Request.Put('http://localhost:8112/numbertest')
-            .addHeader('Accept', APPLICATION_JSON)
-            .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
-            .execute().returnContent().asString()
+      def result = new JsonSlurper().parseText(Request.Put('http://localhost:8112/numbertest')
+        .addHeader('Accept', APPLICATION_JSON)
+        .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
+        .execute().returnContent().asString())
+      assert result == [data: 1234.0, name: 'harry', responsetest: true]
     }
 }

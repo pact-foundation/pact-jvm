@@ -414,10 +414,11 @@ class JsonBodyMatcherSpec extends Specification {
 
     expected                          | actual                                      | message
     '[1,2,3]'                         | '[1,2,3,4]'                                 | '[1, 2, 3, 4]'
-    '[{"i":"a"},{"i":"b"},{"i":"c"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":a}, {"i":b}, {"i":c}, {"i":d}]'
+    '[{"i":"a"},{"i":"b"},{"i":"c"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":"a"}, {"i":"b"}, {"i":"c"}, {"i":"d"}]'
   }
 
   @Unroll
+  @SuppressWarnings('LineLength')
   def 'matching json bodies - with max-equals-ignore-order - return a mismatch when actual has extra elements'() {
     given:
     def maxSize = 3
@@ -439,7 +440,7 @@ class JsonBodyMatcherSpec extends Specification {
 
     expected                | actual                                      | message
     '[1,2]'                 | '[1,2,3,4,5,6]'                             | '[1, 2, 3, 4, 5, 6]'
-    '[{"i":"a"},{"i":"b"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":a}, {"i":b}, {"i":c}, {"i":d}]'
+    '[{"i":"a"},{"i":"b"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":"a"}, {"i":"b"}, {"i":"c"}, {"i":"d"}]'
   }
 
   @Unroll

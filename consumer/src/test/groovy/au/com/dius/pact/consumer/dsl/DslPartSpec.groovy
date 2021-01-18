@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -15,7 +16,7 @@ class DslPartSpec extends Specification {
     @Override
     protected void putArray(DslPart object) { }
 
-    Object body = null
+    JsonValue.Object body = null
 
     @Override
     PactDslJsonArray array(String name) { null }

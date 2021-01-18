@@ -99,10 +99,10 @@ class PactDslRequestWithPathSpec extends Specification {
     def response = pact.interactions[0].response
 
     then:
-    request.body.value == 'example'.bytes
+    request.body.value == '"example"'.bytes
     request.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
       'TypeMatcher']
-    response.body.value == 'example'.bytes
+    response.body.value == '"example"'.bytes
     response.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
       'TypeMatcher']
 

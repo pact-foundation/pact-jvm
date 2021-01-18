@@ -34,7 +34,7 @@ class PactDslJsonBodySpec extends Specification {
   @Unroll
   def 'min array like function should set the example size to the min size'() {
     expect:
-    obj.close().body.getJSONArray('test').length() == 2
+    obj.close().body.get('test').size() == 2
 
     where:
     obj << [
@@ -316,8 +316,9 @@ class PactDslJsonBodySpec extends Specification {
         '$.contactDetails2.mobile.subscriberNumber': [type: 'RandomInt', min: 0, max: 2147483647]
       ]
     ]
-    pactDslJsonBody.toString() == '{"contactDetails2":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":' +
-      '100}},"contactDetails":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":100}}}'
+    pactDslJsonBody.toString() ==
+      '{"contactDetails":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":100}},' +
+      '"contactDetails2":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":100}}}'
   }
 
   @Issue('#895')

@@ -25,7 +25,7 @@ class PactDslJsonArraySpec extends Specification {
 
   def 'min array like function should set the example size to the min size'() {
     expect:
-    obj.close().body.get(0).length() == 2
+    obj.close().body.get(0).size() == 2
 
     where:
     obj = new PactDslJsonArray().minArrayLike(2).id()

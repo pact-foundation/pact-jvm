@@ -139,6 +139,35 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
 
       return generators
     }
+
+    fun applyGenerators(
+      generators: Map<String, Generator>,
+      mode: GeneratorTestMode,
+      closure: (String, Generator) -> Unit
+    ) {
+      for ((key, generator) in generators) {
+        if (generator.correspondsToMode(mode)) {
+          closure.invoke(key, generator)
+        }
+      }
+    }
+
+    fun applyBodyGenerators(
+      generators: Map<String, Generator>,
+      body: OptionalBody,
+      contentType: ContentType,
+      context: Map<String, Any?>,
+      mode: GeneratorTestMode
+    ): OptionalBody {
+      val handler = contentTypeHandlers[contentType.getBaseType()]
+      return handler?.processBody(body) { bodyResult: QueryResult ->
+        for ((key, generator) in generators) {
+          if (generator.correspondsToMode(mode)) {
+            handler.applyKey(bodyResult, key, generator, context)
+          }
+        }
+      } ?: body
+    }
   }
 
   @JvmOverloads
@@ -174,11 +203,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     if (categories.containsKey(category) && categories[category] != null) {
       val categoryValues = categories[category]
       if (categoryValues != null) {
-        for ((key, generator) in categoryValues) {
-          if (generator.correspondsToMode(mode)) {
-            closure.invoke(key, generator)
-          }
-        }
+        applyGenerators(categoryValues, mode, closure)
       }
     }
   }
@@ -191,28 +216,12 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
   ): OptionalBody {
     return when (body.state) {
       OptionalBody.State.EMPTY, OptionalBody.State.MISSING, OptionalBody.State.NULL -> body
-      OptionalBody.State.PRESENT -> when {
-        contentType.isJson() -> processBody(body, "application/json", context, mode)
-        contentType.isXml() -> processBody(body, "application/xml", context, mode)
-        else -> body
+      OptionalBody.State.PRESENT -> if (categories[Category.BODY] != null) {
+        applyBodyGenerators(categories[Category.BODY]!!, body, contentType, context, mode)
+      } else {
+        body
       }
     }
-  }
-
-  private fun processBody(
-    value: OptionalBody,
-    contentType: String,
-    context: Map<String, Any?>,
-    mode: GeneratorTestMode
-  ): OptionalBody {
-    val handler = contentTypeHandlers[contentType]
-    return handler?.processBody(value) { body: QueryResult ->
-      applyGenerator(Category.BODY, mode) { key: String, generator: Generator? ->
-        if (generator != null) {
-          handler.applyKey(body, key, generator, context)
-        }
-      }
-    } ?: value
   }
 
   /**

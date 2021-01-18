@@ -41,11 +41,11 @@ class ProviderStateWithComplexParametersTest {
     @Test
     @PactVerification
     void runTest() {
-        assert '{"data":1234.0,"name":"harry","responsetest":true}' ==
-          Request.Put('http://localhost:8113/numbertest')
-            .addHeader('Accept', APPLICATION_JSON)
-            .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
-            .execute().returnContent().asString()
+      def result = new JsonSlurper().parseText(Request.Put('http://localhost:8113/numbertest')
+        .addHeader('Accept', APPLICATION_JSON)
+        .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
+        .execute().returnContent().asString())
+      assert result == [data: 1234.0, name: 'harry', responsetest: true]
     }
 
     @AfterClass

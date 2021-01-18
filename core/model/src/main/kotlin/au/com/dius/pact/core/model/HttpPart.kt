@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.support.isNotEmpty
@@ -65,6 +67,12 @@ abstract class HttpPart {
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))
     return errors
+  }
+
+  fun buildGenerators(category: Category): Map<String, Generator> {
+    val generators = generators.categories[category] ?: emptyMap()
+//    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name)
+    return generators
   }
 
   companion object : KLogging() {

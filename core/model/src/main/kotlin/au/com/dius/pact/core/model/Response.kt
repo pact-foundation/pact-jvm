@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -30,11 +31,22 @@ class Response @JvmOverloads constructor(
     mode: GeneratorTestMode = GeneratorTestMode.Provider
   ): Response {
     val r = this.copy()
-    generators.applyGenerator(Category.STATUS, mode) { _, g -> r.status = g.generate(context) as Int }
-    generators.applyGenerator(Category.HEADER, mode) { key, g ->
-      r.headers[key] = listOf(g.generate(context).toString())
+    val statusGenerators = r.buildGenerators(Category.STATUS)
+    if (statusGenerators.isNotEmpty()) {
+      Generators.applyGenerators(statusGenerators, mode) { _, g -> r.status = g.generate(context) as Int }
     }
-    r.body = generators.applyBodyGenerators(r.body, ContentType.fromString(contentType()), context, mode)
+    val headerGenerators = r.buildGenerators(Category.HEADER)
+    if (headerGenerators.isNotEmpty()) {
+      Generators.applyGenerators(headerGenerators, mode) { key, g ->
+        r.headers[key] = listOf(g.generate(context).toString())
+      }
+    }
+    if (r.body.isPresent()) {
+      val bodyGenerators = r.buildGenerators(Category.BODY)
+      if (bodyGenerators.isNotEmpty()) {
+        r.body = Generators.applyBodyGenerators(bodyGenerators, r.body, determineContentType(), context, mode)
+      }
+    }
     return r
   }
 

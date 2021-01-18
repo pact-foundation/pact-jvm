@@ -212,7 +212,7 @@ class LambdaDslSpec extends Specification {
     def result = LambdaDsl.newJsonBody(body).build()
 
     then:
-    result.body.toString() == '{"number":1,"bigdecimal":1.1,"bigint":1,"long":1}'
+    result.body.toString() == '{"bigdecimal":1.1,"bigint":1,"long":1,"number":1}'
   }
 
   @Issue('#910')
@@ -233,7 +233,7 @@ class LambdaDslSpec extends Specification {
     def result = LambdaDsl.newJsonBody(body).build()
 
     then:
-    result.body.toString() == '{"date3":"' + date3 + '","date1":"' + date1 + '"}'
+    result.body.toString() == '{"date1":"' + date1 + '","date3":"' + date3 + '"}'
   }
 
   @Unroll

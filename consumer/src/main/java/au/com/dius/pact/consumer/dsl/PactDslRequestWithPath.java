@@ -286,33 +286,29 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Built using the Pact body DSL
      */
     public PactDslRequestWithPath body(DslPart body) {
-        DslPart parent = body.close();
+      DslPart parent = body.close();
 
-        if (parent instanceof PactDslJsonRootValue) {
-          ((PactDslJsonRootValue)parent).setEncodeJson(true);
-        }
+      requestMatchers.addCategory(parent.getMatchers());
+      requestGenerators.addGenerators(parent.generators);
 
-        requestMatchers.addCategory(parent.getMatchers());
-        requestGenerators.addGenerators(parent.generators);
+      Charset charset = Charset.defaultCharset();
+      String contentType = ContentType.APPLICATION_JSON.toString();
+      if (isContentTypeHeaderNotSet()) {
+        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
+      } else {
+        contentType = getContentTypeHeader();
+        ContentType ct = ContentType.parse(contentType);
+        charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+      }
 
-        Charset charset = Charset.defaultCharset();
-        String contentType = ContentType.APPLICATION_JSON.toString();
-        if (isContentTypeHeaderNotSet()) {
-          requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
-        } else {
-          contentType = getContentTypeHeader();
-          ContentType ct = ContentType.parse(contentType);
-          charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
-        }
+      if (parent.getBody() != null) {
+        requestBody = OptionalBody.body(parent.getBody().serialise().getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      } else {
+        requestBody = OptionalBody.nullBody();
+      }
 
-        if (parent.getBody() != null) {
-          requestBody = OptionalBody.body(parent.getBody().toString().getBytes(charset),
-            new au.com.dius.pact.core.model.ContentType(contentType));
-        } else {
-          requestBody = OptionalBody.nullBody();
-        }
-
-        return this;
+      return this;
     }
 
     /**

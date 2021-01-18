@@ -17,7 +17,9 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.core.support.Json;
 import au.com.dius.pact.core.support.expressions.DataType;
+import au.com.dius.pact.core.support.json.JsonValue;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -37,7 +39,7 @@ public class PactDslRootValue extends DslPart {
   private static final String USE_PACT_DSL_JSON_BODY_FOR_OBJECTS = "Use PactDslJsonBody for objects";
   private static final String EXAMPLE = "Example \"";
 
-  private Object value;
+  private JsonValue value;
   private boolean encodeJson = false;
 
   public PactDslRootValue() {
@@ -55,7 +57,7 @@ public class PactDslRootValue extends DslPart {
   }
 
   @Override
-  public Object getBody() {
+  public JsonValue getBody() {
     return value;
   }
 
@@ -571,7 +573,7 @@ public class PactDslRootValue extends DslPart {
   }
 
   public void setValue(Object value) {
-    this.value = value;
+    this.value = Json.toJson(value);
   }
 
   public void setMatcher(MatchingRule matcher) {
