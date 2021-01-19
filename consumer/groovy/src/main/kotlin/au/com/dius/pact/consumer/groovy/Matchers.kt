@@ -4,6 +4,7 @@ import au.com.dius.pact.core.matchers.UrlMatcherSupport
 import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.MockServerURLGenerator
 import au.com.dius.pact.core.model.generators.RandomBooleanGenerator
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator
 import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator
@@ -227,7 +228,12 @@ class UrlMatcher @JvmOverloads constructor(
   private val urlMatcherSupport: UrlMatcherSupport = UrlMatcherSupport(basePath, pathFragments.map {
     if (it is RegexpMatcher) it.matcher!! else it
   })
-) : Matcher(urlMatcherSupport.getExampleValue(), RegexMatcher(urlMatcherSupport.getRegexExpression())) {
+) : Matcher(
+  urlMatcherSupport.getExampleValue(),
+  RegexMatcher(urlMatcherSupport.getRegexExpression()),
+  if (basePath.isEmpty()) MockServerURLGenerator(urlMatcherSupport.getExampleValue(),
+    urlMatcherSupport.getRegexExpression()) else null
+) {
   override val value: Any?
     get() = urlMatcherSupport.getExampleValue()
 }
@@ -236,14 +242,14 @@ class UrlMatcher @JvmOverloads constructor(
  * Array contains matcher for arrays
  */
 class ArrayContainsMatcher(
-  private val variants: List<Pair<Any, MatchingRuleCategory>>
+  private val variants: List<Triple<Any, MatchingRuleCategory, Map<String, Generator>>>
 ) : Matcher(
   buildExample(variants),
   au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher(buildVariants(variants))
 ) {
   companion object {
-    fun buildExample(variants: List<Pair<Any, MatchingRuleCategory>>): List<Any?> {
-      return variants.map { (value, _) ->
+    fun buildExample(variants: List<Triple<Any, MatchingRuleCategory, Map<String, Generator>>>): List<Any?> {
+      return variants.map { (value, _, _) ->
         if (value is Matcher) {
           value.value
         } else {
@@ -252,9 +258,9 @@ class ArrayContainsMatcher(
       }
     }
 
-    fun buildVariants(variants: List<Pair<Any, MatchingRuleCategory>>): List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>> {
+    fun buildVariants(variants: List<Triple<Any, MatchingRuleCategory, Map<String, Generator>>>): List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>> {
       return variants.mapIndexed { index, variant ->
-        Triple(index, variant.second, emptyMap())
+        Triple(index, variant.second, variant.third)
       }
     }
   }
@@ -356,30 +362,6 @@ open class Matchers {
     fun integer(value: Long? = null): Matcher {
       return TypeMatcher(value ?: 100, INTEGER,
         if (value == null) RandomIntGenerator(0, Integer.MAX_VALUE) else null)
-    }
-
-    /**
-     * Match a timestamp
-     * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
-     * @param value Example value, if not provided the current date and time will be used
-     */
-    @Deprecated("use datetime instead")
-    @JvmStatic
-    @JvmOverloads
-    fun timestamp(pattern: String = DateFormatUtils.ISO_DATETIME_FORMAT.pattern, value: String? = null): Matcher {
-      return datetime(pattern, value)
-    }
-
-    /**
-     * Match a timestamp generated from an expression
-     * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
-     * @param expression Expression to use to generate the timestamp
-     */
-    @Deprecated("use datetime instead")
-    @JvmStatic
-    @JvmOverloads
-    fun timestampExpression(expression: String, pattern: String = DateFormatUtils.ISO_DATETIME_FORMAT.pattern): Matcher {
-      return datetimeExpression(expression, pattern)
     }
 
     /**
@@ -544,7 +526,7 @@ open class Matchers {
     @JvmStatic
     @JvmOverloads
     fun minLike(min: Int, numberExamples: Int = 1, arg: Any): Matcher {
-      if (numberExamples > 1 && numberExamples < min) {
+      if (numberExamples in 2 until min) {
         throw InvalidMatcherException("The number of examples you have specified ($numberExamples) is " +
           "less than the minimum ($min)")
       }

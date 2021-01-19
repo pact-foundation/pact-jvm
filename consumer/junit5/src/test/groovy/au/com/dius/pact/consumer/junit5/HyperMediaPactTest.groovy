@@ -10,13 +10,11 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.apache.http.HttpResponse
 import org.apache.http.client.fluent.Request
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'Siren Order Provider')
-//@Disabled
 class HyperMediaPactTest {
 
   @Canonical

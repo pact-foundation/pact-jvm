@@ -10,7 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.support.expressions.DataType
 import groovy.json.JsonBuilder
-import kotlin.Pair
+import kotlin.Triple
 import org.apache.commons.lang3.StringUtils
 
 import java.util.regex.Pattern
@@ -81,8 +81,11 @@ class PactBodyBuilder extends GroovyBuilder {
       case 'decimal':
         decimal()
         break
+      case 'datetime':
+        datetime()
+        break
       case 'timestamp':
-        timestamp()
+        datetime()
         break
       case 'time':
         time()
@@ -331,15 +334,20 @@ class PactBodyBuilder extends GroovyBuilder {
    */
   Matcher arrayContaining(List args) {
     new ArrayContainsMatcher(args.withIndex().collect { v, index ->
-      def variant = new MatchingRuleCategory(BODY)
+      def variantMatchers = new MatchingRuleCategory(BODY)
+      def body = Category.BODY
+      def variantGenerators = new Generators().addCategory(body)
       def matchers = this.matchers
+      def generators = this.generators
       def path = this.path
       this.path = DOLLAR
-      this.matchers = variant
+      this.matchers = variantMatchers
+      this.generators = variantGenerators
       def val = calculateAttributeValue(v, null, '', '')
       this.matchers = matchers
+      this.generators = generators
       this.path = path
-      new Pair(val, variant)
+      new Triple(val, variantMatchers, variantGenerators.categories[body])
     })
   }
 }

@@ -24,7 +24,7 @@ class MatchersSpec extends Specification {
     'regexp'      | '[0-9]+'                               | [match: 'regex', regex: '[0-9]+']
     'hexValue'    | '1234'                                 | [match: 'regex', regex: '[0-9a-fA-F]+']
     'ipAddress'   | '1.2.3.4'                              | [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}']
-    'timestamp'   | 'yyyy-mm-dd'                           | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
+    'datetime'    | 'yyyy-mm-dd'                           | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
     'datetime'    | 'yyyy-mm-dd'                           | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
     'date'        | 'yyyy-mm-dd'                           | [match: 'date', date: 'yyyy-mm-dd']
     'time'        | 'yyyy-mm-dd'                           | [match: 'time', time: 'yyyy-mm-dd']

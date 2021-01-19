@@ -57,8 +57,8 @@ class PactBodyBuilderSpec extends Specification {
           age2(integer)
           salary decimal
 
-          ts(timestamp)
-          timestamp = timestamp('yyyy/MM/dd - HH:mm:ss.S')
+          ts(datetime)
+          timestamp = datetime('yyyy/MM/dd - HH:mm:ss.S')
 
           values([1, 2, 3, numeric])
 
