@@ -20,8 +20,12 @@ data class VerificationNotice(
   val text: String
 ) {
   companion object {
-    fun fromJson(json: JsonValue.Object): VerificationNotice {
-      return VerificationNotice(Json.toString(json["when"]), Json.toString(json["text"]))
+    fun fromJson(json: JsonValue): VerificationNotice? {
+      return if (json is JsonValue.Object) {
+        VerificationNotice(Json.toString(json["when"]), Json.toString(json["text"]))
+      } else {
+        null
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model.matchingrules
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
+import kotlin.Triple
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -185,13 +186,17 @@ class MatchingRulesSpec extends Specification {
 
   def 'Array contains matcher to map for JSON'() {
     expect:
-    new ArrayContainsMatcher([ new MatchingRuleCategory('Variant 1', [
+    new ArrayContainsMatcher([ new Triple(0, new MatchingRuleCategory('Variant 1', [
       '$.index': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)])
-    ])]).toMap(PactSpecVersion.V4) == [
+    ]), [:])]).toMap(PactSpecVersion.V4) == [
       match: 'arrayContains',
       variants: [
-        [index: 0, rules: [
-          '$.index': [matchers: [[match: 'integer']], combine: 'AND']]
+        [
+          index: 0,
+          rules: [
+          '$.index': [matchers: [[match: 'integer']], combine: 'AND']
+          ],
+          generators: [:]
         ]
       ]
     ]
@@ -236,9 +241,9 @@ class MatchingRulesSpec extends Specification {
     matchingRules.rulesForCategory('body').matchingRules.size() == 1
     matchingRules.rulesForCategory('body').matchingRules['$'] == new MatchingRuleGroup([
       new ArrayContainsMatcher([
-        new MatchingRuleCategory('body', [
+        new Triple(0, new MatchingRuleCategory('body', [
           '$.href': new MatchingRuleGroup([new RegexMatcher('.*\\/orders\\/\\d+$')])
-        ])
+        ]), [:])
       ])]
     )
   }

@@ -2,6 +2,11 @@ package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.generators.ArrayContainsGenerator
+import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.NullGenerator
+import au.com.dius.pact.core.model.generators.lookupGenerator
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import java.lang.RuntimeException
 
@@ -30,6 +35,131 @@ interface MatchingRule {
    * Validates this rule against the Pact specification version
    */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+
+  /**
+   * Any generators associated with this matching rule
+   */
+  val generators: List<Generator>
+    get() = listOf()
+
+  /**
+   * If this matching rule has any associated generators
+   */
+  fun hasGenerators(): Boolean = false
+
+  companion object {
+    private const val MATCH = "match"
+    private const val MIN = "min"
+    private const val MAX = "max"
+    private const val REGEX = "regex"
+    private const val TIMESTAMP = "timestamp"
+    private const val TIME = "time"
+    private const val DATE = "date"
+
+    @JvmStatic
+    fun fromJson(json: JsonValue): MatchingRule {
+      return if (json.isObject) {
+        val j: JsonValue.Object = json.downcast()
+        when {
+          j.has(MATCH) -> matchingRule(j)
+          j.has(REGEX) -> RegexMatcher(j[REGEX].asString()!!)
+          j.has(MIN) -> MinTypeMatcher(j[MIN].asNumber()!!.toInt())
+          j.has(MAX) -> MaxTypeMatcher(j[MAX].asNumber()!!.toInt())
+          j.has(TIMESTAMP) -> TimestampMatcher(j[TIMESTAMP].asString()!!)
+          j.has(TIME) -> TimeMatcher(j[TIME].asString()!!)
+          j.has(DATE) -> DateMatcher(j[DATE].asString()!!)
+          else -> {
+            MatchingRuleGroup.logger.warn { "Unrecognised matcher definition $j, defaulting to equality matching" }
+            EqualsMatcher
+          }
+        }
+      } else {
+        MatchingRuleGroup.logger.warn { "Unrecognised matcher definition $json, defaulting to equality matching" }
+        EqualsMatcher
+      }
+    }
+
+    private fun matchingRule(j: JsonValue.Object) = when (j[MATCH].toString()) {
+      REGEX -> RegexMatcher(j[REGEX].asString()!!)
+      "equality" -> EqualsMatcher
+      "null" -> NullMatcher
+      "include" -> IncludeMatcher(j["value"].toString())
+      "type" -> ruleForType(j)
+      "number" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
+      "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
+      "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+      "real" -> {
+        MatchingRuleGroup.logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
+        NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+      }
+      MIN -> MinTypeMatcher(j[MIN].asNumber()!!.toInt())
+      MAX -> MaxTypeMatcher(j[MAX].asNumber()!!.toInt())
+      TIMESTAMP ->
+        if (j.has(TIMESTAMP)) TimestampMatcher(j[TIMESTAMP].toString())
+        else TimestampMatcher()
+      TIME ->
+        if (j.has(TIME)) TimeMatcher(j[TIME].toString())
+        else TimeMatcher()
+      DATE ->
+        if (j.has(DATE)) DateMatcher(j[DATE].toString())
+        else DateMatcher()
+      "values" -> ValuesMatcher
+      "ignore-order" -> ruleForIgnoreOrder(j)
+      "contentType" -> ContentTypeMatcher(j["value"].toString())
+      "arrayContains" -> when (val variants = j["variants"]) {
+        is JsonValue.Array -> ArrayContainsMatcher(variants.values.mapIndexed { index, variant ->
+          when (variant) {
+            is JsonValue.Object -> Triple(
+              variant["index"].asNumber()!!.toInt(),
+              MatchingRuleCategory("body").fromJson(variant["rules"]),
+              variant["generators"].asObject()?.entries?.mapValues {
+                lookupGenerator(it.value) ?: NullGenerator
+              } ?: emptyMap()
+            )
+            else ->
+              throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
+          }
+        })
+        else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
+      }
+      else -> {
+        MatchingRuleGroup.logger.warn { "Unrecognised matcher ${j[MATCH]}, defaulting to equality matching" }
+        EqualsMatcher
+      }
+    }
+
+    private fun ruleForType(map: JsonValue): MatchingRule {
+      return if (map is JsonValue.Object) {
+        if (map.has(MIN) && map.has(MAX)) {
+          MinMaxTypeMatcher(map[MIN].asNumber()!!.toInt(), map[MAX].asNumber()!!.toInt())
+        } else if (map.has(MIN)) {
+          MinTypeMatcher(map[MIN].asNumber()!!.toInt())
+        } else if (map.has(MAX)) {
+          MaxTypeMatcher(map[MAX].asNumber()!!.toInt())
+        } else {
+          TypeMatcher
+        }
+      } else {
+        TypeMatcher
+      }
+    }
+
+    private fun ruleForIgnoreOrder(map: JsonValue): MatchingRule {
+      return  if (map is JsonValue.Object) {
+        if (map.has(MIN) && map.has(MAX)) {
+          MinMaxEqualsIgnoreOrderMatcher(map[MIN].asNumber()!!.toInt(), map[MAX].asNumber()!!.toInt())
+        } else if (map.has(MIN)) {
+          MinEqualsIgnoreOrderMatcher(map[MIN].asNumber()!!.toInt())
+        } else if (map.has(MAX)) {
+          MaxEqualsIgnoreOrderMatcher(map[MAX].asNumber()!!.toInt())
+        } else {
+          EqualsIgnoreOrderMatcher
+        }
+      } else {
+        EqualsIgnoreOrderMatcher
+      }
+    }
+  }
 }
 
 /**
@@ -277,10 +407,16 @@ data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : Matching
 /**
  * Match array items in any order against a list of variants
  */
-data class ArrayContainsMatcher(val variants: List<MatchingRuleCategory>) : MatchingRule {
+data class ArrayContainsMatcher(
+  val variants: List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>>
+) : MatchingRule {
   override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
-    return mapOf("match" to "arrayContains", "variants" to variants.mapIndexed { index, rules ->
-      mapOf("index" to index, "rules" to rules.toMap(spec))
+    return mapOf("match" to "arrayContains", "variants" to variants.map { (index, rules, generators) ->
+      mapOf(
+        "index" to index,
+        "rules" to rules.toMap(spec),
+        "generators" to generators.mapValues { it.value.toMap(spec) }
+      )
     })
   }
 
@@ -292,6 +428,10 @@ data class ArrayContainsMatcher(val variants: List<MatchingRuleCategory>) : Matc
       listOf()
     }
   }
+
+  override val generators = listOf(ArrayContainsGenerator(variants))
+
+  override fun hasGenerators() = true
 }
 
 data class MatchingRuleGroup @JvmOverloads constructor(
@@ -316,6 +456,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
   }
 
   companion object : KLogging() {
+    @Deprecated("use fromJson", replaceWith = ReplaceWith("fromJson"))
     fun fromMap(map: Map<String, Any?>): MatchingRuleGroup {
       var ruleLogic = RuleLogic.AND
       if (map.containsKey("combine")) {
@@ -343,6 +484,40 @@ data class MatchingRuleGroup @JvmOverloads constructor(
       return MatchingRuleGroup(rules, ruleLogic)
     }
 
+    fun fromJson(json: JsonValue): MatchingRuleGroup {
+      var ruleLogic = RuleLogic.AND
+      val rules = mutableListOf<MatchingRule>()
+
+      if (json.isObject) {
+        val groupJson: JsonValue.Object = json.downcast()
+        if (groupJson.has("combine")) {
+          try {
+            val value = groupJson["combine"].asString()
+            if (value !=  null) {
+              ruleLogic = RuleLogic.valueOf(value)
+            }
+          } catch (e: IllegalArgumentException) {
+            logger.warn { "${groupJson["combine"]} is not a valid matcher rule logic value" }
+          }
+        }
+
+        if (json.has("matchers")) {
+          val matchers = json["matchers"]
+          if (matchers is JsonValue.Array) {
+            matchers.values.forEach {
+              if (it.isObject) {
+                rules.add(MatchingRule.fromJson(it))
+              }
+            }
+          } else {
+            logger.warn { "$json does not contain a list of matchers" }
+          }
+        }
+      }
+
+      return MatchingRuleGroup(rules, ruleLogic)
+    }
+
     private const val MATCH = "match"
     private const val MIN = "min"
     private const val MAX = "max"
@@ -356,6 +531,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
       else Integer.parseInt(map[field]!!.toString())
 
     @JvmStatic
+    @Deprecated("Use MatchingRule.fromJson", replaceWith = ReplaceWith("MatchingRule.fromJson"))
     fun ruleFromMap(map: Map<String, Any?>): MatchingRule {
       return when {
         map.containsKey(MATCH) -> when (map[MATCH]) {
@@ -388,7 +564,11 @@ data class MatchingRuleGroup @JvmOverloads constructor(
           "arrayContains" -> when(val variants = map["variants"]) {
             is List<*> -> ArrayContainsMatcher(variants.mapIndexed { index, variant ->
               when (variant) {
-                is Map<*, *> -> MatchingRuleCategory("body").fromMap(variant["rules"] as Map<String, Any?>)
+                is Map<*, *> -> Triple(
+                  mapEntryToInt(variant as Map<String, Any?>, "index"),
+                  MatchingRuleCategory("body").fromMap(variant["rules"] as Map<String, Any?>),
+                  emptyMap()
+                )
                 else ->
                   throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
               }

@@ -105,6 +105,7 @@ fun pathIdentifier(
 fun validPathCharacter(c: Char) = c.isLetterOrDigit() || EXP_ALLOWED_SPECIAL_CHARS.contains(c)
 
 // bracket_path -> (string_path | index | *) ]
+@Suppress("ThrowsCount")
 fun bracketPath(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<PathToken>, path: String, index: Int) {
   if (chars.hasNext()) {
     val ch = chars.next()

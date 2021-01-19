@@ -92,13 +92,13 @@ object Json {
 
   fun toBoolean(jsonElement: JsonValue?) = when {
     jsonElement == null -> false
-    jsonElement.isBoolean -> jsonElement.asBoolean()
+    jsonElement.isBoolean -> jsonElement.asBoolean()!!
     else -> false
   }
 
   fun toInteger(value: JsonValue?) = when {
     value == null -> null
-    value.isNumber -> value.asNumber().toInt()
+    value.isNumber -> value.asNumber()!!.toInt()
     else -> null
   }
 

@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.expect
@@ -90,7 +91,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
       val lock = raf.channel.lock()
       try {
         val source = FileSource(pactFile)
-        val json = JsonParser.parseString(readFileUtf8(raf)).asObject()
+        val json: JsonValue.Object = JsonParser.parseString(readFileUtf8(raf)).downcast()
         val existingPact = DefaultPactReader.pactFromJson(json, source)
         val result = PactMerge.merge(pact, existingPact)
         if (!result.ok) {

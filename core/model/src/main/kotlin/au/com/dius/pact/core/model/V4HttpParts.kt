@@ -8,7 +8,7 @@ import au.com.dius.pact.core.support.json.JsonValue
 
 private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
   return if (json.has("headers") && json["headers"] is JsonValue.Object) {
-    json["headers"].asObject().entries.entries.associate { (key, value) ->
+    json["headers"].asObject()!!.entries.entries.associate { (key, value) ->
       if (value is JsonValue.Array) {
         key to value.values.map { Json.toString(it) }
       } else {
@@ -124,7 +124,7 @@ data class HttpResponse(
         json.has("status") -> {
           val statusJson = json["status"]
           when {
-            statusJson.isNumber -> statusJson.asNumber().toInt()
+            statusJson.isNumber -> statusJson.asNumber()!!.toInt()
             statusJson is JsonValue.StringValue -> statusJson.asString()?.toInt() ?: Response.DEFAULT_STATUS
             else -> Response.DEFAULT_STATUS
           }

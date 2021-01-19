@@ -21,7 +21,6 @@ import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.isNotEmpty
 import com.mifmif.common.regex.Generex
-import groovy.lang.Closure
 import mu.KLogging
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.DateUtils
@@ -253,8 +252,10 @@ class ArrayContainsMatcher(
       }
     }
 
-    fun buildVariants(variants: List<Pair<Any, MatchingRuleCategory>>): List<MatchingRuleCategory> {
-      return variants.map { (_, variant) -> variant }
+    fun buildVariants(variants: List<Pair<Any, MatchingRuleCategory>>): List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>> {
+      return variants.mapIndexed { index, variant ->
+        Triple(index, variant.second, emptyMap())
+      }
     }
   }
 }

@@ -9,7 +9,7 @@ class MockServerURLGeneratorSpec extends Specification {
   @Unroll
   def 'generate returns null when #desc'() {
     expect:
-    new MockServerURLGenerator(example, '.*\\/(orders\\/\\d+)$').generate(context) == null
+    new MockServerURLGenerator(example, '.*\\/(orders\\/\\d+)$').generate(context, null) == null
 
     where:
 
@@ -26,7 +26,7 @@ class MockServerURLGeneratorSpec extends Specification {
   def 'replaces the non-matching parts with the mock server base URL'() {
     expect:
     new MockServerURLGenerator('http://localhost:1234/orders/5678', '.*\\/(orders\\/\\d+)$')
-      .generate(context) == 'http://mockserver/orders/5678'
+      .generate(context, null) == 'http://mockserver/orders/5678'
 
     where:
     context << [

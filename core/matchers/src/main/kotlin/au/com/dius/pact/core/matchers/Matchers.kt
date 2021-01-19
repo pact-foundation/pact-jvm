@@ -246,8 +246,12 @@ object Matchers : KLogging() {
         }
         is ArrayContainsMatcher -> {
           val variants = if (matcher.variants.isEmpty()) {
-            expectedList.map {
-              MatchingRuleCategory("body", mutableMapOf("" to MatchingRuleGroup(mutableListOf(EqualsMatcher))))
+            expectedList.mapIndexed { index, _ ->
+              Triple(
+                index,
+                MatchingRuleCategory("body", mutableMapOf("" to MatchingRuleGroup(mutableListOf(EqualsMatcher)))),
+                emptyMap()
+              )
             }
           } else {
             matcher.variants
@@ -255,7 +259,7 @@ object Matchers : KLogging() {
           for ((index, variant) in variants.withIndex()) {
             if (index < expectedList.size) {
               val expectedValue = expectedList[index]
-              val newContext = MatchingContext(variant, context.allowUnexpectedKeys)
+              val newContext = MatchingContext(variant.second, context.allowUnexpectedKeys)
               val noneMatched = actualList.withIndex().all { (actualIndex, value) ->
                 val variantResult = callback(listOf("$"), expectedValue, value, newContext)
                 val mismatches = variantResult.flatMap { it.result }

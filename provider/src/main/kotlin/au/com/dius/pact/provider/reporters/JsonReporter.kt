@@ -77,7 +77,7 @@ class JsonReporter(
           if (existingContents is JsonValue.Object && existingContents.has("provider") &&
             providerName == existingContents["provider"]["name"].asString()) {
             existingContents["metaData"] = jsonData["metaData"]
-            existingContents["execution"].asArray().addAll(jsonData["execution"])
+            existingContents["execution"].asArray()!!.addAll(jsonData["execution"])
             reportFile.writeText(existingContents.serialise())
           } else {
             reportFile.writeText(jsonData.serialise())
@@ -101,11 +101,11 @@ class JsonReporter(
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
-    jsonData["execution"].asArray().last()["consumer"].asObject()["source"] = jsonObject("url" to pactUrl.url)
+    jsonData["execution"].asArray()!!.last()["consumer"].asObject()!!["source"] = jsonObject("url" to pactUrl.url)
   }
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
-    jsonData["execution"].asArray().last()["consumer"].asObject()["source"] = jsonObject(
+    jsonData["execution"].asArray()!!.last()["consumer"].asObject()!!["source"] = jsonObject(
       "file" to if (pactFile is FileSource) pactFile.file.toString() else pactFile.description()
     )
   }
@@ -117,7 +117,7 @@ class JsonReporter(
         "interactions" to JsonValue.Array()
       ))
     }
-    jsonData["execution"].asArray().last().asObject()["result"] = jsonObject(
+    jsonData["execution"].asArray()!!.last().asObject()!!["result"] = jsonObject(
       "state" to "Pact Load Failure",
       "message" to message
     )
@@ -128,7 +128,7 @@ class JsonReporter(
   override fun warnPactFileHasNoInteractions(pact: Pact) { }
 
   override fun interactionDescription(interaction: Interaction) {
-    jsonData["execution"].asArray().last()["interactions"].asArray().add(jsonObject(
+    jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.add(jsonObject(
       "interaction" to Json.toJson(interaction.toMap(PactSpecVersion.V3)),
       "verification" to jsonObject("result" to "OK")
     ))
@@ -149,7 +149,7 @@ class JsonReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    val interactions = jsonData["execution"].asArray().last()["interactions"].asArray()
+    val interactions = jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!
     val error = jsonObject(
       "result" to FAILED,
       "message" to "State change '$state' callback failed",
@@ -163,7 +163,7 @@ class JsonReporter(
         "verification" to error
       ))
     } else {
-      interactions.last().asObject()["verification"] = error
+      interactions.last().asObject()!!["verification"] = error
     }
   }
 
@@ -184,14 +184,15 @@ class JsonReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    jsonData["execution"].asArray().last()["interactions"].asArray().last().asObject()["verification"] = jsonObject(
-      "result" to FAILED,
-      "message" to interactionMessage,
-      "exception" to jsonObject(
-        "message" to e.message,
-        "stackTrace" to jsonArray(ExceptionUtils.getStackFrames(e).toList())
+    jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.last().asObject()!!["verification"] =
+      jsonObject(
+        "result" to FAILED,
+        "message" to interactionMessage,
+        "exception" to jsonObject(
+          "message" to e.message,
+          "stackTrace" to jsonArray(ExceptionUtils.getStackFrames(e).toList())
+        )
       )
-    )
   }
 
   override fun returnsAResponseWhich() { }
@@ -199,8 +200,8 @@ class JsonReporter(
   override fun statusComparisonOk(status: Int) { }
 
   override fun statusComparisonFailed(status: Int, comparison: Any) {
-    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
-      .asObject()
+    val verification = jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.last()["verification"]
+      .asObject()!!
     verification["result"] = FAILED
     val statusJson = jsonArray(
       if (comparison.hasProperty("message")) {
@@ -217,13 +218,13 @@ class JsonReporter(
   override fun headerComparisonOk(key: String, value: List<String>) { }
 
   override fun headerComparisonFailed(key: String, value: List<String>, comparison: Any) {
-    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
-      .asObject()
+    val verification = jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.last()["verification"]
+      .asObject()!!
     verification["result"] = FAILED
     if (!verification.has("header")) {
       verification["header"] = jsonObject()
     }
-    verification["header"].asObject()[key] = when (comparison) {
+    verification["header"].asObject()!![key] = when (comparison) {
       is List<*> -> Json.toJson(comparison.map {
         when (it) {
           is HeaderMismatch -> JsonValue.StringValue(JsonToken.StringValue(it.mismatch.toCharArray()))
@@ -237,8 +238,8 @@ class JsonReporter(
   override fun bodyComparisonOk() { }
 
   override fun bodyComparisonFailed(comparison: Any) {
-    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
-      .asObject()
+    val verification = jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.last()["verification"]
+      .asObject()!!
     verification["result"] = FAILED
     verification["body"] = when (comparison) {
       is Err<*> -> Json.toJson((comparison as Err<BodyTypeMismatch>).error.description())
@@ -248,19 +249,21 @@ class JsonReporter(
   }
 
   override fun errorHasNoAnnotatedMethodsFoundForInteraction(interaction: Interaction) {
-    jsonData["execution"].asArray().last()["interactions"].asArray().last().asObject()["verification"] = jsonObject(
-      "result" to FAILED,
-      "cause" to jsonObject("message" to "No Annotated Methods Found For Interaction")
-    )
+    jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.last().asObject()!!["verification"] =
+      jsonObject(
+        "result" to FAILED,
+        "cause" to jsonObject("message" to "No Annotated Methods Found For Interaction")
+      )
   }
 
   override fun verificationFailed(interaction: Interaction, e: Exception, printStackTrace: Boolean) {
-    jsonData["execution"].asArray().last()["interactions"].asArray().last().asObject()["verification"] = jsonObject(
-      "result" to FAILED,
-      "exception" to jsonObject(
-        "message" to e.message,
-        "stackTrace" to ExceptionUtils.getStackFrames(e)
-    )
+    jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.last().asObject()!!["verification"] =
+      jsonObject(
+        "result" to FAILED,
+        "exception" to jsonObject(
+          "message" to e.message,
+          "stackTrace" to ExceptionUtils.getStackFrames(e)
+      )
     )
   }
 
@@ -271,13 +274,13 @@ class JsonReporter(
   override fun displayFailures(failures: List<VerificationResult.Failed>) { }
 
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
-    val verification = jsonData["execution"].asArray().last()["interactions"].asArray().last()["verification"]
-      .asObject()
+    val verification = jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.last()["verification"]
+      .asObject()!!
     verification["result"] = FAILED
     if (!verification.has("metadata")) {
       verification["metadata"] = jsonObject()
     }
-    verification["metadata"].asObject()[key] = comparison
+    verification["metadata"].asObject()!![key] = comparison
   }
 
   override fun includesMetadata() { }
@@ -291,7 +294,7 @@ class JsonReporter(
     provider: IProviderInfo,
     notices: List<VerificationNotice>
   ) {
-    jsonData["execution"].asArray().last()["consumer"].asObject()["notices"] = jsonArray(notices.map { it.text })
+    jsonData["execution"].asArray()!!.last()["consumer"].asObject()!!["notices"] = jsonArray(notices.map { it.text })
   }
 
   override fun warnPublishResultsSkippedBecauseFiltered() { }

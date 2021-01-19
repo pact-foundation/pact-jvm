@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model.generators
 
 import com.github.michaelbull.result.getOr
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
@@ -33,26 +34,31 @@ const val DEFAULT_GENERATOR_PACKAGE = "au.com.dius.pact.core.model.generators"
  * au.com.dius.pact.model.generators package, but this can be extended by adding a comma separated list to the
  * pact.generators.packages system property. The generator class name needs to be <Type>Generator.
  */
-fun lookupGenerator(generatorJson: JsonValue.Object): Generator? {
+fun lookupGenerator(generatorJson: JsonValue?): Generator? {
   var generator: Generator? = null
 
-  try {
-    val generatorClass = findGeneratorClass(Json.toString(generatorJson["type"])).kotlin
-    val fromJson = when {
-      generatorClass.companionObject != null ->
-        generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find {
-          it.name == "fromJson" }
-      generatorClass.objectInstance != null ->
-        generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromJson" }
-      else -> null
+  if (generatorJson is JsonValue.Object) {
+    try {
+      val generatorClass = findGeneratorClass(Json.toString(generatorJson["type"])).kotlin
+      val fromJson = when {
+        generatorClass.companionObject != null ->
+          generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find {
+            it.name == "fromJson"
+          }
+        generatorClass.objectInstance != null ->
+          generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromJson" }
+        else -> null
+      }
+      if (fromJson?.second != null) {
+        generator = fromJson.second!!.call(fromJson.first, generatorJson) as Generator?
+      } else {
+        logger.warn { "Could not invoke generator class 'fromJson' for generator config '$generatorJson'" }
+      }
+    } catch (e: ClassNotFoundException) {
+      logger.warn(e) { "Could not find generator class for generator config '$generatorJson'" }
     }
-    if (fromJson?.second != null) {
-      generator = fromJson.second!!.call(fromJson.first, generatorJson) as Generator?
-    } else {
-      logger.warn { "Could not invoke generator class 'fromJson' for generator config '$generatorJson'" }
-    }
-  } catch (e: ClassNotFoundException) {
-    logger.warn(e) { "Could not find generator class for generator config '$generatorJson'" }
+  } else {
+    logger.warn { "'$generatorJson' is not a valid generator JSON value" }
   }
 
   return generator
@@ -84,7 +90,7 @@ fun findGeneratorClass(generatorType: String): Class<*> {
  * Interface that all Generators need to implement
  */
 interface Generator {
-  fun generate(context: Map<String, Any?>): Any?
+  fun generate(context: Map<String, Any?>, exampleValue: Any?): Any?
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any>
   fun correspondsToMode(mode: GeneratorTestMode): Boolean = true
 }
@@ -97,20 +103,20 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
     return mapOf("type" to "RandomInt", "min" to min, "max" to max)
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     return RandomUtils.nextInt(min, max)
   }
 
   companion object {
     fun fromJson(json: JsonValue.Object): RandomIntGenerator {
       val min = if (json["min"].isNumber) {
-        json["min"].asNumber().toInt()
+        json["min"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for min: '${json["min"]}'" }
         0
       }
       val max = if (json["max"].isNumber) {
-        json["max"].asNumber().toInt()
+        json["max"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for max: '${json["max"]}'" }
         Int.MAX_VALUE
@@ -128,7 +134,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
     return mapOf("type" to "RandomDecimal", "digits" to digits)
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     return when {
       digits < 1 -> throw UnsupportedOperationException("RandomDecimalGenerator digits must be > 0, got $digits")
       digits == 1 -> BigDecimal(RandomUtils.nextInt(0, 9))
@@ -156,7 +162,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   companion object {
     fun fromJson(json: JsonValue.Object): RandomDecimalGenerator {
       val digits = if (json["digits"].isNumber) {
-        json["digits"].asNumber().toInt()
+        json["digits"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for digits: '${json["digits"]}'" }
         10
@@ -174,12 +180,13 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
     return mapOf("type" to "RandomHexadecimal", "digits" to digits)
   }
 
-  override fun generate(context: Map<String, Any?>): Any = RandomStringUtils.random(digits, "0123456789abcdef")
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any =
+    RandomStringUtils.random(digits, "0123456789abcdef")
 
   companion object {
     fun fromJson(json: JsonValue.Object): RandomHexadecimalGenerator {
       val digits = if (json["digits"].isNumber) {
-        json["digits"].asNumber().toInt()
+        json["digits"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for digits: '${json["digits"]}'" }
         10
@@ -197,14 +204,14 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
     return mapOf("type" to "RandomString", "size" to size)
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     return RandomStringUtils.randomAlphanumeric(size)
   }
 
   companion object {
     fun fromJson(json: JsonValue.Object): RandomStringGenerator {
       val size = if (json["size"].isNumber) {
-        json["size"].asNumber().toInt()
+        json["size"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for size: '${json["size"]}'" }
         10
@@ -222,7 +229,7 @@ data class RegexGenerator(val regex: String) : Generator {
     return mapOf("type" to "Regex", "regex" to regex)
   }
 
-  override fun generate(context: Map<String, Any?>): Any = Generex(regex).random()
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any = Generex(regex).random()
 
   companion object {
     fun fromJson(json: JsonValue.Object) = RegexGenerator(Json.toString(json["regex"]))
@@ -237,7 +244,7 @@ object UuidGenerator : Generator {
     return mapOf("type" to "Uuid")
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     return UUID.randomUUID().toString()
   }
 
@@ -266,7 +273,7 @@ data class DateGenerator @JvmOverloads constructor(
     return map
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseDate")) context["baseDate"] as OffsetDateTime
       else OffsetDateTime.now()
     val date = DateExpression.executeDateExpression(base, expression).getOr { base }
@@ -305,7 +312,7 @@ data class TimeGenerator @JvmOverloads constructor(
     return map
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetDateTime else OffsetDateTime.now()
     val time = TimeExpression.executeTimeExpression(base, expression).getOr { base }
     return if (!format.isNullOrEmpty()) {
@@ -343,7 +350,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
     return map
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseDateTime")) context["baseDateTime"] as OffsetDateTime
       else OffsetDateTime.now()
     val datetime = DateTimeExpression.executeExpression(base, expression).getOr { base }
@@ -372,7 +379,7 @@ object RandomBooleanGenerator : Generator {
     return mapOf("type" to "RandomBoolean")
   }
 
-  override fun generate(context: Map<String, Any?>): Any {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
     return ThreadLocalRandom.current().nextBoolean()
   }
 
@@ -395,7 +402,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
     return mapOf("type" to "ProviderState", "expression" to expression, "dataType" to type.name)
   }
 
-  override fun generate(context: Map<String, Any?>): Any? {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any? {
     return when (val providerState = context["providerState"]) {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
@@ -434,9 +441,9 @@ data class MockServerURLGenerator(
 
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Consumer
 
-  override fun generate(context: Map<String, Any?>): Any? {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any? {
     logger.debug { "context = $context" }
-    val mockServerDetails = context.get("mockServer")
+    val mockServerDetails = context["mockServer"]
     return if (mockServerDetails != null) {
       if (mockServerDetails is Map<*, *>) {
         val href = mockServerDetails["href"]
@@ -479,4 +486,23 @@ data class MockServerURLGenerator(
       return MockServerURLGenerator(Json.toString(json["example"]), Json.toString(json["regex"]))
     }
   }
+}
+
+object NullGenerator : Generator {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?) = null
+  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
+}
+
+data class ArrayContainsGenerator(
+  val variants: List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>>
+) : Generator {
+  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any? {
+    return if (exampleValue is JsonValue.Array) {
+      null
+    } else {
+      null
+    }
+  }
+
+  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
 }

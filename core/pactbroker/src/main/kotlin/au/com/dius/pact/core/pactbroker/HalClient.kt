@@ -484,7 +484,8 @@ open class HalClient @JvmOverloads constructor(
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
 
     @JvmStatic
-    fun asMap(jsonObject: JsonValue.Object) = jsonObject.entries.entries
-      .associate { entry -> entry.key to fromJson(entry.value) }
+    fun asMap(jsonObject: JsonValue.Object?) = jsonObject?.entries?.entries?.associate {
+        entry -> entry.key to fromJson(entry.value)
+    } ?: emptyMap()
   }
 }

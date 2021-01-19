@@ -60,19 +60,19 @@ sealed class JsonValue {
     fun keys(): Set<String> = entries.keys
   }
 
-  fun asObject(): Object {
-    if (this is Object) {
-      return this
+  fun asObject(): Object? {
+    return if (this is Object) {
+      this
     } else {
-      throw UnsupportedOperationException("Expected an Object, but found a $this")
+      null
     }
   }
 
-  fun asArray(): Array {
-    if (this is Array) {
-      return this
+  fun asArray(): Array? {
+    return if (this is Array) {
+      this
     } else {
-      throw UnsupportedOperationException("Expected an Array, but found a $this")
+      null
     }
   }
 
@@ -102,17 +102,17 @@ sealed class JsonValue {
   fun asBoolean() = when (this) {
     is True -> true
     is False -> false
-    else -> throw UnsupportedOperationException("Expected a Boolean, but found a $this")
+    else -> null
   }
 
-  fun asNumber(): Number = when (this) {
+  fun asNumber(): Number? = when (this) {
     is Integer -> this.toBigInteger()
     is Decimal -> this.toBigDecimal()
-    else -> throw UnsupportedOperationException("Expected a Number, but found a $this")
+    else -> null
   }
 
   operator fun get(field: Any): JsonValue = when {
-    this is Object -> this.asObject()[field.toString()]
+    this is Object -> this[field.toString()]
     this is Array && field is Int -> this.values[field]
     else -> throw UnsupportedOperationException("Indexed lookups only work on Arrays and Objects, not $this")
   }
@@ -255,6 +255,26 @@ sealed class JsonValue {
       is Null -> true
       else -> false
     }
+
+  val isObject: Boolean
+    get() = when (this) {
+      is Object -> true
+      else -> false
+    }
+
+  val isArray: Boolean
+    get() = when (this) {
+      is Array -> true
+      else -> false
+    }
+
+  inline fun <reified T: JsonValue> downcast() : T {
+    return if (this is T) {
+      this
+    } else {
+      throw UnsupportedOperationException("Can not downcast ${this.name} to type ${T::class}")
+    }
+  }
 }
 
 fun <R> JsonValue?.map(transform: (JsonValue) -> R): List<R> = when {

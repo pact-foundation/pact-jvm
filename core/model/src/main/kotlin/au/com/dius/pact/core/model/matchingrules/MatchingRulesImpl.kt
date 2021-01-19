@@ -68,11 +68,11 @@ class MatchingRulesImpl : MatchingRules {
         entry.value.toMap(PactSpecVersion.V3)
     }
 
-    fun fromV3Json(json: JsonValue.Object) {
-      json.entries.forEach { (key, value) ->
-        addRules(key, Json.toMap(value))
-      }
+  fun fromV3Json(json: JsonValue.Object) {
+    json.entries.forEach { (key, value) ->
+      addRules(key, value)
     }
+  }
 
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return rules.values.flatMap { it.validateForVersion(pactVersion) }
@@ -93,9 +93,9 @@ class MatchingRulesImpl : MatchingRules {
       }
     }
 
-    private fun addRules(categoryName: String, matcherDef: Map<String, Any?>) {
-      addCategory(categoryName).fromMap(matcherDef)
-    }
+  private fun addRules(categoryName: String, matcherDef: JsonValue) {
+    addCategory(categoryName).fromJson(matcherDef)
+  }
 
     private fun toV2Map(): Map<String, Any?> {
         val result = mutableMapOf<String, Any?>()

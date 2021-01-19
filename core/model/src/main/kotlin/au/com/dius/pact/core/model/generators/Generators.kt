@@ -45,9 +45,11 @@ object JsonContentTypeHandler : ContentTypeHandler {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
       when (parent) {
-        is JsonValue.Object -> parent[valueKey.toString()] = Json.toJson(generator.generate(context))
-        is JsonValue.Array -> parent[valueKey as Int] = Json.toJson(generator.generate(context))
-        else -> body.value = Json.toJson(generator.generate(context))
+        is JsonValue.Object ->
+          parent[valueKey.toString()] = Json.toJson(generator.generate(context, parent[valueKey.toString()]))
+        is JsonValue.Array ->
+          parent[valueKey as Int] = Json.toJson(generator.generate(context, parent[valueKey]))
+        else -> body.value = Json.toJson(generator.generate(context, body.value))
       }
     }
   }
@@ -118,7 +120,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
               } else {
                 logger.warn { "Ignoring invalid generator config '$generatorJson.obj'" }
               }
-              else -> generatorJson.asObject().entries.forEach { (generatorKey, generatorValue) ->
+              else -> generatorJson.asObject()?.entries?.forEach { (generatorKey, generatorValue) ->
                 if (generatorValue is JsonValue.Object && generatorValue.has("type")) {
                   val generator = lookupGenerator(generatorValue)
                   if (generator != null) {

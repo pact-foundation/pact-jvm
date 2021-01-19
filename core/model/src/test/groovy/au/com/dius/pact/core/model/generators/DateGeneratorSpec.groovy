@@ -10,12 +10,12 @@ class DateGeneratorSpec extends Specification {
 
   def 'supports timezones'() {
     expect:
-    new DateGenerator('yyyy-MM-ddZ', null).generate([:]) ==~ /\d{4}-\d{2}-\d{2}[-+]\d+/
+    new DateGenerator('yyyy-MM-ddZ', null).generate([:], null) ==~ /\d{4}-\d{2}-\d{2}[-+]\d+/
   }
 
   def 'Uses any defined expression to generate the date value'() {
     expect:
-    new DateGenerator('yyyy-MM-dd', '+ 1 day').generate([:]) == date
+    new DateGenerator('yyyy-MM-dd', '+ 1 day').generate([:], null) == date
 
     where:
 
@@ -29,7 +29,7 @@ class DateGeneratorSpec extends Specification {
     def baseDate = OffsetDateTime.now()
 
     expect:
-    DateGenerator.@Companion.fromJson(json).generate([baseDate: baseDate]) == baseDate.toString()
+    DateGenerator.@Companion.fromJson(json).generate([baseDate: baseDate], null) == baseDate.toString()
   }
 
 }

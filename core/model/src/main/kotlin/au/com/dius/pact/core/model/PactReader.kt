@@ -59,7 +59,11 @@ fun loadPactFromUrl(
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options, tag = source.tag)
     }
     else -> when (val jsonResource = fetchJsonResource(http, source)) {
-      is Ok -> jsonResource.value.first.asObject() to jsonResource.value.second
+      is Ok -> if (jsonResource.value.first is JsonValue.Object) {
+        jsonResource.value.first.asObject()!! to jsonResource.value.second
+      } else {
+        throw UnsupportedOperationException("Was expected a JSON document, got ${jsonResource.value}")
+      }
       is Err -> throw jsonResource.error
     }
   }
@@ -218,7 +222,7 @@ object DefaultPactReader : PactReader, KLogging() {
   fun determineSpecVersion(pactInfo: JsonValue.Object): String {
     var version = "2.0.0"
     if (pactInfo.has("metadata")) {
-      val metadata = pactInfo["metadata"].asObject()
+      val metadata: JsonValue.Object = pactInfo["metadata"].downcast()
       version = when {
         metadata.has("pactSpecificationVersion") -> Json.toString(metadata["pactSpecificationVersion"])
         metadata.has("pactSpecification") -> specVersion(metadata["pactSpecification"], version)
@@ -293,8 +297,8 @@ object DefaultPactReader : PactReader, KLogging() {
     val provider = Provider.fromJson(pactJson["provider"])
     val consumer = Consumer.fromJson(pactJson["consumer"])
 
-    val interactions = if (pactJson.has("interactions"))
-      pactJson["interactions"].asArray().values.mapIndexed { i, interaction ->
+    val interactions = if (pactJson.has("interactions") && pactJson["interactions"].isArray)
+      pactJson["interactions"].asArray()!!.values.mapIndexed { i, interaction ->
         V4Interaction.interactionFromJson(i, interaction, source).unwrap()
       }
     else emptyList()
@@ -303,15 +307,23 @@ object DefaultPactReader : PactReader, KLogging() {
   }
 
   @JvmStatic
-  fun extractResponse(responseJson: JsonValue.Object): Response {
-    formatBody(responseJson)
-    return Response.fromJson(responseJson)
+  fun extractResponse(responseJson: JsonValue.Object?): Response {
+    return if (responseJson != null) {
+      formatBody(responseJson)
+      Response.fromJson(responseJson)
+    } else {
+      Response()
+    }
   }
 
   @JvmStatic
-  fun extractRequest(requestJson: JsonValue.Object): Request {
-    formatBody(requestJson)
-    return Request.fromJson(requestJson)
+  fun extractRequest(requestJson: JsonValue.Object?): Request {
+    return if (requestJson != null) {
+      formatBody(requestJson)
+      Request.fromJson(requestJson)
+    } else {
+      Request()
+    }
   }
 
   private fun formatBody(json: JsonValue) {
@@ -344,7 +356,7 @@ object DefaultPactReader : PactReader, KLogging() {
     }
 
     if (pactJson.has("metadata") && pactJson["metadata"] is JsonValue.Object) {
-      pactJson["metadata"] = jsonObject(pactJson["metadata"].asObject().entries.entries.map { entry ->
+      pactJson["metadata"] = jsonObject(pactJson["metadata"].asObject()!!.entries.entries.map { entry ->
         when (entry.key) {
           "pact-specification" -> "pactSpecification" to entry.value
           else -> entry.toPair()
@@ -355,15 +367,19 @@ object DefaultPactReader : PactReader, KLogging() {
     return pactJson
   }
 
-  private fun transformRequestResponseJson(requestJson: JsonValue.Object): JsonValue.Object {
-    return jsonObject(requestJson.entries.entries.map { (k, v) ->
-      when (k) {
-        "responseMatchingRules" -> "matchingRules" to v
-        "requestMatchingRules" -> "matchingRules" to v
-        "method" -> "method" to Json.toString(v).toUpperCase()
-        else -> k to v
-      }
-    })
+  private fun transformRequestResponseJson(requestJson: JsonValue.Object?): JsonValue.Object? {
+    return if (requestJson != null) {
+      jsonObject(requestJson.entries.entries.map { (k, v) ->
+        when (k) {
+          "responseMatchingRules" -> "matchingRules" to v
+          "requestMatchingRules" -> "matchingRules" to v
+          "method" -> "method" to Json.toString(v).toUpperCase()
+          else -> k to v
+        }
+      })
+    } else {
+      null
+    }
   }
 
   @Suppress("ReturnCount")
@@ -371,7 +387,7 @@ object DefaultPactReader : PactReader, KLogging() {
     if (source is ClosurePactSource) {
       return loadFile(source.closure.get(), options)
     } else if (source is FileSource) {
-      return source.file.bufferedReader().use { JsonParser.parseReader(it).asObject() to source }
+      return source.file.bufferedReader().use { JsonParser.parseReader(it).downcast<JsonValue.Object>() to source }
     } else if (source is InputStream || source is Reader || source is File) {
       return loadPactFromFile(source)
     } else if (source is BrokerUrlSource) {
@@ -394,10 +410,10 @@ object DefaultPactReader : PactReader, KLogging() {
       return loadPactFromClasspath(source.substring(CLASSPATH_URI_START.length))
     } else if (source is String && fileExists(source)) {
       val file = File(source)
-      return file.bufferedReader().use { JsonParser.parseReader(it).asObject() to FileSource(file) }
+      return file.bufferedReader().use { JsonParser.parseReader(it).downcast<JsonValue.Object>() to FileSource(file) }
     } else {
       try {
-        return JsonParser.parseString(source.toString()).asObject() to UnknownPactSource
+        return JsonParser.parseString(source.toString()).downcast<JsonValue.Object>() to UnknownPactSource
       } catch (e: JsonException) {
         throw UnsupportedOperationException(
           "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +
@@ -408,10 +424,11 @@ object DefaultPactReader : PactReader, KLogging() {
 
   private fun loadPactFromFile(source: Any): Pair<JsonValue.Object, PactSource> {
     return when (source) {
-      is InputStream -> JsonParser.parseReader(InputStreamReader(source)).asObject() to InputStreamPactSource
-      is Reader -> JsonParser.parseReader(source).asObject() to ReaderPactSource
+      is InputStream -> JsonParser.parseReader(InputStreamReader(source)).downcast<JsonValue.Object>() to
+        InputStreamPactSource
+      is Reader -> JsonParser.parseReader(source).downcast<JsonValue.Object>() to ReaderPactSource
       is File -> source.bufferedReader().use {
-        JsonParser.parseReader(it).asObject() } to FileSource(source)
+        JsonParser.parseReader(it).downcast<JsonValue.Object>() } to FileSource(source)
       else -> throw IllegalArgumentException("loadPactFromFile expects either an InputStream, Reader or File. " +
         "Got a ${source.javaClass.name} instead")
     }
@@ -431,7 +448,7 @@ object DefaultPactReader : PactReader, KLogging() {
       .invoke(s3Client, bucket, key)
     val s3ObjectClass = Class.forName("com.amazonaws.services.s3.model.S3Object")
     val objectContent = s3ObjectClass.getMethod("getObjectContent").invoke(s3Pact) as InputStream
-    return JsonParser.parseReader(InputStreamReader(objectContent)).asObject() to S3PactSource(source)
+    return JsonParser.parseReader(InputStreamReader(objectContent)).downcast<JsonValue.Object>() to S3PactSource(source)
   }
 
   private fun loadPactFromClasspath(source: String): Pair<JsonValue.Object, PactSource> {

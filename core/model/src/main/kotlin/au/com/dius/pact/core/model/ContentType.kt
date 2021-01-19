@@ -47,6 +47,7 @@ class ContentType(val contentType: MediaType?) {
 
   fun getBaseType() = contentType?.baseType?.toString()
 
+  @Suppress("ComplexMethod")
   fun isBinaryType(): Boolean {
     return if (contentType != null) {
       val superType = registry.getSupertype(contentType) ?: MediaType.OCTET_STREAM

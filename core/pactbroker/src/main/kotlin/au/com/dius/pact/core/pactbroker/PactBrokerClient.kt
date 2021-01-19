@@ -259,13 +259,14 @@ open class PactBrokerClient(
           val href = Json.toString(selfLink["href"])
           val name = Json.toString(selfLink["name"])
           val properties = pactJson["verificationProperties"]
-          val notices = properties["notices"].asArray()
-            .map { VerificationNotice.fromJson(it.asObject()) }
+          val notices = properties["notices"].asArray()?.map { VerificationNotice.fromJson(it) }?.filterNotNull() ?:
+            emptyList()
           var pending = false
           if (properties is JsonValue.Object && properties.has("pending") && properties["pending"].isBoolean) {
-            pending = properties["pending"].asBoolean()
+            pending = properties["pending"].asBoolean()!!
           }
-          val wip = if (properties.has("wip") && properties["wip"].isBoolean) properties["wip"].asBoolean()
+          val wip = if (properties.has("wip") && properties["wip"].isBoolean)
+            properties["wip"].asBoolean()!!
           else false
           if (options.containsKey("authentication")) {
             PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending,
@@ -482,7 +483,7 @@ open class PactBrokerClient(
     ) {
       when (val result = halClient.getJson(path, false)) {
         is Ok<JsonValue> -> {
-          val summary = result.value["summary"].asObject()
+          val summary: JsonValue.Object = result.value["summary"].downcast()
           CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
             Json.toInteger(summary["unknown"]))
         }

@@ -71,8 +71,8 @@ abstract class HttpPart {
 
   fun buildGenerators(category: Category): Map<String, Generator> {
     val generators = generators.categories[category] ?: emptyMap()
-//    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name)
-    return generators
+    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.toLowerCase()).generators()
+    return generators + matchingRuleGenerators
   }
 
   companion object : KLogging() {

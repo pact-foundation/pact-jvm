@@ -25,7 +25,7 @@ sealed class Matcher(
   open val generator: Generator? = null
 ) {
   open val value: Any? = value
-    get() = field ?: this.generator?.generate(mapOf())
+    get() = field ?: this.generator?.generate(mapOf(), null)
 }
 
 data class RegexpMatcher(val regex: String, override val value: String?) :

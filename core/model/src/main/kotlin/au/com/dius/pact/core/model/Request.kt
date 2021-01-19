@@ -34,14 +34,28 @@ class Request @JvmOverloads constructor(
     mode: GeneratorTestMode = GeneratorTestMode.Provider
   ): Request {
     val r = this.copy()
-    generators.applyGenerator(Category.PATH, mode) { _, g -> r.path = g.generate(context).toString() }
-    generators.applyGenerator(Category.HEADER, mode) { key, g ->
-      r.headers[key] = listOf(g.generate(context).toString())
+    val pathGenerators = r.buildGenerators(Category.PATH)
+    if (pathGenerators.isNotEmpty()) {
+      Generators.applyGenerators(pathGenerators, mode) { _, g -> r.path = g.generate(context, r.path).toString() }
     }
-    generators.applyGenerator(Category.QUERY, mode) { key, g ->
-      r.query[key] = r.query.getOrElse(key) { emptyList() }.map { g.generate(context).toString() }
+    val headerGenerators = r.buildGenerators(Category.HEADER)
+    if (headerGenerators.isNotEmpty()) {
+      Generators.applyGenerators(headerGenerators, mode) { key, g ->
+        r.headers[key] = listOf(g.generate(context, r.headers[key]).toString())
+      }
     }
-    r.body = generators.applyBodyGenerators(r.body, ContentType.fromString(contentType()), context, mode)
+    val queryGenerators = r.buildGenerators(Category.QUERY)
+    if (queryGenerators.isNotEmpty()) {
+      Generators.applyGenerators(queryGenerators, mode) { key, g ->
+        r.query[key] = r.query.getOrElse(key) { emptyList() }.map { g.generate(context, r.query[key]).toString() }
+      }
+    }
+    if (r.body.isPresent()) {
+      val bodyGenerators = r.buildGenerators(Category.BODY)
+      if (bodyGenerators.isNotEmpty()) {
+        r.body = Generators.applyBodyGenerators(bodyGenerators, r.body, determineContentType(), context, mode)
+      }
+    }
     return r
   }
 
@@ -108,7 +122,7 @@ class Request @JvmOverloads constructor(
       val path = if (json.has("path")) Json.toString(json["path"]) else DEFAULT_PATH
       val query = parseQueryParametersToMap(json["query"])
       val headers = if (json.has("headers") && json["headers"] is JsonValue.Object) {
-        json["headers"].asObject().entries.entries.associate { (key, value) ->
+        json["headers"].asObject()!!.entries.entries.associate { (key, value) ->
           if (value is JsonValue.Array) {
             key to value.values.map { Json.toString(it) }
           } else {

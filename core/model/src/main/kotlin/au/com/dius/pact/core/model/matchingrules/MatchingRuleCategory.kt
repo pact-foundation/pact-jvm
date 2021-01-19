@@ -1,6 +1,8 @@
 package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 import java.util.Comparator
 import java.util.function.Predicate
@@ -169,6 +171,7 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   /**
    * Deserialise the category from the Map
    */
+  @Deprecated("Use fromJson", replaceWith = ReplaceWith("fromJson"))
   fun fromMap(map: Map<String, Any?>): MatchingRuleCategory {
     if (categoryRequiresSubkeys()) {
       map.forEach { (key, value) ->
@@ -194,6 +197,37 @@ data class MatchingRuleCategory @JvmOverloads constructor(
     return this
   }
 
+  /**
+   * Deserialise the category from JSON
+   */
+  fun fromJson(matcherDef: JsonValue): MatchingRuleCategory {
+    if (matcherDef is JsonValue.Object) {
+      if (categoryRequiresSubkeys()) {
+        matcherDef.entries.forEach { (key, value) ->
+          if (value is JsonValue.Object) {
+            val ruleGroup = MatchingRuleGroup.fromJson(value)
+            setRules(key, ruleGroup)
+          } else if (name == "path" && value is JsonValue.Array) {
+            value.values.forEach {
+              addRule(MatchingRule.fromJson(it))
+            }
+          } else {
+            logger.warn { "$value is not a valid matcher definition" }
+          }
+        }
+      } else {
+        val map = matcherDef.entries
+        if (map.size == 1 && map.containsKey("")) {
+          // This is due to Defect #743
+          setRules("", MatchingRuleGroup.fromJson(matcherDef[""]))
+        } else {
+          setRules("", MatchingRuleGroup.fromJson(matcherDef))
+        }
+      }
+    }
+    return this
+  }
+
   private fun categoryRequiresSubkeys() = name != "path"
 
   /**
@@ -204,5 +238,19 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   /** Validates all the rules in this category against the Pact specification version */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return matchingRules.values.flatMap { it.validateForVersion(pactVersion) }
+  }
+
+  fun generators(): Map<String, Generator> {
+    val map = mutableMapOf<String, Generator>()
+    for (entry in matchingRules) {
+      for (rule in entry.value.rules) {
+        if (rule.hasGenerators()) {
+          for (generator in rule.generators) {
+            map[entry.key] = generator
+          }
+        }
+      }
+    }
+    return map
   }
 }

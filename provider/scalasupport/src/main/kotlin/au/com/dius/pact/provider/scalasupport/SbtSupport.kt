@@ -21,7 +21,7 @@ data class Address @JvmOverloads constructor (
         json["host"].toString()
       } else null
       val port = if (json.has("port")) {
-        json["port"].asNumber().toInt()
+        json["port"].asNumber()!!.toInt()
       } else null
       val path = if (json.has("path")) {
         json["path"].toString()

@@ -10,7 +10,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def map = [a: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(map), null, null)
     def key = '$.b'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -24,7 +26,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def map = [a: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(map), null, null)
     def key = '$.d'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -37,7 +41,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     given:
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(100), null, null)
     def key = '$.d'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -51,7 +57,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def list = ['A', 'B', 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(list), null, null)
     def key = '$[1]'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -65,7 +73,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def list = ['A', 'B', 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(list), null, null)
     def key = '$[3]'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -78,7 +88,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     given:
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(100), null, null)
     def key = '$[3]'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -92,7 +104,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def bodyValue = 100
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(bodyValue), null, null)
     def key = '$'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -106,7 +120,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def graph = [a: ['A', [a: 'A', b: ['1': '1', '2': '2'], c: 'C'], 'C'], b: 'B', c: 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(graph), null, null)
     def key = '$.a[1].b[\'2\']'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -120,7 +136,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def graph = [d: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(graph), null, null)
     def key = '$.a[1].b[\'2\']'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -134,7 +152,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def map = [a: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(map), null, null)
     def key = '$.*'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -148,7 +168,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def list = ['A', 'B', 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(list), null, null)
     def key = '$[*]'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -162,7 +184,9 @@ class JsonContentTypeHandlerSpec extends Specification {
     def graph = [a: ['A', [a: 'A', b: ['1', '2'], c: 'C'], 'C'], b: 'B', c: 'C']
     QueryResult body = new QueryResult(Json.INSTANCE.toJson(graph), null, null)
     def key = '$.*[1].b[*]'
-    def generator = { 'X' } as Generator
+    def generator = Mock(Generator) {
+      generate(_, _) >> 'X'
+    }
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
@@ -170,5 +194,4 @@ class JsonContentTypeHandlerSpec extends Specification {
     then:
     Json.INSTANCE.toMap(body.value) == [a: ['A', [a: 'A', b: ['X', 'X'], c: 'C'], 'C'], b: 'B', c: 'C']
   }
-
 }

@@ -12,13 +12,17 @@ class PactDslJsonArrayContaining(
   override fun closeArray(): DslPart {
     val matchers = this.matchers
     this.matchers = MatchingRuleCategory("", mutableMapOf(rootPath to MatchingRuleGroup(mutableListOf(ArrayContainsMatcher(
-      matchers.matchingRules.entries.groupBy {
-        prefixRegex.find(it.key)?.groups?.get(1)?.toString() ?: ""
-      }.map { entry ->
-        MatchingRuleCategory("Variant ${entry.key}", entry.value.associate {
-          it.key.replace(prefixRegex, "\\$.") to it.value
-        }.toMutableMap())
-      }
+      listOf(Triple(
+        0,
+        matchers.matchingRules.entries.groupBy {
+          prefixRegex.find(it.key)?.groups?.get(1)?.toString() ?: ""
+        }.map { entry ->
+          MatchingRuleCategory("Variant ${entry.key}", entry.value.associate {
+            it.key.replace(prefixRegex, "\\$.") to it.value
+          }.toMutableMap())
+        }.first(),
+        emptyMap()
+      ))
     )))))
     return super.closeArray()
   }

@@ -212,6 +212,7 @@ data class OptionalBody(
       }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private val tika = try { TikaConfig() } catch (e: RuntimeException) {
       logger.warn(e) { "Could not initialise Tika, detecting content types will be disabled" }
       null

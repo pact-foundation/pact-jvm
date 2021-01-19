@@ -16,7 +16,7 @@ class ProviderStateGeneratorSpec extends Specification {
   @Unroll
   def 'uses the provider state map from the context'() {
     expect:
-    generator.generate(context)  == value
+    generator.generate(context, null)  == value
 
     where:
 
@@ -30,7 +30,7 @@ class ProviderStateGeneratorSpec extends Specification {
   @Unroll
   def 'parsers any expressions from the context'() {
     expect:
-    new ProviderStateGenerator(expression).generate([providerState: context]) == value
+    new ProviderStateGenerator(expression).generate([providerState: context], null) == value
 
     where:
 
@@ -48,10 +48,9 @@ class ProviderStateGeneratorSpec extends Specification {
     def context = [eName: 'Entity-Name']
 
     when:
-    def result = new ProviderStateGenerator(expression).generate([providerState: context])
+    def result = new ProviderStateGenerator(expression).generate([providerState: context], null)
 
     then:
     result == '{\n  "entityName": "Entity-Name",\n  "xml": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"\n}'
   }
-
 }
