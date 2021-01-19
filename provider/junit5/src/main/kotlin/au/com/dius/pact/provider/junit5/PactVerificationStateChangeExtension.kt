@@ -37,7 +37,7 @@ class PactVerificationStateChangeExtension(
     try {
       val providerStateContext = invokeStateChangeMethods(extensionContext, testContext,
         interaction.providerStates, StateChangeAction.SETUP)
-      testContext.executionContext = mapOf("providerState" to providerStateContext)
+      testContext.executionContext = mutableMapOf("providerState" to providerStateContext)
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }

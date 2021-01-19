@@ -67,7 +67,7 @@ open class HttpTarget
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: Map<String, Any>
+    context: MutableMap<String, Any>
   ) {
     val client = ProviderClient(provider, this.httpClientFactory.invoke())
     val result = verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction,

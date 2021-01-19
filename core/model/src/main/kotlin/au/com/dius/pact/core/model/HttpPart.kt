@@ -69,9 +69,9 @@ abstract class HttpPart {
     return errors
   }
 
-  fun buildGenerators(category: Category): Map<String, Generator> {
+  fun buildGenerators(category: Category, context: MutableMap<String, Any>): Map<String, Generator> {
     val generators = generators.categories[category] ?: emptyMap()
-    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.toLowerCase()).generators()
+    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.toLowerCase()).generators(context)
     return generators + matchingRuleGenerators
   }
 

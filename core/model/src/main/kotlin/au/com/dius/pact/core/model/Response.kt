@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.generators.Category
-import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -27,22 +26,22 @@ class Response @JvmOverloads constructor(
   fun copy() = Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
 
   fun generatedResponse(
-    context: Map<String, Any> = mapOf(),
+    context: MutableMap<String, Any> = mutableMapOf(),
     mode: GeneratorTestMode = GeneratorTestMode.Provider
   ): Response {
     val r = this.copy()
-    val statusGenerators = r.buildGenerators(Category.STATUS)
+    val statusGenerators = r.buildGenerators(Category.STATUS, context)
     if (statusGenerators.isNotEmpty()) {
       Generators.applyGenerators(statusGenerators, mode) { _, g -> r.status = g.generate(context, r.status) as Int }
     }
-    val headerGenerators = r.buildGenerators(Category.HEADER)
+    val headerGenerators = r.buildGenerators(Category.HEADER, context)
     if (headerGenerators.isNotEmpty()) {
       Generators.applyGenerators(headerGenerators, mode) { key, g ->
         r.headers[key] = listOf(g.generate(context, r.headers[key]).toString())
       }
     }
     if (r.body.isPresent()) {
-      val bodyGenerators = r.buildGenerators(Category.BODY)
+      val bodyGenerators = r.buildGenerators(Category.BODY, context)
       if (bodyGenerators.isNotEmpty()) {
         r.body = Generators.applyBodyGenerators(bodyGenerators, r.body, determineContentType(), context, mode)
       }

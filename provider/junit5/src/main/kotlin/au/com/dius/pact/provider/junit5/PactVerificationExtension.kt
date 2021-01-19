@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit5
 
+import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
@@ -104,7 +105,9 @@ class PactVerificationExtension(
     prepareVerifier(testContext, context, pactSource)
     store.put("verifier", testContext.verifier)
 
-    val requestAndClient = testContext.target.prepareRequest(interaction, testContext.executionContext ?: emptyMap())
+    val executionContext = testContext.executionContext ?: mutableMapOf()
+    executionContext["ArrayContainsJsonGenerator"] = ArrayContainsJsonGenerator
+    val requestAndClient = testContext.target.prepareRequest(interaction, executionContext)
     if (requestAndClient != null) {
       val (request, client) = requestAndClient
       store.put("request", request)

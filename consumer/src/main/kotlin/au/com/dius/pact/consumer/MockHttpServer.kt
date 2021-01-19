@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
+import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
 import au.com.dius.pact.core.model.DefaultPactWriter
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -181,8 +182,10 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       is FullRequestMatch -> {
         val interaction = matchResult.interaction as RequestResponseInteraction
         matchedRequests.add(interaction.request)
-        return interaction.response.generatedResponse(mapOf(
-          "mockServer" to mapOf("href" to getUrl(), "port" to getPort())
+        return interaction.response.generatedResponse(
+          mutableMapOf(
+            "mockServer" to mapOf("href" to getUrl(), "port" to getPort()),
+            "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator
         ), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {

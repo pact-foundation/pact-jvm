@@ -25,7 +25,7 @@ interface Target {
    * @param source Source of the Pact interaction
    * @param context Context map for the test
    */
-  fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource, context: Map<String, Any>)
+  fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource, context: MutableMap<String, Any>)
 
   /**
    * Add a callback to receive the test interaction result

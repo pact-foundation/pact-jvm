@@ -18,7 +18,7 @@ class WebFluxTarget(
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: Map<String, Any>
+    context: MutableMap<String, Any>
   ) {
     doTestInteraction(consumerName, interaction, source) { provider, consumer, verifier, failures ->
       val webClient = routerFunction?.let {

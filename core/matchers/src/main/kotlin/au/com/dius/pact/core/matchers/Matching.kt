@@ -2,12 +2,8 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
-import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
-import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import mu.KLogging
 

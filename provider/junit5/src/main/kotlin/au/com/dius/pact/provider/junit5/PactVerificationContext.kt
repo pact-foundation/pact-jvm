@@ -32,7 +32,7 @@ data class PactVerificationContext @JvmOverloads constructor(
   var testExecutionResult: MutableList<VerificationResult.Failed> = mutableListOf()
 ) {
   val stateChangeHandlers: MutableList<Any> = mutableListOf()
-  var executionContext: Map<String, Any>? = null
+  var executionContext: MutableMap<String, Any>? = null
 
   /**
    * Called to verify the interaction from the test template method.
@@ -45,7 +45,7 @@ data class PactVerificationContext @JvmOverloads constructor(
     val request = store.get("request")
     val testContext = store.get("interactionContext") as PactVerificationContext
     try {
-      val result = validateTestExecution(client, request, testContext.executionContext ?: emptyMap())
+      val result = validateTestExecution(client, request, testContext.executionContext ?: mutableMapOf())
         .filterIsInstance<VerificationResult.Failed>()
       this.testExecutionResult.addAll(result)
       if (testExecutionResult.isNotEmpty()) {
@@ -70,7 +70,7 @@ data class PactVerificationContext @JvmOverloads constructor(
   private fun validateTestExecution(
     client: Any?,
     request: Any?,
-    context: Map<String, Any>
+    context: MutableMap<String, Any>
   ): List<VerificationResult> {
     if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
       val interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +

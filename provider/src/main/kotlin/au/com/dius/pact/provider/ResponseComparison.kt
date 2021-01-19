@@ -82,7 +82,12 @@ class ResponseComparison(
 
   companion object : KLogging() {
 
-    private fun generateFullDiff(actual: String, contentType: ContentType, response: String, jsonBody: Boolean): List<String> {
+    private fun generateFullDiff(
+      actual: String,
+      contentType: ContentType,
+      response: String,
+      jsonBody: Boolean
+    ): List<String> {
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
         actualBodyString = if (contentType.isJson()) {
@@ -138,7 +143,11 @@ class ResponseComparison(
     }
 
     @JvmStatic
-    private fun compareMessageBody(message: Message, actual: OptionalBody, context: MatchingContext): MutableList<BodyMismatch> {
+    private fun compareMessageBody(
+      message: Message,
+      actual: OptionalBody,
+      context: MatchingContext
+    ): MutableList<BodyMismatch> {
       val result = MatchingConfig.lookupBodyMatcher(message.getContentType().getBaseType())
       var bodyMismatches = mutableListOf<BodyMismatch>()
       if (result != null) {

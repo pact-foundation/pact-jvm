@@ -57,7 +57,7 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     else -> value.javaClass.simpleName
   }
 
-  private fun compare(
+  fun compare(
     path: List<String>,
     expected: JsonValue,
     actual: JsonValue,

@@ -19,7 +19,7 @@ enum class Category {
 
 interface ContentTypeHandler {
   fun processBody(value: OptionalBody, fn: (QueryResult) -> Unit): OptionalBody
-  fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>)
+  fun applyKey(body: QueryResult, key: String, generator: Generator, context: MutableMap<String, Any>)
 }
 
 val contentTypeHandlers: MutableMap<String, ContentTypeHandler> = mutableMapOf(
@@ -41,7 +41,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
       .toByteArray(value.contentType.asCharset()), ContentType.JSON)
   }
 
-  override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
+  override fun applyKey(body: QueryResult, key: String, generator: Generator, context: MutableMap<String, Any>) {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
       when (parent) {
@@ -158,7 +158,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
       generators: Map<String, Generator>,
       body: OptionalBody,
       contentType: ContentType,
-      context: Map<String, Any?>,
+      context: MutableMap<String, Any>,
       mode: GeneratorTestMode
     ): OptionalBody {
       val handler = contentTypeHandlers[contentType.getBaseType()]
@@ -213,7 +213,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
   fun applyBodyGenerators(
     body: OptionalBody,
     contentType: ContentType,
-    context: Map<String, Any?>,
+    context: MutableMap<String, Any>,
     mode: GeneratorTestMode
   ): OptionalBody {
     return when (body.state) {

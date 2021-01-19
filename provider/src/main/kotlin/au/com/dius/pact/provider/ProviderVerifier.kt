@@ -4,6 +4,7 @@ import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
+import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
@@ -192,7 +193,7 @@ interface IProviderVerifier {
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient,
-    context: Map<String, Any>,
+    context: MutableMap<String, Any>,
     pending: Boolean
   ): VerificationResult
 
@@ -485,10 +486,11 @@ open class ProviderVerifier @JvmOverloads constructor (
       interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
 
-      val context = mapOf(
+      val context = mutableMapOf(
         "providerState" to stateChangeResult.stateChangeResult.value,
         "interaction" to interaction,
-        "pending" to consumer.pending
+        "pending" to consumer.pending,
+        "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator
       )
 
       val result = if (ProviderUtils.verificationType(provider, consumer) == REQUEST_RESPONSE) {
@@ -606,7 +608,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient
-  ) = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, client, mapOf(), false)
+  ) = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, client, mutableMapOf(), false)
 
   @Suppress("TooGenericExceptionCaught")
   override fun verifyResponseFromProvider(
@@ -615,7 +617,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient,
-    context: Map<String, Any>,
+    context: MutableMap<String, Any>,
     pending: Boolean
   ): VerificationResult {
     return try {

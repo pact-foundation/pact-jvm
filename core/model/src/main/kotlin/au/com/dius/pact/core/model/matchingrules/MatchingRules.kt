@@ -39,8 +39,7 @@ interface MatchingRule {
   /**
    * Any generators associated with this matching rule
    */
-  val generators: List<Generator>
-    get() = listOf()
+  fun buildGenerators(context: Map<String, Any>): List<Generator> = listOf()
 
   /**
    * If this matching rule has any associated generators
@@ -429,9 +428,11 @@ data class ArrayContainsMatcher(
     }
   }
 
-  override val generators = listOf(ArrayContainsGenerator(variants))
-
   override fun hasGenerators() = true
+
+  override fun buildGenerators(context: Map<String, Any>): List<Generator> {
+    return listOf(ArrayContainsGenerator(variants))
+  }
 }
 
 data class MatchingRuleGroup @JvmOverloads constructor(

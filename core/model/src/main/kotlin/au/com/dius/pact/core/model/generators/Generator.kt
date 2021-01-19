@@ -90,7 +90,7 @@ fun findGeneratorClass(generatorType: String): Class<*> {
  * Interface that all Generators need to implement
  */
 interface Generator {
-  fun generate(context: Map<String, Any?>, exampleValue: Any?): Any?
+  fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any?
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any>
   fun correspondsToMode(mode: GeneratorTestMode): Boolean = true
 }
@@ -103,7 +103,7 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
     return mapOf("type" to "RandomInt", "min" to min, "max" to max)
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     return RandomUtils.nextInt(min, max)
   }
 
@@ -134,7 +134,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
     return mapOf("type" to "RandomDecimal", "digits" to digits)
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     return when {
       digits < 1 -> throw UnsupportedOperationException("RandomDecimalGenerator digits must be > 0, got $digits")
       digits == 1 -> BigDecimal(RandomUtils.nextInt(0, 9))
@@ -180,7 +180,7 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
     return mapOf("type" to "RandomHexadecimal", "digits" to digits)
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any =
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any =
     RandomStringUtils.random(digits, "0123456789abcdef")
 
   companion object {
@@ -204,7 +204,7 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
     return mapOf("type" to "RandomString", "size" to size)
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     return RandomStringUtils.randomAlphanumeric(size)
   }
 
@@ -229,7 +229,7 @@ data class RegexGenerator(val regex: String) : Generator {
     return mapOf("type" to "Regex", "regex" to regex)
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any = Generex(regex).random()
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any = Generex(regex).random()
 
   companion object {
     fun fromJson(json: JsonValue.Object) = RegexGenerator(Json.toString(json["regex"]))
@@ -244,7 +244,7 @@ object UuidGenerator : Generator {
     return mapOf("type" to "Uuid")
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     return UUID.randomUUID().toString()
   }
 
@@ -273,7 +273,7 @@ data class DateGenerator @JvmOverloads constructor(
     return map
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseDate")) context["baseDate"] as OffsetDateTime
       else OffsetDateTime.now()
     val date = DateExpression.executeDateExpression(base, expression).getOr { base }
@@ -312,7 +312,7 @@ data class TimeGenerator @JvmOverloads constructor(
     return map
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetDateTime else OffsetDateTime.now()
     val time = TimeExpression.executeTimeExpression(base, expression).getOr { base }
     return if (!format.isNullOrEmpty()) {
@@ -350,7 +350,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
     return map
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseDateTime")) context["baseDateTime"] as OffsetDateTime
       else OffsetDateTime.now()
     val datetime = DateTimeExpression.executeExpression(base, expression).getOr { base }
@@ -379,7 +379,7 @@ object RandomBooleanGenerator : Generator {
     return mapOf("type" to "RandomBoolean")
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     return ThreadLocalRandom.current().nextBoolean()
   }
 
@@ -402,7 +402,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
     return mapOf("type" to "ProviderState", "expression" to expression, "dataType" to type.name)
   }
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any? {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
     return when (val providerState = context["providerState"]) {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
@@ -441,7 +441,7 @@ data class MockServerURLGenerator(
 
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Consumer
 
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any? {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
     logger.debug { "context = $context" }
     val mockServerDetails = context["mockServer"]
     return if (mockServerDetails != null) {
@@ -489,17 +489,25 @@ data class MockServerURLGenerator(
 }
 
 object NullGenerator : Generator {
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?) = null
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?) = null
   override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
 }
 
 data class ArrayContainsGenerator(
   val variants: List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>>
 ) : Generator {
-  override fun generate(context: Map<String, Any?>, exampleValue: Any?): Any? {
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
     return if (exampleValue is JsonValue.Array) {
-      null
+      val implementation = context["ArrayContainsJsonGenerator"] as Generator?
+      if (implementation != null) {
+        context["ArrayContainsVariants"] = variants
+        implementation.generate(context, exampleValue)
+      } else {
+        logger.error { "No ArrayContainsGenerator implementation for JSON found in the test context" }
+        null
+      }
     } else {
+      logger.error { "ArrayContainsGenerator can only be applied to lists" }
       null
     }
   }

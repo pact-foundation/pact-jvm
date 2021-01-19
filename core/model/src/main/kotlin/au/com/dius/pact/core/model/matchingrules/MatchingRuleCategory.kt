@@ -240,12 +240,12 @@ data class MatchingRuleCategory @JvmOverloads constructor(
     return matchingRules.values.flatMap { it.validateForVersion(pactVersion) }
   }
 
-  fun generators(): Map<String, Generator> {
+  fun generators(context: Map<String, Any>): Map<String, Generator> {
     val map = mutableMapOf<String, Generator>()
     for (entry in matchingRules) {
       for (rule in entry.value.rules) {
         if (rule.hasGenerators()) {
-          for (generator in rule.generators) {
+          for (generator in rule.buildGenerators(context)) {
             map[entry.key] = generator
           }
         }

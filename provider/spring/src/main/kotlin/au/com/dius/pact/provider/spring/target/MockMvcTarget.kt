@@ -47,7 +47,7 @@ class MockMvcTarget @JvmOverloads constructor(
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: Map<String, Any>
+    context: MutableMap<String, Any>
   ) {
     val mockMvc = buildMockMvc()
     doTestInteraction(consumerName, interaction, source) { provider, consumer, verifier, failures ->

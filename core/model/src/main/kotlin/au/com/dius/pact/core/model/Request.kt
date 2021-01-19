@@ -30,28 +30,28 @@ class Request @JvmOverloads constructor(
 
   @JvmOverloads
   fun generatedRequest(
-    context: Map<String, Any> = emptyMap(),
+    context: MutableMap<String, Any> = mutableMapOf(),
     mode: GeneratorTestMode = GeneratorTestMode.Provider
   ): Request {
     val r = this.copy()
-    val pathGenerators = r.buildGenerators(Category.PATH)
+    val pathGenerators = r.buildGenerators(Category.PATH, context)
     if (pathGenerators.isNotEmpty()) {
       Generators.applyGenerators(pathGenerators, mode) { _, g -> r.path = g.generate(context, r.path).toString() }
     }
-    val headerGenerators = r.buildGenerators(Category.HEADER)
+    val headerGenerators = r.buildGenerators(Category.HEADER, context)
     if (headerGenerators.isNotEmpty()) {
       Generators.applyGenerators(headerGenerators, mode) { key, g ->
         r.headers[key] = listOf(g.generate(context, r.headers[key]).toString())
       }
     }
-    val queryGenerators = r.buildGenerators(Category.QUERY)
+    val queryGenerators = r.buildGenerators(Category.QUERY, context)
     if (queryGenerators.isNotEmpty()) {
       Generators.applyGenerators(queryGenerators, mode) { key, g ->
         r.query[key] = r.query.getOrElse(key) { emptyList() }.map { g.generate(context, r.query[key]).toString() }
       }
     }
     if (r.body.isPresent()) {
-      val bodyGenerators = r.buildGenerators(Category.BODY)
+      val bodyGenerators = r.buildGenerators(Category.BODY, context)
       if (bodyGenerators.isNotEmpty()) {
         r.body = Generators.applyBodyGenerators(bodyGenerators, r.body, determineContentType(), context, mode)
       }

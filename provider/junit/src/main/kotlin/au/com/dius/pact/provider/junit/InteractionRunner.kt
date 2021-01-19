@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit
 
+import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
@@ -223,10 +224,11 @@ open class InteractionRunner(
     var statement: Statement = object : Statement() {
       override fun evaluate() {
         setupTargetForInteraction(target)
-        target.addResultCallback(BiConsumer { result, verifier ->
+        target.addResultCallback { result, verifier ->
           results[interaction.uniqueKey()] = Pair(result, verifier)
-        })
-        target.testInteraction(pact.consumer.name, interaction, source, mapOf("providerState" to context))
+        }
+        target.testInteraction(pact.consumer.name, interaction, source,
+          mutableMapOf("providerState" to context, "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator))
       }
     }
     statement = withStateChanges(interaction, testInstance, statement, target)

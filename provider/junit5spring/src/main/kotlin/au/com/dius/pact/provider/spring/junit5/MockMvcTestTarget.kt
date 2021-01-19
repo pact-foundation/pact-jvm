@@ -32,6 +32,7 @@ import java.net.URI
 import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
+
 /**
  * Test target for tests using Spring MockMvc.
  */
@@ -45,11 +46,11 @@ class MockMvcTestTarget @JvmOverloads constructor(
 ) : TestTarget {
     override fun getProviderInfo(serviceName: String, pactSource: PactSource?) = ProviderInfo(serviceName)
 
-    override fun prepareRequest(interaction: Interaction, context: Map<String, Any>): Pair<MockHttpServletRequestBuilder, MockMvc> {
-        if (interaction is RequestResponseInteraction) {
-            return toMockRequestBuilder(interaction.request.generatedRequest(context)) to buildMockMvc()
-        }
-        throw UnsupportedOperationException("Only request/response interactions can be used with an MockMvc test target")
+    override fun prepareRequest(interaction: Interaction, context: MutableMap<String, Any>): Pair<MockHttpServletRequestBuilder, MockMvc> {
+      if (interaction is RequestResponseInteraction) {
+        return toMockRequestBuilder(interaction.request.generatedRequest(context)) to buildMockMvc()
+      }
+      throw UnsupportedOperationException("Only request/response interactions can be used with an MockMvc test target")
     }
 
     fun setControllers(vararg controllers: Any) {

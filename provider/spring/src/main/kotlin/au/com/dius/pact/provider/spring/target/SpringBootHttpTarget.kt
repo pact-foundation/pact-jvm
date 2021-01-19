@@ -10,7 +10,12 @@ import au.com.dius.pact.provider.junit.target.HttpTarget
  * port from the spring context.
  */
 class SpringBootHttpTarget(override var port: Int = 0) : HttpTarget(port = port) {
-  override fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource, context: Map<String, Any>) {
+  override fun testInteraction(
+    consumerName: String,
+    interaction: Interaction,
+    source: PactSource,
+    context: MutableMap<String, Any>
+  ) {
     provider.port = port
     super.testInteraction(consumerName, interaction, source, context)
   }
