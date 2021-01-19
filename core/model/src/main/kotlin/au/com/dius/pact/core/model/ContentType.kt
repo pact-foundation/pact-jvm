@@ -89,6 +89,19 @@ class ContentType(val contentType: MediaType?) {
     return contentType?.hashCode() ?: 0
   }
 
+  fun getSupertype() : ContentType? {
+    return if (contentType != null && contentType.subtype.endsWith("+json")) {
+      JSON
+    } else {
+      val supertype = registry.getSupertype(contentType)
+      if (supertype != null) {
+        ContentType(supertype)
+      } else {
+        null
+      }
+    }
+  }
+
   companion object : KLogging() {
     @JvmStatic
     fun fromString(contentType: String?) = if (contentType.isNullOrEmpty()) {

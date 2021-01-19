@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'Siren Order Provider')
-@Disabled
+//@Disabled
 class HyperMediaPactTest {
 
   @Canonical

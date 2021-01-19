@@ -87,4 +87,32 @@ class ContentTypeSpec extends Specification {
 
     contentType = new ContentType(value)
   }
+
+  @Unroll
+  def '"#value" supertype -> #result'() {
+    expect:
+    contentType.supertype?.asString() == result
+
+    where:
+
+    value                               || result
+    ''                                  || null
+    'text/plain'                        || 'application/octet-stream'
+    'application/pdf'                   || 'application/octet-stream'
+    'application/zip'                   || 'application/octet-stream'
+    'application/json'                  || 'application/javascript'
+    'application/hal+json'              || 'application/json'
+    'application/HAL+JSON'              || 'application/json'
+    'application/xml'                   || 'text/plain'
+    'application/atom+xml'              || 'application/xml'
+    'application/octet-stream'          || null
+    'image/jpeg'                        || 'application/octet-stream'
+    'video/H264'                        || 'application/octet-stream'
+    'audio/aac'                         || 'application/octet-stream'
+    'text/csv'                          || 'text/plain'
+    'multipart/form-data'               || 'application/octet-stream'
+    'application/x-www-form-urlencoded' || 'text/plain'
+
+    contentType = new ContentType(value)
+  }
 }

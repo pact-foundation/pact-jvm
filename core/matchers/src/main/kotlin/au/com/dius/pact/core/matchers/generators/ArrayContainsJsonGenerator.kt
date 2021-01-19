@@ -25,6 +25,7 @@ object ArrayContainsJsonGenerator : KLogging(), Generator {
           exampleValue[index] = json.value ?: JsonValue.Null
         }
       }
+      exampleValue
     } else {
       logger.error { "ArrayContainsGenerator can only be applied to lists" }
       null
@@ -43,7 +44,7 @@ object ArrayContainsJsonGenerator : KLogging(), Generator {
       val matchingContext = MatchingContext(rules, true)
       val matches = JsonBodyMatcher.compare(listOf("$"), example, example, matchingContext)
       logger.debug { "Comparing variant $index => $matches" }
-      matches.isEmpty()
+      matches.flatMap { it.result }.isEmpty()
     }
   }
 }

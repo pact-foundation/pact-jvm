@@ -161,7 +161,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
       context: MutableMap<String, Any>,
       mode: GeneratorTestMode
     ): OptionalBody {
-      val handler = contentTypeHandlers[contentType.getBaseType()]
+      val handler = findContentTypeHandler(contentType)
       return handler?.processBody(body) { bodyResult: QueryResult ->
         for ((key, generator) in generators) {
           if (generator.correspondsToMode(mode)) {
@@ -169,6 +169,20 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           }
         }
       } ?: body
+    }
+
+    private fun findContentTypeHandler(contentType: ContentType): ContentTypeHandler? {
+      val typeHandler = contentTypeHandlers[contentType.getBaseType()]
+      return if (typeHandler != null) {
+        typeHandler
+      } else {
+        val supertype = contentType.getSupertype()
+        if (supertype != null) {
+          findContentTypeHandler(supertype)
+        } else {
+          null
+        }
+      }
     }
   }
 

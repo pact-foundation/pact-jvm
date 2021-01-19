@@ -1442,6 +1442,6 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public DslPart arrayContaining(String name) {
-    return new PactDslJsonArrayContaining(matcherKey(name, rootPath), name, this);
+    return new PactDslJsonArrayContaining(rootPath, name, this);
   }
 }
