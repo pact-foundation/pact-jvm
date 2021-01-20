@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -187,6 +188,7 @@ class PactDslJsonArraySpec extends Specification {
     array = obj.parent
   }
 
+  @Issue('#628')
   def 'test for behaviour of close for issue 628'() {
     given:
     def body = new PactDslJsonArray()
