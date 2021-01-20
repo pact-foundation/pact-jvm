@@ -65,111 +65,163 @@ public abstract class DslPart {
      */
     public abstract PactDslJsonBody eachLike(String name);
 
-    /**
-     * Array element where each element of the array must match the following object
-     */
-    public abstract PactDslJsonBody eachLike();
+  /**
+   * Array field where each element must match the following object
+   * @param name field name
+   */
+  public abstract PactDslJsonBody eachLike(String name, DslPart object);
 
-    /**
-     * Array field where each element must match the following object
-     * @param name field name
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody eachLike(String name, int numberExamples);
+  /**
+   * Array element where each element of the array must match the following object
+   */
+  public abstract PactDslJsonBody eachLike();
 
-    /**
-     * Array element where each element of the array must match the following object
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody eachLike(int numberExamples);
+  /**
+   * Array element where each element of the array must match the provided object
+   */
+  public abstract PactDslJsonArray eachLike(DslPart object);
 
-    /**
-     * Array field with a minumum size and each element must match the provided object
-     * @param name field name
-     * @param size minimum size
-     */
-    public abstract PactDslJsonBody minArrayLike(String name, Integer size);
+  /**
+   * Array field where each element must match the following object
+   * @param name field name
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody eachLike(String name, int numberExamples);
 
-    /**
-     * Array element with a minumum size and each element of the array must match the provided object
-     * @param size minimum size
-     */
-    public abstract PactDslJsonBody minArrayLike(Integer size);
+  /**
+   * Array element where each element of the array must match the following object
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody eachLike(int numberExamples);
 
-    /**
-     * Array field with a minumum size and each element must match the provided object
-     * @param name field name
-     * @param size minimum size
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples);
+  /**
+   * Array field with a minumum size and each element must match the following object
+   * @param name field name
+   * @param size minimum size
+   */
+  public abstract PactDslJsonBody minArrayLike(String name, Integer size);
 
-    /**
-     * Array element with a minumum size and each element of the array must match the provided object
-     * @param size minimum size
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody minArrayLike(Integer size, int numberExamples);
+  /**
+   * Array element with a minumum size and each element of the array must match the following object
+   * @param size minimum size
+   */
+  public abstract PactDslJsonBody minArrayLike(Integer size);
 
-    /**
-     * Array field with a maximum size and each element must match the provided object
-     * @param name field name
-     * @param size maximum size
-     */
-    public abstract PactDslJsonBody maxArrayLike(String name, Integer size);
+  /**
+   * Array field with a minumum size and each element must match the provided object
+   * @param name field name
+   * @param size minimum size
+   */
+  public abstract PactDslJsonBody minArrayLike(String name, Integer size, DslPart object);
 
-    /**
-     * Array element with a maximum size and each element of the array must match the provided object
-     * @param size minimum size
-     */
-    public abstract PactDslJsonBody maxArrayLike(Integer size);
+  /**
+   * Array element with a minumum size and each element of the array must match the provided object
+   * @param size minimum size
+   */
+  public abstract PactDslJsonArray minArrayLike(Integer size, DslPart object);
 
-    /**
-     * Array field with a maximum size and each element must match the provided object
-     * @param name field name
-     * @param size maximum size
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples);
+  /**
+   * Array field with a minumum size and each element must match the following object
+   * @param name field name
+   * @param size minimum size
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples);
 
-    /**
-     * Array element with a maximum size and each element of the array must match the provided object
-     * @param size minimum size
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody maxArrayLike(Integer size, int numberExamples);
+  /**
+   * Array element with a minumum size and each element of the array must match the following object
+   * @param size minimum size
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody minArrayLike(Integer size, int numberExamples);
 
-    /**
-     * Array field with a minimum and maximum size and each element must match the provided object
-     * @param name field name
-     * @param minSize minimum size
-     * @param maxSize maximum size
-     */
-    public abstract PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize);
+  /**
+   * Array field with a maximum size and each element must match the following object
+   * @param name field name
+   * @param size maximum size
+   */
+  public abstract PactDslJsonBody maxArrayLike(String name, Integer size);
 
-    /**
-     * Array element with a minimum and maximum size and each element of the array must match the provided object
-     * @param minSize minimum size
-     * @param maxSize maximum size
-     */
-    public abstract PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize);
+  /**
+   * Array element with a maximum size and each element of the array must match the following object
+   * @param size minimum size
+   */
+  public abstract PactDslJsonBody maxArrayLike(Integer size);
 
-    /**
-     * Array field with a minimum and maximum size and each element must match the provided object
-     * @param name field name
-     * @param minSize minimum size
-     * @param maxSize maximum size
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples);
+  /**
+   * Array field with a maximum size and each element must match the provided object
+   * @param name field name
+   * @param size maximum size
+   */
+  public abstract PactDslJsonBody maxArrayLike(String name, Integer size, DslPart object);
 
-    /**
-     * Array element with a minimum and maximum size and each element of the array must match the provided object
-     * @param minSize minimum size
-     * @param maxSize maximum size
-     * @param numberExamples number of examples to generate
-     */
-    public abstract PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples);
+  /**
+   * Array element with a maximum size and each element of the array must match the provided object
+   * @param size minimum size
+   */
+  public abstract PactDslJsonArray maxArrayLike(Integer size, DslPart object);
+
+  /**
+   * Array field with a maximum size and each element must match the following object
+   * @param name field name
+   * @param size maximum size
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples);
+
+  /**
+   * Array element with a maximum size and each element of the array must match the following object
+   * @param size minimum size
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody maxArrayLike(Integer size, int numberExamples);
+
+  /**
+   * Array field with a minimum and maximum size and each element must match the following object
+   * @param name field name
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize);
+
+  /**
+   * Array field with a minimum and maximum size and each element must match the provided object
+   * @param name field name
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object);
+
+  /**
+   * Array element with a minimum and maximum size and each element of the array must match the following object
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize);
+
+  /**
+   * Array element with a minimum and maximum size and each element of the array must match the provided object
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object);
+
+  /**
+   * Array field with a minimum and maximum size and each element must match the following object
+   * @param name field name
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples);
+
+  /**
+   * Array element with a minimum and maximum size and each element of the array must match the following object
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   * @param numberExamples number of examples to generate
+   */
+  public abstract PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples);
 
     /**
      * Array field where each element is an array and must match the following object
