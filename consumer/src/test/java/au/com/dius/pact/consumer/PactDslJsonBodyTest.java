@@ -2,7 +2,16 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.TimeZone;
+
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
+import au.com.dius.pact.core.support.json.JsonParser;
 import au.com.dius.pact.core.support.json.JsonValue;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -82,7 +91,7 @@ public class PactDslJsonBodyTest {
     ));
     assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
-    assertThat(body.getBody().asObject().keys(), 
+    assertThat(body.getBody().asObject().keys(),
       is(equalTo(new HashSet(Arrays.asList("200", K_DEPRECIATION_BIPS, "1", "@field")))));
   }
 
@@ -94,14 +103,19 @@ public class PactDslJsonBodyTest {
           .closeObject()
       .closeArray();
 
-    Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
+    DslPart idsBody = new PactDslJsonBody().id();
+      DslPart body2 = new PactDslJsonBody()
+        .eachLike("ids", idsBody);Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
       ".ids",
       ".ids[*].id"
     ));
-    assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
+    assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));assertThat(body2.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
-    assertThat(body.getBody().asObject().keys(), is(equalTo(new HashSet(Collections.singletonList("ids")))));
-  }
+      Set<String> ids = new HashSet<>(Collections.singletonList("ids"));
+      assertThat(body.getBody().asObject().keys(), is(equalTo(ids)));
+      assertThat(body2.getBody().asObject().keys(), is(equalTo(ids)));
+      assertThat(body.getBody().toString(), is(equalTo(body2.getBody().toString())));
+    }
 
   @Test
   public void nestedObjectMatcherTest() {
@@ -252,5 +266,324 @@ public class PactDslJsonBodyTest {
     assertThat(jsonObject.get("dateBerlin").toString(), is(equalTo("1970-01-01")));
     assertThat(jsonObject.get("timeLosAngeles").toString(), is(equalTo("16:00:00")));
     assertThat(jsonObject.get("timeBerlin").toString(), is(equalTo("01:00:00")));
+  }
+
+  @Test
+  public void largeBodyTest() {
+    PactDslJsonBody metadata = new PactDslJsonBody()
+      .stringType("origin", "product-data")
+      .datetimeExpression("dateCreated", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    PactDslJsonBody title = new PactDslJsonBody()
+      .stringType("mainTitle", "Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+      .stringType("webTitle", "sample_data")
+      .minArrayLike("attributes", 1)
+        .stringType("key", "sample_data")
+        .stringType("value", "sample_data")
+        .closeObject()
+      .closeArray().asBody();
+    PactDslJsonBody description = new PactDslJsonBody()
+      .stringType("longDescription", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus pellentesque eu tincidunt tortor aliquam nulla facilisi cras. Nunc sed id semper risus in. Sit amet consectetur adipiscing elit pellentesque. Gravida neque convallis a cras. Auctor augue mauris augue neque gravida. Lectus quam id leo in vitae turpis massa sed elementum. Quisque sagittis purus sit amet volutpat consequat. Interdum velit euismod in pellentesque massa. Eu scelerisque felis imperdiet proin fermentum leo. Vel orci porta non pulvinar neque laoreet suspendisse. Netus et malesuada fames ac turpis egestas maecenas pharetra convallis. Sagittis aliquam malesuada bibendum arcu vitae. Risus in hendrerit gravida rutrum. Varius duis at consectetur lorem donec massa sapien. Platea dictumst quisque sagittis purus sit amet volutpat. Dui sapien eget mi proin sed libero enim. Tincidunt praesent semper feugiat nibh sed pulvinar. Sollicitudin tempor id eu nisl nunc mi. Hac habitasse platea dictumst vestibulum rhoncus.")
+      .stringType("shortDescription", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tellus pellentesque eu tincidunt tortor aliquam nulla facilisi cras. Nunc sed id semper risus in. Sit amet consectetur adipiscing elit pellentesque. Gravida neque convallis a cras. Auctor augue mauris augue neque gravida. Lectus quam id leo in vitae turpis massa sed elementum. Quisque sagittis purus sit amet volutpat consequat. Interdum velit euismod in pellentesque massa. Eu scelerisque felis imperdiet proin fermentum leo. Vel orci porta non pulvinar neque laoreet suspendisse. Netus et malesuada fames ac turpis egestas maecenas pharetra convallis. Sagittis aliquam malesuada bibendum arcu vitae. Risus in hendrerit gravida rutrum. Varius duis at consectetur lorem donec massa sapien. Platea dictumst quisque sagittis purus sit amet volutpat. Dui sapien eget mi proin sed libero enim.")
+      .minArrayLike("attributes", 1)
+        .stringType("key", "sample_data")
+        .stringType("value", "sample_data")
+        .closeObject()
+      .closeArray().asBody();
+    PactDslJsonBody productSpecification = new PactDslJsonBody().integerType("multiPackQuantity", 1)
+      .booleanType("copyrightInd", false)
+      .stringType("copyrightDets", "sample_data")
+      .booleanType("batteryRequired", true)
+      .booleanType("batteryIncluded", false)
+      .booleanType("beabApproved", false)
+      .stringType("beabCertNo", "sample_data")
+      .booleanType("plugRequired", false)
+      .booleanType("plugIncluded", false)
+      .booleanType("bulbRequired", false)
+      .booleanType("bulbIncluded", false)
+      .decimalType("voltage", 10.10)
+      .decimalType("wattage", 10.10);
+    PactDslJsonBody dimensions = new PactDslJsonBody()
+      .decimalType("length", 10.10)
+      .decimalType("width", 10.10)
+      .decimalType("height", 10.10)
+      .decimalType("pileHeight", 10.10)
+      .stringType("uom", "METRE");
+    PactDslJsonBody brand = new PactDslJsonBody()
+      .stringType("name", "sample_data");
+    PactDslJsonBody eventHistories = new PactDslJsonBody()
+      .stringType("eventService", "fam-service")
+      .datetimeExpression("eventCreationDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+      .stringType("eventType", "UPDATE")
+      .datetimeExpression("eventProcessedDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    PactDslJsonBody colours = new PactDslJsonBody()
+      .stringType("name", "sample_data")
+      .booleanType("primary", false)
+      .stringType("colourCode", "sample_data")
+      .stringType("hexCode", "sample_data")
+      .stringType("rgbCode", "sample_data");
+    PactDslJsonBody images = new PactDslJsonBody().stringType("name", "sample_data")
+      .stringType("linkType", "URI")
+      .stringType("uri", "153-7908284-BOK434X.jpg")
+      .stringType("description", "sample_data")
+      .stringType("type", "sample_data")
+      .stringType("status", "sample_data")
+      .minArrayLike("attributes", 1)
+      .stringType("key", "channelFormat")
+      .stringType("value", "X")
+      .closeObject()
+      .closeArray().asBody();
+    PactDslJsonBody caseDimensions = new PactDslJsonBody()
+      .decimalType("length", 10.10)
+      .decimalType("width", 10.10)
+      .decimalType("height", 10.10)
+      .decimalType("weight", 10.10)
+      .stringType("lwhUom", "MILLIMETRE")
+      .stringType("weightUom", "GRAM");
+
+    DslPart body = new PactDslJsonBody()
+      .object("metadata", metadata)
+      .integerType("version", 1)
+      .object("wrapper")
+        .stringType("w", "17f78aqr")
+        .minArrayLike("identifiers", 1)
+          .stringType("alias", "sku")
+          .minArrayLike("value", 1, PactDslJsonRootValue.stringType("7908284"), 1)
+        .closeArray().asBody()
+        .minArrayLike("aliases", 1, PactDslJsonRootValue.stringType("17f78aqr"), 1)
+      .closeObject().asBody()
+      .stringType("itemType", "ITEM")
+      .object("parentWrapper")
+        .stringType("p", "xf7kabqd")
+        .minArrayLike("identifiers", 1)
+          .stringType("alias", "sku")
+          .minArrayLike("value", 1, PactDslJsonRootValue.stringType("135325620.P"), 1)
+          .closeArray().asBody()
+          .minArrayLike("aliases", 1, PactDslJsonRootValue.stringType("xf7kabqd"), 1)
+            .closeObject().asBody()
+          .object("master")
+            .stringType("source", "PDS")
+            .object("title", title)
+            .object("description", description)
+            .object("brand", brand)
+            .object("productSpecification", productSpecification)
+            .minArrayLike("attributes", 1)
+              .stringType("scope", "DESCRIPTIVE")
+              .stringType("key", "sample_data")
+              .minArrayLike("values", 1, PactDslJsonRootValue.stringType("sample_data"), 1)
+                .closeObject()
+              .closeArray().asBody()
+              .minArrayLike("colours", 1, colours)
+              .object("weightsAndMeasures")
+                .object("dimensions", dimensions)
+                .object("weight")
+                  .decimalType("weight", 10.10)
+                  .decimalType("netWeight", 10.10)
+                  .decimalType("catchWeight", 10.10)
+                  .decimalType("pileWeight", 10.10)
+                  .stringType("uom", "KILOGRAM")
+                .closeObject().asBody()
+                .object("volume")
+                  .decimalType("liquidVolume", 10.10)
+                  .stringType("uom", "LITRE")
+                .closeObject().asBody()
+                .object("scannedData")
+                  .datetimeExpression("fileTimestamp", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                  .decimalType("averageWeight", 10.10)
+                  .stringType("averageWeightUom", "GRAM")
+                  .object("shipmentCase", caseDimensions)
+                  .object("vendorCase", caseDimensions)
+                .closeObject().asBody()
+              .closeObject().asBody()
+              .minArrayLike("packages", 1)
+                .integerType("packageType", 1)
+                .object("weightsAndMeasures")
+                  .object("dimensions", dimensions)
+                  .object("weight")
+                    .decimalType("weight", 10.10)
+                    .decimalType("netWeight", 10.10)
+                    .decimalType("catchWeight", 10.10)
+                    .decimalType("pileWeight", 10.10)
+                    .stringType("uom", "KILOGRAM")
+                  .closeObject().asBody()
+                  .object("volume")
+                    .decimalType("liquidVolume", 10.10)
+                    .stringType("uom", "LITRE")
+                  .closeObject().asBody()
+                  .object("scannedData")
+                    .datetimeExpression("fileTimestamp", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                    .decimalType("averageWeight", 10.10)
+                    .stringType("averageWeightUom", "GRAM")
+                    .object("shipmentCase", caseDimensions)
+                    .object("vendorCase", caseDimensions)
+                  .closeObject().asBody()
+                .closeObject().asBody()
+                .closeObject()
+              .closeArray().asBody()
+              .object("media")
+                .minArrayLike("images", 1, images)
+              .closeObject().asBody()
+              .object("safety")
+                .booleanType("ageRestrictedFlag", false)
+                .booleanType("safetyIndicator", false)
+                .booleanType("safetyIndicatorFlag", false)
+                .booleanType("safetyIndicatorOverrideFlag", false)
+              .closeObject().asBody()
+              .object("waste")
+                .stringType("wasteType", "sample_data")
+                .decimalType("percentage", 10.10)
+                .decimalType("defaultPercentage", 10.10)
+                .datetimeExpression("effectiveFromDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .datetimeExpression("effectiveToDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .minArrayLike("attributes", 1)
+                  .stringType("key", "associatedProductNumber")
+                  .stringType("value", "sample_data")
+                  .closeObject()
+                .closeArray().asBody()
+              .closeObject().asBody()
+              .object("optionalTypes")
+                .object("jewellery")
+                  .decimalType("totalWeight", 10.10)
+                  .decimalType("metalWeight", 10.10)
+                  .decimalType("stoneWeight", 10.10)
+                  .decimalType("chainLength", 10.10)
+                  .stringType("ringSize", "sample_data")
+                  .stringType("ringSizeFrom", "sample_data")
+                  .stringType("ringSizeTo", "sample_data")
+                .closeObject().asBody()
+                .object("clothing")
+                  .stringType("size", "sample_data")
+                .closeObject().asBody()
+                .eachLike("batteries", 0)
+                .closeArray().asBody()
+              .closeObject().asBody()
+              .object("productDataAudit")
+                .datetimeExpression("createdDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .datetimeExpression("lastModifiedDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .stringType("lastModifiedBy", "argos-pim-backfeed-adapter-service")
+                .datetimeExpression("deletedDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+              .closeObject().asBody()
+            .closeObject().asBody()
+          .object("division")
+            .stringType("masterSource", "DIV")
+            .object("title", title)
+            .object("description", description)
+            .object("brand", brand)
+            .object("productSpecification", productSpecification)
+            .minArrayLike("attributes", 1)
+              .stringType("scope", "DESCRIPTIVE")
+              .stringType("key", "sample_data")
+              .minArrayLike("values", 1, PactDslJsonRootValue.stringType("sample_data"), 1)
+                .closeObject()
+              .closeArray().asBody()
+              .minArrayLike("colours", 1, colours)
+              .object("weightsAndMeasures")
+                .object("dimensions", dimensions)
+                .object("weight")
+                  .decimalType("weight", 10.10)
+                  .decimalType("netWeight", 10.10)
+                  .decimalType("catchWeight", 10.10)
+                  .decimalType("pileWeight", 10.10)
+                  .stringType("uom", "KILOGRAM")
+                .closeObject().asBody()
+                .object("volume")
+                  .decimalType("liquidVolume", 10.10)
+                  .stringType("uom", "LITRE")
+                .closeObject().asBody()
+                .object("scannedData")
+                  .datetimeExpression("fileTimestamp", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                  .decimalType("averageWeight", 10.10)
+                  .stringType("averageWeightUom", "GRAM")
+                  .object("shipmentCase", caseDimensions)
+                  .object("vendorCase", caseDimensions)
+                .closeObject().asBody()
+              .closeObject().asBody()
+              .minArrayLike("packages", 1)
+                .integerType("packageType", 1)
+                .object("weightsAndMeasures")
+                  .object("dimensions", dimensions)
+                  .object("weight")
+                    .decimalType("weight", 10.10)
+                    .decimalType("netWeight", 10.10)
+                    .decimalType("catchWeight", 10.10)
+                    .decimalType("pileWeight", 10.10)
+                    .stringType("uom", "KILOGRAM")
+                  .closeObject().asBody()
+                  .object("volume")
+                    .decimalType("liquidVolume", 10.10)
+                    .stringType("uom", "LITRE")
+                  .closeObject().asBody()
+                  .object("scannedData")
+                    .datetimeExpression("fileTimestamp", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                    .decimalType("averageWeight", 10.10)
+                    .stringType("averageWeightUom", "GRAM")
+                    .object("shipmentCase", caseDimensions)
+                    .object("vendorCase", caseDimensions)
+                  .closeObject().asBody()
+                .closeObject().asBody()
+                .closeObject()
+              .closeArray().asBody()
+              .object("media")
+                .minArrayLike("images", 1, images)
+              .closeObject().asBody()
+              .object("safety")
+                .booleanType("ageRestrictedFlag", false)
+                .booleanType("safetyIndicator", false)
+                .booleanType("safetyIndicatorFlag", false)
+                .booleanType("safetyIndicatorOverrideFlag", false)
+              .closeObject().asBody()
+              .object("waste")
+                .stringType("wasteType", "sample_data")
+                .decimalType("percentage", 10.10)
+                .decimalType("defaultPercentage", 10.10)
+                .datetimeExpression("effectiveFromDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .datetimeExpression("effectiveToDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .minArrayLike("attributes", 1)
+                .stringType("key", "weeeAssociatedProductNumber")
+                .stringType("value", "sample_data")
+              .closeObject()
+            .closeArray().asBody()
+          .closeObject().asBody()
+          .object("optionalTypes")
+            .object("jewellery")
+            .decimalType("totalWeight", 10.10)
+            .decimalType("metalWeight", 10.10)
+            .decimalType("stoneWeight", 10.10)
+            .decimalType("chainLength", 10.10)
+            .stringType("ringSize", "sample_data")
+            .stringType("ringSizeFrom", "sample_data")
+            .stringType("ringSizeTo", "sample_data")
+          .closeObject().asBody()
+          .object("clothing")
+            .stringType("size", "sample_data")
+          .closeObject().asBody()
+          .eachLike("batteries", 0)
+          .closeArray().asBody()
+        .closeObject().asBody()
+        .object("productDataAudit")
+          .datetimeExpression("createdDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+          .datetimeExpression("lastModifiedDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+          .stringType("lastModifiedBy", "bam")
+          .datetimeExpression("deletedDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        .closeObject().asBody()
+      .closeObject().asBody()
+      .object("exxer")
+        .stringType("masterSource", "EXXER")
+      .closeObject().asBody()
+      .object("itemAudit")
+        .datetimeExpression("createdDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        .datetimeExpression("lastModifiedDate", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        .stringType("lastModifiedBy", "bam")
+        .minArrayLike("eventHistories", 1, eventHistories)
+      .closeObject().asBody();
+
+    JsonValue jsonValue = body.getBody();
+    assertThat(jsonValue.asObject().getEntries().keySet(),
+      is(equalTo(new HashSet<>(Arrays.asList("division", "metadata", "itemType", "itemAudit", "exxer", "wrapper",
+        "parentWrapper", "version", "master")))));
+    assertThat(jsonValue.asObject().get("itemAudit").asObject().getEntries().keySet(),
+      is(equalTo(new HashSet<>(Arrays.asList("createdDate", "eventHistories", "lastModifiedBy", "lastModifiedDate")))));
+    assertThat(jsonValue.asObject().get("itemAudit").get("eventHistories").asArray().getValues()
+        .get(0).asObject().getEntries().keySet(),
+      is(equalTo(new HashSet<>(Arrays.asList("eventProcessedDate", "eventType", "eventService", "eventCreationDate")))));
   }
 }

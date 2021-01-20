@@ -647,6 +647,10 @@ eventStream.run { Message message ->
 
 ### Step 3 - validate that the message was handled correctly
 
+We have invoked the message handling code with a message from the Pact file, but we need to do a light-weight check that everything worked ok.
+In this example, we have recieved a "order confirmation message". The handler was meant to have processed the message and set the status of
+the corresponding order to "confirmed", so let's check that.
+
 ```groovy
 def order = orderRepository.getOrder('10000004')
 assert order.status == 'confirmed'

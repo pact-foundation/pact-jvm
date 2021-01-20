@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -187,6 +188,7 @@ class PactDslJsonArraySpec extends Specification {
     array = obj.parent
   }
 
+  @Issue('#628')
   def 'test for behaviour of close for issue 628'() {
     given:
     def body = new PactDslJsonArray()
@@ -240,4 +242,63 @@ class PactDslJsonArraySpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
+  def 'each like with DSLPart'() {
+    given:
+    PactDslJsonArray body = new PactDslJsonArray()
+      .eachLike()
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+      .closeArray()
+    PactDslJsonBody message = new PactDslJsonBody()
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+    PactDslJsonArray body2 = new PactDslJsonArray()
+      .eachLike(message)
+
+    expect:
+    body.body.toString() == body2.body.toString()
+    body.matchers == body2.matchers
+  }
+
+  def 'min like with DSLPart'() {
+    given:
+    PactDslJsonArray body = new PactDslJsonArray()
+      .minArrayLike(1)
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+      .closeArray()
+    PactDslJsonBody message = new PactDslJsonBody()
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+    PactDslJsonArray body2 = new PactDslJsonArray()
+      .minArrayLike(1, message)
+
+    expect:
+    body.body.toString() == body2.body.toString()
+    body.matchers == body2.matchers
+  }
+
+  def 'max like with DSLPart'() {
+    given:
+    PactDslJsonArray body = new PactDslJsonArray()
+      .maxArrayLike(10)
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+      .closeArray()
+    PactDslJsonBody message = new PactDslJsonBody()
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+    PactDslJsonArray body2 = new PactDslJsonArray()
+      .maxArrayLike(10, message)
+
+    expect:
+    body.body.toString() == body2.body.toString()
+    body.matchers == body2.matchers
+  }
 }
