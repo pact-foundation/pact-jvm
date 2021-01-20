@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.15 - Consumer DSL update
+
+* 57a8541e0 - feat: add PactDslJsonArray eachLike/minArrayLike/maxArrayLike methods that can take a DSLPart #1286 (Ronald Holshausen, Wed Jan 20 15:40:30 2021 +1100)
+* 37d483e5d - chore: split out more objects from large test - failing on JDK 11 #1286 (Ronald Holshausen, Wed Jan 20 15:16:25 2021 +1100)
+* cf4d9fd68 - fix: large body test failing on CI  #1286 (Ronald Holshausen, Wed Jan 20 15:05:07 2021 +1100)
+* da795d148 - feat: add PactDslJsonBody eachLike/minArrayLike/maxArrayLike methods that can take a DSLPart #1286 (Ronald Holshausen, Wed Jan 20 14:46:24 2021 +1100)
+* 606d26ed2 - chore: split out more objects from large test - failing on JDK 10 #1286 (Ronald Holshausen, Wed Jan 20 13:43:05 2021 +1100)
+* dab6022da - chore: add large body test to DSL #1286 (Ronald Holshausen, Wed Jan 20 13:29:38 2021 +1100)
+* 637eda08d - Update README.md (Ronald Holshausen, Wed Jan 13 10:20:54 2021 +1100)
+* f36651b47 - bump version to 4.1.15 (Ronald Holshausen, Sun Jan 10 13:37:01 2021 +1100)
+
 # 4.1.14 - Bugfix Release
 
 * 19c9d66f9 - chore: add test for updating markdown summary with a failed interaction #1128 (Ronald Holshausen, Sun Jan 10 12:44:00 2021 +1100)
