@@ -79,7 +79,7 @@ public abstract class DslPart {
   /**
    * Array element where each element of the array must match the provided object
    */
-  public abstract PactDslJsonBody eachLike(DslPart object);
+  public abstract PactDslJsonArray eachLike(DslPart object);
 
   /**
    * Array field where each element must match the following object
@@ -118,7 +118,7 @@ public abstract class DslPart {
    * Array element with a minumum size and each element of the array must match the provided object
    * @param size minimum size
    */
-  public abstract PactDslJsonBody minArrayLike(Integer size, DslPart object);
+  public abstract PactDslJsonArray minArrayLike(Integer size, DslPart object);
 
   /**
    * Array field with a minumum size and each element must match the following object
@@ -159,7 +159,7 @@ public abstract class DslPart {
    * Array element with a maximum size and each element of the array must match the provided object
    * @param size minimum size
    */
-  public abstract PactDslJsonBody maxArrayLike(Integer size, DslPart object);
+  public abstract PactDslJsonArray maxArrayLike(Integer size, DslPart object);
 
   /**
    * Array field with a maximum size and each element must match the following object
@@ -204,7 +204,7 @@ public abstract class DslPart {
    * @param minSize minimum size
    * @param maxSize maximum size
    */
-  public abstract PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object);
+  public abstract PactDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object);
 
   /**
    * Array field with a minimum and maximum size and each element must match the following object

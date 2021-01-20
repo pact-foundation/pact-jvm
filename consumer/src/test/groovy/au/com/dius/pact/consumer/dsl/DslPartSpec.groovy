@@ -38,7 +38,7 @@ class DslPartSpec extends Specification {
     PactDslJsonBody eachLike() { null }
 
     @Override
-    PactDslJsonBody eachLike(DslPart object) {
+    PactDslJsonArray eachLike(DslPart object) {
       null
     }
 
@@ -60,7 +60,7 @@ class DslPartSpec extends Specification {
     }
 
     @Override
-    PactDslJsonBody minArrayLike(Integer size, DslPart object) {
+    PactDslJsonArray minArrayLike(Integer size, DslPart object) {
       null
     }
 
@@ -82,7 +82,7 @@ class DslPartSpec extends Specification {
     }
 
     @Override
-    PactDslJsonBody maxArrayLike(Integer size, DslPart object) {
+    PactDslJsonArray maxArrayLike(Integer size, DslPart object) {
       null
     }
 
@@ -156,7 +156,7 @@ class DslPartSpec extends Specification {
     }
 
     @Override
-    PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
+    PactDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
       null
     }
 

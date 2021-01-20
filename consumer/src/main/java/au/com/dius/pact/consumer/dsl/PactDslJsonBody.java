@@ -755,7 +755,7 @@ public class PactDslJsonBody extends DslPart {
     }
 
   @Override
-  public PactDslJsonBody eachLike(DslPart object) {
+  public PactDslJsonArray eachLike(DslPart object) {
     throw new UnsupportedOperationException("use the eachLike(String name, DslPart object) form");
   }
 
@@ -831,7 +831,7 @@ public class PactDslJsonBody extends DslPart {
   }
 
   @Override
-  public PactDslJsonBody minArrayLike(Integer size, DslPart object) {
+  public PactDslJsonArray minArrayLike(Integer size, DslPart object) {
     throw new UnsupportedOperationException("use the minArrayLike(String name, Integer size, DslPart object) form");
   }
 
@@ -918,7 +918,7 @@ public class PactDslJsonBody extends DslPart {
   }
 
   @Override
-  public PactDslJsonBody maxArrayLike(Integer size, DslPart object) {
+  public PactDslJsonArray maxArrayLike(Integer size, DslPart object) {
     throw new UnsupportedOperationException("use the maxArrayLike(String name, Integer size, DslPart object) form");
   }
 
@@ -1284,7 +1284,7 @@ public class PactDslJsonBody extends DslPart {
   }
 
   @Override
-  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
+  public PactDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
     throw new UnsupportedOperationException("use the minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) form");
   }
 
