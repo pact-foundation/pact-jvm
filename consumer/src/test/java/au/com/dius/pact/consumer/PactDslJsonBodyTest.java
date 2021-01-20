@@ -685,10 +685,10 @@ public class PactDslJsonBodyTest {
     assertThat(jsonValue.asObject().getEntries().keySet(),
       is(equalTo(new HashSet<>(Arrays.asList("division", "metadata", "itemType", "itemAudit", "exxer", "wrapper",
         "parentWrapper", "version", "master")))));
-    assertThat(jsonValue.asObject().get("itemAudit").serialise(),
-      is(equalTo("{\"createdDate\":\"2000-02-01T00:00:00.000Z\",\"eventHistories\":[" +
-        "{\"eventCreationDate\":\"2000-02-01T00:00:00.000Z\",\"eventProcessedDate\":\"2000-02-01T00:00:00.000Z\"," +
-        "\"eventService\":\"fam-service\",\"eventType\":\"UPDATE\"}],\"lastModifiedBy\":\"bam\"," +
-        "\"lastModifiedDate\":\"2000-02-01T00:00:00.000Z\"}")));
+    assertThat(jsonValue.asObject().get("itemAudit").asObject().getEntries().keySet(),
+      is(equalTo(new HashSet<>(Arrays.asList("createdDate", "eventHistories", "lastModifiedBy", "lastModifiedDate")))));
+    assertThat(jsonValue.asObject().get("itemAudit").get("eventHistories").asArray().getValues()
+        .get(0).asObject().getEntries().keySet(),
+      is(equalTo(new HashSet<>(Arrays.asList("eventProcessedDate", "eventType", "eventService", "eventCreationDate")))));
   }
 }
