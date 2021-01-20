@@ -734,10 +734,30 @@ public class PactDslJsonBody extends DslPart {
         return eachLike(name, 1);
     }
 
+  @Override
+  public PactDslJsonBody eachLike(String name, DslPart object) {
+    String base = matcherKey(name, rootPath);
+    matchers.addRule(base, matchMin(0));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), "", this, true);
+
+    if (object instanceof PactDslJsonBody) {
+      parent.putObject(object);
+    } else if (object instanceof PactDslJsonArray) {
+      parent.putArray(object);
+    }
+
+    return (PactDslJsonBody) parent.closeArray();
+  }
+
     @Override
     public PactDslJsonBody eachLike() {
         throw new UnsupportedOperationException("use the eachLike(String name) form");
     }
+
+  @Override
+  public PactDslJsonBody eachLike(DslPart object) {
+    throw new UnsupportedOperationException("use the eachLike(String name, DslPart object) form");
+  }
 
     /**
      * Attribute that is an array where each item must match the following example
@@ -794,6 +814,26 @@ public class PactDslJsonBody extends DslPart {
     public PactDslJsonBody minArrayLike(Integer size) {
         throw new UnsupportedOperationException("use the minArrayLike(String name, Integer size) form");
     }
+
+  @Override
+  public PactDslJsonBody minArrayLike(String name, Integer size, DslPart object) {
+    String base = matcherKey(name, rootPath);
+    matchers.addRule(base, matchMin(size));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), "", this, true);
+
+    if (object instanceof PactDslJsonBody) {
+      parent.putObject(object);
+    } else if (object instanceof PactDslJsonArray) {
+      parent.putArray(object);
+    }
+
+    return (PactDslJsonBody) parent.closeArray();
+  }
+
+  @Override
+  public PactDslJsonBody minArrayLike(Integer size, DslPart object) {
+    throw new UnsupportedOperationException("use the minArrayLike(String name, Integer size, DslPart object) form");
+  }
 
     /**
      * Attribute that is an array with a minimum size where each item must match the following example
@@ -861,6 +901,26 @@ public class PactDslJsonBody extends DslPart {
     public PactDslJsonBody maxArrayLike(Integer size) {
         throw new UnsupportedOperationException("use the maxArrayLike(String name, Integer size) form");
     }
+
+  @Override
+  public PactDslJsonBody maxArrayLike(String name, Integer size, DslPart object) {
+    String base = matcherKey(name, rootPath);
+    matchers.addRule(base, matchMax(size));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), "", this, true);
+
+    if (object instanceof PactDslJsonBody) {
+      parent.putObject(object);
+    } else if (object instanceof PactDslJsonArray) {
+      parent.putArray(object);
+    }
+
+    return (PactDslJsonBody) parent.closeArray();
+  }
+
+  @Override
+  public PactDslJsonBody maxArrayLike(Integer size, DslPart object) {
+    throw new UnsupportedOperationException("use the maxArrayLike(String name, Integer size, DslPart object) form");
+  }
 
     /**
      * Attribute that is an array with a maximum size where each item must match the following example
@@ -1203,8 +1263,29 @@ public class PactDslJsonBody extends DslPart {
   }
 
   @Override
+  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) {
+    validateMinAndMaxAndExamples(minSize, maxSize, minSize);
+    String base = matcherKey(name, rootPath);
+    matchers.addRule(base, matchMinMax(minSize, maxSize));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), "", this, true);
+
+    if (object instanceof PactDslJsonBody) {
+      parent.putObject(object);
+    } else if (object instanceof PactDslJsonArray) {
+      parent.putArray(object);
+    }
+
+    return (PactDslJsonBody) parent.closeArray();
+  }
+
+  @Override
   public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
     throw new UnsupportedOperationException("use the minMaxArrayLike(String name, Integer minSize, Integer maxSize) form");
+  }
+
+  @Override
+  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
+    throw new UnsupportedOperationException("use the minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) form");
   }
 
   @Override

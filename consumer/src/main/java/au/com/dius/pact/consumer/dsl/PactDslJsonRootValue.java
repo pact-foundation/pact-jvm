@@ -112,6 +112,12 @@ public class PactDslJsonRootValue extends DslPart {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
+  @Override
+  @Deprecated
+  public PactDslJsonBody eachLike(String name, DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
   /**
    * @deprecated Use PactDslJsonArray for arrays
    */
@@ -139,6 +145,12 @@ public class PactDslJsonRootValue extends DslPart {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
+  @Override
+  @Deprecated
+  public PactDslJsonBody eachLike(DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
   /**
    * @deprecated Use PactDslJsonArray for arrays
    */
@@ -154,6 +166,18 @@ public class PactDslJsonRootValue extends DslPart {
   @Override
   @Deprecated
   public PactDslJsonBody minArrayLike(Integer size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  @Override
+  @Deprecated
+  public PactDslJsonBody minArrayLike(String name, Integer size, DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  @Override
+  @Deprecated
+  public PactDslJsonBody minArrayLike(Integer size, DslPart object) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -193,6 +217,18 @@ public class PactDslJsonRootValue extends DslPart {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
+  @Override
+  @Deprecated
+  public PactDslJsonBody maxArrayLike(String name, Integer size, DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  @Override
+  @Deprecated
+  public PactDslJsonBody maxArrayLike(Integer size, DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
   /**
    * @deprecated Use PactDslJsonArray for arrays
    */
@@ -220,12 +256,24 @@ public class PactDslJsonRootValue extends DslPart {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
+  @Override
+  @Deprecated
+  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
   /**
    * @deprecated Use PactDslJsonArray for arrays
    */
   @Override
   @Deprecated
   public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  @Override
+  @Deprecated
+  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 

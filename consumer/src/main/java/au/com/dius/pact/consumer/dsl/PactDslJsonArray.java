@@ -106,7 +106,12 @@ public class PactDslJsonArray extends DslPart {
         throw new UnsupportedOperationException("use the eachLike() form");
     }
 
-    @Override
+  @Override
+  public PactDslJsonBody eachLike(String name, DslPart object) {
+    return null;
+  }
+
+  @Override
     public PactDslJsonBody eachLike(String name, int numberExamples) {
       throw new UnsupportedOperationException("use the eachLike(numberExamples) form");
     }
@@ -119,7 +124,12 @@ public class PactDslJsonArray extends DslPart {
         return eachLike(1);
     }
 
-    /**
+  @Override
+  public PactDslJsonBody eachLike(DslPart object) {
+    return null;
+  }
+
+  /**
      * Element that is an array where each item must match the following example
      * @param numberExamples Number of examples to generate
      */
@@ -145,7 +155,17 @@ public class PactDslJsonArray extends DslPart {
         return minArrayLike(size, size);
     }
 
-    @Override
+  @Override
+  public PactDslJsonBody minArrayLike(String name, Integer size, DslPart object) {
+    return null;
+  }
+
+  @Override
+  public PactDslJsonBody minArrayLike(Integer size, DslPart object) {
+    return null;
+  }
+
+  @Override
     public PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) {
       throw new UnsupportedOperationException("use the minArrayLike(Integer size, int numberExamples) form");
     }
@@ -181,7 +201,17 @@ public class PactDslJsonArray extends DslPart {
         return maxArrayLike(size, 1);
     }
 
-    @Override
+  @Override
+  public PactDslJsonBody maxArrayLike(String name, Integer size, DslPart object) {
+    return null;
+  }
+
+  @Override
+  public PactDslJsonBody maxArrayLike(Integer size, DslPart object) {
+    return null;
+  }
+
+  @Override
     public PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) {
       throw new UnsupportedOperationException("use the maxArrayLike(Integer size, int numberExamples) form");
     }
@@ -1101,8 +1131,18 @@ public class PactDslJsonArray extends DslPart {
   }
 
   @Override
+  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) {
+    return null;
+  }
+
+  @Override
   public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
     return minMaxArrayLike(minSize, maxSize, minSize);
+  }
+
+  @Override
+  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
+    return null;
   }
 
   @Override

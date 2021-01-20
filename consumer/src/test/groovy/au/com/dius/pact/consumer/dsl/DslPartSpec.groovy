@@ -30,7 +30,17 @@ class DslPartSpec extends Specification {
     PactDslJsonBody eachLike(String name) { null }
 
     @Override
+    PactDslJsonBody eachLike(String name, DslPart object) {
+      null
+    }
+
+    @Override
     PactDslJsonBody eachLike() { null }
+
+    @Override
+    PactDslJsonBody eachLike(DslPart object) {
+      null
+    }
 
     @Override
     PactDslJsonBody eachLike(String name, int numberExamples) { null }
@@ -45,6 +55,16 @@ class DslPartSpec extends Specification {
     PactDslJsonBody minArrayLike(Integer size) { null }
 
     @Override
+    PactDslJsonBody minArrayLike(String name, Integer size, DslPart object) {
+      null
+    }
+
+    @Override
+    PactDslJsonBody minArrayLike(Integer size, DslPart object) {
+      null
+    }
+
+    @Override
     PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) { null }
 
     @Override
@@ -55,6 +75,16 @@ class DslPartSpec extends Specification {
 
     @Override
     PactDslJsonBody maxArrayLike(Integer size) { null }
+
+    @Override
+    PactDslJsonBody maxArrayLike(String name, Integer size, DslPart object) {
+      null
+    }
+
+    @Override
+    PactDslJsonBody maxArrayLike(Integer size, DslPart object) {
+      null
+    }
 
     @Override
     PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) { null }
@@ -116,7 +146,17 @@ class DslPartSpec extends Specification {
     }
 
     @Override
+    PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) {
+      null
+    }
+
+    @Override
     PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
+      null
+    }
+
+    @Override
+    PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
       null
     }
 
@@ -166,7 +206,5 @@ class DslPartSpec extends Specification {
     'matchMin'        | 1            | [match: 'type', min: 1]
     'matchMax'        | 1            | [match: 'type', max: 1]
     'includesMatcher' | 1            | [match: 'include', value: '1']
-
   }
-
 }
