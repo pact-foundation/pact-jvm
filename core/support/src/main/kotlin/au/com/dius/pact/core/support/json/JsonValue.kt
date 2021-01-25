@@ -17,14 +17,32 @@ sealed class JsonValue {
     constructor(value: CharArray) : this(JsonToken.StringValue(value))
     constructor(value: String) : this(JsonToken.StringValue(value.toCharArray()))
     override fun toString() = String(value.chars)
+
+    override fun equals(other: Any?): Boolean {
+      if (this === other) return true
+      return when (other) {
+        is StringValue -> value == other.value
+        is String -> value.chars.contentEquals(other.toCharArray())
+        else -> false
+      }
+    }
+
+    override fun hashCode(): Int {
+      var result = super.hashCode()
+      result = 31 * result + value.hashCode()
+      return result
+    }
   }
 
   object True : JsonValue()
   object False : JsonValue()
   object Null : JsonValue()
 
-  class Array(val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
+  class Array @JvmOverloads constructor (val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
     fun find(function: (JsonValue) -> Boolean) = values.find(function)
+    operator fun get(i: Int): JsonValue {
+      return values[i]
+    }
     operator fun set(i: Int, value: JsonValue) {
       values[i] = value
     }
@@ -39,9 +57,13 @@ sealed class JsonValue {
     }
 
     fun last() = values.last()
+
+    fun append(value: JsonValue) {
+      values.add(value)
+    }
   }
 
-  class Object(val entries: MutableMap<String, JsonValue>) : JsonValue() {
+  class Object @JvmOverloads constructor (val entries: MutableMap<String, JsonValue> = mutableMapOf()) : JsonValue() {
     constructor(vararg values: Pair<String, JsonValue>) : this(values.associate { it }.toMutableMap())
     operator fun get(name: String) = entries[name] ?: Null
     override fun has(field: String) = entries.containsKey(field)
@@ -58,46 +80,63 @@ sealed class JsonValue {
     fun add(key: String, value: JsonValue) {
       entries[key] = value
     }
+
+    fun keys(): Set<String> = entries.keys
   }
 
-  fun asObject(): Object {
-    if (this is Object) {
-      return this
+  fun asObject(): Object? {
+    return if (this is Object) {
+      this
     } else {
-      throw UnsupportedOperationException("Expected an Object, but found a $this")
+      null
     }
   }
 
-  fun asArray(): Array {
-    if (this is Array) {
-      return this
+  fun asArray(): Array? {
+    return if (this is Array) {
+      this
     } else {
-      throw UnsupportedOperationException("Expected an Array, but found a $this")
+      null
     }
   }
 
-  fun asString(): String {
+  fun asString(): String? {
     return if (this is StringValue) {
       String(value.chars)
     } else {
-      serialise()
+      null
+    }
+  }
+
+  override fun toString(): String {
+    return when (this) {
+      is Null -> "null"
+      is Decimal -> String(this.value.chars)
+      is Integer -> String(this.value.chars)
+      is StringValue -> this.value.toString()
+      is True -> "true"
+      is False -> "false"
+      is Array -> "[${this.values.joinToString(",") { it.serialise() }}]"
+      is Object -> "{${this.entries.entries.sortedBy { it.key }.joinToString(",") { 
+        "\"${it.key}\":" + it.value.serialise() 
+      }}}"
     }
   }
 
   fun asBoolean() = when (this) {
     is True -> true
     is False -> false
-    else -> throw UnsupportedOperationException("Expected a Boolean, but found a $this")
+    else -> null
   }
 
-  fun asNumber(): Number = when (this) {
+  fun asNumber(): Number? = when (this) {
     is Integer -> this.toBigInteger()
     is Decimal -> this.toBigDecimal()
-    else -> throw UnsupportedOperationException("Expected a Number, but found a $this")
+    else -> null
   }
 
   operator fun get(field: Any): JsonValue = when {
-    this is Object -> this.asObject()[field.toString()]
+    this is Object -> this[field.toString()]
     this is Array && field is Int -> this.values[field]
     else -> throw UnsupportedOperationException("Indexed lookups only work on Arrays and Objects, not $this")
   }
@@ -112,16 +151,11 @@ sealed class JsonValue {
       is Null -> "null"
       is Decimal -> String(this.value.chars)
       is Integer -> String(this.value.chars)
-      is StringValue -> "\"${Json.escape(this.asString())}\""
+      is StringValue -> "\"${Json.escape(this.asString()!!)}\""
       is True -> "true"
       is False -> "false"
       is Array -> "[${this.values.joinToString(",") { it.serialise() }}]"
-      is Object -> {
-        val s = this.entries.entries
-          .sortedBy { it.key }
-          .joinToString(",") { "\"${it.key}\":" + it.value.serialise() }
-        "{$s}"
-      }
+      is Object -> "{${this.entries.entries.sortedBy { it.key }.joinToString(",") { "\"${it.key}\":" + it.value.serialise() }}}"
     }
   }
 
@@ -177,7 +211,7 @@ sealed class JsonValue {
     is Null -> 0.hashCode()
     is Decimal -> this.toBigDecimal().hashCode()
     is Integer -> this.toBigInteger().hashCode()
-    is StringValue -> this.asString().hashCode()
+    is StringValue -> this.asString()!!.hashCode()
     is True -> true.hashCode()
     is False -> false.hashCode()
     is Array -> this.values.hashCode()
@@ -191,7 +225,7 @@ sealed class JsonValue {
       when (this) {
         is Array -> "[\n" + this.values.joinToString(",\n") {
           it.prettyPrint(indent + 2) } + "\n$indentStr]"
-        is Object -> "{\n" + this.entries.entries.joinToString(",\n") {
+        is Object -> "{\n" + this.entries.entries.sortedBy { it.key }.joinToString(",\n") {
           "$indentStr2\"${it.key}\": ${it.value.prettyPrint(indent + 2, true)}"
           } + "\n$indentStr}"
         else -> this.serialise()
@@ -200,7 +234,7 @@ sealed class JsonValue {
       when (this) {
         is Array -> "$indentStr$indentStr[\n" + this.values.joinToString(",\n") {
           it.prettyPrint(indent + 2) } + "\n$indentStr]"
-        is Object -> "$indentStr{\n" + this.entries.entries.joinToString(",\n") {
+        is Object -> "$indentStr{\n" + this.entries.entries.sortedBy { it.key }.joinToString(",\n") {
           "$indentStr2\"${it.key}\": ${it.value.prettyPrint(indent + 2, true)}"
           } + "\n$indentStr}"
         else -> indentStr + this.serialise()
@@ -257,6 +291,14 @@ sealed class JsonValue {
       is Array -> true
       else -> false
     }
+
+  inline fun <reified T: JsonValue> downcast() : T {
+    return if (this is T) {
+      this
+    } else {
+      throw UnsupportedOperationException("Can not downcast ${this.name} to type ${T::class}")
+    }
+  }
 }
 
 fun <R> JsonValue?.map(transform: (JsonValue) -> R): List<R> = when {

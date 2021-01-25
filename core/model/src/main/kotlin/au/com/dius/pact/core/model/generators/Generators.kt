@@ -118,7 +118,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
               } else {
                 logger.warn { "Ignoring invalid generator config '$generatorJson.obj'" }
               }
-              else -> generatorJson.asObject().entries.forEach { (generatorKey, generatorValue) ->
+              else -> generatorJson.asObject()?.entries?.forEach { (generatorKey, generatorValue) ->
                 if (generatorValue is JsonValue.Object && generatorValue.has("type")) {
                   val generator = lookupGenerator(generatorValue)
                   if (generator != null) {

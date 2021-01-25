@@ -72,7 +72,7 @@ abstract class HttpPart {
     ): OptionalBody {
       return when (val b = json["body"]) {
         is JsonValue.Null -> OptionalBody.nullBody()
-        is JsonValue.StringValue -> decodeBody(b.asString(), contentType, decoder)
+        is JsonValue.StringValue -> decodeBody(b.asString()!!, contentType, decoder)
         else -> decodeBody(b.serialise(), contentType, decoder)
       }
     }

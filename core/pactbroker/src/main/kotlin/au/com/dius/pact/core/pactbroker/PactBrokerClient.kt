@@ -19,6 +19,7 @@ import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.unwrap
 import com.google.common.net.UrlEscapers.urlFormParameterEscaper
+import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import mu.KLogging
 import java.io.File
 import java.io.IOException
@@ -401,7 +402,7 @@ interface IPactBrokerClient {
   fun uploadPactFile(pactFile: File, version: String, tags: List<String>): Result<String?, Exception>
 
   /**
-   * Uploads the given pact file to the broker and applies any tags/Branch
+   * Uploads the given pact file to the broker and applies any tags/branches
    */
   fun uploadPactFile(pactFile: File, config: PublishConfiguration): Result<String?, Exception>
 }
@@ -590,13 +591,14 @@ open class PactBrokerClient(
           val href = Json.toString(selfLink["href"])
           val name = Json.toString(selfLink["name"])
           val properties = pactJson["verificationProperties"]
-          val notices = properties["notices"].asArray()
-            .map { VerificationNotice.fromJson(it.asObject()) }
+          val notices = properties["notices"].asArray()?.map { VerificationNotice.fromJson(it) }?.filterNotNull() ?:
+            emptyList()
           var pending = false
           if (properties is JsonValue.Object && properties.has("pending") && properties["pending"].isBoolean) {
-            pending = properties["pending"].asBoolean()
+            pending = properties["pending"].asBoolean()!!
           }
-          val wip = if (properties.has("wip") && properties["wip"].isBoolean) properties["wip"].asBoolean()
+          val wip = if (properties.has("wip") && properties["wip"].isBoolean)
+            properties["wip"].asBoolean()!!
           else false
 
           PactBrokerResult(name, href, pactBrokerUrl, halClient.getAuth()?.legacyForm() ?: emptyList(),
@@ -621,8 +623,8 @@ open class PactBrokerClient(
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient().navigate()
-    val providerName = pact["provider"]["name"].asString()
-    val consumerName = pact["consumer"]["name"].asString()
+    val providerName = Json.toString(pact["provider"]["name"])
+    val consumerName = Json.toString(pact["consumer"]["name"])
 
     val publishContractsLink = halClient.linkUrl(PUBLISH_CONTRACTS_LINK)
     return if (publishContractsLink != null) {
@@ -690,7 +692,7 @@ open class PactBrokerClient(
         if (error is RequestFailedException && error.body != null) {
           when (val json = handleWith<JsonValue> { JsonParser.parseString(error.body) }) {
             is Ok -> if (json.value is JsonValue.Object) {
-              val body = json.value.asObject()
+              val body: JsonValue.Object = json.value.downcast()
               displayNotices(body)
               if (error.status.statusCode == 400) {
                 displayErrors(body)
@@ -731,7 +733,7 @@ open class PactBrokerClient(
     if (notices is JsonValue.Array) {
       for (noticeJson in notices.values) {
         if (noticeJson.isObject) {
-          val notice = noticeJson.asObject()
+          val notice: JsonValue.Object = noticeJson.downcast()
           val level = notice["level"].asString()
           val text = notice["text"].asString()
           when (level) {
@@ -754,7 +756,7 @@ open class PactBrokerClient(
     if (errors is JsonValue.Object) {
       for ((key, errorJson) in errors.entries) {
         if (errorJson.isArray) {
-          for (error in errorJson.asArray().values) {
+          for (error in errorJson.asArray()!!.values) {
             logger.error("$key: $error")
           }
         } else {
@@ -1004,7 +1006,7 @@ open class PactBrokerClient(
     ) {
       when (val result = halClient.getJson(path, false)) {
         is Ok<JsonValue> -> {
-          val summary = result.value["summary"].asObject()
+          val summary = result.value["summary"].asObject()!!
           val matrix = result.value["matrix"]
           val verificationResultUrl = if (matrix.isArray) {
             matrix.asArray()
@@ -1017,7 +1019,7 @@ open class PactBrokerClient(
           } else {
             null
           }
-          CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
+          CanIDeployResult(Json.toBoolean(summary["deployable"])!!, "", Json.toString(summary["reason"]),
             Json.toInteger(summary["unknown"]), verificationResultUrl)
         }
         is Err<Exception> -> {

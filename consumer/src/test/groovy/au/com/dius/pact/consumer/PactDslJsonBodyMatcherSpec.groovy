@@ -188,8 +188,8 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     def keys = ['type', 'features'] as Set
 
     then:
-    bodyJson == '{"features":[{"geometry":{"coordinates":[[-7.55717,49.766896]],"type":"Point"},"type":"Feature",' +
-      '"properties":{"prop0":"value0"}}],"type":"FeatureCollection"}'
+    bodyJson == '{"features":[{"geometry":{"coordinates":[[-7.55717,49.766896]],"type":"Point"},' +
+      '"properties":{"prop0":"value0"},"type":"Feature"}],"type":"FeatureCollection"}'
     result.size() == 2
     result.keySet() == keys
     result.features[0].geometry.coordinates[0] == [-7.55717, 49.766896]
@@ -205,7 +205,6 @@ class PactDslJsonBodyMatcherSpec extends Specification {
       '.features[*].geometry.coordinates[*][1]': new MatchingRuleGroup([
         new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)])
     ]
-
   }
 
   def 'each like generates the correct JSON for arrays of strings'() {

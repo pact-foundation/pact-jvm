@@ -229,12 +229,8 @@ public class PactDslResponse {
     public PactDslResponse body(DslPart body) {
       DslPart parent = body.close();
 
-      if (parent instanceof PactDslJsonRootValue) {
-        ((PactDslJsonRootValue)parent).setEncodeJson(true);
-      }
-
       responseMatchers.addCategory(parent.getMatchers());
-      responseGenerators.addGenerators(parent.generators);
+      responseGenerators.addGenerators(parent.getGenerators());
 
       Charset charset = Charset.defaultCharset();
       String contentType = ContentType.APPLICATION_JSON.toString();
@@ -247,7 +243,7 @@ public class PactDslResponse {
       }
 
       if (parent.getBody() != null) {
-        responseBody = OptionalBody.body(parent.getBody().toString().getBytes(charset),
+        responseBody = OptionalBody.body(parent.getBody().serialise().getBytes(charset),
           new au.com.dius.pact.core.model.ContentType(contentType));
       } else {
         responseBody = OptionalBody.nullBody();

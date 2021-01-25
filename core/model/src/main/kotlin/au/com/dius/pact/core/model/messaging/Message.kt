@@ -171,13 +171,13 @@ class Message @JvmOverloads constructor(
     @JvmStatic
     fun fromJson(json: JsonValue.Object): Message {
       val providerStates = when {
-        json.has("providerStates") -> json["providerStates"].asArray().values.map { ProviderState.fromJson(it) }
+        json.has("providerStates") -> json["providerStates"].asArray()?.values?.map { ProviderState.fromJson(it) }
         json.has("providerState") -> listOf(ProviderState(Json.toString(json["providerState"])))
         else -> listOf()
       }
 
-      val metaData = if (json.has("metaData"))
-        json["metaData"].asObject().entries.entries.associate { it.key to Json.fromJson(it.value) }
+      val metaData = if (json.has("metaData") && json["metaData"].isObject)
+        json["metaData"].asObject()!!.entries.entries.associate { it.key to Json.fromJson(it.value) }
       else
         emptyMap()
 
@@ -185,7 +185,7 @@ class Message @JvmOverloads constructor(
       val contents = if (json.has("contents")) {
         when (val contents = json["contents"]) {
           is JsonValue.Null -> OptionalBody.nullBody()
-          is JsonValue.StringValue -> OptionalBody.body(contents.asString().toByteArray(contentType.asCharset()),
+          is JsonValue.StringValue -> OptionalBody.body(contents.asString()!!.toByteArray(contentType.asCharset()),
             contentType)
           else -> OptionalBody.body(contents.serialise().toByteArray(contentType.asCharset()), contentType)
         }
@@ -199,7 +199,7 @@ class Message @JvmOverloads constructor(
         Generators.fromJson(json["generators"])
       else Generators()
 
-      return Message(Json.toString(json["description"]), providerStates,
+      return Message(Json.toString(json["description"]), providerStates ?: emptyList(),
         contents, matchingRules, generators, metaData.toMutableMap(), Json.toString(json["_id"]))
     }
 

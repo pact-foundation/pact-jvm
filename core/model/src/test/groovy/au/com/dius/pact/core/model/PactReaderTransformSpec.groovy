@@ -46,9 +46,6 @@ class PactReaderTransformSpec extends Specification {
 
     then:
     Json.INSTANCE.prettyPrint(result) == '''{
-      |  "provider": {
-      |    "name": "Alice Service"
-      |  },
       |  "consumer": {
       |    "name": "Consumer"
       |  },
@@ -56,23 +53,26 @@ class PactReaderTransformSpec extends Specification {
       |    {
       |      "description": "a retrieve Mallory request",
       |      "request": {
-      |        "method": "GET",
-      |        "path": "/mallory",
-      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
-      |        }
+      |        },
+      |        "method": "GET",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good"
       |      },
       |      "response": {
-      |        "status": 200,
+      |        "body": "\\"That is some good Mallory.\\"",
       |        "headers": {
       |          "Content-Type": "text/html"
       |        },
-      |        "body": "\\"That is some good Mallory.\\""
+      |        "status": 200
       |      }
       |    }
-      |  ]
+      |  ],
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  }
       |}'''.stripMargin()
   }
 
@@ -86,35 +86,35 @@ class PactReaderTransformSpec extends Specification {
 
     then:
     Json.INSTANCE.prettyPrint(result) == '''{
-      |  "provider": {
-      |    "name": "Alice Service"
-      |  },
-      |  "consumer": {
-      |    "name": "Consumer"
-      |  },
-      |  "interactions": [
-      |    {
-      |      "description": "a retrieve Mallory request",
-      |      "request": {
-      |        "method": "GET",
-      |        "path": "/mallory",
-      |        "query": "name=ron&status=good",
-      |        "body": {
-      |          "id": "123",
-      |          "method": "create"
-      |        }
-      |      },
-      |      "response": {
-      |        "status": 200,
-      |        "headers": {
-      |          "Content-Type": "text/html"
-      |        },
-      |        "body": "\\"That is some good Mallory.\\""
-      |      },
-      |      "providerState": "provider state"
-      |    }
-      |  ]
-      |}'''.stripMargin()
+    |  "consumer": {
+    |    "name": "Consumer"
+    |  },
+    |  "interactions": [
+    |    {
+    |      "description": "a retrieve Mallory request",
+    |      "providerState": "provider state",
+    |      "request": {
+    |        "body": {
+    |          "id": "123",
+    |          "method": "create"
+    |        },
+    |        "method": "GET",
+    |        "path": "/mallory",
+    |        "query": "name=ron&status=good"
+    |      },
+    |      "response": {
+    |        "body": "\\"That is some good Mallory.\\"",
+    |        "headers": {
+    |          "Content-Type": "text/html"
+    |        },
+    |        "status": 200
+    |      }
+    |    }
+    |  ],
+    |  "provider": {
+    |    "name": "Alice Service"
+    |  }
+    |}'''.stripMargin()
   }
 
   def 'handles both a snake and camel case provider state'() {
@@ -129,34 +129,34 @@ class PactReaderTransformSpec extends Specification {
 
     then:
     Json.INSTANCE.prettyPrint(result) == '''{
-      |  "provider": {
-      |    "name": "Alice Service"
-      |  },
       |  "consumer": {
       |    "name": "Consumer"
       |  },
       |  "interactions": [
       |    {
       |      "description": "a retrieve Mallory request",
+      |      "providerState": "provider state 2",
       |      "request": {
-      |        "method": "GET",
-      |        "path": "/mallory",
-      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
-      |        }
+      |        },
+      |        "method": "GET",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good"
       |      },
       |      "response": {
-      |        "status": 200,
+      |        "body": "\\"That is some good Mallory.\\"",
       |        "headers": {
       |          "Content-Type": "text/html"
       |        },
-      |        "body": "\\"That is some good Mallory.\\""
-      |      },
-      |      "providerState": "provider state 2"
+      |        "status": 200
+      |      }
       |    }
-      |  ]
+      |  ],
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  }
       |}'''.stripMargin()
   }
 
@@ -172,9 +172,6 @@ class PactReaderTransformSpec extends Specification {
 
     then:
     Json.INSTANCE.prettyPrint(result) == '''{
-      |  "provider": {
-      |    "name": "Alice Service"
-      |  },
       |  "consumer": {
       |    "name": "Consumer"
       |  },
@@ -182,9 +179,6 @@ class PactReaderTransformSpec extends Specification {
       |    {
       |      "description": "a retrieve Mallory request",
       |      "request": {
-      |        "method": "GET",
-      |        "path": "/mallory",
-      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
@@ -197,14 +191,16 @@ class PactReaderTransformSpec extends Specification {
       |              }
       |            ]
       |          }
-      |        }
+      |        },
+      |        "method": "GET",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good"
       |      },
       |      "response": {
-      |        "status": 200,
+      |        "body": "\\"That is some good Mallory.\\"",
       |        "headers": {
       |          "Content-Type": "text/html"
       |        },
-      |        "body": "\\"That is some good Mallory.\\"",
       |        "matchingRules": {
       |          "body": {
       |            "$": [
@@ -213,10 +209,14 @@ class PactReaderTransformSpec extends Specification {
       |              }
       |            ]
       |          }
-      |        }
+      |        },
+      |        "status": 200
       |      }
       |    }
-      |  ]
+      |  ],
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  }
       |}'''.stripMargin()
   }
 
@@ -230,9 +230,6 @@ class PactReaderTransformSpec extends Specification {
 
     then:
     Json.INSTANCE.prettyPrint(result) == '''{
-      |  "provider": {
-      |    "name": "Alice Service"
-      |  },
       |  "consumer": {
       |    "name": "Consumer"
       |  },
@@ -240,23 +237,26 @@ class PactReaderTransformSpec extends Specification {
       |    {
       |      "description": "a retrieve Mallory request",
       |      "request": {
-      |        "method": "POST",
-      |        "path": "/mallory",
-      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
-      |        }
+      |        },
+      |        "method": "POST",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good"
       |      },
       |      "response": {
-      |        "status": 200,
+      |        "body": "\\"That is some good Mallory.\\"",
       |        "headers": {
       |          "Content-Type": "text/html"
       |        },
-      |        "body": "\\"That is some good Mallory.\\""
+      |        "status": 200
       |      }
       |    }
-      |  ]
+      |  ],
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  }
       |}'''.stripMargin()
   }
 }

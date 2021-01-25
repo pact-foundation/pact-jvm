@@ -157,7 +157,7 @@ class MessagePactBuilder @JvmOverloads constructor(
       metadata["contentType"] = contentTypeEntry.value
     }
 
-    val parent = body.close()
+    val parent = body.close()!!
     message.contents = OptionalBody.body(parent.toString().toByteArray(contentType.asCharset()), contentType)
     message.metaData = metadata
     message.matchingRules.addCategory(parent.matchers)

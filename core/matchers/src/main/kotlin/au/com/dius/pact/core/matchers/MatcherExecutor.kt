@@ -62,7 +62,7 @@ fun safeToString(value: Any?): String {
     is Text -> value.wholeText
     is Element -> value.textContent
     is Attr -> value.nodeValue
-    is JsonValue -> value.asString()
+    is JsonValue -> value.toString()
     else -> value.toString()
   }
 }
@@ -187,7 +187,9 @@ fun <M : Mismatch> matchType(
   actual: Any?,
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
-  logger.debug { "comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path" }
+  logger.debug {
+    "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to ${valueOf(expected)} (${typeOf(expected)}) at $path"
+  }
   return if (expected is String && actual is String ||
     expected is Number && actual is Number ||
     expected is Boolean && actual is Boolean ||
@@ -265,7 +267,7 @@ fun matchDecimal(actual: Any?): Boolean {
       val bigDecimal = actual.toBigDecimal()
       bigDecimal == BigDecimal.ZERO || bigDecimal.scale() > 0
     }
-    actual is JsonValue.Integer -> decimalRegex.matches(actual.asString())
+    actual is JsonValue.Integer -> decimalRegex.matches(actual.toString())
     actual is Attr -> decimalRegex.matches(actual.nodeValue)
     else -> false
   }
@@ -280,7 +282,7 @@ fun matchInteger(actual: Any?): Boolean {
     actual is BigInteger -> true
     actual is JsonValue.Integer -> true
     actual is BigDecimal && actual.scale() == 0 -> true
-    actual is JsonValue.Decimal -> integerRegex.matches(actual.asString())
+    actual is JsonValue.Decimal -> integerRegex.matches(actual.toString())
     actual is Attr -> integerRegex.matches(actual.nodeValue)
     else -> false
   }

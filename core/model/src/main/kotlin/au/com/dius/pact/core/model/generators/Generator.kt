@@ -33,26 +33,31 @@ const val DEFAULT_GENERATOR_PACKAGE = "au.com.dius.pact.core.model.generators"
  * au.com.dius.pact.model.generators package, but this can be extended by adding a comma separated list to the
  * pact.generators.packages system property. The generator class name needs to be <Type>Generator.
  */
-fun lookupGenerator(generatorJson: JsonValue.Object): Generator? {
+fun lookupGenerator(generatorJson: JsonValue?): Generator? {
   var generator: Generator? = null
 
-  try {
-    val generatorClass = findGeneratorClass(Json.toString(generatorJson["type"])).kotlin
-    val fromJson = when {
-      generatorClass.companionObject != null ->
-        generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find {
-          it.name == "fromJson" }
-      generatorClass.objectInstance != null ->
-        generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromJson" }
-      else -> null
+  if (generatorJson is JsonValue.Object) {
+    try {
+      val generatorClass = findGeneratorClass(Json.toString(generatorJson["type"])).kotlin
+      val fromJson = when {
+        generatorClass.companionObject != null ->
+          generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find {
+            it.name == "fromJson"
+          }
+        generatorClass.objectInstance != null ->
+          generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromJson" }
+        else -> null
+      }
+      if (fromJson?.second != null) {
+        generator = fromJson.second!!.call(fromJson.first, generatorJson) as Generator?
+      } else {
+        logger.warn { "Could not invoke generator class 'fromJson' for generator config '$generatorJson'" }
+      }
+    } catch (e: ClassNotFoundException) {
+      logger.warn(e) { "Could not find generator class for generator config '$generatorJson'" }
     }
-    if (fromJson?.second != null) {
-      generator = fromJson.second!!.call(fromJson.first, generatorJson) as Generator?
-    } else {
-      logger.warn { "Could not invoke generator class 'fromJson' for generator config '$generatorJson'" }
-    }
-  } catch (e: ClassNotFoundException) {
-    logger.warn(e) { "Could not find generator class for generator config '$generatorJson'" }
+  } else {
+    logger.warn { "'$generatorJson' is not a valid generator JSON value" }
   }
 
   return generator
@@ -104,13 +109,13 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   companion object {
     fun fromJson(json: JsonValue.Object): RandomIntGenerator {
       val min = if (json["min"].isNumber) {
-        json["min"].asNumber().toInt()
+        json["min"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for min: '${json["min"]}'" }
         0
       }
       val max = if (json["max"].isNumber) {
-        json["max"].asNumber().toInt()
+        json["max"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for max: '${json["max"]}'" }
         Int.MAX_VALUE
@@ -156,7 +161,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   companion object {
     fun fromJson(json: JsonValue.Object): RandomDecimalGenerator {
       val digits = if (json["digits"].isNumber) {
-        json["digits"].asNumber().toInt()
+        json["digits"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for digits: '${json["digits"]}'" }
         10
@@ -179,7 +184,7 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   companion object {
     fun fromJson(json: JsonValue.Object): RandomHexadecimalGenerator {
       val digits = if (json["digits"].isNumber) {
-        json["digits"].asNumber().toInt()
+        json["digits"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for digits: '${json["digits"]}'" }
         10
@@ -204,7 +209,7 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   companion object {
     fun fromJson(json: JsonValue.Object): RandomStringGenerator {
       val size = if (json["size"].isNumber) {
-        json["size"].asNumber().toInt()
+        json["size"].asNumber()!!.toInt()
       } else {
         logger.warn { "Ignoring invalid value for size: '${json["size"]}'" }
         10

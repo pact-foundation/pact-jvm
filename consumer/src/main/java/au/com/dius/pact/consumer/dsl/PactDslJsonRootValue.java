@@ -21,7 +21,9 @@ import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.support.Json;
 import au.com.dius.pact.core.support.expressions.DataType;
+import au.com.dius.pact.core.support.json.JsonValue;
 import com.mifmif.common.regex.Generex;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONObject;
@@ -38,42 +40,24 @@ public class PactDslJsonRootValue extends DslPart {
   private static final String EXAMPLE = "Example \"";
 
   private Object value;
-  private boolean encodeJson = false;
 
   public PactDslJsonRootValue() {
     super("", "");
   }
 
   @Override
-  protected void putObject(DslPart object) {
+  public void putObjectPrivate(DslPart object) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  protected void putArray(DslPart object) {
+  public void putArrayPrivate(DslPart object) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Object getBody() {
-    if (encodeJson) {
-      return Json.toJson(value).serialise();
-    }
-    return value;
-  }
-
-  /**
-   * If the value should be encoded to be safe as JSON
-   */
-  public boolean isEncodeJson() {
-    return encodeJson;
-  }
-
-  /**
-   * If the value should be encoded to be safe as JSON
-   */
-  public void setEncodeJson(boolean encodeJson) {
-    this.encodeJson = encodeJson;
+  public JsonValue getBody() {
+    return Json.toJson(value);
   }
 
   /**
@@ -156,7 +140,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody minArrayLike(String name, Integer size) {
+  public PactDslJsonBody minArrayLike(String name, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -165,28 +149,19 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody minArrayLike(Integer size) {
+  public PactDslJsonBody minArrayLike(int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   @Override
   @Deprecated
-  public PactDslJsonBody minArrayLike(String name, Integer size, DslPart object) {
+  public PactDslJsonBody minArrayLike(String name, int size, DslPart object) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   @Override
   @Deprecated
-  public PactDslJsonArray minArrayLike(Integer size, DslPart object) {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  /**
-   * @deprecated Use PactDslJsonArray for arrays
-   */
-  @Override
-  @Deprecated
-  public PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) {
+  public PactDslJsonArray minArrayLike(int size, DslPart object) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -195,7 +170,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody minArrayLike(Integer size, int numberExamples) {
+  public PactDslJsonBody minArrayLike(String name, int size, int numberExamples) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -204,7 +179,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody maxArrayLike(String name, Integer size) {
+  public PactDslJsonBody minArrayLike(int size, int numberExamples) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -213,19 +188,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody maxArrayLike(Integer size) {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  @Override
-  @Deprecated
-  public PactDslJsonBody maxArrayLike(String name, Integer size, DslPart object) {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  @Override
-  @Deprecated
-  public PactDslJsonArray maxArrayLike(Integer size, DslPart object) {
+  public PactDslJsonBody maxArrayLike(String name, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -234,7 +197,19 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) {
+  public PactDslJsonBody maxArrayLike(int size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  @Override
+  @Deprecated
+  public PactDslJsonBody maxArrayLike(String name, int size, DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  @Override
+  @Deprecated
+  public PactDslJsonArray maxArrayLike(int size, DslPart object) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -243,7 +218,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody maxArrayLike(Integer size, int numberExamples) {
+  public PactDslJsonBody maxArrayLike(String name, int size, int numberExamples) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -252,13 +227,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize) {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  @Override
-  @Deprecated
-  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) {
+  public PactDslJsonBody maxArrayLike(int size, int numberExamples) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -267,22 +236,13 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
+  public PactDslJsonBody minMaxArrayLike(String name, int minSize, int maxSize) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   @Override
   @Deprecated
-  public PactDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  /**
-   * @deprecated Use PactDslJsonArray for arrays
-   */
-  @Override
-  @Deprecated
-  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples) {
+  public PactDslJsonBody minMaxArrayLike(String name, int minSize, int maxSize, DslPart object) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -291,7 +251,31 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples) {
+  public PactDslJsonBody minMaxArrayLike(int minSize, int maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  @Override
+  @Deprecated
+  public PactDslJsonArray minMaxArrayLike(int minSize, int maxSize, DslPart object) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonBody minMaxArrayLike(String name, int minSize, int maxSize, int numberExamples) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonBody minMaxArrayLike(int minSize, int maxSize, int numberExamples) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -334,7 +318,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue stringType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new RandomStringGenerator(20));
+    value.getGenerators().addGenerator(Category.BODY, "", new RandomStringGenerator(20));
     value.setValue("string");
     value.setMatcher(TypeMatcher.INSTANCE);
     return value;
@@ -357,7 +341,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue numberType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
+    value.getGenerators().addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
     value.setValue(100);
     value.setMatcher(TypeMatcher.INSTANCE);
     return value;
@@ -379,7 +363,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue integerType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
+    value.getGenerators().addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
     value.setValue(100);
     value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER));
     return value;
@@ -400,7 +384,7 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that must be an integer
    * @param number example integer value to use for generated bodies
    */
-  public static PactDslJsonRootValue integerType(Integer number) {
+  public static PactDslJsonRootValue integerType(int number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
     value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER));
@@ -412,7 +396,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue decimalType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new RandomDecimalGenerator(10));
+    value.getGenerators().addGenerator(Category.BODY, "", new RandomDecimalGenerator(10));
     value.setValue(100);
     value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL));
     return value;
@@ -482,7 +466,7 @@ public class PactDslJsonRootValue extends DslPart {
   @Deprecated
   public static PactDslJsonRootValue stringMatcher(String regex) {
     PactDslJsonRootValue rootValue = new PactDslJsonRootValue();
-    rootValue.generators.addGenerator(Category.BODY, "", new RegexGenerator(regex));
+    rootValue.getGenerators().addGenerator(Category.BODY, "", new RegexGenerator(regex));
     rootValue.setValue(new Generex(regex).random());
     rootValue.setMatcher(rootValue.regexp(regex));
     return rootValue;
@@ -501,7 +485,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue timestamp(String format) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new DateTimeGenerator(format));
+    value.getGenerators().addGenerator(Category.BODY, "", new DateTimeGenerator(format));
     FastDateFormat instance = FastDateFormat.getInstance(format);
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchTimestamp(format));
@@ -535,7 +519,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue date(String format) {
     FastDateFormat instance = FastDateFormat.getInstance(format);
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new DateGenerator(format));
+    value.getGenerators().addGenerator(Category.BODY, "", new DateGenerator(format));
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchDate(format));
     return value;
@@ -568,7 +552,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue time(String format) {
     FastDateFormat instance = FastDateFormat.getInstance(format);
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new TimeGenerator(format));
+    value.getGenerators().addGenerator(Category.BODY, "", new TimeGenerator(format));
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchTime(format));
     return value;
@@ -617,7 +601,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue hexValue() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new RandomHexadecimalGenerator(10));
+    value.getGenerators().addGenerator(Category.BODY, "", new RandomHexadecimalGenerator(10));
     value.setValue("1234a");
     value.setMatcher(value.regexp("[0-9a-fA-F]+"));
     return value;
@@ -642,7 +626,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue uuid() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", UuidGenerator.INSTANCE);
+    value.getGenerators().addGenerator(Category.BODY, "", UuidGenerator.INSTANCE);
     value.setValue("e2490de5-5bd3-43d5-b7c4-526e33f71304");
     value.setMatcher(value.regexp(UUID_REGEX));
     return value;
@@ -676,7 +660,7 @@ public class PactDslJsonRootValue extends DslPart {
   }
 
   public void setMatcher(MatchingRule matcher) {
-    matchers.addRule(matcher);
+    getMatchers().addRule(matcher);
   }
 
   /**
@@ -702,7 +686,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) {
+  public PactDslJsonArray eachArrayWithMaxLike(String name, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -711,7 +695,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMaxLike(Integer size) {
+  public PactDslJsonArray eachArrayWithMaxLike(int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -720,7 +704,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
+  public PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -729,7 +713,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) {
+  public PactDslJsonArray eachArrayWithMaxLike(int numberExamples, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -738,7 +722,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinLike(String name, Integer size) {
+  public PactDslJsonArray eachArrayWithMinLike(String name, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -747,7 +731,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinLike(Integer size) {
+  public PactDslJsonArray eachArrayWithMinLike(int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -756,7 +740,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) {
+  public PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -765,7 +749,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
+  public PactDslJsonArray eachArrayWithMinLike(int numberExamples, int size) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -774,7 +758,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize) {
+  public PactDslJsonArray eachArrayWithMinMaxLike(String name, int minSize, int maxSize) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -783,7 +767,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize) {
+  public PactDslJsonArray eachArrayWithMinMaxLike(int minSize, int maxSize) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -792,7 +776,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, Integer minSize, Integer maxSize) {
+  public PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, int minSize, int maxSize) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -801,7 +785,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize) {
+  public PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, int minSize, int maxSize) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
@@ -835,7 +819,7 @@ public class PactDslJsonRootValue extends DslPart {
     } else {
       value.setValue(JSONObject.NULL);
     }
-    value.matchers.setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
+    value.getMatchers().setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
     return value;
   }
 
@@ -851,7 +835,7 @@ public class PactDslJsonRootValue extends DslPart {
     } else {
       value.setValue(JSONObject.NULL);
     }
-    value.matchers.setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
+    value.getMatchers().setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
     return value;
   }
 
@@ -868,6 +852,30 @@ public class PactDslJsonRootValue extends DslPart {
     return value;
   }
 
+  @Override
+  public DslPart matchUrl(String name, String basePath, Object... pathFragments) {
+    throw new UnsupportedOperationException(
+      "URL matcher with an attribute name is not supported. " +
+        "Use matchUrl(String basePath, Object... pathFragments)");
+  }
+
+  @Override
+  public PactDslJsonBody matchUrl2(String name, Object... pathFragments) {
+    throw new UnsupportedOperationException(
+      "URL matcher with an attribute name is not supported. " +
+        "Use matchUrl2(Object... pathFragments)");
+  }
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions. Base path from the mock server
+   * will be used.
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  @Override
+  public DslPart matchUrl2(Object... pathFragments) {
+    return matchUrl(null, pathFragments);
+  }
+
   /**
    * Adds a value that will have it's value injected from the provider state
    * @param expression Expression to be evaluated from the provider state
@@ -875,7 +883,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue valueFromProviderState(String expression, Object example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression, DataType.from(example)));
+    value.getGenerators().addGenerator(Category.BODY, "", new ProviderStateGenerator(expression, DataType.from(example)));
     value.setValue(example);
     value.setMatcher(TypeMatcher.INSTANCE);
     return value;
@@ -897,7 +905,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue dateExpression(String expression, String format) {
     FastDateFormat instance = FastDateFormat.getInstance(format);
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new DateGenerator(format, expression));
+    value.getGenerators().addGenerator(Category.BODY, "", new DateGenerator(format, expression));
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchDate(format));
     return value;
@@ -919,7 +927,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue timeExpression(String expression, String format) {
     FastDateFormat instance = FastDateFormat.getInstance(format);
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new TimeGenerator(format, expression));
+    value.getGenerators().addGenerator(Category.BODY, "", new TimeGenerator(format, expression));
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchTime(format));
     return value;
@@ -941,10 +949,9 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue datetimeExpression(String expression, String format) {
     FastDateFormat instance = FastDateFormat.getInstance(format);
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new DateTimeGenerator(format, expression));
+    value.getGenerators().addGenerator(Category.BODY, "", new DateTimeGenerator(format, expression));
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchTimestamp(format));
     return value;
   }
-
 }

@@ -98,7 +98,7 @@ object Json {
 
   fun toInteger(value: JsonValue?) = when {
     value == null -> null
-    value.isNumber -> value.asNumber().toInt()
+    value.isNumber -> value.asNumber()?.toInt()
     else -> null
   }
 

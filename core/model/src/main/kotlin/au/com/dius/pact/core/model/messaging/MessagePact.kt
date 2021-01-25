@@ -60,8 +60,8 @@ class MessagePact @JvmOverloads constructor (
         "(it contains request/response interactions)")
     }
 
-    val messages = ((newPact["messages"] as List<Map<String, Any>>) +
-      json["messages"].asArray().values.map { Json.toMap(it) })
+    val messages = (newPact["messages"] as List<Map<String, Any>>) +
+      (json["messages"].asArray()?.values?.map { Json.toMap(it) } ?: emptyList())
       .distinctBy { it["description"] }
     newPact["messages"] = messages
     return newPact
@@ -120,7 +120,9 @@ class MessagePact @JvmOverloads constructor (
       val transformedJson = DefaultPactReader.transformJson(json)
       val consumer = Consumer.fromJson(transformedJson["consumer"])
       val provider = Provider.fromJson(transformedJson["provider"])
-      val messages = transformedJson["messages"].asArray().values.map { Message.fromJson(it.asObject()) }
+      val messages = transformedJson["messages"].asArray()?.values?.map {
+        Message.fromJson(it.downcast())
+      } ?: emptyList()
       val metadata = if (transformedJson.has("metadata"))
         Json.toMap(transformedJson["metadata"])
       else emptyMap()

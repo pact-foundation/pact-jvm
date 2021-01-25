@@ -66,24 +66,8 @@ class Response @JvmOverloads constructor(
 
     @JvmStatic
     fun fromJson(json: JsonValue.Object): Response {
-      val status = when {
-        json.has("status") -> {
-          val statusJson = json["status"]
-          when {
-            statusJson.isNumber -> statusJson.asNumber().toInt()
-            statusJson is JsonValue.StringValue -> statusJson.asString().toInt()
-            else -> DEFAULT_STATUS
-          }
-        }
-        else -> DEFAULT_STATUS
-      }
-      val headers = if (json.has("headers") && json["headers"] is JsonValue.Object) {
-        json["headers"].asObject().entries.entries.associate { (key, value) ->
-          key to HeaderParser.fromJson(key, value)
-        }
-      } else {
-        emptyMap()
-      }
+      val status = statusFromJson(json)
+      val headers = headersFromJson(json)
 
       var contentType = ContentType.UNKNOWN
       val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
@@ -101,6 +85,27 @@ class Response @JvmOverloads constructor(
         Generators.fromJson(json["generators"])
       else Generators()
       return Response(status, headers.toMutableMap(), body, matchingRules, generators)
+    }
+
+    private fun headersFromJson(json: JsonValue.Object) =
+      if (json.has("headers") && json["headers"] is JsonValue.Object) {
+        json["headers"].asObject()!!.entries.entries.associate { (key, value) ->
+          key to HeaderParser.fromJson(key, value)
+        }
+      } else {
+        emptyMap()
+      }
+
+    private fun statusFromJson(json: JsonValue.Object) = when {
+      json.has("status") -> {
+        val statusJson = json["status"]
+        when {
+          statusJson.isNumber -> statusJson.asNumber()!!.toInt()
+          statusJson is JsonValue.StringValue -> statusJson.asString()?.toInt() ?: DEFAULT_STATUS
+          else -> DEFAULT_STATUS
+        }
+      }
+      else -> DEFAULT_STATUS
     }
   }
 }

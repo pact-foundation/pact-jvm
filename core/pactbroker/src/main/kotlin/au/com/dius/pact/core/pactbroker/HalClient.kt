@@ -4,6 +4,7 @@ import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.HttpClient
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.fromJson
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
@@ -360,7 +361,7 @@ open class HalClient @JvmOverloads constructor(
           return if (linkByName is JsonValue.Object && linkByName["templated"].isBoolean) {
             parseLinkUrl(linkByName["href"].toString(), options)
           } else if (linkByName is JsonValue.Object) {
-            linkByName["href"].asString()
+            Json.toString(linkByName["href"])
           } else {
             throw InvalidNavigationRequest("Link '$link' does not have an entry with name '${options["name"]}'. " +
               "URL: '$baseUrl', LINK: '$link'")
@@ -371,9 +372,9 @@ open class HalClient @JvmOverloads constructor(
         }
       } else if (linkData is JsonValue.Object) {
         return if (linkData.has("templated") && linkData["templated"].isBoolean) {
-          parseLinkUrl(linkData["href"].asString(), options)
+          parseLinkUrl(Json.toString(linkData["href"]), options)
         } else {
-          linkData["href"].asString()
+          Json.toString(linkData["href"])
         }
       } else {
         throw InvalidHalResponse("Expected link in map form in the response, but " +
@@ -425,11 +426,11 @@ open class HalClient @JvmOverloads constructor(
           if (jsonBody.has("errors")) {
             val errors = jsonBody["errors"]
             if (errors is JsonValue.Array) {
-              error = " - " + errors.values.joinToString(", ") { it.asString() }
+              error = " - " + errors.values.joinToString(", ") { Json.toString(it) }
             } else if (errors is JsonValue.Object) {
               error = " - " + errors.entries.entries.joinToString(", ") { entry ->
                 if (entry.value is JsonValue.Array) {
-                  "${entry.key}: ${(entry.value as JsonValue.Array).values.joinToString(", ") { it.asString() }}"
+                  "${entry.key}: ${(entry.value as JsonValue.Array).values.joinToString(", ") { Json.toString(it) }}"
                 } else {
                   "${entry.key}: ${entry.value.asString()}"
                 }
@@ -514,7 +515,8 @@ open class HalClient @JvmOverloads constructor(
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)}")
 
     @JvmStatic
-    fun asMap(jsonObject: JsonValue.Object) = jsonObject.entries.entries
-      .associate { entry -> entry.key to fromJson(entry.value) }
+    fun asMap(jsonObject: JsonValue.Object?) = jsonObject?.entries?.entries?.associate {
+        entry -> entry.key to fromJson(entry.value)
+    } ?: emptyMap()
   }
 }

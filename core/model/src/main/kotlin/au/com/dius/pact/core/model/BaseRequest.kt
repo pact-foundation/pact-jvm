@@ -50,7 +50,7 @@ abstract class BaseRequest : HttpPart() {
         null -> emptyMap()
         is JsonValue.Object -> query.entries.entries.associate { entry ->
           val list = when (entry.value) {
-            is JsonValue.Array -> entry.value.asArray().values.map { Json.toString(it) }
+            is JsonValue.Array -> (entry.value as JsonValue.Array).values.map { Json.toString(it) }
             else -> emptyList()
           }
           entry.key to list

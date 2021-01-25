@@ -104,7 +104,7 @@ class Request @JvmOverloads constructor(
       val path = if (json.has("path")) Json.toString(json["path"]) else DEFAULT_PATH
       val query = parseQueryParametersToMap(json["query"])
       val headers = if (json.has("headers") && json["headers"] is JsonValue.Object) {
-        json["headers"].asObject().entries.entries.associate { (key, value) ->
+        json["headers"].asObject()!!.entries.entries.associate { (key, value) ->
           key to HeaderParser.fromJson(key, value)
         }
       } else {

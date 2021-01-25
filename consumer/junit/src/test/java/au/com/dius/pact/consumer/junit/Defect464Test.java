@@ -52,10 +52,10 @@ public class Defect464Test {
   public void runTest() throws IOException {
     String jsonString
       = Request.Get(provider.getUrl() + PROVIDER_URI).execute().returnContent().asString();
-    JsonValue root = JsonParser.INSTANCE.parseString(jsonString);
+    JsonValue root = JsonParser.parseString(jsonString);
     JsonValue.Array myArrayElement = root.asObject().get(JSON_ARRAY_MEMBER_NAME).asArray();
     List<ElementOfMyArray> myArray = myArrayElement.getValues().stream()
-      .map(e -> new ElementOfMyArray(e.asString()))
+      .map(e -> new ElementOfMyArray(e.get("id").asString()))
       .collect(Collectors.toList());
 
     List<String> ids = new ArrayList<>();
