@@ -48,7 +48,7 @@ import java.util.regex.Pattern
  * DSL to define a JSON Object
  */
 @Suppress("LargeClass", "TooManyFunctions", "SpreadOperator")
-class PactDslJsonBody : DslPart {
+open class PactDslJsonBody : DslPart {
   override var body: JsonValue
 
   /**
@@ -64,7 +64,7 @@ class PactDslJsonBody : DslPart {
    * @param rootName Name to associate this object as in the parent
    * @param parent Parent to attach to
    */
-  constructor(rootPath: String?, rootName: String?, parent: DslPart?) : super(parent, rootPath!!, rootName!!) {
+  constructor(rootPath: String, rootName: String, parent: DslPart?) : super(parent, rootPath, rootName) {
     body = JsonValue.Object()
   }
 
@@ -75,7 +75,8 @@ class PactDslJsonBody : DslPart {
    * @param parent Parent to attach to
    * @param body Body to copy values from
    */
-  constructor(rootPath: String?, rootName: String?, parent: DslPart?, body: PactDslJsonBody) : super(parent, rootPath!!, rootName!!) {
+  constructor(rootPath: String, rootName: String, parent: DslPart?, body: PactDslJsonBody)
+    : super(parent, rootPath, rootName) {
     this.body = body.body
     matchers = body.matchers.copyWithUpdatedMatcherRootPrefix(rootPath)
     generators = body.generators.copyWithUpdatedMatcherRootPrefix(rootPath)
