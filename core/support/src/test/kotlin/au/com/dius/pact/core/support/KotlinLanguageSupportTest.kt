@@ -65,4 +65,23 @@ class KotlinLanguageSupportTest : DescribeSpec({
       }
     }
   }
+
+  describe("padTo") {
+    it("returns an empty list when if the array is empty") {
+      emptyArray<Int>().padTo(100).shouldBeEmpty()
+    }
+
+    it("returns the list if the array is bigger than the pad") {
+      arrayOf(1, 2, 3, 4).padTo(2).shouldHaveSize(4)
+    }
+
+    it("returns the list if the array is has the same size as the pad") {
+      arrayOf(1, 2, 3, 4).padTo(4).shouldHaveSize(4)
+    }
+
+    it("pads the array by cycling the elements") {
+      arrayOf(1, 2, 3, 4).padTo(8).shouldBe(listOf(1, 2, 3, 4, 1, 2, 3, 4))
+      arrayOf(1, 2, 3, 4).padTo(5).shouldBe(listOf(1, 2, 3, 4, 1))
+    }
+  }
 })

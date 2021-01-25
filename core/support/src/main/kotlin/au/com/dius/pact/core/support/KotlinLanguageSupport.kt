@@ -54,6 +54,26 @@ public fun <A, B> Result<A, B>.unwrap(): A {
   }
 }
 
+public fun <T> List<T>.padTo(size: Int): List<T> {
+  return if (this.isEmpty()) {
+    emptyList()
+  } else if (this.size > size) {
+    this
+  } else {
+    val list = this.toMutableList()
+    while (list.size < size) {
+      list += this
+    }
+    list.subList(0, size)
+  }
+}
+
+public fun <T> Array<T>.padTo(size: Int) = this.asList().padTo(size)
+public fun BooleanArray.padTo(size: Int) = this.asList().padTo(size)
+public fun LongArray.padTo(size: Int) = this.asList().padTo(size)
+public fun IntArray.padTo(size: Int) = this.asList().padTo(size)
+public fun DoubleArray.padTo(size: Int) = this.asList().padTo(size)
+
 // This is not available in Kotlin 1.4
 public fun String?.ifNullOrEmpty(function: () -> String?) = if (this.isNullOrEmpty()) {
   function()

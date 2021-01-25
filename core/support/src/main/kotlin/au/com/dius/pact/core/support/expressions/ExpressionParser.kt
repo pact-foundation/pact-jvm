@@ -25,7 +25,7 @@ enum class DataType {
 
   companion object {
     @JvmStatic
-    fun from(example: Any) = when (example) {
+    fun from(example: Any?) = when (example) {
       is Int -> INTEGER
       is Long -> INTEGER
       is BigInteger -> INTEGER
