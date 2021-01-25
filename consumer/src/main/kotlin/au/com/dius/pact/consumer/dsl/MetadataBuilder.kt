@@ -328,7 +328,7 @@ open class MetadataBuilder(
    * @param hexValue example value to use for generated bodies
    */
   fun hexValue(name: String, hexValue: String): MetadataBuilder {
-    if (!hexValue.matches(Regex(DslPart.HEXADECIMAL))) {
+    if (!hexValue.matches(DslPart.HEXADECIMAL)) {
       throw InvalidMatcherException("Example \"$hexValue\" is not a valid hexadecimal value")
     }
     values[name] = hexValue
@@ -360,11 +360,11 @@ open class MetadataBuilder(
    * @param uuid example UUID to use for generated bodies
    */
   fun uuid(name: String, uuid: String): MetadataBuilder {
-    if (!uuid.matches(Regex(DslPart.UUID_REGEX))) {
+    if (!uuid.matches(DslPart.UUID_REGEX)) {
       throw InvalidMatcherException("Example \"$uuid\" is not a valid UUID")
     }
     values[name] = uuid
-    matchers.addRule(name, RegexMatcher(DslPart.UUID_REGEX))
+    matchers.addRule(name, RegexMatcher(DslPart.UUID_REGEX.pattern))
     return this
   }
 

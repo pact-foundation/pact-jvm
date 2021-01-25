@@ -29,6 +29,7 @@ import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -49,7 +50,7 @@ import static au.com.dius.pact.consumer.dsl.Dsl.matcherKey;
 public class PactDslJsonBody extends DslPart {
 
   private static final String EXAMPLE = "Example \"";
-  private final JsonValue.Object body;
+  private JsonValue.Object body;
 
   /**
    * Constructs a new body as a root
@@ -120,12 +121,17 @@ public class PactDslJsonBody extends DslPart {
     }
   }
 
-    @Override
-    public JsonValue getBody() {
-        return body;
-    }
+  @Override
+  public JsonValue getBody() {
+      return body;
+  }
 
-    /**
+  @Override
+  public void setBody(JsonValue body) {
+    this.body = (JsonValue.Object) body;
+  }
+
+  /**
      * Attribute that must be the specified value
      * @param name attribute name
      * @param value string value
@@ -1032,7 +1038,7 @@ public class PactDslJsonBody extends DslPart {
      * @param hexValue example value to use for generated bodies
      */
     public PactDslJsonBody hexValue(String name, String hexValue) {
-      if (!hexValue.matches(HEXADECIMAL)) {
+      if (!hexValue.matches(DslPart.Companion.getHEXADECIMAL().getPattern())) {
         throw new InvalidMatcherException(EXAMPLE + hexValue + "\" is not a hexadecimal value");
       }
       body.add(name, new JsonValue.StringValue(hexValue.toCharArray()));
@@ -1064,11 +1070,11 @@ public class PactDslJsonBody extends DslPart {
      * @param uuid example UUID to use for generated bodies
      */
     public PactDslJsonBody uuid(String name, String uuid) {
-      if (!uuid.matches(UUID_REGEX)) {
+      if (!uuid.matches(DslPart.Companion.getUUID_REGEX().getPattern())) {
         throw new InvalidMatcherException(EXAMPLE + uuid + "\" is not an UUID");
       }
       body.add(name, new JsonValue.StringValue(uuid.toCharArray()));
-      getMatchers().addRule(matcherKey(name, getRootPath()), regexp(UUID_REGEX));
+      getMatchers().addRule(matcherKey(name, getRootPath()), regexp(DslPart.Companion.getUUID_REGEX().getPattern()));
       return this;
     }
 

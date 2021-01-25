@@ -60,6 +60,11 @@ public class PactDslJsonRootValue extends DslPart {
     return Json.toJson(value);
   }
 
+  @Override
+  public void setBody(JsonValue body) {
+    value = body;
+  }
+
   /**
    * @deprecated Use PactDslJsonArray for arrays
    */
@@ -612,7 +617,7 @@ public class PactDslJsonRootValue extends DslPart {
    * @param hexValue example value to use for generated bodies
    */
   public static PactDslJsonRootValue hexValue(String hexValue) {
-    if (!hexValue.matches(HEXADECIMAL)) {
+    if (!hexValue.matches(DslPart.Companion.getHEXADECIMAL().getPattern())) {
       throw new InvalidMatcherException(EXAMPLE + hexValue + "\" is not a hexadecimal value");
     }
     PactDslJsonRootValue value = new PactDslJsonRootValue();
@@ -628,7 +633,7 @@ public class PactDslJsonRootValue extends DslPart {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.getGenerators().addGenerator(Category.BODY, "", UuidGenerator.INSTANCE);
     value.setValue("e2490de5-5bd3-43d5-b7c4-526e33f71304");
-    value.setMatcher(value.regexp(UUID_REGEX));
+    value.setMatcher(value.regexp(DslPart.Companion.getUUID_REGEX().getPattern()));
     return value;
   }
 
@@ -645,13 +650,13 @@ public class PactDslJsonRootValue extends DslPart {
    * @param uuid example UUID to use for generated bodies
    */
   public static PactDslJsonRootValue uuid(String uuid) {
-    if (!uuid.matches(UUID_REGEX)) {
+    if (!uuid.matches(DslPart.Companion.getUUID_REGEX().getPattern())) {
       throw new InvalidMatcherException(EXAMPLE + uuid + "\" is not an UUID");
     }
 
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(uuid);
-    value.setMatcher(value.regexp(UUID_REGEX));
+    value.setMatcher(value.regexp(DslPart.Companion.getUUID_REGEX().getPattern()));
     return value;
   }
 

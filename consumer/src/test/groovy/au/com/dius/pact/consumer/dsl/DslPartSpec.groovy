@@ -210,6 +210,9 @@ class DslPartSpec extends Specification {
     DslPart matchUrl2(Object... pathFragments) {
       null
     }
+
+    @Override
+    void setBody(JsonValue body) { }
   }
 
   @Unroll

@@ -42,7 +42,7 @@ abstract class DslPart {
 
   abstract fun putObjectPrivate(obj: DslPart)
   abstract fun putArrayPrivate(obj: DslPart)
-  abstract val body: JsonValue
+  abstract var body: JsonValue
 
   /**
    * Field which is an array
@@ -58,7 +58,7 @@ abstract class DslPart {
   /**
    * Close of the previous array element
    */
-  abstract fun closeArray(): DslPart
+  abstract fun closeArray(): DslPart?
 
   /**
    * Array field where each element must match the following object
@@ -431,9 +431,9 @@ abstract class DslPart {
   abstract fun matchUrl2(vararg pathFragments: Any): DslPart
 
   companion object {
-    const val HEXADECIMAL = "[0-9a-fA-F]+"
-    const val IP_ADDRESS = "(\\d{1,3}\\.)+\\d{1,3}"
-    const val UUID_REGEX = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    val HEXADECIMAL = Regex("[0-9a-fA-F]+")
+    val IP_ADDRESS = Regex("(\\d{1,3}\\.)+\\d{1,3}")
+    val UUID_REGEX = Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
     const val DATE_2000 = 949323600000L
 
     /**
