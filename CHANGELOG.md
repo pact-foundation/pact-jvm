@@ -1,5 +1,43 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.0-beta.3 - support for using generators with array contains matcher + Fixes
+
+* e0488a4de - refactor: converted the remaining Java DSL body classes to Kotlin (Ronald Holshausen, Mon Jan 25 15:30:37 2021 +1100)
+* bfde7cbe7 - refactor: converted PactDslJsonBody to Kotlin (Ronald Holshausen, Mon Jan 25 14:59:15 2021 +1100)
+* e0a50079a - refactor: converted PactDslJsonArray to Kotlin (Ronald Holshausen, Mon Jan 25 14:05:54 2021 +1100)
+* 267889bad - refactor: converted DslPart to Kotlin (Ronald Holshausen, Mon Jan 25 12:45:27 2021 +1100)
+* d9c3475ee - Merge branch 'master' into v4.2.x (Ronald Holshausen, Wed Jan 20 16:51:41 2021 +1100)
+* d13c182e1 - bump version to 4.1.16 (Ronald Holshausen, Wed Jan 20 16:26:44 2021 +1100)
+* 96cdbef85 - update changelog for release 4.1.15 (Ronald Holshausen, Wed Jan 20 16:13:53 2021 +1100)
+* 57a8541e0 - feat: add PactDslJsonArray eachLike/minArrayLike/maxArrayLike methods that can take a DSLPart #1286 (Ronald Holshausen, Wed Jan 20 15:40:30 2021 +1100)
+* 37d483e5d - chore: split out more objects from large test - failing on JDK 11 #1286 (Ronald Holshausen, Wed Jan 20 15:16:25 2021 +1100)
+* cf4d9fd68 - fix: large body test failing on CI  #1286 (Ronald Holshausen, Wed Jan 20 15:05:07 2021 +1100)
+* da795d148 - feat: add PactDslJsonBody eachLike/minArrayLike/maxArrayLike methods that can take a DSLPart #1286 (Ronald Holshausen, Wed Jan 20 14:46:24 2021 +1100)
+* 606d26ed2 - chore: split out more objects from large test - failing on JDK 10 #1286 (Ronald Holshausen, Wed Jan 20 13:43:05 2021 +1100)
+* dab6022da - chore: add large body test to DSL #1286 (Ronald Holshausen, Wed Jan 20 13:29:38 2021 +1100)
+* 1e148c4d5 - feat: implemented support for using generators with array contains matcher (Ronald Holshausen, Tue Jan 19 17:06:42 2021 +1100)
+* 2978f60a1 - feat: Hyper media test working with array contains matcher + generators (Ronald Holshausen, Tue Jan 19 15:28:58 2021 +1100)
+* a906ea7d1 - refactor: phase 3 - added ArrayContainsJsonGenerator to the test execution context to break cycle deps (Ronald Holshausen, Tue Jan 19 14:14:49 2021 +1100)
+* 945632db1 - refactor: phase 2 - add example value to generator calls (Ronald Holshausen, Tue Jan 19 11:11:26 2021 +1100)
+* d60c594d4 - refactor: first phase of supporting matchers that embed generators (Ronald Holshausen, Mon Jan 18 15:05:55 2021 +1100)
+* 637eda08d - Update README.md (Ronald Holshausen, Wed Jan 13 10:20:54 2021 +1100)
+* 50688d778 - feat: added MockServerURL generator (Ronald Holshausen, Sun Jan 10 16:21:16 2021 +1100)
+* 7ac46d10f - Merge branch 'master' into v4.2.x (Ronald Holshausen, Sun Jan 10 13:43:14 2021 +1100)
+* f36651b47 - bump version to 4.1.15 (Ronald Holshausen, Sun Jan 10 13:37:01 2021 +1100)
+* 0d3901123 - update changelog for release 4.1.14 (Ronald Holshausen, Sun Jan 10 13:08:22 2021 +1100)
+* 19c9d66f9 - chore: add test for updating markdown summary with a failed interaction #1128 (Ronald Holshausen, Sun Jan 10 12:44:00 2021 +1100)
+* 1c7af0efb - fix(regression): previous change fails on JDK 8 #1281 (Ronald Holshausen, Sun Jan 10 12:28:41 2021 +1100)
+* a2472c7a7 - fix(regression): aupport null example values with OR matcher #1281 (Ronald Holshausen, Sun Jan 10 12:10:57 2021 +1100)
+* a4d497dca - chore: upgrade spock framework to 2.0-M4 (Ronald Holshausen, Sun Jan 10 11:43:30 2021 +1100)
+* c64739185 - feat: when using old pact broker endpoints, take fall back tag value into consideration #1264 (Ronald Holshausen, Sun Jan 10 11:36:46 2021 +1100)
+* fe3ad3bdd - Update README.md (Ronald Holshausen, Mon Dec 28 18:46:50 2020 +1100)
+* ff2900677 - chore: upgrade Kotlin to 1.4.21 (Ronald Holshausen, Mon Dec 28 18:38:10 2020 +1100)
+* 9722d62f0 - chore: correct changelog (Ronald Holshausen, Mon Dec 28 18:37:47 2020 +1100)
+* 6d0521c68 - fix: correct release script (Ronald Holshausen, Mon Dec 28 18:37:27 2020 +1100)
+* 6eeb2fd59 - chore: upgrade Gradle to 6.7.1 (Ronald Holshausen, Mon Dec 28 18:19:56 2020 +1100)
+* 3e9d4a41b - chore: fix release script for Java 11 version format (Ronald Holshausen, Mon Dec 28 18:19:35 2020 +1100)
+* 9275c3c83 - bump version to 4.2.0-beta.3 (Ronald Holshausen, Mon Dec 28 18:17:33 2020 +1100)
+
 # 4.1.15 - Consumer DSL update
 
 * 57a8541e0 - feat: add PactDslJsonArray eachLike/minArrayLike/maxArrayLike methods that can take a DSLPart #1286 (Ronald Holshausen, Wed Jan 20 15:40:30 2021 +1100)
