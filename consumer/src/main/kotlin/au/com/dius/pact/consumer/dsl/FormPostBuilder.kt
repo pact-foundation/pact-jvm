@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.InvalidMatcherException
+import au.com.dius.pact.consumer.dsl.DslPart.Companion.HEXADECIMAL
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.DateGenerator
@@ -283,7 +284,7 @@ class FormPostBuilder(
    * @param hexValue example value to use for generated bodies
    */
   fun hexValue(name: String, hexValue: String): FormPostBuilder {
-    if (!hexValue.matches(HEXADECIMAL_REGEX)) {
+    if (!hexValue.matches(HEXADECIMAL)) {
       throw InvalidMatcherException("Example \"$hexValue\" is not a hexadecimal value")
     }
     body[name] = listOf(hexValue)
@@ -315,11 +316,11 @@ class FormPostBuilder(
    * @param uuid example UUID to use for generated bodies
    */
   fun uuid(name: String, uuid: String): FormPostBuilder {
-    if (!uuid.matches(UUID_REGEX)) {
+    if (!uuid.matches(DslPart.UUID_REGEX)) {
       throw InvalidMatcherException("Example \"$uuid\" is not an UUID")
     }
     body[name] = listOf(uuid)
-    matchers.addRule(ROOT + name, PM.stringMatcher(DslPart.UUID_REGEX))
+    matchers.addRule(ROOT + name, PM.stringMatcher(DslPart.UUID_REGEX.pattern))
     return this
   }
 
@@ -430,8 +431,6 @@ class FormPostBuilder(
   }
 
   companion object {
-    val HEXADECIMAL_REGEX = Regex(DslPart.HEXADECIMAL)
-    val UUID_REGEX = Regex(DslPart.UUID_REGEX)
     val APPLICATION_FORM_URLENCODED = org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED.toString()
     const val ROOT = "$."
   }

@@ -27,7 +27,7 @@ class PactDslJsonArrayContaining(
         } ?: emptyMap()
       ))
     )))))
-    return super.closeArray()
+    return super.closeArray()!!
   }
 
   companion object {

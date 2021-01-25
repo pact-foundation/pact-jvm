@@ -9,7 +9,6 @@ import au.com.dius.pact.core.model.generators.RandomDecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomIntGenerator;
 import au.com.dius.pact.core.model.generators.RandomStringGenerator;
-import au.com.dius.pact.core.model.generators.RegexGenerator;
 import au.com.dius.pact.core.model.generators.TimeGenerator;
 import au.com.dius.pact.core.model.generators.UuidGenerator;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
@@ -20,7 +19,6 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.support.Json;
 import au.com.dius.pact.core.support.expressions.DataType;
 import au.com.dius.pact.core.support.json.JsonValue;
-import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONObject;
@@ -59,6 +57,11 @@ public class PactDslRootValue extends DslPart {
   @Override
   public JsonValue getBody() {
     return value;
+  }
+
+  @Override
+  public void setBody(JsonValue body) {
+    value = body;
   }
 
   /**
@@ -569,7 +572,7 @@ public class PactDslRootValue extends DslPart {
    * @param hexValue example value to use for generated bodies
    */
   public static PactDslRootValue hexValue(String hexValue) {
-    if (!hexValue.matches(HEXADECIMAL)) {
+    if (!hexValue.matches(DslPart.Companion.getHEXADECIMAL().getPattern())) {
       throw new InvalidMatcherException(EXAMPLE + hexValue + "\" is not a hexadecimal value");
     }
     PactDslRootValue value = new PactDslRootValue();
@@ -585,7 +588,7 @@ public class PactDslRootValue extends DslPart {
     PactDslRootValue value = new PactDslRootValue();
     value.getGenerators().addGenerator(Category.BODY, "", UuidGenerator.INSTANCE);
     value.setValue("e2490de5-5bd3-43d5-b7c4-526e33f71304");
-    value.setMatcher(value.regexp(UUID_REGEX));
+    value.setMatcher(value.regexp(DslPart.Companion.getUUID_REGEX().getPattern()));
     return value;
   }
 
@@ -602,13 +605,13 @@ public class PactDslRootValue extends DslPart {
    * @param uuid example UUID to use for generated bodies
    */
   public static PactDslRootValue uuid(String uuid) {
-    if (!uuid.matches(UUID_REGEX)) {
+    if (!uuid.matches(DslPart.Companion.getUUID_REGEX().getPattern())) {
       throw new InvalidMatcherException(EXAMPLE + uuid + "\" is not an UUID");
     }
 
     PactDslRootValue value = new PactDslRootValue();
     value.setValue(uuid);
-    value.setMatcher(value.regexp(UUID_REGEX));
+    value.setMatcher(value.regexp(DslPart.Companion.getUUID_REGEX().getPattern()));
     return value;
   }
 
