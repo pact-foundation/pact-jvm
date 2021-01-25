@@ -234,7 +234,7 @@ public class PactDslResponse {
       DslPart parent = body.close();
 
       responseMatchers.addCategory(parent.getMatchers());
-      responseGenerators.addGenerators(parent.generators);
+      responseGenerators.addGenerators(parent.getGenerators());
 
       Charset charset = Charset.defaultCharset();
       String contentType = ContentType.APPLICATION_JSON.toString();

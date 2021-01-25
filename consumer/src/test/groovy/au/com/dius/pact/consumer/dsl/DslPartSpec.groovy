@@ -11,10 +11,10 @@ class DslPartSpec extends Specification {
   private static final DslPart subject = new DslPart('', '') {
 
     @Override
-    protected void putObject(DslPart object) { }
+    void putObjectPrivate(DslPart object) { }
 
     @Override
-    protected void putArray(DslPart object) { }
+    void putArrayPrivate(DslPart object) { }
 
     JsonValue.Object body = null
 
@@ -50,48 +50,48 @@ class DslPartSpec extends Specification {
     PactDslJsonBody eachLike(int numberExamples) { null }
 
     @Override
-    PactDslJsonBody minArrayLike(String name, Integer size) { null }
+    PactDslJsonBody minArrayLike(String name, int size) { null }
 
     @Override
-    PactDslJsonBody minArrayLike(Integer size) { null }
+    PactDslJsonBody minArrayLike(int size) { null }
 
     @Override
-    PactDslJsonBody minArrayLike(String name, Integer size, DslPart object) {
+    PactDslJsonBody minArrayLike(String name, int size, DslPart object) {
       null
     }
 
     @Override
-    PactDslJsonArray minArrayLike(Integer size, DslPart object) {
+    PactDslJsonArray minArrayLike(int size, DslPart object) {
       null
     }
 
     @Override
-    PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) { null }
+    PactDslJsonBody minArrayLike(String name, int size, int numberExamples) { null }
 
     @Override
-    PactDslJsonBody minArrayLike(Integer size, int numberExamples) { null }
+    PactDslJsonBody minArrayLike(int size, int numberExamples) { null }
 
     @Override
-    PactDslJsonBody maxArrayLike(String name, Integer size) { null }
+    PactDslJsonBody maxArrayLike(String name, int size) { null }
 
     @Override
-    PactDslJsonBody maxArrayLike(Integer size) { null }
+    PactDslJsonBody maxArrayLike(int size) { null }
 
     @Override
-    PactDslJsonBody maxArrayLike(String name, Integer size, DslPart object) {
+    PactDslJsonBody maxArrayLike(String name, int size, DslPart object) {
       null
     }
 
     @Override
-    PactDslJsonArray maxArrayLike(Integer size, DslPart object) {
+    PactDslJsonArray maxArrayLike(int size, DslPart object) {
       null
     }
 
     @Override
-    PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) { null }
+    PactDslJsonBody maxArrayLike(String name, int size, int numberExamples) { null }
 
     @Override
-    PactDslJsonBody maxArrayLike(Integer size, int numberExamples) { null }
+    PactDslJsonBody maxArrayLike(int size, int numberExamples) { null }
 
     @Override
     PactDslJsonArray eachArrayLike(String name) { null }
@@ -106,28 +106,28 @@ class DslPartSpec extends Specification {
     PactDslJsonArray eachArrayLike(int numberExamples) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) { null }
+    PactDslJsonArray eachArrayWithMaxLike(String name, int size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(Integer size) { null }
+    PactDslJsonArray eachArrayWithMaxLike(int size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) { null }
+    PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, int size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) { null }
+    PactDslJsonArray eachArrayWithMaxLike(int numberExamples, int size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(String name, Integer size) { null }
+    PactDslJsonArray eachArrayWithMinLike(String name, int size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(Integer size) { null }
+    PactDslJsonArray eachArrayWithMinLike(int size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) { null }
+    PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, int size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) { null }
+    PactDslJsonArray eachArrayWithMinLike(int numberExamples, int size) { null }
 
     @Override
     PactDslJsonBody object(String name) { null }
@@ -142,52 +142,52 @@ class DslPartSpec extends Specification {
     DslPart close() { null }
 
     @Override
-    PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize) {
+    PactDslJsonBody minMaxArrayLike(String name, int minSize, int maxSize) {
       null
     }
 
     @Override
-    PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, DslPart object) {
+    PactDslJsonBody minMaxArrayLike(String name, int minSize, int maxSize, DslPart object) {
       null
     }
 
     @Override
-    PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
+    PactDslJsonBody minMaxArrayLike(int minSize, int maxSize) {
       null
     }
 
     @Override
-    PactDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, DslPart object) {
+    PactDslJsonArray minMaxArrayLike(int minSize, int maxSize, DslPart object) {
       null
     }
 
     @Override
-    PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples) {
+    PactDslJsonBody minMaxArrayLike(String name, int minSize, int maxSize, int numberExamples) {
       null
     }
 
     @Override
-    PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples) {
+    PactDslJsonBody minMaxArrayLike(int minSize, int maxSize, int numberExamples) {
       null
     }
 
     @Override
-    PactDslJsonArray eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize) {
+    PactDslJsonArray eachArrayWithMinMaxLike(String name, int minSize, int maxSize) {
       null
     }
 
     @Override
-    PactDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize) {
+    PactDslJsonArray eachArrayWithMinMaxLike(int minSize, int maxSize) {
       null
     }
 
     @Override
-    PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, Integer minSize, Integer maxSize) {
+    PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, int minSize, int maxSize) {
       null
     }
 
     @Override
-    PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize) {
+    PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, int minSize, int maxSize) {
       null
     }
 

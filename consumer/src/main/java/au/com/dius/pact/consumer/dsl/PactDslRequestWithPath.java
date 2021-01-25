@@ -289,7 +289,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
       DslPart parent = body.close();
 
       requestMatchers.addCategory(parent.getMatchers());
-      requestGenerators.addGenerators(parent.generators);
+      requestGenerators.addGenerators(parent.getGenerators());
 
       Charset charset = Charset.defaultCharset();
       String contentType = ContentType.APPLICATION_JSON.toString();

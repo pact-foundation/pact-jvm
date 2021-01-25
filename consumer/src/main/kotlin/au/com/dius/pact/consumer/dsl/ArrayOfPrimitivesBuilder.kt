@@ -87,18 +87,18 @@ class ArrayOfPrimitivesBuilder {
     val array = PactDslJsonArray("", "", null, true)
     array.numberExamples = this.examples
     if (this.minLength != null && this.maxLength != null) {
-      array.getMatchers().addRule("", MinMaxTypeMatcher(this.minLength!!, this.maxLength!!))
+      array.matchers.addRule("", MinMaxTypeMatcher(this.minLength!!, this.maxLength!!))
     } else if (this.minLength != null) {
-      array.getMatchers().addRule("", MinTypeMatcher(this.minLength!!))
+      array.matchers.addRule("", MinTypeMatcher(this.minLength!!))
     } else if (this.maxLength != null) {
-      array.getMatchers().addRule("", MaxTypeMatcher(this.maxLength!!))
+      array.matchers.addRule("", MaxTypeMatcher(this.maxLength!!))
     }
 
     if (matcher != null) {
-      array.getMatchers().addRule("[*]", matcher!!)
+      array.matchers.addRule("[*]", matcher!!)
     }
     if (generator != null) {
-      array.getGenerators().addGenerator(Category.BODY, "[*]", generator!!)
+      array.generators.addGenerator(Category.BODY, "[*]", generator!!)
     }
     for (i in 0 until this.examples) {
       array.body.add(Json.toJson(this.value))
