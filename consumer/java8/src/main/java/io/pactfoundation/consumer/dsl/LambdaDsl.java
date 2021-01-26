@@ -1,5 +1,6 @@
 package io.pactfoundation.consumer.dsl;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher;
@@ -13,6 +14,12 @@ import java.util.function.Consumer;
  */
 public class LambdaDsl {
 
+    private LambdaDsl() {
+    }
+
+    /**
+     * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonArray}.
+     */
     public static LambdaDslJsonArray newJsonArray(Consumer<LambdaDslJsonArray> array) {
         final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
@@ -20,6 +27,9 @@ public class LambdaDsl {
         return dslArray;
     }
 
+    /**
+     * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonArray} where a minimum base array size is specified
+     */
     public static LambdaDslJsonArray newJsonArrayMinLike(Integer size, Consumer<LambdaDslJsonArray> array) {
         final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
         pactDslJsonArray.setNumberExamples(size);
@@ -30,6 +40,9 @@ public class LambdaDsl {
         return dslArray;
     }
 
+    /**
+     * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonArray} where a maximum base array size is specified
+     */
     public static LambdaDslJsonArray newJsonArrayMaxLike(Integer size, Consumer<LambdaDslJsonArray> array) {
         final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
         pactDslJsonArray.setNumberExamples(1);
@@ -40,6 +53,9 @@ public class LambdaDsl {
         return dslArray;
     }
 
+    /**
+     * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonArray} where a minimum and maximum base array size is specified
+     */
     public static LambdaDslJsonArray newJsonArrayMinMaxLike(Integer minSize, Integer maxSize, Consumer<LambdaDslJsonArray> array) {
         final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
         pactDslJsonArray.setNumberExamples(minSize);
@@ -50,6 +66,9 @@ public class LambdaDsl {
         return dslArray;
     }
 
+    /**
+     * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonBody}.
+     */
     public static LambdaDslJsonBody newJsonBody(Consumer<LambdaDslJsonBody> array) {
         final PactDslJsonBody pactDslJsonBody = new PactDslJsonBody();
         final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(pactDslJsonBody);
