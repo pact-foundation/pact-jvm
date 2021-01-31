@@ -109,7 +109,7 @@ class Response @JvmOverloads constructor(
           if (value is JsonValue.Array) {
             key to value.values.map { Json.toString(it) }
           } else {
-            key to Json.toString(value).split(",").map { it.trim() }
+            key to listOf(Json.toString(value).trim())
           }
         }
       } else {
