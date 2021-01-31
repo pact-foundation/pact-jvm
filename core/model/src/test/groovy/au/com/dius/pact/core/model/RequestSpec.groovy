@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
+import spock.lang.Issue
 import spock.lang.Specification
 
 class RequestSpec extends Specification {
@@ -59,6 +60,20 @@ class RequestSpec extends Specification {
     expect:
     new Request(headers: ['Cookie': ['test=12345', 'test2=abcd; test3=xgfes']]).cookie() == [
       'test=12345', 'test2=abcd', 'test3=xgfes'
+    ]
+  }
+
+  @Issue('#1288')
+  def 'when loading from json, do not split header values'() {
+    expect:
+    Request.fromJson(Json.INSTANCE.toJson([
+      headers: [
+        'Expires': 'Sat, 27 Nov 1999 12:00:00 GMT',
+        'Content-Type': 'application/json'
+      ]
+    ]).asObject()).headers == [
+      Expires: ['Sat, 27 Nov 1999 12:00:00 GMT'],
+      'Content-Type': ['application/json']
     ]
   }
 }

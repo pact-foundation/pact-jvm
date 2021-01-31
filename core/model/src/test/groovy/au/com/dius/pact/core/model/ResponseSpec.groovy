@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -45,4 +46,17 @@ class ResponseSpec extends Specification {
     statusValue << [200, 200L, 200.0, 200.0G, 200G]
   }
 
+  @Issue('#1288')
+  def 'when loading from json, do not split header values'() {
+    expect:
+    Response.fromJson(Json.INSTANCE.toJson([
+      headers: [
+        'Expires': 'Sat, 27 Nov 1999 12:00:00 GMT',
+        'Content-Type': 'application/json'
+      ]
+    ]).asObject()).headers == [
+      Expires: ['Sat, 27 Nov 1999 12:00:00 GMT'],
+      'Content-Type': ['application/json']
+    ]
+  }
 }
