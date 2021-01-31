@@ -21,107 +21,221 @@ public class LambdaDslObject {
         this.object = object;
     }
 
+    /**
+     * Get the raw {@link PactDslJsonBody} which is abstracted with {@link LambdaDslObject}
+     */
     public PactDslJsonBody getPactDslObject() {
         return object;
     }
 
+    /**
+     * Attribute that must be the specified value
+     *
+     * @param name  attribute name
+     * @param value string value
+     */
     public LambdaDslObject stringValue(final String name, final String value) {
         object.stringValue(name, value);
         return this;
     }
 
+    /**
+     * Attribute that can be any string
+     *
+     * @param name    attribute name
+     * @param example example value to use for generated bodies
+     */
     public LambdaDslObject stringType(final String name, final String example) {
         object.stringType(name, example);
         return this;
     }
 
+    /**
+     * Attribute that can be any string
+     *
+     * @param name attribute name
+     */
     public LambdaDslObject stringType(final String name) {
         object.stringType(name);
         return this;
     }
 
+    /**
+     * Attributes that can be any string
+     *
+     * @param names attribute names
+     */
     public LambdaDslObject stringType(final String... names) {
         object.stringType(names);
         return this;
     }
 
-    public LambdaDslObject stringMatcher(final String name, final String example) {
-        object.stringMatcher(name, example);
+    /**
+     * Attribute that must match the regular expression
+     *
+     * @param name  attribute name
+     * @param regex regular expression
+     */
+    public LambdaDslObject stringMatcher(final String name, final String regex) {
+        object.stringMatcher(name, regex);
         return this;
     }
 
-    public LambdaDslObject stringMatcher(final String name, final String regex, final String value) {
-        object.stringMatcher(name, regex, value);
+    /**
+     * Attribute that must match the regular expression
+     *
+     * @param name    attribute name
+     * @param regex   regular expression
+     * @param example example value to use for generated bodies
+     */
+    public LambdaDslObject stringMatcher(final String name, final String regex, final String example) {
+        object.stringMatcher(name, regex, example);
         return this;
     }
 
+    /**
+     * Attribute that must be the specified number
+     *
+     * @param name  attribute name
+     * @param value number value
+     */
     public LambdaDslObject numberValue(final String name, final Number value) {
         object.numberValue(name, value);
         return this;
     }
 
+    /**
+     * Attribute that can be any number
+     *
+     * @param name    attribute name
+     * @param example example number to use for generated bodies
+     */
     public LambdaDslObject numberType(final String name, final Number example) {
         object.numberType(name, example);
         return this;
     }
 
+    /**
+     * Attributes that can be any number
+     *
+     * @param names attribute names
+     */
     public LambdaDslObject numberType(final String... names) {
         object.numberType(names);
         return this;
     }
 
-    public LambdaDslObject decimalType(final String name, final BigDecimal value) {
-        object.decimalType(name, value);
+    /**
+     * Attribute that must be a decimalType value
+     *
+     * @param name    attribute name
+     * @param example example decimalType value
+     */
+    public LambdaDslObject decimalType(final String name, final BigDecimal example) {
+        object.decimalType(name, example);
         return this;
     }
 
+    /**
+     * Attribute that must be a decimalType value
+     *
+     * @param name    attribute name
+     * @param example example decimalType value
+     */
     public LambdaDslObject decimalType(final String name, final Double example) {
         object.decimalType(name, example);
         return this;
     }
 
+    /**
+     * Attributes that must be decimal values
+     *
+     * @param names attribute names
+     */
     public LambdaDslObject decimalType(final String... names) {
         object.decimalType(names);
         return this;
     }
 
+    /**
+     * Attribute that must be the specified boolean
+     *
+     * @param name  attribute name
+     * @param value boolean value
+     */
     public LambdaDslObject booleanValue(final String name, final Boolean value) {
         object.booleanValue(name, value);
         return this;
     }
 
+    /**
+     * Attribute that must be a boolean
+     *
+     * @param name    attribute name
+     * @param example example boolean to use for generated bodies
+     */
     public LambdaDslObject booleanType(final String name, final Boolean example) {
         object.booleanType(name, example);
         return this;
     }
 
+    /**
+     * Attributes that must be a boolean
+     *
+     * @param names attribute names
+     */
     public LambdaDslObject booleanType(final String... names) {
         object.booleanType(names);
         return this;
     }
 
+    /**
+     * Attribute named 'id' that must be a numeric identifier
+     */
     public LambdaDslObject id() {
         object.id();
         return this;
     }
 
+    /**
+     * Attribute that must be a numeric identifier
+     *
+     * @param name attribute name
+     */
     public LambdaDslObject id(final String name) {
         object.id(name);
         return this;
     }
 
-    public LambdaDslObject id(final String name, Long id) {
-        object.id(name, id);
+    /**
+     * Attribute that must be a numeric identifier
+     *
+     * @param name    attribute name
+     * @param example example id to use for generated bodies
+     */
+    public LambdaDslObject id(final String name, Long example) {
+        object.id(name, example);
         return this;
     }
 
+    /**
+     * Attribute that must be encoded as an UUID
+     *
+     * @param name attribute name
+     */
     public LambdaDslObject uuid(final String name) {
         object.uuid(name);
         return this;
     }
 
-    public LambdaDslObject uuid(final String name, UUID id) {
-        object.uuid(name, id);
+    /**
+     * Attribute that must be encoded as an UUID
+     *
+     * @param name    attribute name
+     * @param example example UUID to use for generated bodies
+     */
+    public LambdaDslObject uuid(final String name, UUID example) {
+        object.uuid(name, example);
         return this;
     }
 
@@ -169,9 +283,9 @@ public class LambdaDslObject {
     /**
      * Attribute that must match the provided date format
      *
-     * @param name    attribute date
-     * @param format  date format to match
-     * @param example example date to use for generated values
+     * @param name     attribute date
+     * @param format   date format to match
+     * @param example  example date to use for generated values
      * @param timeZone time zone used for formatting of example date
      */
     public LambdaDslObject date(String name, String format, Date example, TimeZone timeZone) {
@@ -231,12 +345,13 @@ public class LambdaDslObject {
         object.time(name, format, example);
         return this;
     }
+
     /**
      * Attribute that must match the provided time format
      *
-     * @param name    attribute name
-     * @param format  time format to match
-     * @param example example time to use for generated values
+     * @param name     attribute name
+     * @param format   time format to match
+     * @param example  example time to use for generated values
      * @param timeZone time zone used for formatting of example time
      */
     public LambdaDslObject time(String name, String format, Date example, TimeZone timeZone) {
@@ -320,14 +435,14 @@ public class LambdaDslObject {
     /**
      * Attribute that must match the given timestamp format
      *
-     * @param name    attribute name
-     * @param format  timestamp format
-     * @param example example date and time to use for generated bodies
+     * @param name     attribute name
+     * @param format   timestamp format
+     * @param example  example date and time to use for generated bodies
      * @param timeZone time zone used for formatting of example date and time
      * @deprecated use datetime instead
      */
     @Deprecated
-    public LambdaDslObject timestamp(String name, String format, Date example, TimeZone timeZone){
+    public LambdaDslObject timestamp(String name, String format, Date example, TimeZone timeZone) {
         object.datetime(name, format, example, timeZone);
         return this;
     }
@@ -394,12 +509,12 @@ public class LambdaDslObject {
     /**
      * Attribute that must match the given datetime format
      *
-     * @param name    attribute name
-     * @param format  datetime format
-     * @param example example date and time to use for generated bodies
+     * @param name     attribute name
+     * @param format   datetime format
+     * @param example  example date and time to use for generated bodies
      * @param timeZone time zone used for formatting of example date and time
      */
-    public LambdaDslObject datetime(String name, String format, Date example, TimeZone timeZone){
+    public LambdaDslObject datetime(String name, String format, Date example, TimeZone timeZone) {
         object.datetime(name, format, example, timeZone);
         return this;
     }
@@ -428,38 +543,45 @@ public class LambdaDslObject {
 
     /**
      * Attribute that will have its value injected from the provider state
-     * @param name Attribute name
+     *
+     * @param name       Attribute name
      * @param expression Expression to be evaluated from the provider state
-     * @param example Example value to be used in the consumer test
+     * @param example    Example value to be used in the consumer test
      */
     public LambdaDslObject valueFromProviderState(String name, String expression, Object example) {
         object.valueFromProviderState(name, expression, example);
         return this;
     }
 
-    /** Combine all the matchers using AND
-    * @param name  Attribute name
-    * @param value Attribute example value
-    * @param rules Matching rules to apply
-    * @return
-    */
+    /**
+     * Combine all the matchers using AND
+     *
+     * @param name  Attribute name
+     * @param value Attribute example value
+     * @param rules Matching rules to apply
+     */
     public LambdaDslObject and(String name, Object value, MatchingRule... rules) {
         object.and(name, value, rules);
         return this;
     }
 
     /**
-    * Combine all the matchers using OR
-    * @param name  Attribute name
-    * @param value Attribute example value
-    * @param rules Matching rules to apply
-    * @return
-    */
+     * Combine all the matchers using OR
+     *
+     * @param name  Attribute name
+     * @param value Attribute example value
+     * @param rules Matching rules to apply
+     */
     public LambdaDslObject or(String name, Object value, MatchingRule... rules) {
         object.or(name, value, rules);
         return this;
     }
 
+    /**
+     * Attribute that is an array
+     *
+     * @param name field name
+     */
     public LambdaDslObject array(final String name, final Consumer<LambdaDslJsonArray> array) {
         final PactDslJsonArray pactArray = object.array(name);
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactArray);
@@ -468,6 +590,11 @@ public class LambdaDslObject {
         return this;
     }
 
+    /**
+     * Attribute that is a JSON object
+     *
+     * @param name field name
+     */
     public LambdaDslObject object(final String name, final Consumer<LambdaDslObject> nestedObject) {
         final PactDslJsonBody pactObject = object.object(name);
         final LambdaDslObject dslObject = new LambdaDslObject(pactObject);
@@ -506,7 +633,7 @@ public class LambdaDslObject {
     /**
      * Attribute that is an array where each item is a primitive that must match the provided value
      *
-     * @param name field name
+     * @param name  field name
      * @param value Value that each item in the array must match
      */
     public LambdaDslObject eachLike(String name, PactDslJsonRootValue value) {
@@ -517,8 +644,8 @@ public class LambdaDslObject {
     /**
      * Attribute that is an array where each item is a primitive that must match the provided value
      *
-     * @param name field name
-     * @param value Value that each item in the array must match
+     * @param name           field name
+     * @param value          Value that each item in the array must match
      * @param numberExamples Number of examples to generate
      */
     public LambdaDslObject eachLike(String name, PactDslJsonRootValue value, int numberExamples) {
@@ -559,14 +686,15 @@ public class LambdaDslObject {
     /**
      * Attribute that is an array of values with a minimum size that are not objects where each item must match
      * the following example
-     * @param name field name
-     * @param size minimum size of the array
-     * @param value Value to use to match each item
+     *
+     * @param name           field name
+     * @param size           minimum size of the array
+     * @param value          Value to use to match each item
      * @param numberExamples number of examples to generate
      */
     public LambdaDslObject minArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
-      object.minArrayLike(name, size, value, numberExamples);
-      return this;
+        object.minArrayLike(name, size, value, numberExamples);
+        return this;
     }
 
     /**
@@ -599,65 +727,67 @@ public class LambdaDslObject {
         return this;
     }
 
-  /**
-   * Attribute that is an array of values with a maximum size that are not objects where each item must match the
-   * following example
-   * @param name field name
-   * @param size maximum size of the array
-   * @param value Value to use to match each item
-   * @param numberExamples number of examples to generate
-   */
-  public LambdaDslObject maxArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
-    object.maxArrayLike(name, size, value, numberExamples);
-    return this;
-  }
+    /**
+     * Attribute that is an array of values with a maximum size that are not objects where each item must match the
+     * following example
+     *
+     * @param name           field name
+     * @param size           maximum size of the array
+     * @param value          Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public LambdaDslObject maxArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
+        object.maxArrayLike(name, size, value, numberExamples);
+        return this;
+    }
 
-  /**
-   * Attribute that is an array with a minimum and maximum size where each item must match the following example
-   *
-   * @param name field name
-   * @param minSize minimum size of the array
-   * @param maxSize maximum size of the array
-   */
-  public LambdaDslObject minMaxArrayLike(String name, Integer minSize, Integer maxSize, Consumer<LambdaDslObject> nestedObject) {
-    final PactDslJsonBody maxArrayLike = object.minMaxArrayLike(name, minSize, maxSize);
-    final LambdaDslObject dslObject = new LambdaDslObject(maxArrayLike);
-    nestedObject.accept(dslObject);
-    maxArrayLike.closeArray();
-    return this;
-  }
+    /**
+     * Attribute that is an array with a minimum and maximum size where each item must match the following example
+     *
+     * @param name    field name
+     * @param minSize minimum size of the array
+     * @param maxSize maximum size of the array
+     */
+    public LambdaDslObject minMaxArrayLike(String name, Integer minSize, Integer maxSize, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody maxArrayLike = object.minMaxArrayLike(name, minSize, maxSize);
+        final LambdaDslObject dslObject = new LambdaDslObject(maxArrayLike);
+        nestedObject.accept(dslObject);
+        maxArrayLike.closeArray();
+        return this;
+    }
 
-  /**
-   * Attribute that is an array with a minimum and maximum size where each item must match the following example
-   *
-   * @param name           field name
-   * @param minSize minimum size of the array
-   * @param maxSize maximum size of the array
-   * @param numberExamples number of examples to generate
-   */
-  public LambdaDslObject minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples,
-                                      Consumer<LambdaDslObject> nestedObject) {
-    final PactDslJsonBody maxArrayLike = object.minMaxArrayLike(name, minSize, maxSize, numberExamples);
-    final LambdaDslObject dslObject = new LambdaDslObject(maxArrayLike);
-    nestedObject.accept(dslObject);
-    maxArrayLike.closeArray();
-    return this;
-  }
+    /**
+     * Attribute that is an array with a minimum and maximum size where each item must match the following example
+     *
+     * @param name           field name
+     * @param minSize        minimum size of the array
+     * @param maxSize        maximum size of the array
+     * @param numberExamples number of examples to generate
+     */
+    public LambdaDslObject minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples,
+                                           Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody maxArrayLike = object.minMaxArrayLike(name, minSize, maxSize, numberExamples);
+        final LambdaDslObject dslObject = new LambdaDslObject(maxArrayLike);
+        nestedObject.accept(dslObject);
+        maxArrayLike.closeArray();
+        return this;
+    }
 
-  /**
-   * Attribute that is an array of values with a minimum and maximum size that are not objects where each item must
-   * match the following example
-   * @param name field name
-   * @param minSize minimum size of the array
-   * @param maxSize maximum size of the array
-   * @param value Value to use to match each item
-   * @param numberExamples number of examples to generate
-   */
-  public LambdaDslObject minMaxArrayLike(String name, Integer minSize, Integer maxSize, PactDslJsonRootValue value,
-                                         int numberExamples) {
-    object.minMaxArrayLike(name, minSize, maxSize, value, numberExamples);
-    return this;
-  }
+    /**
+     * Attribute that is an array of values with a minimum and maximum size that are not objects where each item must
+     * match the following example
+     *
+     * @param name           field name
+     * @param minSize        minimum size of the array
+     * @param maxSize        maximum size of the array
+     * @param value          Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public LambdaDslObject minMaxArrayLike(String name, Integer minSize, Integer maxSize, PactDslJsonRootValue value,
+                                           int numberExamples) {
+        object.minMaxArrayLike(name, minSize, maxSize, value, numberExamples);
+        return this;
+    }
 
     /**
      * Sets the field to a null value
@@ -669,6 +799,11 @@ public class LambdaDslObject {
         return this;
     }
 
+    /**
+     * Array field where each element is an array and must match the following object
+     *
+     * @param name field name
+     */
     public LambdaDslObject eachArrayLike(String name, Consumer<LambdaDslJsonArray> nestedArray) {
         final PactDslJsonArray arrayLike = object.eachArrayLike(name);
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
@@ -677,6 +812,12 @@ public class LambdaDslObject {
         return this;
     }
 
+    /**
+     * Array field where each element is an array and must match the following object
+     *
+     * @param name           field name
+     * @param numberExamples number of examples to generate
+     */
     public LambdaDslObject eachArrayLike(String name, int numberExamples, Consumer<LambdaDslJsonArray> nestedArray) {
         final PactDslJsonArray arrayLike = object.eachArrayLike(name, numberExamples);
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
@@ -685,6 +826,13 @@ public class LambdaDslObject {
         return this;
     }
 
+    /**
+     * Array field where each element is an array and must match the following object.
+     * This will generate 1 example value, if you want to change that number use {@link #eachArrayWithMaxLike(String, int, Integer, Consumer)}
+     *
+     * @param name field name
+     * @param size Maximum size of the outer array
+     */
     public LambdaDslObject eachArrayWithMaxLike(String name, Integer size, Consumer<LambdaDslJsonArray> nestedArray) {
         final PactDslJsonArray arrayLike = object.eachArrayWithMaxLike(name, size);
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
@@ -693,7 +841,13 @@ public class LambdaDslObject {
         return this;
     }
 
-
+    /**
+     * Array field where each element is an array and must match the following object
+     *
+     * @param name           field name
+     * @param numberExamples number of examples to generate
+     * @param size           Maximum size of the outer array
+     */
     public LambdaDslObject eachArrayWithMaxLike(String name, int numberExamples, Integer size,
                                                 Consumer<LambdaDslJsonArray> nestedArray) {
         final PactDslJsonArray arrayLike = object.eachArrayWithMaxLike(name, numberExamples, size);
@@ -703,7 +857,13 @@ public class LambdaDslObject {
         return this;
     }
 
-
+    /**
+     * Array field where each element is an array and must match the following object.
+     * This will generate 1 example value, if you want to change that number use {@link #eachArrayWithMinLike(String, int, Integer, Consumer)}
+     *
+     * @param name field name
+     * @param size Minimum size of the outer array
+     */
     public LambdaDslObject eachArrayWithMinLike(String name, Integer size, Consumer<LambdaDslJsonArray> nestedArray) {
         final PactDslJsonArray arrayLike = object.eachArrayWithMinLike(name, size);
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
@@ -712,7 +872,13 @@ public class LambdaDslObject {
         return this;
     }
 
-
+    /**
+     * Array field where each element is an array and must match the following object
+     *
+     * @param name           field name
+     * @param numberExamples number of examples to generate
+     * @param size           Minimum size of the outer array
+     */
     public LambdaDslObject eachArrayWithMinLike(String name, int numberExamples, Integer size,
                                                 Consumer<LambdaDslJsonArray> nestedArray) {
         final PactDslJsonArray arrayLike = object.eachArrayWithMinLike(name, numberExamples, size);
@@ -722,22 +888,38 @@ public class LambdaDslObject {
         return this;
     }
 
-  public LambdaDslObject eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize, Consumer<LambdaDslJsonArray> nestedArray) {
-    final PactDslJsonArray arrayLike = object.eachArrayWithMinMaxLike(name, minSize, maxSize);
-    final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
-    nestedArray.accept(dslArray);
-    arrayLike.closeArray().closeArray();
-    return this;
-  }
+    /**
+     * Array field where each element is an array and must match the following object.
+     * This will generate 1 example value, if you want to change that number use {@link #eachArrayWithMinMaxLike(String, Integer, Integer, int, Consumer)}
+     *
+     * @param name    field name
+     * @param minSize minimum size
+     * @param maxSize maximum size
+     */
+    public LambdaDslObject eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize, Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayWithMinMaxLike(name, minSize, maxSize);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
+        return this;
+    }
 
-  public LambdaDslObject eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize, int numberExamples,
-                                              Consumer<LambdaDslJsonArray> nestedArray) {
-    final PactDslJsonArray arrayLike = object.eachArrayWithMinMaxLike(name, numberExamples, minSize, maxSize);
-    final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
-    nestedArray.accept(dslArray);
-    arrayLike.closeArray().closeArray();
-    return this;
-  }
+    /**
+     * Array field where each element is an array and must match the following object
+     *
+     * @param name           field name
+     * @param numberExamples number of examples to generate
+     * @param minSize        minimum size
+     * @param maxSize        maximum size
+     */
+    public LambdaDslObject eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize, int numberExamples,
+                                                   Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayWithMinMaxLike(name, numberExamples, minSize, maxSize);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
+        return this;
+    }
 
     /**
      * Accepts any key, and each key is mapped to a list of items that must match the following object definition.
@@ -770,74 +952,81 @@ public class LambdaDslObject {
     /**
      * Accepts any key, and each key is mapped to a map that must match the provided object definition
      * Note: this needs the Java system property "pact.matching.wildcard" set to value "true" when the pact file is verified.
+     *
      * @param exampleKey Example key to use for generating bodies
-     * @param value Value to use for matching and generated bodies
+     * @param value      Value to use for matching and generated bodies
      */
     public LambdaDslObject eachKeyLike(String exampleKey, PactDslJsonRootValue value) {
         object.eachKeyLike(exampleKey, value);
         return this;
     }
 
-  /**
-   * Attribute whose values are generated from the provided expression. Will use an ISO format.
-   * @param name Attribute name
-   * @param expression Date expression
-   */
-  public LambdaDslObject dateExpression(String name, String expression) {
-    object.dateExpression(name, expression);
-    return this;
-  }
+    /**
+     * Attribute whose values are generated from the provided expression. Will use an ISO format.
+     *
+     * @param name       Attribute name
+     * @param expression Date expression
+     */
+    public LambdaDslObject dateExpression(String name, String expression) {
+        object.dateExpression(name, expression);
+        return this;
+    }
 
-  /**
-   * Attribute whose values are generated from the provided expression
-   * @param name Attribute name
-   * @param expression Date expression
-   * @param format Date format to use for values
-   */
-  public LambdaDslObject dateExpression(String name, String expression, String format) {
-    object.dateExpression(name, expression, format);
-    return this;
-  }
+    /**
+     * Attribute whose values are generated from the provided expression
+     *
+     * @param name       Attribute name
+     * @param expression Date expression
+     * @param format     Date format to use for values
+     */
+    public LambdaDslObject dateExpression(String name, String expression, String format) {
+        object.dateExpression(name, expression, format);
+        return this;
+    }
 
-  /**
-   * Attribute whose values are generated from the provided expression. Will use an ISO format.
-   * @param name Attribute name
-   * @param expression Time expression
-   */
-  public LambdaDslObject timeExpression(String name, String expression) {
-    object.timeExpression(name, expression);
-    return this;
-  }
+    /**
+     * Attribute whose values are generated from the provided expression. Will use an ISO format.
+     *
+     * @param name       Attribute name
+     * @param expression Time expression
+     */
+    public LambdaDslObject timeExpression(String name, String expression) {
+        object.timeExpression(name, expression);
+        return this;
+    }
 
-  /**
-   * Attribute whose values are generated from the provided expression
-   * @param name Attribute name
-   * @param expression Time expression
-   * @param format Time format to use for values
-   */
-  public LambdaDslObject timeExpression(String name, String expression, String format) {
-    object.timeExpression(name, expression, format);
-    return this;
-  }
+    /**
+     * Attribute whose values are generated from the provided expression
+     *
+     * @param name       Attribute name
+     * @param expression Time expression
+     * @param format     Time format to use for values
+     */
+    public LambdaDslObject timeExpression(String name, String expression, String format) {
+        object.timeExpression(name, expression, format);
+        return this;
+    }
 
-  /**
-   * Attribute whose values are generated from the provided expression. Will use an ISO format.
-   * @param name Attribute name
-   * @param expression Datetime expression
-   */
-  public LambdaDslObject datetimeExpression(String name, String expression) {
-    object.datetimeExpression(name, expression);
-    return this;
-  }
+    /**
+     * Attribute whose values are generated from the provided expression. Will use an ISO format.
+     *
+     * @param name       Attribute name
+     * @param expression Datetime expression
+     */
+    public LambdaDslObject datetimeExpression(String name, String expression) {
+        object.datetimeExpression(name, expression);
+        return this;
+    }
 
-  /**
-   * Attribute whose values are generated from the provided expression
-   * @param name Attribute name
-   * @param expression Datetime expression
-   * @param format Datetime format to use for values
-   */
-  public LambdaDslObject datetimeExpression(String name, String expression, String format) {
-    object.datetimeExpression(name, expression, format);
-    return this;
-  }
+    /**
+     * Attribute whose values are generated from the provided expression
+     *
+     * @param name       Attribute name
+     * @param expression Datetime expression
+     * @param format     Datetime format to use for values
+     */
+    public LambdaDslObject datetimeExpression(String name, String expression, String format) {
+        object.datetimeExpression(name, expression, format);
+        return this;
+    }
 }
