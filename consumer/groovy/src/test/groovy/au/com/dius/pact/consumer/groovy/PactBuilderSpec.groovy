@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.core.model.ProviderState
+import spock.lang.Issue
 import spock.lang.Specification
 
 @SuppressWarnings('PrivateFieldCouldBeFinal')
@@ -321,5 +323,27 @@ class PactBuilderSpec extends Specification {
 
     then:
     response.headers['Content-Type'] == ['application/hal+json']
+  }
+
+  @Issue('#1287')
+  def 'provider states should be able to be set before ar after the uponReceiving call'() {
+    given:
+    aliceService {
+      given('provider state one')
+      uponReceiving('a request with provider states')
+      given('provider state two')
+      willRespondWith(
+        status: 200,
+      )
+    }
+
+    when:
+    aliceService.updateInteractions()
+
+    then:
+    aliceService.interactions.size() == 1
+    aliceService.interactions[0].providerStates == [
+      new ProviderState('provider state one'), new ProviderState('provider state two')
+    ]
   }
 }

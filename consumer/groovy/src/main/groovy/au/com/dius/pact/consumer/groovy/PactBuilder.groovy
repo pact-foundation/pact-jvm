@@ -69,8 +69,13 @@ class PactBuilder extends GroovyBuilder {
    * Defines the provider state the provider needs to be in for the interaction
    * @param providerState provider state description
    */
+  @CompileStatic
   PactBuilder given(String providerState) {
-    this.providerStates << new ProviderState(providerState)
+    if (requestState && currentInteraction != null) {
+      currentInteraction.providerStates << new ProviderState(providerState)
+    } else {
+      this.providerStates << new ProviderState(providerState)
+    }
     this
   }
 
@@ -79,8 +84,13 @@ class PactBuilder extends GroovyBuilder {
    * @param providerState provider state description
    * @param params Data parameters for the provider state
    */
+  @CompileStatic
   PactBuilder given(String providerState, Map params) {
-    this.providerStates << new ProviderState(providerState, params)
+    if (requestState && currentInteraction != null) {
+      currentInteraction.providerStates << new ProviderState(providerState, params)
+    } else {
+      this.providerStates << new ProviderState(providerState, params)
+    }
     this
   }
 
