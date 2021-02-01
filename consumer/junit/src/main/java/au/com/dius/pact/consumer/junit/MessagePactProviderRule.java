@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactDirectory;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
@@ -76,7 +77,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				Map<String, Message> pacts;
 				if (StringUtils.isNoneEmpty(pactDef.fragment())) {
           Optional<Method> possiblePactMethod = findPactMethod(pactDef);
-          if (!possiblePactMethod.isPresent()) {
+          if (possiblePactMethod.isEmpty()) {
             base.evaluate();
             return;
           }
@@ -110,8 +111,11 @@ public class MessagePactProviderRule extends ExternalResource {
 				try {
 					base.evaluate();
 					PactFolder pactFolder = testClassInstance.getClass().getAnnotation(PactFolder.class);
+					PactDirectory pactDirectory = testClassInstance.getClass().getAnnotation(PactDirectory.class);
 					if (pactFolder != null) {
 						messagePact.write(pactFolder.value(), PactSpecVersion.V3);
+					} else if (pactDirectory != null) {
+						messagePact.write(pactDirectory.value(), PactSpecVersion.V3);
 					} else {
 						messagePact.write(BuiltToolConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
 					}
@@ -130,14 +134,14 @@ public class MessagePactProviderRule extends ExternalResource {
 		}
 
 		Optional<PactVerification> possiblePactVerification = findPactVerification(pactVerifications);
-		if (!possiblePactVerification.isPresent()) {
+		if (possiblePactVerification.isEmpty()) {
 			base.evaluate();
 			return;
 		}
 
 		PactVerification pactVerification = possiblePactVerification.get();
 		Optional<Method> possiblePactMethod = findPactMethod(pactVerification);
-		if (!possiblePactMethod.isPresent()) {
+		if (possiblePactMethod.isEmpty()) {
 			throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
 		}
 
@@ -180,7 +184,7 @@ public class MessagePactProviderRule extends ExternalResource {
 	@SuppressWarnings("unchecked")
 	private Map<String, Message> parsePacts() {
         if (providerStateMessages == null) {
-        	providerStateMessages = new HashMap <String, Message> ();
+        	providerStateMessages = new HashMap<>();
             for (Method m: testClassInstance.getClass().getMethods()) {
                 if (conformsToSignature(m)) {
 	                Pact pact = m.getAnnotation(Pact.class);

@@ -56,7 +56,7 @@ no parameters or a single Map parameter.
             );
         }
 
-        @State("default", "no-data") // Method will be run before testing interactions that require "default" or "no-data" state
+        @State({"default", "no-data"}) // Method will be run before testing interactions that require "default" or "no-data" state
         public void toDefaultState() {
             // Prepare service before interaction that require "default" state
             // ...

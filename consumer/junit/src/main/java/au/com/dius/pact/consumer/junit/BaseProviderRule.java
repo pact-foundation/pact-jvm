@@ -2,16 +2,17 @@ package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.MockServer;
-import au.com.dius.pact.consumer.model.MockServerImplementation;
-import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.consumer.PactVerificationResult;
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
 import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
+import au.com.dius.pact.consumer.model.MockServerImplementation;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactDirectory;
+import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
@@ -20,7 +21,12 @@ import org.junit.runners.model.Statement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
@@ -82,7 +88,8 @@ public class BaseProviderRule extends ExternalResource {
               }
 
             PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
-            PactVerificationResult result = runPactTest(base, pact.get(), pactFolder);
+            PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
+            PactVerificationResult result = runPactTest(base, pact.get(), pactFolder, pactDirectory);
             validateResult(result, pactDef);
           }
       };
@@ -119,7 +126,8 @@ public class BaseProviderRule extends ExternalResource {
     });
 
     PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
-    PactVerificationResult result = runPactTest(base, pact[0], pactFolder);
+    PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
+    PactVerificationResult result = runPactTest(base, pact[0], pactFolder, pactDirectory);
     JUnitTestSupport.validateMockServerResult(result);
   }
 
@@ -162,7 +170,7 @@ public class BaseProviderRule extends ExternalResource {
       }
   }
 
-  private PactVerificationResult runPactTest(final Statement base, au.com.dius.pact.core.model.Pact pact, PactFolder pactFolder) {
+  private PactVerificationResult runPactTest(final Statement base, au.com.dius.pact.core.model.Pact pact, PactFolder pactFolder, PactDirectory pactDirectory) {
       return runConsumerTest(pact, config, (mockServer, context) -> {
         this.mockServer = mockServer;
         base.evaluate();
@@ -170,6 +178,9 @@ public class BaseProviderRule extends ExternalResource {
 
         if (pactFolder != null) {
           context.setPactFolder(pactFolder.value());
+        }
+        if (pactDirectory != null) {
+          context.setPactFolder(pactDirectory.value());
         }
 
         return null;

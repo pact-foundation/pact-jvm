@@ -19,6 +19,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
+import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
@@ -389,8 +390,11 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
   private fun lookupPactDirectory(context: ExtensionContext): String {
     val pactFolder = AnnotationSupport.findAnnotation(context.requiredTestClass, PactFolder::class.java)
+    val pactDirectory = AnnotationSupport.findAnnotation(context.requiredTestClass, PactDirectory::class.java)
     return if (pactFolder.isPresent)
       pactFolder.get().value
+    else if (pactDirectory.isPresent)
+      pactDirectory.get().value
     else
       BuiltToolConfig.pactDirectory
   }
