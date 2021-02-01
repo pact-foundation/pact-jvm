@@ -3,11 +3,13 @@ package au.com.dius.pact.consumer.junit;
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.PactConsumerConfig;
+import au.com.dius.pact.core.model.annotations.PactDirectory;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
+import au.com.dius.pact.core.support.BuiltToolConfig;
 import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
@@ -110,10 +112,13 @@ public class MessagePactProviderRule extends ExternalResource {
 				try {
 					base.evaluate();
 					PactFolder pactFolder = testClassInstance.getClass().getAnnotation(PactFolder.class);
+					PactDirectory pactDirectory = testClassInstance.getClass().getAnnotation(PactDirectory.class);
 					if (pactFolder != null) {
 						messagePact.write(pactFolder.value(), PactSpecVersion.V3);
+					} else if (pactDirectory != null) {
+						messagePact.write(pactDirectory.value(), PactSpecVersion.V3);
 					} else {
-						messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+						messagePact.write(BuiltToolConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
 					}
 				} catch (Throwable t) {
 					throw t;

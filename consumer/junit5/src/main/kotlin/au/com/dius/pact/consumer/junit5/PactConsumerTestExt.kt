@@ -5,7 +5,6 @@ import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
-import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.PactTestRun
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
@@ -20,8 +19,10 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
+import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import mu.KLogging
@@ -389,10 +390,13 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
   private fun lookupPactDirectory(context: ExtensionContext): String {
     val pactFolder = AnnotationSupport.findAnnotation(context.requiredTestClass, PactFolder::class.java)
+    val pactDirectory = AnnotationSupport.findAnnotation(context.requiredTestClass, PactDirectory::class.java)
     return if (pactFolder.isPresent)
       pactFolder.get().value
+    else if (pactDirectory.isPresent)
+      pactDirectory.get().value
     else
-      PactConsumerConfig.pactDirectory
+      BuiltToolConfig.pactDirectory
   }
 
   override fun afterAll(context: ExtensionContext) {

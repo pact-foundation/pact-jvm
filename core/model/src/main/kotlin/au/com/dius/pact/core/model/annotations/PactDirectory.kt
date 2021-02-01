@@ -8,10 +8,9 @@ import java.lang.annotation.Inherited
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
 @Inherited
-@Deprecated("Use PactDirectory")
-annotation class PactFolder(
+annotation class PactDirectory(
   /**
-   * @return path to subfolder of project resource folder with pacts
+   * @return path to directory of project resource folder with pacts
    */
   val value: String
 )

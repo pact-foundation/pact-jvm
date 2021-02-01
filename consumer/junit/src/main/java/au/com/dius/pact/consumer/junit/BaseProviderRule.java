@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.model.MockServerImplementation;
 import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactDirectory;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.consumer.PactVerificationResult;
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
@@ -82,7 +83,8 @@ public class BaseProviderRule extends ExternalResource {
               }
 
             PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
-            PactVerificationResult result = runPactTest(base, pact.get(), pactFolder);
+            PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
+            PactVerificationResult result = runPactTest(base, pact.get(), pactFolder, pactDirectory);
             validateResult(result, pactDef);
           }
       };
@@ -119,7 +121,8 @@ public class BaseProviderRule extends ExternalResource {
     });
 
     PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
-    PactVerificationResult result = runPactTest(base, pact[0], pactFolder);
+    PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
+    PactVerificationResult result = runPactTest(base, pact[0], pactFolder, pactDirectory);
     JUnitTestSupport.validateMockServerResult(result);
   }
 
@@ -162,7 +165,7 @@ public class BaseProviderRule extends ExternalResource {
       }
   }
 
-  private PactVerificationResult runPactTest(final Statement base, RequestResponsePact pact, PactFolder pactFolder) {
+  private PactVerificationResult runPactTest(final Statement base, RequestResponsePact pact, PactFolder pactFolder, PactDirectory pactDirectory) {
       return runConsumerTest(pact, config, (mockServer, context) -> {
         this.mockServer = mockServer;
         base.evaluate();
@@ -170,6 +173,9 @@ public class BaseProviderRule extends ExternalResource {
 
         if (pactFolder != null) {
           context.setPactFolder(pactFolder.value());
+        }
+        if (pactDirectory != null) {
+          context.setPactFolder(pactDirectory.value());
         }
 
         return null;

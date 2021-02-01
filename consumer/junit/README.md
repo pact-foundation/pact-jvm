@@ -665,10 +665,10 @@ fork in Test := true,
 javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
 ```
 
-### Using `@PactFolder` annotation
+### Using `@PactDirectory` annotation
 
-You can override the directory the pacts are written in a test by adding the `@PactFolder` annotation to the test
-class. Be sure to import the correct annotation from `au.com.dius.pact.provider.junitsupport.loader.PactFolder`.
+You can override the directory the pacts are written in a test by adding the `@PactDirectory` annotation to the test
+class.
 
 ## Forcing pact files to be overwritten (3.6.5+)
 
