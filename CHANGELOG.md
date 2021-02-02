@@ -1,5 +1,18 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.16 - Bugfix Release
+
+* fec362567 - chore: correct git ignore file (Ronald Holshausen, Tue Feb 2 11:23:11 2021 +1100)
+* f1a4c34a1 - chore: deprecate consumer PactFolder annotation in favour of PactDirectory (Ronald Holshausen, Tue Feb 2 10:44:39 2021 +1100)
+* 9834f5c2b - Merge pull request #1299 from joklek/patch-1 (Ronald Holshausen, Mon Feb 1 08:55:46 2021 +1100)
+* 62c985547 - docs: Correctly set multiple state names (joklek, Sun Jan 31 16:40:51 2021 +0200)
+* 73c9053dc - fix: Don't split header values when loading from a pact file #1288 (Ronald Holshausen, Sun Jan 31 13:23:48 2021 +1100)
+* 071f5ee11 - fix(Groovy DSL): allow provider states to be specified before and after the request #1287 (Ronald Holshausen, Sun Jan 31 12:15:50 2021 +1100)
+* b960ace7c - Merge pull request #1297 from joklek/docs/add_docs_to_java8_dsl (Ronald Holshausen, Sun Jan 31 12:06:50 2021 +1100)
+* 22a312cb6 - docs: Add docs for LambdaDSL, with minor style fixes (joklek, Tue Jan 26 18:38:00 2021 +0200)
+* abaab1645 - Update README.md (Ronald Holshausen, Tue Jan 26 10:14:19 2021 +1100)
+* d13c182e1 - bump version to 4.1.16 (Ronald Holshausen, Wed Jan 20 16:26:44 2021 +1100)
+
 # 4.2.0-beta.3 - support for using generators with array contains matcher + Fixes
 
 * e0488a4de - refactor: converted the remaining Java DSL body classes to Kotlin (Ronald Holshausen, Mon Jan 25 15:30:37 2021 +1100)

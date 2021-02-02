@@ -38,5 +38,5 @@ consumer/junit5/target/
 consumer/specs2/target/
 consumer/scalasupport/target/
 provider/target/
-provider/scalasupport/
+provider/scalasupport/target/
 .kotlintest/
