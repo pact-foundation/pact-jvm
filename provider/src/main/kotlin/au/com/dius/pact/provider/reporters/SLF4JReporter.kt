@@ -57,7 +57,7 @@ class SLF4JReporter(
   override fun finaliseReport() = Unit
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    var out = "Verifying a pact between ${consumer.name}"
+    var out = "Verifying a pact between ${consumer.name.substringAfter("Pact between ")}"
     if (!consumer.name.contains(provider.name)) {
       out += " and ${provider.name}"
     }
