@@ -8,6 +8,10 @@ import java.nio.charset.Charset
 @SuppressWarnings('UnnecessaryBooleanExpression')
 class ContentTypeSpec extends Specification {
 
+  def setupSpec() {
+    System.setProperty('pact.content_type.override.application/x-thrift', 'json')
+  }
+
   @Unroll
   def '"#value" is json -> #result'() {
     expect:
@@ -22,6 +26,7 @@ class ContentTypeSpec extends Specification {
     'application/json'     || true
     'application/hal+json' || true
     'application/HAL+JSON' || true
+    'application/x-thrift' || true
 
     contentType = new ContentType(value)
   }
