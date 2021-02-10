@@ -58,7 +58,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
         subject.matchers.matchingRules == [
-          '': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+          '': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
           '[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
           '[*].clearedDate': new MatchingRuleGroup([new DateMatcher('mm/dd/yyyy')]),
           '[*].status': new MatchingRuleGroup([TypeMatcher.INSTANCE])
@@ -218,7 +218,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     subject.matchers.toMap(PactSpecVersion.V2) == [
       '$.body[1]': [max: 2, match: 'type'],
       '$.body[2]': [min: 2, match: 'type'],
-      '$.body[0]': [min: 0, match: 'type'],
+      '$.body[0]': [match: 'type'],
       '$.body[1][*]': [match: 'type'],
       '$.body[2][*]': [match: 'type'],
       '$.body[0][*]': [match: 'type']
@@ -235,7 +235,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     then:
     result == '["eachLike"]'
     subject.matchers.toMap(PactSpecVersion.V2) == [
-      '$.body': [match: 'type', min: 0],
+      '$.body': [match: 'type'],
       '$.body[*]': [match: 'type']
     ]
   }

@@ -737,7 +737,7 @@ public class PactDslJsonBody extends DslPart {
   @Override
   public PactDslJsonBody eachLike(String name, DslPart object) {
     String base = matcherKey(name, rootPath);
-    matchers.addRule(base, matchMin(0));
+    matchers.addRule(base, TypeMatcher.INSTANCE);
     PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), "", this, true);
 
     if (object instanceof PactDslJsonBody) {
@@ -766,7 +766,7 @@ public class PactDslJsonBody extends DslPart {
      */
     @Override
     public PactDslJsonBody eachLike(String name, int numberExamples) {
-      matchers.addRule(matcherKey(name, rootPath), matchMin(0));
+      matchers.addRule(matcherKey(name, rootPath), TypeMatcher.INSTANCE);
       PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), "", this, true);
       parent.setNumberExamples(numberExamples);
       return new PactDslJsonBody(".", ".", parent);
@@ -793,7 +793,7 @@ public class PactDslJsonBody extends DslPart {
      * @param numberExamples number of examples to generate
      */
     public PactDslJsonBody eachLike(String name, PactDslJsonRootValue value, int numberExamples) {
-      matchers.addRule(matcherKey(name, rootPath), matchMin(0));
+      matchers.addRule(matcherKey(name, rootPath), TypeMatcher.INSTANCE);
       PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), "", this, true);
       parent.setNumberExamples(numberExamples);
       parent.putObject(value);
@@ -1079,7 +1079,7 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray eachArrayLike(String name, int numberExamples) {
-    matchers.addRule(matcherKey(name, rootPath), matchMin(0));
+    matchers.addRule(matcherKey(name, rootPath), TypeMatcher.INSTANCE);
     PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name, rootPath), name, this, true);
     parent.setNumberExamples(numberExamples);
     return new PactDslJsonArray("", "", parent);
@@ -1153,7 +1153,7 @@ public class PactDslJsonBody extends DslPart {
     if (FeatureToggles.isFeatureSet(Feature.UseMatchValuesMatcher)) {
       matchers.addRule(rootPath.endsWith(".") ? rootPath.substring(0, rootPath.length() - 1) : rootPath, ValuesMatcher.INSTANCE);
     } else {
-      matchers.addRule(rootPath + "*", matchMin(0));
+      matchers.addRule(rootPath + "*", TypeMatcher.INSTANCE);
     }
     PactDslJsonArray parent = new PactDslJsonArray(rootPath + "*", exampleKey, this, true);
     return new PactDslJsonBody(".", "", parent);

@@ -126,7 +126,7 @@ public class PactDslJsonArray extends DslPart {
 
   @Override
   public PactDslJsonArray eachLike(DslPart object) {
-    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0));
+    matchers.addRule(rootPath + appendArrayIndex(1), TypeMatcher.INSTANCE);
     PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
     parent.setNumberExamples(numberExamples);
 
@@ -145,7 +145,7 @@ public class PactDslJsonArray extends DslPart {
      */
     @Override
     public PactDslJsonBody eachLike(int numberExamples) {
-      matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0));
+      matchers.addRule(rootPath + appendArrayIndex(1), TypeMatcher.INSTANCE);
       PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
       parent.setNumberExamples(numberExamples);
       return new PactDslJsonBody(".", "", parent);
@@ -733,7 +733,7 @@ public class PactDslJsonArray extends DslPart {
   public static PactDslJsonBody arrayEachLike(Integer numberExamples) {
     PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
     parent.setNumberExamples(numberExamples);
-    parent.matchers.addRule("", parent.matchMin(0));
+    parent.matchers.addRule("", TypeMatcher.INSTANCE);
     return new PactDslJsonBody(".", "", parent);
   }
 
@@ -751,7 +751,7 @@ public class PactDslJsonArray extends DslPart {
   public static PactDslJsonArray arrayEachLike(Integer numberExamples, PactDslJsonRootValue value) {
     PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
     parent.setNumberExamples(numberExamples);
-    parent.matchers.addRule("", parent.matchMin(0));
+    parent.matchers.addRule("", TypeMatcher.INSTANCE);
     parent.putObject(value);
     return parent;
   }
@@ -1031,7 +1031,7 @@ public class PactDslJsonArray extends DslPart {
         "example in the Pact provider implementation. See https://github.com/DiUS/pact-jvm/issues/546");
     }
 
-    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0));
+    matchers.addRule(rootPath + appendArrayIndex(1), TypeMatcher.INSTANCE);
     PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
     parent.setNumberExamples(numberExamples);
     parent.putObject(value);
