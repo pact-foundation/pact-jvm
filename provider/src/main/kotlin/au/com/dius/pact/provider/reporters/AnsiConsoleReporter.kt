@@ -54,7 +54,7 @@ class AnsiConsoleReporter(
   override fun finaliseReport() { }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    var out = "\nVerifying a pact between ${t.bold(consumer.name)}"
+    var out = "\nVerifying a pact between ${t.bold(consumer.name.substringAfter("Pact between "))}"
     if (!consumer.name.contains(provider.name)) {
       out += " and ${t.bold(provider.name)}"
     }

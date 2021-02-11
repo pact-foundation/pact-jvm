@@ -52,7 +52,7 @@ class InteractionRunnerSpec extends Specification {
     runner.run([:] as RunNotifier)
 
     then:
-    2 * testResultAccumulator.updateTestResult(pact, _, _, _)
+    2 * testResultAccumulator.updateTestResult(pact, _, _, _, _)
   }
 
   @RestoreSystemProperties
@@ -108,7 +108,7 @@ class InteractionRunnerSpec extends Specification {
     def filteredPact = new FilteredPact(pact, { it.description == 'interaction1' })
     def testResultAccumulator = DefaultTestResultAccumulator.INSTANCE
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
     def runner = new InteractionRunner(clazz, filteredPact, UnknownPactSource.INSTANCE)
 
@@ -130,7 +130,7 @@ class InteractionRunnerSpec extends Specification {
     def notifier = Mock(RunNotifier)
     def testResultAccumulator = DefaultTestResultAccumulator.INSTANCE
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
     def runner = new InteractionRunner(clazz, pact, UnknownPactSource.INSTANCE)
 

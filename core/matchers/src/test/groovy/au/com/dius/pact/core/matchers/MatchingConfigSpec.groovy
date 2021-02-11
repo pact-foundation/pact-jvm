@@ -5,6 +5,10 @@ import spock.lang.Unroll
 
 class MatchingConfigSpec extends Specification {
 
+  def setupSpec() {
+    System.setProperty('pact.content_type.override.application/x-thrift', 'json')
+  }
+
   @Unroll
   def 'maps JSON content types to JSON body matcher'() {
     expect:
@@ -19,6 +23,7 @@ class MatchingConfigSpec extends Specification {
     'application/stuff+xml'   | 'au.com.dius.pact.core.matchers.XmlBodyMatcher'
     'application/json-rpc'    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
     'application/jsonrequest' | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
+    'application/x-thrift'    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
   }
 
 }

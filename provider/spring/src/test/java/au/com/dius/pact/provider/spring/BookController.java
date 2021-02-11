@@ -18,7 +18,8 @@ public class BookController {
     ResponseEntity create(@RequestBody Book book) throws Exception {
         bookLogic.createBook(book);
         return new ResponseEntity(HttpStatus.CREATED);
-}
+    }
+
     @RequestMapping(value = "/books/{id}", method = RequestMethod.PUT)
     ResponseEntity updateById(@RequestBody Book book, @PathVariable UUID id) throws Exception {
         bookLogic.updateBook(book);

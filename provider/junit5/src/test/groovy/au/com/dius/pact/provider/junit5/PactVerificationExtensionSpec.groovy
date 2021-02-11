@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
@@ -30,6 +31,7 @@ class PactVerificationExtensionSpec extends Specification {
     ExtensionContext extContext = Stub {
       getStore(_) >> store
     }
+    def mockValueResolver = Mock(ValueResolver)
 
     def interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
     def interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
@@ -41,13 +43,13 @@ class PactVerificationExtensionSpec extends Specification {
       Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, [])
 
     PactVerificationExtension extension = new PactVerificationExtension(filteredPact, pactSource, interaction1,
-      'service', 'consumer')
+      'service', 'consumer', mockValueResolver)
 
     when:
     extension.afterTestExecution(extContext)
 
     then:
-    extension.testResultAccumulator.updateTestResult(pact, interaction1, [], pactSource)
+    DefaultTestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, [], pactSource, mockValueResolver)
   }
 
     def 'updateTestResult uses the pact itself when pact is not filtered '() {
@@ -63,6 +65,7 @@ class PactVerificationExtensionSpec extends Specification {
         ExtensionContext extContext = Stub {
             getStore(_) >> store
         }
+        def mockValueResolver = Mock(ValueResolver)
 
         def interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
         def interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
@@ -73,13 +76,13 @@ class PactVerificationExtensionSpec extends Specification {
           Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, [])
 
         PactVerificationExtension extension = new PactVerificationExtension(pact, pactSource, interaction1,
-          'service', 'consumer')
+          'service', 'consumer', mockValueResolver)
 
         when:
         extension.afterTestExecution(extContext)
 
         then:
-        extension.testResultAccumulator.updateTestResult(pact, interaction1, [], pactSource)
+        extension.testResultAccumulator.updateTestResult(pact, interaction1, [], pactSource, mockValueResolver)
     }
 
 }

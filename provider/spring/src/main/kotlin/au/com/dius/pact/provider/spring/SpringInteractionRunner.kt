@@ -76,15 +76,15 @@ open class SpringInteractionRunner(
   private val testContextManager: TestContextManager
 ) : InteractionRunner(testClass, pact, pactSource ?: UnknownPactSource) {
 
-  override fun withBefores(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
+  override fun withBefores(interaction: Interaction, target: Any, statement: Statement): Statement {
     val befores = testClass.getAnnotatedMethods(Before::class.java)
-    return SpringBeforeRunner(statement, befores, testInstance,
+    return SpringBeforeRunner(statement, befores, target,
       this.javaClass.getMethod("surrogateTestMethod"), testContextManager)
   }
 
-  override fun withAfters(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
+  override fun withAfters(interaction: Interaction, target: Any, statement: Statement): Statement {
     val afters = testClass.getAnnotatedMethods(After::class.java)
-    return SpringAfterRunner(statement, afters, testInstance,
+    return SpringAfterRunner(statement, afters, target,
       this.javaClass.getMethod("surrogateTestMethod"), testContextManager)
   }
 
@@ -97,11 +97,12 @@ open class SpringInteractionRunner(
   override fun setupTargetForInteraction(target: Target) {
     super.setupTargetForInteraction(target)
 
+    val environment = testContextManager.testContext.applicationContext.environment
     if (target is SpringBootHttpTarget) {
-      val environment = testContextManager.testContext.applicationContext.environment
       val port = environment.getProperty("local.server.port")
       target.port = Integer.parseInt(port)
     }
+    super.propertyResolver = SpringEnvironmentResolver(environment)
   }
 
   open fun surrogateTestMethod() { }

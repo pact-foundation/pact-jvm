@@ -114,7 +114,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers.matchingRules == [
-      '.types': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+      '.types': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '.subscriptionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '.types[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '.preference': new MatchingRuleGroup([TypeMatcher.INSTANCE])
@@ -200,11 +200,11 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.features[0].geometry.coordinates[0] == [-7.55717, 49.766896]
     subject.matchers.matchingRules == [
       '.type': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '.features': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+      '.features': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '.features[*].type': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '.features[*].properties.prop0': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '.features[*].geometry.type': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '.features[*].geometry.coordinates': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+      '.features[*].geometry.coordinates': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '.features[*].geometry.coordinates[*][0]': new MatchingRuleGroup([
         new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
       '.features[*].geometry.coordinates[*][1]': new MatchingRuleGroup([

@@ -4,6 +4,9 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderUtils.instantiatePactLoader
 import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
@@ -47,7 +50,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     var description = ""
     val providerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Provider::class.java)
     val serviceName = if (providerInfo.isPresent && providerInfo.get().value.isNotEmpty()) {
-      providerInfo.get().value
+      parseExpression(providerInfo.get().value, DataType.STRING)?.toString()
     } else {
       System.getProperty("pact.provider.name")
     }
@@ -58,7 +61,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     description += "Provider: $serviceName"
 
     val consumerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Consumer::class.java)
-    val consumerName = consumerInfo.orElse(null)?.value
+    val consumerName = parseExpression(consumerInfo.orElse(null)?.value, DataType.STRING)?.toString()
     if (consumerName.isNotEmpty()) {
       description += "\nConsumer: $consumerName"
     }
@@ -67,8 +70,8 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
 
     logger.debug { "Verifying pacts for provider '$serviceName' and consumer '$consumerName'" }
 
+    val valueResolver = getValueResolver(context)
     val pactSources = findPactSources(context).flatMap { loader ->
-      val valueResolver = getValueResolver(context)
       if (valueResolver != null) {
         loader.setValueResolver(valueResolver)
       }
@@ -90,7 +93,9 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
         .filter {
           interactionFilter.isNullOrEmpty() || it.description.matches(Regex(interactionFilter))
         }
-        .map { PactVerificationExtension(pact, pact.source, it, serviceName, consumerName) }
+        .map {
+          PactVerificationExtension(pact, pact.source, it, serviceName, consumerName, valueResolver ?: SystemPropertyResolver)
+        }
     }, description)
   }
 

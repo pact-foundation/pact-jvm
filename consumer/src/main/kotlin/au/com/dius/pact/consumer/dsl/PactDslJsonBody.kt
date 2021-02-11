@@ -158,6 +158,17 @@ open class PactDslJsonBody : DslPart {
   }
 
   /**
+   * Attribute that must be the same type as the example
+   * @param name attribute name
+   */
+  open fun like(name: String, example: Any?): PactDslJsonBody {
+    val body = body as JsonValue.Object
+    body.add(name, toJson(example))
+    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+    return this
+  }
+
+  /**
    * Attribute that can be any string
    * @param name attribute name
    */
@@ -743,7 +754,7 @@ open class PactDslJsonBody : DslPart {
 
   override fun eachLike(name: String, obj: DslPart): PactDslJsonBody {
     val base = matcherKey(name, rootPath)
-    matchers.addRule(base, matchMin(0))
+    matchers.addRule(base, TypeMatcher)
     val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
     if (obj is PactDslJsonBody) {
       parent.putObjectPrivate(obj)
@@ -767,7 +778,7 @@ open class PactDslJsonBody : DslPart {
    * @param numberExamples number of examples to generate
    */
   override fun eachLike(name: String, numberExamples: Int): PactDslJsonBody {
-    matchers.addRule(matcherKey(name, rootPath), matchMin(0))
+    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
     val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonBody(".", ".", parent)
@@ -785,7 +796,7 @@ open class PactDslJsonBody : DslPart {
    */
   @JvmOverloads
   fun eachLike(name: String, value: PactDslJsonRootValue, numberExamples: Int = 1): PactDslJsonBody {
-    matchers.addRule(matcherKey(name, rootPath), matchMin(0))
+    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
     val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
     parent.numberExamples = numberExamples
     parent.putObjectPrivate(value)
@@ -1038,7 +1049,7 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun eachArrayLike(name: String, numberExamples: Int): PactDslJsonArray {
-    matchers.addRule(matcherKey(name, rootPath), matchMin(0))
+    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
     val parent = PactDslJsonArray(matcherKey(name, rootPath), name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonArray("", "", parent)
@@ -1108,7 +1119,7 @@ open class PactDslJsonBody : DslPart {
         if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
       )
     } else {
-      matchers.addRule("$rootPath*", matchMin(0))
+      matchers.addRule("$rootPath*", TypeMatcher)
     }
     val parent = PactDslJsonArray("$rootPath*", exampleKey, this, true)
     return PactDslJsonBody(".", "", parent)

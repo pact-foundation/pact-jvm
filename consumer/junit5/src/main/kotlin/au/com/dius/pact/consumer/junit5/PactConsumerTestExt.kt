@@ -149,7 +149,8 @@ data class ProviderInfo @JvmOverloads constructor(
 
   companion object {
     fun fromAnnotation(annotation: PactTestFor): ProviderInfo =
-      ProviderInfo(annotation.providerName, annotation.hostInterface, annotation.port,
+      ProviderInfo(parseExpression(annotation.providerName, DataType.STRING)?.toString() ?: annotation.providerName,
+        annotation.hostInterface, annotation.port,
         when (annotation.pactVersion) {
           PactSpecVersion.UNSPECIFIED -> null
           else -> annotation.pactVersion
@@ -311,7 +312,9 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         else -> {
           logger.debug { "Looking for first @Pact method for provider '$providerName'" }
           methods.firstOrNull {
-            val annotationProviderName = AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider
+            val pactAnnotationProviderName = AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider
+            val annotationProviderName = parseExpression(pactAnnotationProviderName, DataType.STRING)?.toString()
+              ?: pactAnnotationProviderName
             annotationProviderName.isEmpty() || annotationProviderName == providerInfo.providerName
           }
         }
@@ -330,18 +333,19 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       }
 
       val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
+      val pactConsumer = parseExpression(pactAnnotation.consumer, DataType.STRING)?.toString() ?: pactAnnotation.consumer
       logger.debug {
         "Invoking method '${method.name}' to get Pact for the test " +
           "'${context.testMethod.map { it.name }.orElse("unknown")}'"
       }
 
-      val provider = parseExpression(pactAnnotation.provider, DataType.RAW)?.toString()
+      val provider = parseExpression(pactAnnotation.provider, DataType.STRING)?.toString()
       val providerNameToUse = if (provider.isNullOrEmpty()) providerName else provider
       val pact = when (providerType) {
         ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-          ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact
+          ConsumerPactBuilder.consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
         ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-          MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact
+          MessagePactBuilder.consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
       }
       val executedFragments = store["executedFragments"] as MutableSet<Method>
       executedFragments.add(method)

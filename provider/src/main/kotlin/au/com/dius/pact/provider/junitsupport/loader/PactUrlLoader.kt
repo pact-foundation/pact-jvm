@@ -16,7 +16,7 @@ import au.com.dius.pact.core.support.expressions.ValueResolver
 open class PactUrlLoader(val urls: Array<String>, val authentication: Auth? = null) : PactLoader {
   lateinit var pactSource: UrlsSource
   var pactReader: PactReader = DefaultPactReader
-  var resolver: ValueResolver = SystemPropertyResolver()
+  var resolver: ValueResolver = SystemPropertyResolver
 
   constructor(pactUrl: PactUrl) : this(pactUrl.urls, when {
     pactUrl.auth.token.isNotEmpty() -> Auth.BearerAuthentication(pactUrl.auth.token)

@@ -24,6 +24,7 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.expressions.DataType.Companion.from
 import au.com.dius.pact.core.support.json.JsonValue
@@ -113,7 +114,7 @@ open class PactDslJsonArray : DslPart {
   }
 
   override fun eachLike(obj: DslPart): PactDslJsonArray {
-    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0))
+    matchers.addRule(rootPath + appendArrayIndex(1), TypeMatcher)
     val parent = PactDslJsonArray(rootPath, "", this, true)
     parent.numberExamples = numberExamples
     if (obj is PactDslJsonBody) {
@@ -130,7 +131,7 @@ open class PactDslJsonArray : DslPart {
    * @param numberExamples Number of examples to generate
    */
   override fun eachLike(numberExamples: Int): PactDslJsonBody {
-    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0))
+    matchers.addRule(rootPath + appendArrayIndex(1), TypeMatcher)
     val parent = PactDslJsonArray(rootPath, "", this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonBody(".", "", parent)
@@ -301,6 +302,15 @@ open class PactDslJsonArray : DslPart {
    */
   fun booleanValue(value: Boolean): PactDslJsonArray {
     body.add(if (value) JsonValue.True else JsonValue.False)
+    return this
+  }
+
+  /**
+   * Element that must be the same type as the example
+   */
+  fun like(example: Any?): PactDslJsonArray {
+    body.add(toJson(example))
+    matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher)
     return this
   }
 
@@ -837,7 +847,7 @@ open class PactDslJsonArray : DslPart {
   }
 
   override fun eachArrayLike(numberExamples: Int): PactDslJsonArray {
-    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0))
+    matchers.addRule(rootPath + appendArrayIndex(1), TypeMatcher)
     val parent = PactDslJsonArray(rootPath, "", this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonArray("", "", parent)
@@ -905,7 +915,7 @@ open class PactDslJsonArray : DslPart {
       "Testing Zero examples is unsafe. Please make sure to provide at least one " +
         "example in the Pact provider implementation. See https://github.com/DiUS/pact-jvm/issues/546"
     }
-    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0))
+    matchers.addRule(rootPath + appendArrayIndex(1), TypeMatcher)
     val parent = PactDslJsonArray(rootPath, "", this, true)
     parent.numberExamples = numberExamples
     parent.putObjectPrivate(value!!)
@@ -1198,7 +1208,7 @@ open class PactDslJsonArray : DslPart {
     fun arrayEachLike(numberExamples: Int = 1): PactDslJsonBody {
       val parent = PactDslJsonArray("", "", null, true)
       parent.numberExamples = numberExamples
-      parent.matchers.addRule("", parent.matchMin(0))
+      parent.matchers.addRule("", TypeMatcher)
       return PactDslJsonBody(".", "", parent)
     }
 
@@ -1219,7 +1229,7 @@ open class PactDslJsonArray : DslPart {
     fun arrayEachLike(numberExamples: Int, value: PactDslJsonRootValue): PactDslJsonArray {
       val parent = PactDslJsonArray("", "", null, true)
       parent.numberExamples = numberExamples
-      parent.matchers.addRule("", parent.matchMin(0))
+      parent.matchers.addRule("", TypeMatcher)
       parent.putObjectPrivate(value)
       return parent
     }

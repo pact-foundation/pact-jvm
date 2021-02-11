@@ -47,13 +47,13 @@ object ExpressionParser {
 
   @JvmOverloads
   @JvmStatic
-  fun parseListExpression(value: String, valueResolver: ValueResolver = SystemPropertyResolver()): List<String> {
+  fun parseListExpression(value: String, valueResolver: ValueResolver = SystemPropertyResolver): List<String> {
     return replaceExpressions(value, valueResolver).split(VALUES_SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
   }
 
   @JvmOverloads
   @JvmStatic
-  fun parseExpression(value: String?, type: DataType, valueResolver: ValueResolver = SystemPropertyResolver()): Any? {
+  fun parseExpression(value: String?, type: DataType, valueResolver: ValueResolver = SystemPropertyResolver): Any? {
     return when {
       containsExpressions(value) -> type.convert(replaceExpressions(value!!, valueResolver))
       value != null -> type.convert(value)

@@ -14,7 +14,15 @@ class ContentType(val contentType: MediaType?) {
 
   constructor(contentType: String) : this(MediaType.parse(contentType))
 
-  fun isJson(): Boolean = if (contentType != null) jsonRegex.matches(contentType.subtype.toLowerCase()) else false
+  fun isJson(): Boolean {
+    return if (contentType != null) {
+      val override = System.getProperty("pact.content_type.override.${contentType.baseType}")
+      if (override == null)
+        jsonRegex.matches(contentType.subtype.toLowerCase())
+      else
+        jsonRegex.matches(override)
+    } else false
+  }
 
   fun isXml(): Boolean = if (contentType != null) xmlRegex.matches(contentType.subtype.toLowerCase()) else false
 
@@ -75,6 +83,8 @@ class ContentType(val contentType: MediaType?) {
   fun isMultipart() = if (contentType != null)
     contentType.baseType.type == "multipart"
     else false
+
+  fun isMultipartFormData() = isMultipart() && contentType?.subtype == "form-data"
 
   override fun equals(other: Any?): Boolean {
     return when {

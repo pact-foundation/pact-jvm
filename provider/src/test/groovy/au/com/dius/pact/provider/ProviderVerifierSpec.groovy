@@ -24,6 +24,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -558,6 +559,7 @@ class ProviderVerifierSpec extends Specification {
     given:
     verifier.projectHasProperty = { value != null }
     verifier.projectGetProperty = { value }
+    def resolver = SystemPropertyResolver.INSTANCE
 
     if (value != null) {
       System.setProperty(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS, value)
@@ -565,7 +567,7 @@ class ProviderVerifierSpec extends Specification {
 
     expect:
     verifier.publishingResultsDisabled() == result
-    DefaultVerificationReporter.INSTANCE.publishingResultsDisabled() == result
+    DefaultVerificationReporter.INSTANCE.publishingResultsDisabled(resolver) == result
 
     where:
 

@@ -6,9 +6,7 @@ object MatchingConfig {
   val bodyMatchers = mapOf(
     "application/.*xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
     "text/xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
-    "application/.*json" to "au.com.dius.pact.core.matchers.JsonBodyMatcher",
-    "application/json-rpc" to "au.com.dius.pact.core.matchers.JsonBodyMatcher",
-    "application/jsonrequest" to "au.com.dius.pact.core.matchers.JsonBodyMatcher",
+    ".*json.*" to "au.com.dius.pact.core.matchers.JsonBodyMatcher",
     "text/plain" to "au.com.dius.pact.core.matchers.PlainTextBodyMatcher",
     "multipart/form-data" to "au.com.dius.pact.core.matchers.MultipartMessageBodyMatcher",
     "multipart/mixed" to "au.com.dius.pact.core.matchers.MultipartMessageBodyMatcher",
@@ -23,7 +21,18 @@ object MatchingConfig {
         val clazz = Class.forName(matcher).kotlin
         (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
       } else {
-        null
+        val override = System.getProperty("pact.content_type.override.$contentType")
+        if (override != null) {
+          val matcherOverride = bodyMatchers.entries.find { override.matches(Regex(it.key)) }?.value
+          if (matcherOverride != null) {
+            val clazz = Class.forName(matcherOverride).kotlin
+            (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
+          } else {
+            null
+          }
+        } else {
+          null
+        }
       }
     } else {
       null
