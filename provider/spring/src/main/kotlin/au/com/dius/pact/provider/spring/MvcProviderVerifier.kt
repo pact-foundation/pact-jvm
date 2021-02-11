@@ -79,14 +79,18 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     val requestBuilder = if (body.isPresent()) {
       if (request.isMultipartFileUpload()) {
         val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(), request.contentTypeHeader()))
-        val multipartRequest = MockMvcRequestBuilders.fileUpload(requestUriString(request))
+        val multipartRequest = MockMvcRequestBuilders.multipart(requestUriString(request))
         var i = 0
         while (i < multipart.count) {
           val bodyPart = multipart.getBodyPart(i)
           val contentDisposition = ContentDisposition(bodyPart.getHeader("Content-Disposition").first())
           val name = StringUtils.defaultString(contentDisposition.getParameter("name"), "file")
-          val filename = contentDisposition.getParameter("filename").orEmpty()
-          multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
+          val filename = contentDisposition.getParameter("filename")
+          if (filename.isNullOrEmpty()) {
+            multipartRequest.param(name, bodyPart.content.toString())
+          } else {
+            multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
+          }
           i++
         }
         multipartRequest.headers(mapHeaders(request, true))

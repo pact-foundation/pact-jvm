@@ -83,6 +83,8 @@ class ContentType(val contentType: MediaType?) {
     contentType.baseType.type == "multipart"
     else false
 
+  fun isMultipartFormData() = isMultipart() && contentType?.subtype == "form-data"
+
   override fun equals(other: Any?): Boolean {
     return when {
       this === other -> true
