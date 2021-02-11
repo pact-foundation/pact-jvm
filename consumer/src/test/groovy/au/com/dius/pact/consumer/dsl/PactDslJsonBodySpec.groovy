@@ -372,4 +372,16 @@ class PactDslJsonBodySpec extends Specification {
       '$.datetimeExp': [type: 'DateTime', format: "yyyy-MM-dd'T'HH:mm:ss", expression: 'today + 1 hour']]]
   }
 
+  def 'like matcher'() {
+    given:
+    PactDslJsonBody body = new PactDslJsonBody()
+      .like('test', 'Test')
+      .like('num', 100)
+
+    expect:
+    body.body.toString() == '{"test":"Test","num":100}'
+    body.matchers.toMap(PactSpecVersion.V3) == [
+      '.test': [matchers: [[match: 'type']], combine: 'AND'],
+      '.num': [matchers: [[match: 'type']], combine:'AND']]
+  }
 }

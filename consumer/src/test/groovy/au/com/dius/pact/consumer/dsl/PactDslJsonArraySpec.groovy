@@ -293,4 +293,16 @@ class PactDslJsonArraySpec extends Specification {
     body.body.toString() == body2.body.toString()
     body.matchers == body2.matchers
   }
+
+  def 'like matcher'() {
+    given:
+    PactDslJsonArray body = new PactDslJsonArray().like('Test').like(100)
+
+    expect:
+    body.body.toString() == '["Test",100]'
+    body.matchers.toMap(PactSpecVersion.V3) == [
+      '[0]': [matchers: [[match: 'type']], combine: 'AND'],
+      '[1]': [matchers: [[match: 'type']], combine: 'AND']
+    ]
+  }
 }
