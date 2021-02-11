@@ -15,18 +15,19 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 
-@RunWith(RestPactRunner.class)
-@Provider("Multipart-Service")
-@PactFolder("pacts")
+@RunWith(RestPactRunner)
+@Provider('Multipart-Service')
+@PactFolder('pacts')
+@SuppressWarnings(['JUnitPublicField', 'PublicInstanceField'])
 class MultiPartSpec {
 
   @Controller
   static class FormController {
-    @RequestMapping(value = "/api/form", method = RequestMethod.POST)
+    @RequestMapping(value = '/api/form', method = RequestMethod.POST)
     ResponseEntity create(@RequestParam MultipartFile page001,
                           @RequestParam String entityId,
                           @RequestParam String entityType) throws Exception {
-      if (entityId == "99199292" && entityType == "TYPE" && page001.contentType == "image/png") {
+      if (entityId == '99199292' && entityType == 'TYPE' && page001.contentType == 'image/png') {
         new ResponseEntity(HttpStatus.CREATED)
       } else {
         new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
