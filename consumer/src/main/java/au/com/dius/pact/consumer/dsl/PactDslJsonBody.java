@@ -159,6 +159,16 @@ public class PactDslJsonBody extends DslPart {
     }
 
     /**
+     * Attribute that must be the same type as the example
+     * @param name attribute name
+     */
+    public PactDslJsonBody like(String name, Object example) {
+      body.put(name, example);
+      matchers.addRule(matcherKey(name, rootPath), TypeMatcher.INSTANCE);
+      return this;
+    }
+
+    /**
      * Attribute that can be any string
      * @param name attribute name
      */

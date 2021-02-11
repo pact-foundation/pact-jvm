@@ -333,6 +333,15 @@ public class PactDslJsonArray extends DslPart {
     }
 
     /**
+     * Element that must be the same type as the example
+     */
+    public PactDslJsonArray like(Object example) {
+      body.put(example);
+      matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
+      return this;
+    }
+
+    /**
      * Element that can be any string
      */
     public PactDslJsonArray stringType() {
