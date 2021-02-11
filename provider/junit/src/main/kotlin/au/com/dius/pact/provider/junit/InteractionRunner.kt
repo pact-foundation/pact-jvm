@@ -6,6 +6,8 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
@@ -62,6 +64,7 @@ open class InteractionRunner<I>(
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
   private val descriptionGenerator = DescriptionGenerator(testClass, pact)
+  protected var propertyResolver: ValueResolver = SystemPropertyResolver
 
   var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
@@ -175,9 +178,11 @@ open class InteractionRunner<I>(
             pending)
         } finally {
           if (pact is FilteredPact) {
-            testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource)
+            testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource,
+              propertyResolver)
           } else {
-            testResultAccumulator.updateTestResult(pact, interaction, testResult.toTestResult(), pactSource)
+            testResultAccumulator.updateTestResult(pact, interaction, testResult.toTestResult(), pactSource,
+              propertyResolver)
           }
         }
       }

@@ -11,6 +11,8 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -79,13 +81,14 @@ class TestResultAccumulatorSpec extends Specification {
     ])
     def mockVerificationReporter = Mock(VerificationReporter)
     testResultAccumulator.verificationReporter = mockVerificationReporter
+    def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(mutablePact, interaction1, new TestResult.Ok(), null)
-    testResultAccumulator.updateTestResult(mutablePact, interaction2, new TestResult.Ok(), null)
-    testResultAccumulator.updateTestResult(mutablePact2, interaction, new TestResult.Failed(), null)
+    testResultAccumulator.updateTestResult(mutablePact, interaction1, new TestResult.Ok(), null, mockValueResolver)
+    testResultAccumulator.updateTestResult(mutablePact, interaction2, new TestResult.Ok(), null, mockValueResolver)
+    testResultAccumulator.updateTestResult(mutablePact2, interaction, new TestResult.Failed(), null, mockValueResolver)
     mutablePact.interactions.first().request.matchingRules.rulesForCategory('body')
-    testResultAccumulator.updateTestResult(mutablePact, interaction3, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(mutablePact, interaction3, new TestResult.Ok(), null, mockValueResolver)
 
     then:
     1 * mockVerificationReporter.reportResults(_, new TestResult.Ok(), _, null, [])
@@ -102,9 +105,11 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled(_) >> true
     }
+    def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), UnknownPactSource.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), UnknownPactSource.INSTANCE,
+      mockValueResolver)
 
     then:
     0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _)
@@ -122,9 +127,10 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled(_) >> false
     }
+    def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, result, null)
+    testResultAccumulator.updateTestResult(pact, interaction1, result, null, mockValueResolver)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
@@ -147,10 +153,11 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled(_) >> false
     }
+    def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, interaction1Result, null)
-    testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result, null)
+    testResultAccumulator.updateTestResult(pact, interaction1, interaction1Result, null, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result, null, mockValueResolver)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
@@ -177,11 +184,12 @@ class TestResultAccumulatorSpec extends Specification {
       publishingResultsDisabled(_) >> false
     }
     def failedResult = new TestResult.Failed()
+    def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, failedResult, null)
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
-    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, failedResult, null, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null, mockValueResolver)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _, _)
@@ -200,10 +208,11 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled(_) >> false
     }
+    def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
-    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null, mockValueResolver)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _)
@@ -225,9 +234,10 @@ class TestResultAccumulatorSpec extends Specification {
       publishingResultsDisabled(_) >> false
     }
     System.setProperty('pact.provider.tag', 'updateTestResultTag')
+    def mockValueResolver = SystemPropertyResolver.INSTANCE
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null, mockValueResolver)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _,
@@ -250,9 +260,10 @@ class TestResultAccumulatorSpec extends Specification {
       publishingResultsDisabled(_) >> false
     }
     System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
+    def mockValueResolver = SystemPropertyResolver.INSTANCE
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null)
+    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null, mockValueResolver)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _,

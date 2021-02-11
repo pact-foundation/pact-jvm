@@ -7,6 +7,7 @@ import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderUtils.instantiatePactLoader
 import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
@@ -70,8 +71,8 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
 
     logger.debug { "Verifying pacts for provider '$serviceName' and consumer '$consumerName'" }
 
+    val valueResolver = getValueResolver(context)
     val pactSources = findPactSources(context).flatMap { loader ->
-      val valueResolver = getValueResolver(context)
       if (valueResolver != null) {
         loader.setValueResolver(valueResolver)
       }
@@ -93,7 +94,9 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
         .filter {
           interactionFilter.isNullOrEmpty() || it.description.matches(Regex(interactionFilter))
         }
-        .map { PactVerificationExtension(pact, pact.source, it, serviceName, consumerName) }
+        .map {
+          PactVerificationExtension(pact, pact.source, it, serviceName, consumerName, valueResolver ?: SystemPropertyResolver)
+        }
     }, description)
   }
 
