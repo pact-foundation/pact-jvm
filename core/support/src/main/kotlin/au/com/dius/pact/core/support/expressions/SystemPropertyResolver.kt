@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.contains
 
-class SystemPropertyResolver : ValueResolver {
+object SystemPropertyResolver : ValueResolver {
 
   override fun resolveValue(property: String?): String? {
     val tuple = PropertyValueTuple(property).invoke()
@@ -23,6 +23,25 @@ class SystemPropertyResolver : ValueResolver {
       propertyValue
     } else {
       property
+    }
+  }
+
+  override fun resolveValue(property: String?, default: String?): String? {
+    return if (property.isNotEmpty()) {
+      var propertyValue = System.getProperty(property)
+      if (propertyValue == null) {
+        propertyValue = System.getenv(property)
+      }
+      if (propertyValue == null) {
+        propertyValue = default
+      }
+      if (propertyValue == null) {
+        throw RuntimeException("Could not resolve property \"${property}\" in the system properties or " +
+          "environment variables and no default value is supplied")
+      }
+      propertyValue
+    } else {
+      default
     }
   }
 

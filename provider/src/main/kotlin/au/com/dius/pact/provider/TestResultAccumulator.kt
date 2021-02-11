@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ProviderVerifier.Companion.PACT_VERIFIER_PUBLISH_RESULTS
 import mu.KLogging
@@ -63,7 +64,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
       logger.debug {
         "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} have a verification result"
       }
-      if (verificationReporter.publishingResultsDisabled()) {
+      if (verificationReporter.publishingResultsDisabled(SystemPropertyResolver)) {
         logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
       } else {

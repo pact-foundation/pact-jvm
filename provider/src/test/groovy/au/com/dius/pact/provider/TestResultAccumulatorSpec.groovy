@@ -100,7 +100,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> true
+      publishingResultsDisabled(_) >> true
     }
 
     when:
@@ -120,7 +120,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
 
     when:
@@ -145,7 +145,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
 
     when:
@@ -174,7 +174,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
     def failedResult = new TestResult.Failed()
 
@@ -198,7 +198,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
 
     when:
@@ -222,7 +222,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
     System.setProperty('pact.provider.tag', 'updateTestResultTag')
 
@@ -247,7 +247,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
-      publishingResultsDisabled() >> false
+      publishingResultsDisabled(_) >> false
     }
     System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
 

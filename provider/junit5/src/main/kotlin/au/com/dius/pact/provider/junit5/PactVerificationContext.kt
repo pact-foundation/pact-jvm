@@ -25,7 +25,7 @@ data class PactVerificationContext @JvmOverloads constructor(
   private val context: ExtensionContext,
   var target: TestTarget = HttpTestTarget(port = 8080),
   var verifier: IProviderVerifier? = null,
-  var valueResolver: ValueResolver = SystemPropertyResolver(),
+  var valueResolver: ValueResolver = SystemPropertyResolver,
   var providerInfo: IProviderInfo,
   val consumer: IConsumerInfo,
   val interaction: Interaction,

@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import com.github.michaelbull.result.Err
 import mu.KLogging
 
@@ -38,7 +40,13 @@ interface VerificationReporter {
   /**
    * This must return true unless the pact.verifier.publishResults property has the value of "true"
    */
+  @Deprecated("Use version that takes a value resolver")
   fun publishingResultsDisabled(): Boolean
+
+  /**
+   * This must return true unless the pact.verifier.publishResults property has the value of "true"
+   */
+  fun publishingResultsDisabled(resolver: ValueResolver): Boolean
 }
 
 /**
@@ -95,11 +103,10 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     }
   }
 
-  override fun publishingResultsDisabled(): Boolean {
-    var property = System.getProperty(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)
-    if (property.isNullOrEmpty()) {
-      property = System.getenv(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)
-    }
+  override fun publishingResultsDisabled() = publishingResultsDisabled(SystemPropertyResolver)
+
+  override fun publishingResultsDisabled(resolver: ValueResolver): Boolean {
+    val property = resolver.resolveValue(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS, "false")
     return property?.toLowerCase() != "true"
   }
 }

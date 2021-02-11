@@ -20,6 +20,7 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.PactVerification.REQUEST_RESPONSE
@@ -263,7 +264,8 @@ open class ProviderVerifier @JvmOverloads constructor (
    */
   override fun publishingResultsDisabled(): Boolean {
     return when {
-      !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) -> verificationReporter.publishingResultsDisabled()
+      !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) ->
+        verificationReporter.publishingResultsDisabled(SystemPropertyResolver)
       else -> projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
     }
   }

@@ -34,7 +34,7 @@ abstract class BaseTarget : TestClassAwareTarget {
   protected lateinit var testClass: TestClass
   protected lateinit var testTarget: Any
 
-  var valueResolver: ValueResolver = SystemPropertyResolver()
+  var valueResolver: ValueResolver = SystemPropertyResolver
   private val callbacks = mutableListOf<BiConsumer<VerificationResult, IProviderVerifier>>()
   private val stateHandlers = mutableListOf<Pair<Class<out Any>, Supplier<out Any>>>()
 

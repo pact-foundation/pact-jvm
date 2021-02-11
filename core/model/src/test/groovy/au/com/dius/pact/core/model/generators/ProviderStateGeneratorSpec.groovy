@@ -38,7 +38,7 @@ class ProviderStateGeneratorSpec extends Specification {
     [a: 'A']         | 'a'          | 'A'
     [a: 100]         | 'a'          | 100
     [a: 'A', b: 100] | '/${a}/${b}' | '/A/100'
-    [a: 'A', b: 100] | '/${a}/${c}' | '/A/null'
+    [a: 'A', b: 100] | '/${a}/${c}' | '/A/'
   }
 
   @Issue('#1031')

@@ -160,7 +160,7 @@ open class PactBrokerLoader(
   }
 
   private fun setupValueResolver(): ValueResolver {
-    var valueResolver: ValueResolver = SystemPropertyResolver()
+    var valueResolver: ValueResolver = SystemPropertyResolver
     if (resolver != null) {
       valueResolver = resolver!!
     } else if (valueResolverClass != null) {

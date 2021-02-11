@@ -57,7 +57,7 @@ import java.io.IOException
 open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I : Interaction {
 
   private val children = mutableListOf<InteractionRunner<I>>()
-  private var valueResolver = SystemPropertyResolver()
+  private var valueResolver = SystemPropertyResolver
   private var initialized = false
 
   private fun initialize() {
