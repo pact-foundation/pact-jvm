@@ -382,6 +382,7 @@ class PactDslJsonBodySpec extends Specification {
     body.body.toString() == '{"test":"Test","num":100}'
     body.matchers.toMap(PactSpecVersion.V3) == [
       '.test': [matchers: [[match: 'type']], combine: 'AND'],
-      '.num': [matchers: [[match: 'type']], combine:'AND']]
+      '.num': [matchers: [[match: 'type']], combine: 'AND']
+    ]
   }
 }
