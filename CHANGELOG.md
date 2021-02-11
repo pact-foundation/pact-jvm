@@ -1,5 +1,32 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.17 - Bugfix Release
+
+* 612f99200 - feat: fix codenarc errors (Ronald Holshausen, Thu Feb 11 14:30:49 2021 +1100)
+* cc7b6a145 - feat: add ests for the like method in Java DSL (Ronald Holshausen, Thu Feb 11 14:24:30 2021 +1100)
+* 94f0312f6 - feat: add like method to Java DSL (Ronald Holshausen, Thu Feb 11 14:09:13 2021 +1100)
+* dd5a23585 - feat: support setting pact.verifier.publishResults in the Spring context #1294 (Ronald Holshausen, Thu Feb 11 14:04:35 2021 +1100)
+* 1a6ff07e3 - refactor: add a value resolver to the publishingResultsDisabled check #1294 (Ronald Holshausen, Thu Feb 11 12:47:59 2021 +1100)
+* 6f528c6d8 - chore: fix code narc errors #1290 (Ronald Holshausen, Thu Feb 11 11:34:21 2021 +1100)
+* a19b38a10 - feat: Update MockMvcTarget to handle non-file parts in a multipart form post #1290 (Ronald Holshausen, Thu Feb 11 11:25:27 2021 +1100)
+* 39804f97b - fix: make the Java DSL consistant with the Groovy DSL #1289 (Ronald Holshausen, Thu Feb 11 09:18:09 2021 +1100)
+* b3c30fbb0 - Merge pull request #1304 from keeping-it-up/support-x-thrift-as-json (Ronald Holshausen, Thu Feb 11 08:52:11 2021 +1100)
+* fb8ed9593 - Merge pull request #1303 from zmot/fix/verification-reporting-logging (Ronald Holshausen, Thu Feb 11 08:49:32 2021 +1100)
+* cf1a57912 - Merge pull request #1302 from cjr125/review/supportConsumerEnvVars (Ronald Holshausen, Thu Feb 11 08:48:14 2021 +1100)
+* e91725516 - fix: Support setting consumer and provider pacticipant names from environment variables in consumer contract tests (Christopher Roberts, Fri Feb 5 22:02:00 2021 -0500)
+* 254f8162c - fix: codenarc violations (TM, Sun Feb 7 22:03:51 2021 +0100)
+* 432807d64 - fix: consumer name formatting in Ansi console reporting (TM, Sun Feb 7 21:42:12 2021 +0100)
+* 2ecff5b46 - fix: consumer name formatting in SL4J reporting (TM, Sun Feb 7 21:40:05 2021 +0100)
+* 21dad5ca1 - chore: added support to handle json content type with x-thrift protocol #1298 (ankur, Fri Feb 5 17:23:56 2021 +0000)
+* e5c867ad5 - chore: correct git ignore file (Ronald Holshausen, Tue Feb 2 11:52:20 2021 +1100)
+* f9ac4df38 - bump version to 4.1.17 (Ronald Holshausen, Tue Feb 2 11:47:17 2021 +1100)
+* b4935be1f - Merge branch 'master' into v4.1.x (Ronald Holshausen, Wed Jan 20 16:06:12 2021 +1100)
+* 6c2b503d4 - Merge branch 'master' into v4.1.x (Ronald Holshausen, Sun Jan 10 13:38:43 2021 +1100)
+* 78b414267 - Merge branch 'master' into v4.1.x (Ronald Holshausen, Mon Dec 28 15:58:54 2020 +1100)
+* 0b0a0c6e9 - Merge branch 'master' into v4.1.x (Ronald Holshausen, Sun Oct 18 15:11:59 2020 +1100)
+* 3368b3bf7 - Merge pull request #1217 from rejeeshg/patch-2 (Ronald Holshausen, Wed Sep 30 15:00:34 2020 +1000)
+* 5350f8075 - Update gradle.properties (rejeeshg, Tue Sep 29 16:13:31 2020 +0530)
+
 # 4.1.16 - Bugfix Release
 
 * fec362567 - chore: correct git ignore file (Ronald Holshausen, Tue Feb 2 11:23:11 2021 +1100)
