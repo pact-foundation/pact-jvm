@@ -10,8 +10,7 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.4.21'
-//  id 'org.jmailen.kotlinter' version '3.2.0'
+  id 'org.jetbrains.kotlin.jvm' version '1.4.30'
   id 'io.gitlab.arturbosch.detekt' version '1.14.1'
   id 'org.jetbrains.dokka' version '1.4.10' apply false
   id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
@@ -60,7 +59,6 @@ subprojects {
     apply plugin: 'jacoco'
   }
   apply plugin: 'org.jetbrains.kotlin.jvm'
-//  apply plugin: 'org.jmailen.kotlinter'
   apply plugin: 'io.gitlab.arturbosch.detekt'
   if (System.env.CI != 'true') {
     apply plugin: 'org.jetbrains.dokka'
@@ -215,11 +213,6 @@ subprojects {
   if (!System.env.CI) {
     check.dependsOn << 'jacocoTestReport'
   }
-
-//  kotlinter {
-//    indentSize = 2
-//    reporters = ['checkstyle', 'plain', 'json']
-//  }
 
   detekt {
     failFast = false
