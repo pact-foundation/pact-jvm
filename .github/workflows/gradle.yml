@@ -5,7 +5,7 @@ on:
     branches:
       - master
   pull_request:
-    branches: [ master ]
+    branches: [ master, v4.1.x, v4.2.x, v5.0.x ]
 
 jobs:
   latest_jdk:
