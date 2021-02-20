@@ -37,9 +37,12 @@ data class SelectorResult(
  */
 @Suppress("LongParameterList", "TooManyFunctions")
 open class PactBrokerLoader(
-  val pactBrokerHost: String,
+  @Deprecated("Use pactBrokerUrl")
+  val pactBrokerHost: String?,
+  @Deprecated("Use pactBrokerUrl")
   val pactBrokerPort: String?,
-  val pactBrokerScheme: String,
+  @Deprecated("Use pactBrokerUrl")
+  val pactBrokerScheme: String?,
   @Deprecated(message = "Use Consumer version selectors instead",
     replaceWith = ReplaceWith("pactBrokerConsumerVersionSelectors"))
   val pactBrokerTags: List<String>? = listOf("latest"),
@@ -51,7 +54,8 @@ open class PactBrokerLoader(
   valueResolver: ValueResolver? = null,
   val enablePendingPacts: String = "false",
   val providerTags: List<String> = emptyList(),
-  val includeWipPactsSince: String = ""
+  val includeWipPactsSince: String = "",
+  val pactBrokerUrl: String? = null
 ) : OverrideablePactLoader {
 
   private var resolver: ValueResolver? = valueResolver
@@ -73,7 +77,8 @@ open class PactBrokerLoader(
     null,
     pactBroker.enablePendingPacts,
     pactBroker.providerTags.toList(),
-    pactBroker.includeWipPactsSince
+    pactBroker.includeWipPactsSince,
+    pactBroker.url
   )
 
   override fun description(): String {
@@ -164,12 +169,16 @@ open class PactBrokerLoader(
     if (resolver != null) {
       valueResolver = resolver!!
     } else if (valueResolverClass != null) {
-      try {
-        valueResolver = valueResolverClass!!.java.newInstance()
-      } catch (e: InstantiationException) {
-        logger.warn(e) { "Failed to instantiate the value resolver, using the default" }
-      } catch (e: IllegalAccessException) {
-        logger.warn(e) { "Failed to instantiate the value resolver, using the default" }
+      if (valueResolverClass!!.objectInstance != null) {
+        valueResolver = valueResolverClass!!.objectInstance!!
+      } else {
+        try {
+          valueResolver = valueResolverClass!!.java.newInstance()
+        } catch (e: InstantiationException) {
+          logger.warn(e) { "Failed to instantiate the value resolver, using the default" }
+        } catch (e: IllegalAccessException) {
+          logger.warn(e) { "Failed to instantiate the value resolver, using the default" }
+        }
       }
     }
     return valueResolver
@@ -230,35 +239,44 @@ open class PactBrokerLoader(
     }
   }
 
-  private fun brokerUrl(resolver: ValueResolver): URIBuilder {
-    val (host, port, scheme) = getPactBrokerSource(resolver)
+  fun brokerUrl(resolver: ValueResolver): URIBuilder {
+    val (host, port, scheme, _, url) = getPactBrokerSource(resolver)
 
-    val uriBuilder = URIBuilder().setScheme(scheme).setHost(host)
-    if (port.isNotEmpty()) {
-      uriBuilder.port = Integer.parseInt(port)
+    return if (url.isNullOrEmpty()) {
+      val uriBuilder = URIBuilder().setScheme(scheme).setHost(host)
+      if (port.isNotEmpty()) {
+        uriBuilder.port = Integer.parseInt(port)
+      }
+      uriBuilder
+    } else {
+      URIBuilder(url)
     }
-    return uriBuilder
   }
 
-  private fun getPactBrokerSource(resolver: ValueResolver): PactBrokerSource<Interaction> {
+  fun getPactBrokerSource(resolver: ValueResolver): PactBrokerSource<Interaction> {
     val scheme = parseExpression(pactBrokerScheme, DataType.RAW, resolver)?.toString()
     val host = parseExpression(pactBrokerHost, DataType.RAW, resolver)?.toString()
     val port = parseExpression(pactBrokerPort, DataType.RAW, resolver)?.toString()
+    val url = parseExpression(pactBrokerUrl, DataType.RAW, resolver)?.toString()
 
-    if (host.isNullOrEmpty() || !host.matches(Regex("[0-9a-zA-Z\\-.]+"))) {
-      throw IllegalArgumentException(String.format("Invalid pact broker host specified ('%s'). " +
-        "Please provide a valid host or specify the system property 'pactbroker.host'.", pactBrokerHost))
-    }
+    return if (url.isNullOrEmpty()) {
+      if (host.isNullOrEmpty() || !host.matches(Regex("[0-9a-zA-Z\\-.]+"))) {
+        throw IllegalArgumentException(String.format("Invalid pact broker host specified ('%s'). " +
+          "Please provide a valid host or specify the system property 'pactbroker.host'.", pactBrokerHost))
+      }
 
-    if (port.isNotEmpty() && !port!!.matches(Regex("^[0-9]+"))) {
-      throw IllegalArgumentException(String.format("Invalid pact broker port specified ('%s'). " +
-        "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort))
-    }
+      if (port.isNotEmpty() && !port!!.matches(Regex("^[0-9]+"))) {
+        throw IllegalArgumentException(String.format("Invalid pact broker port specified ('%s'). " +
+          "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort))
+      }
 
-    return if (scheme == null) {
-      PactBrokerSource(host, port)
+      if (scheme == null) {
+        PactBrokerSource(host, port)
+      } else {
+        PactBrokerSource(host, port, scheme)
+      }
     } else {
-      PactBrokerSource(host, port, scheme)
+      PactBrokerSource(null, null, url = url)
     }
   }
 

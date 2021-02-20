@@ -27,10 +27,14 @@ data class DirectorySource @JvmOverloads constructor(
 }
 
 data class PactBrokerSource<I> @JvmOverloads constructor(
-  val host: String,
+  @Deprecated("Use url instead")
+  val host: String?,
+  @Deprecated("Use url instead")
   val port: String?,
-  val scheme: String = "http",
-  val pacts: MutableMap<Consumer, MutableList<Pact>> = mutableMapOf()
+  @Deprecated("Use url instead")
+  val scheme: String? = "http",
+  val pacts: MutableMap<Consumer, MutableList<Pact>> = mutableMapOf(),
+  val url: String? = null
 ) : PactSource()
   where I : Interaction {
   override fun description() =

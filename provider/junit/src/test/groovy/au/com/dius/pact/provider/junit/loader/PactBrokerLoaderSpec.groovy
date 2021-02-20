@@ -32,6 +32,7 @@ class PactBrokerLoaderSpec extends Specification {
   private String host
   private String port
   private String protocol
+  private String url
   private List tags
   private List<VersionSelector> consumerVersionSelectors
   private List consumers
@@ -47,6 +48,7 @@ class PactBrokerLoaderSpec extends Specification {
     host = 'pactbroker'
     port = '1234'
     protocol = 'http'
+    url = null
     tags = []
     consumerVersionSelectors = []
     consumers = []
@@ -65,7 +67,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       IPactBrokerClient client = brokerClient
       def loader = new PactBrokerLoader(host, port, protocol, tags, consumerVersionSelectors, consumers,
-        failIfNoPactsFound, null, null, valueResolver, enablePendingPacts, providerTags, includeWipPactsSince) {
+        failIfNoPactsFound, null, null, valueResolver, enablePendingPacts, providerTags, includeWipPactsSince, url) {
         @Override
         IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           client
@@ -174,12 +176,38 @@ class PactBrokerLoaderSpec extends Specification {
   }
 
   @RestoreSystemProperties
+  void 'Uses fallback PactBroker System Properties for URL'() {
+    given:
+    System.setProperty('pactbroker.url', 'http://my.pactbroker.host:4751')
+    pactBrokerLoader = {
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+          assert url.host == 'my.pactbroker.host'
+          assert url.port == 4751
+          assert url.toString() == 'http://my.pactbroker.host:4751'
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
+  }
+
+  @RestoreSystemProperties
   void 'Uses fallback PactBroker System Properties for PactSource'() {
     given:
     host = 'my.pactbroker.host'
     port = '4711'
+    url = 'http://my.pactbroker.host:4711'
     System.setProperty('pactbroker.host', host)
     System.setProperty('pactbroker.port', port)
+    System.setProperty('pactbroker.url', url)
 
     when:
     def pactSource = new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)).pactSource
@@ -189,8 +217,9 @@ class PactBrokerLoaderSpec extends Specification {
 
     def pactBrokerSource = (PactBrokerSource) pactSource
     assert pactBrokerSource.scheme == 'http'
-    assert pactBrokerSource.host == host
-    assert pactBrokerSource.port == port
+    assert pactBrokerSource.host == null
+    assert pactBrokerSource.port == null
+    assert pactBrokerSource.url == url
   }
 
   @RestoreSystemProperties
@@ -198,6 +227,7 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     System.clearProperty('pactbroker.host')
     System.clearProperty('pactbroker.port')
+    System.clearProperty('pactbroker.url')
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
@@ -1168,6 +1198,53 @@ class PactBrokerLoaderSpec extends Specification {
     result == [
       new ConsumerVersionSelector(null, true, 'test', null)
     ]
+  }
+
+  @Unroll
+  @SuppressWarnings('LineLength')
+  def 'getPactBrokerSource uses the URL if it is set'() {
+    given:
+    def valueResolver = Mock(ValueResolver)
+
+    when:
+    host = p_host
+    port = p_port
+    protocol = p_protocol
+    url = p_url
+    def source = pactBrokerLoader().getPactBrokerSource(valueResolver)
+
+    then:
+    source == expected
+
+    where:
+
+    p_host      | p_port | p_protocol | p_url              | expected
+    null        | null   | null       | 'http://localhost' | new PactBrokerSource(null, null, 'http', [:], 'http://localhost')
+    'localhost' | '1234' | null       | null               | new PactBrokerSource('localhost', '1234', 'http', [:], null)
+    'localhost' | '1234' | 'https'    | null               | new PactBrokerSource('localhost', '1234', 'https', [:], null)
+  }
+
+  @Unroll
+  def 'brokerUrl returns the url if it is set'() {
+    given:
+    def valueResolver = Mock(ValueResolver)
+
+    when:
+    host = p_host
+    port = p_port
+    protocol = p_protocol
+    url = p_url
+    def result = pactBrokerLoader().brokerUrl(valueResolver).toString()
+
+    then:
+    result == expected
+
+    where:
+
+    p_host      | p_port | p_protocol | p_url               | expected
+    null        | null   | null       | 'http://localhost/' | 'http://localhost/'
+    'localhost' | '1234' | null       | null                | 'http://localhost:1234'
+    'localhost' | '1234' | 'https'    | null                | 'https://localhost:1234'
   }
 
   private static VersionSelector createVersionSelector(Map args = [:]) {

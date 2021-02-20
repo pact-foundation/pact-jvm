@@ -167,7 +167,9 @@ open class InteractionRunner(
       if (included) {
         try {
           interactionBlock(interaction, pactSource, testContext).evaluate()
-          notifier.fireTestFinished(description)
+          if (!pending) {
+            notifier.fireTestFinished(description)
+          }
         } catch (e: Throwable) {
           if (!pending) {
             notifier.fireTestFailure(Failure(description, e))

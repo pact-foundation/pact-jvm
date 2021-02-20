@@ -20,48 +20,59 @@ import java.lang.annotation.Target;
 @PactSource(PactBrokerLoader.class)
 @Inherited
 public @interface PactBroker {
-    /**
-     * @return host of pact broker
-     */
-    String host() default "${pactbroker.host:}";
+  /**
+   * @return URL of pact broker
+   */
+  String url() default "${pactbroker.url:}";
 
-    /**
-     * @return port of pact broker
-     */
-    String port() default "${pactbroker.port:}";
+  /**
+   * @return host of pact broker
+   * @deprecated Use url instead
+   */
+  @Deprecated
+  String host() default "${pactbroker.host:}";
 
-    /**
-     * HTTP scheme, defaults to HTTP
-     */
-    String scheme() default "${pactbroker.scheme:http}";
+  /**
+   * @return port of pact broker
+   * @deprecated Use url instead
+   */
+  @Deprecated
+  String port() default "${pactbroker.port:}";
 
-    /**
-     * Tags to use to fetch pacts for, defaults to `latest`
-     * If you set the tags through the `pactbroker.tags` system property, separate the tags by commas
-     *
-     * @deprecated Use {@link #consumerVersionSelectors} instead
-     */
-    @Deprecated
-    String[] tags() default "${pactbroker.tags:}";
+  /**
+   * HTTP scheme, defaults to HTTP
+   * @deprecated Use url instead
+   */
+  @Deprecated
+  String scheme() default "${pactbroker.scheme:http}";
 
-    /**
-     * Consumer version selectors to fetch pacts for, defaults to latest version
-     * If you set the version selector tags or latest fields through system properties, separate values by commas
-     */
-    VersionSelector[] consumerVersionSelectors() default @VersionSelector(
-      tag = "${pactbroker.consumerversionselectors.tags:}",
-      latest = "${pactbroker.consumerversionselectors.latest:}",
-      consumer = "${pactbroker.consumers:}"
-    );
+  /**
+   * Tags to use to fetch pacts for, defaults to `latest`
+   * If you set the tags through the `pactbroker.tags` system property, separate the tags by commas
+   *
+   * @deprecated Use {@link #consumerVersionSelectors} instead
+   */
+  @Deprecated
+  String[] tags() default "${pactbroker.tags:}";
 
-    /**
-     * Consumers to fetch pacts for, defaults to all consumers
-     * If you set the consumers through the `pactbroker.consumers` system property, separate the consumers by commas
-     *
-     * @deprecated Use {@link #consumerVersionSelectors} instead
-     */
-    @Deprecated
-    String[] consumers() default "${pactbroker.consumers:}";
+  /**
+   * Consumer version selectors to fetch pacts for, defaults to latest version
+   * If you set the version selector tags or latest fields through system properties, separate values by commas
+   */
+  VersionSelector[] consumerVersionSelectors() default @VersionSelector(
+    tag = "${pactbroker.consumerversionselectors.tags:}",
+    latest = "${pactbroker.consumerversionselectors.latest:}",
+    consumer = "${pactbroker.consumers:}"
+  );
+
+  /**
+   * Consumers to fetch pacts for, defaults to all consumers
+   * If you set the consumers through the `pactbroker.consumers` system property, separate the consumers by commas
+   *
+   * @deprecated Use {@link #consumerVersionSelectors} instead
+   */
+  @Deprecated
+  String[] consumers() default "${pactbroker.consumers:}";
 
   /**
    * Authentication to use with the pact broker, by default no authentication is used
