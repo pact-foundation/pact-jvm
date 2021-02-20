@@ -32,6 +32,17 @@ class PactBrokerAnnotationDefaultsTest {
                     .forEach { props.remove(it) }
 
     @Test
+    fun `default url is empty`() {
+      assertThat(parseExpression(annotation.url, DataType.RAW)?.toString(), `is`(""))
+    }
+
+    @Test
+    fun `can set url`() {
+      props.setProperty("pactbroker.url", "http://myHost")
+      assertThat(parseExpression(annotation.url, DataType.RAW)?.toString(), `is`("http://myHost"))
+    }
+
+    @Test
     fun `default host is empty`() {
         assertThat(parseExpression(annotation.host, DataType.RAW)?.toString(), `is`(""))
     }
