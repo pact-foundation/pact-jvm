@@ -70,11 +70,12 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected | actual                               | regex      || mustBeEmpty
-    'Harry'  | 'Happy'                              | 'Ha[a-z]*' || true
-    'Harry'  | null                                 | 'Ha[a-z]*' || false
-    '100'    | 20123                                | '\\d+'     || true
-    '100'    | new JsonValue.Integer('20123'.chars) | '\\d+'     || true
+    expected                  | actual                                | regex        || mustBeEmpty
+    'Harry'                   | 'Happy'                               | 'Ha[a-z]*'   || true
+    'Harry'                   | null                                  | 'Ha[a-z]*'   || false
+    '100'                     | 20123                                 | '\\d+'       || true
+    '100'                     | new JsonValue.Integer('20123'.chars)  | '\\d+'       || true
+    json('"issue1316"')       | JsonValue.Null.INSTANCE               | '[a-x0-9]+'  || false
   }
 
   @Unroll
