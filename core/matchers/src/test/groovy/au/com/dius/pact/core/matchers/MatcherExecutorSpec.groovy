@@ -77,6 +77,7 @@ class MatcherExecutorSpec extends Specification {
     '100'                     | new JsonValue.Integer('20123'.chars)  | '\\d+'       || true
     json('"harry100"')        | json('"20123happy"')                  | '[a-z0-9]+'  || true
     json('"issue1316"')       | JsonValue.Null.INSTANCE               | '[a-z0-9]+'  || false
+    json('"issue1316"')       | null                                  | '[a-z0-9]*'  || false
   }
 
   @Unroll
