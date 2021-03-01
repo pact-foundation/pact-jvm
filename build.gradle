@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.4.30'
+  id 'org.jetbrains.kotlin.jvm' version '1.4.31'
   id 'io.gitlab.arturbosch.detekt' version '1.14.1'
   id 'org.jetbrains.dokka' version '1.4.10' apply false
   id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
