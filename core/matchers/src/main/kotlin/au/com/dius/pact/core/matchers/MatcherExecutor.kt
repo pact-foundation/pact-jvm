@@ -173,7 +173,7 @@ fun <M : Mismatch> matchRegex(
   actual: Any?,
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
-  val matches = safeToString(actual).matches(Regex(regex))
+  val matches = if (actual == null || actual is JsonValue.Null) false else safeToString(actual).matches(Regex(regex))
   logger.debug { "comparing ${valueOf(actual)} with regexp $regex at $path -> $matches" }
   return if (matches ||
     expected is List<*> && actual is List<*> ||
