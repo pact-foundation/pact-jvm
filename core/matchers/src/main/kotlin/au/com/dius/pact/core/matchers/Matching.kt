@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
 
 data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpectedKeys: Boolean) {
@@ -45,20 +46,6 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
     }
   }
 
-  fun wildcardMatcherDefined(path: List<String>): Boolean {
-    val resolvedMatchers = matchers.filter {
-      Matchers.matchesPath(it, path) == path.size
-    }
-    return resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith(".*") }
-  }
-
-  fun wildcardIndexMatcherDefined(path: List<String>): Boolean {
-    val resolvedMatchers = matchers.filter {
-      Matchers.matchesPath(it, path) == path.size
-    }
-    return resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith("[*]") }
-  }
-
   fun typeMatcherDefined(path: List<String>): Boolean {
     val resolvedMatchers = resolveMatchers(path, Comparator.naturalOrder())
     return resolvedMatchers.allMatchingRules().any { it is TypeMatcher }
@@ -70,27 +57,32 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
     actualEntries: Map<String, T>,
     generateDiff: () -> String
   ): List<BodyItemMatchResult> {
-    val p = path + "any"
-    return if (!Matchers.wildcardMatchingEnabled() || !wildcardMatcherDefined(p)) {
-      val expectedKeys = expectedEntries.keys.sorted()
-      val actualKeys = actualEntries.keys
-      val actualKeysSorted = actualKeys.sorted()
-      val missingKeys = expectedKeys.filter { key -> !actualKeys.contains(key) }
-      if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
-        listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
-          "Actual map is missing the following keys: ${missingKeys.joinToString(", ")}",
-          path.joinToString("."), generateDiff()))))
-      } else if (!allowUnexpectedKeys && expectedKeys != actualKeysSorted) {
-        listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
-          "Expected a Map with keys $expectedKeys " +
-            "but received one with keys $actualKeysSorted",
-          path.joinToString("."), generateDiff()))))
-      } else {
-        emptyList()
-      }
+    val expectedKeys = expectedEntries.keys.sorted()
+    val actualKeys = actualEntries.keys
+    val actualKeysSorted = actualKeys.sorted()
+    val missingKeys = expectedKeys.filter { key -> !actualKeys.contains(key) }
+    return if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
+      listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
+        "Actual map is missing the following keys: ${missingKeys.joinToString(", ")}",
+        path.joinToString("."), generateDiff()))))
+    } else if (!allowUnexpectedKeys && expectedKeys != actualKeysSorted) {
+      listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
+        "Expected a Map with keys $expectedKeys " +
+          "but received one with keys $actualKeysSorted",
+        path.joinToString("."), generateDiff()))))
     } else {
       emptyList()
     }
+  }
+
+  /**
+   * Matcher defined at that path (ignoring parents)
+   */
+  fun directMatcherDefined(path: List<String>, pathComparator: Comparator<String> = Comparator.naturalOrder()): Boolean {
+    val resolveMatchers = resolveMatchers(path, pathComparator).filter {
+      parsePath(it).size == path.size
+    }
+    return resolveMatchers.isNotEmpty()
   }
 }
 

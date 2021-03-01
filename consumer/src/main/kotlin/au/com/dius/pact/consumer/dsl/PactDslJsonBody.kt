@@ -1109,54 +1109,38 @@ open class PactDslJsonBody : DslPart {
 
   /**
    * Accepts any key, and each key is mapped to a list of items that must match the following object definition
-   * Note: this needs the Java system property "pact.matching.wildcard" set to value "true" when the pact file
-   * is verified.
    * @param exampleKey Example key to use for generating bodies
    */
   fun eachKeyMappedToAnArrayLike(exampleKey: String): PactDslJsonBody {
-    if (isFeatureSet(Feature.UseMatchValuesMatcher)) {
-      matchers.addRule(
-        if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
-      )
-    } else {
-      matchers.addRule("$rootPath*", TypeMatcher)
-    }
+    matchers.addRule(
+      if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
+    )
     val parent = PactDslJsonArray("$rootPath*", exampleKey, this, true)
     return PactDslJsonBody(".", "", parent)
   }
 
   /**
    * Accepts any key, and each key is mapped to a map that must match the following object definition
-   * Note: this needs the Java system property "pact.matching.wildcard" set to value "true" when the pact file
-   * is verified.
    * @param exampleKey Example key to use for generating bodies
    */
   fun eachKeyLike(exampleKey: String): PactDslJsonBody {
-    if (isFeatureSet(Feature.UseMatchValuesMatcher)) {
-      matchers.addRule(
-        if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
-      )
-    } else {
-      matchers.addRule("$rootPath*", TypeMatcher)
-    }
+    matchers.addRule(
+      if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
+    )
     return PactDslJsonBody("$rootPath*.", exampleKey, this)
   }
 
   /**
    * Accepts any key, and each key is mapped to a map that must match the provided object definition
-   * Note: this needs the Java system property "pact.matching.wildcard" set to value "true" when the pact file
-   * is verified.
    * @param exampleKey Example key to use for generating bodies
    * @param value Value to use for matching and generated bodies
    */
   fun eachKeyLike(exampleKey: String, value: PactDslJsonRootValue): PactDslJsonBody {
     val body = body as JsonValue.Object
     body.add(exampleKey, value.body)
-    if (isFeatureSet(Feature.UseMatchValuesMatcher)) {
-      matchers.addRule(
-        if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
-      )
-    }
+    matchers.addRule(
+      if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
+    )
     for (matcherName in value.matchers.matchingRules.keys) {
       matchers.addRules("$rootPath*$matcherName", value.matchers.matchingRules[matcherName]!!.rules)
     }

@@ -2,10 +2,10 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
@@ -15,7 +15,6 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
-import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings('ClosureAsLastMethodParameter')
 class MatchersSpec extends Specification {
@@ -215,36 +214,6 @@ class MatchersSpec extends Specification {
         .addRule('$.*', TypeMatcher.INSTANCE)
       matchingRules
     }
-  }
-
-  def 'wildcardMatchingEnabled - disabled by default'() {
-    expect:
-    !Matchers.wildcardMatchingEnabled()
-  }
-
-  @RestoreSystemProperties
-  @Unroll
-  def 'wildcardMatchingEnabled - #enabledOrDisabled when pact.matching.wildcard = "#value"'() {
-    given:
-    def testInvocation = { String v ->
-      System.setProperty('pact.matching.wildcard', v)
-      Matchers.wildcardMatchingEnabled()
-    }
-
-    expect:
-    testInvocation(value) == enabled
-
-    where:
-
-    value       | enabledOrDisabled | enabled
-    ''          | 'disabled'        | false
-    '  '        | 'disabled'        | false
-    'somevalue' | 'disabled'        | false
-    'false'     | 'disabled'        | false
-    ' false   ' | 'disabled'        | false
-    'true'      | 'enabled'         | true
-    '  true   ' | 'enabled'         | true
-
   }
 
   def 'should default to a matching defined at a parent level'() {

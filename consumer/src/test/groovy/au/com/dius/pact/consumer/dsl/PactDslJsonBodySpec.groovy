@@ -1,7 +1,5 @@
 package au.com.dius.pact.consumer.dsl
 
-import au.com.dius.pact.core.model.Feature
-import au.com.dius.pact.core.model.FeatureToggles
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
@@ -214,46 +212,8 @@ class PactDslJsonBodySpec extends Specification {
     ]
   }
 
-  def 'eachKey - generate a wildcard matcher pattern if useMatchValuesMatcher is not set'() {
+  def 'eachKey - generate a match values matcher'() {
     given:
-    FeatureToggles.toggleFeature(Feature.UseMatchValuesMatcher, false)
-
-    def pactDslJsonBody = new PactDslJsonBody()
-      .object('one')
-        .eachKeyLike('key1')
-          .id()
-          .closeObject()
-      .closeObject()
-      .object('two')
-        .eachKeyLike('key2', PactDslJsonRootValue.stringMatcher('\\w+', 'test'))
-      .closeObject()
-      .object('three')
-        .eachKeyMappedToAnArrayLike('key3')
-          .id('key3-id')
-          .closeObject()
-        .closeArray()
-      .closeObject()
-
-    when:
-    pactDslJsonBody.close()
-
-    then:
-    pactDslJsonBody.matchers.matchingRules == [
-      '$.one.*': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '$.one.*.id': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '$.two.*': new MatchingRuleGroup([new RegexMatcher('\\w+', 'test')]),
-      '$.three.*': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '$.three.*[*].key3-id': new MatchingRuleGroup([TypeMatcher.INSTANCE])
-    ]
-
-    cleanup:
-    FeatureToggles.reset()
-  }
-
-  def 'eachKey - generate a match values matcher if useMatchValuesMatcher is set'() {
-    given:
-    FeatureToggles.toggleFeature(Feature.UseMatchValuesMatcher, true)
-
     def pactDslJsonBody = new PactDslJsonBody()
       .object('one')
       .eachKeyLike('key1')
@@ -282,9 +242,6 @@ class PactDslJsonBodySpec extends Specification {
       '$.three': new MatchingRuleGroup([ValuesMatcher.INSTANCE]),
       '$.three.*[*].key3-id': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
-
-    cleanup:
-    FeatureToggles.reset()
   }
 
   def 'Allow an attribute to be defined from a DSL part'() {

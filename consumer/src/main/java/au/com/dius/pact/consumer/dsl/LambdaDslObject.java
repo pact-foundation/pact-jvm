@@ -943,7 +943,6 @@ public class LambdaDslObject {
 
     /**
      * Accepts any key, and each key is mapped to a list of items that must match the following object definition.
-     * Note: this needs the Java system property "pact.matching.wildcard" set to value "true" when the pact file is verified.
      *
      * @param exampleKey Example key to use for generating bodies
      */
@@ -957,7 +956,6 @@ public class LambdaDslObject {
 
     /**
      * Accepts any key, and each key is mapped to a map that must match the following object definition.
-     * Note: this needs the Java system property "pact.matching.wildcard" set to value "true" when the pact file is verified.
      *
      * @param exampleKey Example key to use for generating bodies
      */
@@ -971,7 +969,6 @@ public class LambdaDslObject {
 
     /**
      * Accepts any key, and each key is mapped to a map that must match the provided object definition
-     * Note: this needs the Java system property "pact.matching.wildcard" set to value "true" when the pact file is verified.
      *
      * @param exampleKey Example key to use for generating bodies
      * @param value      Value to use for matching and generated bodies

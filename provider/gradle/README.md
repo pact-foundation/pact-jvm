@@ -95,7 +95,6 @@ The following project properties can be specified with `-Pproperty=value` on the
 |`pact.filter.providerState`|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |`pact.filter.pacturl`|This filter allows just the just the changed pact specified in a webhook to be run. It should be used in conjunction with `pact.filter.consumers` |
 |`pact.verifier.publishResults`|Publishing of verification results will be skipped unless this property is set to 'true'|
-|`pact.matching.wildcard`|Enables matching of map values ignoring the keys when this property is set to 'true'|
 |`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|

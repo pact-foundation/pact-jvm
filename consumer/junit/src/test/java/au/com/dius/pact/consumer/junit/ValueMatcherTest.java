@@ -21,14 +21,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 
-public class WildcardKeysTest {
+public class ValueMatcherTest {
 
     private static final String APPLICATION_JSON = "application/json";
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("WildcardKeysProvider", "localhost", 8111, this);
+    public PactProviderRule provider = new PactProviderRule("ValueMatcherProvider", this);
 
-    @Pact(provider="WildcardKeysProvider", consumer="WildcardKeysConsumer")
+    @Pact(provider="ValueMatcherProvider", consumer="ValueMatcherConsumer")
     public RequestResponsePact createFragment(PactDslWithProvider builder) {
       DslPart body = new PactDslJsonBody()
         .eachLike("articles")
@@ -67,13 +67,15 @@ public class WildcardKeysTest {
       MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
         "$.articles",
         "$.articles[*].variants",
-        "$.articles[*].variants[*].*",
+        "$.articles[*].variants[*]",
         "$.articles[*].variants[*].*[*].bundles",
-        "$.articles[*].variants[*].*[*].bundles[*].*",
+        "$.articles[*].variants[*].*[*].bundles[*]",
         "$.articles[*].variants[*].*[*].bundles[*].*.description",
         "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles",
+        "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*]",
         "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].*",
         "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId",
+        "$.foo",
         "$.foo.*"
       );
 
@@ -81,9 +83,9 @@ public class WildcardKeysTest {
     }
 
     @Test
-    @PactVerification("WildcardKeysProvider")
+    @PactVerification("ValueMatcherProvider")
     public void runTest() throws IOException {
-      String result = Request.Get("http://localhost:8111/")
+      String result = Request.Get(provider.getUrl())
         .addHeader("Accept", APPLICATION_JSON)
         .execute().returnContent().asString();
       Map<String, Object> body = (Map<String, Object>) new JsonSlurper().parseText(result);

@@ -39,10 +39,10 @@
                             ],
                             "combine": "AND"
                         },
-                        "$.articles[*].variants.*": {
+                        "$.articles[*].variants": {
                             "matchers": [
                                 {
-                                    "match": "type"
+                                    "match": "values"
                                 }
                             ],
                             "combine": "AND"

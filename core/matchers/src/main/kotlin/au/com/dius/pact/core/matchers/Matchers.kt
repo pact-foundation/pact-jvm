@@ -18,6 +18,7 @@ import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
 import java.math.BigInteger
@@ -26,7 +27,6 @@ import java.util.function.Predicate
 
 object Matchers : KLogging() {
 
-  const val PACT_MATCHING_WILDCARD = "pact.matching.wildcard"
   private val intRegex = Regex("\\d+")
 
   private fun matchesToken(pathElement: String, token: PathToken): Int {
@@ -132,12 +132,6 @@ object Matchers : KLogging() {
       resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith(".*") }
     } else false
 
-  /**
-   * If wildcard matching logic is enabled (where keys are ignored and only values are compared)
-   */
-  @JvmStatic
-  fun wildcardMatchingEnabled() = System.getProperty(PACT_MATCHING_WILDCARD)?.trim() == "true"
-
   @JvmStatic
   @JvmOverloads
   fun <M : Mismatch> domatch(
@@ -200,7 +194,7 @@ object Matchers : KLogging() {
     callback: (List<String>, T?, T?) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
-    if (wildcardMatchingEnabled() && context.wildcardMatcherDefined(path + "any")) {
+    if (matcher is ValuesMatcher) {
       actualEntries.entries.forEach { (key, value) ->
         if (expectedEntries.containsKey(key)) {
           result.addAll(callback(path + key, expectedEntries[key]!!, value))
@@ -297,37 +291,26 @@ object Matchers : KLogging() {
   }
 
   /**
-   * Compares any "extra" actual elements to expected using wildcard
-   * matching.
+   * Compares any "extra" actual elements to expected
    */
-  private fun <T> wildcardCompare(
-    basePath: List<String>,
+  private fun <T> compareActualElements(
+    path: List<String>,
+    actualIndex: Int,
     expectedValues: List<T>,
     actual: T,
     context: MatchingContext,
     callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
-    val path = basePath + expectedValues.size.toString()
-    val pathStr = path.joinToString(".")
-    val starPathStr = (basePath + "*").joinToString(".")
-
-    return callback(path, expectedValues[0], actual, context)
-      .map { matchResult ->
-        // replaces index with '*' for clearer errors
-        matchResult.copy(
-          key = matchResult.key.replaceFirst(pathStr, starPathStr),
-          result = matchResult.result.map { mismatch ->
-            mismatch.copy(path = mismatch.path.replaceFirst(pathStr, starPathStr))
-          })
-      }
+    val indexPath = path + actualIndex.toString()
+    return if (context.directMatcherDefined(indexPath)) {
+      callback(indexPath, expectedValues[0], actual, context)
+    } else {
+      emptyList()
+    }
   }
 
   /**
    * Compares every permutation of actual against expected.
-   *
-   * If actual has more elements than expected, and there is a wildcard matcher,
-   * then each extra actual element is compared to the first expected element
-   * using the wildcard matcher.
    */
   fun <T> compareListContentUnordered(
     expectedList: List<T>,
@@ -337,11 +320,8 @@ object Matchers : KLogging() {
     generateDiff: () -> String,
     callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
-    val doWildCardMatching = actualList.size > expectedList.size &&
-      context.wildcardIndexMatcherDefined(path + expectedList.size.toString())
-
-    val memoizedWildcardCompare = { actualIndex: Int ->
-      wildcardCompare(path, expectedList, actualList[actualIndex], context, callback)
+    val memoizedActualCompare = { actualIndex: Int ->
+      compareActualElements(path, actualIndex, expectedList, actualList[actualIndex], context, callback)
     }.memoizeFixed(actualList.size)
 
     val memoizedCompare = { expectedIndex: Int, actualIndex: Int ->
@@ -375,19 +355,23 @@ object Matchers : KLogging() {
       } else {
         examinedActualIndicesCombos.add(actualIndices.comboId)
         longestMatch.useIfLarger(expectedIndex, actualIndices)
-        if (expectedIndex < expectedList.size) {
-          actualIndices.indices().any { actualIndex ->
-            memoizedCompare(expectedIndex, actualIndex).all {
-              it.result.isEmpty()
-            } && hasMatchingPermutation(expectedIndex + 1, actualIndices - actualIndex)
-          }
-        } else if (doWildCardMatching) {
-          actualIndices.indices().all { actualIndex ->
-            memoizedWildcardCompare(actualIndex).all {
-              it.result.isEmpty()
+        when {
+          expectedIndex < expectedList.size -> {
+            actualIndices.indices().any { actualIndex ->
+              memoizedCompare(expectedIndex, actualIndex).all {
+                it.result.isEmpty()
+              } && hasMatchingPermutation(expectedIndex + 1, actualIndices - actualIndex)
             }
           }
-        } else true
+          actualList.size > expectedList.size -> {
+            actualIndices.indices().all { actualIndex ->
+              memoizedActualCompare(actualIndex).all {
+                it.result.isEmpty()
+              }
+            }
+          }
+          else -> true
+        }
       }
     }
 
@@ -400,8 +384,8 @@ object Matchers : KLogging() {
       val remainingErrors = smallestCombo.indices().map { actualIndex ->
         (longestMatch until expectedList.size).map { expectedIndex ->
           memoizedCompare(expectedIndex, actualIndex).flatMap { it.result }
-        }.flatten() + if (doWildCardMatching) {
-          memoizedWildcardCompare(actualIndex).flatMap { it.result }
+        }.flatten() + if (actualList.size > expectedList.size) {
+          memoizedActualCompare(actualIndex).flatMap { it.result }
         } else emptyList()
       }.toList().flatten()
         .groupBy { it.path }

@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import spock.lang.Ignore
 import spock.lang.Issue
 import spock.lang.Specification
@@ -255,11 +256,10 @@ class JsonBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('{"something": 101}'.bytes)
   }
 
-  @RestoreSystemProperties
-  def 'matching json bodies - with a matcher defined - and when the actual body is missing a key, not be a mismatch'() {
+  @SuppressWarnings('LineLength')
+  def 'matching json bodies - with a Values matcher defined - and when the actual body is missing a key, not be a mismatch'() {
     given:
-    context.matchers.addRule('$.*', TypeMatcher.INSTANCE)
-    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
+    context.matchers.addRule('$', ValuesMatcher.INSTANCE)
 
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
@@ -276,7 +276,6 @@ class JsonBodyMatcherSpec extends Specification {
     given:
     context.matchers.addRule('$', new MinTypeMatcher(1))
     context.matchers.addRule('$[*].*', TypeMatcher.INSTANCE)
-    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'false')
 
     when:
     def result = matcher.matchBody(expectedBody, actualBody, context)
@@ -314,12 +313,10 @@ class JsonBodyMatcherSpec extends Specification {
     }]'''.bytes)
   }
 
-  @RestoreSystemProperties
   def 'returns a mismatch - when comparing maps with different keys and wildcard matching is disabled'() {
     given:
     context = new MatchingContext(new MatchingRuleCategory('body'), false)
     context.matchers.addRule('$.*', new MinTypeMatcher(0))
-    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'false')
 
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
@@ -334,10 +331,9 @@ class JsonBodyMatcherSpec extends Specification {
   }
 
   @RestoreSystemProperties
-  def 'returns no mismatch - when comparing maps with different keys and wildcard matching is enabled'() {
+  def 'returns no mismatch - when comparing maps with different keys and Value matcher is enabled'() {
     given:
-    context.matchers.addRule('$.*', new MinTypeMatcher(0))
-    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
+    context.matchers.addRule('$', ValuesMatcher.INSTANCE)
 
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
@@ -424,8 +420,7 @@ class JsonBodyMatcherSpec extends Specification {
     def maxSize = 3
     def actualBody = OptionalBody.body(actual.bytes)
     def expectedBody = OptionalBody.body(expected.bytes)
-    context.matchers
-      .addRule('$', new MaxEqualsIgnoreOrderMatcher(maxSize))
+    context.matchers.addRule('$', new MaxEqualsIgnoreOrderMatcher(maxSize))
 
     when:
     def mismatches = matcher.matchBody(expectedBody, actualBody, context)
@@ -496,7 +491,7 @@ class JsonBodyMatcherSpec extends Specification {
     then:
     mismatches.size() == 2
     mismatches*.mismatch[0].matches(/Expected \[(.*)\] to match \[(.*)\] ignoring order of elements/)
-    mismatches*.path == ['$', '$.*']
+    mismatches*.path == ['$', '$.2']
 
     where:
 

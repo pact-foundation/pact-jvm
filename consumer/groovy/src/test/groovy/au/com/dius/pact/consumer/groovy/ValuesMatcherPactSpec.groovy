@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
-import au.com.dius.pact.core.model.FeatureToggles
 import groovy.json.JsonSlurper
 import groovyx.net.http.ContentTypes
 import groovyx.net.http.FromServer
@@ -11,10 +10,10 @@ import spock.lang.Specification
 import static groovyx.net.http.ContentTypes.JSON
 
 @SuppressWarnings(['AbcMetric'])
-class WildcardPactSpec extends Specification {
+class ValuesMatcherPactSpec extends Specification {
 
   @SuppressWarnings(['NestedBlockDepth'])
-  def 'pact test requiring wildcards'() {
+  def 'pact test using values matcher'() {
     given:
     def articleService = new PactBuilder()
     articleService {
@@ -74,21 +73,22 @@ class WildcardPactSpec extends Specification {
     articleService.interactions[0].response.matchingRules.rulesForCategory('body').matchingRules.keySet() == [
       '$.articles',
       '$.articles[*].variants',
+      '$.articles[*].variants[*]',
       '$.articles[*].variants[*].*',
       '$.articles[*].variants[*].*[*].bundles',
-      '$.articles[*].variants[*].*[*].bundles[*].*',
+      '$.articles[*].variants[*].*[*].bundles[*]',
       '$.articles[*].variants[*].*[*].bundles[*].*.description',
       '$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles',
       '$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId',
+      '$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*]',
       '$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].*'
     ] as Set
 
   }
 
   @SuppressWarnings(['NestedBlockDepth'])
-  def 'key like test with useMatchValuesMatcher turned on'() {
+  def 'key like test'() {
     given:
-    FeatureToggles.toggleFeature('pact.feature.matchers.useMatchValuesMatcher', true)
     def articleService = new PactBuilder()
     articleService {
       serviceConsumer 'ArticleConsumer'
@@ -144,9 +144,5 @@ class WildcardPactSpec extends Specification {
       '$.events.*.references.*',
       '$.events.*.references.*[*].eventId'
     ] as Set
-
-    cleanup:
-    FeatureToggles.reset()
-
   }
 }

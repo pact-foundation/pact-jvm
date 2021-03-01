@@ -262,7 +262,6 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |`pact.filter.providerState`|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |`pact.filter.pacturl`|This filter allows just the just the changed pact specified in a webhook to be run. It should be used in conjunction with `pact.filter.consumers`|
 |`pact.verifier.publishResults`|Publishing of verification results will be skipped unless this property is set to `true` [version 3.5.18+]|
-|`pact.matching.wildcard`|Enables matching of map values ignoring the keys when this property is set to `true`|
 |`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|

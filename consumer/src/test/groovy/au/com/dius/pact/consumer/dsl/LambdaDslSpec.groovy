@@ -107,7 +107,7 @@ class LambdaDslSpec extends Specification {
     def result = LambdaDsl.newJsonBody(jsonObject).build()
 
     then:
-    result.matchers.matchingRules.keySet() == ['.offer.prices.*', '.offer.shippingCosts.*'] as Set
+    result.matchers.matchingRules.keySet() == ['.offer.prices', '.offer.prices.*', '.offer.shippingCosts'] as Set
     result.toString() == '{"offer":{"prices":{"DE":1620},"shippingCosts":{"DE":{"cia":300}}}}'
 
   }

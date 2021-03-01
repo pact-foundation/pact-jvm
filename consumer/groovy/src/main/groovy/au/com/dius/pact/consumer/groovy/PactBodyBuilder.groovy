@@ -1,7 +1,5 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.core.model.Feature
-import au.com.dius.pact.core.model.FeatureToggles
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
@@ -289,17 +287,12 @@ class PactBodyBuilder extends GroovyBuilder {
   }
 
   /**
-   * Matches the values of the map ignoring the keys. Note: this needs the Java system property
-   * "pact.matching.wildcard" set to value "true" when the pact file is verified.
+   * Matches the values of the map ignoring the keys.
    */
   def keyLike(String key, def value) {
-    if (FeatureToggles.isFeatureSet(Feature.UseMatchValuesMatcher)) {
-      setMatcherAttribute(new ValuesMatcher(), path)
-      if (value instanceof Closure) {
-        bodyRepresentation[key] = invokeClosure(value, buildPath(STAR))
-      } else {
-        addAttribute(key, STAR, value)
-      }
+    setMatcherAttribute(new ValuesMatcher(), path)
+    if (value instanceof Closure) {
+      bodyRepresentation[key] = invokeClosure(value, buildPath(STAR))
     } else {
       addAttribute(key, STAR, value)
     }

@@ -354,13 +354,6 @@ DslPart body = new PactDslJsonBody()
 
 For an example, have a look at [WildcardKeysTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/WildcardKeysTest.java).
 
-**NOTE:** The `eachKeyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
- of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition
- applied to a map will result in only one being applied when the pact is verified (probably the last).
- 
-**Further Note: From version 3.5.22 onwards pacts with wildcards applied to map keys will require the Java system property 
-"pact.matching.wildcard" set to value "true" when the pact file is verified.**
-
 ### Matching on paths
 
 You can use regular expressions to match incoming requests. The DSL has a `matchPath` method for this. You can provide

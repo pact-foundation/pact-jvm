@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.junit;
 
-import au.com.dius.pact.core.matchers.Matchers;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
@@ -11,7 +10,6 @@ import au.com.dius.pact.provider.junitsupport.target.Target;
 import au.com.dius.pact.provider.junitsupport.target.TestTarget;
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
@@ -26,7 +24,7 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 
 @RunWith(PactRunner.class)
 @Provider("ArticlesProvider")
-@PactFolder("src/test/resources/wildcards")
+@PactFolder("src/test/resources/match-values")
 @VerificationReports({"console", "markdown"})
 public class ArticlesContractTest {
 
@@ -40,16 +38,10 @@ public class ArticlesContractTest {
 
   @Before
   public void before() throws IOException {
-    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, "true");
     String json = IOUtils.toString(getClass().getResourceAsStream("/articles.json"), Charset.defaultCharset());
     embeddedService.addExpectation(
       onRequestTo("/articles.json"), giveResponse(json, "application/json")
     );
-  }
-
-  @After
-  public void after() {
-    System.clearProperty(Matchers.PACT_MATCHING_WILDCARD);
   }
 
   @State("Pact for Issue 313")

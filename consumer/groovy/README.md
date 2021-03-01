@@ -520,13 +520,6 @@ withBody {
 
 For an example, have a look at [WildcardPactSpec](https://github.com/DiUS/pact-jvm/blob/master/consumer/groovy/src/test/groovy/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
 
-**NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
- of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
- applied to a map will result in only one being applied when the pact is verified (probably the last).
-
-**Further Note: From version 3.5.22 onwards pacts with wildcards applied to map keys will require the Java system property
-"pact.matching.wildcard" set to value "true" when the pact file is verified.**
-
 ### Matching with an OR
 
 The V3 spec allows multiple matchers to be combined using either AND or OR for a value. The main use of this would be to
