@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.1 - Bugfix Release
+
+* b30c55d6c - Merge pull request #1317 from ryanlevell/fix/issue1316 (Ronald Holshausen, Mon Mar 1 15:35:29 2021 +1100)
+* cce1cfcdd - refactor: remove old wild-card matching logic in favor of using the ValueMatcher (Ronald Holshausen, Mon Mar 1 15:31:31 2021 +1100)
+* 4d37371b5 - chore: update Kotlin to latest (Ronald Holshausen, Mon Mar 1 11:25:07 2021 +1100)
+* 20f53c684 - included literal 'null' check for regex as it has similar issue as JsonValue.Null (Ryan Levell, Sat Feb 27 19:27:56 2021 -0600)
+* e3bd289a1 - fixed regex typo. added happy path json regex (Ryan Levell, Sat Feb 27 08:00:43 2021 -0600)
+* 672e85384 - added check for Null JsonValue for regex matcher (Ryan Levell, Fri Feb 26 21:24:09 2021 -0600)
+* 4f2cf8972 - Merge branch 'v4.1.x' (Ronald Holshausen, Sat Feb 20 15:29:38 2021 +1100)
+* e954d801a - fix(JUnit 4): do not fire the test finished event for pending pacts #1310 (Ronald Holshausen, Sat Feb 20 15:25:09 2021 +1100)
+* b782ccca0 - feat: deprecate pact broker host, port and scheme in favour of a url #1300 (Ronald Holshausen, Sat Feb 20 14:03:25 2021 +1100)
+* c91f44d2a - chore: update GH action workflow (Ronald Holshausen, Fri Feb 12 12:31:51 2021 +1100)
+* 10e8c72b3 - Update gradle.yml (Ronald Holshausen, Fri Feb 12 12:30:50 2021 +1100)
+* a72d9fa52 - chore: update GH action workflow (Ronald Holshausen, Fri Feb 12 12:27:50 2021 +1100)
+* f5ae1c5d1 - Update gradle.yml (Ronald Holshausen, Fri Feb 12 12:26:12 2021 +1100)
+* cd446eef8 - chore: upgrade Kotlin to 1.4.30 (Ronald Holshausen, Fri Feb 12 11:24:54 2021 +1100)
+* 295d0c0d6 - Update README.md (Ronald Holshausen, Thu Feb 11 17:17:41 2021 +1100)
+* 1f6c42275 - Update README.md (Ronald Holshausen, Thu Feb 11 17:15:59 2021 +1100)
+* 6990a6cb8 - Update README.md (Ronald Holshausen, Thu Feb 11 17:15:30 2021 +1100)
+* 93a483738 - bump version to 4.2.1 (Ronald Holshausen, Thu Feb 11 17:06:54 2021 +1100)
+
 # 4.2.0 - First non-beta release
 
 * 36d0cddbf - chore: drop beta version (Ronald Holshausen, Thu Feb 11 16:28:37 2021 +1100)
