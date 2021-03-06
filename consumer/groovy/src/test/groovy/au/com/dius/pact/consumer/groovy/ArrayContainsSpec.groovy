@@ -10,7 +10,8 @@ import kotlin.Triple
 import spock.lang.Issue
 import spock.lang.Specification
 
-class ArrayContainsSpec extends Specification{
+@SuppressWarnings('LineLength')
+class ArrayContainsSpec extends Specification {
   @Issue('#1318')
   def 'array contains with simple values'() {
     given:
@@ -50,7 +51,7 @@ class ArrayContainsSpec extends Specification{
     builder {
       array arrayContaining([
         date('yyyy-MM-dd'),
-        equalTo("Test"),
+        equalTo('Test'),
         uuid()
       ])
     }
