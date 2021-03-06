@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import kotlin.Triple
+import org.apache.commons.lang3.time.DateFormatUtils
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -56,16 +57,16 @@ class ArrayContainsSpec extends Specification {
       ])
     }
     def rules = builder.matchers.matchingRules
+    def date = DateFormatUtils.ISO_DATE_FORMAT.format(new Date(Matchers.DATE_2000))
 
     then:
-    // TODO: This fails on CI with JDK 13+
-//    builder.body == '''{
-//    |    "array": [
-//    |        "2000-02-01",
-//    |        "Test",
-//    |        "e2490de5-5bd3-43d5-b7c4-526e33f71304"
-//    |    ]
-//    |}'''.stripMargin()
+    builder.body == ('''{
+    |    "array": [
+    |        "''' + date + '''",
+    |        "Test",
+    |        "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+    |    ]
+    |}''').stripMargin()
     rules.keySet() == ['$.array'] as Set
     rules['$.array'].rules.size() == 1
     rules['$.array'].rules[0] instanceof au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher

@@ -513,7 +513,8 @@ abstract class DslPart {
     val HEXADECIMAL = Regex("[0-9a-fA-F]+")
     val IP_ADDRESS = Regex("(\\d{1,3}\\.)+\\d{1,3}")
     val UUID_REGEX = Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
-    const val DATE_2000 = 949323600000L
+    @JvmStatic
+    val DATE_2000 = 949323600000L
 
     /**
      * Returns a regular expression matcher

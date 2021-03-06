@@ -7,7 +7,7 @@ import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import groovy.json.JsonSlurper
+import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.FastDateFormat
 import spock.lang.Issue
 import spock.lang.Specification
@@ -302,12 +302,10 @@ class LambdaDslSpec extends Specification {
           .uuid()
       }
     }.build()
+    def date = DateFormatUtils.ISO_DATE_FORMAT.format(new Date(DslPart.DATE_2000))
 
     expect:
-    // TODO: This fails on CI for JDK 13+
-    //new JsonSlurper().parseText(body.toString()) == [
-    //  output: ['2000-02-01', 'test', 'e2490de5-5bd3-43d5-b7c4-526e33f71304']
-    //]
+    body.toString() == '{"output":["' + date + '","test","e2490de5-5bd3-43d5-b7c4-526e33f71304"]}'
     body.matchers.toMap(PactSpecVersion.V3) == [
       '$.output': [
         matchers: [

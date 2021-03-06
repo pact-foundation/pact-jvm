@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.consumer.groovy.Matchers.Companion.DATE_2000
 import au.com.dius.pact.core.matchers.UrlMatcherSupport
 import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
@@ -36,10 +37,7 @@ import java.util.regex.Pattern
 const val HEXADECIMAL = "[0-9a-fA-F]+"
 const val IP_ADDRESS = "(\\d{1,3}\\.)+\\d{1,3}"
 const val UUID_REGEX = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-const val TEN = 10
-const val TYPE = "type"
 const val DECIMAL = "decimal"
-const val DATE_2000 = 949323600000L
 const val INTEGER = "integer"
 
 /**
@@ -272,6 +270,8 @@ class ArrayContainsMatcher(
 open class Matchers {
 
   companion object : KLogging() {
+    @JvmStatic
+    val DATE_2000 = 949323600000L
 
     /**
      * Match a regular expression
