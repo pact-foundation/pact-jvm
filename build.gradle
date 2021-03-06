@@ -55,7 +55,7 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
   apply plugin: 'codenarc'
-  if (!System.env.CI) {
+  if (System.env.JACOCO) {
     apply plugin: 'jacoco'
   }
   apply plugin: 'org.jetbrains.kotlin.jvm'
@@ -210,7 +210,7 @@ subprojects {
       configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
   }
 
-  if (!System.env.CI) {
+  if (System.env.JACOCO) {
     check.dependsOn << 'jacocoTestReport'
   }
 
