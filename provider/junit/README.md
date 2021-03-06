@@ -451,7 +451,7 @@ having been verified due to a configuration error. **
 
 By default, bodies will be handled based on their content types. For binary contents, the bodies will be base64
 encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
-an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`. For instance, setting 
+an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary`. For instance, setting 
 `pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
 
 ## Test target

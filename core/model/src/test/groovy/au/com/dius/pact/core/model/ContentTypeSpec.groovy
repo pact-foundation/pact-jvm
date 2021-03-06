@@ -2,20 +2,25 @@ package au.com.dius.pact.core.model
 
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 import java.nio.charset.Charset
 
 @SuppressWarnings('UnnecessaryBooleanExpression')
+@RestoreSystemProperties
 class ContentTypeSpec extends Specification {
 
   def setupSpec() {
     System.setProperty('pact.content_type.override.application/x-thrift', 'json')
+    System.setProperty('pact.content_type.override.application/x-other', 'text')
+    System.setProperty('pact.content_type.override.application/x-bin', 'binary')
+    System.setProperty('pact.content_type.override.application/x-ml', 'xml')
   }
 
   @Unroll
   def '"#value" is json -> #result'() {
     expect:
-    result ? contentType.json : !contentType.json
+    result == contentType.json
 
     where:
 
@@ -27,6 +32,7 @@ class ContentTypeSpec extends Specification {
     'application/hal+json' || true
     'application/HAL+JSON' || true
     'application/x-thrift' || true
+    'application/x-other'  || false
 
     contentType = new ContentType(value)
   }
@@ -34,7 +40,7 @@ class ContentTypeSpec extends Specification {
   @Unroll
   def '"#value" is xml -> #result'() {
     expect:
-    result ? contentType.xml : !contentType.xml
+    result == contentType.xml
 
     where:
 
@@ -45,6 +51,8 @@ class ContentTypeSpec extends Specification {
     'application/xml'       || true
     'application/stuff+xml' || true
     'application/STUFF+XML' || true
+    'application/x-ml'      || true
+    'application/x-thrift'  || false
 
     contentType = new ContentType(value)
   }
@@ -89,6 +97,7 @@ class ContentTypeSpec extends Specification {
     'text/csv'                          || false
     'multipart/form-data'               || true
     'application/x-www-form-urlencoded' || false
+    'application/x-bin'                 || true
 
     contentType = new ContentType(value)
   }

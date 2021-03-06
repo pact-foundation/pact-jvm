@@ -16,15 +16,19 @@ class ContentType(val contentType: MediaType?) {
 
   fun isJson(): Boolean {
     return if (contentType != null) {
-      val override = System.getProperty("pact.content_type.override.${contentType.baseType}")
-      if (override == null)
-        jsonRegex.matches(contentType.subtype.toLowerCase())
-      else
-        jsonRegex.matches(override)
+      when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
+        "json" -> true
+        else -> jsonRegex.matches(contentType.subtype.toLowerCase())
+      }
     } else false
   }
 
-  fun isXml(): Boolean = if (contentType != null) xmlRegex.matches(contentType.subtype.toLowerCase()) else false
+  fun isXml(): Boolean = if (contentType != null) {
+    when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
+      "xml" -> true
+      else -> xmlRegex.matches(contentType.subtype.toLowerCase())
+    }
+  } else false
 
   fun isOctetStream(): Boolean = if (contentType != null)
     contentType.baseType.toString() == "application/octet-stream"
@@ -61,6 +65,7 @@ class ContentType(val contentType: MediaType?) {
       val type = contentType.type
       val baseType = superType.type
       val override = System.getProperty("pact.content_type.override.$type.${contentType.subtype}")
+        ?: System.getProperty("pact.content_type.override.$type/${contentType.subtype}")
       when {
         override.isNotEmpty() -> override == "binary"
         type == "text" || baseType == "text" -> false

@@ -1,8 +1,10 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.json.JsonValue
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 import java.nio.charset.Charset
 
@@ -60,5 +62,21 @@ class HttpPartSpec extends Specification {
     expect:
     HttpPart.extractBody(json, ContentType.fromString('application/zip'))
       .valueAsString() == 'hello'
+  }
+
+  @Issue('#1314')
+  @RestoreSystemProperties
+  def 'takes into account content type overrides'() {
+    given:
+    def json = new JsonValue.Object([body: new JsonValue.StringValue('{}'.chars)])
+    System.setProperty('pact.content_type.override.application/x-thrift', 'json')
+    def decoder = Mock(Base64.Decoder)
+
+    when:
+    def result = HttpPart.extractBody(json, ContentType.fromString('application/x-thrift'), decoder)
+
+    then:
+    0 * decoder.decode(_)
+    result.valueAsString() == '{}'
   }
 }

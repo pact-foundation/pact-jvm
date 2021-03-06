@@ -266,7 +266,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|
-|`pact.content_type.override.<TYPE>.<SUBTYPE>=text\|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
+|`pact.content_type.override.<TYPE>.<SUBTYPE>=text\|json\|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
 
 Example in the configuration section:
 
@@ -752,7 +752,7 @@ For example:
 
 By default, bodies will be handled based on their content types. For binary contents, the bodies will be base64
 encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
-an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`. For instance, setting 
+an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary`. For instance, setting 
 `pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
 
 # Publishing verification results to a Pact Broker
