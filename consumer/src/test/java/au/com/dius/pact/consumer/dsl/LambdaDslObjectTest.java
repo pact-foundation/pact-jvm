@@ -1030,4 +1030,12 @@ public class LambdaDslObjectTest {
             .build().toString();
     assertThat(lambdaDslJson, is(pactDslJson));
   }
+
+  @Test
+  public void testAttributeNamesWithDateFormats() {
+    DslPart dslPart = LambdaDsl.newJsonBody(body -> body.object("schedule", schedule ->
+      schedule.booleanType("01/01/1900", true)
+        .booleanType("04/01/2021", false))).build();
+    assertThat(dslPart.toString(), is("{\"schedule\":{\"01/01/1900\":true,\"04/01/2021\":false}}"));
+  }
 }
