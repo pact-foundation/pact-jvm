@@ -17,6 +17,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody
+
 class LambdaDslSpec extends Specification {
 
   def testArrayMinMaxLike() {
@@ -261,5 +263,68 @@ class LambdaDslSpec extends Specification {
     'newJsonArrayMinUnordered'    | [2]    | new MinEqualsIgnoreOrderMatcher(2)
     'newJsonArrayMaxUnordered'    | [4]    | new MaxEqualsIgnoreOrderMatcher(4)
     'newJsonArrayMinMaxUnordered' | [2, 4] | new MinMaxEqualsIgnoreOrderMatcher(2, 4)
+  }
+
+  @Issue('#1318')
+  def 'array contains with simple values'() {
+    given:
+    def body = newJsonBody { o ->
+      o.arrayContaining('output') { a ->
+        a.stringType('a').numberType(100)
+      }
+    }.build()
+
+    expect:
+    body.toString() == '{"output":["a",100]}'
+    body.matchers.toMap(PactSpecVersion.V3) == [
+      '$.output': [
+        matchers: [
+          [
+            match: 'arrayContains', variants: [
+              [index: 0, rules: ['$': [matchers: [[match: 'type']], combine: 'AND']], generators: [:]],
+              [index: 1, rules: ['$': [matchers: [[match: 'number']], combine: 'AND']], generators: [:]]
+            ]
+          ]
+        ], combine: 'AND'
+      ]
+    ]
+  }
+
+  @Issue('#1318')
+  @SuppressWarnings(['LineLength'])
+  def 'array contains with simple values and generators'() {
+    given:
+    def body = newJsonBody { o ->
+      o.arrayContaining('output') { a ->
+        a.date('yyyy-MM-dd')
+          .stringValue('test')
+          .uuid()
+      }
+    }.build()
+
+    expect:
+    body.toString() == '{"output":["2000-02-01","test","e2490de5-5bd3-43d5-b7c4-526e33f71304"]}'
+    body.matchers.toMap(PactSpecVersion.V3) == [
+      '$.output': [
+        matchers: [
+          [
+            match: 'arrayContains',
+            variants: [
+              [
+                index: 0,
+                rules: ['$': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND']],
+                generators: ['$': [type: 'DateTime', format: 'yyyy-MM-dd']]
+              ],
+              [index: 1, rules: [:], generators: [:]],
+              [
+                index: 2,
+                rules: ['$': [matchers: [[match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']], combine: 'AND']],
+                generators: ['$': [type: 'Uuid']]
+              ]
+            ]
+          ]
+        ], combine: 'AND'
+      ]
+    ]
   }
 }
