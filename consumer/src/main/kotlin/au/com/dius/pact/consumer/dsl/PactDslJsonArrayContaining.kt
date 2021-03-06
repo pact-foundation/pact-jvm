@@ -11,26 +11,25 @@ class PactDslJsonArrayContaining(
   parent: DslPart
 ): PactDslJsonArray("", rootName, parent) {
   override fun closeArray(): DslPart {
-    val matchers = this.matchers
+    val matchingRules = this.matchers.matchingRules.entries.groupBy {
+      prefixRegex.find(it.key)?.groups?.get(1)?.toString() ?: ""
+    }.map { entry ->
+      MatchingRuleCategory("body", entry.value.associate {
+        it.key.replace(prefixRegex, "\\$") to it.value
+      }.toMutableMap())
+    }
+    val generators = generators.categoryFor(Category.BODY)?.entries?.associate {
+      it.key.replace(prefixRegex, "\\$") to it.value
+    } ?: emptyMap()
     this.matchers = MatchingRuleCategory("", mutableMapOf(root + rootName to MatchingRuleGroup(mutableListOf(ArrayContainsMatcher(
-      listOf(Triple(
-        0,
-        matchers.matchingRules.entries.groupBy {
-          prefixRegex.find(it.key)?.groups?.get(1)?.toString() ?: ""
-        }.map { entry ->
-          MatchingRuleCategory("body", entry.value.associate {
-            it.key.replace(prefixRegex, "\\$.") to it.value
-          }.toMutableMap())
-        }.first(),
-        generators.categoryFor(Category.BODY)?.entries?.associate {
-          it.key.replace(prefixRegex, "\\$.") to it.value
-        } ?: emptyMap()
-      ))
+      matchingRules.mapIndexed { index, item ->
+        Triple(index, item, generators)
+      }
     )))))
     return super.closeArray()!!
   }
 
   companion object {
-    val prefixRegex = Regex("\\[(\\d+)\\]\\.")
+    val prefixRegex = Regex("^\\[(\\d+)]")
   }
 }

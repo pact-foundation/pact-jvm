@@ -107,7 +107,7 @@ class LambdaDslSpec extends Specification {
     def result = LambdaDsl.newJsonBody(jsonObject).build()
 
     then:
-    result.matchers.matchingRules.keySet() == ['.offer.prices', '.offer.prices.*', '.offer.shippingCosts'] as Set
+    result.matchers.matchingRules.keySet() == ['$.offer.prices', '$.offer.prices.*', '$.offer.shippingCosts'] as Set
     result.toString() == '{"offer":{"prices":{"DE":1620},"shippingCosts":{"DE":{"cia":300}}}}'
 
   }
@@ -125,8 +125,8 @@ class LambdaDslSpec extends Specification {
 
     then:
     result.body.toString() == '{"componentsIds":["A1"],"componentsIds2":["A1","A1","A1","A1","A1"]}'
-    result.matchers.matchingRules.keySet() == ['.componentsIds', '.componentsIds[*]', '.componentsIds2',
-                                               '.componentsIds2[*]'] as Set
+    result.matchers.matchingRules.keySet() == ['$.componentsIds', '$.componentsIds[*]', '$.componentsIds2',
+                                               '$.componentsIds2[*]'] as Set
   }
 
   @Issue('#829')
@@ -158,15 +158,15 @@ class LambdaDslSpec extends Specification {
 
     then:
     result.matchers.toMap(PactSpecVersion.V3) == [
-      '.dateExp': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
-      '.timeExp': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
-      '.datetimeExp': [matchers: [[match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
+      '$.dateExp': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
+      '$.timeExp': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
+      '$.datetimeExp': [matchers: [[match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
     ]
     result.generators.toMap(PactSpecVersion.V3) == [
       body: [
-        '.dateExp': [type: 'Date', format: 'yyyy-MM-dd', expression: 'today + 1 day'],
-        '.timeExp': [type: 'Time', format: 'HH:mm:ss', expression: 'now + 1 hour'],
-        '.datetimeExp': [type: 'DateTime', format: "yyyy-MM-dd'T'HH:mm:ss", expression: 'today + 1 hour']
+        '$.dateExp': [type: 'Date', format: 'yyyy-MM-dd', expression: 'today + 1 day'],
+        '$.timeExp': [type: 'Time', format: 'HH:mm:ss', expression: 'now + 1 hour'],
+        '$.datetimeExp': [type: 'DateTime', format: "yyyy-MM-dd'T'HH:mm:ss", expression: 'today + 1 hour']
       ]
     ]
   }
@@ -262,5 +262,4 @@ class LambdaDslSpec extends Specification {
     'newJsonArrayMaxUnordered'    | [4]    | new MaxEqualsIgnoreOrderMatcher(4)
     'newJsonArrayMinMaxUnordered' | [2, 4] | new MinMaxEqualsIgnoreOrderMatcher(2, 4)
   }
-
 }

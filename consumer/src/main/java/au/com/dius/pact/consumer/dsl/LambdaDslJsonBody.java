@@ -10,6 +10,7 @@ public class LambdaDslJsonBody extends LambdaDslObject {
     }
 
     public DslPart build() {
-        return dslPart;
+      dslPart.close();
+      return dslPart;
     }
 }

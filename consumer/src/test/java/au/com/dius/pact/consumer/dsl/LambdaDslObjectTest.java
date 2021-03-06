@@ -1,23 +1,24 @@
 package au.com.dius.pact.consumer.dsl;
 
-import au.com.dius.pact.consumer.dsl.DslPart;
-import au.com.dius.pact.consumer.dsl.PM;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.core.model.PactSpecVersion;
-import au.com.dius.pact.consumer.dsl.LambdaDsl;
-import au.com.dius.pact.consumer.dsl.LambdaDslJsonBody;
-import au.com.dius.pact.consumer.dsl.LambdaDslObject;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
 
 public class LambdaDslObjectTest {
 
@@ -1007,7 +1008,7 @@ public class LambdaDslObjectTest {
             .close();
 
         // Lambda DSL
-        final DslPart lambdaPactDsl = LambdaDsl.newJsonBody(body ->
+        final DslPart lambdaPactDsl = newJsonBody(body ->
             body.unorderedArray("foo", foo ->
                 foo.stringValue("a")
                     .stringValue("b")
@@ -1025,17 +1026,48 @@ public class LambdaDslObjectTest {
     String pactDslJson = new PactDslJsonBody()
             .valueFromProviderState("id", "id", "A1")
             .getBody().toString();
-    String lambdaDslJson = LambdaDsl
-            .newJsonBody(body -> body.valueFromProviderState("id", "id", "A1"))
+    String lambdaDslJson = newJsonBody(body -> body.valueFromProviderState("id", "id", "A1"))
             .build().toString();
     assertThat(lambdaDslJson, is(pactDslJson));
   }
 
   @Test
   public void testAttributeNamesWithDateFormats() {
-    DslPart dslPart = LambdaDsl.newJsonBody(body -> body.object("schedule", schedule ->
+    DslPart dslPart = newJsonBody(body -> body.object("schedule", schedule ->
       schedule.booleanType("01/01/1900", true)
         .booleanType("04/01/2021", false))).build();
     assertThat(dslPart.toString(), is("{\"schedule\":{\"01/01/1900\":true,\"04/01/2021\":false}}"));
+  }
+
+  @Test
+  public void testArrayContains() {
+    DslPart dslPart = newJsonBody(o -> o.arrayContaining("output", a -> a.stringType("a").numberType(100))).build();
+    assertThat(dslPart.toString(), is("{\"output\":[\"a\",100]}"));
+    Map<String, Object> matchers = dslPart.getMatchers().toMap(PactSpecVersion.V3);
+    assertThat(matchers.keySet(), is(equalTo(Set.of("$.output"))));
+    Map<String, List<Map<String, Object>>> output = (Map<String, List<Map<String, Object>>>) matchers.get("$.output");
+    Map<String, Object> matcher = output.get("matchers").get(0);
+    assertThat(matcher, hasEntry("match", "arrayContains"));
+    assertThat(matcher, hasKey(equalTo("variants")));
+    List<Map<String, Object>> variants = (List<Map<String, Object>>) matcher.get("variants");
+    assertThat(variants, hasSize(2));
+
+    Map<String, Object> variant = variants.get(0);
+    assertThat(variant, hasKey(equalTo("rules")));
+    Map<String, Map<String, Object>> rules = (Map<String, Map<String, Object>>) variant.get("rules");
+    assertThat(rules, hasKey("$"));
+    Map<String, Object> map = rules.get("$");
+    assertThat(map, hasKey("matchers"));
+    Map<String, Object> variant1Matcher = (Map<String, Object>) ((List) map.get("matchers")).get(0);
+    assertThat(variant1Matcher, hasEntry("match", "type"));
+
+    Map<String, Object> variant2 = variants.get(1);
+    assertThat(variant2, hasKey(equalTo("rules")));
+    Map<String, Map<String, Object>> rules2 = (Map<String, Map<String, Object>>) variant2.get("rules");
+    assertThat(rules2, hasKey("$"));
+    Map<String, Object> map2 = rules2.get("$");
+    assertThat(map2, hasKey("matchers"));
+    Map<String, Object> variant2Matcher = (Map<String, Object>) ((List) map2.get("matchers")).get(0);
+    assertThat(variant2Matcher, hasEntry("match", "number"));
   }
 }
