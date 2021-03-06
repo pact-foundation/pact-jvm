@@ -21,17 +21,10 @@ object MatchingConfig {
         val clazz = Class.forName(matcher).kotlin
         (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
       } else {
-        val override = System.getProperty("pact.content_type.override.$contentType")
-        if (override != null) {
-          val matcherOverride = bodyMatchers.entries.find { override.matches(Regex(it.key)) }?.value
-          if (matcherOverride != null) {
-            val clazz = Class.forName(matcherOverride).kotlin
-            (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
-          } else {
-            null
-          }
-        } else {
-          null
+        when (System.getProperty("pact.content_type.override.$contentType")) {
+          "json" -> JsonBodyMatcher
+          "text" -> PlainTextBodyMatcher()
+          else -> null
         }
       }
     } else {

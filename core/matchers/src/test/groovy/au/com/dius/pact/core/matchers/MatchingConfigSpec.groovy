@@ -2,11 +2,14 @@ package au.com.dius.pact.core.matchers
 
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
+@RestoreSystemProperties
 class MatchingConfigSpec extends Specification {
 
   def setupSpec() {
     System.setProperty('pact.content_type.override.application/x-thrift', 'json')
+    System.setProperty('pact.content_type.override.application/x-other', 'text')
   }
 
   @Unroll
@@ -24,6 +27,6 @@ class MatchingConfigSpec extends Specification {
     'application/json-rpc'    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
     'application/jsonrequest' | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
     'application/x-thrift'    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
+    'application/x-other'     | 'au.com.dius.pact.core.matchers.PlainTextBodyMatcher'
   }
-
 }

@@ -79,18 +79,23 @@ abstract class HttpPart {
     private const val CONTENT_TYPE = "Content-Type"
 
     @JvmStatic
-    fun extractBody(json: JsonValue.Object, contentType: ContentType): OptionalBody {
+    @JvmOverloads
+    fun extractBody(
+      json: JsonValue.Object,
+      contentType: ContentType,
+      decoder: Base64.Decoder = Base64.getDecoder()
+    ): OptionalBody {
       return when (val b = json["body"]) {
         is JsonValue.Null -> OptionalBody.nullBody()
-        is JsonValue.StringValue -> decodeBody(b.asString()!!, contentType)
-        else -> decodeBody(b.serialise(), contentType)
+        is JsonValue.StringValue -> decodeBody(b.toString(), contentType, decoder)
+        else -> decodeBody(b.serialise(), contentType, decoder)
       }
     }
 
-    private fun decodeBody(body: String, contentType: ContentType): OptionalBody {
+    private fun decodeBody(body: String, contentType: ContentType, decoder: Base64.Decoder): OptionalBody {
       return when {
         contentType.isBinaryType() || contentType.isMultipart() -> try {
-          OptionalBody.body(Base64.getDecoder().decode(body), contentType)
+          OptionalBody.body(decoder.decode(body), contentType)
         } catch (ex: IllegalArgumentException) {
           logger.warn(ex) { "Expected body for content type $contentType to be base64 encoded" }
           OptionalBody.body(body.toByteArray(contentType.asCharset()), contentType)
