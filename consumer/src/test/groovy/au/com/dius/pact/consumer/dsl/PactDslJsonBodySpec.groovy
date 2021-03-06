@@ -170,6 +170,7 @@ class PactDslJsonBodySpec extends Specification {
       .closeArray().toString() == '{"available Options":[{"Material":"Gold"}]}'
   }
 
+  @Issue("#619")
   def 'test for behaviour of close for issue 619'() {
     given:
     PactDslJsonBody pactDslJsonBody = new PactDslJsonBody()
@@ -189,6 +190,7 @@ class PactDslJsonBodySpec extends Specification {
     ]
   }
 
+  @Issue("#628")
   def 'test for behaviour of close for issue 628'() {
     given:
     PactDslJsonBody getBody = new PactDslJsonBody()
@@ -383,6 +385,21 @@ class PactDslJsonBodySpec extends Specification {
     body.matchers.toMap(PactSpecVersion.V3) == [
       '.test': [matchers: [[match: 'type']], combine: 'AND'],
       '.num': [matchers: [[match: 'type']], combine: 'AND']
+    ]
+  }
+
+  @Issue('#1220')
+  def 'objects with date formatted keys'() {
+    given:
+    PactDslJsonBody body = new PactDslJsonBody()
+      .stringType("01/01/2001", "1234")
+      .booleanType('01/01/1900', true)
+
+    expect:
+    body.body.toString() == '{"01/01/2001":"1234","01/01/1900":true}'
+    body.matchers.toMap(PactSpecVersion.V2) == [
+      '$.body[\'01/01/2001\']': [match: 'type'],
+      '$.body[\'01/01/1900\']': [match: 'type']
     ]
   }
 }

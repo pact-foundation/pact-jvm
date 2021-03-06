@@ -1,5 +1,6 @@
 package io.pactfoundation.consumer.dsl;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PM;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
@@ -1000,5 +1001,13 @@ public class LambdaDslObjectTest {
             .newJsonBody(body -> body.valueFromProviderState("id", "id", "A1"))
             .build().toString();
     assertThat(lambdaDslJson, is(pactDslJson));
+  }
+
+  @Test
+  public void testAttributeNamesWithDateFormats() {
+    DslPart dslPart = LambdaDsl.newJsonBody(body -> body.object("schedule", schedule ->
+      schedule.booleanType("01/01/1900", true)
+        .booleanType("04/01/2021", false))).build();
+    assertThat(dslPart.toString(), is("{\"schedule\":{\"01/01/1900\":true,\"04/01/2021\":false}}"));
   }
 }
