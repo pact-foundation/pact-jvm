@@ -14,10 +14,10 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
@@ -25,6 +25,8 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import com.github.michaelbull.result.get
+import com.github.michaelbull.result.unwrap
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.AfterAllCallback
@@ -183,10 +185,18 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val providerInfo = lookupProviderInfo(extensionContext).first
     val type = parameterContext.parameter.type
     return when (providerInfo.providerType) {
-      ProviderType.ASYNCH -> when {
-        type.isAssignableFrom(List::class.java) -> true
-        type.isAssignableFrom(MessagePact::class.java) -> true
-        else -> false
+      ProviderType.ASYNCH -> if (providerInfo.pactVersion == PactSpecVersion.V4) {
+        when {
+          type.isAssignableFrom(List::class.java) -> true
+          type.isAssignableFrom(V4Pact::class.java) -> true
+          else -> false
+        }
+      } else {
+        when {
+          type.isAssignableFrom(List::class.java) -> true
+          type.isAssignableFrom(MessagePact::class.java) -> true
+          else -> false
+        }
       }
       else -> when {
         type.isAssignableFrom(MockServer::class.java) -> true
@@ -202,11 +212,20 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val type = parameterContext.parameter.type
     return when (providerInfo.first.providerType) {
       ProviderType.ASYNCH -> {
-        val pact = lookupPact(providerInfo.first, providerInfo.second, extensionContext) as MessagePact
-        when {
-          type.isAssignableFrom(List::class.java) -> pact.messages
-          type.isAssignableFrom(MessagePact::class.java) -> pact
-          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+        if (providerInfo.first.pactVersion == PactSpecVersion.V4) {
+          val pact = lookupPact(providerInfo.first, providerInfo.second, extensionContext).asV4Pact().unwrap()
+          when {
+            type.isAssignableFrom(List::class.java) -> pact.interactions
+            type.isAssignableFrom(V4Pact::class.java) -> pact
+            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+          }
+        } else {
+          val pact = lookupPact(providerInfo.first, providerInfo.second, extensionContext) as MessagePact
+          when {
+            type.isAssignableFrom(List::class.java) -> pact.messages
+            type.isAssignableFrom(MessagePact::class.java) -> pact
+            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+          }
         }
       }
       else -> {
@@ -324,10 +343,10 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       if (method == null) {
         throw UnsupportedOperationException("No method annotated with @Pact was found on test class " +
           context.requiredTestClass.simpleName + " for provider '${providerInfo.providerName}'")
-      } else if (providerType == ProviderType.SYNCH && !JUnitTestSupport.conformsToSignature(method)) {
+      } else if (providerType == ProviderType.SYNCH && !JUnitTestSupport.conformsToSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V3)) {
         throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
           "'public RequestResponsePact xxx(PactDslWithProvider builder)'")
-      } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method)) {
+      } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V3)) {
         throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
           "'public MessagePact xxx(MessagePactBuilder builder)'")
       }
@@ -345,7 +364,8 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
           ConsumerPactBuilder.consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
         ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-          MessagePactBuilder.consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
+          MessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V3)
+            .consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
       }
       val executedFragments = store["executedFragments"] as MutableSet<Method>
       executedFragments.add(method)

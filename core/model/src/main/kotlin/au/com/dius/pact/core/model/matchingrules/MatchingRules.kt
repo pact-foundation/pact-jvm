@@ -673,4 +673,7 @@ interface MatchingRules {
 
   /** Validates the matching rules against the specification version */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+
+  /** Creates a copy of the matching rules with a category renamed */
+  fun rename(oldCategory: String, newCategory: String): MatchingRules
 }

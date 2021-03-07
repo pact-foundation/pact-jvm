@@ -247,4 +247,17 @@ class MatchingRulesSpec extends Specification {
       ])]
     )
   }
+
+  def 'renaming categories'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('path').addRule(new RegexMatcher('\\w+'))
+    matchingRules.addCategory('body')
+    matchingRules.addCategory('header')
+
+    expect:
+    matchingRules.rename('path', 'content').toV3Map() == [
+      content: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']
+    ]
+  }
 }

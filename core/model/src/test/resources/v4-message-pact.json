@@ -25,8 +25,21 @@
           "a": "1234-1234"
         }
       },
+      "matchingRules": {
+        "content": {
+          "$.a": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "\\d+-\\d+"
+              }
+            ],
+            "combine": "AND"
+          }
+        }
+      },
       "generators": {
-        "body": {
+        "content": {
           "a": {
             "type": "Uuid"
           }

@@ -78,7 +78,19 @@ class MatchingRulesImpl : MatchingRules {
     return rules.values.flatMap { it.validateForVersion(pactVersion) }
   }
 
-    companion object : KLogging() {
+  override fun rename(oldCategory: String, newCategory: String): MatchingRules {
+    val copy = MatchingRulesImpl()
+    rules.map { it.value }.forEach {
+      if (it.name == oldCategory) {
+        copy.addCategory(it.copy(name = newCategory))
+      } else {
+        copy.addCategory(it)
+      }
+    }
+    return copy
+  }
+
+  companion object : KLogging() {
       @JvmStatic
       fun fromJson(json: JsonValue?): MatchingRules {
         val matchingRules = MatchingRulesImpl()

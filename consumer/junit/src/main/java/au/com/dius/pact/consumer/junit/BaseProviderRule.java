@@ -199,7 +199,7 @@ public class BaseProviderRule extends ExternalResource {
       if (pacts == null) {
         pacts = new HashMap<>();
           for (Method m: target.getClass().getMethods()) {
-              if (JUnitTestSupport.conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
+              if (JUnitTestSupport.conformsToSignature(m, config.getPactVersion()) && methodMatchesFragment(m, fragment)) {
                   Pact pactAnnotation = m.getAnnotation(Pact.class);
                 String provider = parseExpression(pactAnnotation.provider(), DataType.RAW).toString();
                 if (StringUtils.isEmpty(provider) || this.provider.equals(provider)) {

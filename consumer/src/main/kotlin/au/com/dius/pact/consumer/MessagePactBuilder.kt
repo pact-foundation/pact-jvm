@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
@@ -23,11 +24,11 @@ import java.util.stream.Collectors
 /**
  * PACT DSL builder for v3 specification
  */
-class MessagePactBuilder(
+class MessagePactBuilder @JvmOverloads constructor(
   /**
    * The consumer for the pact.
    */
-  private var consumer: Consumer,
+  private var consumer: Consumer = Consumer(),
 
   /**
    * The provider for the pact.
@@ -42,8 +43,25 @@ class MessagePactBuilder(
   /**
    * Messages for the pact
    */
-  private var messages: MutableList<Message> = mutableListOf()
+  private var messages: MutableList<Message> = mutableListOf(),
+
+  /**
+   * Specification Version
+   */
+  private var specVersion: PactSpecVersion = PactSpecVersion.V3
 ) {
+
+  constructor(specVersion: PactSpecVersion) : this(Consumer(), Provider(), mutableListOf(), mutableListOf(), specVersion)
+
+  /**
+   * Name the consumer of the pact
+   *
+   * @param consumer Consumer name
+   */
+  fun consumer(consumer: String): MessagePactBuilder {
+    this.consumer = Consumer(consumer)
+    return this
+  }
 
   /**
    * Name the provider that the consumer has a pact with.
@@ -208,16 +226,10 @@ class MessagePactBuilder(
    * Convert this builder into a Pact
    */
   fun <P : Pact> toPact(): P {
-    return MessagePact(provider, consumer, messages) as P
-  }
-
-  companion object {
-    /**
-     * Name the consumer of the pact
-     *
-     * @param consumer Consumer name
-     */
-    @JvmStatic
-    fun consumer(consumer: String) = MessagePactBuilder(Consumer(consumer))
+    return if (specVersion == PactSpecVersion.V4) {
+      V4Pact(consumer, provider, messages.map { it.asV4Interaction() }) as P
+    } else {
+      MessagePact(provider, consumer, messages) as P
+    }
   }
 }

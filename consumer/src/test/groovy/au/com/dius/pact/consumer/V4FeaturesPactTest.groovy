@@ -71,7 +71,7 @@ class V4FeaturesPactTest {
     PactDslJsonBody content = new PactDslJsonBody()
     content.unorderedArray('items').string('harry')
 
-    Pact pact = MessagePactBuilder
+    Pact pact = new MessagePactBuilder()
       .consumer('async_ping_consumer')
       .hasPactWith('async_ping_provider')
       .expectsToReceive('a message')
@@ -91,7 +91,7 @@ class V4FeaturesPactTest {
     PactDslJsonBody content = new PactDslJsonBody()
     content.unorderedArray('items').string('harry')
 
-    Pact pact = MessagePactBuilder
+    Pact pact = new MessagePactBuilder()
       .consumer('v4_async_ping_consumer')
       .hasPactWith('v4_async_ping_provider')
       .expectsToReceive('a message')

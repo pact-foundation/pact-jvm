@@ -171,13 +171,13 @@ sealed class V4Interaction(
     }
   }
 
-  class AsynchronousMessage(
+  class AsynchronousMessage @JvmOverloads constructor(
     key: String,
     description: String,
-    val contents: OptionalBody,
-    var metadata: Map<String, Any?>,
-    val matchingRules: MatchingRules,
-    val generators: Generators,
+    val contents: OptionalBody = OptionalBody.missing(),
+    var metadata: Map<String, Any?> = emptyMap(),
+    val matchingRules: MatchingRules = MatchingRulesImpl(),
+    val generators: Generators = Generators(),
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf()
   ) : V4Interaction(key, description, interactionId, providerStates) {
@@ -229,8 +229,8 @@ sealed class V4Interaction(
     override fun asV4Interaction() = this
 
     fun asV3Interaction(): Message {
-      return Message(description, providerStates, contents, matchingRules, generators, metadata.toMutableMap(),
-        interactionId)
+      return Message(description, providerStates, contents, matchingRules.rename("content", "body"),
+        generators, metadata.toMutableMap(), interactionId)
     }
 
     override fun isAsynchronousMessage() = true

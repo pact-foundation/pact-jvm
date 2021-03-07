@@ -19,7 +19,7 @@ public class MessageConsumerPactRunnerTest {
         PactDslJsonBody content = new PactDslJsonBody();
         content.stringType("sampleContentFieldName", "exampleValue");
 
-        Pact pact = MessagePactBuilder
+        Pact pact = new MessagePactBuilder()
                 .consumer("async_ping_consumer")
                 .hasPactWith("async_ping_provider")
                 .expectsToReceive("a message")
@@ -44,7 +44,7 @@ public class MessageConsumerPactRunnerTest {
         PactDslJsonBody content = new PactDslJsonBody();
         content.stringType("sampleContentFieldName", "exampleValue");
 
-        Pact pact = MessagePactBuilder
+        Pact pact = new MessagePactBuilder()
                 .consumer("async_ping_consumer")
                 .hasPactWith("async_ping_provider")
                 .expectsToReceive("another message")

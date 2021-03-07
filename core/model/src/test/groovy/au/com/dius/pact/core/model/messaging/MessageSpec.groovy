@@ -5,7 +5,9 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -204,4 +206,16 @@ class MessageSpec extends Specification {
       new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
   }
 
+  def 'when upgrading message to V4, rename the matching rules from body to content'() {
+    given:
+    MatchingRules matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('body').addRule('$', TypeMatcher.INSTANCE)
+    def message = new Message('description', [], OptionalBody.missing(), matchingRules)
+
+    when:
+    def v4Message = message.asV4Interaction()
+
+    then:
+    v4Message.toMap(PactSpecVersion.V4).matchingRules == [content: ['$': [matchers: [[match: 'type']], combine: 'AND']]]
+  }
 }

@@ -85,7 +85,7 @@ public class MessagePactProviderRule extends ExternalResource {
           pacts = new HashMap<>();
           Method method = possiblePactMethod.get();
           Pact pact = method.getAnnotation(Pact.class);
-          MessagePactBuilder builder = MessagePactBuilder.consumer(
+          MessagePactBuilder builder = new MessagePactBuilder().consumer(
           		Objects.toString(parseExpression(pact.consumer(), DataType.RAW))).hasPactWith(provider);
           messagePact = (MessagePact) method.invoke(testClassInstance, builder);
           for (Message message : messagePact.getMessages()) {
@@ -147,7 +147,7 @@ public class MessagePactProviderRule extends ExternalResource {
 
 		Method method = possiblePactMethod.get();
 		Pact pact = method.getAnnotation(Pact.class);
-		MessagePactBuilder builder = MessagePactBuilder.consumer(
+		MessagePactBuilder builder = new MessagePactBuilder().consumer(
 				Objects.toString(parseExpression(pact.consumer(), DataType.RAW))).hasPactWith(provider);
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
 		setMessage(messagePact.getMessages().get(0), description);
@@ -174,7 +174,7 @@ public class MessagePactProviderRule extends ExternalResource {
 			Pact pact = method.getAnnotation(Pact.class);
 			if (pact != null && provider.equals(parseExpression(pact.provider(), DataType.RAW))
 					&& (pactFragment.isEmpty() || pactFragment.equals(method.getName()))) {
-				JUnitTestSupport.conformsToMessagePactSignature(method);
+				JUnitTestSupport.conformsToMessagePactSignature(method, PactSpecVersion.V3);
 				return Optional.of(method);
 			}
 		}
@@ -183,39 +183,40 @@ public class MessagePactProviderRule extends ExternalResource {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, Message> parsePacts() {
-        if (providerStateMessages == null) {
-        	providerStateMessages = new HashMap<>();
-            for (Method m: testClassInstance.getClass().getMethods()) {
-                if (conformsToSignature(m)) {
-	                Pact pact = m.getAnnotation(Pact.class);
-	                if (pact != null) {
-	                	String provider = Objects.toString(parseExpression(pact.provider(), DataType.RAW));
-	                	if (provider != null && !provider.trim().isEmpty()) {
-	                		MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
-	                		List<Message> messages;
-	                		try {
-	                			messagePact = (MessagePact) m.invoke(testClassInstance, builder);
-		                		messages = messagePact.getMessages();
-	                		} catch (Exception e) {
-		                        throw new RuntimeException("Failed to invoke pact method", e);
-		                    }
+		if (providerStateMessages == null) {
+			providerStateMessages = new HashMap<>();
+				for (Method m: testClassInstance.getClass().getMethods()) {
+						if (conformsToSignature(m)) {
+							Pact pact = m.getAnnotation(Pact.class);
+							if (pact != null) {
+								String provider = Objects.toString(parseExpression(pact.provider(), DataType.RAW));
+								if (provider != null && !provider.trim().isEmpty()) {
+									MessagePactBuilder builder = new MessagePactBuilder()
+										.consumer(pact.consumer()).hasPactWith(provider);
+									List<Message> messages;
+									try {
+										messagePact = (MessagePact) m.invoke(testClassInstance, builder);
+										messages = messagePact.getMessages();
+									} catch (Exception e) {
+												throw new RuntimeException("Failed to invoke pact method", e);
+										}
 
-	                		for (Message message : messages) {
-	                			if (message.getProviderStates().isEmpty()) {
-													providerStateMessages.put("", message);
-												} else {
-	                				for (ProviderState state : message.getProviderStates()) {
-														providerStateMessages.put(state.getName(), message);
-													}
-												}
-	                		}
-	                	}
-	                }
-                }
-            }
-        }
+									for (Message message : messages) {
+										if (message.getProviderStates().isEmpty()) {
+											providerStateMessages.put("", message);
+										} else {
+											for (ProviderState state : message.getProviderStates()) {
+												providerStateMessages.put(state.getName(), message);
+											}
+										}
+									}
+								}
+							}
+						}
+				}
+		}
 
-        return providerStateMessages;
+		return providerStateMessages;
 	}
 
     /**

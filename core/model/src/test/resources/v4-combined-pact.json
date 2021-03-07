@@ -45,7 +45,7 @@
         }
       },
       "generators": {
-        "body": {
+        "content": {
           "a": {
             "type": "Uuid"
           }

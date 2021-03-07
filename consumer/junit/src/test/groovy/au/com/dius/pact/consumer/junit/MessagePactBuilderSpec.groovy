@@ -37,7 +37,7 @@ class MessagePactBuilderSpec extends Specification {
       'destination': Matchers.regexp(~/\w+\d+/, 'X001')
     ]
 
-    MessagePactBuilder builder = MessagePactBuilder.consumer('MessagePactBuilderSpec')
+    MessagePactBuilder builder = new MessagePactBuilder().consumer('MessagePactBuilderSpec')
     builder.given('srm.countries.get_message')
       .expectsToReceive('srm.countries.get')
       .withContent(getBody)
@@ -84,7 +84,7 @@ class MessagePactBuilderSpec extends Specification {
     ]
 
     when:
-    def pact = MessagePactBuilder
+    def pact = new MessagePactBuilder()
       .consumer('MessagePactBuilderSpec')
       .given('srm.countries.get_message')
       .expectsToReceive('srm.countries.get')
@@ -111,7 +111,7 @@ class MessagePactBuilderSpec extends Specification {
     ]
 
     when:
-    def pact = MessagePactBuilder
+    def pact = new MessagePactBuilder()
       .consumer('MessagePactBuilderSpec')
       .given('srm.countries.get_message')
       .expectsToReceive('srm.countries.get')
@@ -131,7 +131,7 @@ class MessagePactBuilderSpec extends Specification {
     def expectedProviderState = new ProviderState(description, params)
 
     when:
-    def pact = MessagePactBuilder
+    def pact = new MessagePactBuilder()
       .consumer('MessagePactBuilderSpec')
       .given(description, params)
 
@@ -146,7 +146,7 @@ class MessagePactBuilderSpec extends Specification {
     def expectedProviderState = new ProviderState(description, params)
 
     when:
-    def pact = MessagePactBuilder
+    def pact = new MessagePactBuilder()
             .consumer('MessagePactBuilderSpec')
             .given(expectedProviderState)
 
@@ -164,7 +164,7 @@ class MessagePactBuilderSpec extends Specification {
             'contentType': 'application/xml',
             'destination': Matchers.regexp(~/\w+\d+/, 'X001')
     ]
-    def builder = MessagePactBuilder
+    def builder = new MessagePactBuilder()
             .consumer("MessagePactBuilderSpec")
             .given('srm.countries.get_message')
             .expectsToReceive('srm.countries.get')
@@ -195,7 +195,7 @@ class MessagePactBuilderSpec extends Specification {
     def category = au.com.dius.pact.core.model.generators.Category.BODY
 
     when:
-    def pact = MessagePactBuilder
+    def pact = new MessagePactBuilder()
       .consumer('MessagePactBuilderSpec')
       .expectsToReceive('a message with generators')
       .withContent(body).toPact()

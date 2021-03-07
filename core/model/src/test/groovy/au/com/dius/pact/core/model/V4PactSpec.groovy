@@ -37,6 +37,10 @@ class V4PactSpec extends Specification {
     pact.interactions[0].uniqueKey() == 'm_001'
     pact.interactions[0] instanceof V4Interaction.AsynchronousMessage
     pact.interactions[0].description == 'Test Message'
+    pact.interactions[0].matchingRules.toV3Map() == [
+      content: ['$.a': [matchers: [[match: 'regex', regex: '\\d+-\\d+']], combine: 'AND']]
+    ]
+    pact.interactions[0].generators.toMap(PactSpecVersion.V4) == [content: [a: [type: 'Uuid']]]
     pact.metadata['pactSpecification']['version'] == '4.0'
   }
 
@@ -58,6 +62,8 @@ class V4PactSpec extends Specification {
     pact.interactions[1].uniqueKey() == 'm_001'
     pact.interactions[1] instanceof V4Interaction.AsynchronousMessage
     pact.interactions[1].description == 'Test Message'
+    pact.interactions[1].matchingRules.toV3Map() == [:]
+    pact.interactions[1].generators.toMap(PactSpecVersion.V4) == [content: [a: [type: 'Uuid']]]
     pact.metadata['pactSpecification']['version'] == '4.0'
   }
 }
