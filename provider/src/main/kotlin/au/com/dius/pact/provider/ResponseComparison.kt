@@ -14,8 +14,11 @@ import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.isNullOrEmpty
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
@@ -123,15 +126,24 @@ class ResponseComparison(
 
     @JvmStatic
     @JvmOverloads
-    fun compareMessage(message: Message, actual: OptionalBody, metadata: Map<String, Any>? = null): ComparisonResult {
-      val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body"), true)
+    fun compareMessage(
+      message: MessageInteraction,
+      actual: OptionalBody,
+      metadata: Map<String, Any>? = null
+    ): ComparisonResult {
+      val bodyContext = when (message) {
+        is V4Interaction.AsynchronousMessage ->
+          MatchingContext(message.matchingRules.rulesForCategory("content"), true)
+        else ->
+          MatchingContext(message.matchingRules.rulesForCategory("body") ?: MatchingRuleCategory("body"), true)
+      }
       val metadataContext = MatchingContext(message.matchingRules.rulesForCategory("metadata"), true)
 
       val bodyMismatches = compareMessageBody(message, actual, bodyContext)
 
       val metadataMismatches = when (metadata) {
         null -> emptyList()
-        else -> Matching.compareMessageMetadata(message.metaData, metadata, metadataContext)
+        else -> Matching.compareMessageMetadata(message.metadata, metadata, metadataContext)
       }
 
       val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
@@ -144,7 +156,7 @@ class ResponseComparison(
 
     @JvmStatic
     private fun compareMessageBody(
-      message: Message,
+      message: MessageInteraction,
       actual: OptionalBody,
       context: MatchingContext
     ): MutableList<BodyMismatch> {

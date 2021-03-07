@@ -68,7 +68,7 @@ class PactMessageBuilder extends GroovyBuilder {
       throw new InvalidPactException('expectsToReceive is required before withMetaData')
     }
     Message message = messages.last()
-    message.metaData = metadata.collectEntries {
+    message.metadata = metadata.collectEntries {
       if (it.value instanceof Matcher) {
         message.matchingRules.addCategory('metadata').addRule(it.key, it.value.matcher)
         if (it.value.generator) {
@@ -96,9 +96,9 @@ class PactMessageBuilder extends GroovyBuilder {
     def contentType = ContentType.JSON.contentType
     if (options.contentType) {
       contentType = options.contentType
-      messages.last().metaData.contentType = options.contentType
-    } else if (messages.last().metaData.contentType) {
-      contentType = messages.last().metaData.contentType
+      messages.last().metadata.contentType = options.contentType
+    } else if (messages.last().metadata.contentType) {
+      contentType = messages.last().metadata.contentType
     }
 
     def body = new PactBodyBuilder(mimetype: contentType, prettyPrintBody: options.prettyPrint)

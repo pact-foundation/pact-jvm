@@ -107,7 +107,7 @@ class PactMessageBuilderSpec extends Specification {
 
     when:
     builder.run { Message message ->
-      assert message.metaData == [contentType: 'application/json', destination: 'X01']
+      assert message.metadata == [contentType: 'application/json', destination: 'X01']
       assert message.matchingRules.rules.metadata.matchingRules == [
         destination: new MatchingRuleGroup([new RegexMatcher('X\\d+', 'X01')])
       ]

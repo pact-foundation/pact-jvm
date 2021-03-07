@@ -127,7 +127,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     val message = messages.last()
-    message.metaData = metadata.mapValues { (key, value) ->
+    message.metadata = metadata.mapValues { (key, value) ->
       if (value is Matcher) {
         message.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
         if (value.generator != null) {
@@ -151,7 +151,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     val message = messages.last()
-    val metadata = message.metaData.toMutableMap()
+    val metadata = message.metadata.toMutableMap()
     val contentTypeEntry = metadata.entries.find {
       it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
     }
@@ -167,7 +167,7 @@ class MessagePactBuilder @JvmOverloads constructor(
 
     val parent = body.close()!!
     message.contents = OptionalBody.body(parent.toString().toByteArray(contentType.asCharset()), contentType)
-    message.metaData = metadata
+    message.metadata = metadata
     message.matchingRules.addCategory(parent.matchers)
     message.generators.addGenerators(parent.generators)
 
@@ -183,7 +183,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     val message = messages.last()
-    val metadata = message.metaData.toMutableMap()
+    val metadata = message.metadata.toMutableMap()
     val contentTypeEntry = metadata.entries.find {
       it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
     }
@@ -198,7 +198,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     message.contents = OptionalBody.body(xmlBuilder.asBytes(contentType.asCharset()), contentType)
-    message.metaData = metadata
+    message.metadata = metadata
     message.matchingRules.addCategory(xmlBuilder.matchingRules)
     message.generators.addGenerators(xmlBuilder.generators)
 

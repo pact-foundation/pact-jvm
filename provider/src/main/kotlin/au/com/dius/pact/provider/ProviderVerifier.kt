@@ -19,6 +19,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -30,7 +31,6 @@ import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.getError
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import mu.KLogging
@@ -325,8 +325,8 @@ open class ProviderVerifier @JvmOverloads constructor (
           "'${interaction.description}'. You need to provide a method annotated with " +
           "@PactVerifyProvider(\"${interaction.description}\") on the classpath that returns the message contents.")
       } else {
-        return if (interaction is Message) {
-          verifyMessagePact(methodsAnnotatedWith.toHashSet(), interaction, interactionMessage, failures,
+        return if (interaction.isAsynchronousMessage()) {
+          verifyMessage(methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage, failures,
             consumer.pending)
         } else {
           val expectedResponse = (interaction as RequestResponseInteraction).response
@@ -382,9 +382,9 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  fun verifyMessagePact(
+  fun verifyMessage(
     methods: Set<Method>,
-    message: Message,
+    message: MessageInteraction,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     pending: Boolean

@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
@@ -174,13 +175,13 @@ sealed class V4Interaction(
   class AsynchronousMessage @JvmOverloads constructor(
     key: String,
     description: String,
-    val contents: OptionalBody = OptionalBody.missing(),
-    var metadata: Map<String, Any?> = emptyMap(),
-    val matchingRules: MatchingRules = MatchingRulesImpl(),
+    override val contents: OptionalBody = OptionalBody.missing(),
+    override var metadata: Map<String, Any?> = emptyMap(),
+    override val matchingRules: MatchingRules = MatchingRulesImpl(),
     val generators: Generators = Generators(),
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf()
-  ) : V4Interaction(key, description, interactionId, providerStates) {
+  ) : V4Interaction(key, description, interactionId, providerStates), MessageInteraction {
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
       return AsynchronousMessage(generateKey(), description, contents, metadata, matchingRules, generators,
@@ -234,6 +235,7 @@ sealed class V4Interaction(
     }
 
     override fun isAsynchronousMessage() = true
+    override fun getContentType() = contents.contentType.or(Message.contentType(metadata))
   }
 
   companion object : KLogging() {

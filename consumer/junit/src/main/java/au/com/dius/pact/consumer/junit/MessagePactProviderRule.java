@@ -257,7 +257,7 @@ public class MessagePactProviderRule extends ExternalResource {
 			throws InvocationTargetException, IllegalAccessException {
 
 		this.message = message.contentsAsBytes();
-		this.metadata = message.getMetaData();
+		this.metadata = message.getMetadata();
 		Method messageSetter;
 		try {
 			messageSetter = description.getTestClass().getMethod("setMessage", byte[].class);

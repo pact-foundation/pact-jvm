@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
@@ -80,6 +83,13 @@ interface Interaction {
   /** If this interaction represents an asynchronous message */
   fun isAsynchronousMessage(): Boolean {
     return false
+  }
+
+  /**
+   * Return this interaction as a V3 message (if it is one), otherwise null
+   */
+  fun asMessage(): Message? {
+    return null
   }
 }
 

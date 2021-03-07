@@ -47,7 +47,7 @@ class MessagePactBuilderSpec extends Specification {
     def pact = builder.toPact()
     Message message = pact.interactions.first()
     def messageBody = new JsonSlurper().parseText(message.contents.valueAsString())
-    def messageMetadata = message.metaData
+    def messageMetadata = message.metadata
 
     then:
     messageBody == [
@@ -91,7 +91,7 @@ class MessagePactBuilderSpec extends Specification {
       .withMetadata(metadata)
       .withContent(body).toPact()
     Message message = pact.interactions.first()
-    def messageMetadata = message.metaData
+    def messageMetadata = message.metadata
 
     then:
     messageMetadata == [contentType: 'application/json']
@@ -118,7 +118,7 @@ class MessagePactBuilderSpec extends Specification {
       .withMetadata(metadata)
       .withContent(body).toPact()
     Message message = pact.interactions.first()
-    def messageMetadata = message.metaData
+    def messageMetadata = message.metadata
 
     then:
     messageMetadata == [contentType: 'application/json', otherValue: 10L]
@@ -175,7 +175,7 @@ class MessagePactBuilderSpec extends Specification {
     def pact = builder.toPact()
     Message message = pact.interactions.first()
     def messageBody = new XmlParser().parseText(message.contents.valueAsString())
-    def messageMetadata = message.metaData
+    def messageMetadata = message.metadata
 
     then:
     messageBody.element1.text() == 'value1'

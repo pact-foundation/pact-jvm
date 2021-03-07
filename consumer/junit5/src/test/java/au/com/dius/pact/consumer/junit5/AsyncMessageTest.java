@@ -57,7 +57,7 @@ public class AsyncMessageTest {
   @PactTestFor(pactMethod = "createPact")
   void test(List<Message> messages) {
     assertThat(new String(messages.get(0).contentsAsBytes()), is("{\"testParam1\":\"value1\",\"testParam2\":\"value2\"}"));
-    assertThat(messages.get(0).getMetaData(), hasEntry("destination", "X001"));
+    assertThat(messages.get(0).getMetadata(), hasEntry("destination", "X001"));
   }
 
   @Test

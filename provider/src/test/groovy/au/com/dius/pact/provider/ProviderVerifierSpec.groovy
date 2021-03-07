@@ -393,7 +393,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.reporters = [reporter]
 
     when:
-    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures, false)
+    def result = verifier.verifyMessage(methods, message, interactionMessage, failures, false)
 
     then:
     1 * reporter.bodyComparisonOk()

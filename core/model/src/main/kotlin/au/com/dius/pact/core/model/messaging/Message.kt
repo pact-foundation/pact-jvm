@@ -18,29 +18,38 @@ import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 
+interface MessageInteraction {
+  val interactionId: String?
+  val matchingRules: MatchingRules
+  val metadata: Map<String, Any?>
+  val contents: OptionalBody
+
+  fun getContentType(): ContentType
+}
+
 /**
  * Message in a Message Pact
  */
 class Message @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),
-  var contents: OptionalBody = OptionalBody.missing(),
-  var matchingRules: MatchingRules = MatchingRulesImpl(),
+  override var contents: OptionalBody = OptionalBody.missing(),
+  override val matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators(),
-  var metaData: MutableMap<String, Any?> = mutableMapOf(),
+  override var metadata: MutableMap<String, Any?> = mutableMapOf(),
   interactionId: String? = null
-) : BaseInteraction(interactionId, description, providerStates) {
+) : BaseInteraction(interactionId, description, providerStates), MessageInteraction {
 
   fun contentsAsBytes() = contents.orEmpty()
 
   fun contentsAsString() = contents.valueAsString()
 
-  fun getContentType() = contentType(metaData).or(contents.contentType)
+  override fun getContentType() = contentType(metadata).or(contents.contentType)
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     val map: MutableMap<String, Any?> = mutableMapOf(
       "description" to description,
-      "metaData" to metaData
+      "metaData" to metadata
     )
     if (!contents.isMissing()) {
       map["contents"] = when {
@@ -74,7 +83,7 @@ class Message @JvmOverloads constructor(
 
   private fun isJsonContents(): Boolean {
     return if (contents.isPresent()) {
-      contentType(metaData).or(contents.contentType).isJson()
+      contentType(metadata).or(contents.contentType).isJson()
     } else {
       false
     }
@@ -82,7 +91,7 @@ class Message @JvmOverloads constructor(
 
   fun formatContents(): String {
     return if (contents.isPresent()) {
-      val contentType = contentType(metaData).or(contents.contentType)
+      val contentType = contentType(metadata).or(contents.contentType)
       when {
         contentType.isJson() -> JsonParser.parseString(contents.valueAsString()).prettyPrint()
         contentType.isOctetStream() -> Base64.encodeBase64String(contentsAsBytes())
@@ -126,11 +135,11 @@ class Message @JvmOverloads constructor(
 
   override fun toString(): String {
     return "Message(description='$description', providerStates=$providerStates, contents=$contents, " +
-      "matchingRules=$matchingRules, generators=$generators, metaData=$metaData)"
+      "matchingRules=$matchingRules, generators=$generators, metadata=$metadata)"
   }
 
   fun withMetaData(metadata: Map<String, Any>): Message {
-    this.metaData = metadata.toMutableMap()
+    this.metadata = metadata.toMutableMap()
     return this
   }
 
@@ -143,12 +152,14 @@ class Message @JvmOverloads constructor(
 
   @ExperimentalUnsignedTypes
   override fun asV4Interaction(): V4Interaction {
-    return V4Interaction.AsynchronousMessage("", description, contents, metaData,
+    return V4Interaction.AsynchronousMessage("", description, contents, metadata,
       matchingRules.rename("body", "content"), generators,
       interactionId, providerStates).withGeneratedKey()
   }
 
   override fun isAsynchronousMessage() = true
+
+  override fun asMessage() = this
 
   companion object : KLogging() {
 
