@@ -1,0 +1,60 @@
+{
+  "match": false,
+  "comment": "Wrong type for name key",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "matchingRules": {
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    },
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Fred"
+          }
+        ]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Mary"
+          },
+          {
+            "name": 1
+          }
+        ]
+      }
+    }
+  }
+}

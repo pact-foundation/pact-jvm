@@ -12,6 +12,7 @@ import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.V4Interaction
@@ -113,9 +114,9 @@ class ResponseComparison(
     }
 
     @JvmStatic
-    fun compareResponse(response: Response, actualResponse: ProviderResponse): ComparisonResult {
+    fun compareResponse(response: IResponse, actualResponse: ProviderResponse): ComparisonResult {
       val actualResponseContentType = actualResponse.contentType
-      val comparison = ResponseComparison(response.headers, response.body, response.jsonBody(),
+      val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
         actualResponseContentType, actualResponse.body)
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode,
         actualResponse.headers.toMutableMap(), OptionalBody.body(actualResponse.body?.toByteArray(

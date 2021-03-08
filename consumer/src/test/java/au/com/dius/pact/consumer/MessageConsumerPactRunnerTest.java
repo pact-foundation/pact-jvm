@@ -14,50 +14,49 @@ import static org.junit.Assert.assertEquals;
 
 public class MessageConsumerPactRunnerTest {
 
-    @Test
-    public void testRunMessageConsumerTestWithPassingTest() {
-        PactDslJsonBody content = new PactDslJsonBody();
-        content.stringType("sampleContentFieldName", "exampleValue");
+  @Test
+  public void testRunMessageConsumerTestWithPassingTest() {
+    PactDslJsonBody content = new PactDslJsonBody();
+    content.stringType("sampleContentFieldName", "exampleValue");
 
-        Pact pact = new MessagePactBuilder()
-                .consumer("async_ping_consumer")
-                .hasPactWith("async_ping_provider")
-                .expectsToReceive("a message")
-                .withContent(content)
-                .toPact();
+    Pact pact = new MessagePactBuilder()
+      .consumer("async_ping_consumer")
+      .hasPactWith("async_ping_provider")
+      .expectsToReceive("a message")
+      .withContent(content)
+      .toPact();
 
-        PactVerificationResult result = runMessageConsumerTest(pact, PactSpecVersion.V3, (messages, context) -> {
-            assertEquals(messages.size(), 1);
-            assertEquals(messages.get(0).contentsAsString(), "{\"sampleContentFieldName\":\"exampleValue\"}");
-            return true;
-        });
+    PactVerificationResult result = runMessageConsumerTest(pact, PactSpecVersion.V3, (messages, context) -> {
+      assertEquals(messages.size(), 1);
+      assertEquals(messages.get(0).asMessage().contentsAsString(), "{\"sampleContentFieldName\":\"exampleValue\"}");
+      return true;
+    });
 
-        if (result instanceof PactVerificationResult.Error) {
-            throw new RuntimeException(((PactVerificationResult.Error) result).getError());
-        }
-
-        assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
+    if (result instanceof PactVerificationResult.Error) {
+      throw new RuntimeException(((PactVerificationResult.Error) result).getError());
     }
 
-    @Test
-    public void testRunMessageConsumerTestWithFailingTest() {
-        PactDslJsonBody content = new PactDslJsonBody();
-        content.stringType("sampleContentFieldName", "exampleValue");
+    assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
+  }
 
-        Pact pact = new MessagePactBuilder()
-                .consumer("async_ping_consumer")
-                .hasPactWith("async_ping_provider")
-                .expectsToReceive("another message")
-                .withContent(content)
-                .toPact();
+  @Test
+  public void testRunMessageConsumerTestWithFailingTest() {
+    PactDslJsonBody content = new PactDslJsonBody();
+    content.stringType("sampleContentFieldName", "exampleValue");
 
-        PactVerificationResult result = runMessageConsumerTest(pact, PactSpecVersion.V3, (messages, context) -> {
-            assertEquals(messages.size(), 1);
-            assertEquals(messages.get(0).contentsAsString(), "{\"sampleContentFieldName\":\"not the correct value\"}");
-            return false;
-        });
+    Pact pact = new MessagePactBuilder()
+      .consumer("async_ping_consumer")
+      .hasPactWith("async_ping_provider")
+      .expectsToReceive("another message")
+      .withContent(content)
+      .toPact();
 
-        assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
-    }
+    PactVerificationResult result = runMessageConsumerTest(pact, PactSpecVersion.V3, (messages, context) -> {
+      assertEquals(messages.size(), 1);
+      assertEquals(messages.get(0).asMessage().contentsAsString(), "{\"sampleContentFieldName\":\"not the correct value\"}");
+      return false;
+    });
 
+    assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
+  }
 }

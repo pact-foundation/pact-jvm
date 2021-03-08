@@ -1,0 +1,15 @@
+{
+  "match": true,
+  "comment": "XML Missing body",
+  "expected" : {
+    "headers": {"Content-Type": "application/xml"}
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/xml"},
+    "body": {
+      "contentType": "application/xml",
+      "encoded": false,
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><alligator name=\"Mary\"/>"
+    }
+  }
+}

@@ -27,6 +27,7 @@ import java.io.File
 /**
  * Pact for a sequences of messages
  */
+@ExperimentalUnsignedTypes
 class MessagePact @JvmOverloads constructor (
   override var provider: Provider,
   override var consumer: Consumer,
@@ -77,6 +78,8 @@ class MessagePact @JvmOverloads constructor (
     sortInteractions()
     return this
   }
+
+  override fun isRequestResponsePact() = false
 
   override fun asRequestResponsePact() =
     Err("A V3 Message Pact can not be converted to a V3 Request/Response Pact")

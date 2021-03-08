@@ -1,0 +1,33 @@
+{
+  "match": false,
+  "comment": "Property of second object matches, but unexpected element recieved",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": [
+        {
+          "favouriteColor": "red"
+        }
+      ]
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": [
+        {
+          "favouriteColor": "blue",
+          "favouriteNumber": 4
+        },
+        {
+          "favouriteColor": "red",
+          "favouriteNumber": 2
+        }
+      ]
+    }
+  }
+}

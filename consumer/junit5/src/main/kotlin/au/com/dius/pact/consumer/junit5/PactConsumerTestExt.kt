@@ -175,7 +175,7 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Abst
   override fun waitForServer() = baseMockServer.waitForServer()
   override fun getUrl() = baseMockServer.getUrl()
   override fun getPort() = baseMockServer.getPort()
-  override fun <R> runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>) =
+  override fun <R> runAndWritePact(pact: BasePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>) =
     baseMockServer.runAndWritePact(pact, pactVersion, testFn)
   override fun validateMockServerState(testResult: Any?) = baseMockServer.validateMockServerState(testResult)
 }

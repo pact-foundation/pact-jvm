@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -21,14 +22,14 @@ private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
 }
 
 data class HttpRequest(
-  val method: String,
-  val path: String,
-  val query: Map<String, List<String>>,
-  val headers: Map<String, List<String>>,
-  val body: OptionalBody,
-  val matchingRules: MatchingRules,
-  val generators: Generators
-) {
+  override val method: String,
+  override val path: String,
+  override val query: Map<String, List<String>>,
+  override val headers: Map<String, List<String>>,
+  override val body: OptionalBody,
+  override val matchingRules: MatchingRules,
+  override val generators: Generators
+): IRequest {
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
@@ -64,7 +65,31 @@ data class HttpRequest(
     return map
   }
 
+  override fun cookies(): List<String> {
+    val cookieEntry = headers.entries.find { (k, _) -> k.toLowerCase() == Request.COOKIE_KEY }
+    return if (cookieEntry != null) {
+      cookieEntry.value.flatMap {
+        it.split(';')
+      }.map { it.trim() }
+    } else {
+      emptyList()
+    }
+  }
+
+  override fun asHttpPart() = toV3Request()
+
+  override fun headersWithoutCookie(): Map<String, List<String>> {
+    return headers.filter { (k, _) -> k.toLowerCase() != Request.COOKIE_KEY }
+  }
+
+  override fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest {
+    return toV3Request().generatedRequest(context, mode)
+  }
+
+  override fun isMultipartFileUpload() = asHttpPart().isMultipartFileUpload()
+
   companion object {
+    @JvmStatic
     fun fromJson(json: JsonValue): HttpRequest {
       val method = if (json.has("method")) Json.toString(json["method"]).toUpperCase() else Request.DEFAULT_METHOD
       val path = if (json.has("path")) Json.toString(json["path"]) else Request.DEFAULT_PATH
@@ -84,12 +109,12 @@ data class HttpRequest(
 }
 
 data class HttpResponse(
-  val status: Int,
-  val headers: Map<String, List<String>>,
-  val body: OptionalBody,
-  val matchingRules: MatchingRules,
-  val generators: Generators
-) {
+  override val status: Int,
+  override val headers: Map<String, List<String>>,
+  override val body: OptionalBody,
+  override val matchingRules: MatchingRules,
+  override val generators: Generators
+) : IResponse {
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
@@ -117,6 +142,12 @@ data class HttpResponse(
     }
     return map
   }
+
+  override fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse {
+    return this.toV3Response().generatedResponse(context, mode)
+  }
+
+  override fun asHttpPart() = toV3Response()
 
   companion object {
     fun fromJson(json: JsonValue): HttpResponse {

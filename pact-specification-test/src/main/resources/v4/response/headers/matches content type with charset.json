@@ -1,0 +1,14 @@
+{
+  "match": true,
+  "comment": "Headers match when the actual includes additional parameters",
+  "expected" : {
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "actual": {
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "match": true,
+  "comment": "Extra headers allowed",
+  "expected" : {
+    "method": "POST",
+    "path": "/path",
+    "query": {},
+    "headers": {}
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/path",
+    "query": {},
+    "headers": {
+      "Accept": "alligators"
+    }
+  }
+}

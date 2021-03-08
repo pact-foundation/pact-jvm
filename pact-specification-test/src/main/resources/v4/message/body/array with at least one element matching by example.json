@@ -1,0 +1,52 @@
+{
+  "match": true,
+  "comment": "Types and regular expressions match",
+  "expected": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Fred"
+          }
+        ]
+      }
+    },
+    "matchingRules": {
+      "content": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Mary"
+          },
+          {
+            "name": "Susan"
+          }
+        ]
+      }
+    }
+  }
+}

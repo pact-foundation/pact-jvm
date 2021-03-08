@@ -12,23 +12,38 @@ import mu.KLogging
 /**
  * Response from a provider to a consumer
  */
+interface IResponse {
+  val status: Int
+  val headers: Map<String, List<String>>
+  val body: OptionalBody
+  val matchingRules: MatchingRules
+  val generators: Generators
+
+  /**
+   * Create a new response by applying any generators to this response
+   */
+  fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse
+
+  fun asHttpPart() : HttpPart
+}
+
+/**
+ * Response from a provider to a consumer
+ */
 class Response @JvmOverloads constructor(
-  var status: Int = DEFAULT_STATUS,
+  override var status: Int = DEFAULT_STATUS,
   override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override var matchingRules: MatchingRules = MatchingRulesImpl(),
   override var generators: Generators = Generators()
-) : HttpPart() {
+) : HttpPart(), IResponse {
 
   override fun toString() =
     "\tstatus: $status\n\theaders: $headers\n\tmatchers: $matchingRules\n\tgenerators: $generators\n\tbody: $body"
 
   fun copy() = Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
 
-  fun generatedResponse(
-    context: MutableMap<String, Any> = mutableMapOf(),
-    mode: GeneratorTestMode = GeneratorTestMode.Provider
-  ): Response {
+  override fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse {
     val r = this.copy()
     val statusGenerators = r.buildGenerators(Category.STATUS, context)
     if (statusGenerators.isNotEmpty()) {
@@ -76,6 +91,8 @@ class Response @JvmOverloads constructor(
   fun asV4Response(): HttpResponse {
     return HttpResponse(status, headers, body, matchingRules, generators)
   }
+
+  override fun asHttpPart() = this
 
   companion object : KLogging() {
     const val DEFAULT_STATUS = 200

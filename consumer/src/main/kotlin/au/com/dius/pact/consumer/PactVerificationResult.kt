@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.Mismatch
+import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Request
 
 sealed class PactVerificationResult {
@@ -29,11 +30,11 @@ sealed class PactVerificationResult {
     }
   }
 
-  data class UnexpectedRequest(val request: Request) : PactVerificationResult() {
+  data class UnexpectedRequest(val request: IRequest) : PactVerificationResult() {
     override fun getDescription() = "Unexpected Request:\n$request"
   }
 
-  data class ExpectedButNotReceived(val expectedRequests: List<Request>) : PactVerificationResult() {
+  data class ExpectedButNotReceived(val expectedRequests: List<IRequest>) : PactVerificationResult() {
     override fun getDescription(): String {
       return "The following requests were not received:\n" + expectedRequests.joinToString("\n")
     }

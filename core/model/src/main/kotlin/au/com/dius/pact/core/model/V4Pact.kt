@@ -124,11 +124,11 @@ sealed class V4Interaction(
   class SynchronousHttp(
     key: String,
     description: String,
-    val request: HttpRequest,
-    val response: HttpResponse,
+    override val request: HttpRequest,
+    override val response: HttpResponse,
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf()
-  ) : V4Interaction(key, description, interactionId, providerStates) {
+  ) : V4Interaction(key, description, interactionId, providerStates), SynchronousRequestResponse {
 
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
@@ -170,9 +170,13 @@ sealed class V4Interaction(
       return RequestResponseInteraction(description, providerStates, request.toV3Request(), response.toV3Response(),
         interactionId)
     }
+
+    override fun isSynchronousRequestResponse() = true
+
+    override fun asSynchronousRequestResponse() = this
   }
 
-  class AsynchronousMessage @JvmOverloads constructor(
+  class AsynchronousMessage @Suppress("LongParameterList") @JvmOverloads constructor(
     key: String,
     description: String,
     override val contents: OptionalBody = OptionalBody.missing(),
@@ -346,4 +350,6 @@ open class V4Pact(
   }
 
   override fun asV4Pact() = Ok(this)
+
+  override fun isRequestResponsePact() = interactions.any { it is V4Interaction.SynchronousHttp }
 }

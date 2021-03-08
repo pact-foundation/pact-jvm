@@ -1,0 +1,41 @@
+{
+  "match": false,
+  "comment": "Unexpected favourite colour with null value",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteColours": [
+            "red",
+            "blue"
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteColours": [
+            "red",
+            "blue",
+            null
+          ]
+        }
+      }
+    }
+  }
+}

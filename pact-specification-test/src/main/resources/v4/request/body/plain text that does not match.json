@@ -1,0 +1,26 @@
+{
+  "match": false,
+  "comment": "Plain text that does not match",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": { "Content-Type": "text/plain" },
+    "body": {
+      "contentType": "text/plain",
+      "encoded": false,
+      "content": "alligator named mary"
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": { "Content-Type": "text/plain" },
+    "body": {
+      "contentType": "text/plain",
+      "encoded": false,
+      "content": "alligator named fred"
+    }
+  }
+}

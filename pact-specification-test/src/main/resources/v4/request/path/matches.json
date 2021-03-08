@@ -1,0 +1,16 @@
+{
+  "match": true,
+  "comment": "Paths match",
+  "expected" : {
+    "method": "POST",
+    "path": "/path/to/something",
+    "query": {},
+    "headers": {}
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/path/to/something",
+    "query": {},
+    "headers": {}
+  }
+}

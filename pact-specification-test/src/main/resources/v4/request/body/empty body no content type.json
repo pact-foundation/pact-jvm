@@ -1,0 +1,21 @@
+{
+  "match": true,
+  "comment": "Empty body, no content-type",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "body": {
+      "content": ""
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "content": ""
+    }
+  }
+}

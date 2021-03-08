@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.SynchronousRequestResponse
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
@@ -80,8 +82,9 @@ open class HttpTestTarget @JvmOverloads constructor (
 
   override fun prepareRequest(interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>? {
     val providerClient = ProviderClient(getProviderInfo("provider"), this.httpClientFactory.invoke())
-    if (interaction is RequestResponseInteraction) {
-      return providerClient.prepareRequest(interaction.request.generatedRequest(context)) to providerClient
+    if (interaction is SynchronousRequestResponse) {
+      val request = interaction.request.generatedRequest(context, GeneratorTestMode.Provider)
+      return providerClient.prepareRequest(request) to providerClient
     }
     throw UnsupportedOperationException("Only request/response interactions can be used with an HTTP test target")
   }

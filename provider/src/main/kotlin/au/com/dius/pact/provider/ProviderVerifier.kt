@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FilteredPact
+import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
@@ -17,8 +18,10 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
@@ -179,7 +182,7 @@ interface IProviderVerifier {
    */
   fun verifyResponseFromProvider(
     provider: IProviderInfo,
-    interaction: RequestResponseInteraction,
+    interaction: SynchronousRequestResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient
@@ -190,7 +193,7 @@ interface IProviderVerifier {
    */
   fun verifyResponseFromProvider(
     provider: IProviderInfo,
-    interaction: RequestResponseInteraction,
+    interaction: SynchronousRequestResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient,
@@ -213,7 +216,7 @@ interface IProviderVerifier {
    * Compares the expected and actual responses
    */
   fun verifyRequestResponsePact(
-    expectedResponse: Response,
+    expectedResponse: IResponse,
     actualResponse: ProviderResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
@@ -533,7 +536,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   override fun verifyRequestResponsePact(
-    expectedResponse: Response,
+    expectedResponse: IResponse,
     actualResponse: ProviderResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
@@ -606,7 +609,7 @@ open class ProviderVerifier @JvmOverloads constructor (
 
   override fun verifyResponseFromProvider(
     provider: IProviderInfo,
-    interaction: RequestResponseInteraction,
+    interaction: SynchronousRequestResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient
@@ -615,7 +618,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   @Suppress("TooGenericExceptionCaught")
   override fun verifyResponseFromProvider(
     provider: IProviderInfo,
-    interaction: RequestResponseInteraction,
+    interaction: SynchronousRequestResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient,
@@ -623,8 +626,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean
   ): VerificationResult {
     return try {
-      val expectedResponse = interaction.response.generatedResponse(context)
-      val actualResponse = client.makeRequest(interaction.request.generatedRequest(context))
+      val expectedResponse = interaction.response.generatedResponse(context, GeneratorTestMode.Provider)
+      val actualResponse = client.makeRequest(interaction.request.generatedRequest(context, GeneratorTestMode.Provider))
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
         interaction.interactionId.orEmpty(), pending)

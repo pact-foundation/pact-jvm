@@ -1,0 +1,49 @@
+{
+  "match": false,
+  "comment": "Array must have at least 2 elements",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "matchingRules": {
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 2
+            }
+          ]
+        }
+      }
+    },
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Fred"
+          }
+        ]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Fred"
+          }
+        ]
+      }
+    }
+  }
+}

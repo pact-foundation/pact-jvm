@@ -1,0 +1,11 @@
+{
+  "match": true,
+  "comment": "Plain text that matches",
+  "expected" : {
+    "headers": { "Content-Type": "text/plain" }
+  },
+  "actual": {
+    "headers": { "Content-Type": "text/plain" }
+  }
+}
+

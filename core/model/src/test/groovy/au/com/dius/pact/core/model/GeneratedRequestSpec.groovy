@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.RandomIntGenerator
 import au.com.dius.pact.core.model.generators.RandomStringGenerator
@@ -27,7 +28,7 @@ class GeneratedRequestSpec extends Specification {
     request.path = '/path'
 
     when:
-    def generated = request.generatedRequest()
+    def generated = request.generatedRequest([:], GeneratorTestMode.Provider)
 
     then:
     generated.path != request.path
@@ -38,7 +39,7 @@ class GeneratedRequestSpec extends Specification {
     request.headers = [A: 'a', B: 'b']
 
     when:
-    def generated = request.generatedRequest()
+    def generated = request.generatedRequest([:], GeneratorTestMode.Provider)
 
     then:
     generated.headers.A != 'a'
@@ -50,7 +51,7 @@ class GeneratedRequestSpec extends Specification {
     request.query = [A: ['a', 'b'], B: ['b']]
 
     when:
-    def generated = request.generatedRequest()
+    def generated = request.generatedRequest([:], GeneratorTestMode.Provider)
 
     then:
     generated.query.A != ['a', 'b']
@@ -64,12 +65,11 @@ class GeneratedRequestSpec extends Specification {
     request.body = OptionalBody.body(Json.INSTANCE.prettyPrint(body).bytes)
 
     when:
-    def generated = request.generatedRequest()
+    def generated = request.generatedRequest([:], GeneratorTestMode.Provider)
     def generatedBody = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(generated.body.valueAsString()))
 
     then:
     generatedBody.a != 'A'
     generatedBody.b == 'B'
   }
-
 }

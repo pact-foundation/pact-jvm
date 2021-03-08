@@ -1,0 +1,43 @@
+{
+  "match": false,
+  "comment": "objects in array with type mismatching",
+  "expected": {
+    "headers": {},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": [
+        {
+          "Name": "John Smith",
+          "Age": 50
+        }
+      ]
+    },
+    "matchingRules": {
+      "body": {
+        "$[*]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": [{
+      "name": "Peter Peterson",
+      "age": 22,
+      "gender": "Male"
+    }, {}]
+  }
+}

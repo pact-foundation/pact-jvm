@@ -1,0 +1,81 @@
+{
+  "match": false,
+  "comment": "Nested arrays do not match, age is wrong type",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "matchingRules": {
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].children": {
+          "matchers": [
+            {
+              "min": 1
+            }
+          ]
+        },
+        "$.animals[*].children[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    },
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Fred",
+            "children": [
+              {
+                "age": 9
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Mary",
+            "children": [
+              {
+                "age": "9"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

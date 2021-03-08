@@ -1,0 +1,26 @@
+{
+  "match": false,
+  "comment": "Name should not be null",
+  "expected": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "name": "Mary"
+        }
+      }
+    }
+  },
+  "actual": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "name": null
+        }
+      }
+    }
+  }
+}

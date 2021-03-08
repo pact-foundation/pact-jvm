@@ -1,0 +1,16 @@
+{
+  "match": true,
+  "comment": "Content-Type and Accept Headers match when the charset differs in case",
+  "expected" : {
+    "headers": {
+      "Accept": "application/json;charset=utf-8",
+      "Content-Type": "application/json;charset=utf-8"
+    }
+  },
+  "actual": {
+    "headers": {
+      "Accept": "application/json; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8"
+    }
+  }
+}

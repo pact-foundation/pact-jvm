@@ -325,7 +325,7 @@ public class PactDslResponse {
     /**
      * Terminates the DSL and builds a pact to represent the interactions
      */
-    public <P extends Pact> P toPact(Class<P> pactClass) {
+    public <P extends BasePact> P toPact(Class<P> pactClass) {
       addInteraction();
       if (pactClass.isAssignableFrom(V4Pact.class)) {
         return (P) new V4Pact(request.consumer, request.provider, consumerPactBuilder.getInteractions()

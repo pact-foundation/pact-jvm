@@ -1,0 +1,42 @@
+{
+  "match": false,
+  "comment": "Favourite colours expected to contain null, but not null found",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteNumbers": [
+            "1",
+            null,
+            "3"
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteNumbers": [
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      }
+    }
+  }
+}

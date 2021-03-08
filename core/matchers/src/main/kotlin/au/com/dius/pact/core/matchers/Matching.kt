@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
@@ -14,7 +15,7 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
   }
 
   private fun resolveMatchers(path: List<String>, pathComparator: Comparator<String>): MatchingRuleCategory {
-    return if (matchers.name == "body")
+    return if (matchers.name == "body" || matchers.name == "content")
       matchers.filter { Matchers.matchesPath(it, path) > 0 }
     else if (matchers.name == "header" || matchers.name == "query" || matchers.name == "metadata")
       matchers.filter { key -> path.all { pathComparator.compare(key, it) == 0 } }
@@ -78,7 +79,10 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
   /**
    * Matcher defined at that path (ignoring parents)
    */
-  fun directMatcherDefined(path: List<String>, pathComparator: Comparator<String> = Comparator.naturalOrder()): Boolean {
+  fun directMatcherDefined(
+    path: List<String>,
+    pathComparator: Comparator<String> = Comparator.naturalOrder()
+  ): Boolean {
     val resolveMatchers = resolveMatchers(path, pathComparator).filter {
       parsePath(it).size == path.size
     }
@@ -92,7 +96,7 @@ object Matching : KLogging() {
   val pathFilter = Regex("http[s]*://([^/]*)")
 
   @JvmStatic
-  fun matchRequestHeaders(expected: Request, actual: Request, context: MatchingContext) =
+  fun matchRequestHeaders(expected: IRequest, actual: IRequest, context: MatchingContext) =
     matchHeaders(expected.headersWithoutCookie(), actual.headersWithoutCookie(), context)
 
   @JvmStatic
@@ -179,7 +183,7 @@ object Matching : KLogging() {
     }
   }
 
-  fun matchPath(expected: Request, actual: Request, context: MatchingContext): PathMismatch? {
+  fun matchPath(expected: IRequest, actual: IRequest, context: MatchingContext): PathMismatch? {
     val replacedActual = actual.path.replaceFirst(pathFilter, "")
     return if (context.matcherDefined(emptyList())) {
       val mismatch = Matchers.domatch(context, emptyList(), expected.path, replacedActual, PathMismatchFactory)
@@ -190,7 +194,7 @@ object Matching : KLogging() {
 
   fun matchStatus(expected: Int, actual: Int) = if (expected == actual) null else StatusMismatch(expected, actual)
 
-  fun matchQuery(expected: Request, actual: Request, context: MatchingContext): List<QueryMatchResult> {
+  fun matchQuery(expected: IRequest, actual: IRequest, context: MatchingContext): List<QueryMatchResult> {
     return expected.query.entries.fold(emptyList<QueryMatchResult>()) { acc, entry ->
       when (val value = actual.query[entry.key]) {
         null -> acc +

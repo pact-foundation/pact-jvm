@@ -8,13 +8,14 @@ import java.net.URLEncoder
 /**
  * Interaction between a consumer and a provider
  */
+@ExperimentalUnsignedTypes
 open class RequestResponseInteraction @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),
-  val request: Request = Request(),
-  val response: Response = Response(),
+  override val request: Request = Request(),
+  override val response: Response = Response(),
   interactionId: String? = null
-) : BaseInteraction(interactionId, description, providerStates) {
+) : BaseInteraction(interactionId, description, providerStates), SynchronousRequestResponse {
 
   override fun toString() =
     "Interaction: $description\n\tin states ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"
@@ -78,6 +79,10 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     return V4Interaction.SynchronousHttp("", description, request.asV4Request(), response.asV4Response(),
       interactionId, providerStates).withGeneratedKey()
   }
+
+  override fun isSynchronousRequestResponse() = true
+
+  override fun asSynchronousRequestResponse() = this
 
   companion object : KLogging() {
     const val COMMA = ", "

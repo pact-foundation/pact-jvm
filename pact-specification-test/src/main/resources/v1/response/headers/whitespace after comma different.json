@@ -3,12 +3,12 @@
   "comment": "Whitespace between comma separated headers does not matter",
   "expected" : {
     "headers": {
-      "Accept": "alligators,hippos"
+      "Type": "alligators,hippos"
     }
   },
   "actual": {
     "headers": {
-      "Accept": "alligators, hippos"
+      "Type": "alligators, hippos"
     }
   }
 }

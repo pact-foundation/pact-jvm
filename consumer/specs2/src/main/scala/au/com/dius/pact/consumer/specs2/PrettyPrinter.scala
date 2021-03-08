@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.specs2
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.PactVerificationResult.{Error, ExpectedButNotReceived, Mismatches, Ok, PartialMismatch, UnexpectedRequest}
 import au.com.dius.pact.core.matchers._
-import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.{IRequest, Request}
 import au.com.dius.pact.core.support.Json
 import difflib.DiffUtils
 
@@ -63,7 +63,7 @@ object PrettyPrinter {
     }.mkString("\n")
   }
 
-  def printMissing(missing: Seq[Request]) = {
+  def printMissing(missing: Seq[IRequest]) = {
     if(missing.isEmpty) {
       ""
     } else {
@@ -71,7 +71,7 @@ object PrettyPrinter {
     }
   }
 
-  def printUnexpected(unexpected: List[Request]) = {
+  def printUnexpected(unexpected: List[IRequest]) = {
     if(unexpected.isEmpty) {
       ""
     } else {

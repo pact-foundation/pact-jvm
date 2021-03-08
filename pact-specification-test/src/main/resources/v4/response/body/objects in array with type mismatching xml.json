@@ -1,0 +1,38 @@
+{
+  "match": false,
+  "comment": "XML objects in array with type mismatching",
+  "expected": {
+    "headers": {},
+    "body": {
+      "contentType": "application/xml",
+      "encoded": false,
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><people><person name=\"John Smith\" age=\"50\"/></people>"
+    },
+    "matchingRules": {
+      "body": {
+        "$[*]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": {
+      "contentType": "application/xml",
+      "encoded": false,
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><people><person name=\"Peter Peterson\" age=\"22\" gender=\"Male\"/><person/></people>"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.junit.pactproviderrule;
 
+import au.com.dius.pact.core.model.IRequest;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.consumer.PactVerificationResult;
@@ -94,7 +95,7 @@ public class PactProviderTest {
           assertThat(result, is(instanceOf(PactVerificationResult.ExpectedButNotReceived.class)));
           PactVerificationResult.ExpectedButNotReceived error = (PactVerificationResult.ExpectedButNotReceived) result;
           assertThat(error.getExpectedRequests(), hasSize(1));
-          Request request = error.getExpectedRequests().get(0);
+          IRequest request = error.getExpectedRequests().get(0);
           assertThat(request.getPath(), is("/"));
       });
       Assert.assertEquals(new ConsumerClient(mockTestProvider.getUrl()).options("/second"), 200);

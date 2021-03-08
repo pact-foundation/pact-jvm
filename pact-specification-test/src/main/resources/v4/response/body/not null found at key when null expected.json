@@ -1,0 +1,28 @@
+{
+  "match": false,
+  "comment": "Name should be null",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "name": null
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "name": "Fred"
+        }
+      }
+    }
+  }
+}

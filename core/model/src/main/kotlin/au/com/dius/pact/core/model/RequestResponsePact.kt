@@ -39,6 +39,8 @@ class RequestResponsePact @JvmOverloads constructor(
     return this
   }
 
+  override fun isRequestResponsePact() = true
+
   override fun asRequestResponsePact() = Ok(this)
 
   override fun asMessagePact() = Err("A V3 Request/Response Pact can not be converted to a Message Pact")

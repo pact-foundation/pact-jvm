@@ -8,6 +8,7 @@ import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.consumer.model.MockServerImplementation;
+import au.com.dius.pact.core.model.BasePact;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
@@ -37,7 +38,7 @@ public class BaseProviderRule extends ExternalResource {
   protected final String provider;
   protected final Object target;
   protected MockProviderConfig config;
-  private Map<String, au.com.dius.pact.core.model.Pact> pacts;
+  private Map<String, BasePact> pacts;
   private MockServer mockServer;
 
   public BaseProviderRule(Object target, String provider, String hostInterface, Integer port, PactSpecVersion pactVersion) {
@@ -74,8 +75,8 @@ public class BaseProviderRule extends ExternalResource {
                   return;
               }
 
-              Map<String, au.com.dius.pact.core.model.Pact> pacts = getPacts(pactDef.fragment());
-              Optional<au.com.dius.pact.core.model.Pact> pact;
+              Map<String, BasePact> pacts = getPacts(pactDef.fragment());
+              Optional<BasePact> pact;
               if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
                   pact = pacts.values().stream().findFirst();
               } else {
@@ -170,21 +171,21 @@ public class BaseProviderRule extends ExternalResource {
       }
   }
 
-  private PactVerificationResult runPactTest(final Statement base, au.com.dius.pact.core.model.Pact pact, PactFolder pactFolder, PactDirectory pactDirectory) {
-      return runConsumerTest(pact, config, (mockServer, context) -> {
-        this.mockServer = mockServer;
-        base.evaluate();
-        this.mockServer = null;
+  private PactVerificationResult runPactTest(final Statement base, BasePact pact, PactFolder pactFolder, PactDirectory pactDirectory) {
+    return runConsumerTest(pact, config, (mockServer, context) -> {
+      this.mockServer = mockServer;
+      base.evaluate();
+      this.mockServer = null;
 
-        if (pactFolder != null) {
-          context.setPactFolder(pactFolder.value());
-        }
-        if (pactDirectory != null) {
-          context.setPactFolder(pactDirectory.value());
-        }
+      if (pactFolder != null) {
+        context.setPactFolder(pactFolder.value());
+      }
+      if (pactDirectory != null) {
+        context.setPactFolder(pactDirectory.value());
+      }
 
-        return null;
-      });
+      return null;
+    });
   }
 
   protected void validateResult(PactVerificationResult result, PactVerification pactVerification) throws Throwable {
@@ -195,30 +196,29 @@ public class BaseProviderRule extends ExternalResource {
    * scan all methods for @Pact annotation and execute them, if not already initialized
    * @param fragment
    */
-  protected Map<String, au.com.dius.pact.core.model.Pact> getPacts(String fragment) {
-      if (pacts == null) {
-        pacts = new HashMap<>();
-          for (Method m: target.getClass().getMethods()) {
-              if (JUnitTestSupport.conformsToSignature(m, config.getPactVersion()) && methodMatchesFragment(m, fragment)) {
-                  Pact pactAnnotation = m.getAnnotation(Pact.class);
-                String provider = parseExpression(pactAnnotation.provider(), DataType.RAW).toString();
-                if (StringUtils.isEmpty(provider) || this.provider.equals(provider)) {
-                      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
-                              parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
-                          .hasPactWith(this.provider);
-                      updateAnyDefaultValues(dslBuilder);
-                      try {
-                        au.com.dius.pact.core.model.Pact pact = (au.com.dius.pact.core.model.Pact)
-                          m.invoke(target, dslBuilder);
-                        pacts.put(this.provider, pact);
-                      } catch (Exception e) {
-                          throw new RuntimeException("Failed to invoke pact method", e);
-                      }
-                  }
-              }
+  protected Map<String, BasePact> getPacts(String fragment) {
+    if (pacts == null) {
+      pacts = new HashMap<>();
+      for (Method m: target.getClass().getMethods()) {
+        if (JUnitTestSupport.conformsToSignature(m, config.getPactVersion()) && methodMatchesFragment(m, fragment)) {
+          Pact pactAnnotation = m.getAnnotation(Pact.class);
+          String provider = parseExpression(pactAnnotation.provider(), DataType.RAW).toString();
+          if (StringUtils.isEmpty(provider) || this.provider.equals(provider)) {
+            PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
+                    parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
+                .hasPactWith(this.provider);
+            updateAnyDefaultValues(dslBuilder);
+            try {
+              BasePact pact = (BasePact) m.invoke(target, dslBuilder);
+              pacts.put(this.provider, pact);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke pact method", e);
+            }
           }
+        }
       }
-      return pacts;
+    }
+    return pacts;
   }
 
   private void updateAnyDefaultValues(PactDslWithProvider dslBuilder) {

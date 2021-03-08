@@ -1,0 +1,26 @@
+{
+  "match": true,
+  "comment": "Paths match with regex",
+  "expected" : {
+    "method": "POST",
+    "path": "/path/to/1234",
+    "query": {},
+    "headers": {},
+    "matchingRules": {
+      "path": {
+        "matchers": [
+          {
+            "match": "regex",
+            "regex": "\\/path\\/to\\/\\d{4}"
+          }
+        ]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/path/to/5678",
+    "query": {},
+    "headers": {}
+  }
+}

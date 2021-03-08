@@ -1,0 +1,22 @@
+{
+  "match": true,
+  "comment": "Headers match",
+  "expected" : {
+    "method": "POST",
+    "path": "/path",
+    "query": {},
+    "headers": {
+      "Accept": "alligators",
+      "Content-Type": "hippos"
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/path",
+    "query": {},
+    "headers": {
+      "Content-Type": "hippos",
+      "Accept": "alligators"
+    }
+  }
+}

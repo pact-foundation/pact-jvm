@@ -1,0 +1,29 @@
+{
+  "match": true,
+  "comment": "Unexpected phone number with null value",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "name": "Mary"
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "name": "Mary",
+          "phoneNumber": null
+        }
+      }
+    }
+  }
+}

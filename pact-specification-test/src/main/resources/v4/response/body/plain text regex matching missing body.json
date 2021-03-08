@@ -1,0 +1,27 @@
+{
+  "match": false,
+  "comment": "Plain text that matches",
+  "expected" : {
+    "headers": { "Content-Type": "text/plain" },
+    "body": {
+      "contentType": "text/plain",
+      "encoded": false,
+      "content": "alligator named mary"
+    },
+    "matchingRules": {
+      "body": {
+        "$": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "alligator named .{4}"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": { "Content-Type": "text/plain" }
+  }
+}

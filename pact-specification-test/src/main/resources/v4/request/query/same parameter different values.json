@@ -1,0 +1,20 @@
+{
+  "match": false,
+  "comment": "Queries are not the same - animals are alligator, hippo versus alligator, elephant",
+  "expected" : {
+    "method": "GET",
+    "path": "/path",
+    "query": {
+      "animal": ["alligator", "hippo"]
+    },
+    "headers": {}
+  },
+  "actual": {
+    "method": "GET",
+    "path": "/path",
+    "query": {
+      "animal": ["alligator", "elephant"]
+    },
+    "headers": {}
+  }
+}

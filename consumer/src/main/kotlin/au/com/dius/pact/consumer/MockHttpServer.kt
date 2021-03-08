@@ -7,8 +7,12 @@ import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
 import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
+import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.DefaultPactWriter
+import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
@@ -44,7 +48,7 @@ import java.util.zip.GZIPInputStream
 /**
  * Returns a mock server for the pact and config
  */
-fun mockServer(pact: RequestResponsePact, config: MockProviderConfig): BaseMockServer {
+fun mockServer(pact: BasePact, config: MockProviderConfig): BaseMockServer {
   return when (config) {
     is MockHttpsProviderConfig -> when (config.mockServerImplementation) {
       MockServerImplementation.KTorServer -> KTorMockServer(pact, config)
@@ -71,8 +75,7 @@ interface MockServer {
   /**
    * This will start the mock server and execute the test function. Returns the result of running the test.
    */
-  fun <R> runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>):
-    PactVerificationResult
+  fun <R> runAndWritePact(pact: BasePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>): PactVerificationResult
 
   /**
    * Returns the results of validating the mock server state
@@ -94,10 +97,10 @@ abstract class AbstractBaseMockServer : MockServer {
   }
 }
 
-abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig) : AbstractBaseMockServer() {
+abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig) : AbstractBaseMockServer() {
 
-  private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
-  private val matchedRequests = ConcurrentLinkedQueue<Request>()
+  private val mismatchedRequests = ConcurrentHashMap<IRequest, MutableList<PactVerificationResult>>()
+  private val matchedRequests = ConcurrentLinkedQueue<IRequest>()
   private val requestMatcher = RequestMatching(pact.interactions)
 
   override fun waitForServer() {
@@ -121,7 +124,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
     httpclient.execute(httpOptions).close()
   }
 
-  override fun <R> runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>):
+  override fun <R> runAndWritePact(pact: BasePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>):
     PactVerificationResult {
     start()
     waitForServer()
@@ -144,7 +147,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
   fun <R> verifyResultAndWritePact(
     testResult: R,
     context: PactTestExecutionContext,
-    pact: RequestResponsePact,
+    pact: BasePact,
     pactVersion: PactSpecVersion
   ): PactVerificationResult {
     val result = validateMockServerState(testResult)
@@ -168,7 +171,8 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       return PactVerificationResult.Mismatches(mismatchedRequests.values.flatten())
     }
     val expectedRequests = pact.interactions.asSequence()
-      .map { it.request }
+      .filter { it.isSynchronousRequestResponse() }
+      .map { it.asSynchronousRequestResponse()!!.request }
       .filter { !matchedRequests.contains(it) }
       .toList()
     if (expectedRequests.isNotEmpty()) {
@@ -177,10 +181,10 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
     return PactVerificationResult.Ok(testResult)
   }
 
-  protected fun generatePactResponse(request: Request): Response {
+  protected fun generatePactResponse(request: IRequest): IResponse {
     when (val matchResult = requestMatcher.matchInteraction(request)) {
       is FullRequestMatch -> {
-        val interaction = matchResult.interaction as RequestResponseInteraction
+        val interaction = matchResult.interaction
         matchedRequests.add(interaction.request)
         return interaction.response.generatedResponse(
           mutableMapOf(
@@ -202,7 +206,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
     return invalidResponse(request)
   }
 
-  private fun invalidResponse(request: Request): Response {
+  private fun invalidResponse(request: IRequest): IResponse {
     val body = "{ \"error\": \"Unexpected request : ${StringEscapeUtils.escapeJson(request.toString())}\" }"
     return Response(500, mutableMapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
       "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray(),
@@ -213,7 +217,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
 }
 
 abstract class BaseJdkMockServer(
-  pact: RequestResponsePact,
+  pact: BasePact,
   config: MockProviderConfig,
   private val server: HttpServer,
   private var stopped: Boolean = false
@@ -239,7 +243,7 @@ abstract class BaseJdkMockServer(
     }
   }
 
-  private fun pactResponseToHttpExchange(response: Response, exchange: HttpExchange) {
+  private fun pactResponseToHttpExchange(response: IResponse, exchange: HttpExchange) {
     val headers = response.headers
     exchange.responseHeaders.putAll(headers)
     val body = response.body
@@ -314,10 +318,10 @@ abstract class BaseJdkMockServer(
   companion object : KLogging()
 }
 
-open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig) :
+open class MockHttpServer(pact: BasePact, config: MockProviderConfig) :
   BaseJdkMockServer(pact, config, HttpServer.create(config.address(), 0))
 
-open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig) :
+open class MockHttpsServer(pact: BasePact, config: MockProviderConfig) :
   BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
 fun calculateCharset(headers: Map<String, List<String?>>): Charset {

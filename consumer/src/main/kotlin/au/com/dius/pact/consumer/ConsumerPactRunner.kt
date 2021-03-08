@@ -1,6 +1,9 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.core.model.BasePact
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
@@ -14,7 +17,7 @@ interface PactTestRun<R> {
   fun run(mockServer: MockServer, context: PactTestExecutionContext?): R
 }
 
-fun <R> runConsumerTest(pact: Pact, config: MockProviderConfig, test: PactTestRun<R>): PactVerificationResult {
+fun <R> runConsumerTest(pact: BasePact, config: MockProviderConfig, test: PactTestRun<R>): PactVerificationResult {
   val errors = pact.validateForVersion(config.pactVersion)
   if (errors.isNotEmpty()) {
     return PactVerificationResult.Error(
@@ -22,14 +25,16 @@ fun <R> runConsumerTest(pact: Pact, config: MockProviderConfig, test: PactTestRu
         "${config.pactVersion} - ${errors.joinToString(", ")}"), PactVerificationResult.Ok())
   }
 
-  val requestResponsePact = pact.asRequestResponsePact().expect { "Expected an HTTP Request/Response Pact" }
-  val server = mockServer(requestResponsePact, config)
-  return server.runAndWritePact(requestResponsePact, config.pactVersion, test)
+  if (!pact.isRequestResponsePact()) {
+    throw InvalidPactException("Expected an HTTP Request/Response Pact")
+  }
+  val server = mockServer(pact, config)
+  return server.runAndWritePact(pact, config.pactVersion, test)
 }
 
 interface MessagePactTestRun<R> {
   @Throws(Throwable::class)
-  fun run(messages: List<Message>, context: PactTestExecutionContext?): R
+  fun run(messages: List<Interaction>, context: PactTestExecutionContext?): R
 }
 
 fun <R> runMessageConsumerTest(

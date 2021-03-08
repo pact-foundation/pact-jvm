@@ -1,0 +1,36 @@
+{
+  "match": false,
+  "comment": "Array of objects, properties match on incorrect objects",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": [
+        {
+          "favouriteColor": "red"
+        },
+        {
+          "favouriteNumber": 2
+        }
+      ]
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": [
+        {
+          "favouriteColor": "blue",
+          "favouriteNumber": 4
+        },
+        {
+          "favouriteColor": "red",
+          "favouriteNumber": 2
+        }
+      ]
+    }
+  }
+}

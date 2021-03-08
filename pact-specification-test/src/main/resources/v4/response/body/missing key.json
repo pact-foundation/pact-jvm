@@ -1,0 +1,29 @@
+{
+  "match": false,
+  "comment": "Missing key alligator name",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "name": "Mary",
+          "age": 3
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "age": 3
+        }
+      }
+    }
+  }
+}

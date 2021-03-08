@@ -6,7 +6,7 @@
     "path": "/path",
     "query": "",
     "headers": {
-      "Accept": "alligators"
+      "Type": "alligators"
     }
   },
   "actual": {
@@ -14,7 +14,7 @@
     "path": "/path",
     "query": "",
     "headers": {
-      "Accept": "Alligators"
+      "Type": "Alligators"
     }
   }
 }

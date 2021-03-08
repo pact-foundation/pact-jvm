@@ -14,7 +14,7 @@ class ContentTypeMatcherSpec extends Specification {
     }] as MismatchFactory
 
     when:
-    def result = MatcherExecutorKt.matchContentType(path, contentType, actual, mismatchFactory)
+    def result = MatcherExecutorKt.matchHeaderWithParameters(path, contentType, actual, mismatchFactory)
 
     then:
     result.empty
@@ -30,7 +30,7 @@ class ContentTypeMatcherSpec extends Specification {
     }] as MismatchFactory
 
     when:
-    def result = MatcherExecutorKt.matchContentType(path, contentType, actual, mismatchFactory)
+    def result = MatcherExecutorKt.matchHeaderWithParameters(path, contentType, actual, mismatchFactory)
 
     then:
     !result.empty

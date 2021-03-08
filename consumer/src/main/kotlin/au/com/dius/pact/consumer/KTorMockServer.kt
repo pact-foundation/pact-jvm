@@ -2,8 +2,11 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
@@ -30,7 +33,7 @@ import java.util.zip.DeflaterInputStream
 import java.util.zip.GZIPInputStream
 
 class KTorMockServer(
-  pact: RequestResponsePact,
+  pact: BasePact,
   config: MockProviderConfig,
   private val stopTimeout: Long = 20000
 ) : BaseMockServer(pact, config) {
@@ -75,7 +78,7 @@ class KTorMockServer(
 
   private var server: NettyApplicationEngine = embeddedServer(Netty, environment = env, configure = {})
 
-  private suspend fun pactResponseToKTorResponse(response: Response, call: ApplicationCall) {
+  private suspend fun pactResponseToKTorResponse(response: IResponse, call: ApplicationCall) {
     response.headers.forEach { entry ->
       entry.value.forEach {
         call.response.headers.append(entry.key, it, safeOnly = false)

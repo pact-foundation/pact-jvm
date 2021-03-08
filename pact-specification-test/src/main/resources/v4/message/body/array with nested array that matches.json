@@ -1,0 +1,88 @@
+{
+  "match": true,
+  "comment": "Nested arrays match",
+  "expected": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Fred",
+            "children": [
+              {
+                "age": 9
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "matchingRules": {
+      "content": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].children": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].children[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "name": "Mary",
+            "children": [
+              {
+                "age": 3
+              },
+              {
+                "age": 5
+              },
+              {
+                "age": 5456
+              }
+            ]
+          },
+          {
+            "name": "Jo",
+            "children": [
+              {
+                "age": 0
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

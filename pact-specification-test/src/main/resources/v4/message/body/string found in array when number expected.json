@@ -1,0 +1,34 @@
+{
+  "match": false,
+  "comment": "Favourite Numbers expected to be numbers, but 2 is a string",
+  "expected": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteNumbers": [
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteNumbers": [
+            1,
+            "2",
+            3
+          ]
+        }
+      }
+    }
+  }
+}

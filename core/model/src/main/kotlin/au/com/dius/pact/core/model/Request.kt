@@ -13,26 +13,45 @@ import mu.KLogging
 /**
  * Request made by a consumer to a provider
  */
-class Request @JvmOverloads constructor(
-  var method: String = DEFAULT_METHOD,
-  var path: String = DEFAULT_PATH,
-  var query: MutableMap<String, List<String>> = mutableMapOf(),
+interface IRequest {
+  val method: String
+  val path: String
+  val query: Map<String, List<String>>
+  val headers: Map<String, List<String>>
+  val body: OptionalBody
+  val matchingRules: MatchingRules
+  val generators: Generators
+
+  fun cookies(): List<String>
+  fun headersWithoutCookie(): Map<String, List<String>>
+  fun asHttpPart() : HttpPart
+  fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest
+
+  /**
+   * If this request represents a multipart file upload
+   */
+  fun isMultipartFileUpload(): Boolean
+}
+
+/**
+ * Request made by a consumer to a provider
+ */
+class Request @Suppress("LongParameterList") @JvmOverloads constructor(
+  override var method: String = DEFAULT_METHOD,
+  override var path: String = DEFAULT_PATH,
+  override var query: MutableMap<String, List<String>> = mutableMapOf(),
   override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override var matchingRules: MatchingRules = MatchingRulesImpl(),
   override var generators: Generators = Generators()
-) : BaseRequest(), Comparable<Request> {
+) : BaseRequest(), Comparable<IRequest>, IRequest {
 
-  override fun compareTo(other: Request) = if (equals(other)) 0 else 1
+  override fun compareTo(other: IRequest) = if (equals(other)) 0 else 1
 
   fun copy() = Request(method, path, query.toMutableMap(), headers.toMutableMap(), body.copy(), matchingRules.copy(),
     generators.copy())
 
-  @JvmOverloads
-  fun generatedRequest(
-    context: MutableMap<String, Any> = mutableMapOf(),
-    mode: GeneratorTestMode = GeneratorTestMode.Provider
-  ): Request {
+  override fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest {
     val r = this.copy()
     val pathGenerators = r.buildGenerators(Category.PATH, context)
     if (pathGenerators.isNotEmpty()) {
@@ -64,11 +83,14 @@ class Request @JvmOverloads constructor(
       "generators: $generators\n\tbody: $body"
   }
 
-  fun headersWithoutCookie(): Map<String, List<String>> {
+  override fun headersWithoutCookie(): Map<String, List<String>> {
     return headers.filter { (k, _) -> k.toLowerCase() != COOKIE_KEY }
   }
 
-  fun cookie(): List<String> {
+  @Deprecated("use cookies()", ReplaceWith("cookies()"))
+  fun cookie() = cookies()
+
+  override fun cookies(): List<String> {
     val cookieEntry = headers.entries.find { (k, _) -> k.toLowerCase() == COOKIE_KEY }
     return if (cookieEntry != null) {
       cookieEntry.value.flatMap {
@@ -79,21 +101,23 @@ class Request @JvmOverloads constructor(
     }
   }
 
+  override fun asHttpPart() = this
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
-    if (javaClass != other?.javaClass) return false
+    if (other is IRequest) {
+      if (method != other.method) return false
+      if (path != other.path) return false
+      if (query != other.query) return false
+      if (headers != other.headers) return false
+      if (body != other.body) return false
+      if (matchingRules != other.matchingRules) return false
+      if (generators != other.generators) return false
 
-    other as Request
+      return true
+    }
 
-    if (method != other.method) return false
-    if (path != other.path) return false
-    if (query != other.query) return false
-    if (headers != other.headers) return false
-    if (body != other.body) return false
-    if (matchingRules != other.matchingRules) return false
-    if (generators != other.generators) return false
-
-    return true
+    return false
   }
 
   override fun hashCode(): Int {

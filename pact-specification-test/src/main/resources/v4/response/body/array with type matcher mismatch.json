@@ -1,0 +1,41 @@
+{
+  "match": false,
+  "comment": "array with type matcher mismatch",
+  "expected": {
+    "headers": {},
+    "body" : {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "myDates": [
+          10
+        ]
+      }
+    },
+    "matchingRules" : {
+      "body": {
+        "$.myDates[*]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "myDates": [
+          20,
+          5,
+          "100299"
+        ]
+      }
+    }    
+  }
+}   

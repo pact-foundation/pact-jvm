@@ -1,7 +1,5 @@
 package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
@@ -91,6 +89,32 @@ interface Interaction {
   fun asMessage(): Message? {
     return null
   }
+
+  /**
+   * If this interaction is synchronous request/response
+   */
+  fun isSynchronousRequestResponse(): Boolean {
+    return false
+  }
+
+  fun asSynchronousRequestResponse(): SynchronousRequestResponse? {
+    return null
+  }
+}
+
+/**
+ * Interface to a request/response interaction
+ */
+interface SynchronousRequestResponse: Interaction {
+  /**
+   * Request part
+   */
+  val request: IRequest
+
+  /**
+   * Response part
+   */
+  val response: IResponse
 }
 
 /**
@@ -144,6 +168,9 @@ interface Pact {
 
   /** Validates if this Pact can be used with the provided Pact specification version */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+
+  /** If this pact is a synchronous request/response pact */
+  fun isRequestResponsePact() : Boolean
 
   /** Converts this Pact into a concrete V3 HTTP Pact, if able to */
   fun asRequestResponsePact() : Result<RequestResponsePact, String>

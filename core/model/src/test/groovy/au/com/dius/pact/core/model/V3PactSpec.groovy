@@ -134,6 +134,11 @@ class V3PactSpec extends Specification {
             Result<V4Pact, String> asV4Pact() {
               new Err('Not implemented')
             }
+
+          @Override
+          boolean isRequestResponsePact() {
+            false
+          }
         }
 
         when:
@@ -194,6 +199,11 @@ class V3PactSpec extends Specification {
           @Override
           Result<V4Pact, String> asV4Pact() {
             new Err('Not implemented')
+          }
+
+          @Override
+          boolean isRequestResponsePact() {
+            false
           }
         }
 

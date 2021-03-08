@@ -1,0 +1,68 @@
+{
+  "match": false,
+  "comment": "Types and regular expressions match",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "matchingRules": {
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].phoneNumber": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d+"
+            }
+          ]
+        }
+      }
+    },
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "phoneNumber": "0415674567"
+          }
+        ]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "animals": [
+          {
+            "phoneNumber": "333"
+          },
+          {
+            "phoneNumber": "abc"
+          }
+        ]
+      }
+    }
+  }
+}

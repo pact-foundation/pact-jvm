@@ -1,10 +1,13 @@
 package au.com.dius.pact.provider.spring.junit5
 
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.SynchronousRequestResponse
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
@@ -46,9 +49,13 @@ class MockMvcTestTarget @JvmOverloads constructor(
 ) : TestTarget {
     override fun getProviderInfo(serviceName: String, pactSource: PactSource?) = ProviderInfo(serviceName)
 
-    override fun prepareRequest(interaction: Interaction, context: MutableMap<String, Any>): Pair<MockHttpServletRequestBuilder, MockMvc> {
-      if (interaction is RequestResponseInteraction) {
-        return toMockRequestBuilder(interaction.request.generatedRequest(context)) to buildMockMvc()
+    override fun prepareRequest(
+      interaction: Interaction,
+      context: MutableMap<String, Any>
+    ): Pair<MockHttpServletRequestBuilder, MockMvc> {
+      if (interaction is SynchronousRequestResponse) {
+          val request = interaction.request.generatedRequest(context, GeneratorTestMode.Provider)
+          return toMockRequestBuilder(request) to buildMockMvc()
       }
       throw UnsupportedOperationException("Only request/response interactions can be used with an MockMvc test target")
     }
@@ -82,11 +89,12 @@ class MockMvcTestTarget @JvmOverloads constructor(
           .build()
     }
 
-    private fun toMockRequestBuilder(request: Request): MockHttpServletRequestBuilder {
+    private fun toMockRequestBuilder(request: IRequest): MockHttpServletRequestBuilder {
         val body = request.body
         return if (body.isPresent()) {
             if (request.isMultipartFileUpload()) {
-                val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(), request.contentTypeHeader()))
+                val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(),
+                  request.asHttpPart().contentTypeHeader()))
                 val multipartRequest = MockMvcRequestBuilders.fileUpload(requestUriString(request))
                 var i = 0
                 while (i < multipart.count) {
@@ -109,7 +117,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
         }
     }
 
-    private fun requestUriString(request: Request): URI {
+    private fun requestUriString(request: IRequest): URI {
         val uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
         val query = request.query
@@ -122,7 +130,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
         return URI.create(uriBuilder.toUriString())
     }
 
-    private fun mapHeaders(request: Request, hasBody: Boolean): HttpHeaders {
+    private fun mapHeaders(request: IRequest, hasBody: Boolean): HttpHeaders {
         val httpHeaders = HttpHeaders()
 
         request.headers.forEach { (k, v) ->

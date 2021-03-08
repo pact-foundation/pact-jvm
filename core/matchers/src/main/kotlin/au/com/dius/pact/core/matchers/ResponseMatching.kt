@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.Response
 import mu.KLogging
 
@@ -17,18 +18,18 @@ object ResponseMatching : KLogging() {
   }
 
   @JvmStatic
-  fun responseMismatches(expected: Response, actual: Response): List<Mismatch> {
+  fun responseMismatches(expected: IResponse, actual: IResponse): List<Mismatch> {
     val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), true)
     val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), true)
 
-    val bodyResults = Matching.matchBody(expected, actual, bodyContext)
+    val bodyResults = Matching.matchBody(expected.asHttpPart(), actual.asHttpPart(), bodyContext)
     val typeResult = if (bodyResults.typeMismatch != null) {
       listOf(bodyResults.typeMismatch)
     } else {
       emptyList()
     }
     return (typeResult + Matching.matchStatus(expected.status, actual.status) +
-      Matching.matchHeaders(expected, actual, headerContext).flatMap { it.result } +
+      Matching.matchHeaders(expected.asHttpPart(), actual.asHttpPart(), headerContext).flatMap { it.result } +
       bodyResults.bodyResults.flatMap { it.result }).filterNotNull()
   }
 }

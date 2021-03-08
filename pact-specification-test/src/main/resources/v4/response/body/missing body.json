@@ -1,0 +1,24 @@
+{
+  "match": true,
+  "comment": "Missing body",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"}
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "feet": 4,
+          "name": "Mary",
+          "favouriteColours": [
+            "red",
+            "blue"
+          ]
+        }
+      }
+    }
+  }
+}

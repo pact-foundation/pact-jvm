@@ -1,0 +1,17 @@
+{
+  "match": false,
+  "comment": "Methods is incorrect",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {}
+  },
+  "actual": {
+    "method": "GET",
+    "path": "/",
+    "query": {},
+    "headers": {}
+
+  }
+}

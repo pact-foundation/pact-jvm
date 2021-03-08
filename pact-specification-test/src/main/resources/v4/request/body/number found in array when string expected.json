@@ -1,0 +1,42 @@
+{
+  "match": false,
+  "comment": "Favourite colours expected to be strings found a number",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteNumbers": [
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteNumbers": [
+            "1",
+            2,
+            "3"
+          ]
+        }
+      }
+    }
+  }
+}

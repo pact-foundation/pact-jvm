@@ -1,0 +1,32 @@
+{
+  "match": false,
+  "comment": "Favourite colours in wrong order",
+  "expected": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteColours": [
+            "red",
+            "blue"
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "contents": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "alligator": {
+          "favouriteColours": [
+            "blue",
+            "red"
+          ]
+        }
+      }
+    }
+  }
+}

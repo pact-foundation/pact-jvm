@@ -1,0 +1,41 @@
+{
+  "match": true,
+  "comment": "additional property with type matcher wildcards",
+  "expected": {
+    "headers": {},
+    "body" : {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "myPerson": {
+          "name": "Any name"
+        }
+      }
+    },
+    "matchingRules" : {
+      "body": {
+        "$.myPerson.*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": {
+      "contentType": "application/json",
+      "encoded": false,
+      "content": {
+        "myPerson": {
+          "name": "Jon Peterson",
+          "age": "39",
+          "nationality": "Australian"
+        }
+      }
+    }    
+  }
+}

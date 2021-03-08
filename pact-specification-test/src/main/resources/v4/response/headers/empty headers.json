@@ -1,0 +1,10 @@
+  {
+  "match": true,
+  "comment": "Empty headers match",
+  "expected" : {
+    "headers": {}
+  },
+  "actual": {
+    "headers": {}
+  }
+}

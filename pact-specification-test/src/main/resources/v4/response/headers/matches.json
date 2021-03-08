@@ -1,0 +1,16 @@
+{
+  "match": true,
+  "comment": "Headers match",
+  "expected" : {
+    "headers": {
+      "Accept": "alligators",
+      "Content-Type": "hippos"
+    }
+  },
+  "actual": {
+    "headers": {
+      "Content-Type": "hippos",
+      "Accept": "alligators"
+    }
+  }
+}

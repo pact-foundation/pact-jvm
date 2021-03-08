@@ -1,0 +1,20 @@
+{
+  "match": true,
+  "comment": "Whitespace between comma separated headers does not matter",
+  "expected" : {
+    "method": "POST",
+    "path": "/path",
+    "query": {},
+    "headers": {
+      "Accept": "alligators,hippos"
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/path",
+    "query": {},
+    "headers": {
+      "Accept": "alligators, hippos"
+    }
+  }
+}

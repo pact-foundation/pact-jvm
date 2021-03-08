@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
@@ -221,7 +222,7 @@ open class ProviderClient(
     }
   }
 
-  open fun makeRequest(request: Request): ProviderResponse {
+  open fun makeRequest(request: IRequest): ProviderResponse {
     val httpclient = getHttpClient()
     val method = prepareRequest(request)
     return executeRequest(httpclient, method)
@@ -233,7 +234,7 @@ open class ProviderClient(
     }
   }
 
-  open fun prepareRequest(request: Request): HttpUriRequest {
+  open fun prepareRequest(request: IRequest): HttpUriRequest {
     logger.debug { "Making request for provider $provider:" }
     logger.debug { request.toString() }
 
@@ -278,9 +279,9 @@ open class ProviderClient(
     }
   }
 
-  open fun setupBody(request: Request, method: HttpRequest) {
+  open fun setupBody(request: IRequest, method: HttpRequest) {
     if (method is HttpEntityEnclosingRequest && request.body.isPresent()) {
-      val contentTypeHeader = request.contentTypeHeader()
+      val contentTypeHeader = request.asHttpPart().contentTypeHeader()
       if (null != contentTypeHeader) {
         try {
           val contentType = ContentType.parse(contentTypeHeader)
@@ -294,7 +295,7 @@ open class ProviderClient(
     }
   }
 
-  open fun setupHeaders(request: Request, method: HttpRequest) {
+  open fun setupHeaders(request: IRequest, method: HttpRequest) {
     val headers = request.headers
     if (headers.isNotEmpty()) {
       headers.forEach { (key, value) ->
@@ -406,7 +407,7 @@ open class ProviderClient(
     return response
   }
 
-  open fun newRequest(request: Request): HttpUriRequest {
+  open fun newRequest(request: IRequest): HttpUriRequest {
     val scheme = provider.protocol
     val host = invokeIfClosure(provider.host)
     val port = convertToInteger(invokeIfClosure(provider.port))
@@ -424,11 +425,9 @@ open class ProviderClient(
       urlBuilder.path = path
     }
 
-    if (request.query != null) {
-      request.query.forEach { entry ->
-        entry.value.forEach {
-          urlBuilder.addParameter(entry.key, it)
-        }
+    request.query.forEach { entry ->
+      entry.value.forEach {
+        urlBuilder.addParameter(entry.key, it)
       }
     }
 

@@ -139,7 +139,7 @@ fun <M : Mismatch> domatch(
     is MaxEqualsIgnoreOrderMatcher -> matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
     is MinMaxEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn) +
             matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
-    is ContentTypeMatcher -> matchContentType(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
+    is ContentTypeMatcher -> matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     is ArrayContainsMatcher -> listOf()
     else -> matchEquality(path, expected, actual, mismatchFn)
   }
@@ -553,7 +553,7 @@ fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: 
 
 private val tika = TikaConfig()
 
-fun <M : Mismatch> matchContentType(
+fun <M : Mismatch> matchHeaderWithParameters(
   path: List<String>,
   contentType: ContentType,
   actual: Any?,
