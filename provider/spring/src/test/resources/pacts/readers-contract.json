@@ -77,7 +77,25 @@
         }
       }
     }
-  } ],
+  },
+  {
+    "provider_state": "book-exists",
+    "description" : "Get book CSV",
+    "request" : {
+      "method" : "GET",
+      "path" : "/api/books/90f1787e-9f39-4e42-b897-b59d29/csv",
+      "headers": {
+        "Accept": "text/csv"
+      }
+    },
+    "response" : {
+      "status" : 200,
+      "headers": {
+        "Content-Type": "text/csv"
+      },
+      "body": "AUTHOR,BEST_SELLER,CREATED_ON\nNick Hoftsettler,true,2021-03-13T00:00:00.000Z\n"
+    }
+  }],
   "metadata" : {
     "pact-specification" : {
       "version" : "2.0.0"

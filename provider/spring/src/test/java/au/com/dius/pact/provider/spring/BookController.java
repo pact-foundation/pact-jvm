@@ -1,11 +1,16 @@
 package au.com.dius.pact.provider.spring;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +40,18 @@ public class BookController {
     @RequestMapping(value = "/books/{id}", method = RequestMethod.GET)
     ResponseEntity<Book> getByID(@PathVariable UUID id) throws Exception {
         return new ResponseEntity(bookLogic.getBookById(id), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/books/{id}/csv", method = RequestMethod.GET, produces = {"text/csv"})
+    void getCsvByID(@PathVariable UUID id, HttpServletResponse response) throws Exception {
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", ContentDisposition.builder("attachment")
+          .filename("book.csv").build().toString());
+        response.setStatus(HttpStatus.OK.value());
+        try (Writer w = new OutputStreamWriter(response.getOutputStream())) {
+            w.write(bookLogic.getBookById(id).asCsv());
+            w.flush();
+        }
     }
 
     @RequestMapping(value = {"/books"}, method = RequestMethod.GET)
