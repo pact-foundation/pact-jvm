@@ -79,8 +79,8 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
       val pacts = handleWith<List<Pact>> { loader.load(serviceName) }.getOrElse {
         val ignoreAnnotation = AnnotationSupport.findAnnotation(context.requiredTestClass, IgnoreNoPactsToVerify::class.java)
         if (ignoreAnnotation.isPresent &&
-          (valueResolver != null && valueResolver.resolveValue(ignoreAnnotation.get().ignoreIoErrors) == "true") ||
-          ignoreAnnotation.get().ignoreIoErrors == "true") {
+          ((valueResolver != null && valueResolver.resolveValue(ignoreAnnotation.get().ignoreIoErrors) == "true") ||
+          ignoreAnnotation.get().ignoreIoErrors == "true")) {
           emptyList()
         } else {
           throw it
