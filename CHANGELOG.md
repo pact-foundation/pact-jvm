@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.18 - Bugfix Release
+
+* 273b9164d - feat: add a system property to enable redirect handling #1323 (Ronald Holshausen, Sat Mar 13 15:37:55 2021 +1100)
+* aadbde41d - chore: fix failing tests (Ronald Holshausen, Sat Mar 13 15:12:53 2021 +1100)
+* 275785837 - chore: add some tests around handling IO errors from Pact Broker #1322 (Ronald Holshausen, Sat Mar 13 14:56:52 2021 +1100)
+* 3a211ebc5 - chore: add example spring MVC test with CSV #1013 (Ronald Holshausen, Sat Mar 13 13:58:56 2021 +1100)
+* a80c5861b - fix: codenarc errors (Ronald Holshausen, Sat Mar 6 14:06:58 2021 +1100)
+* 85f0caa11 - chore: add tests for json object attributes formmated as dates #1220 (Ronald Holshausen, Sat Mar 6 14:01:35 2021 +1100)
+* 03fbfe060 - feat: update content type overrides to allow setting the content type to json #1314 (Ronald Holshausen, Sat Mar 6 12:59:06 2021 +1100)
+* 4e5c05bb2 - included literal 'null' check for regex as it has similar issue as JsonValue.Null (Ryan Levell, Sat Feb 27 19:27:56 2021 -0600)
+* c19ff1fab - fixed regex typo. added happy path json regex (Ryan Levell, Sat Feb 27 08:00:43 2021 -0600)
+* ba9ac502d - added check for Null JsonValue for regex matcher (Ryan Levell, Fri Feb 26 21:24:09 2021 -0600)
+* e954d801a - fix(JUnit 4): do not fire the test finished event for pending pacts #1310 (Ronald Holshausen, Sat Feb 20 15:25:09 2021 +1100)
+* b782ccca0 - feat: deprecate pact broker host, port and scheme in favour of a url #1300 (Ronald Holshausen, Sat Feb 20 14:03:25 2021 +1100)
+* 10e8c72b3 - Update gradle.yml (Ronald Holshausen, Fri Feb 12 12:30:50 2021 +1100)
+* f5ae1c5d1 - Update gradle.yml (Ronald Holshausen, Fri Feb 12 12:26:12 2021 +1100)
+* 70eea0cf3 - bump version to 4.1.18 (Ronald Holshausen, Thu Feb 11 15:01:18 2021 +1100)
+
 # 4.1.17 - Bugfix Release
 
 * 612f99200 - feat: fix codenarc errors (Ronald Holshausen, Thu Feb 11 14:30:49 2021 +1100)
