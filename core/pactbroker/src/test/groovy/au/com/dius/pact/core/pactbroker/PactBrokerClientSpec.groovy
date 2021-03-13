@@ -606,7 +606,8 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * halClient.navigate() >> {
-      throw new InvalidNavigationRequest('PKIX path building failed', new SSLHandshakeException('PKIX path building failed'))
+      throw new InvalidNavigationRequest('PKIX path building failed',
+        new SSLHandshakeException('PKIX path building failed'))
     }
     notThrown(SSLHandshakeException)
     result instanceof Err
