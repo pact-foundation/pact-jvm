@@ -102,6 +102,6 @@ public class BooksPactProviderTest {
 
     @TargetRequestFilter
     public void requestFilter(MockHttpServletRequestBuilder request) {
-        request.header("Content-Type", "application/json");
+        // request.header("Content-Type", "application/json");
     }
 }

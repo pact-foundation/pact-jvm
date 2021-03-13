@@ -35,8 +35,6 @@ public class ConsumerClient {
                 .bodyString(body, mimeType)
                 .execute().returnContent().asString();
 
-
-
         return jsonToMap(respBody);
     }
 

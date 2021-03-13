@@ -172,7 +172,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
   fun mapHeaders(request: Request, hasBody: Boolean): HttpHeaders {
     val httpHeaders = HttpHeaders()
 
-    request.headers?.forEach { k, v ->
+    request.headers.forEach { (k, v) ->
       httpHeaders.add(k, v.joinToString(", "))
     }
 

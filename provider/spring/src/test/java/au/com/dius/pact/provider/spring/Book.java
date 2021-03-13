@@ -51,4 +51,8 @@ public class Book {
         this.createdOn = createdOn;
     }
 
+    public String asCsv() {
+        return "AUTHOR,BEST_SELLER,CREATED_ON\n" +
+          author + "," + bestSeller + "," + createdOn + "\n";
+    }
 }
