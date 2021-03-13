@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
+import au.com.dius.pact.core.pactbroker.InvalidNavigationRequest
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
@@ -21,6 +22,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
+import javax.net.ssl.SSLHandshakeException
 import java.lang.annotation.Annotation
 
 import static au.com.dius.pact.core.support.expressions.ExpressionParser.VALUES_SEPARATOR
@@ -1245,6 +1247,18 @@ class PactBrokerLoaderSpec extends Specification {
     null        | null   | null       | 'http://localhost/' | 'http://localhost/'
     'localhost' | '1234' | null       | null                | 'http://localhost:1234'
     'localhost' | '1234' | 'https'    | null                | 'https://localhost:1234'
+  }
+
+  @Issue('#1322')
+  def 'Throws an Exception if there is a certificate error'() {
+    when:
+    pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false, '') >> {
+      throw new InvalidNavigationRequest('PKIX path building failed', new SSLHandshakeException('PKIX path building failed'))
+    }
+    thrown(InvalidNavigationRequest)
   }
 
   private static VersionSelector createVersionSelector(Map args = [:]) {
