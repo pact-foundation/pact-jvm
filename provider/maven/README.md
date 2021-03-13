@@ -267,6 +267,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|
 |`pact.content_type.override.<TYPE>.<SUBTYPE>=text\|json\|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
+|`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
 
 Example in the configuration section:
 
