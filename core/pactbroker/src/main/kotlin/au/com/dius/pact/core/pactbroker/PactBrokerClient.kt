@@ -18,6 +18,7 @@ import com.github.michaelbull.result.unwrap
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import mu.KLogging
 import java.io.File
+import java.io.IOException
 import java.net.URLDecoder
 import java.util.function.Consumer
 
@@ -114,6 +115,7 @@ interface IPactBrokerClient {
   /**
    * Fetches all consumers for the given provider and selectors
    */
+  @Throws(IOException::class)
   fun fetchConsumersWithSelectors(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,

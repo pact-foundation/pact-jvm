@@ -11,6 +11,8 @@ import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import javax.net.ssl.SSLHandshakeException
+
 @SuppressWarnings('UnnecessaryGetter')
 class PactBrokerClientSpec extends Specification {
 
@@ -586,5 +588,28 @@ class PactBrokerClientSpec extends Specification {
     1 * client.fetchConsumersWithTag('provider', 'DEV') >> []
     1 * client.fetchConsumersWithTag('provider', 'MASTER') >> []
     result instanceof Ok
+  }
+
+  @Issue('#1322')
+  def 'when fetching pacts fails with a certificate error'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def selectors = [
+      new ConsumerVersionSelector('DEV', true, null, 'MASTER')
+    ]
+
+    when:
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], false, '')
+
+    then:
+    1 * halClient.navigate() >> {
+      throw new InvalidNavigationRequest('PKIX path building failed', new SSLHandshakeException('PKIX path building failed'))
+    }
+    notThrown(SSLHandshakeException)
+    result instanceof Err
+    result.component2() instanceof InvalidNavigationRequest
   }
 }

@@ -100,6 +100,7 @@ open class PactBrokerLoader(
     overriddenConsumer = consumer
   }
 
+  @Throws(IOException::class)
   override fun load(providerName: String): List<Pact> {
     val resolver = setupValueResolver()
     return when {
