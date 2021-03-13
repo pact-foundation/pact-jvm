@@ -99,6 +99,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|
 |`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
+|`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
 
 ## Specifying the provider hostname at runtime
 

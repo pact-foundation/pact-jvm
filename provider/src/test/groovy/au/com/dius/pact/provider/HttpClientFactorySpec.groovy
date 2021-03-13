@@ -1,7 +1,11 @@
 package au.com.dius.pact.provider
 
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.LaxRedirectStrategy
+import org.apache.http.impl.execchain.RedirectExec
+import spock.lang.Issue
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 class HttpClientFactorySpec extends Specification {
 
@@ -29,4 +33,44 @@ class HttpClientFactorySpec extends Specification {
     new HttpClientFactory().newClient(provider) != null
   }
 
+  @Issue('#1323')
+  @RestoreSystemProperties
+  def 'if pact.verifier.enableRedirectHandling is set, add a redirect handler'() {
+    given:
+    def provider = new ProviderInfo()
+    System.setProperty('pact.verifier.enableRedirectHandling', 'true')
+
+    when:
+    def client = new HttpClientFactory().newClient(provider)
+
+    then:
+    client.execChain instanceof RedirectExec
+    client.execChain.redirectStrategy instanceof LaxRedirectStrategy
+  }
+
+  @Issue('#1323')
+  @RestoreSystemProperties
+  def 'if pact.verifier.enableRedirectHandling is not set to true, do not add a redirect handler'() {
+    given:
+    def provider = new ProviderInfo()
+    System.setProperty('pact.verifier.enableRedirectHandling', 'false')
+
+    when:
+    def client = new HttpClientFactory().newClient(provider)
+
+    then:
+    !(client.execChain instanceof RedirectExec)
+  }
+
+  @Issue('#1323')
+  def 'if pact.verifier.enableRedirectHandling is not set, do not add a redirect handler'() {
+    given:
+    def provider = new ProviderInfo()
+
+    when:
+    def client = new HttpClientFactory().newClient(provider)
+
+    then:
+    !(client.execChain instanceof RedirectExec)
+  }
 }
