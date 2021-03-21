@@ -3,6 +3,7 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
@@ -10,10 +11,15 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.apache.commons.lang3.builder.HashCodeBuilder
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -299,8 +305,124 @@ class TestResultAccumulatorSpec extends Specification {
   }
 
   private int calculateHash(String... args) {
-    def builder = new HashCodeBuilder()
+    def builder = new HashCodeBuilder(91, 47)
     args.each { builder.append(it) }
     builder.toHashCode()
+  }
+
+  @Issue('#1266')
+  @SuppressWarnings(['AbcMetric', 'VariableName', 'MethodSize', 'UnnecessaryObjectReferences', 'UnnecessaryGetter'])
+  def 'updateTestResult - with a pending and non-pending pact'() {
+    given:
+
+    def provider1 = new Provider('provider1')
+
+    def consumer1 = new Consumer('consumer1')
+    def consumer2 = new Consumer('consumer2')
+    def consumer3 = new Consumer('consumer3')
+
+    def body = OptionalBody.missing()
+    def mr = new MatchingRulesImpl()
+    def g = new Generators()
+
+    def interaction1_1 = new Message('interaction1_1', [], body, mr, g, [:], 'interaction1_1')
+    def interaction1_2 = new Message('interaction1_2', [], body, mr, g, [:], 'interaction1_2')
+    def interaction1_3 = new Message('interaction1_3', [], body, mr, g, [:], 'interaction1_3')
+    def interaction1_4 = new Message('interaction1_4', [], body, mr, g, [:], 'interaction1_4')
+    def interaction1_5 = new Message('interaction1_5', [], body, mr, g, [:], 'interaction1_5')
+
+    def interaction2_1 = new Message('interaction2_1', [], body, mr, g, [:], 'interaction2_1')
+    def interaction2_2 = new Message('interaction2_2', [], body, mr, g, [:], 'interaction2_2')
+    def interaction2_3 = new Message('interaction2_3', [], body, mr, g, [:], 'interaction2_3')
+    def interaction2_4 = new Message('interaction2_4', [], body, mr, g, [:], 'interaction2_4')
+
+    def interaction3_1 = new Message('interaction3_1', [], body, mr, g, [:], 'interaction3_1')
+    def interaction3_2 = new Message('interaction3_2', [], body, mr, g, [:], 'interaction3_2')
+    def interaction3_3 = new Message('interaction3_3', [], body, mr, g, [:], 'interaction3_3')
+    def interaction3_4 = new Message('interaction3_4', [], body, mr, g, [:], 'interaction3_4')
+
+    def pact1 = new MessagePact(provider1, consumer1, [interaction1_1, interaction1_2, interaction1_3, interaction1_4,
+                                                       interaction1_5])
+    def source1 = new BrokerUrlSource('http://url1', 'http://broker', [:], [:], 'master')
+    def pact2 = new MessagePact(provider1, consumer2, [interaction2_1, interaction2_2, interaction2_3, interaction2_4])
+    def source2 = new BrokerUrlSource('http://url2', 'http://broker', [:], [:], 'master')
+    def pact3 = new MessagePact(provider1, consumer2, [interaction2_1, interaction2_2, interaction2_3, interaction2_4])
+    def source3 = new BrokerUrlSource('http://url3', 'http://broker', [:], [:], 'tag1')
+    def pact4 = new MessagePact(provider1, consumer3, [interaction3_1, interaction3_2, interaction3_3, interaction3_4])
+    def source4 = new BrokerUrlSource('http://url4', 'http://broker', [:], [:], 'master')
+
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    def verificationReporter = Mock(VerificationReporter)
+    testResultAccumulator.verificationReporter = verificationReporter
+    def mockValueResolver = Mock(ValueResolver)
+    def exception = new RuntimeException()
+
+    when:
+    testResultAccumulator.updateTestResult(pact1, interaction1_1,
+      [new VerificationResult.Ok(new HashSet(['interaction1_1']))], source1, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact1, interaction1_3,
+      [new VerificationResult.Ok(new HashSet(['interaction1_3']))], source1, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact2, interaction2_1,
+      [new VerificationResult.Ok(new HashSet(['interaction2_1']))], source2, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact3, interaction2_1,
+      [new VerificationResult.Ok(new HashSet(['interaction2_1']))], source3, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact1, interaction1_2,
+      [new VerificationResult.Ok(new HashSet(['interaction1_2']))], source1, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact2, interaction2_4,
+      [new VerificationResult.Ok(new HashSet(['interaction2_4']))], source2, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact3, interaction2_4,
+      [new VerificationResult.Failed('failed', 'failed',
+        [
+          interaction2_4: [new VerificationFailureType.ExceptionFailure('failed', exception)]
+        ], true)
+      ], source3, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact2, interaction2_2,
+      [new VerificationResult.Ok(new HashSet(['interaction2_2']))], source2, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact3, interaction2_2,
+      [new VerificationResult.Ok(new HashSet(['interaction2_2']))], source3, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact2, interaction2_3,
+      [new VerificationResult.Ok(new HashSet(['interaction2_3']))], source2, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact3, interaction2_3,
+      [new VerificationResult.Ok(new HashSet(['interaction2_3']))], source3, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact1, interaction1_4,
+      [new VerificationResult.Ok(new HashSet(['interaction1_4']))], source1, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact4, interaction3_1,
+      [new VerificationResult.Ok(new HashSet(['interaction3_1']))], source4, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact4, interaction3_3,
+      [new VerificationResult.Ok(new HashSet(['interaction3_3']))], source4, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact4, interaction3_2,
+      [new VerificationResult.Ok(new HashSet(['interaction3_2']))], source4, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact4, interaction3_4,
+      [new VerificationResult.Ok(new HashSet(['interaction3_4']))], source4, mockValueResolver)
+    testResultAccumulator.updateTestResult(pact1, interaction1_5,
+      [new VerificationResult.Ok(new HashSet(['interaction1_5']))], source1, mockValueResolver)
+
+    then:
+    verificationReporter.publishingResultsDisabled(_) >> false
+    1 * verificationReporter.reportResults(pact2,
+      new TestResult.Ok(['interaction2_3', 'interaction2_1', 'interaction2_4', 'interaction2_2'] as HashSet), _, _,
+      [])
+    1 * verificationReporter.reportResults(pact3,
+      new TestResult.Failed(
+        [
+          [exception: exception, description: 'failed', interactionId: 'interaction2_4'],
+          [interactionId: 'interaction2_1'],
+          [interactionId: 'interaction2_2'],
+          [interactionId: 'interaction2_3']
+        ], 'failed'), _, _,
+      [])
+    1 * verificationReporter.reportResults(pact4,
+      new TestResult.Ok(['interaction3_1', 'interaction3_2', 'interaction3_3', 'interaction3_4'] as HashSet), _, _,
+      [])
+    1 * verificationReporter.reportResults(pact1,
+      new TestResult.Ok(
+        ['interaction1_1', 'interaction1_2', 'interaction1_3', 'interaction1_4', 'interaction1_5'] as HashSet
+      ), _, _, [])
+    0 * verificationReporter._
+    testResultAccumulator.testResults.isEmpty()
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
   }
 }

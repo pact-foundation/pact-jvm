@@ -20,6 +20,13 @@ interface TestResultAccumulator {
   fun updateTestResult(
     pact: Pact,
     interaction: Interaction,
+    testExecutionResult: List<VerificationResult>,
+    source: PactSource,
+    propertyResolver: ValueResolver = SystemPropertyResolver
+  )
+  fun updateTestResult(
+    pact: Pact,
+    interaction: Interaction,
     testExecutionResult: TestResult,
     source: PactSource?,
     propertyResolver: ValueResolver = SystemPropertyResolver
@@ -32,12 +39,12 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   val testResults: MutableMap<Int, MutableMap<Int, TestResult>> = mutableMapOf()
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
-  fun updateTestResult(
+  override fun updateTestResult(
     pact: Pact,
     interaction: Interaction,
     testExecutionResult: List<VerificationResult>,
     source: PactSource,
-    propertyResolver: ValueResolver = SystemPropertyResolver
+    propertyResolver: ValueResolver
   ) {
     val initial = TestResult.Ok(interaction.interactionId)
     updateTestResult(pact, interaction, testExecutionResult.fold(initial) {
@@ -93,7 +100,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   }
 
   fun calculatePactHash(pact: Pact, source: PactSource?): Int {
-    val builder = HashCodeBuilder().append(pact.consumer.name).append(pact.provider.name)
+    val builder = HashCodeBuilder(91, 47).append(pact.consumer.name).append(pact.provider.name)
 
     if (source is BrokerUrlSource && source.tag.isNotEmpty()) {
       builder.append(source.tag)

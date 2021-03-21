@@ -26,6 +26,13 @@ public class BooksPactProviderStates {
       .thenReturn(new Book(UUID.randomUUID(), "Nick Hoftsettler", true, dateTime));
   }
 
+  @State("book-exists-on-2021-03-13")
+  public void bookFoundOn13th() {
+    when(bookLogic.getBookById(any(UUID.class)))
+      .thenReturn(new Book(UUID.randomUUID(), "Nick Hoftsettler", true,
+        DateTime.parse("2021-03-13T00:00:00.000Z")));
+  }
+
   @State("book-not-found")
   public void bookNotFound() {
     when(bookLogic.getBookById(any(UUID.class)))
