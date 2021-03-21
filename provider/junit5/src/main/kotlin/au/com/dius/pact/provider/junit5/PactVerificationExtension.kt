@@ -12,6 +12,7 @@ import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
 import mu.KLogging
@@ -40,7 +41,7 @@ class PactVerificationExtension(
 ) : TestTemplateInvocationContext, ParameterResolver, BeforeEachCallback, BeforeTestExecutionCallback,
   AfterTestExecutionCallback {
 
-  private val testResultAccumulator = DefaultTestResultAccumulator
+  private val testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
   override fun getDisplayName(invocationIndex: Int): String {
     return when {
