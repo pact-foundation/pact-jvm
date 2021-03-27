@@ -282,7 +282,7 @@ class TestResultAccumulatorSpec extends Specification {
 
   @Unroll
   @SuppressWarnings('LineLength')
-  def 'calculatePactHash includes the tag if one is available'() {
+  def 'calculatePactHash includes the Pact URL if one is available'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
       [interaction1])
@@ -300,8 +300,8 @@ class TestResultAccumulatorSpec extends Specification {
     new UrlSource('http://pact.io')                                                                           | calculateHash('consumer', 'provider')
     new FileSource('/tmp/pact' as File)                                                                       | calculateHash('consumer', 'provider')
     new FileSource('/tmp/pact' as File)                                                                       | calculateHash('consumer', 'provider')
-    new BrokerUrlSource('https://test.pact.dius.com.au', 'https://test.pact.dius.com.au', [:], [:])           | calculateHash('consumer', 'provider')
-    new BrokerUrlSource('https://test.pact.dius.com.au', 'https://test.pact.dius.com.au', [:], [:], 'master') | calculateHash('consumer', 'provider', 'master')
+    new BrokerUrlSource('https://test.pact.dius.com.au', 'https://test.pact.dius.com.au', [:], [:])           | calculateHash('consumer', 'provider', 'https://test.pact.dius.com.au')
+    new BrokerUrlSource('https://test.pact.dius.com.au', 'https://test.pact.dius.com.au', [:], [:], 'master') | calculateHash('consumer', 'provider', 'https://test.pact.dius.com.au')
   }
 
   private int calculateHash(String... args) {
@@ -314,7 +314,6 @@ class TestResultAccumulatorSpec extends Specification {
   @SuppressWarnings(['AbcMetric', 'VariableName', 'MethodSize', 'UnnecessaryObjectReferences', 'UnnecessaryGetter'])
   def 'updateTestResult - with a pending and non-pending pact'() {
     given:
-
     def provider1 = new Provider('provider1')
 
     def consumer1 = new Consumer('consumer1')
@@ -343,13 +342,13 @@ class TestResultAccumulatorSpec extends Specification {
 
     def pact1 = new MessagePact(provider1, consumer1, [interaction1_1, interaction1_2, interaction1_3, interaction1_4,
                                                        interaction1_5])
-    def source1 = new BrokerUrlSource('http://url1', 'http://broker', [:], [:], 'master')
+    def source1 = new BrokerUrlSource('http://url1', 'http://broker', [:], [:])
     def pact2 = new MessagePact(provider1, consumer2, [interaction2_1, interaction2_2, interaction2_3, interaction2_4])
-    def source2 = new BrokerUrlSource('http://url2', 'http://broker', [:], [:], 'master')
+    def source2 = new BrokerUrlSource('http://url2', 'http://broker', [:], [:])
     def pact3 = new MessagePact(provider1, consumer2, [interaction2_1, interaction2_2, interaction2_3, interaction2_4])
-    def source3 = new BrokerUrlSource('http://url3', 'http://broker', [:], [:], 'tag1')
+    def source3 = new BrokerUrlSource('http://url3', 'http://broker', [:], [:])
     def pact4 = new MessagePact(provider1, consumer3, [interaction3_1, interaction3_2, interaction3_3, interaction3_4])
-    def source4 = new BrokerUrlSource('http://url4', 'http://broker', [:], [:], 'master')
+    def source4 = new BrokerUrlSource('http://url4', 'http://broker', [:], [:])
 
     testResultAccumulator.testResults.clear()
     def reporter = testResultAccumulator.verificationReporter

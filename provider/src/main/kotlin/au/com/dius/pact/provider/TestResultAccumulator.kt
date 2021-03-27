@@ -102,8 +102,8 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   fun calculatePactHash(pact: Pact<out Interaction>, source: PactSource?): Int {
     val builder = HashCodeBuilder(91, 47).append(pact.consumer.name).append(pact.provider.name)
 
-    if (source is BrokerUrlSource && source.tag.isNotEmpty()) {
-      builder.append(source.tag)
+    if (source is BrokerUrlSource && source.url.isNotEmpty()) {
+      builder.append(source.url)
     }
 
     return builder.toHashCode()
