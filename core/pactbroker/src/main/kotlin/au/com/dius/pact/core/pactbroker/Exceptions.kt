@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
 import org.apache.http.StatusLine
+import java.io.IOException
 
 /**
  * This exception is thrown when we don't receive a HAL response from the broker
@@ -19,9 +20,9 @@ open class RequestFailedException(
   val status: StatusLine,
   val body: String?,
   message: String = "Request failed with $status"
-) : RuntimeException(message)
+) : IOException(message)
 
 /**
  * This exception is raised when an invalid navigation is attempted
  */
-open class InvalidNavigationRequest(override val message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+open class InvalidNavigationRequest(override val message: String, cause: Throwable? = null) : IOException(message, cause)

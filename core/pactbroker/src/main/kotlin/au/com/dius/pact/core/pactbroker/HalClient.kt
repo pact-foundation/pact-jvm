@@ -42,6 +42,7 @@ interface IHalClient {
   /**
    * Navigates to the Root
    */
+  @Throws(InvalidNavigationRequest::class)
   fun navigate(): IHalClient
 
   /**
@@ -218,6 +219,7 @@ open class HalClient @JvmOverloads constructor(
     return httpClient!!
   }
 
+  @Throws(InvalidNavigationRequest::class)
   override fun navigate(): IHalClient {
     when (val result = fetch(ROOT)) {
       is Ok<JsonValue.Object> -> pathInfo = result.value
