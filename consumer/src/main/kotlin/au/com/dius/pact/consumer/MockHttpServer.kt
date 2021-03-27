@@ -257,7 +257,7 @@ abstract class BaseJdkMockServer(
     exchange.close()
   }
 
-  private fun toPactRequest(exchange: HttpExchange): Request {
+  fun toPactRequest(exchange: HttpExchange): Request {
     val headers = exchange.requestHeaders
     val contentType = contentType(headers)
     val bodyContents = when (bodyIsCompressed(headers.getFirst("Content-Encoding"))) {
@@ -270,7 +270,7 @@ abstract class BaseJdkMockServer(
     } else {
       OptionalBody.body(bodyContents, contentType)
     }
-    return Request(exchange.requestMethod, exchange.requestURI.path,
+    return Request(exchange.requestMethod, exchange.requestURI.rawPath,
       queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers.toMutableMap(), body)
   }
 

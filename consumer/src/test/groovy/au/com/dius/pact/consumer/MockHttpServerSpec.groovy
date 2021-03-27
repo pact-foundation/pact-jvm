@@ -4,7 +4,9 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
+import com.sun.net.httpserver.HttpExchange
 import spock.lang.IgnoreIf
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Timeout
 import spock.lang.Unroll
@@ -45,7 +47,7 @@ class MockHttpServerSpec extends Specification {
   }
 
   @Timeout(60)
-  @IgnoreIf({ System.env.TRAVIS != 'true' })
+  @IgnoreIf({ System.env.CI != 'true' })
   def 'handle more than 200 tests'() {
     given:
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [])
@@ -61,4 +63,22 @@ class MockHttpServerSpec extends Specification {
     true
   }
 
+  @Issue('#1326')
+  def 'use the raw path when creating the Pact request'() {
+    given:
+    def mockServer = new MockHttpServer(new RequestResponsePact(new Provider(), new Consumer(), []),
+      MockProviderConfig.createDefault())
+    def exchange = Mock(HttpExchange) {
+      getRequestHeaders() >> new com.sun.net.httpserver.Headers()
+      getRequestURI() >> new URI('http://localhost/endpoint/Some%2FValue')
+      getRequestBody() >> new ByteArrayInputStream([] as byte[])
+      getRequestMethod() >> 'GET'
+    }
+
+    when:
+    def request = mockServer.toPactRequest(exchange)
+
+    then:
+    request.path == '/endpoint/Some%2FValue'
+  }
 }

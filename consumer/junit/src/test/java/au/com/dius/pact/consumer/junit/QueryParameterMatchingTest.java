@@ -14,7 +14,7 @@ public class QueryParameterMatchingTest extends ConsumerPactTest {
     protected RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
                 .uponReceiving("java test interaction with a query string matcher")
-                .path("/some path")
+                .path("/some/path")
                 .method("GET")
                 .queryMatchingDate("date", "yyyy-MM-dd", "2011-12-03")
                 .queryMatchingDate("date2", "yyyy-MM-dd")
@@ -40,7 +40,7 @@ public class QueryParameterMatchingTest extends ConsumerPactTest {
 
     @Override
     protected void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException {
-        new ConsumerClient(mockServer.getUrl()).getAsMap("/some path",
+        new ConsumerClient(mockServer.getUrl()).getAsMap("/some/path",
           "date=2011-12-03&date2=2012-09-13&time=10:05:22&datetime=2019-01-23 16:09:33" +
             "&isodate=2011-12-03&isotime=10:05:22&isodatetime=2019-01-23T16:09:33+11:00");
     }

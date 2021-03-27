@@ -67,7 +67,7 @@ class PactBrokerClientPactSpec extends Specification {
       }
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0/A',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0%2FA',
         body: pactContents
       )
       willRespondWith(status: 200)
@@ -99,7 +99,7 @@ class PactBrokerClientPactSpec extends Specification {
         }
         uponReceiving('a tag create request')
         withAttributes(method: 'PUT',
-                path: '/pacticipants/Foo Consumer/versions/10.0.0/tags/A',
+                path: '/pacticipants/Foo%20Consumer/versions/10.0.0/tags/A',
                 body: '{}'
         )
         willRespondWith(status: 201)
@@ -131,7 +131,7 @@ class PactBrokerClientPactSpec extends Specification {
       }
       uponReceiving('a tag create request')
       withAttributes(method: 'PUT',
-              path: '/pacticipants/Foo Consumer/versions/10.0.0/tags/A',
+              path: '/pacticipants/Foo%20Consumer/versions/10.0.0/tags/A',
               body: '{}'
       )
       willRespondWith(status: 500)
@@ -163,7 +163,7 @@ class PactBrokerClientPactSpec extends Specification {
       }
       uponReceiving('a pact publish request which will be forbidden')
       withAttributes(method: 'PUT',
-              path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+              path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
               body: pactContents
       )
       willRespondWith(status: 401, headers: [
@@ -201,7 +201,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('No pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish request with invalid version')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/XXXX',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/XXXX',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'], body: body)
@@ -245,7 +245,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('No pact has been published between the Provider and Foo Consumer and there is a similar consumer')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 409, headers: ['Content-Type': 'text/plain'], body: body)
@@ -281,7 +281,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('Non-JSON response')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'text/plain'],
@@ -319,7 +319,7 @@ class PactBrokerClientPactSpec extends Specification {
         }
       }
       uponReceiving('a request for the provider pacts')
-      withAttributes(path: '/pacts/provider/Activity Service/latest')
+      withAttributes(path: '/pacts/provider/Activity%20Service/latest')
       willRespondWith(status: 200)
       withBody(contentType: 'application/hal+json') {
         '_links' {
@@ -353,7 +353,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('A pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish verification request')
       withAttributes(method: 'POST',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results'
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890/verification-results'
       )
       withBody {
         success true
@@ -386,7 +386,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('A pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish verification request with build info')
       withAttributes(method: 'POST',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results'
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890/verification-results'
       )
       withBody {
         success true
@@ -420,7 +420,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('A pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish verification request with failure info')
       withAttributes(method: 'POST',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results')
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890/verification-results')
       withBody(mimeType: 'application/json') {
         success false
         providerApplicationVersion '10.0.0'
@@ -582,7 +582,7 @@ class PactBrokerClientPactSpec extends Specification {
         consumer2: 'Foo Web Client 2'
       ])
       uponReceiving('a request for the provider pacts')
-      withAttributes(method: 'POST', path: '/pacts/provider/Activity Service/for-verification')
+      withAttributes(method: 'POST', path: '/pacts/provider/Activity%20Service/for-verification')
       withBody(contentType: 'application/hal+json') {
         consumerVersionSelectors([
             {
@@ -681,7 +681,7 @@ class PactBrokerClientPactSpec extends Specification {
         consumer2: 'Foo Web Client 2'
       ])
       uponReceiving('a request for the provider pacts')
-      withAttributes(method: 'POST', path: '/pacts/provider/Activity Service/for-verification')
+      withAttributes(method: 'POST', path: '/pacts/provider/Activity%20Service/for-verification')
       withBody(contentType: 'application/hal+json') {
         consumerVersionSelectors([
           {
@@ -794,7 +794,7 @@ class PactBrokerClientPactSpec extends Specification {
         consumer2: 'Foo Web Client 2'
       ])
       uponReceiving('a request for the provider pacts')
-      withAttributes(method: 'POST', path: '/pacts/provider/Activity Service/for-verification')
+      withAttributes(method: 'POST', path: '/pacts/provider/Activity%20Service/for-verification')
       withBody(contentType: 'application/hal+json') {
         consumerVersionSelectors([
           {
