@@ -1,10 +1,12 @@
 package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.ProviderUtils
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider
 import org.junit.platform.commons.support.AnnotationSupport
 import org.junit.platform.commons.support.HierarchyTraversalMode
+import java.io.IOException
 import java.util.stream.Stream
 
 val namespace: ExtensionContext.Namespace = ExtensionContext.Namespace.create("pact-jvm")
@@ -77,14 +80,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
       }
       description += "\nSource: ${loader.description()}"
       val pacts = handleWith<List<Pact>> { loader.load(serviceName) }.getOrElse {
-        val ignoreAnnotation = AnnotationSupport.findAnnotation(context.requiredTestClass, IgnoreNoPactsToVerify::class.java)
-        if (ignoreAnnotation.isPresent &&
-          ((valueResolver != null && valueResolver.resolveValue(ignoreAnnotation.get().ignoreIoErrors) == "true") ||
-          ignoreAnnotation.get().ignoreIoErrors == "true")) {
-          emptyList()
-        } else {
-          throw it
-        }
+        handleException(context, valueResolver, it)
       }
       filterPactsByAnnotations(pacts, context.requiredTestClass)
     }.filter { p -> consumerName == null || p.consumer.name == consumerName }
@@ -99,6 +95,26 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
           PactVerificationExtension(pact, pact.source, it, serviceName, consumerName, valueResolver ?: SystemPropertyResolver)
         }
     }, description)
+  }
+
+  fun handleException(context: ExtensionContext, valueResolver: ValueResolver?, exception: Exception): List<Pact> {
+    val ignoreAnnotation = AnnotationSupport.findAnnotation(context.requiredTestClass, IgnoreNoPactsToVerify::class.java)
+    return when {
+      ignoreAnnotation.isPresent -> {
+        val noPactsToVerify = ignoreAnnotation.get()
+        when (exception) {
+          is IOException -> when {
+            noPactsToVerify.ignoreIoErrors == "true" -> emptyList()
+            valueResolver != null &&
+              parseExpression(noPactsToVerify.ignoreIoErrors, DataType.RAW, valueResolver) == "true" -> emptyList()
+            else -> throw exception
+          }
+          is NotFoundHalResponse -> emptyList()
+          else -> throw exception
+        }
+      }
+      else -> throw exception
+    }
   }
 
   protected open fun getValueResolver(context: ExtensionContext): ValueResolver? = null

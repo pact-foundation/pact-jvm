@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
 import au.com.dius.pact.provider.junitsupport.Provider
@@ -22,7 +24,7 @@ import spock.util.environment.RestoreSystemProperties
 
 import java.util.stream.Collectors
 
-@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter', 'LineLength'])
 class PactVerificationInvocationContextProviderSpec extends Specification {
 
   @Provider('myAwesomeService')
@@ -51,6 +53,15 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @PactFolder('pacts')
   @IgnoreNoPactsToVerify
   static class TestClassWithNoPactsWithIgnore {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('myAwesomeService')
+  @Consumer('doesNotExist')
+  @PactFolder('pacts')
+  @IgnoreNoPactsToVerify(ignoreIoErrors = 'true')
+  static class TestClassWithNoPactsWithIgnoreIoErrors {
     @TestTarget
     Target target
   }
@@ -277,5 +288,85 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
 
     then:
     thrown(UnknownHostException)
+  }
+
+  @Issue('#1324')
+  def 'handling exceptions test - with no annotation throws the exception'() {
+    given:
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> TestClassWithAnnotation
+    }
+    def valueResolver = null
+
+    when:
+    provider.handleException(context, valueResolver, new RuntimeException())
+
+    then:
+    thrown(RuntimeException)
+  }
+
+  @Issue('#1324')
+  def 'handling exceptions test - with IgnoreNoPactsToVerify annotation and an IO exception throws the exception'() {
+    given:
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> TestClassWithNoPactsWithIgnore
+    }
+    def valueResolver = null
+
+    when:
+    provider.handleException(context, valueResolver, new IOException())
+
+    then:
+    thrown(IOException)
+  }
+
+  @Issue('#1324')
+  def 'handling exceptions test - with IgnoreNoPactsToVerify(ignoreIoErrors = "true") annotation and an IO exception does not throw the exception'() {
+    given:
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> TestClassWithNoPactsWithIgnoreIoErrors
+    }
+    def valueResolver = null
+
+    when:
+    def result = provider.handleException(context, valueResolver, new IOException())
+
+    then:
+    notThrown(IOException)
+    result.empty
+  }
+
+  @Issue('#1324')
+  @RestoreSystemProperties
+  def 'handling exceptions test - with IgnoreNoPactsToVerify annotation and ignoreIoErrors system property set and an IO exception does not throw the exception'() {
+    given:
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> TestClassWithNoPactsWithIgnore
+    }
+    def valueResolver = SystemPropertyResolver.INSTANCE
+    System.setProperty('pact.verification.ignoreIoErrors', 'true')
+
+    when:
+    def result = provider.handleException(context, valueResolver, new IOException())
+
+    then:
+    noExceptionThrown()
+    result.empty
+  }
+
+  @Issue('#1324')
+  def 'handling exceptions test - with IgnoreNoPactsToVerify annotation and NotFoundHalResponse exception does not throw the exception'() {
+    given:
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> TestClassWithNoPactsWithIgnore
+    }
+    def valueResolver = null
+
+    when:
+    def result = provider.handleException(context, valueResolver, new NotFoundHalResponse())
+
+    then:
+    noExceptionThrown()
+    result.empty
   }
 }
