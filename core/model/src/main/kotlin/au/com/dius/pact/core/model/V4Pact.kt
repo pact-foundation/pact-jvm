@@ -273,7 +273,7 @@ sealed class V4Interaction(
                 } else {
                   mapOf()
                 }
-                val contents = bodyFromJson("body", json, metadata)
+                val contents = bodyFromJson("contents", json, metadata)
                 val matchingRules = if (json.has("matchingRules") && json["matchingRules"] is JsonValue.Object)
                   MatchingRulesImpl.fromJson(json["matchingRules"])
                 else MatchingRulesImpl()
