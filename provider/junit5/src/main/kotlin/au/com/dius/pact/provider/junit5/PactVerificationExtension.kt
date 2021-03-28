@@ -31,13 +31,13 @@ import java.io.File
 /**
  * JUnit 5 test extension class used to inject parameters and execute the test for a Pact interaction.
  */
-class PactVerificationExtension(
-  private val pact: Pact<Interaction>,
-  private val pactSource: au.com.dius.pact.core.model.PactSource,
-  private val interaction: Interaction,
-  private val serviceName: String,
-  private val consumerName: String?,
-  private val propertyResolver: ValueResolver = SystemPropertyResolver
+open class PactVerificationExtension(
+  val pact: Pact<Interaction>,
+  val pactSource: au.com.dius.pact.core.model.PactSource,
+  val interaction: Interaction,
+  val serviceName: String,
+  val consumerName: String?,
+  val propertyResolver: ValueResolver = SystemPropertyResolver
 ) : TestTemplateInvocationContext, ParameterResolver, BeforeEachCallback, BeforeTestExecutionCallback,
   AfterTestExecutionCallback {
 

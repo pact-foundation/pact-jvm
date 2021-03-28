@@ -85,10 +85,11 @@ class MockMvcTestTarget @JvmOverloads constructor(
 
   private fun toMockRequestBuilder(request: Request): MockHttpServletRequestBuilder {
     val body = request.body
-    return if (body.isPresent()) {
+    val cookies = cookies(request)
+    val servletRequestBuilder: MockHttpServletRequestBuilder = if (body.isPresent()) {
       if (request.isMultipartFileUpload()) {
         val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(), request.contentTypeHeader()))
-        val multipartRequest = MockMvcRequestBuilders.fileUpload(requestUriString(request))
+        val multipartRequest = MockMvcRequestBuilders.multipart(requestUriString(request))
         var i = 0
         while (i < multipart.count) {
           val bodyPart = multipart.getBodyPart(i)
@@ -98,18 +99,20 @@ class MockMvcTestTarget @JvmOverloads constructor(
           multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
           i++
         }
-        multipartRequest.headers(mapHeaders(request, true)).cookie(*cookies(request))
+        multipartRequest.headers(mapHeaders(request, true))
       } else {
         MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
           .headers(mapHeaders(request, true))
           .content(body.value)
-          .cookie(*cookies(request))
       }
     } else {
       MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
         .headers(mapHeaders(request, false))
-        .cookie(*cookies(request))
     }
+    if (cookies.isNotEmpty()) {
+      servletRequestBuilder.cookie(*cookies)
+    }
+    return servletRequestBuilder
   }
 
   private fun cookies(request: Request): Array<Cookie> {
