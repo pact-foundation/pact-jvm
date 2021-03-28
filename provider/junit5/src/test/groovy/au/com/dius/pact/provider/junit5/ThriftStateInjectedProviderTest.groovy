@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.junit5
 
-
 import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder

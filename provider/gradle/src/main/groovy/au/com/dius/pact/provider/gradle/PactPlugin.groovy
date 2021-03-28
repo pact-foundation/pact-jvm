@@ -1,25 +1,19 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.provider.ProviderInfo
 import org.gradle.api.GradleScriptException
-import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.invocation.Gradle
 
 /**
  * Main plugin class
  */
-class PactPlugin implements Plugin<Project> {
-
-  private static final GROUP = 'Pact'
-  private static final String PACT_VERIFY = 'pactVerify'
-  private static final String TEST_CLASSES = 'testClasses'
+class PactPlugin extends PactPluginBase {
 
   @Override
     void apply(Project project) {
 
         // Create and install the extension object
-        project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo))
+        project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo,
+          new ProviderInfoFactory(project)))
 
         project.task(PACT_VERIFY, description: 'Verify your pacts against your providers', group: GROUP)
         project.task('pactPublish', description: 'Publish your pacts to a pact broker', type: PactPublishTask,
@@ -35,12 +29,9 @@ class PactPlugin implements Plugin<Project> {
             throw new GradleScriptException('Your project is misconfigured, was expecting a \'pact\' configuration ' +
               "in the build, but got a ${it.pact.class.simpleName} with value '${it.pact}' instead. " +
               'Make sure there is no property that is overriding \'pact\'.', null)
-          } else if (it.pact.serviceProviders.empty
-            && it.gradle.startParameter.taskNames.any { it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
-            throw new GradleScriptException('No service providers are configured', null)
           }
 
-          it.pact.serviceProviders.all { ProviderInfo provider ->
+          it.pact.serviceProviders.all { GradleProviderInfo provider ->
             setupPactConsumersFromBroker(provider, project, it.pact)
 
                 def taskName = {
@@ -89,7 +80,7 @@ class PactPlugin implements Plugin<Project> {
     }
 
   @SuppressWarnings('CatchRuntimeException')
-  private void setupPactConsumersFromBroker(ProviderInfo provider, Project project, PactPluginExtension ext) {
+  private void setupPactConsumersFromBroker(GradleProviderInfo provider, Project project, PactPluginExtension ext) {
     if (provider.brokerConfig && project.gradle.startParameter.taskNames.any {
       it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
       def options = [:]

@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderVerifier
+import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
@@ -39,6 +40,10 @@ class PactVerificationTask extends PactVerificationBaseTask {
         def reportsDir = new File(project.buildDir, 'reports/pact')
         reporters = project.pact.reports.toVerifierReporters(reportsDir, it)
       }
+    }
+
+    if (providerToVerify.consumers.empty && !ignoreNoConsumers()) {
+      throw new GradleScriptException("There are no consumers for service provider '${providerToVerify.name}'", null)
     }
 
     runVerification(verifier, providerToVerify)

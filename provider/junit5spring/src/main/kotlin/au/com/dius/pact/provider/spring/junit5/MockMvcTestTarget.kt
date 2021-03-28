@@ -35,6 +35,7 @@ import java.net.URI
 import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
+import javax.servlet.http.Cookie
 
 /**
  * Test target for tests using Spring MockMvc.
@@ -89,35 +90,47 @@ class MockMvcTestTarget @JvmOverloads constructor(
           .build()
     }
 
-    private fun toMockRequestBuilder(request: IRequest): MockHttpServletRequestBuilder {
-        val body = request.body
-        return if (body.isPresent()) {
-            if (request.isMultipartFileUpload()) {
-                val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(),
+  private fun toMockRequestBuilder(request: IRequest): MockHttpServletRequestBuilder {
+    val body = request.body
+    val cookies = cookies(request)
+    val servletRequestBuilder: MockHttpServletRequestBuilder = if (body.isPresent()) {
+      if (request.isMultipartFileUpload()) {
+        val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(),
                   request.asHttpPart().contentTypeHeader()))
-                val multipartRequest = MockMvcRequestBuilders.fileUpload(requestUriString(request))
-                var i = 0
-                while (i < multipart.count) {
-                    val bodyPart = multipart.getBodyPart(i)
-                    val contentDisposition = ContentDisposition(bodyPart.getHeader("Content-Disposition").first())
-                    val name = StringUtils.defaultString(contentDisposition.getParameter("name"), "file")
-                    val filename = contentDisposition.getParameter("filename").orEmpty()
-                    multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
-                    i++
-                }
-                multipartRequest.headers(mapHeaders(request, true))
-            } else {
-                MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
-                  .headers(mapHeaders(request, true))
-                  .content(body.value)
-            }
-        } else {
-            MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
-              .headers(mapHeaders(request, false))
+        val multipartRequest = MockMvcRequestBuilders.multipart(requestUriString(request))
+        var i = 0
+        while (i < multipart.count) {
+          val bodyPart = multipart.getBodyPart(i)
+          val contentDisposition = ContentDisposition(bodyPart.getHeader("Content-Disposition").first())
+          val name = StringUtils.defaultString(contentDisposition.getParameter("name"), "file")
+          val filename = contentDisposition.getParameter("filename").orEmpty()
+          multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
+          i++
         }
+        multipartRequest.headers(mapHeaders(request, true))
+      } else {
+        MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
+          .headers(mapHeaders(request, true))
+          .content(body.value)
+      }
+    } else {
+      MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
+        .headers(mapHeaders(request, false))
     }
+    if (cookies.isNotEmpty()) {
+      servletRequestBuilder.cookie(*cookies)
+    }
+    return servletRequestBuilder
+  }
 
-    private fun requestUriString(request: IRequest): URI {
+  private fun cookies(request: IRequest): Array<Cookie> {
+    return request.cookies().map {
+      val values = it.split('=', limit = 2)
+      Cookie(values[0], values[1])
+    }.toTypedArray()
+  }
+
+  private fun requestUriString(request: IRequest): URI {
         val uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
         val query = request.query

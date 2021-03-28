@@ -179,26 +179,4 @@ class PactPluginTest {
 
       project.evaluate()
     }
-
-  @Test(expected = ProjectConfigurationException)
-  void 'fails if there are no configured service providers and pactVerify is in the start parameters'() {
-      project.pact {
-          serviceProviders {
-          }
-      }
-      project.gradle.startParameter.taskNames = ['pactVerify']
-
-      project.evaluate()
-  }
-
-  @Test(expected = ProjectConfigurationException)
-  void 'when checking for pactVerify in the start parameters, do a case insensitive check'() {
-    project.pact {
-      serviceProviders {
-      }
-    }
-    project.gradle.startParameter.taskNames = ['pactverify']
-
-    project.evaluate()
-  }
 }

@@ -1,10 +1,13 @@
 package au.com.dius.pact.provider.spring.junit5
 
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.provider.junit5.PactVerificationExtension
 import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 import org.springframework.test.context.TestContextManager
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.util.stream.Stream
 
 class PactVerificationSpringProvider() : PactVerificationInvocationContextProvider() {
 
@@ -15,5 +18,15 @@ class PactVerificationSpringProvider() : PactVerificationInvocationContextProvid
       TestContextManager::class.java)
     val environment = testContextManager.testContext.applicationContext.environment
     return SpringEnvironmentResolver(environment)
+  }
+
+  override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
+    return super.provideTestTemplateInvocationContexts(context).map {
+      if (it is PactVerificationExtension) {
+        PactVerificationSpringExtension(it)
+      } else {
+        it
+      }
+    }
   }
 }
