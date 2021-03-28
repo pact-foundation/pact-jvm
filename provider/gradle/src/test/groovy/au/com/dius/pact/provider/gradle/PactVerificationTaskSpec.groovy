@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
@@ -12,6 +13,7 @@ import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 class PactVerificationTaskSpec extends Specification {
 
@@ -37,6 +39,7 @@ class PactVerificationTaskSpec extends Specification {
     task = project.tasks.pactVerify_Test_Service
     verifier = Mock(IProviderVerifier)
     task.verifier = verifier
+    task.providerToVerify.consumers << new ConsumerInfo('Test')
   }
 
   def 'raises an exception if the verification fails'() {
@@ -72,5 +75,31 @@ class PactVerificationTaskSpec extends Specification {
     then:
     noExceptionThrown()
     1 * verifier.verifyProvider(_) >> [new VerificationResult.Failed('', '', [:], true) ]
+  }
+
+  def 'raises an exception if there are no consumers'() {
+    given:
+    task.providerToVerify.consumers = []
+
+    when:
+    task.verifyPact()
+
+    then:
+    def ex = thrown(GradleScriptException)
+    ex.message == 'There are no consumers for service provider \'Test Service\''
+  }
+
+  @RestoreSystemProperties
+  def 'Does not raise an exception if there are no consumers and ignoreNoConsumers is set'() {
+    given:
+    task.providerToVerify.consumers = []
+    System.setProperty('pact.verifier.ignoreNoConsumers', 'true')
+    verifier.verifyProvider(_) >> []
+
+    when:
+    task.verifyPact()
+
+    then:
+    noExceptionThrown()
   }
 }

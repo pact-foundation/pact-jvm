@@ -219,7 +219,7 @@ open class HalClient @JvmOverloads constructor(
     when (val result = fetch(ROOT)) {
       is Ok<JsonValue.Object> -> pathInfo = result.value
       is Err<Exception> -> {
-        logger.error(result.error) { "Failed to fetch the root HAL document" }
+        logger.warn { "Failed to fetch the root HAL document" }
         throw InvalidNavigationRequest("Failed to fetch the root HAL document", result.error)
       }
     }

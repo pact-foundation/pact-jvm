@@ -5,15 +5,18 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ConsumersGroup
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.gradle.PactPluginBase.Companion.PACT_VERIFY
 import groovy.lang.Closure
+import mu.KLogging
 import org.gradle.api.GradleScriptException
+import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
 import java.net.URL
 
 /**
  * Extends the provider info to be setup in a gradle build
  */
-open class GradleProviderInfo(name: String) : ProviderInfo(name) {
+open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo(name) {
   var providerVersion: Any? = null
   @Deprecated("Use providerTags instead")
   var providerTag: String? = null
@@ -39,11 +42,26 @@ open class GradleProviderInfo(name: String) : ProviderInfo(name) {
     pactBrokerUrl: String,
     closure: Closure<*>
   ): List<ConsumerInfo> {
-    val fromPactBroker = super.hasPactsFromPactBroker(options, pactBrokerUrl)
+    val fromPactBroker = this.hasPactsFromPactBroker(options, pactBrokerUrl)
     fromPactBroker.forEach {
       ConfigureUtil.configure(closure, it)
     }
     return fromPactBroker
+  }
+
+  override fun hasPactsFromPactBroker(options: Map<String, Any>, pactBrokerUrl: String): List<ConsumerInfo> {
+    return try {
+      super.hasPactsFromPactBroker(options, pactBrokerUrl)
+    } catch (e: Exception) {
+      val verifyTaskName = PACT_VERIFY.toLowerCase()
+      if (project.gradle.startParameter.taskNames.any { it.toLowerCase().contains(verifyTaskName) }) {
+        logger.error(e) { "Failed to access Pact Broker" }
+        throw e
+      } else {
+        logger.warn { "Failed to access Pact Broker, no provider tasks will be configured - ${e.message}" }
+        emptyList()
+      }
+    }
   }
 
   @JvmOverloads
@@ -53,11 +71,30 @@ open class GradleProviderInfo(name: String) : ProviderInfo(name) {
     selectors: List<ConsumerVersionSelector>,
     closure: Closure<*>
   ): List<ConsumerInfo> {
-    val fromPactBroker = super.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
+    val fromPactBroker = this.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
     fromPactBroker.forEach {
       ConfigureUtil.configure(closure, it)
     }
     return fromPactBroker
+  }
+
+  override fun hasPactsFromPactBrokerWithSelectors(
+    options: Map<String, Any>,
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelector>
+  ): List<ConsumerInfo> {
+    return try {
+      super.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
+    } catch (e: Exception) {
+      val verifyTaskName = PACT_VERIFY.toLowerCase()
+      if (project.gradle.startParameter.taskNames.any { it.toLowerCase().contains(verifyTaskName) }) {
+        logger.error(e) { "Failed to access Pact Broker" }
+        throw e
+      } else {
+        logger.warn { "Failed to access Pact Broker, no provider tasks will be configured - ${e.message}" }
+        emptyList()
+      }
+    }
   }
 
   open fun url(path: String) = URL(path)
@@ -83,4 +120,6 @@ open class GradleProviderInfo(name: String) : ProviderInfo(name) {
         """.trimMargin("|"), null)
     }
   }
+
+  companion object : KLogging()
 }

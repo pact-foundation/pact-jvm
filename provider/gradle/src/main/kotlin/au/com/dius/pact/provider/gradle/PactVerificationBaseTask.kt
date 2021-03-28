@@ -22,4 +22,10 @@ open class PactVerificationBaseTask : DefaultTask() {
       verifier.finaliseReports()
     }
   }
+
+  fun ignoreNoConsumers(): Boolean {
+    val ignoreProperty = project.properties["pact.verifier.ignoreNoConsumers"]
+    val ignoreSystemProperty = System.getProperty("pact.verifier.ignoreNoConsumers")
+    return ignoreProperty == "true" || ignoreSystemProperty == "true"
+  }
 }
