@@ -1,5 +1,35 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.3 - Bugfix Release
+
+* 02f5b72da - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Mar 28 15:06:06 2021 +1100)
+* 3038d357e - Merge pull request #1332 from zariye/fix/lookup_contents (Ronald Holshausen, Sun Mar 28 14:45:36 2021 +1100)
+* 3622c25ef - feat(Junit5+Spring): support injecting MockHttpServletRequestBuilder when using MockMvc tests #1334 (Ronald Holshausen, Sun Mar 28 14:42:19 2021 +1100)
+* bed5ba584 - feat: support @CookieValue with MockMvc tests #1333 (Ronald Holshausen, Sun Mar 28 14:07:26 2021 +1100)
+* d698515d0 - fix(Gradle): do not fail when the pacts from the broker are not available and a non-pact verify task is run #1331 (Ronald Holshausen, Sun Mar 28 12:51:53 2021 +1100)
+* dde4af635 - chore: add test for application/x-thrift with provider state injected values #1330 (Ronald Holshausen, Sat Mar 27 18:03:03 2021 +1100)
+* 08d6518db - fix: use the raw URL path in the mock server as HttpExchange will decode the path #1326 (Ronald Holshausen, Sat Mar 27 17:11:58 2021 +1100)
+* 4f06881c0 - fix: handle exceptions correctly when @IgnoreNoPactsToVerify is present #1324 (Ronald Holshausen, Sat Mar 27 16:32:38 2021 +1100)
+* 2a304a949 - fix: use the Pact URL to disambiguate Pacts when accumilating results #1266 (Ronald Holshausen, Sat Mar 27 14:51:36 2021 +1100)
+* 22cd267e7 - chore: add test for results with both a pending and non-pending pact #1266 (Ronald Holshausen, Sun Mar 21 14:27:30 2021 +1100)
+* 8239e4ca3 - fix: use the Pact URL to disambiguate Pacts when accumilating results #1266 (Ronald Holshausen, Sat Mar 27 14:51:36 2021 +1100)
+* 014ee3a7c - Update README.md (Ronald Holshausen, Sat Mar 27 12:48:22 2021 +1100)
+* b6323203f - lookup contents in v4 interaction  with key contents instead of bodys (zara, Thu Mar 25 16:33:42 2021 +0100)
+* 9bcc878f7 - chore: add test for results with both a pending and non-pending pact #1266 (Ronald Holshausen, Sun Mar 21 14:27:30 2021 +1100)
+* 0edf6ec23 - bump version to 4.2.3 (Ronald Holshausen, Sat Mar 13 17:13:35 2021 +1100)
+* 809cf81c6 - bump version to 4.1.19 (Ronald Holshausen, Sat Mar 13 16:16:43 2021 +1100)
+* a646b3543 - update changelog for release 4.1.18 (Ronald Holshausen, Sat Mar 13 16:02:05 2021 +1100)
+* 273b9164d - feat: add a system property to enable redirect handling #1323 (Ronald Holshausen, Sat Mar 13 15:37:55 2021 +1100)
+* aadbde41d - chore: fix failing tests (Ronald Holshausen, Sat Mar 13 15:12:53 2021 +1100)
+* 275785837 - chore: add some tests around handling IO errors from Pact Broker #1322 (Ronald Holshausen, Sat Mar 13 14:56:52 2021 +1100)
+* 3a211ebc5 - chore: add example spring MVC test with CSV #1013 (Ronald Holshausen, Sat Mar 13 13:58:56 2021 +1100)
+* a80c5861b - fix: codenarc errors (Ronald Holshausen, Sat Mar 6 14:06:58 2021 +1100)
+* 85f0caa11 - chore: add tests for json object attributes formmated as dates #1220 (Ronald Holshausen, Sat Mar 6 14:01:35 2021 +1100)
+* 03fbfe060 - feat: update content type overrides to allow setting the content type to json #1314 (Ronald Holshausen, Sat Mar 6 12:59:06 2021 +1100)
+* 4e5c05bb2 - included literal 'null' check for regex as it has similar issue as JsonValue.Null (Ryan Levell, Sat Feb 27 19:27:56 2021 -0600)
+* c19ff1fab - fixed regex typo. added happy path json regex (Ryan Levell, Sat Feb 27 08:00:43 2021 -0600)
+* ba9ac502d - added check for Null JsonValue for regex matcher (Ryan Levell, Fri Feb 26 21:24:09 2021 -0600)
+
 # 4.2.2 - Bugfix Release
 
 * 9b5c57915 - feat: add a system property to enable redirect handling #1323 (Ronald Holshausen, Sat Mar 13 15:37:55 2021 +1100)
