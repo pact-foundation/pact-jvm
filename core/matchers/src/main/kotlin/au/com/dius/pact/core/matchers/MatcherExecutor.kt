@@ -145,13 +145,18 @@ fun <M : Mismatch> matchEquality(
     actual is Element && expected is Element -> QualifiedName(actual) == QualifiedName(expected)
     actual is Attr && expected is Attr -> QualifiedName(actual) == QualifiedName(expected) &&
       actual.nodeValue == expected.nodeValue
+    actual is BigDecimal && expected is BigDecimal -> actual.compareTo(expected) == 0
     else -> actual != null && actual == expected
   }
-  logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
+  logger.debug {
+    "comparing ${valueOf(actual)} (${typeOf(actual)}) to " +
+      "${valueOf(expected)} (${typeOf(expected)}) at $path -> $matches"
+  }
   return if (matches) {
     emptyList()
   } else {
-    listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to equal ${valueOf(expected)}", path))
+    listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to equal ${valueOf(expected)} (${typeOf(expected)})", path))
   }
 }
 
