@@ -20,14 +20,6 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   override fun toString() =
     "Interaction: $description\n\tin states ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"
 
-  fun displayState(): String {
-    return if (providerStates.isEmpty() || providerStates.size == 1 && providerStates[0].name.isNullOrEmpty()) {
-      "None"
-    } else {
-      providerStates.joinToString(COMMA) { it.name.toString() }
-    }
-  }
-
   override fun conflictsWith(other: Interaction) = other !is RequestResponseInteraction
 
   override fun uniqueKey() = "${displayState()}_$description"

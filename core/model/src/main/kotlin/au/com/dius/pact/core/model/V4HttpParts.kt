@@ -21,14 +21,14 @@ private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
   }
 }
 
-data class HttpRequest(
-  override val method: String,
-  override val path: String,
-  override val query: Map<String, List<String>>,
-  override val headers: Map<String, List<String>>,
-  override val body: OptionalBody,
-  override val matchingRules: MatchingRules,
-  override val generators: Generators
+data class HttpRequest @JvmOverloads constructor(
+  override val method: String = "GET",
+  override val path: String = "/",
+  override val query: Map<String, List<String>> = mapOf(),
+  override val headers: Map<String, List<String>> = mapOf(),
+  override val body: OptionalBody = OptionalBody.missing(),
+  override val matchingRules: MatchingRules = MatchingRulesImpl(),
+  override val generators: Generators = Generators()
 ): IRequest {
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     val errors = mutableListOf<String>()
@@ -108,12 +108,12 @@ data class HttpRequest(
   }
 }
 
-data class HttpResponse(
-  override val status: Int,
-  override val headers: Map<String, List<String>>,
-  override val body: OptionalBody,
-  override val matchingRules: MatchingRules,
-  override val generators: Generators
+data class HttpResponse @JvmOverloads constructor(
+  override val status: Int = 200,
+  override val headers: Map<String, List<String>> = mapOf(),
+  override val body: OptionalBody = OptionalBody.missing(),
+  override val matchingRules: MatchingRules = MatchingRulesImpl(),
+  override val generators: Generators = Generators()
 ) : IResponse {
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     val errors = mutableListOf<String>()

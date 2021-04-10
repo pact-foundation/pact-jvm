@@ -1,7 +1,9 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class V4PactSpec extends Specification {
 
   def 'test load v4 pact'() {
@@ -65,5 +67,45 @@ class V4PactSpec extends Specification {
     pact.interactions[1].matchingRules.toV3Map() == [:]
     pact.interactions[1].generators.toMap(PactSpecVersion.V4) == [content: [a: [type: 'Uuid']]]
     pact.metadata['pactSpecification']['version'] == '4.0'
+  }
+
+  def 'test load v4 pact with comments'() {
+    given:
+    def pactUrl = V4PactSpec.classLoader.getResource('v4-http-pact-comments.json')
+
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+
+    then:
+    pact instanceof V4Pact
+    pact.interactions.size() == 1
+    pact.interactions[0].comments == [
+      text: new JsonValue.Array([
+        new JsonValue.StringValue('This allows me to specify just a bit more information about the interaction'.chars),
+        new JsonValue.StringValue('It has no functional impact, but can be displayed in the broker HTML page, and potentially in the test output'.chars),
+        new JsonValue.StringValue('It could even contain the name of the running test on the consumer side to help marry the interactions back to the test case'.chars)
+      ]),
+      testname: new JsonValue.StringValue('example_test.groovy'.chars)
+    ]
+  }
+
+  def 'test load v4 pact with message with comments'() {
+    given:
+    def pactUrl = V4PactSpec.classLoader.getResource('v4-message-pact-comments.json')
+
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+
+    then:
+    pact instanceof V4Pact
+    pact.interactions.size() == 1
+    pact.interactions[0].comments == [
+      text: new JsonValue.Array([
+        new JsonValue.StringValue('This allows me to specify just a bit more information about the interaction'.chars),
+        new JsonValue.StringValue('It has no functional impact, but can be displayed in the broker HTML page, and potentially in the test output'.chars),
+        new JsonValue.StringValue('It could even contain the name of the running test on the consumer side to help marry the interactions back to the test case'.chars)
+      ]),
+      testname: new JsonValue.StringValue('example_test.groovy'.chars)
+    ]
   }
 }

@@ -1,0 +1,43 @@
+{
+  "provider": {
+    "name": "test_provider"
+  },
+  "consumer": {
+    "name": "test_consumer"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "001",
+      "description": "test interaction with a binary body",
+      "request": {
+        "method": "GET",
+        "path": "/"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": ["image/gif"]
+        },
+        "body": {
+          "contentType": "image/gif",
+          "encoded": "base64",
+          "content": "R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs="
+        }
+      },
+      "comments": {
+        "text": [
+          "This allows me to specify just a bit more information about the interaction",
+          "It has no functional impact, but can be displayed in the broker HTML page, and potentially in the test output",
+          "It could even contain the name of the running test on the consumer side to help marry the interactions back to the test case"
+        ],
+        "testname": "example_test.groovy"
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  }
+}

@@ -139,7 +139,8 @@ fun <M : Mismatch> domatch(
     is MaxEqualsIgnoreOrderMatcher -> matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
     is MinMaxEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn) +
             matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
-    is ContentTypeMatcher -> matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
+    is ContentTypeMatcher ->
+      matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     is ArrayContainsMatcher -> listOf()
     else -> matchEquality(path, expected, actual, mismatchFn)
   }

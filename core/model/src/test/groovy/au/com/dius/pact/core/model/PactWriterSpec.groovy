@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -242,5 +243,45 @@ class PactWriterSpec extends Specification {
     interactionJson2.request.query == [
       'include[]': ['term', 'total_scores', 'license', 'is_public', 'needs_grading_count', 'permissions',
                     'current_grading_period_scores', 'course_image', 'favorites']]
+  }
+
+  def 'writing V4 pacts with comments'() {
+    def comments = [
+      text: new JsonValue.Array([
+        new JsonValue.StringValue('This allows me to specify just a bit more information about the interaction'.chars),
+        new JsonValue.StringValue(('It has no functional impact, but can be displayed in the broker ' +
+          'HTML page, and potentially in the test output').chars)
+      ]),
+      testname: new JsonValue.StringValue('example_test.groovy'.chars)
+    ]
+    given:
+    def pact = new V4Pact(
+      new Consumer('PactWriterSpecConsumer'),
+      new Provider('PactWriterSpecProvider'),
+      [
+        new V4Interaction.SynchronousHttp('A1', 'A1', new HttpRequest(), new HttpResponse(), null,
+          [], comments),
+        new V4Interaction.AsynchronousMessage('A2', 'A2', OptionalBody.missing(), [:],
+          new MatchingRulesImpl(), new Generators(), null, [], comments)
+      ])
+    def sw = new StringWriter()
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
+    def interactionJson = json['interactions'][0]
+    def interaction2Json = json['interactions'][1]
+
+    then:
+    interactionJson['comments']['testname'] == 'example_test.groovy'
+    interactionJson['comments']['text'] == [
+      'This allows me to specify just a bit more information about the interaction',
+      'It has no functional impact, but can be displayed in the broker HTML page, and potentially in the test output'
+    ]
+    interaction2Json['comments']['testname'] == 'example_test.groovy'
+    interaction2Json['comments']['text'] == [
+      'This allows me to specify just a bit more information about the interaction',
+      'It has no functional impact, but can be displayed in the broker HTML page, and potentially in the test output'
+    ]
   }
 }

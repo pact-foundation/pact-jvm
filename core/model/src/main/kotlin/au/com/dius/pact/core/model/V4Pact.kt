@@ -107,8 +107,9 @@ sealed class V4Interaction(
   val key: String,
   description: String,
   interactionId: String? = null,
-  providerStates: List<ProviderState> = listOf()
-) : BaseInteraction(interactionId, description, providerStates) {
+  providerStates: List<ProviderState> = listOf(),
+  comments: MutableMap<String, JsonValue> = mutableMapOf()
+) : BaseInteraction(interactionId, description, providerStates, comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
   }
@@ -127,8 +128,13 @@ sealed class V4Interaction(
     override val request: HttpRequest,
     override val response: HttpResponse,
     interactionId: String? = null,
-    providerStates: List<ProviderState> = listOf()
-  ) : V4Interaction(key, description, interactionId, providerStates), SynchronousRequestResponse {
+    providerStates: List<ProviderState> = listOf(),
+    override val comments: MutableMap<String, JsonValue> = mutableMapOf()
+  ) : V4Interaction(key, description, interactionId, providerStates, comments), SynchronousRequestResponse {
+
+    override fun toString() =
+      "Interaction: $description\n\tin states ${displayState()}\n" +
+        "request:\n$request\n\nresponse:\n$response\n\ncomments: $comments"
 
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
@@ -153,6 +159,9 @@ sealed class V4Interaction(
       )
       if (providerStates.isNotEmpty()) {
         map["providerStates"] = providerStates.map { it.toMap() }
+      }
+      if (comments.isNotEmpty()) {
+        map["comments"] = comments
       }
       return map
     }
@@ -184,8 +193,9 @@ sealed class V4Interaction(
     override val matchingRules: MatchingRules = MatchingRulesImpl(),
     val generators: Generators = Generators(),
     interactionId: String? = null,
-    providerStates: List<ProviderState> = listOf()
-  ) : V4Interaction(key, description, interactionId, providerStates), MessageInteraction {
+    providerStates: List<ProviderState> = listOf(),
+    override val comments: MutableMap<String, JsonValue> = mutableMapOf()
+  ) : V4Interaction(key, description, interactionId, providerStates, comments), MessageInteraction {
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
       return AsynchronousMessage(generateKey(), description, contents, metadata, matchingRules, generators,
@@ -220,6 +230,9 @@ sealed class V4Interaction(
       }
       if (generators.isNotEmpty()) {
         map["generators"] = generators.toMap(PactSpecVersion.V4)
+      }
+      if (comments.isNotEmpty()) {
+        map["comments"] = comments
       }
       return map
     }
@@ -256,10 +269,21 @@ sealed class V4Interaction(
             } else {
               emptyList()
             }
+            val comments = if (json.has("comments")) {
+              when (val comments = json["comments"]) {
+                is JsonValue.Object -> comments.entries
+                else -> {
+                  logger.warn { "Interaction comments must be a JSON Object, found a ${json["comments"].name}. Ignoring" }
+                  mutableMapOf()
+                }
+              }
+            } else {
+              mutableMapOf()
+            }
             when (result.value) {
               V4InteractionType.SynchronousHTTP -> {
                 Ok(SynchronousHttp(key, description, HttpRequest.fromJson(json["request"]),
-                  HttpResponse.fromJson(json["response"]), id, providerStates))
+                  HttpResponse.fromJson(json["response"]), id, providerStates, comments))
               }
               V4InteractionType.AsynchronousMessages -> {
                 val metadata = if (json.has("metadata")) {
@@ -281,7 +305,7 @@ sealed class V4Interaction(
                   Generators.fromJson(json["generators"])
                 else Generators()
                 Ok(AsynchronousMessage(key, description, contents, metadata, matchingRules, generators, id,
-                  providerStates))
+                  providerStates, comments))
               }
               V4InteractionType.SynchronousMessages -> {
                 val message = "Interaction type '$type' is currently unimplemented. It will be ignored. Source: $source"
@@ -305,7 +329,7 @@ sealed class V4Interaction(
   }
 }
 
-open class V4Pact(
+open class V4Pact @JvmOverloads constructor(
   consumer: Consumer,
   provider: Provider,
   override val interactions: List<V4Interaction>,

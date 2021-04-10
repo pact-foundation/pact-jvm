@@ -17,6 +17,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.support.json.JsonValue
 import groovy.transform.CompileStatic
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
@@ -29,6 +30,8 @@ import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
  */
 @SuppressWarnings('PropertyName')
 class PactBuilder extends GroovyBuilder {
+
+  public static final String TEXT = 'text'
 
   RequestResponsePact pact = new RequestResponsePact(new Provider(), new Consumer())
   Integer port = 0
@@ -322,5 +325,24 @@ class PactBuilder extends GroovyBuilder {
   @SuppressWarnings('UnnecessaryOverridingMethod')
   def build(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
     super.build(closure)
+  }
+
+  /**
+   * Adds a comment to either the request of response
+   */
+  PactBuilder comment(String comment) {
+    if (!currentInteraction.comments.containsKey(TEXT)) {
+      currentInteraction.comments [TEXT] = new JsonValue.Array()
+    }
+    currentInteraction.comments[TEXT].append(new JsonValue.StringValue(comment.chars))
+    this
+  }
+
+  /**
+   * Sets the name of the test
+   */
+  PactBuilder testname(String testname) {
+    currentInteraction.comments['testname'] = new JsonValue.StringValue(testname.chars)
+    this
   }
 }

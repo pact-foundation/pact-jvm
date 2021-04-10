@@ -72,6 +72,11 @@ interface Interaction {
    */
   val interactionId: String?
 
+  /**
+   * Annotations and comments associated with this interaction
+   */
+  val comments: MutableMap<String, JsonValue>
+
   /** Validates if this Interaction can be used with the provided Pact specification version */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String>
 

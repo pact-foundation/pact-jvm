@@ -16,13 +16,32 @@ sealed class JsonValue {
   class StringValue(val value: JsonToken.StringValue) : JsonValue() {
     constructor(value: CharArray) : this(JsonToken.StringValue(value))
     override fun toString() = String(value.chars)
+
+    override fun equals(other: Any?): Boolean {
+      if (this === other) return true
+      return when (other) {
+        is StringValue -> value == other.value
+        is String -> value.chars.contentEquals(other.toCharArray())
+        else -> false
+      }
+    }
+
+    override fun hashCode(): Int {
+      var result = super.hashCode()
+      result = 31 * result + value.hashCode()
+      return result
+    }
   }
+
   object True : JsonValue()
   object False : JsonValue()
   object Null : JsonValue()
 
   class Array @JvmOverloads constructor (val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
     fun find(function: (JsonValue) -> Boolean) = values.find(function)
+    operator fun get(i: Int): JsonValue {
+      return values[i]
+    }
     operator fun set(i: Int, value: JsonValue) {
       values[i] = value
     }
@@ -37,6 +56,10 @@ sealed class JsonValue {
     }
 
     fun last() = values.last()
+
+    fun append(value: JsonValue) {
+      values.add(value)
+    }
   }
 
   class Object @JvmOverloads constructor (val entries: MutableMap<String, JsonValue> = mutableMapOf()) : JsonValue() {
