@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactDirectory;
 import au.com.dius.pact.core.model.annotations.PactFolder;
+import au.com.dius.pact.core.support.Json;
 import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
@@ -58,42 +59,47 @@ public class BaseProviderRule extends ExternalResource {
 
   @Override
   public Statement apply(final Statement base, final Description description) {
-      return new Statement() {
+    return new Statement() {
 
-          @Override
-          public void evaluate() throws Throwable {
-              PactVerifications pactVerifications = description.getAnnotation(PactVerifications.class);
-              if (pactVerifications != null) {
-                  evaluatePactVerifications(pactVerifications, base);
-                  return;
-              }
+      @Override
+      public void evaluate() throws Throwable {
+        PactVerifications pactVerifications = description.getAnnotation(PactVerifications.class);
+        if (pactVerifications != null) {
+          evaluatePactVerifications(pactVerifications, base);
+          return;
+        }
 
-              PactVerification pactDef = description.getAnnotation(PactVerification.class);
-              // no pactVerification? execute the test normally
-              if (pactDef == null) {
-                  base.evaluate();
-                  return;
-              }
+        PactVerification pactDef = description.getAnnotation(PactVerification.class);
+        // no pactVerification? execute the test normally
+        if (pactDef == null) {
+          base.evaluate();
+          return;
+        }
 
-              Map<String, BasePact> pacts = getPacts(pactDef.fragment());
-              Optional<BasePact> pact;
-              if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
-                  pact = pacts.values().stream().findFirst();
-              } else {
-                  pact = Arrays.stream(pactDef.value()).map(pacts::get)
-                          .filter(Objects::nonNull).findFirst();
-              }
-              if (pact.isEmpty()) {
-                  base.evaluate();
-                  return;
-              }
+        Map<String, BasePact> pacts = getPacts(pactDef.fragment());
+        Optional<BasePact> pact;
+        if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
+          pact = pacts.values().stream().findFirst();
+        } else {
+          pact = Arrays.stream(pactDef.value()).map(pacts::get)
+            .filter(Objects::nonNull).findFirst();
+        }
+        if (pact.isEmpty()) {
+          base.evaluate();
+          return;
+        }
 
-            PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
-            PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
-            PactVerificationResult result = runPactTest(base, pact.get(), pactFolder, pactDirectory);
-            validateResult(result, pactDef);
-          }
-      };
+        if (config.getPactVersion() == PactSpecVersion.V4) {
+          pact.get().asV4Pact().component1().getInteractions()
+            .forEach(i -> i.getComments().put("testname", Json.toJson(description.getDisplayName())));
+        }
+
+        PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
+        PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
+        PactVerificationResult result = runPactTest(base, pact.get(), pactFolder, pactDirectory);
+        validateResult(result, pactDef);
+      }
+    };
   }
 
   private void evaluatePactVerifications(PactVerifications pactVerifications, Statement base) throws Throwable {
@@ -103,19 +109,21 @@ public class BaseProviderRule extends ExternalResource {
         return;
     }
 
-    final RequestResponsePact[] pact = { null };
+    final BasePact[] pact = { null };
     possiblePactVerifications.forEach(pactVerification -> {
       Optional<Method> possiblePactMethod = findPactMethod(pactVerification);
-      if (!possiblePactMethod.isPresent()) {
+      if (possiblePactMethod.isEmpty()) {
         throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
       }
 
       Method method = possiblePactMethod.get();
       Pact pactAnnotation = method.getAnnotation(Pact.class);
       PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
-              parseExpression(pactAnnotation.consumer(), DataType.RAW).toString()).hasPactWith(provider);
+              parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
+        .pactSpecVersion(config.getPactVersion())
+        .hasPactWith(provider);
       try {
-        RequestResponsePact pactFromMethod = (RequestResponsePact) method.invoke(target, dslBuilder);
+        BasePact pactFromMethod = (BasePact) method.invoke(target, dslBuilder);
         if (pact[0] == null) {
           pact[0] = pactFromMethod;
         } else {
@@ -205,8 +213,9 @@ public class BaseProviderRule extends ExternalResource {
           String provider = parseExpression(pactAnnotation.provider(), DataType.RAW).toString();
           if (StringUtils.isEmpty(provider) || this.provider.equals(provider)) {
             PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
-                    parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
-                .hasPactWith(this.provider);
+                parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
+              .pactSpecVersion(config.getPactVersion())
+              .hasPactWith(this.provider);
             updateAnyDefaultValues(dslBuilder);
             try {
               BasePact pact = (BasePact) m.invoke(target, dslBuilder);

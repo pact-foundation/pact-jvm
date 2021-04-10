@@ -23,7 +23,7 @@ class PactDslRequestWithPathSpec extends Specification {
 
     when:
     PactDslRequestWithPath subject = new PactDslRequestWithPath(consumerPactBuilder, 'spec', 'spec', [], 'test', '/',
-      'GET', [:], [:], OptionalBody.empty(), new MatchingRulesImpl(), new Generators(), defaultRequestValues, null)
+      'GET', [:], [:], OptionalBody.empty(), new MatchingRulesImpl(), new Generators(), defaultRequestValues, null, [])
     PactDslRequestWithPath subject2 = new PactDslRequestWithPath(consumerPactBuilder, subject, 'test',
       defaultRequestValues, null)
 
@@ -141,12 +141,11 @@ class PactDslRequestWithPathSpec extends Specification {
     when:
     PactDslRequestWithPath request = new PactDslRequestWithPath(consumerPactBuilder,
       'test', 'test', [], 'test', '/', 'GET', [:], [:], OptionalBody.missing(), new MatchingRulesImpl(),
-      new Generators(), null, null)
+      new Generators(), null, null, [])
       .headers('content-type', 'text/plain')
       .body(new PactDslJsonBody())
 
     then:
     request.requestHeaders == ['content-type': ['text/plain']]
   }
-
 }

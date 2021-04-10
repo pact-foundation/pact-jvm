@@ -114,7 +114,7 @@ sealed class V4Interaction(
     return false
   }
 
-  override fun uniqueKey() = if (key.isEmpty()) { generateKey() } else { key }
+  override fun uniqueKey() = key.ifEmpty { generateKey() }
 
   /** Created a copy of the interaction with the key calculated from contents */
   abstract fun withGeneratedKey(): V4Interaction
@@ -138,7 +138,7 @@ sealed class V4Interaction(
 
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
-      return SynchronousHttp(generateKey(), description, request, response, interactionId, providerStates)
+      return SynchronousHttp(generateKey(), description, request, response, interactionId, providerStates, comments)
     }
 
     @ExperimentalUnsignedTypes
@@ -199,7 +199,7 @@ sealed class V4Interaction(
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
       return AsynchronousMessage(generateKey(), description, contents, metadata, matchingRules, generators,
-        interactionId, providerStates)
+        interactionId, providerStates, comments)
     }
 
     @ExperimentalUnsignedTypes
