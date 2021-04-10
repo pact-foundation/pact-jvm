@@ -173,7 +173,7 @@ sealed class JsonValue {
     if (other !is JsonValue) return false
     return when (this) {
       is Null -> other is Null
-      is Decimal -> other is Decimal && this.toBigDecimal() == other.toBigDecimal()
+      is Decimal -> other is Decimal && this.toBigDecimal().compareTo(other.toBigDecimal()) == 0
       is Integer -> other is Integer && this.toBigInteger() == other.toBigInteger()
       is StringValue -> other is StringValue && this.asString() == other.asString()
       is True -> other is True

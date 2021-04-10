@@ -107,3 +107,14 @@ class MockMvcTestTargetStandaloneMockMvcTestJava {
 
 **Important:** Since `@WebMvcTest` starts only Spring MVC components you can't use `PactVerificationSpringProvider` 
 and need to fallback to `PactVerificationInvocationContextProvider`
+
+## Modifying requests
+
+As documented in [Pact JUnit5 module](/provider/junit5/README.md#modifying-the-requests-before-they-are-sent), you can
+inject a request object to modifiy the requests made. However, depending on the Pact test target you are using,
+you need to use a different class.
+
+| Test Target | Class to use |
+|-------------|--------------|
+| HttpTarget, HttpsTarget, SpringBootHttpTarget | org.apache.http.HttpRequest |
+| MockMvcTestTarget | MockHttpServletRequestBuilder |

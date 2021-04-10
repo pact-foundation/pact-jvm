@@ -9,7 +9,7 @@ import org.springframework.test.context.TestContextManager
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.stream.Stream
 
-class PactVerificationSpringProvider() : PactVerificationInvocationContextProvider() {
+open class PactVerificationSpringProvider() : PactVerificationInvocationContextProvider() {
 
   override fun getValueResolver(context: ExtensionContext): ValueResolver? {
     val store = context.root.getStore(ExtensionContext.Namespace.create(SpringExtension::class.java))

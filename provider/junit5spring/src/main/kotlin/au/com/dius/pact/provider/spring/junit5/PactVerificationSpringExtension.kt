@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 
-class PactVerificationSpringExtension(
+open class PactVerificationSpringExtension(
   pact: Pact,
   pactSource: PactSource,
   interaction: Interaction,

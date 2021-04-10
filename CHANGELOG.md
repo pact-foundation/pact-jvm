@@ -120,6 +120,15 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 3368b3bf7 - Merge pull request #1217 from rejeeshg/patch-2 (Ronald Holshausen, Wed Sep 30 15:00:34 2020 +1000)
 * 5350f8075 - Update gradle.properties (rejeeshg, Tue Sep 29 16:13:31 2020 +0530)
 
+# 4.1.19 - Bugfix Release
+
+* 3622c25ef - feat(Junit5+Spring): support injecting MockHttpServletRequestBuilder when using MockMvc tests #1334 (Ronald Holshausen, Sun Mar 28 14:42:19 2021 +1100)
+* bed5ba584 - feat: support @CookieValue with MockMvc tests #1333 (Ronald Holshausen, Sun Mar 28 14:07:26 2021 +1100)
+* d698515d0 - fix(Gradle): do not fail when the pacts from the broker are not available and a non-pact verify task is run #1331 (Ronald Holshausen, Sun Mar 28 12:51:53 2021 +1100)
+* 8239e4ca3 - fix: use the Pact URL to disambiguate Pacts when accumilating results #1266 (Ronald Holshausen, Sat Mar 27 14:51:36 2021 +1100)
+* 9bcc878f7 - chore: add test for results with both a pending and non-pending pact #1266 (Ronald Holshausen, Sun Mar 21 14:27:30 2021 +1100)
+* 809cf81c6 - bump version to 4.1.19 (Ronald Holshausen, Sat Mar 13 16:16:43 2021 +1100)
+
 # 4.1.18 - Bugfix Release
 
 * 273b9164d - feat: add a system property to enable redirect handling #1323 (Ronald Holshausen, Sat Mar 13 15:37:55 2021 +1100)

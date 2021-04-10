@@ -45,23 +45,27 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected                           | actual                             || mustBeEmpty
-    '100'                              | '100'                              || true
-    100                                | '100'                              || false
-    100                                | 100                                || true
-    new JsonValue.Integer('100'.chars) | new JsonValue.Integer('100'.chars) || true
-    null                               | null                               || true
-    '100'                              | null                               || false
-    null                               | 100                                || false
-    JsonValue.Null.INSTANCE            | null                               || true
-    null                               | JsonValue.Null.INSTANCE            || true
-    JsonValue.Null.INSTANCE            | JsonValue.Null.INSTANCE            || true
-    xml('<a/>')                        | xml('<a/>')                        || true
-    xml('<a/>')                        | xml('<b/>')                        || false
-    xml('<e xmlns="a"/>')              | xml('<a:e xmlns:a="a"/>')          || true
-    xml('<a:e xmlns:a="a"/>')          | xml('<b:e xmlns:b="a"/>')          || true
-    xml('<e xmlns="a"/>')              | xml('<e xmlns="b"/>')              || false
-    json('"hello"')                    | json('"hello"')                    || true
+    expected                           | actual                               || mustBeEmpty
+    '100'                              | '100'                                || true
+    100                                | '100'                                || false
+    100                                | 100                                  || true
+    new JsonValue.Integer('100'.chars) | new JsonValue.Integer('100'.chars)   || true
+    null                               | null                                 || true
+    '100'                              | null                                 || false
+    null                               | 100                                  || false
+    JsonValue.Null.INSTANCE            | null                                 || true
+    null                               | JsonValue.Null.INSTANCE              || true
+    JsonValue.Null.INSTANCE            | JsonValue.Null.INSTANCE              || true
+    xml('<a/>')                        | xml('<a/>')                          || true
+    xml('<a/>')                        | xml('<b/>')                          || false
+    xml('<e xmlns="a"/>')              | xml('<a:e xmlns:a="a"/>')            || true
+    xml('<a:e xmlns:a="a"/>')          | xml('<b:e xmlns:b="a"/>')            || true
+    xml('<e xmlns="a"/>')              | xml('<e xmlns="b"/>')                || false
+    json('"hello"')                    | json('"hello"')                      || true
+    2.3d                               | 2.300d                               || true
+    2.3f                               | 2.300f                               || true
+    2.3g                               | 2.300g                               || true
+    new JsonValue.Decimal('2.3'.chars) | new JsonValue.Decimal('2.300'.chars) || true
   }
 
   @Unroll
@@ -105,6 +109,8 @@ class MatcherExecutorSpec extends Specification {
     xml('<e xmlns="a"/>')     | xml('<e xmlns="b"/>')      || false
     json('"hello"')           | json('"hello"')            || true
     json('100')               | json('200')                || true
+    2.3d                      | 2.300d                     || true
+    2.3g                      | 2.300g                     || true
   }
 
   @Unroll
@@ -137,6 +143,10 @@ class MatcherExecutorSpec extends Specification {
     INTEGER    | 100      | [a: 200.3, b: 200, c: 300]         || false
     DECIMAL    | 100.0    | [a: 200.3, b: 200, c: 300]         || false
     NUMBER     | 100      | [a: 200.3, b: 200, c: 300]         || false
+    NUMBER     | 100      | 2.300g                             || true
+    NUMBER     | 100      | 2.300d                             || true
+    DECIMAL    | 100      | 2.300g                             || true
+    DECIMAL    | 100      | 2.300d                             || true
   }
 
   @Unroll
@@ -224,7 +234,7 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.matchEquality path, 'foo', 'bar', factory
 
     then:
-    1 * factory.create(_, _, "Expected 'bar' to equal 'foo'", _)
+    1 * factory.create(_, _, "Expected 'bar' (String) to equal 'foo' (String)", _)
     0 * _
   }
 
@@ -258,10 +268,10 @@ class MatcherExecutorSpec extends Specification {
     '100'             | false
     100               | true
     100.0             | false
-    100 as int        | true
-    100 as long       | true
+    100i              | true
+    100l              | true
     100 as BigInteger | true
-    100 as BigDecimal | true
+    100g              | true
     BigInteger.ZERO   | true
     BigDecimal.ZERO   | true
   }
@@ -279,10 +289,10 @@ class MatcherExecutorSpec extends Specification {
     '100'                            | false
     100                              | false
     100.0                            | true
-    100.0 as float                   | true
-    100.0 as double                  | true
-    100 as int                       | false
-    100 as long                      | false
+    100.0f                           | true
+    100.0d                           | true
+    100i                             | false
+    100l                             | false
     100 as BigInteger                | false
     BigInteger.ZERO                  | false
     BigDecimal.ZERO                  | true
