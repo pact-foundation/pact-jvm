@@ -261,7 +261,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       val config = providerInfo.mockServerConfig()
 
       store.put("mockServerConfig", config)
-      val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context) as RequestResponsePact, config)
+      val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context), config)
       store.put("mockServer", JUnit5MockServerSupport(mockServer))
       mockServer
     } else {
@@ -361,11 +361,19 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       val provider = parseExpression(pactAnnotation.provider, DataType.STRING)?.toString()
       val providerNameToUse = if (provider.isNullOrEmpty()) providerName else provider
       val pact = when (providerType) {
-        ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-          ConsumerPactBuilder.consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
-        ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-          MessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V3)
-            .consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
+        ProviderType.SYNCH, ProviderType.UNSPECIFIED -> {
+          val consumerPactBuilder = ConsumerPactBuilder.consumer(pactConsumer)
+          if (providerInfo.pactVersion != null) {
+            consumerPactBuilder.pactSpecVersion(providerInfo.pactVersion)
+          }
+          ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
+            consumerPactBuilder.hasPactWith(providerNameToUse)) as BasePact
+        }
+        ProviderType.ASYNCH -> {
+          ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
+            MessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V3)
+              .consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
+        }
       }
       val executedFragments = store["executedFragments"] as MutableSet<Method>
       executedFragments.add(method)
