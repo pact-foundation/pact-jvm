@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.4 - V4 features + Bugfixes
+
+* a73015a6e - feat(V4): add the JUnit 5 test description to comments (Ronald Holshausen, Sun Apr 11 15:21:34 2021 +1000)
+* ea66d68d1 - feat(V4): display comments when verifying V4 pact files (Ronald Holshausen, Sun Apr 11 14:42:09 2021 +1000)
+* 5a91dd7ee - fix: merge from v4.1.x (Ronald Holshausen, Sun Apr 11 11:22:57 2021 +1000)
+* af50b2f58 - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Apr 11 11:12:15 2021 +1000)
+* 30083b062 - fix(regression): IO Exceptions are now wrapped #1337 (Ronald Holshausen, Sun Apr 11 11:10:03 2021 +1000)
+* 6b7bc101b - feat(V4): enable comment support with JUnit 5 (Ronald Holshausen, Sun Apr 11 10:38:15 2021 +1000)
+* 1374973ca - feat(V4): support user provided comments with interactions in Junit 4 consumer tests (Ronald Holshausen, Sat Apr 10 18:14:15 2021 +1000)
+* 65b5b9ee5 - feat(V4): support user provided comments with interactions (Ronald Holshausen, Sat Apr 10 15:40:27 2021 +1000)
+* c8faad644 - Merge branch 'v4.1.x' (Ronald Holshausen, Sat Apr 10 13:41:18 2021 +1000)
+* 768e7684a - chore: update readme on injecting request objects (Ronald Holshausen, Sat Apr 10 13:08:09 2021 +1000)
+* 2e6ae47b1 - fix: JUnit 5 Spring extension classes need to be open #1338 (Ronald Holshausen, Sat Apr 10 12:43:09 2021 +1000)
+* 5614d0387 - fix: compare decimal values using compareTo instead of equals #1335 (Ronald Holshausen, Fri Apr 9 16:05:30 2021 +1000)
+* d88e8c02b - bump version to 4.2.4 (Ronald Holshausen, Sun Mar 28 16:26:53 2021 +1100)
+* 592122abb - bump version to 4.1.20 (Ronald Holshausen, Sun Mar 28 15:47:45 2021 +1100)
+* 799a8e8f0 - update changelog for release 4.1.19 (Ronald Holshausen, Sun Mar 28 15:27:29 2021 +1100)
+
 # 4.2.3 - Bugfix Release
 
 * 02f5b72da - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Mar 28 15:06:06 2021 +1100)
