@@ -96,24 +96,17 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
         filterPacts(pactLoader.load(serviceName)
           .filter { p -> consumerName == null || p.consumer.name == consumerName } as List<Pact>)
       } catch (e: IOException) {
-        if (ignoreIoErrors == "true") {
-          logger.warn { "\n" + WARNING_ON_IGNORED_IOERROR.trimIndent() }
-          logger.debug(e) { "Failed to load pact files" }
-          emptyList<Pact>()
-        } else {
-          throw InitializationError(e)
-        }
+        checkIgnoreIoException(ignoreIoErrors, e)
       } catch (e: JsonException) {
-        if (ignoreIoErrors == "true") {
-          logger.warn { "\n" + WARNING_ON_IGNORED_IOERROR.trimIndent() }
-          logger.debug(e) { "Failed to load pact files" }
-          emptyList<Pact>()
-        } else {
-          throw InitializationError(e)
-        }
+        checkIgnoreIoException(ignoreIoErrors, e)
       } catch (e: NoPactsFoundException) {
         logger.debug(e) { "No pacts found" }
-        emptyList<Pact>()
+        emptyList<Pact<I>>()
+      } catch (e: Exception) {
+        when (e.cause) {
+          is IOException -> checkIgnoreIoException(ignoreIoErrors, e)
+          else -> throw e
+        }
       }
 
       if (pacts.isEmpty()) {
@@ -127,6 +120,14 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
       setupInteractionRunners(testClass, pacts, pactLoader)
     }
     initialized = true
+  }
+
+  private fun checkIgnoreIoException(ignoreIoErrors: String, e: Exception) = if (ignoreIoErrors == "true") {
+    logger.warn { "\n" + WARNING_ON_IGNORED_IOERROR.trimIndent() }
+    logger.debug(e) { "Failed to load pact files" }
+    emptyList<Pact>()
+  } else {
+    throw InitializationError(e)
   }
 
   protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact>, pactLoader: PactLoader) {
