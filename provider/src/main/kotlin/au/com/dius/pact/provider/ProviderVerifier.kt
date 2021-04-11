@@ -30,6 +30,7 @@ import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.PactVerification.REQUEST_RESPONSE
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
+import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -323,14 +324,14 @@ open class ProviderVerifier @JvmOverloads constructor (
 
       logger.debug { "Found methods = $methodsAnnotatedWith" }
       if (methodsAnnotatedWith.isEmpty()) {
-        reporters.forEach { it.errorHasNoAnnotatedMethodsFoundForInteraction(interaction) }
+        emitEvent(Event.ErrorHasNoAnnotatedMethodsFoundForInteraction(interaction))
         throw RuntimeException("No annotated methods were found for interaction " +
           "'${interaction.description}'. You need to provide a method annotated with " +
           "@PactVerifyProvider(\"${interaction.description}\") on the classpath that returns the message contents.")
       } else {
         return if (interaction.isAsynchronousMessage()) {
-          verifyMessage(methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage, failures,
-            consumer.pending)
+          verifyMessage(methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage,
+            failures, consumer.pending)
         } else {
           val expectedResponse = (interaction as RequestResponseInteraction).response
           var result: VerificationResult = VerificationResult.Ok(interactionId)
@@ -346,7 +347,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       }
     } catch (e: Exception) {
       failures[interactionMessage] = e
-      reporters.forEach { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
+      emitEvent(Event.VerificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)))
       val errors = listOf(
         VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e)
       )
@@ -354,6 +355,10 @@ open class ProviderVerifier @JvmOverloads constructor (
         "Request to provider method failed with an exception", interactionMessage,
         mapOf(interactionId.orEmpty() to errors), consumer.pending)
     }
+  }
+
+  private fun emitEvent(event: Event) {
+    reporters.forEach { it.receive(event) }
   }
 
   fun displayBodyResult(
@@ -364,10 +369,10 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean
   ): VerificationResult {
     return if (comparison is Ok && comparison.value.mismatches.isEmpty()) {
-      reporters.forEach { it.bodyComparisonOk() }
+      emitEvent(Event.BodyComparisonOk)
       VerificationResult.Ok(interactionId)
     } else {
-      reporters.forEach { it.bodyComparisonFailed(comparison) }
+      emitEvent(Event.BodyComparisonFailed(comparison))
       val description = "$comparisonDescription has a matching body"
       when (comparison) {
         is Err -> {
@@ -395,7 +400,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     val interactionId = message.interactionId
     var result: VerificationResult = VerificationResult.Ok(interactionId)
     methods.forEach { method ->
-      reporters.forEach { it.generatesAMessageWhich() }
+      emitEvent(Event.GeneratesAMessageWhich)
       val messageResult = invokeProviderMethod(method, providerMethodInstance.apply(method))
       val actualMessage: ByteArray
       var messageMetadata: Map<String, Any>? = null
@@ -441,18 +446,18 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean
   ): VerificationResult {
     return if (comparison.isEmpty()) {
-      reporters.forEach { it.metadataComparisonOk() }
+      emitEvent(Event.MetadataComparisonOk())
       VerificationResult.Ok(interactionId)
     } else {
-      reporters.forEach { it.includesMetadata() }
+      emitEvent(Event.IncludesMetadata)
       var result: VerificationResult = VerificationResult.Failed("Metadata had differences",
         comparisonDescription, pending = pending)
       comparison.forEach { (key, metadataComparison) ->
         val expectedValue = expectedMetadata[key]
         if (metadataComparison.isEmpty()) {
-          reporters.forEach { it.metadataComparisonOk(key, expectedValue) }
+          emitEvent(Event.MetadataComparisonOk(key, expectedValue))
         } else {
-          reporters.forEach { it.metadataComparisonFailed(key, expectedValue, metadataComparison) }
+          emitEvent(Event.MetadataComparisonFailed(key, expectedValue, metadataComparison))
           val description = "$comparisonDescription includes metadata \"$key\" with value \"$expectedValue\""
           failures[description] = metadataComparison
           result = result.merge(VerificationResult.Failed("", description,
@@ -500,7 +505,7 @@ open class ProviderVerifier @JvmOverloads constructor (
 
       val result = if (ProviderUtils.verificationType(provider, consumer) == REQUEST_RESPONSE) {
         logger.debug { "Verifying via request/response" }
-        verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interactionMessage, failures,
+        verifyResponseFromProvider(provider, interaction.asSynchronousRequestResponse()!!, interactionMessage, failures,
           providerClient, context, consumer.pending)
       } else {
         logger.debug { "Verifying via annotated test method" }
@@ -522,7 +527,10 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   override fun reportInteractionDescription(interaction: Interaction) {
-    reporters.forEach { it.interactionDescription(interaction) }
+    emitEvent(Event.InteractionDescription(interaction))
+    if (interaction.comments.isNotEmpty()) {
+      emitEvent(Event.DisplayInteractionComments(interaction.comments))
+    }
   }
 
   override fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String {

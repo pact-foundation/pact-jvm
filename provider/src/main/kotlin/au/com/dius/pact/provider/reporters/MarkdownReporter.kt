@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.hasProperty
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
@@ -39,10 +40,10 @@ import java.io.StringReader
 import java.io.StringWriter
 import java.time.ZonedDateTime
 
-data class Event(
+data class MREvent(
   val type: String,
   val contents: String,
-  val data: List<Any?>
+  val data: List<Any?> = listOf()
 )
 
 /**
@@ -53,7 +54,7 @@ class MarkdownReporter(
   var name: String,
   override var reportDir: File?,
   override var ext: String
-) : VerifierReporter {
+) : BaseVerifierReporter() {
 
   constructor(name: String, reportDir: File?) : this(name, reportDir, ".md")
 
@@ -61,7 +62,7 @@ class MarkdownReporter(
   override lateinit var verifier: IProviderVerifier
 
   private lateinit var provider: IProviderInfo
-  private val events = mutableListOf<Event>()
+  private val events = mutableListOf<MREvent>()
 
   init {
     if (reportDir == null) {
@@ -261,16 +262,16 @@ class MarkdownReporter(
       output.append(" [PENDING]")
     }
     output.append("\n\n")
-    events.add(Event("reportVerificationForConsumer", output.toString(), listOf(consumer, provider, tag)))
+    events.add(MREvent("reportVerificationForConsumer", output.toString(), listOf(consumer, provider, tag)))
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
-    events.add(Event("verifyConsumerFromUrl", "From `${pactUrl.description()}`<br/>\n",
+    events.add(MREvent("verifyConsumerFromUrl", "From `${pactUrl.description()}`<br/>\n",
       listOf(pactUrl, consumer)))
   }
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
-    events.add(Event("verifyConsumerFromFile", "From `${pactFile.description()}`<br/>\n",
+    events.add(MREvent("verifyConsumerFromFile", "From `${pactFile.description()}`<br/>\n",
       listOf(pactFile, consumer)))
   }
 
@@ -281,16 +282,16 @@ class MarkdownReporter(
   override fun warnPactFileHasNoInteractions(pact: Pact) { }
 
   override fun interactionDescription(interaction: Interaction) {
-    events.add(Event("interactionDescription", "${interaction.description}  <br/>\n", listOf(interaction)))
+    events.add(MREvent("interactionDescription", "${interaction.description}  <br/>\n", listOf(interaction)))
   }
 
   override fun stateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean) {
-    events.add(Event("stateForInteraction", "Given **$state**  <br/>\n",
+    events.add(MREvent("stateForInteraction", "Given **$state**  <br/>\n",
       listOf(state, provider, consumer, isSetup)))
   }
 
   override fun warnStateChangeIgnored(state: String, provider: IProviderInfo, consumer: IConsumerInfo) {
-    events.add(Event("warnStateChangeIgnored",
+    events.add(MREvent("warnStateChangeIgnored",
       "&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as " +
         "there is no stateChange URL</span>  <br/>\n", listOf(state, provider, consumer)))
   }
@@ -309,12 +310,12 @@ class MarkdownReporter(
     pw.write("\n```\n\n")
     pw.close()
 
-    events.add(Event("stateChangeRequestFailedWithException", sw.toString(),
+    events.add(MREvent("stateChangeRequestFailedWithException", sw.toString(),
       listOf(state, isSetup, e, printStackTrace)))
   }
 
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
-    events.add(Event("stateChangeRequestFailedWithException",
+    events.add(MREvent("stateChangeRequestFailedWithException",
       "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $httpStatus" +
         "</span>  \n", listOf(state, provider, isSetup, httpStatus)))
   }
@@ -325,7 +326,7 @@ class MarkdownReporter(
     isSetup: Boolean,
     stateChangeHandler: Any
   ) {
-    events.add(Event("warnStateChangeIgnoredDueToInvalidUrl",
+    events.add(MREvent("warnStateChangeIgnoredDueToInvalidUrl",
       "&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as " +
         "there is no stateChange URL, received `$stateChangeHandler`</span>  <br/>\n",
       listOf(state, provider, isSetup, stateChangeHandler)))
@@ -345,16 +346,16 @@ class MarkdownReporter(
     pw.write("\n```\n\n")
     pw.close()
 
-    events.add(Event("requestFailed", sw.toString(), listOf(provider, interaction, interactionMessage, e,
+    events.add(MREvent("requestFailed", sw.toString(), listOf(provider, interaction, interactionMessage, e,
       printStackTrace)))
   }
 
   override fun returnsAResponseWhich() {
-    events.add(Event("returnsAResponseWhich", "&nbsp;&nbsp;returns a response which  <br/>\n", listOf()))
+    events.add(MREvent("returnsAResponseWhich", "&nbsp;&nbsp;returns a response which  <br/>\n", listOf()))
   }
 
   override fun statusComparisonOk(status: Int) {
-    events.add(Event("statusComparisonOk", "&nbsp;&nbsp;&nbsp;&nbsp;has status code **$status** " +
+    events.add(MREvent("statusComparisonOk", "&nbsp;&nbsp;&nbsp;&nbsp;has status code **$status** " +
       "(<span style='color:green'>OK</span>)  <br/>\n", listOf(status)))
   }
 
@@ -371,15 +372,15 @@ class MarkdownReporter(
     pw.write("\n```\n\n")
     pw.close()
 
-    events.add(Event("statusComparisonFailed", sw.toString(), listOf(status, comparison)))
+    events.add(MREvent("statusComparisonFailed", sw.toString(), listOf(status, comparison)))
   }
 
   override fun includesHeaders() {
-    events.add(Event("includesHeaders", "&nbsp;&nbsp;&nbsp;&nbsp;includes headers  <br/>\n", listOf()))
+    events.add(MREvent("includesHeaders", "&nbsp;&nbsp;&nbsp;&nbsp;includes headers  <br/>\n", listOf()))
   }
 
   override fun headerComparisonOk(key: String, value: List<String>) {
-    events.add(Event("headerComparisonOk",
+    events.add(MREvent("headerComparisonOk",
       "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
         "(<span style=\'color:green\'>OK</span>)  <br/>\n", listOf(key, value)))
   }
@@ -401,11 +402,11 @@ class MarkdownReporter(
     pw.write("\n```\n\n")
     pw.close()
 
-    events.add(Event("headerComparisonFailed", sw.toString(), listOf(key, value, comparison)))
+    events.add(MREvent("headerComparisonFailed", sw.toString(), listOf(key, value, comparison)))
   }
 
   override fun bodyComparisonOk() {
-    events.add(Event("bodyComparisonOk",
+    events.add(MREvent("bodyComparisonOk",
       "&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:green'>OK</span>)  <br/>\n", listOf()))
   }
 
@@ -438,7 +439,7 @@ class MarkdownReporter(
       else -> pw.write("```\n${comparison}\n```\n")
     }
     pw.close()
-    events.add(Event("bodyComparisonFailed", sw.toString(), listOf(comparison)))
+    events.add(MREvent("bodyComparisonFailed", sw.toString(), listOf(comparison)))
   }
 
   private fun renderDiff(pw: PrintWriter, diff: Any?) {
@@ -460,11 +461,11 @@ class MarkdownReporter(
     e.printStackTrace(pw)
     pw.write("\n```\n\n")
     pw.close()
-    events.add(Event("verificationFailed", sw.toString(), listOf(interaction, e, printStackTrace)))
+    events.add(MREvent("verificationFailed", sw.toString(), listOf(interaction, e, printStackTrace)))
   }
 
   override fun generatesAMessageWhich() {
-    events.add(Event("generatesAMessageWhich", "&nbsp;&nbsp;generates a message which  <br/>\n", listOf()))
+    events.add(MREvent("generatesAMessageWhich", "&nbsp;&nbsp;generates a message which  <br/>\n", listOf()))
   }
 
   override fun displayFailures(failures: Map<String, Any>) { }
@@ -478,21 +479,21 @@ class MarkdownReporter(
       "(<span style=\'color:red\'>FAILED</span>)  \n")
     pw.write("\n```\n$comparison\n```\n\n")
     pw.close()
-    events.add(Event("metadataComparisonFailed", sw.toString(), listOf(key, value, comparison)))
+    events.add(MREvent("metadataComparisonFailed", sw.toString(), listOf(key, value, comparison)))
   }
 
   override fun includesMetadata() {
-    events.add(Event("includesMetadata", "&nbsp;&nbsp;&nbsp;&nbsp;includes metadata  <br/>\n", listOf()))
+    events.add(MREvent("includesMetadata", "&nbsp;&nbsp;&nbsp;&nbsp;includes metadata  <br/>\n", listOf()))
   }
 
   override fun metadataComparisonOk(key: String, value: Any?) {
-    events.add(Event("metadataComparisonOk",
+    events.add(MREvent("metadataComparisonOk",
       "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
         "(<span style=\'color:green\'>OK</span>)  <br/>\n", listOf(key, value)))
   }
 
   override fun metadataComparisonOk() {
-    events.add(Event("metadataComparisonOk",
+    events.add(MREvent("metadataComparisonOk",
       "&nbsp;&nbsp;&nbsp;&nbsp;has matching metadata (<span style='color:green'>OK</span>)<br/>\n", listOf()))
   }
 
@@ -507,17 +508,44 @@ class MarkdownReporter(
     notices.forEachIndexed { i, notice -> pw.write("${i + 1}. ${notice.text}\n") }
     pw.write("\n")
     pw.close()
-    events.add(Event("reportVerificationNoticesForConsumer", sw.toString(), listOf(consumer, provider, notices)))
+    events.add(MREvent("reportVerificationNoticesForConsumer", sw.toString(), listOf(consumer, provider, notices)))
   }
 
   override fun warnPublishResultsSkippedBecauseFiltered() {
-    events.add(Event("warnPublishResultsSkippedBecauseFiltered",
+    events.add(MREvent("warnPublishResultsSkippedBecauseFiltered",
       "NOTE: Skipping publishing of verification results as the interactions have been filtered<br/>\n", listOf()))
   }
 
   override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
-    events.add(Event("warnPublishResultsSkippedBecauseDisabled",
+    events.add(MREvent("warnPublishResultsSkippedBecauseDisabled",
       "NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')<br/>\n",
       listOf(envVar)))
+  }
+
+  override fun receive(event: Event) {
+    when (event) {
+      is Event.DisplayInteractionComments -> events.add(MREvent("displayComments", displayComments(event)))
+      else -> super.receive(event)
+    }
+  }
+
+  private fun displayComments(event: Event.DisplayInteractionComments): String {
+    val result = StringBuilder()
+    val test = event.comments["testname"]?.asString()
+    if (test != null) {
+      result.appendLine("Test Name: $test")
+    }
+
+    val text = event.comments["text"]
+    if (text != null) {
+      result.appendLine("Comments:")
+      when (text) {
+        is JsonValue.Array -> for (value in text.values) {
+          result.appendLine("  * " + value.asString())
+        }
+        else -> result.appendLine("    $text")
+      }
+    }
+    return result.toString()
   }
 }

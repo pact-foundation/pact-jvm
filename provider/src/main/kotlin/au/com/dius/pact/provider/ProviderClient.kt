@@ -1,10 +1,13 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
@@ -101,16 +104,19 @@ open class ConsumerInfo @JvmOverloads constructor (
   override fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
   override fun resolvePactSource(): PactSource? {
     val source = pactSource
-    val result = if (source is Callable<*>) {
-      source.call()
-    } else {
-      source
+    val result = when (source) {
+      is Callable<*> -> source.call()
+      else -> source
     }
-    return if (result is PactSource) {
-      result
-    } else {
-      logger.warn { "Expected a PactSource, but got $source" }
-      null
+    return when (result) {
+      is PactSource -> result
+      is File -> FileSource(result)
+      is URL -> UrlSource(result.toString())
+      is URI -> UrlSource(result.toString())
+      else -> {
+        logger.warn { "Expected a PactSource, but got $source (${source?.javaClass})" }
+        null
+      }
     }
   }
 

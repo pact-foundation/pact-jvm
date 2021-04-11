@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
@@ -23,7 +24,7 @@ class SLF4JReporter(
   var name: String,
   override var reportDir: File?,
   var displayFullDiff: Boolean
-) : VerifierReporter {
+) : BaseVerifierReporter() {
 
   constructor(name: String, reportDir: File?) : this(name, reportDir, false)
 
@@ -316,5 +317,32 @@ class SLF4JReporter(
 
   private fun prepareError(err: Throwable): String {
     return "      ${err.javaClass.name}: ${err.message}"
+  }
+
+  override fun receive(event: Event) {
+    when (event) {
+      is Event.DisplayInteractionComments -> displayComments(event)
+      else -> super.receive(event)
+    }
+  }
+
+  private fun displayComments(event: Event.DisplayInteractionComments) {
+    val result = StringBuilder()
+    val test = event.comments["testname"]?.asString()
+    if (test != null) {
+      result.appendLine("\n  Test Name: $test")
+    }
+
+    val text = event.comments["text"]
+    if (text != null) {
+      result.appendLine("\n  Comments:")
+      when (text) {
+        is JsonValue.Array -> for (value in text.values) {
+          result.appendLine("    " + value.asString())
+        }
+        else -> result.appendLine("    $text")
+      }
+    }
+    log.info(result.toString())
   }
 }

@@ -81,4 +81,25 @@ interface VerifierReporter {
   ) {}
   fun warnPublishResultsSkippedBecauseFiltered() {}
   fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {}
+  fun receive(event: Event)
+}
+
+abstract class BaseVerifierReporter: VerifierReporter {
+  override fun receive(event: Event) {
+    when (event) {
+      is Event.ErrorHasNoAnnotatedMethodsFoundForInteraction ->
+        errorHasNoAnnotatedMethodsFoundForInteraction(event.interaction)
+      is Event.VerificationFailed -> verificationFailed(event.interaction, event.e, event.showStacktrace)
+      Event.BodyComparisonOk -> bodyComparisonOk()
+      is Event.BodyComparisonFailed -> bodyComparisonFailed(event.comparison)
+      Event.GeneratesAMessageWhich -> generatesAMessageWhich()
+      is Event.MetadataComparisonOk -> if (event.key != null) {
+        metadataComparisonOk(event.key, event.mismatches)
+      } else metadataComparisonOk()
+      Event.IncludesMetadata -> includesMetadata()
+      is Event.MetadataComparisonFailed -> metadataComparisonFailed(event.key, event.value, event.comparison)
+      is Event.InteractionDescription -> interactionDescription(event.interaction)
+      is Event.DisplayInteractionComments -> {}
+    }
+  }
 }

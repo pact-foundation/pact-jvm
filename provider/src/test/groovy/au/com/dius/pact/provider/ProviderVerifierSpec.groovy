@@ -25,6 +25,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -396,9 +397,9 @@ class ProviderVerifierSpec extends Specification {
     def result = verifier.verifyMessage(methods, message, interactionMessage, failures, false)
 
     then:
-    1 * reporter.bodyComparisonOk()
-    1 * reporter.generatesAMessageWhich()
-    1 * reporter.metadataComparisonOk()
+    1 * reporter.receive(Event.BodyComparisonOk.INSTANCE)
+    1 * reporter.receive(Event.GeneratesAMessageWhich.INSTANCE)
+    1 * reporter.receive(new Event.MetadataComparisonOk(null, null))
     0 * reporter._
     result
   }
@@ -461,9 +462,11 @@ class ProviderVerifierSpec extends Specification {
     }
     def interaction1 = Mock(RequestResponseInteraction) {
       getDescription() >> 'Interaction 1'
+      getComments() >> [:]
     }
     def interaction2 = Mock(RequestResponseInteraction) {
       getDescription() >> 'Interaction 2'
+      getComments() >> [:]
     }
     def mockPact = Mock(Pact) {
       getSource() >> UnknownPactSource.INSTANCE

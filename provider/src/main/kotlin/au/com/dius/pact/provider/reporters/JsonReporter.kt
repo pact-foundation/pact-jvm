@@ -40,7 +40,7 @@ class JsonReporter(
   var jsonData: JsonValue.Object = JsonValue.Object(),
   override var ext: String = ".json",
   private var providerName: String? = null
-) : VerifierReporter {
+) : BaseVerifierReporter() {
 
   constructor(name: String, reportDir: File?) : this(name, reportDir, JsonValue.Object(), ".json", null)
 
@@ -299,6 +299,15 @@ class JsonReporter(
 
   override fun warnPublishResultsSkippedBecauseFiltered() { }
   override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) { }
+
+  override fun receive(event: Event) {
+    when (event) {
+      is Event.DisplayInteractionComments ->
+        jsonData["execution"].asArray()!!.last()["consumer"].asObject()!!["comments"] =
+          JsonValue.Object(event.comments.toMutableMap())
+      else -> super.receive(event)
+    }
+  }
 
   companion object {
     const val REPORT_FORMAT = "0.1.0"

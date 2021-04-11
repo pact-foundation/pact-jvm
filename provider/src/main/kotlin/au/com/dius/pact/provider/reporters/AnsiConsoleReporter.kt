@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
@@ -21,7 +22,7 @@ class AnsiConsoleReporter(
   var name: String,
   override var reportDir: File?,
   var displayFullDiff: Boolean
-) : VerifierReporter {
+) : BaseVerifierReporter() {
 
   constructor(name: String, reportDir: File?) : this(name, reportDir, false)
 
@@ -312,5 +313,31 @@ class AnsiConsoleReporter(
     } else {
       println("      ${err.javaClass.name}")
     }
+  }
+
+  override fun receive(event: Event) {
+    when (event) {
+      is Event.DisplayInteractionComments -> displayComments(event)
+      else -> super.receive(event)
+    }
+  }
+
+  private fun displayComments(event: Event.DisplayInteractionComments) {
+    val test = event.comments["testname"]?.asString()
+    if (test != null) {
+      println("\n  Test Name: $test")
+    }
+
+    val text = event.comments["text"]
+    if (text != null) {
+      println("\n  Comments:")
+      when (text) {
+        is JsonValue.Array -> for (value in text.values) {
+          println("    " + value.asString())
+        }
+        else -> println("    $text")
+      }
+    }
+    println()
   }
 }
