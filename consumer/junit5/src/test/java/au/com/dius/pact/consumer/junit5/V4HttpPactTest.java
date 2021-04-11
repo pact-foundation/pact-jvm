@@ -25,7 +25,7 @@ public class V4HttpPactTest {
     return builder
       .given("good state")
       .comment("This is a comment")
-      .uponReceiving("V3 PactProviderTest test interaction")
+      .uponReceiving("V4 PactProviderTest test interaction")
       .path("/")
       .method("GET")
       .comment("Another comment")

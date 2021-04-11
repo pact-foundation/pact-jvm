@@ -23,6 +23,7 @@ import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import com.github.michaelbull.result.get
@@ -375,6 +376,14 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
               .consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
         }
       }
+
+      if (providerInfo.pactVersion == PactSpecVersion.V4) {
+        pact.asV4Pact().unwrap().interactions.forEach { i ->
+         i.comments["testname"] = Json.toJson(context.testClass.map { it.name + "." }.orElse("") +
+           context.displayName)
+        }
+      }
+
       val executedFragments = store["executedFragments"] as MutableSet<Method>
       executedFragments.add(method)
       store.put("pact", pact)

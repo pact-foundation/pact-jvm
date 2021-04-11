@@ -464,10 +464,12 @@ class ProviderVerifierSpec extends Specification {
       getDescription() >> 'Interaction 1'
       getComments() >> [:]
     }
+    interaction1.asSynchronousRequestResponse() >> { interaction1 }
     def interaction2 = Mock(RequestResponseInteraction) {
       getDescription() >> 'Interaction 2'
       getComments() >> [:]
     }
+    interaction2.asSynchronousRequestResponse() >> { interaction2 }
     def mockPact = Mock(Pact) {
       getSource() >> UnknownPactSource.INSTANCE
     }
