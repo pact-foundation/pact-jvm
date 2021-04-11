@@ -101,7 +101,7 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
         checkIgnoreIoException(ignoreIoErrors, e)
       } catch (e: NoPactsFoundException) {
         logger.debug(e) { "No pacts found" }
-        emptyList<Pact<I>>()
+        emptyList()
       } catch (e: Exception) {
         when (e.cause) {
           is IOException -> checkIgnoreIoException(ignoreIoErrors, e)
