@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.20 - Bugfix Release
+
+* 30083b062 - fix(regression): IO Exceptions are now wrapped #1337 (Ronald Holshausen, Sun Apr 11 11:10:03 2021 +1000)
+* 768e7684a - chore: update readme on injecting request objects (Ronald Holshausen, Sat Apr 10 13:08:09 2021 +1000)
+* 2e6ae47b1 - fix: JUnit 5 Spring extension classes need to be open #1338 (Ronald Holshausen, Sat Apr 10 12:43:09 2021 +1000)
+* 5614d0387 - fix: compare decimal values using compareTo instead of equals #1335 (Ronald Holshausen, Fri Apr 9 16:05:30 2021 +1000)
+* 592122abb - bump version to 4.1.20 (Ronald Holshausen, Sun Mar 28 15:47:45 2021 +1100)
+
 # 4.1.19 - Bugfix Release
 
 * 3622c25ef - feat(Junit5+Spring): support injecting MockHttpServletRequestBuilder when using MockMvc tests #1334 (Ronald Holshausen, Sun Mar 28 14:42:19 2021 +1100)
