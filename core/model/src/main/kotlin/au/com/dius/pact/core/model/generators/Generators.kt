@@ -1,11 +1,6 @@
 package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.core.model.ContentType
-import au.com.dius.pact.core.model.InvalidPactException
-import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.PathToken
-import au.com.dius.pact.core.model.parsePath
+import au.com.dius.pact.core.model.*
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
@@ -172,17 +167,24 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     }
 
     private fun findContentTypeHandler(contentType: ContentType): ContentTypeHandler? {
-      val typeHandler = contentTypeHandlers[contentType.getBaseType()]
+      val updatedContentType = getUpdatedContentType(contentType)
+      val typeHandler = contentTypeHandlers[updatedContentType.getBaseType()]
       return if (typeHandler != null) {
         typeHandler
       } else {
-        val supertype = contentType.getSupertype()
+        val supertype = updatedContentType.getSupertype()
         if (supertype != null) {
           findContentTypeHandler(supertype)
         } else {
           null
         }
       }
+    }
+
+    private fun getUpdatedContentType(contentType: ContentType): ContentType {
+      if (contentType.isJson())
+        return ContentType.JSON
+      return contentType
     }
   }
 
