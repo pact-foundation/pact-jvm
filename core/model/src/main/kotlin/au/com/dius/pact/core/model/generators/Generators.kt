@@ -1,6 +1,11 @@
 package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.core.model.*
+import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.InvalidPactException
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
