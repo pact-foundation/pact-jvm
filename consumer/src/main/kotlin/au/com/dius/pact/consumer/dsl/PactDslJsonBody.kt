@@ -37,6 +37,7 @@ import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.FastDateFormat
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -562,6 +563,21 @@ open class PactDslJsonBody : DslPart {
     matchers.addRule(matcherKey(name, rootPath), matchDate(format))
     return this
   }
+
+  /**
+   * Attribute that must match the provided date format
+   * @param name attribute date
+   * @param format date format to match
+   * @param example example date to use for generated values
+   */
+  fun localDate(name: String, format: String, example: LocalDate): PactDslJsonBody {
+    val formatter = DateTimeFormatter.ofPattern(format)
+    val body = body as JsonValue.Object
+    body.add(name, JsonValue.StringValue(formatter.format(example).toCharArray()))
+    matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+    return this
+  }
+
   /**
    * Attribute that must be an ISO formatted time
    * @param name attribute name
