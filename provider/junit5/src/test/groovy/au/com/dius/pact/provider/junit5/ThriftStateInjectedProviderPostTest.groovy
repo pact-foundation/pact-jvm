@@ -11,7 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import ru.lanwen.wiremock.ext.WiremockResolver
 import ru.lanwen.wiremock.ext.WiremockUriResolver
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import static com.github.tomakehurst.wiremock.client.WireMock.containing
+import static com.github.tomakehurst.wiremock.client.WireMock.post
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 
 @Provider('ThriftJsonPostService')
 @PactFolder('pacts')
@@ -36,7 +39,7 @@ class ThriftStateInjectedProviderPostTest {
 
     server.stubFor(
       post(urlPathEqualTo('/data/1234'))
-        .withRequestBody(containing("{\"id\":\"abc\"}"))
+        .withRequestBody(containing('{"id":"abc"}'))
         .willReturn(aResponse()
           .withStatus(200)
           .withHeader('Content-Type', 'application/x-thrift')
