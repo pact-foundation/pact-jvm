@@ -1,0 +1,71 @@
+{
+  "provider": {
+    "name": "matchValuesService"
+  },
+  "consumer": {
+    "name": "my-consumer"
+  },
+  "interactions": [
+    {
+      "description": "testing pact",
+      "request": {
+        "method": "GET",
+        "path": "/myapp/test"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "field1": "test string",
+          "field2": false,
+          "field3": {
+            "nested1": {
+              "0": {
+                "value3": 102
+              }
+            }
+          },
+          "field4": 50
+        },
+        "matchingRules": {
+          "body": {
+            "$.field4": {
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.field3.nested1": {
+              "matchers": [
+                {
+                  "match": "values"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.field3.nested1.*.value3": {
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.2.4"
+    }
+  }
+}
