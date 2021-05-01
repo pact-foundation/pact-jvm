@@ -193,7 +193,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
         ), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
-        val interaction = matchResult.problems.keys.first() as RequestResponseInteraction
+        val interaction = matchResult.problems.keys.first().asSynchronousRequestResponse()!!
         mismatchedRequests.putIfAbsent(interaction.request, mutableListOf())
         mismatchedRequests[interaction.request]?.add(PactVerificationResult.PartialMismatch(
           matchResult.problems[interaction]!!.mismatches))

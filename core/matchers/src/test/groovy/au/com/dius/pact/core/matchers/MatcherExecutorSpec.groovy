@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
@@ -315,4 +316,30 @@ class MatcherExecutorSpec extends Specification {
     xml('<a>text</a>').firstChild || "'text'"
   }
 
+  @Unroll
+  def 'boolean matcher test - #expected -> #actual'() {
+    expect:
+    MatcherExecutorKt.domatch(BooleanMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+
+    where:
+    expected        | actual                                            || mustBeEmpty
+    'Harry'         | 'Some other string'                               || false
+    100             | 200.3                                             || false
+    true            | false                                             || true
+    null            | null                                              || true
+    '200'           | 200                                               || false
+    200             | null                                              || false
+    [100, 200, 300] | [200.3]                                           || true
+    [a: 100]        | [a: 200.3, b: 200, c: 300]                        || true
+    xml('<a/>')     | xml('<a/>')                                       || false
+    xml('<a/>')     | xml('<a v="true"/>').attributes.getNamedItem('v') || true
+    xml('<a/>')     | xml('<a v="bool"/>').attributes.getNamedItem('v') || false
+    json('"hello"') | json('"hello"')                                   || false
+    json('100')     | json('200')                                       || false
+    json('100')     | json('true')                                      || true
+    2.3d            | 2.300d                                            || false
+    2.3g            | 2.300g                                            || false
+    true            | false                                             || true
+    true            | 'false'                                           || true
+  }
 }

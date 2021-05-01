@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
+import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
@@ -36,11 +37,11 @@ import java.math.BigInteger
 import java.text.ParseException
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import kotlin.math.exp
 
 private val logger = KotlinLogging.logger {}
 private val integerRegex = Regex("^\\d+$")
 private val decimalRegex = Regex("^0|\\d+\\.\\d*$")
+private val booleanRegex = Regex("^true|false$")
 
 fun valueOf(value: Any?): String {
   return when (value) {
@@ -143,6 +144,7 @@ fun <M : Mismatch> domatch(
     is ContentTypeMatcher ->
       matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     is ArrayContainsMatcher -> listOf()
+    is BooleanMatcher -> matchBoolean(path, expected, actual, mismatchFn)
     else -> matchEquality(path, expected, actual, mismatchFn)
   }
 }
@@ -300,6 +302,29 @@ fun matchInteger(actual: Any?): Boolean {
   }
   logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches integer -> $result" }
   return result
+}
+
+fun <M : Mismatch> matchBoolean(
+  path: List<String>,
+  expected: Any?,
+  actual: Any?,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  if (expected == null && actual != null) {
+    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
+  }
+  logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to match a boolean at $path" }
+  return when {
+    expected == null && actual == null -> emptyList()
+    actual is Boolean -> emptyList()
+    actual is JsonValue && actual.isBoolean -> emptyList()
+    actual is Attr && actual.nodeValue.matches(booleanRegex) -> emptyList()
+    actual is String && actual.matches(booleanRegex) -> emptyList()
+    actual is List<*> -> emptyList()
+    actual is Map<*, *> -> emptyList()
+    else -> listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to match a boolean", path))
+  }
 }
 
 fun <M : Mismatch> matchDate(

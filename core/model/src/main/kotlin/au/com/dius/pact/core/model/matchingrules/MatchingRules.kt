@@ -121,6 +121,7 @@ interface MatchingRule {
         })
         else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
       }
+      "boolean" -> BooleanMatcher
       else -> {
         MatchingRuleGroup.logger.warn { "Unrecognised matcher ${j[MATCH]}, defaulting to equality matching" }
         EqualsMatcher
@@ -246,6 +247,18 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
       listOf()
     }
   }
+}
+
+/**
+ * Type matching for booleans
+ */
+object BooleanMatcher : MatchingRule {
+  override fun toMap(spec: PactSpecVersion) = when {
+    spec == PactSpecVersion.V4 -> mapOf("match" to "boolean")
+    else -> TypeMatcher.toMap(spec)
+  }
+
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> = listOf()
 }
 
 /**

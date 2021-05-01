@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.generators.RandomStringGenerator
 import au.com.dius.pact.core.model.generators.RegexGenerator
 import au.com.dius.pact.core.model.generators.TimeGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
+import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
@@ -91,6 +92,7 @@ class TypeMatcher @JvmOverloads constructor(
     "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
     "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
     "number" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
+    "boolean" -> BooleanMatcher
     else -> au.com.dius.pact.core.model.matchingrules.TypeMatcher
   },
   generator
@@ -487,9 +489,9 @@ open class Matchers {
     @JvmOverloads
     fun bool(value: Boolean? = null): Matcher {
       return if (value != null) {
-        TypeMatcher(value)
+        TypeMatcher(value, "boolean")
       } else {
-        TypeMatcher(true, generator = RandomBooleanGenerator)
+        TypeMatcher(true, "boolean", RandomBooleanGenerator)
       }
     }
 
