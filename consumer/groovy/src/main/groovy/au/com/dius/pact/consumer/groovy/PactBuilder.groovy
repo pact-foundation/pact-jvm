@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.PactTestExecutionContext
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.model.MockServerImplementation
+import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -13,6 +14,9 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.SynchronousRequestResponse
+import au.com.dius.pact.core.model.V4Interaction
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -33,12 +37,21 @@ class PactBuilder extends GroovyBuilder {
 
   public static final String TEXT = 'text'
 
-  RequestResponsePact pact = new RequestResponsePact(new Provider(), new Consumer())
+  BasePact pact = new RequestResponsePact(new Provider(), new Consumer())
   Integer port = 0
-  RequestResponseInteraction currentInteraction
+  SynchronousRequestResponse currentInteraction
   List interactions = []
   List<ProviderState> providerStates = []
   boolean requestState
+  PactSpecVersion specVersion = PactSpecVersion.V3
+
+  PactBuilder(PactSpecVersion version = PactSpecVersion.V3) {
+    this.specVersion = version
+
+    if (specVersion == PactSpecVersion.V4) {
+      pact = new V4Pact(new Consumer(), new Provider())
+    }
+  }
 
   /**
    * Defines the service consumer
@@ -103,7 +116,11 @@ class PactBuilder extends GroovyBuilder {
    */
   PactBuilder uponReceiving(String requestDescription) {
     updateInteractions()
-    this.currentInteraction = new RequestResponseInteraction(requestDescription, providerStates)
+    if (this.specVersion == PactSpecVersion.V4) {
+      this.currentInteraction = new V4Interaction.SynchronousHttp('', requestDescription, providerStates)
+    } else {
+      this.currentInteraction = new RequestResponseInteraction(requestDescription, providerStates)
+    }
     requestState = true
     providerStates = []
     this
@@ -126,8 +143,8 @@ class PactBuilder extends GroovyBuilder {
     Map query = setupQueryParameters(requestData.query ?: [:], requestMatchers, requestGenerators)
     String path = setupPath(requestData.path ?: '/', requestMatchers, requestGenerators)
     this.currentInteraction.request.method = requestData.method ?: 'GET'
-    this.currentInteraction.request.headers = headers
-    this.currentInteraction.request.query = query
+    this.currentInteraction.request.headers.putAll(headers)
+    this.currentInteraction.request.query.putAll(query)
     this.currentInteraction.request.path = path
     def requestBody = setupBody(requestData, currentInteraction.request)
     this.currentInteraction.request.body = requestBody
@@ -145,7 +162,7 @@ class PactBuilder extends GroovyBuilder {
     Generators responseGenerators = currentInteraction.response.generators
     Map responseHeaders = setupHeaders(responseData.headers ?: [:], responseMatchers, responseGenerators)
     this.currentInteraction.response.status = responseData.status ?: 200
-    this.currentInteraction.response.headers = responseHeaders
+    this.currentInteraction.response.headers.putAll(responseHeaders)
     def responseBody = setupBody(responseData, currentInteraction.response)
     this.currentInteraction.response.body = responseBody
     requestState = false
@@ -238,7 +255,7 @@ class PactBuilder extends GroovyBuilder {
   @CompileStatic
   PactVerificationResult runTest(Map options = [:], Closure closure) {
     updateInteractions()
-    this.pact.interactions = interactions
+    this.pact.interactions.addAll(interactions)
 
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
     MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion as PactSpecVersion,

@@ -139,7 +139,7 @@ interface Pact {
   /**
    * Returns all the interactions of the pact
    */
-  val interactions: List<Interaction>
+  val interactions: MutableList<Interaction>
 
   /**
    * The source that this pact was loaded from

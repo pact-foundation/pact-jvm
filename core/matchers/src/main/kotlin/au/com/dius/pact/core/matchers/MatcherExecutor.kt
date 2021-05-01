@@ -36,6 +36,7 @@ import java.math.BigInteger
 import java.text.ParseException
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import kotlin.math.exp
 
 private val logger = KotlinLogging.logger {}
 private val integerRegex = Regex("^\\d+$")
@@ -198,7 +199,9 @@ fun <M : Mismatch> matchType(
   actual: Any?,
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
-  logger.debug { "comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path" }
+  logger.debug {
+    "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to ${valueOf(expected)} (${typeOf(expected)}) at $path"
+  }
   return if (expected is String && actual is String ||
     expected is Number && actual is Number ||
     expected is Boolean && actual is Boolean ||

@@ -12,12 +12,10 @@ import com.github.michaelbull.result.Result
 class RequestResponsePact @JvmOverloads constructor(
   override var provider: Provider,
   override var consumer: Consumer,
-  interactions: List<RequestResponseInteraction> = listOf(),
+  override var interactions: MutableList<Interaction> = mutableListOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
 ) : BasePact(consumer, provider, metadata, source) {
-
-  override var interactions = interactions.toMutableList()
 
   override fun sortInteractions(): Pact {
     interactions.sortBy { interaction -> interaction.providerStates.joinToString { it.name.toString() } +
@@ -46,13 +44,13 @@ class RequestResponsePact @JvmOverloads constructor(
   override fun asMessagePact() = Err("A V3 Request/Response Pact can not be converted to a Message Pact")
 
   override fun asV4Pact(): Result<V4Pact, String> {
-    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }, metadata))
+    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }.toMutableList(), metadata))
   }
 
-  fun interactionFor(description: String, providerState: String): RequestResponseInteraction? {
+  fun interactionFor(description: String, providerState: String): SynchronousRequestResponse? {
     return interactions.find { i ->
       i.description == description && i.providerStates.any { it.name == providerState }
-    }
+    }?.asSynchronousRequestResponse()
   }
 
   override fun equals(other: Any?): Boolean {

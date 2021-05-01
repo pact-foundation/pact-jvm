@@ -303,7 +303,8 @@ object DefaultPactReader : PactReader, KLogging() {
       }
     else emptyList()
 
-    return V4Pact(consumer, provider, interactions, BasePact.metaData(pactJson["metadata"], PactSpecVersion.V4))
+    return V4Pact(consumer, provider, interactions.toMutableList(), BasePact.metaData(pactJson["metadata"],
+      PactSpecVersion.V4))
   }
 
   @JvmStatic

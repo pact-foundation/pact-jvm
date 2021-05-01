@@ -13,14 +13,14 @@ import mu.KLogging
 /**
  * Request made by a consumer to a provider
  */
-interface IRequest {
-  val method: String
-  val path: String
-  val query: Map<String, List<String>>
-  val headers: Map<String, List<String>>
-  val body: OptionalBody
-  val matchingRules: MatchingRules
-  val generators: Generators
+interface IRequest: IHttpPart {
+  var method: String
+  var path: String
+  val query: MutableMap<String, List<String>>
+  override val headers: MutableMap<String, List<String>>
+  override var body: OptionalBody
+  override val matchingRules: MatchingRules
+  override val generators: Generators
 
   fun cookies(): List<String>
   fun headersWithoutCookie(): Map<String, List<String>>

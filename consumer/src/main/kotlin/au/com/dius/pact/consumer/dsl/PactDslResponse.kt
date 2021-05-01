@@ -284,11 +284,11 @@ open class PactDslResponse @JvmOverloads constructor(
       consumerPactBuilder.interactions.add(V4Interaction.SynchronousHttp(
         "",
         request!!.description,
+        request.state,
         HttpRequest(request.requestMethod, request.path, request.query,
           request.requestHeaders, request.requestBody, request.requestMatchers, request.requestGenerators),
         HttpResponse(responseStatus, responseHeaders, responseBody, responseMatchers, responseGenerators),
-        null,
-        request.state, mutableMapOf("text" to jsonArray(comments))).withGeneratedKey())
+        null, mutableMapOf("text" to jsonArray(comments))).withGeneratedKey())
     } else {
       consumerPactBuilder.interactions.add(RequestResponseInteraction(
         request!!.description,
@@ -309,12 +309,12 @@ open class PactDslResponse @JvmOverloads constructor(
     return when {
       pactClass.isAssignableFrom(V4Pact::class.java) -> {
         V4Pact(request!!.consumer, request.provider,
-          consumerPactBuilder.interactions.map { obj -> obj.asV4Interaction() }, DEFAULT_METADATA,
+          consumerPactBuilder.interactions.map { obj -> obj.asV4Interaction() }.toMutableList(), DEFAULT_METADATA,
           UnknownPactSource) as P
       }
       pactClass.isAssignableFrom(RequestResponsePact::class.java) -> {
         RequestResponsePact(request!!.provider, request.consumer,
-          consumerPactBuilder.interactions.map { it.asSynchronousRequestResponse() as RequestResponseInteraction }) as P
+          consumerPactBuilder.interactions.map { it.asSynchronousRequestResponse()!! }.toMutableList()) as P
       }
       else -> throw IllegalArgumentException(pactClass.simpleName + " is not a valid Pact class")
     }

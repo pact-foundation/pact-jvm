@@ -122,13 +122,13 @@ sealed class V4Interaction(
   /** Generate a unique key from the contents of the interaction */
   abstract fun generateKey(): String
 
-  class SynchronousHttp(
+  class SynchronousHttp @JvmOverloads constructor(
     key: String,
     description: String,
-    override val request: HttpRequest,
-    override val response: HttpResponse,
-    interactionId: String? = null,
     providerStates: List<ProviderState> = listOf(),
+    override val request: HttpRequest = HttpRequest(),
+    override val response: HttpResponse = HttpResponse(),
+    interactionId: String? = null,
     override val comments: MutableMap<String, JsonValue> = mutableMapOf()
   ) : V4Interaction(key, description, interactionId, providerStates, comments), SynchronousRequestResponse {
 
@@ -138,7 +138,7 @@ sealed class V4Interaction(
 
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
-      return SynchronousHttp(generateKey(), description, request, response, interactionId, providerStates, comments)
+      return SynchronousHttp(generateKey(), description, providerStates, request, response, interactionId, comments)
     }
 
     @ExperimentalUnsignedTypes
@@ -282,8 +282,8 @@ sealed class V4Interaction(
             }
             when (result.value) {
               V4InteractionType.SynchronousHTTP -> {
-                Ok(SynchronousHttp(key, description, HttpRequest.fromJson(json["request"]),
-                  HttpResponse.fromJson(json["response"]), id, providerStates, comments))
+                Ok(SynchronousHttp(key, description, providerStates, HttpRequest.fromJson(json["request"]),
+                  HttpResponse.fromJson(json["response"]), id, comments))
               }
               V4InteractionType.AsynchronousMessages -> {
                 val metadata = if (json.has("metadata")) {
@@ -332,14 +332,14 @@ sealed class V4Interaction(
 open class V4Pact @JvmOverloads constructor(
   consumer: Consumer,
   provider: Provider,
-  override val interactions: List<V4Interaction>,
+  override val interactions: MutableList<Interaction> = mutableListOf(),
   metadata: Map<String, Any?> = DEFAULT_METADATA,
   source: PactSource = UnknownPactSource
 ) : BasePact(consumer, provider, metadata, source) {
   override fun sortInteractions(): Pact {
     return V4Pact(consumer, provider, interactions.sortedBy { interaction ->
       interaction.providerStates.joinToString { it.name.toString() } + interaction.description
-    }, metadata, source)
+    }.toMutableList(), metadata, source)
   }
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
@@ -352,11 +352,11 @@ open class V4Pact @JvmOverloads constructor(
   }
 
   override fun mergeInteractions(interactions: List<Interaction>): Pact {
-    return V4Pact(consumer, provider, merge(interactions), metadata, source)
+    return V4Pact(consumer, provider, merge(interactions).toMutableList(), metadata, source)
   }
 
-  private fun merge(interactions: List<Interaction>): List<V4Interaction> {
-    val mergedResult = this.interactions.associateBy { it.generateKey() } +
+  private fun merge(interactions: List<Interaction>): List<Interaction> {
+    val mergedResult = this.interactions.associateBy { (it as V4Interaction).generateKey() } +
       interactions.map { it.asV4Interaction() }.associateBy { it.generateKey() }
     return mergedResult.values.toList()
   }
@@ -364,7 +364,7 @@ open class V4Pact @JvmOverloads constructor(
   override fun asRequestResponsePact(): Result<RequestResponsePact, String> {
     return Ok(RequestResponsePact(provider, consumer,
       interactions.filterIsInstance<V4Interaction.SynchronousHttp>()
-        .map { it.asV3Interaction() }))
+        .map { it.asV3Interaction() }.toMutableList()))
   }
 
   override fun asMessagePact(): Result<MessagePact, String> {

@@ -12,12 +12,12 @@ import mu.KLogging
 /**
  * Response from a provider to a consumer
  */
-interface IResponse {
-  val status: Int
-  val headers: Map<String, List<String>>
-  val body: OptionalBody
-  val matchingRules: MatchingRules
-  val generators: Generators
+interface IResponse: IHttpPart {
+  var status: Int
+  override val headers: MutableMap<String, List<String>>
+  override var body: OptionalBody
+  override val matchingRules: MatchingRules
+  override val generators: Generators
 
   /**
    * Create a new response by applying any generators to this response
