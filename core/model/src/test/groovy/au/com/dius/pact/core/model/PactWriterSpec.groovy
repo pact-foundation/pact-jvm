@@ -259,8 +259,8 @@ class PactWriterSpec extends Specification {
       new Consumer('PactWriterSpecConsumer'),
       new Provider('PactWriterSpecProvider'),
       [
-        new V4Interaction.SynchronousHttp('A1', 'A1', new HttpRequest(), new HttpResponse(), null,
-          [], comments),
+        new V4Interaction.SynchronousHttp('A1', 'A1', [], new HttpRequest(), new HttpResponse(), null,
+          comments),
         new V4Interaction.AsynchronousMessage('A2', 'A2', OptionalBody.missing(), [:],
           new MatchingRulesImpl(), new Generators(), null, [], comments)
       ])
