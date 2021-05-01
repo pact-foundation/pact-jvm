@@ -63,7 +63,7 @@ trait UnitSpecsSupport extends Specification {
     new RequestResponseInteraction(description, states.asJava, request, response, null)
 
   def buildPactFragment(consumer: String, provider: String, interactions: List[RequestResponseInteraction]): RequestResponsePact =
-    new RequestResponsePact(new Provider(provider), new Consumer(consumer), interactions.asJava)
+    new RequestResponsePact(new Provider(provider), new Consumer(consumer), interactions.asInstanceOf[List[Interaction]].asJava)
 
   def description(pact: RequestResponsePact): String = s"Consumer '${pact.getConsumer.getName}' has a pact with Provider '${pact.getProvider.getName}': " +
     pact.getInteractions.asScala.map { i => i.getDescription }.mkString(" and ") + sys.props("line.separator")

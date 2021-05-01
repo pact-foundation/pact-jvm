@@ -39,11 +39,12 @@ trait ProviderSpec extends Specification {
       val description = s"${interaction.getProviderStates.asScala.map(_.getName).mkString(", ")} ${interaction.getDescription}"
       val test: String => Result = { url =>
         implicit val executionContext: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
-        val request = interaction.getRequest.copy
-        request.setPath(s"$url${interaction.getRequest.getPath}")
+        val requestResponse = interaction.asSynchronousRequestResponse
+        val request = requestResponse.getRequest.copy
+        request.setPath(s"$url${request.getPath}")
         val actualResponseFuture = HttpClient.run(request)
         val actualResponse = Await.result(actualResponseFuture, timeout)
-        ResponseMatching.matchRules(interaction.getResponse, actualResponse) must beEqualTo(FullResponseMatch.INSTANCE)
+        ResponseMatching.matchRules(requestResponse.getResponse, actualResponse) must beEqualTo(FullResponseMatch.INSTANCE)
       }
       fragmentFactory.example(description, {inState(interaction.getProviderStates.asScala.headOption.map(_.getName).getOrElse(""), test)})
     }.toSeq

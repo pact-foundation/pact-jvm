@@ -102,6 +102,9 @@ interface Interaction {
     return false
   }
 
+  /**
+   * If this interaction is synchronous request/response, returns it. Otherwise returns null.
+   */
   fun asSynchronousRequestResponse(): SynchronousRequestResponse? {
     return null
   }

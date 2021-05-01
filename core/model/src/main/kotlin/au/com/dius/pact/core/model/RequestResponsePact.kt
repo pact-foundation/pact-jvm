@@ -12,14 +12,18 @@ import com.github.michaelbull.result.Result
 class RequestResponsePact @JvmOverloads constructor(
   override var provider: Provider,
   override var consumer: Consumer,
-  override var interactions: MutableList<Interaction> = mutableListOf(),
+  interactions: MutableList<Interaction> = mutableListOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
 ) : BasePact(consumer, provider, metadata, source) {
 
+  override var interactions = interactions.toMutableList()
+
   override fun sortInteractions(): Pact {
-    interactions.sortBy { interaction -> interaction.providerStates.joinToString { it.name.toString() } +
-      interaction.description }
+    interactions
+      .sortBy { interaction ->
+        interaction.providerStates.joinToString { it.name.toString() } + interaction.description
+      }
     return this
   }
 
@@ -31,7 +35,6 @@ class RequestResponsePact @JvmOverloads constructor(
   )
 
   override fun mergeInteractions(interactions: List<Interaction>): Pact {
-    interactions as List<RequestResponseInteraction>
     this.interactions = (interactions + this.interactions).distinctBy { it.uniqueKey() }.toMutableList()
     sortInteractions()
     return this

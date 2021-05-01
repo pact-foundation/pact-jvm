@@ -88,6 +88,9 @@ data class HttpRequest @JvmOverloads constructor(
 
   override fun isMultipartFileUpload() = asHttpPart().isMultipartFileUpload()
 
+  override fun copy(): IRequest = this.copy(body = this.body.copy(), matchingRules = this.matchingRules.copy(),
+    generators = this.generators.copy())
+
   companion object {
     @JvmStatic
     fun fromJson(json: JsonValue): HttpRequest {

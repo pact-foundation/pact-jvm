@@ -80,7 +80,8 @@ public class EventsRepositoryDictionaryNestedArrayConsumerTest {
     HashMap<String, MatchingRuleGroup> matchingRules = new HashMap<>();
     matchingRules.put("$.events", new MatchingRuleGroup(Collections.singletonList(ValuesMatcher.INSTANCE)));
     matchingRules.put("$.events.*[*].title", new MatchingRuleGroup(Collections.singletonList(TypeMatcher.INSTANCE)));
-    assertThat(pact.getInteractions().get(0).getResponse().getMatchingRules().rulesForCategory("body").getMatchingRules(),
+    assertThat(pact.getInteractions().get(0).asSynchronousRequestResponse()
+        .getResponse().getMatchingRules().rulesForCategory("body").getMatchingRules(),
       is(equalTo(matchingRules)));
 
     return pact;

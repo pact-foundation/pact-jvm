@@ -34,20 +34,23 @@ public class MatcherTestUtils {
     }
 
     public static void assertResponseMatcherKeysEqualTo(RequestResponsePact pact, String category, String... matcherKeys) {
-      MatchingRules matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
+      MatchingRules matchingRules = pact.getInteractions().get(0)
+        .asSynchronousRequestResponse().getResponse().getMatchingRules();
       Map<String, MatchingRuleGroup> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
       assertEquals(asSet(matcherKeys), new TreeSet<>(matchers.keySet()));
     }
 
     @SuppressWarnings("unchecked")
     public static void assertResponseGeneratorKeysEqualTo(RequestResponsePact pact, String category, String... matcherKeys) {
-        Generators generators = pact.getInteractions().get(0).getResponse().getGenerators();
+        Generators generators = pact.getInteractions().get(0)
+          .asSynchronousRequestResponse().getResponse().getGenerators();
         Map<String, Object> categoryMap = (Map<String, Object>) generators.toMap(PactSpecVersion.V3).get(category);
         assertEquals(asSet(matcherKeys), new TreeSet<>(categoryMap.keySet()));
     }
 
     public static void assertResponseKeysEqualTo(RequestResponsePact pact, String... keys) {
-      String body = pact.getInteractions().get(0).getResponse().getBody().valueAsString();
+      String body = pact.getInteractions().get(0)
+        .asSynchronousRequestResponse().getResponse().getBody().valueAsString();
       Map hashMap = null;
       try {
         hashMap = new ObjectMapper().readValue(body, HashMap.class);

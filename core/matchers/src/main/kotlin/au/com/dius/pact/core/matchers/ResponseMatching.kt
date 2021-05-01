@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.IResponse
-import au.com.dius.pact.core.model.Response
 import mu.KLogging
 
 sealed class ResponseMatch
@@ -11,7 +10,7 @@ data class ResponseMismatch(val mismatches: List<Mismatch>) : ResponseMatch()
 object ResponseMatching : KLogging() {
 
   @JvmStatic
-  fun matchRules(expected: Response, actual: Response): ResponseMatch {
+  fun matchRules(expected: IResponse, actual: IResponse): ResponseMatch {
     val mismatches = responseMismatches(expected, actual)
     return if (mismatches.isEmpty()) FullResponseMatch
     else ResponseMismatch(mismatches)

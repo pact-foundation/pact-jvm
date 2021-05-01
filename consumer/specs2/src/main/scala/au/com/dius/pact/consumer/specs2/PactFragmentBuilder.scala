@@ -122,7 +122,7 @@ object PactFragmentBuilder {
     }
 
     def asPact(): RequestResponsePact = {
-      new RequestResponsePact(provider, consumer, interactions.asJava)
+      new RequestResponsePact(provider, consumer, interactions.asInstanceOf[List[Interaction]].asJava)
     }
 
     case class InState(newState: List[ProviderState], pactWithAtLeastOneRequest: PactWithAtLeastOneRequest) {

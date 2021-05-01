@@ -46,7 +46,8 @@ public class Defect266Test {
       .status(200)
       .body(body)
       .toPact();
-    MatchingRules matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
+    MatchingRules matchingRules = pact.getInteractions().get(0)
+      .asSynchronousRequestResponse().getResponse().getMatchingRules();
     Map<String, MatchingRuleGroup> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
     assertThat(bodyMatchingRules.keySet(), is(equalTo(Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
       "$[0][*].email"))));
@@ -74,7 +75,8 @@ public class Defect266Test {
       .status(200)
       .body(body)
       .toPact();
-    MatchingRules matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
+    MatchingRules matchingRules = pact.getInteractions().get(0)
+      .asSynchronousRequestResponse().getResponse().getMatchingRules();
     Map<String, MatchingRuleGroup> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
     assertThat(bodyMatchingRules.keySet(), is(equalTo(Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
       "$[0][*].email"))));

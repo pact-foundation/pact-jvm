@@ -31,6 +31,8 @@ interface IRequest: IHttpPart {
    * If this request represents a multipart file upload
    */
   fun isMultipartFileUpload(): Boolean
+
+  fun copy(): IRequest
 }
 
 /**
@@ -48,8 +50,8 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
 
   override fun compareTo(other: IRequest) = if (equals(other)) 0 else 1
 
-  fun copy() = Request(method, path, query.toMutableMap(), headers.toMutableMap(), body.copy(), matchingRules.copy(),
-    generators.copy())
+  override fun copy() = Request(method, path, query.toMutableMap(), headers.toMutableMap(), body.copy(),
+    matchingRules.copy(), generators.copy())
 
   override fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest {
     val r = this.copy()
