@@ -11,13 +11,18 @@ import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.exampleclients.ConsumerClient;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.fluent.Request;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -154,5 +159,19 @@ public class PactProviderWithMultipleFragmentsTest {
         } catch (HttpResponseException ex) {
             assertThat(ex.getStatusCode(), is(404));
         }
+    }
+
+    @Test
+    @PactVerifications({
+            @PactVerification(value = "test_provider2", fragment = "createFragment2")
+    })
+    public void runTestWithPactVerificationsAndDefaultResponseValuesArePresent() throws IOException {
+
+        HttpResponse httpResponse = Request.Get(mockTestProvider2.getUrl())
+                                           .addHeader("testreqheader", "testreqheadervalue")
+                                           .execute().returnResponse();
+        Assertions.assertThat(List.of(httpResponse.getHeaders("testresheader")))
+                  .flatExtracting(Header::getValue)
+                  .containsExactly("testresheadervalue");
     }
 }

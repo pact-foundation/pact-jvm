@@ -122,6 +122,7 @@ public class BaseProviderRule extends ExternalResource {
               parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
         .pactSpecVersion(config.getPactVersion())
         .hasPactWith(provider);
+      updateAnyDefaultValues(dslBuilder);
       try {
         BasePact pactFromMethod = (BasePact) method.invoke(target, dslBuilder);
         if (pact[0] == null) {
