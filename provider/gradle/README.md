@@ -642,16 +642,15 @@ Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpcli
 ### Allowing just the changed pact specified in a webhook to be verified [4.0.6+]
 
 When a consumer publishes a new version of a pact file, the Pact broker can fire off a webhook with the URL of the changed 
-pact file. To allow only the changed pact file to be verified, you can override the URL by using the `pact.filter.consumers`
-and `pact.filter.pacturl` project properties.
+pact file. To allow only the changed pact file to be verified, you can override the URL by using the `pact.filter.pacturl` project properties.
 
 For example, running:
 
 ```console
-gradle pactVerify -Ppact.filter.consumers='Foo Web Client' -Ppact.filter.pacturl=https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.1
-```  
+gradle pactVerify -Ppact.filter.pacturl=https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.1
+```
 
-will only run the verification for Foo Web Client with the given pact file URL.
+will only run the verification with the given pact file URL.
 
 ## Verifying pact files from a S3 bucket
 

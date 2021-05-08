@@ -167,5 +167,4 @@ class MultiTest {
       .status(404)
       .toPact()
   }
-
 }

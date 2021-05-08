@@ -111,7 +111,13 @@ annotation class PactTestFor(
    * The type of mock server implementation to use. The default is to use the Java server for HTTP and the KTor
    * server for HTTPS
    */
-  val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default
+  val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default,
+
+  /**
+   * Test methods that provides the Pacts to use for the test. This allows multiple providers to be
+   * used in the same test.
+   */
+  val pactMethods: Array<String> = []
 )
 
 data class ProviderInfo @JvmOverloads constructor(
@@ -183,7 +189,7 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Abst
 
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver, AfterTestExecutionCallback, AfterAllCallback {
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
-    val providerInfo = lookupProviderInfo(extensionContext).first
+    val providerInfo = lookupProviderInfo(extensionContext).first().first
     val type = parameterContext.parameter.type
     return when (providerInfo.providerType) {
       ProviderType.ASYNCH -> if (providerInfo.pactVersion == PactSpecVersion.V4) {
@@ -208,7 +214,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
-    val providerInfo = lookupProviderInfo(extensionContext)
+    val providerInfo = lookupProviderInfo(extensionContext).first()
     val store = extensionContext.getStore(NAMESPACE)
     val type = parameterContext.parameter.type
     return when (providerInfo.first.providerType) {
@@ -246,7 +252,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   override fun beforeTestExecution(context: ExtensionContext) {
-    val (providerInfo, pactMethod) = lookupProviderInfo(context)
+    val (providerInfo, pactMethod) = lookupProviderInfo(context).first()
     logger.debug { "providerInfo = $providerInfo" }
 
     if (providerInfo.providerType != ProviderType.ASYNCH) {
@@ -270,10 +276,10 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     }
   }
 
-  fun lookupProviderInfo(context: ExtensionContext): Pair<ProviderInfo, String> {
+  fun lookupProviderInfo(context: ExtensionContext): List<Pair<ProviderInfo, String>> {
     val store = context.getStore(NAMESPACE)
     return if (store["providerInfo"] != null) {
-      (store["providerInfo"] as ProviderInfo) to store["pactMethod"].toString()
+      listOf((store["providerInfo"] as ProviderInfo) to store["pactMethod"].toString())
     } else {
       val methodAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestMethod, PactTestFor::class.java)) {
         logger.debug { "Found @PactTestFor annotation on test method" }
@@ -305,7 +311,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       store.put("providerInfo", providerInfo.first)
       store.put("pactMethod", providerInfo.second)
 
-      providerInfo
+      listOf(providerInfo)
     }
   }
 
