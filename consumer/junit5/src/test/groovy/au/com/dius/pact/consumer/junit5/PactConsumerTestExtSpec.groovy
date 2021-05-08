@@ -8,9 +8,11 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
 import groovy.json.JsonSlurper
+import kotlin.Pair
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.mockito.Mockito
@@ -25,6 +27,8 @@ class PactConsumerTestExtSpec extends Specification {
 
   def testMethodRequestResponsePact(RequestResponsePact pact) { }
   def testMethodMessagePact(MessagePact pact) { }
+  def testMethodV4Pact(V4Pact pact) { }
+  def testMethodV4MessagePact(V4Pact pact) { }
 
   def setup() {
     testExt = new PactConsumerTestExt()
@@ -39,7 +43,13 @@ class PactConsumerTestExtSpec extends Specification {
       providerType, false)
 
     def store = [get: { arg ->
-      arg == 'providerInfo' ? providerInfo : model.newInstance(new Provider(), new Consumer(), [])
+      if (arg == 'providers') {
+        [new Pair(providerInfo, 'test')]
+      } else if (model.isAssignableFrom(V4Pact)) {
+        model.newInstance(new Consumer(), new Provider(), [])
+      } else {
+        model.newInstance(new Provider(), new Consumer(), [])
+      }
     } ] as ExtensionContext.Store
     def extensionContext = [getStore: { store } ] as ExtensionContext
 
@@ -52,6 +62,8 @@ class PactConsumerTestExtSpec extends Specification {
     model               | providerType        | testMethod
     RequestResponsePact | ProviderType.SYNCH  | 'testMethodRequestResponsePact'
     MessagePact         | ProviderType.ASYNCH | 'testMethodMessagePact'
+    V4Pact              | ProviderType.SYNCH  | 'testMethodV4Pact'
+    V4Pact              | ProviderType.ASYNCH | 'testMethodV4MessagePact'
   }
 
   @RestoreSystemProperties
@@ -64,9 +76,9 @@ class PactConsumerTestExtSpec extends Specification {
       new PactVerificationResult.Ok()
     }
     def mockStore = [
-      'mockServer': new JUnit5MockServerSupport(mockServer),
-      'mockServerConfig': new MockProviderConfig(),
-      'providerInfo': new ProviderInfo()
+      'mockServer:provider': new JUnit5MockServerSupport(mockServer),
+      'mockServerConfig:provider': new MockProviderConfig(),
+      'providers': [new Pair(new ProviderInfo('provider'), 'test')]
     ]
     def mockContext = [
       'getTestClass': { Optional.of(Object) },
@@ -86,9 +98,9 @@ class PactConsumerTestExtSpec extends Specification {
 
     when:
     testExt.beforeAll(mockContext)
-    mockStore['pact'] = first  // normally set by testExt.resolveParameter()
+    mockStore['pact:provider'] = first  // normally set by testExt.resolveParameter()
     testExt.afterTestExecution(mockContext)
-    mockStore['pact'] = second  // normally set by testExt.resolveParameter()
+    mockStore['pact:provider'] = second  // normally set by testExt.resolveParameter()
     testExt.afterTestExecution(mockContext)
     testExt.afterAll(mockContext)
     def pactFile = new File("${BuiltToolConfig.pactDirectory}/consumer-provider.json")
