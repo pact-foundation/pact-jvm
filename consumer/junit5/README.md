@@ -184,3 +184,22 @@ You can also just use the key instead of an expression:
 
 You can enable a HTTPS mock server by setting `https=true` on the `@PactTestFor` annotation. Note that this mock
 server will use a self-signed certificate, so any client code will need to accept self-signed certificates.
+
+## Using multiple providers in a test (4.2.5+)
+
+It is advisable to focus on a single interaction with each test, but you can enable multiple providers in a single test.
+In this case, a separate mock server will be started for each configured provider.
+
+To enable this:
+
+1. Create a method to create the Pact for each provider annotated with the `@Pact(provider = "....")` annotation. The
+    provider name must be set on the annotation. You can create as many of these as required, but each must have a unique 
+    provider name.
+2. In the test method, use the `pactMethods` attribute on the `@PactTestFor` annotation with the names of all the 
+    methods defined in step 1.
+3. Add a MockServer parameter to the test method for each provider configured in step 1 with a `@ForProvider` 
+    annotation with the name of the provider.
+4. In your test method, interact with each of the mock servers passed in step 3. Note that if any mock server does not
+    get the requests it expects, it will fail the test.
+   
+For an example, see [MultiProviderTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/MultiProviderTest.groovy).
