@@ -1,5 +1,31 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.5 - Bugfix + small enhancements
+
+* 374be4495 - Merge pull request #1361 from akashagarwal7/patch-1 (Ronald Holshausen, Sun May 9 11:26:41 2021 +1000)
+* a813755ab - Merge pull request #1360 from humbled/patch-1 (Ronald Holshausen, Sun May 9 11:26:06 2021 +1000)
+* 1c0c0e381 - Merge pull request #1359 from feixie79/fixBugNotUsingSourceInLoadV4Pact (Ronald Holshausen, Sun May 9 11:25:15 2021 +1000)
+* 0c48b2e34 - Merge pull request #1348 from JapuDCret/patch-1 (Ronald Holshausen, Sun May 9 10:05:45 2021 +1000)
+* bd7625857 - feat: support multiple providers in a JUnit 5 consumer test #1342 (Ronald Holshausen, Sat May 8 16:41:53 2021 +1000)
+* 4a6c7dff1 - refactor: support multiple providerinfo in JUnit 5 tests #1342 (Ronald Holshausen, Sat May 8 14:39:52 2021 +1000)
+* 1c15fb111 - Update README.md (Akash Agarwal, Fri May 7 14:29:54 2021 +1000)
+* 5f76a3e20 - README updates (humbled, Fri May 7 15:02:56 2021 +1200)
+* 7d62150cb - fix: use source by loadV4Pact (Fei Xie, Thu May 6 16:56:03 2021 +0200)
+* 20da4aa46 - fix: values matcher must not cascade #1347 (Ronald Holshausen, Sat May 1 17:47:41 2021 +1000)
+* bbd09423a - feat(V4): added a boolean matcher #1346 (Ronald Holshausen, Sat May 1 16:34:20 2021 +1000)
+* 075996d64 - chore: fix failing tests after refactor (Ronald Holshausen, Sat May 1 15:43:43 2021 +1000)
+* f6d864374 - chore: fix failing test after refactor (Ronald Holshausen, Sat May 1 14:49:10 2021 +1000)
+* d5630e609 - refactor: update Groovy builder to support V4 Pacts (Ronald Holshausen, Sat May 1 14:42:26 2021 +1000)
+* 295625ce9 - Merge pull request #1344 from RadekKoubsky/support_for_localdate_matcher (Ronald Holshausen, Sat May 1 12:50:36 2021 +1000)
+* 3a7edfd6d - fix typo in provider/junit/README.md (JapuDCret, Wed Apr 21 17:29:30 2021 +0200)
+* 99dedba72 - fix: codenarc voilation after merging PR (Ronald Holshausen, Wed Apr 21 14:51:27 2021 +1000)
+* 049e7c37a - Merge pull request #1340 from keeping-it-up/1330-issue (Ronald Holshausen, Wed Apr 21 14:26:21 2021 +1000)
+* a228c8992 - feat: add support for java LocalDate matching method in pact dsl (Radek Koubsky, Thu Apr 15 11:10:36 2021 +0200)
+* 8e6d16130 - wildcard import removed #1330 (ankur, Tue Apr 13 14:49:02 2021 +0100)
+* 0cae13687 - fixed content type for request body when content type is application/xthrift #1330 (ankur, Tue Apr 13 14:34:07 2021 +0100)
+* 399bce86c - test case added with expression in body #1330 (ankur, Mon Apr 12 11:24:43 2021 +0100)
+* ac6a0eae0 - bump version to 4.2.5 (Ronald Holshausen, Sun Apr 11 16:23:15 2021 +1000)
+
 # 4.2.4 - V4 features + Bugfixes
 
 * a73015a6e - feat(V4): add the JUnit 5 test description to comments (Ronald Holshausen, Sun Apr 11 15:21:34 2021 +1000)
