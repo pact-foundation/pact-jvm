@@ -1,5 +1,4 @@
-Gradle
-======
+# Gradle plugin to verify a provider
 
 Gradle plugin for verifying pacts against a provider.
 
