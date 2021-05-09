@@ -299,7 +299,7 @@ include pacts for the latest version of a tag, or all versions of a tag.
 )
 ```
 
-#### Using authentication with the with the pact broker
+#### Using authentication with the pact broker
 
 You can use basic authentication with the `@PactBroker` annotation by setting the `authentication` value to a `@PactBrokerAuth`
 annotation. For example:
