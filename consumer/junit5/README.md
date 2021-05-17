@@ -203,3 +203,7 @@ To enable this:
     get the requests it expects, it will fail the test.
    
 For an example, see [MultiProviderTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/MultiProviderTest.groovy).
+
+# Message Pacts
+## Consumer test for a message consumer
+For testing a consumer of messages from a message queue using JUnit 5 and Pact V4, see [AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/ac6a0eae0b18183f6f453eafddb89b90741ace42/consumer/junit5/src/test/java/au/com/dius/pact/consumer/junit5/AsyncMessageTest.java).
