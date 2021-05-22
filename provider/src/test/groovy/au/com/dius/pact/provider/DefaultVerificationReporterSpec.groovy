@@ -16,18 +16,19 @@ class DefaultVerificationReporterSpec extends Specification {
 
   def 'for Pact broker sources, publish the test results and return the result'() {
     given:
+    def links = ['publish': 'true']
     def interaction = new RequestResponseInteraction('interaction1')
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
       interaction
-    ], [:], new BrokerUrlSource('', ''))
+    ], [:], new BrokerUrlSource('', '', links))
     def testResult = new TestResult.Ok()
     def brokerClient = Mock(PactBrokerClient)
 
     when:
-    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [])
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [])
 
     then:
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Ok(true)
+    1 * brokerClient.publishVerificationResults(links, testResult, '0') >> new Ok(true)
     result == new Ok(true)
   }
 
@@ -38,9 +39,14 @@ class DefaultVerificationReporterSpec extends Specification {
       interaction
     ], [:], UnknownPactSource.INSTANCE)
     def testResult = new TestResult.Ok()
+    def brokerClient = Mock(PactBrokerClient)
 
-    expect:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', null, []) == new Ok(false)
+    when:
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [])
+
+    then:
+    0 * brokerClient.publishVerificationResults(_, new TestResult.Ok(), '0')
+    result == new Ok(false)
   }
 
   def 'return an error if publishing the test results fails'() {
