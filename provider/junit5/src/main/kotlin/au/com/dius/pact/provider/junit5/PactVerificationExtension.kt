@@ -15,6 +15,7 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
+import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.apache.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -41,7 +42,7 @@ open class PactVerificationExtension(
 ) : TestTemplateInvocationContext, ParameterResolver, BeforeEachCallback, BeforeTestExecutionCallback,
   AfterTestExecutionCallback {
 
-  private val testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
+  var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
   override fun getDisplayName(invocationIndex: Int): String {
     return when {
@@ -183,8 +184,11 @@ open class PactVerificationExtension(
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
     val pact = if (this.pact is FilteredPact) pact.pact else pact
-    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult,
+    val updateTestResult = testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult,
       pactSource, propertyResolver)
+    if (updateTestResult is Err) {
+      throw AssertionError("Failed to update the test results: " + updateTestResult.error.joinToString("\n"))
+    }
   }
 
   companion object : KLogging()
