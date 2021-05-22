@@ -23,6 +23,7 @@ import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
+import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.junit.After
 import org.junit.Before
@@ -43,6 +44,7 @@ import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
+import java.lang.RuntimeException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.BiConsumer
 import java.util.function.Supplier
@@ -166,25 +168,34 @@ open class InteractionRunner<I>(
       if (included) {
         try {
           interactionBlock(interaction, pactSource, testContext).evaluate()
-          if (!pending) {
-            notifier.fireTestFinished(description)
-          }
         } catch (e: Throwable) {
-          if (!pending) {
-            notifier.fireTestFailure(Failure(description, e))
-            notifier.fireTestFinished(description)
-          }
           testResult = VerificationResult.Failed("Request to provider failed with an exception", description.displayName,
             mapOf(interaction.interactionId.orEmpty() to
               listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
             pending)
         } finally {
-          if (pact is FilteredPact) {
-            testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource,
-              propertyResolver)
-          } else {
-            testResultAccumulator.updateTestResult(pact, interaction, testResult.toTestResult(), pactSource,
-              propertyResolver)
+          val updateTestResult = testResultAccumulator.updateTestResult(if (pact is FilteredPact) pact.pact else pact, interaction,
+            testResult.toTestResult(), pactSource, propertyResolver)
+          if (testResult is VerificationResult.Ok && updateTestResult is Err) {
+            testResult = VerificationResult.Failed("Failed to publish results to Pact broker",
+              description.displayName, mapOf(interaction.interactionId.orEmpty() to
+                listOf(VerificationFailureType.PublishResultsFailure(updateTestResult.error))),
+              pending)
+          }
+
+          if (!pending) {
+            when (testResult) {
+              is VerificationResult.Ok -> notifier.fireTestFinished(description)
+              is VerificationResult.Failed -> {
+                val failure = testResult.failures[interactionId.orEmpty()]?.first()
+                if (failure is VerificationFailureType.ExceptionFailure) {
+                  notifier.fireTestFailure(Failure(description, failure.getException()))
+                } else {
+                  notifier.fireTestFailure(Failure(description, RuntimeException()))
+                }
+                notifier.fireTestFinished(description)
+              }
+            }
           }
         }
       }

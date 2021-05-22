@@ -127,6 +127,39 @@ interface IPactBrokerClient {
   fun getUrlForProvider(providerName: String, tag: String): String?
 
   val options: Map<String, Any>
+
+  /**
+   * Publish all the tags for the provider to the Pact broker
+   * @param docAttributes Attributes associated with the fetched Pact file
+   * @param tag Provider name
+   * @param tags Provider tags to tag the provider with
+   * @param version Provider version
+   */
+  fun publishProviderTags(
+    docAttributes: Map<String, Any?>,
+    name: String,
+    tags: List<String>,
+    version: String
+  ): Result<Boolean, List<String>>
+
+  /**
+   * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
+   */
+  fun publishVerificationResults(
+    docAttributes: Map<String, Any?>,
+    result: TestResult,
+    version: String,
+    buildUrl: String?
+  ): Result<Boolean, String>
+
+  /**
+   * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
+   */
+  fun publishVerificationResults(
+    docAttributes: Map<String, Any?>,
+    result: TestResult,
+    version: String
+  ): Result<Boolean, String>
 }
 
 data class PactBrokerClientConfig(
@@ -322,15 +355,17 @@ open class PactBrokerClient(
 
   open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
 
-  /**
-   * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
-   */
-  @JvmOverloads
-  open fun publishVerificationResults(
+  override fun publishVerificationResults(
+    docAttributes: Map<String, Any?>,
+    result: TestResult,
+    version: String
+  ) = publishVerificationResults(docAttributes, result, version, null)
+
+  override fun publishVerificationResults(
     docAttributes: Map<String, Any?>,
     result: TestResult,
     version: String,
-    buildUrl: String? = null
+    buildUrl: String?
   ): Result<Boolean, String> {
     val halClient = newHalClient()
     val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
@@ -460,16 +495,36 @@ open class PactBrokerClient(
     }
   }
 
-  fun publishProviderTags(docAttributes: Map<String, Any?>, name: String, tags: List<String>, version: String) {
+  override fun publishProviderTags(
+    docAttributes: Map<String, Any?>,
+    name: String,
+    tags: List<String>,
+    version: String
+  ): Result<Boolean, List<String>> {
     try {
       val halClient = newHalClient()
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
-      tags.forEach {
-        logPublishingResults(halClient, version, it, name)
+      val initial: Result<Boolean, List<String>> = Ok(true)
+      return tags.map { tag ->
+        val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")
+        when (result) {
+          is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+        }
+        result
+      }.fold(initial) { result, v ->
+        when {
+          result is Ok && v is Ok -> result
+          result is Ok && v is Err -> Err(listOf(v.error.toString()))
+          result is Err && v is Ok -> result
+          result is Err && v is Err -> Err(result.error + v.error.toString())
+          else -> result
+        }
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
+      return Err(listOf("Could not tag provider $name, link was missing"))
     }
   }
 

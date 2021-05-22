@@ -13,7 +13,7 @@ import spock.lang.Unroll
 
 import javax.net.ssl.SSLHandshakeException
 
-@SuppressWarnings('UnnecessaryGetter')
+@SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
 class PactBrokerClientSpec extends Specification {
 
   private PactBrokerClient pactBrokerClient
@@ -612,5 +612,39 @@ class PactBrokerClientSpec extends Specification {
     notThrown(SSLHandshakeException)
     result instanceof Err
     result.component2() instanceof InvalidNavigationRequest
+  }
+
+  def 'when publishing provider tags, return an Ok result if it succeeds'() {
+    given:
+    def halClient = Mock(IHalClient)
+    halClient.withDocContext(_) >> halClient
+    halClient.navigate(_) >> halClient
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def attributes = [:]
+    halClient.putJson('pb:version-tag', _, _) >> new Ok(true)
+
+    expect:
+    client.publishProviderTags(attributes, 'provider', ['0'], 'null') == new Ok(true)
+  }
+
+  def 'when publishing provider tags, return an error result if any tag fails'() {
+    given:
+    def halClient = Mock(IHalClient)
+    halClient.withDocContext(_) >> halClient
+    halClient.navigate(_) >> halClient
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def result = client.publishProviderTags([:], 'provider', ['0', '1', '2'], 'null')
+
+    then:
+    1 * halClient.putJson('pb:version-tag', [version: 'null', tag: '0'], _) >> new Ok(true)
+    1 * halClient.putJson('pb:version-tag', [version: 'null', tag: '1'], _) >> new Err(new RuntimeException('failed'))
+    1 * halClient.putJson('pb:version-tag', [version: 'null', tag: '2'], _) >> new Ok(true)
+    result == new Err(['java.lang.RuntimeException: failed'])
   }
 }

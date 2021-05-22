@@ -499,7 +499,7 @@ class ProviderVerifierSpec extends Specification {
     DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(), '0', client, [])
 
     then:
-    1 * client.publishVerificationResults(links, new TestResult.Ok(), '0', null) >> new Ok(true)
+    1 * client.publishVerificationResults(links, new TestResult.Ok(), '0') >> new Ok(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')

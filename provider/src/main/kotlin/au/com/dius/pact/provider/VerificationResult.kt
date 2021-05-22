@@ -84,6 +84,16 @@ sealed class VerificationFailureType {
     override fun hasException() = result.stateChangeResult is Err
     override fun getException() = result.stateChangeResult.getError()
   }
+
+  data class PublishResultsFailure(val cause: List<String>) : VerificationFailureType() {
+    override fun description() = formatForDisplay(TermColors())
+    override fun formatForDisplay(t: TermColors): String {
+      return "Publishing verification results failed - " + cause.joinToString("\n")
+    }
+
+    override fun hasException() = false
+    override fun getException() = null
+  }
 }
 
 typealias VerificationFailures = Map<String, List<VerificationFailureType>>
@@ -161,6 +171,9 @@ sealed class VerificationResult {
                 is MetadataMismatch -> listOf("identifier" to mismatch.key, "description" to mismatch.mismatch)
                 else -> listOf()
               }
+              is VerificationFailureType.PublishResultsFailure -> listOf(
+                "description" to failure.description()
+              )
             }
             (listOf("interactionId" to entry.key) + errorMap).toMap()
           }

@@ -9,6 +9,8 @@ import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ProviderVerifier.Companion.PACT_VERIFIER_PUBLISH_RESULTS
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
@@ -23,14 +25,14 @@ interface TestResultAccumulator {
     testExecutionResult: List<VerificationResult>,
     source: PactSource,
     propertyResolver: ValueResolver = SystemPropertyResolver
-  )
+  ): Result<Boolean, List<String>>
   fun updateTestResult(
     pact: Pact<out Interaction>,
     interaction: Interaction,
     testExecutionResult: TestResult,
     source: PactSource?,
     propertyResolver: ValueResolver = SystemPropertyResolver
-  )
+  ): Result<Boolean, List<String>>
   fun clearTestResult(pact: Pact<out Interaction>, source: PactSource?)
 }
 
@@ -45,9 +47,9 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     testExecutionResult: List<VerificationResult>,
     source: PactSource,
     propertyResolver: ValueResolver
-  ) {
+  ): Result<Boolean, List<String>> {
     val initial = TestResult.Ok(interaction.interactionId)
-    updateTestResult(pact, interaction, testExecutionResult.fold(initial) {
+    return updateTestResult(pact, interaction, testExecutionResult.fold(initial) {
       acc: TestResult, r -> acc.merge(r.toTestResult())
     }, source, propertyResolver)
   }
@@ -58,7 +60,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     testExecutionResult: TestResult,
     source: PactSource?,
     propertyResolver: ValueResolver
-  ) {
+  ): Result<Boolean, List<String>> {
     logger.debug { "Received test result '$testExecutionResult' for Pact ${pact.provider.name}-${pact.consumer.name} " +
       "and ${interaction.description} (${source?.description()})" }
     val pactHash = calculatePactHash(pact, source)
@@ -71,25 +73,30 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
       interactionResults[interactionHash] = testResult.merge(testExecutionResult)
     }
     val unverifiedInteractions = unverifiedInteractions(pact, interactionResults)
-    if (unverifiedInteractions.isEmpty()) {
+    return if (unverifiedInteractions.isEmpty()) {
       logger.debug {
         "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} have a verification result"
       }
-      if (verificationReporter.publishingResultsDisabled(propertyResolver)) {
-        logger.warn { "Skipping publishing of verification results as it has been disabled " +
-          "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
+      val result = if (verificationReporter.publishingResultsDisabled(propertyResolver)) {
+        logger.warn {
+          "Skipping publishing of verification results as it has been disabled " +
+            "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')"
+        }
+        Ok(false)
       } else {
         val initial = TestResult.Ok(interaction.interactionId)
-        verificationReporter.reportResults(pact, interactionResults.values.fold(initial) {
-          acc: TestResult, result -> acc.merge(result)
+        verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
+          acc.merge(result)
         }, lookupProviderVersion(), null, lookupProviderTags())
       }
       testResults.remove(pactHash)
+      result
     } else {
       logger.warn { "Not all of the ${pact.interactions.size} were verified. The following were missing:" }
       unverifiedInteractions.forEach {
         logger.warn { "    ${it.description}" }
       }
+      Ok(true)
     }
   }
 
