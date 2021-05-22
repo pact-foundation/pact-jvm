@@ -28,7 +28,7 @@ dependencies {
 
   testRuntime 'org.clojure:tools.nrepl:0.2.13'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
+  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
 
