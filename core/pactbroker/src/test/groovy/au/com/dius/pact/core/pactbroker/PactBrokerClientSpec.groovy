@@ -645,6 +645,6 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.putJson('pb:version-tag', [version: 'null', tag: '0'], _) >> new Ok(true)
     1 * halClient.putJson('pb:version-tag', [version: 'null', tag: '1'], _) >> new Err(new RuntimeException('failed'))
     1 * halClient.putJson('pb:version-tag', [version: 'null', tag: '2'], _) >> new Ok(true)
-    result == new Err(['java.lang.RuntimeException: failed'])
+    result == new Err(["Publishing tag '1' failed: failed"])
   }
 }

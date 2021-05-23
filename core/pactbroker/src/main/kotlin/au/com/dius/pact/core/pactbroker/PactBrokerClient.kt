@@ -506,19 +506,19 @@ open class PactBrokerClient(
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       val initial: Result<Boolean, List<String>> = Ok(true)
-      return tags.map { tag ->
-        val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")
+      return tags.map { tagName ->
+        val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tagName), "{}")
         when (result) {
-          is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
-          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+          is Ok<*> -> logger.debug { "Pushed tag $tagName for provider $name and version $version" }
+          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tagName for provider $name and version $version" }
         }
-        result
+        result.mapError { err -> "Publishing tag '$tagName' failed: ${err.message ?: err.toString()}" }
       }.fold(initial) { result, v ->
         when {
           result is Ok && v is Ok -> result
-          result is Ok && v is Err -> Err(listOf(v.error.toString()))
+          result is Ok && v is Err -> Err(listOf(v.error))
           result is Err && v is Ok -> result
-          result is Err && v is Err -> Err(result.error + v.error.toString())
+          result is Err && v is Err -> Err(result.error + v.error)
           else -> result
         }
       }

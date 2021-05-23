@@ -15,7 +15,13 @@ import com.github.michaelbull.result.getError
 
 private fun padLines(str: String, indent: Int): String {
   val pad = " ".repeat(indent)
-  return str.split('\n').joinToString("\n") { pad + it }
+  val lines = str.split('\n')
+  return lines.mapIndexed { i, line ->
+    if (i == 0)
+      line
+    else
+      pad + line
+  }.joinToString("\n")
 }
 
 sealed class VerificationFailureType {
@@ -66,7 +72,7 @@ sealed class VerificationFailureType {
       return if (e.message.isNotEmpty()) {
         padLines(e.message!!, 6)
       } else {
-        "      ${e.javaClass.name}"
+        padLines(e.toString(), 6)
       }
     }
 
@@ -88,7 +94,7 @@ sealed class VerificationFailureType {
   data class PublishResultsFailure(val cause: List<String>) : VerificationFailureType() {
     override fun description() = formatForDisplay(TermColors())
     override fun formatForDisplay(t: TermColors): String {
-      return "Publishing verification results failed - " + cause.joinToString("\n")
+      return "Publishing verification results failed - \n" + cause.joinToString("\n") { "             $it" }
     }
 
     override fun hasException() = false
