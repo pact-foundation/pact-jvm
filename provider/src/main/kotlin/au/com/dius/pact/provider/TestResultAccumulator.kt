@@ -87,7 +87,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         val initial = TestResult.Ok(interaction.interactionId)
         verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
           acc.merge(result)
-        }, lookupProviderVersion(), null, lookupProviderTags())
+        }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver))
       }
       testResults.remove(pactHash)
       result
@@ -116,18 +116,20 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     return builder.toHashCode()
   }
 
-  fun lookupProviderVersion(): String {
-    val version = ProviderVersion { System.getProperty("pact.provider.version") }.get()
-    return if (version.isNullOrEmpty()) {
+  fun lookupProviderVersion(propertyResolver: ValueResolver): String {
+    val version = ProviderVersion { propertyResolver.resolveValue("pact.provider.version", "") }.get()
+    return version.ifEmpty {
       logger.warn { "Set the provider version using the 'pact.provider.version' property. Defaulting to '0.0.0'" }
       "0.0.0"
-    } else {
-      version
     }
   }
 
-  private fun lookupProviderTags() = System.getProperty("pact.provider.tag").orEmpty().split(',')
-    .map { it.trim() }.filter { it.isNotEmpty() }
+  private fun lookupProviderTags(propertyResolver: ValueResolver) = propertyResolver
+    .resolveValue("pact.provider.tag", "")
+    .orEmpty()
+    .split(',')
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
 
   fun unverifiedInteractions(pact: Pact, results: MutableMap<Int, TestResult>): List<Interaction> {
     logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }

@@ -251,10 +251,18 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
-  override var providerVersion: Supplier<String> = ProviderVersion { System.getProperty(PACT_PROVIDER_VERSION) },
-  override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) },
+  override var providerVersion: Supplier<String> = ProviderVersion {
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_VERSION, "")
+  },
+  override var providerTag: Supplier<String?>? = Supplier {
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_TAG, "")
+  },
   override var providerTags: Supplier<List<String>>? = Supplier {
-    System.getProperty(PACT_PROVIDER_TAG).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_TAG, "")
+      .orEmpty()
+      .split(',')
+      .map { it.trim() }
+      .filter { it.isNotEmpty() }
   },
   override var projectClassLoader: Supplier<ClassLoader?>? = null
 ) : IProviderVerifier {
