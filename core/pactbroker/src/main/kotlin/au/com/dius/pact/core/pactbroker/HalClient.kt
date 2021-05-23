@@ -183,8 +183,11 @@ open class HalClient @JvmOverloads constructor(
         logger.debug { "Response body: ${it.entity?.content?.reader()?.readText()}" }
         if (handler != null) {
           handler(it.statusLine.statusCode, it)
+        } else if (it.statusLine.statusCode >= 300) {
+          logger.error { "PUT JSON request failed with status ${it.statusLine}" }
+          Err(RequestFailedException(it.statusLine, if (it.entity != null) EntityUtils.toString(it.entity) else null))
         } else {
-          it.statusLine.statusCode < 300
+          true
         }
       }
     }
