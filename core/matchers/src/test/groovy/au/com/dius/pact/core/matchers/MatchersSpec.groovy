@@ -14,7 +14,6 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import au.com.dius.pact.core.support.json.JsonParser
 import kotlin.Triple
 import spock.lang.Issue
 import spock.lang.Specification
