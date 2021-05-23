@@ -44,12 +44,12 @@ class TestResultAccumulatorSpec extends Specification {
     System.setProperty('pact.provider.version', '1.2.3')
 
     expect:
-    testResultAccumulator.lookupProviderVersion() == '1.2.3'
+    testResultAccumulator.lookupProviderVersion(SystemPropertyResolver.INSTANCE) == '1.2.3'
   }
 
   def 'lookupProviderVersion - returns a default value if there is no version set in the system properties'() {
     expect:
-    testResultAccumulator.lookupProviderVersion() == '0.0.0'
+    testResultAccumulator.lookupProviderVersion(SystemPropertyResolver.INSTANCE) == '0.0.0'
   }
 
   @RestoreSystemProperties
@@ -59,7 +59,7 @@ class TestResultAccumulatorSpec extends Specification {
     System.setProperty('pact.provider.version.trimSnapshot', 'true')
 
     expect:
-    testResultAccumulator.lookupProviderVersion() == '1.2.3'
+    testResultAccumulator.lookupProviderVersion(SystemPropertyResolver.INSTANCE) == '1.2.3'
   }
 
   @Unroll
