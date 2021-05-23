@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
@@ -13,8 +14,13 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.support.json.JsonParser
+import kotlin.Triple
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import static au.com.dius.pact.core.support.json.JsonParser.parseString
 
 @SuppressWarnings('ClosureAsLastMethodParameter')
 class MatchersSpec extends Specification {
@@ -384,4 +390,24 @@ class MatchersSpec extends Specification {
     category << [ 'header', 'query', 'metadata' ]
   }
 
+  @Issue('#1367')
+  def 'array contains matcher with simple values'() {
+    given:
+    def matcher = new ArrayContainsMatcher([new Triple(0, new MatchingRuleCategory('body'), [:])])
+    def expected = parseString('["a"]').asArray()
+    def actual = parseString('["a", 1, {"id": 10,"name": "john"}]').asArray()
+    def actual2 = parseString('["b", 1, {"id": 10,"name": "john"}]').asArray()
+    def mismatchFactory = [
+      create: { e, a, des, p -> new BodyMismatch(e.toString(), a.toString(), des) }
+    ] as MismatchFactory
+    def callback = { path, e, a, context ->
+      def result = MatcherExecutorKt.matchEquality(path, e, a, mismatchFactory)
+      [ new BodyItemMatchResult('0', result) ]
+    }
+    def context = new MatchingContext(new MatchingRuleCategory('body'), true)
+
+    expect:
+    Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual.values, context, { -> }, callback).empty
+    !Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual2.values, context, { -> }, callback).empty
+  }
 }
