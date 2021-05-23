@@ -22,6 +22,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -34,6 +35,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
+@SuppressWarnings('UnnecessaryGetter')
 class ProviderVerifierSpec extends Specification {
 
   ProviderVerifier verifier
@@ -432,13 +434,14 @@ class ProviderVerifierSpec extends Specification {
     verifier.pactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
 
+    def tags = ['tag1', 'tag2', 'tag3']
     System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, ['tag1', 'tag2', 'tag3'])
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags) >> new Ok(true)
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
@@ -449,6 +452,43 @@ class ProviderVerifierSpec extends Specification {
     new VerificationResult.Ok()     | new VerificationResult.Failed() | new TestResult.Failed()
     new VerificationResult.Failed() | new VerificationResult.Ok()     | new TestResult.Failed()
     new VerificationResult.Failed() | new VerificationResult.Failed() | new TestResult.Failed()
+  }
+
+  def 'return a failed result if reportVerificationResults returns an error'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    IPactBrokerClient pactBrokerClient = Mock(IPactBrokerClient)
+    verifier.verificationReporter = Mock(VerificationReporter)
+    verifier.pactReader = Stub(PactReader)
+    def statechange = Stub(StateChange) {
+      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+    }
+    def interaction1 = Stub(RequestResponseInteraction)
+    def interaction2 = Stub(RequestResponseInteraction)
+    def mockPact = Stub(Pact) {
+      getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
+    }
+
+    verifier.projectHasProperty = { it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS }
+    verifier.projectGetProperty = {
+      (it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS).toString()
+    }
+    verifier.stateChangeHandler = statechange
+
+    verifier.pactReader.loadPact(_) >> mockPact
+    mockPact.interactions >> [interaction1, interaction2]
+
+    when:
+    def result = verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
+
+    then:
+    1 * verifier.verificationReporter.reportResults(_, _, '0.0.0', pactBrokerClient, []) >> new Err(['failed'])
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> new VerificationResult.Ok()
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> new VerificationResult.Ok()
+    result instanceof VerificationResult.Failed
+    result.description == 'Failed to publish results to the Pact broker'
+    result.failures == ['': [new VerificationFailureType.PublishResultsFailure(['failed'])]]
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -489,37 +529,6 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     0 * verifier.verificationReporter.reportResults(_, _, _, _, _)
-  }
-
-  @SuppressWarnings('UnnecessaryGetter')
-  def 'If the pact source is from a pact broker, publish the verification results back'() {
-    given:
-    def links = ['publish': 'true']
-    def pact = Mock(Pact) {
-      getSource() >> new BrokerUrlSource('url', 'url', links)
-    }
-    def client = Mock(PactBrokerClient)
-
-    when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(), '0', client, [])
-
-    then:
-    1 * client.publishVerificationResults(links, new TestResult.Ok(), '0', null) >> new Ok(true)
-  }
-
-  @SuppressWarnings('UnnecessaryGetter')
-  def 'If the pact source is not from a pact broker, ignore the verification results'() {
-    given:
-    def pact = Mock(Pact) {
-      getSource() >> new UrlSource('url', null)
-    }
-    def client = Mock(PactBrokerClient)
-
-    when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(), '0', client, [])
-
-    then:
-    0 * client.publishVerificationResults(_, new TestResult.Ok(), '0', null)
   }
 
   @SuppressWarnings(['UnnecessaryGetter', 'LineLength'])

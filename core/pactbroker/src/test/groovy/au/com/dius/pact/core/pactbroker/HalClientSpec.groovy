@@ -296,13 +296,13 @@ class HalClientSpec extends Specification {
     mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), status, 'OK')
 
     expect:
-    client.postJson('path', 'body') == expectedResult
+    client.postJson('path', 'body').class == expectedResult
 
     where:
 
     success   | status | expectedResult
-    'success' | 200    | new Ok(true)
-    'failure' | 400    | new Ok(false)
+    'success' | 200    | Ok
+    'failure' | 400    | Err
   }
 
   def 'post URL returns a failure result if an exception is thrown'() {

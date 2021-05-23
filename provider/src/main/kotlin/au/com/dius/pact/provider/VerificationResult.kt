@@ -15,7 +15,13 @@ import com.github.michaelbull.result.getError
 
 private fun padLines(str: String, indent: Int): String {
   val pad = " ".repeat(indent)
-  return str.split('\n').joinToString("\n") { pad + it }
+  val lines = str.split('\n')
+  return lines.mapIndexed { i, line ->
+    if (i == 0)
+      line
+    else
+      pad + line
+  }.joinToString("\n")
 }
 
 sealed class VerificationFailureType {
@@ -66,7 +72,7 @@ sealed class VerificationFailureType {
       return if (e.message.isNotEmpty()) {
         padLines(e.message!!, 6)
       } else {
-        "      ${e.javaClass.name}"
+        padLines(e.toString(), 6)
       }
     }
 
@@ -83,6 +89,16 @@ sealed class VerificationFailureType {
 
     override fun hasException() = result.stateChangeResult is Err
     override fun getException() = result.stateChangeResult.getError()
+  }
+
+  data class PublishResultsFailure(val cause: List<String>) : VerificationFailureType() {
+    override fun description() = formatForDisplay(TermColors())
+    override fun formatForDisplay(t: TermColors): String {
+      return "Publishing verification results failed - \n" + cause.joinToString("\n") { "             $it" }
+    }
+
+    override fun hasException() = false
+    override fun getException() = null
   }
 }
 
@@ -161,6 +177,9 @@ sealed class VerificationResult {
                 is MetadataMismatch -> listOf("identifier" to mismatch.key, "description" to mismatch.mismatch)
                 else -> listOf()
               }
+              is VerificationFailureType.PublishResultsFailure -> listOf(
+                "description" to failure.description()
+              )
             }
             (listOf("interactionId" to entry.key) + errorMap).toMap()
           }

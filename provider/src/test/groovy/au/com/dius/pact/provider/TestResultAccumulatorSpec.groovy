@@ -18,12 +18,15 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
+@SuppressWarnings('UnnecessaryGetter')
 class TestResultAccumulatorSpec extends Specification {
 
   static interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
@@ -114,11 +117,12 @@ class TestResultAccumulatorSpec extends Specification {
     def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), UnknownPactSource.INSTANCE,
-      mockValueResolver)
+    def result = testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(),
+      UnknownPactSource.INSTANCE, mockValueResolver)
 
     then:
-    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _)
+    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _) >> new Ok(false)
+    result == new Ok(false)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -136,10 +140,12 @@ class TestResultAccumulatorSpec extends Specification {
     def mockValueResolver = Mock(ValueResolver)
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, result, null, mockValueResolver)
+    def updateTestResult = testResultAccumulator.updateTestResult(pact, interaction1, result, null,
+      mockValueResolver)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _) >> new Ok(true)
+    updateTestResult == new Ok(true)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -204,7 +210,6 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = reporter
   }
 
-  @SuppressWarnings('UnnecessaryGetter')
   def 'updateTestResult - clear the results when they are published'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
@@ -420,6 +425,33 @@ class TestResultAccumulatorSpec extends Specification {
       ), _, _, [])
     0 * verificationReporter._
     testResultAccumulator.testResults.isEmpty()
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
+  }
+
+  def 'updateTestResult - return an error if publishing fails'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1, interaction2])
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled(_) >> false
+    }
+    def mockValueResolver = Mock(ValueResolver)
+
+    when:
+    def result1 = testResultAccumulator.updateTestResult(pact, interaction1, new TestResult.Ok(), null,
+      mockValueResolver)
+    def result2 = testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null,
+      mockValueResolver)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _) >>
+      new Err('failed')
+    testResultAccumulator.testResults.isEmpty()
+    result1 instanceof Ok
+    result2 instanceof Err
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter

@@ -24,7 +24,7 @@ import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
@@ -680,7 +680,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     failures: MutableMap<String, Any>,
     provider: IProviderInfo,
     consumer: IConsumerInfo,
-    client: PactBrokerClient? = null
+    client: IPactBrokerClient? = null
   ): VerificationResult {
     val pact = FilteredPact(loadPactFileForConsumer(consumer),
       Predicate { filterInteractions(it) })
@@ -692,18 +692,30 @@ open class ProviderVerifier @JvmOverloads constructor (
       val result = pact.interactions.map {
         verifyInteraction(provider, consumer, failures, it)
       }.reduce { acc, result -> acc.merge(result) }
-      when {
-        pact.isFiltered() -> reporters.forEach { it.warnPublishResultsSkippedBecauseFiltered() }
-        publishingResultsDisabled() -> reporters.forEach {
-          it.warnPublishResultsSkippedBecauseDisabled(PACT_VERIFIER_PUBLISH_RESULTS)
+      result.merge(when {
+        pact.isFiltered() -> {
+          reporters.forEach { it.warnPublishResultsSkippedBecauseFiltered() }
+          VerificationResult.Ok()
         }
-        else -> verificationReporter.reportResults(pact,
-          result.toTestResult(),
-          providerVersion.get(),
-          client,
-          providerTags?.get().orEmpty())
-      }
-      result
+        publishingResultsDisabled() -> {
+          reporters.forEach {
+            it.warnPublishResultsSkippedBecauseDisabled(PACT_VERIFIER_PUBLISH_RESULTS)
+          }
+          VerificationResult.Ok()
+        }
+        else -> {
+          val reportResults = verificationReporter.reportResults(pact,
+            result.toTestResult(),
+            providerVersion.get(),
+            client,
+            providerTags?.get().orEmpty())
+          when (reportResults) {
+            is Ok -> VerificationResult.Ok()
+            is Err -> VerificationResult.Failed("Failed to publish results to the Pact broker", "",
+              mapOf("" to listOf(VerificationFailureType.PublishResultsFailure(reportResults.error))))
+          }
+        }
+      })
     }
   }
 
