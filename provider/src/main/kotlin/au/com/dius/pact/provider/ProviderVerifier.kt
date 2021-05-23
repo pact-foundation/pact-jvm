@@ -20,7 +20,6 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
-import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property

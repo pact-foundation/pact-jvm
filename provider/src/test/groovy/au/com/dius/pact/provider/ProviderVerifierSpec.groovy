@@ -433,13 +433,14 @@ class ProviderVerifierSpec extends Specification {
     verifier.pactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
 
+    def tags = ['tag1', 'tag2', 'tag3']
     System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, ['tag1', 'tag2', 'tag3']) >> new Ok(true)
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags) >> new Ok(true)
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
