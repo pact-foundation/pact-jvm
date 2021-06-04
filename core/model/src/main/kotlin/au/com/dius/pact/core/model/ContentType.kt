@@ -18,7 +18,14 @@ class ContentType(val contentType: MediaType?) {
     return if (contentType != null) {
       when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
         "json" -> true
-        else -> jsonRegex.matches(contentType.subtype.toLowerCase())
+        else -> {
+          if (jsonRegex.matches(contentType.subtype.toLowerCase())) {
+            true
+          } else {
+            val superType = registry.getSupertype(contentType)
+            superType != null && superType.type == "application" && superType.subtype == "json"
+          }
+        }
       }
     } else false
   }
