@@ -239,7 +239,7 @@ object Matchers : KLogging() {
           result.addAll(compareListContentUnordered(expectedList, actualList, path, context, generateDiff, callback))
         }
         is ArrayContainsMatcher -> {
-          val variants = if (matcher.variants.isEmpty()) {
+          val variants = matcher.variants.ifEmpty {
             expectedList.mapIndexed { index, _ ->
               Triple(
                 index,
@@ -247,8 +247,6 @@ object Matchers : KLogging() {
                 emptyMap()
               )
             }
-          } else {
-            matcher.variants
           }
           for ((index, variant) in variants.withIndex()) {
             if (index < expectedList.size) {

@@ -27,9 +27,8 @@ class PactDslJsonArrayContaining(
       }
     }
 
-    val maxIndex = max(max(matchingRules.maxOfOrNull { it.first } ?: -1, generators?.maxOfOrNull { it.first } ?: -1), 0)
     this.matchers = MatchingRuleCategory("", mutableMapOf(root + rootName to MatchingRuleGroup(mutableListOf(ArrayContainsMatcher(
-      (0..maxIndex).map { index ->
+      (0 until body.size()).map { index ->
         Triple(
           index,
           matchingRules.find { it.first == index }?.second ?: MatchingRuleCategory("body"),
@@ -37,6 +36,9 @@ class PactDslJsonArrayContaining(
         )
       }
     )))))
+
+    this.generators.categoryFor(Category.BODY)?.clear()
+
     return super.closeArray()!!
   }
 

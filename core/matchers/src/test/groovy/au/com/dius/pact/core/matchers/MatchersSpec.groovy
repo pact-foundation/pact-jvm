@@ -406,7 +406,43 @@ class MatchersSpec extends Specification {
     def context = new MatchingContext(new MatchingRuleCategory('body'), true)
 
     expect:
-    Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual.values, context, { -> }, callback).empty
-    !Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual2.values, context, { -> }, callback).empty
+    Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual.values, context,
+      { -> }, callback).empty
+    !Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual2.values, context,
+      { -> }, callback).empty
+  }
+
+  @Issue('#1367')
+  def 'array contains matcher with two expected values'() {
+    given:
+    def matcher = new ArrayContainsMatcher([
+      new Triple(0, new MatchingRuleCategory('body'), [:]),
+      new Triple(1, new MatchingRuleCategory('body'), [:])
+    ])
+    def expected = parseString('["a", 1]').asArray()
+    def actual = parseString('["a", {"id": 10,"name": "john"}, 1, false]').asArray()
+    def actual2 = parseString('["b", {"id": 10,"name": "john"}, 1, true]').asArray()
+    def actual3 = parseString('["b", {"id": 10,"name": "john"}, 5, true]').asArray()
+    def mismatchFactory = [
+      create: { e, a, des, p -> new BodyMismatch(e.toString(), a.toString(), des) }
+    ] as MismatchFactory
+    def callback = { path, e, a, context ->
+      def result = MatcherExecutorKt.matchEquality(path, e, a, mismatchFactory)
+      [ new BodyItemMatchResult('0', result) ]
+    }
+    def context = new MatchingContext(new MatchingRuleCategory('body'), true)
+
+    when:
+    def result1 = Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual.values,
+      context, { -> }, callback)
+    def result2 = Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual2.values,
+      context, { -> }, callback)
+    def result3 = Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual3.values,
+      context, { -> }, callback)
+
+    then:
+    result1.empty
+    result2.size() == 1
+    result3.size() == 2
   }
 }

@@ -76,4 +76,26 @@ class LambdaDslJsonBodySpec extends Specification {
       ])
     ]
   }
+
+  @Issue('#1367')
+  def 'array contains test with two variants'() {
+    when:
+    def result = newJsonBody(o -> {
+      o.arrayContaining('output', a -> {
+        a.stringValue('a')
+        a.numberValue(1)
+      });
+    }).build()
+
+    then:
+    result.body.toString() == '{"output":["a",1]}'
+    result.matchers.matchingRules == [
+      '$.output': new MatchingRuleGroup([
+        new ArrayContainsMatcher([
+          new Triple(0, new MatchingRuleCategory('body'), [:]),
+          new Triple(1, new MatchingRuleCategory('body'), [:])
+        ])
+      ])
+    ]
+  }
 }

@@ -71,7 +71,7 @@ subprojects {
   }
 
   java {
-    modularity.inferModulePath = true
+//    modularity.inferModulePath = true
   }
 
     compileTestGroovy {
