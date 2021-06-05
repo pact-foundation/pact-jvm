@@ -454,6 +454,18 @@ encoded when written to the Pact file and then decoded again when the file is lo
 an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary`. For instance, setting 
 `pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
 
+### Controlling the generation of diffs
+
+**NOTE: version 4.2.7+**
+
+When there are mismatches with large bodies the calculation of the diff can take a long time . You can turn off the 
+generation of the diffs with the JVM system property: `pact.verifier.generateDiff=true|false|<dataSize>`, where 
+`dataSize`, if specified, must be a valid data size (for instance `100kb` or `1mb`). This will turn off the diff
+calculation for payloads that exceed this size. 
+
+For instance, setting `pact.verifier.generateDiff=false` will turn off the generation of diffs for all bodies, while
+`pact.verifier.generateDiff=512kb` will only turn off the diffs if the actual or expected body is larger than 512kb.
+
 ## Test target
 
 The field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget`
