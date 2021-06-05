@@ -1,5 +1,10 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.22 - Backported Fix
+
+* c7895cc0b - fix(backport): handle exceptions correctly when @IgnoreNoPactsToVerify is present #1324 (Ronald Holshausen, Sat Mar 27 16:32:38 2021 +1100)
+* bb5a56e87 - bump version to 4.1.22 (Ronald Holshausen, Sun May 23 15:54:12 2021 +1000)
+
 # 4.1.21 - Bugfix Release
 
 * 6fb78d046 - chore: upgrade classgraph to 4.8.105 (Ronald Holshausen, Sun May 23 15:31:07 2021 +1000)
