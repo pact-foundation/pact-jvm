@@ -1,10 +1,14 @@
 package au.com.dius.pact.core.support
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import mu.KLogging
 import org.apache.commons.lang3.RandomUtils
 import java.io.IOException
 import java.net.ServerSocket
 import java.util.jar.JarInputStream
+import kotlin.math.pow
 import kotlin.reflect.full.cast
 import kotlin.reflect.full.declaredMemberProperties
 
@@ -122,6 +126,23 @@ object Utils : KLogging() {
       }
     } else {
       ""
+    }
+  }
+
+  private val SIZE_REGEX = Regex("(\\d+)(\\w+)")
+  private val DATA_SIZES = listOf("b", "kb", "mb", "gb", "tb")
+
+  fun sizeOf(value: String): Result<Int, String> {
+    val matchResult = SIZE_REGEX.matchEntire(value.toLowerCase())
+    return if (matchResult != null) {
+      val unitPower = DATA_SIZES.indexOf(matchResult.groupValues[2])
+      if (unitPower >= 0) {
+        Ok(Integer.parseInt(matchResult.groupValues[1]) * 1024.0.pow(unitPower).toInt())
+      } else {
+        Err("'$value' is not a valid data size")
+      }
+    } else {
+      Err("'$value' is not a valid data size")
     }
   }
 }
