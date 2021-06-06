@@ -163,7 +163,7 @@ class PactBuilder extends GroovyBuilder {
     Map responseHeaders = setupHeaders(responseData.headers ?: [:], responseMatchers, responseGenerators)
     if (responseData.status instanceof StatusCodeMatcher) {
       this.currentInteraction.response.status = responseData.status.defaultStatus()
-      responseMatchers.addCategory("status").addRule(responseData.status.matcher)
+      responseMatchers.addCategory('status').addRule(responseData.status.matcher)
     } else {
       this.currentInteraction.response.status = responseData.status ?: 200
     }
@@ -258,6 +258,7 @@ class PactBuilder extends GroovyBuilder {
    * @return The result of the test run
    */
   @CompileStatic
+  @SuppressWarnings('UnusedMethodParameter')
   PactVerificationResult runTest(Map options = [:], Closure closure) {
     updateInteractions()
     this.pact.interactions.addAll(interactions)

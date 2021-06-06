@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.matchingrules.HttpStatus
 import com.github.ajalt.mordant.TermColors
 
 /**
@@ -17,10 +18,27 @@ sealed class Mismatch {
   open fun type(): String = this::class.java.simpleName
 }
 
-data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
-  override fun description() = "expected status of $expected but was $actual"
-  override fun description(t: TermColors) =
-    "expected status of ${t.bold(expected.toString())} but was ${t.bold(actual.toString())}"
+data class StatusMismatch(
+  val expected: Any,
+  val actual: Int,
+  val statusType: HttpStatus? = null,
+  val statusCodes: List<Int> = emptyList(),
+) : Mismatch() {
+  override fun description(): String {
+    return when (statusType) {
+      null -> "expected status of $expected but was $actual"
+      HttpStatus.StatusCodes -> "expected a status in $statusCodes but was $actual"
+      else -> "expected $statusType but was $actual"
+    }
+  }
+  override fun description(t: TermColors): String {
+    return when (statusType) {
+      null -> "expected status of ${t.bold(expected.toString())} but was ${t.bold(actual.toString())}"
+      HttpStatus.StatusCodes ->
+        "expected a status in ${t.bold(statusCodes.toString())} but was ${t.bold(actual.toString())}"
+      else -> "expected ${t.bold(statusType.toString())} but was ${t.bold(actual.toString())}"
+    }
+  }
   fun toMap(): Map<String, Any?> {
     return mapOf("mismatch" to description())
   }
@@ -55,6 +73,11 @@ data class PathMismatch @JvmOverloads constructor (
 object PathMismatchFactory : MismatchFactory<PathMismatch> {
   override fun create(expected: Any?, actual: Any?, message: String, path: List<String>) =
     PathMismatch(expected.toString(), actual.toString(), message)
+}
+
+object StatusMismatchFactory : MismatchFactory<StatusMismatch> {
+  override fun create(expected: Any?, actual: Any?, message: String, path: List<String>) =
+    StatusMismatch(expected as Int, actual as Int)
 }
 
 data class MethodMismatch(val expected: String, val actual: String) : Mismatch() {

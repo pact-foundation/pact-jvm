@@ -2,7 +2,6 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.IRequest
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
@@ -205,8 +204,16 @@ object Matching : KLogging() {
     else PathMismatch(expected.path, replacedActual)
   }
 
-  fun matchStatus(expected: Int, actual: Int): StatusMismatch? {
-    return if (expected == actual) null else StatusMismatch(expected, actual)
+  fun matchStatus(expected: Int, actual: Int, context: MatchingContext): StatusMismatch? {
+    return when {
+      context.matcherDefined(emptyList()) -> {
+        logger.debug { "Matcher defined for status" }
+        val mismatch = Matchers.domatch(context, emptyList(), expected, actual, StatusMismatchFactory)
+        mismatch.firstOrNull()
+      }
+      expected == actual -> null
+      else -> StatusMismatch(expected, actual)
+    }
   }
 
   fun matchQuery(expected: IRequest, actual: IRequest, context: MatchingContext): List<QueryMatchResult> {

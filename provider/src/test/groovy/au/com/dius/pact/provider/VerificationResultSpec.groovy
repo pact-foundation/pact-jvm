@@ -96,7 +96,7 @@ class VerificationResultSpec extends Specification {
       '+        "tags": null',
       '+    }'].join('\n')
     def failures = [
-      new VerificationFailureType.MismatchFailure(new StatusMismatch(200, 404), null, null),
+      new VerificationFailureType.MismatchFailure(new StatusMismatch(200, 404, null, []), null, null),
       new VerificationFailureType.MismatchFailure(new HeaderMismatch('X', 'A', 'B', 'Expected a header X with value A but was B'), null, null),
       new VerificationFailureType.MismatchFailure(new BodyMismatch(null, null, 'Expected id=\'1234\' but received id=\'9905\'', '$.ns:projects.@id', diff), null, null),
     ]

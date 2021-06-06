@@ -11,7 +11,7 @@ import org.junit.Test
 class ArrayContainsTest {
   @Test
   void 'array contains matcher example'() {
-    def service = new PactBuilder()
+    def service = new PactBuilder(PactSpecVersion.V4)
     service {
       serviceConsumer 'Order Processor'
       hasPactWith 'Siren Order Service'
@@ -58,7 +58,7 @@ class ArrayContainsTest {
       }
     }
 
-    assert service.runTest(specificationVersion: PactSpecVersion.V4) { server ->
+    assert service.runTest { server ->
       def http = HttpBuilder.configure { request.uri = server.url }
       http.get {
         request.uri.path = '/orders'

@@ -18,6 +18,7 @@ object ResponseMatching : KLogging() {
 
   @JvmStatic
   fun responseMismatches(expected: IResponse, actual: IResponse): List<Mismatch> {
+    val statusContext = MatchingContext(expected.matchingRules.rulesForCategory("status"), true)
     val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), true)
     val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), true)
 
@@ -27,7 +28,7 @@ object ResponseMatching : KLogging() {
     } else {
       emptyList()
     }
-    return (typeResult + Matching.matchStatus(expected.status, actual.status) +
+    return (typeResult + Matching.matchStatus(expected.status, actual.status, statusContext) +
       Matching.matchHeaders(expected.asHttpPart(), actual.asHttpPart(), headerContext).flatMap { it.result } +
       bodyResults.bodyResults.flatMap { it.result }).filterNotNull()
   }

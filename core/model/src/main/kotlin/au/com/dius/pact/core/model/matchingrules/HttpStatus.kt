@@ -34,6 +34,19 @@ enum class HttpStatus {
     }
   }
 
+  override fun toString(): String {
+    return when (this) {
+      Information -> "Informational response (100–199)"
+      Success -> "Successful response (200–299)"
+      Redirect -> "Redirect (300–399)"
+      ClientError -> "Client error (400–499)"
+      ServerError -> "Server error (500–599)"
+      NonError -> "Non-error response (< 400)"
+      Error -> "Error response (>= 400)"
+      else -> super.toString()
+    }
+  }
+
   companion object {
     fun fromJson(value: JsonValue): HttpStatus {
       return if (value.isString) {

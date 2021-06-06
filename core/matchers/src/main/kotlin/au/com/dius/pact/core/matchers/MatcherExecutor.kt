@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.HttpStatus
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
@@ -19,6 +20,7 @@ import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
@@ -145,6 +147,8 @@ fun <M : Mismatch> domatch(
       matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     is ArrayContainsMatcher -> listOf()
     is BooleanMatcher -> matchBoolean(path, expected, actual, mismatchFn)
+    is StatusCodeMatcher ->
+      matchStatusCode(matcher.statusType, matcher.values, expected as Int, actual as Int) as List<M>
     else -> matchEquality(path, expected, actual, mismatchFn)
   }
 }
@@ -611,5 +615,31 @@ fun <M : Mismatch> matchHeaderWithParameters(
     listOf(mismatchFactory.create(contentType.toString(), actual,
       "Expected binary contents to have content type '$contentType' " +
         "but detected contents was '$detectedContentType'", path))
+  }
+}
+
+fun matchStatusCode(
+  statusType: HttpStatus,
+  statusCodes: List<Int>,
+  expected: Int,
+  actual: Int
+): List<StatusMismatch> {
+  val matches = when (statusType) {
+    HttpStatus.Information -> (100..199).contains(actual)
+    HttpStatus.Success -> (200..299).contains(actual)
+    HttpStatus.Redirect -> (300..399).contains(actual)
+    HttpStatus.ClientError -> (400..499).contains(actual)
+    HttpStatus.ServerError -> (500..599).contains(actual)
+    HttpStatus.StatusCodes -> statusCodes.contains(actual)
+    HttpStatus.NonError -> actual < 400
+    HttpStatus.Error -> actual >= 400
+  }
+  logger.debug {
+    "Matching status $actual with $statusType/$statusCodes -> $matches"
+  }
+  return if (matches) {
+    emptyList()
+  } else {
+    listOf(StatusMismatch(expected, actual, statusType, statusCodes))
   }
 }
