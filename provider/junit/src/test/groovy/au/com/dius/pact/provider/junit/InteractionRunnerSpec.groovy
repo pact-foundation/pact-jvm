@@ -53,8 +53,8 @@ class InteractionRunnerSpec extends Specification {
     ] as IProviderVerifier
 
     @Override
-    void testInteraction(@NotNull String consumerName, @NotNull Interaction interaction, @NotNull PactSource source,
-                         @NotNull Map<String, ?> context) {
+    void testInteraction(@NotNull String consumerName, @NotNull Interaction interaction,
+                         @NotNull PactSource source, @NotNull Map<String, Object> context, boolean pending) {
 
     }
 
@@ -111,7 +111,7 @@ class InteractionRunnerSpec extends Specification {
 
     @Override
     void testInteraction(@NotNull String consumerName, @NotNull Interaction interaction, @NotNull PactSource source,
-                         @NotNull Map<String, ?> context) {
+                         @NotNull Map<String, Object> context, boolean pending) {
       throw new AssertionFailedError('boom')
     }
 

@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.ContentType
-import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
@@ -33,7 +33,7 @@ class WebFluxProviderVerifier : ProviderVerifier() {
 
   fun verifyResponseFromProvider(
     provider: ProviderInfo,
-    interaction: RequestResponseInteraction,
+    interaction: SynchronousRequestResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     webClient: WebTestClient,
@@ -68,7 +68,7 @@ class WebFluxProviderVerifier : ProviderVerifier() {
 
   fun executeWebFluxRequest(
     webTestClient: WebTestClient,
-    request: Request,
+    request: IRequest,
     provider: ProviderInfo
   ): EntityExchangeResult<ByteArray> {
     val body = request.body
@@ -167,7 +167,7 @@ class WebFluxProviderVerifier : ProviderVerifier() {
     }
   }
 
-  fun requestUriString(request: Request): String {
+  fun requestUriString(request: IRequest): String {
     val uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
     request.query.forEach { (key, value) ->

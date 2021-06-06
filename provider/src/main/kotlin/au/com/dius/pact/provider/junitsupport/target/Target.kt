@@ -24,9 +24,15 @@ interface Target {
    * @param interaction interaction to be tested
    * @param source Source of the Pact interaction
    * @param context Context map for the test
+   * @param pending if the Pact or Interaction is pending
    */
-  fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource,
-                      context: MutableMap<String, Any>)
+  fun testInteraction(
+    consumerName: String,
+    interaction: Interaction,
+    source: PactSource,
+    context: MutableMap<String, Any>,
+    pending: Boolean
+  )
 
   /**
    * Add a callback to receive the test interaction result

@@ -100,6 +100,14 @@ sealed class VerificationFailureType {
     override fun hasException() = false
     override fun getException() = null
   }
+
+  data class InvalidInteractionFailure(val cause: String) : VerificationFailureType() {
+    override fun description() = formatForDisplay(TermColors())
+    override fun formatForDisplay(t: TermColors) = cause
+
+    override fun hasException() = false
+    override fun getException() = null
+  }
 }
 
 typealias VerificationFailures = Map<String, List<VerificationFailureType>>
@@ -180,6 +188,7 @@ sealed class VerificationResult {
               is VerificationFailureType.PublishResultsFailure -> listOf(
                 "description" to failure.description()
               )
+              is VerificationFailureType.InvalidInteractionFailure -> listOf("description" to failure.description())
             }
             (listOf("interactionId" to entry.key) + errorMap).toMap()
           }

@@ -47,7 +47,6 @@ import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import java.lang.RuntimeException
 import java.util.concurrent.ConcurrentHashMap
-import java.util.function.BiConsumer
 import java.util.function.Supplier
 import kotlin.reflect.jvm.kotlinProperty
 import org.apache.commons.lang3.tuple.Pair as TuplePair
@@ -154,7 +153,11 @@ open class InteractionRunner(
       val description = describeChild(interaction)
       val interactionId = interaction.interactionId
       var testResult: VerificationResult = VerificationResult.Ok(interactionId)
-      val pending = pact.source is BrokerUrlSource && (pact.source as BrokerUrlSource).result?.pending == true
+      val pending = when {
+        interaction.isV4() && interaction.asV4Interaction().pending -> true
+        pact.source is BrokerUrlSource -> (pact.source as BrokerUrlSource).result?.pending == true
+        else -> false
+      }
       val included = interactionIncluded(interaction)
       if (!pending && included) {
         notifier.fireTestStarted(description)
@@ -168,7 +171,7 @@ open class InteractionRunner(
 
       if (included) {
         try {
-          interactionBlock(interaction, pactSource, testContext).evaluate()
+          interactionBlock(interaction, pactSource, testContext, pending).evaluate()
         } catch (e: Throwable) {
           testResult = VerificationResult.Failed("Request to provider failed with an exception", description.displayName,
             mapOf(interaction.interactionId.orEmpty() to
@@ -216,7 +219,12 @@ open class InteractionRunner(
     return testClass.javaClass.newInstance()
   }
 
-  protected fun interactionBlock(interaction: Interaction, source: PactSource, context: Map<String, Any>): Statement {
+  protected fun interactionBlock(
+    interaction: Interaction,
+    source: PactSource,
+    context: Map<String, Any>,
+    pending: Boolean
+  ): Statement {
 
     // 1. prepare object
     // 2. get Target
@@ -246,7 +254,9 @@ open class InteractionRunner(
           results[interaction.uniqueKey()] = Pair(result, verifier)
         }
         target.testInteraction(pact.consumer.name, interaction, source,
-          mutableMapOf("providerState" to context, "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator))
+          mutableMapOf("providerState" to context, "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator),
+          pending
+        )
       }
     }
     statement = withStateChanges(interaction, testInstance, statement, target)

@@ -17,7 +17,6 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @RunWith(PactRunner.class)
 @Provider("test_provider")
 @PactFolder("pacts")
-@Ignore // TODO: V4 Pacts not supported yet
 public class V4PendingInteractionTest {
   @ClassRule
   public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);

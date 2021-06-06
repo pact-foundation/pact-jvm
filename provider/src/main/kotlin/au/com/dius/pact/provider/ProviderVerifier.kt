@@ -341,7 +341,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           verifyMessage(methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage,
             failures, pending)
         } else {
-          val expectedResponse = (interaction as RequestResponseInteraction).response
+          val expectedResponse = (interaction as SynchronousRequestResponse).response
           var result: VerificationResult = VerificationResult.Ok(interactionId)
           methodsAnnotatedWith.forEach {
             val response = invokeProviderMethod(it, null) as Map<String, Any>

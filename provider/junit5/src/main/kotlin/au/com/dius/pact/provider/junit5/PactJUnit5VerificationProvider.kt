@@ -39,7 +39,7 @@ val namespace: ExtensionContext.Namespace = ExtensionContext.Namespace.create("p
 open class PactVerificationInvocationContextProvider : TestTemplateInvocationContextProvider {
 
   override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
-    logger.debug { "provideTestTemplateInvocationContexts called" }
+    logger.trace { "provideTestTemplateInvocationContexts called" }
     val tests = resolvePactSources(context)
     return when {
       tests.first.isNotEmpty() -> tests.first.stream() as Stream<TestTemplateInvocationContext>

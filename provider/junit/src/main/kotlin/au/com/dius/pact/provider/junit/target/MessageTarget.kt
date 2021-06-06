@@ -38,7 +38,8 @@ open class MessageTarget @JvmOverloads constructor(
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: MutableMap<String, Any>
+    context: MutableMap<String, Any>,
+    pending: Boolean
   ) {
     val result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
       interaction.description, mutableMapOf(), false)
