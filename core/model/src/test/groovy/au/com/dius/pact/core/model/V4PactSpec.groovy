@@ -108,4 +108,20 @@ class V4PactSpec extends Specification {
       testname: new JsonValue.StringValue('example_test.groovy'.chars)
     ]
   }
+
+  def 'test load v4 pact with pending interactions'() {
+    given:
+    def pactUrl = V4PactSpec.classLoader.getResource('v4-pending-pact.json')
+
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+
+    then:
+    pact instanceof V4Pact
+    pact.interactions.size() == 2
+    pact.interactions[0] instanceof V4Interaction
+    pact.interactions[0].pending == true
+    pact.interactions[0] instanceof V4Interaction
+    pact.interactions[0].pending == true
+  }
 }

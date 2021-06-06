@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
@@ -19,31 +20,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
 
 private val logger = KotlinLogging.logger {}
-
-enum class V4InteractionType {
-  SynchronousHTTP,
-  AsynchronousMessages,
-  SynchronousMessages;
-
-  override fun toString(): String {
-    return when (this) {
-      SynchronousHTTP -> "Synchronous/HTTP"
-      AsynchronousMessages -> "Asynchronous/Messages"
-      SynchronousMessages -> "Synchronous/Messages"
-    }
-  }
-
-  companion object {
-    fun fromString(str: String): Result<V4InteractionType, String> {
-      return when (str) {
-        "Synchronous/HTTP" -> Ok(SynchronousHTTP)
-        "Asynchronous/Messages" -> Ok(AsynchronousMessages)
-        "Synchronous/Messages" -> Ok(SynchronousMessages)
-        else -> Err("'$str' is not a valid V4 interaction type")
-      }
-    }
-  }
-}
 
 fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): OptionalBody {
   var contentType = ContentType.UNKNOWN
@@ -108,7 +84,8 @@ sealed class V4Interaction(
   description: String,
   interactionId: String? = null,
   providerStates: List<ProviderState> = listOf(),
-  comments: MutableMap<String, JsonValue> = mutableMapOf()
+  comments: MutableMap<String, JsonValue> = mutableMapOf(),
+  val pending: Boolean = false
 ) : BaseInteraction(interactionId, description, providerStates, comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
@@ -129,8 +106,9 @@ sealed class V4Interaction(
     override val request: HttpRequest = HttpRequest(),
     override val response: HttpResponse = HttpResponse(),
     interactionId: String? = null,
-    override val comments: MutableMap<String, JsonValue> = mutableMapOf()
-  ) : V4Interaction(key, description, interactionId, providerStates, comments), SynchronousRequestResponse {
+    override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
+    pending: Boolean = false
+  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), SynchronousRequestResponse {
 
     override fun toString() =
       "Interaction: $description\n\tin states ${displayState()}\n" +
@@ -155,7 +133,8 @@ sealed class V4Interaction(
         "key" to uniqueKey(),
         "description" to description,
         "request" to request.toMap(),
-        "response" to response.toMap()
+        "response" to response.toMap(),
+        "pending" to pending
       )
       if (providerStates.isNotEmpty()) {
         map["providerStates"] = providerStates.map { it.toMap() }
@@ -194,8 +173,9 @@ sealed class V4Interaction(
     val generators: Generators = Generators(),
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf(),
-    override val comments: MutableMap<String, JsonValue> = mutableMapOf()
-  ) : V4Interaction(key, description, interactionId, providerStates, comments), MessageInteraction {
+    override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
+    pending: Boolean = false
+  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), MessageInteraction {
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
       return AsynchronousMessage(generateKey(), description, contents, metadata, matchingRules, generators,
@@ -217,7 +197,8 @@ sealed class V4Interaction(
         "type" to V4InteractionType.AsynchronousMessages.toString(),
         "key" to key,
         "description" to description,
-        "contents" to contents.toV4Format()
+        "contents" to contents.toV4Format(),
+        "pending" to pending
       )
       if (metadata.isNotEmpty()) {
         map["metadata"] = metadata
@@ -280,10 +261,12 @@ sealed class V4Interaction(
             } else {
               mutableMapOf()
             }
+            val pending = json["pending"].asBoolean() ?: false
+
             when (result.value) {
               V4InteractionType.SynchronousHTTP -> {
                 Ok(SynchronousHttp(key, description, providerStates, HttpRequest.fromJson(json["request"]),
-                  HttpResponse.fromJson(json["response"]), id, comments))
+                  HttpResponse.fromJson(json["response"]), id, comments, pending))
               }
               V4InteractionType.AsynchronousMessages -> {
                 val metadata = if (json.has("metadata")) {
@@ -305,7 +288,7 @@ sealed class V4Interaction(
                   Generators.fromJson(json["generators"])
                 else Generators()
                 Ok(AsynchronousMessage(key, description, contents, metadata, matchingRules, generators, id,
-                  providerStates, comments))
+                  providerStates, comments, pending))
               }
               V4InteractionType.SynchronousMessages -> {
                 val message = "Interaction type '$type' is currently unimplemented. It will be ignored. Source: $source"
