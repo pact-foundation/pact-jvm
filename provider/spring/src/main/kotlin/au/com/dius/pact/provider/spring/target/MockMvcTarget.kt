@@ -89,4 +89,6 @@ class MockMvcTarget @JvmOverloads constructor(
   override fun getRequestClass(): Class<*> = MockHttpServletRequestBuilder::class.java
 
   override fun createProviderVerifier() = MvcProviderVerifier(printRequestResponse)
+
+  override fun validForInteraction(interaction: Interaction) = interaction.isSynchronousRequestResponse()
 }

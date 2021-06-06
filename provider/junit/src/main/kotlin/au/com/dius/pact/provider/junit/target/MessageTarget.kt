@@ -114,5 +114,7 @@ open class MessageTarget @JvmOverloads constructor(
     return providerInfo
   }
 
+  override fun validForInteraction(interaction: Interaction) = interaction.isAsynchronousMessage()
+
   companion object : KLogging()
 }

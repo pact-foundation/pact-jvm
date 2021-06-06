@@ -96,6 +96,8 @@ open class HttpTarget
     }
   }
 
+  override fun validForInteraction(interaction: Interaction) = interaction.isSynchronousRequestResponse()
+
   override fun setupVerifier(
     interaction: Interaction,
     provider: IProviderInfo,

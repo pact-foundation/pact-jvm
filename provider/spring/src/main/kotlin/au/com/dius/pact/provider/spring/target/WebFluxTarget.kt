@@ -46,4 +46,6 @@ class WebFluxTarget(
   override fun getRequestClass(): Class<*> = WebTestClient.RequestHeadersSpec::class.java
 
   override fun createProviderVerifier() = WebFluxProviderVerifier()
+
+  override fun validForInteraction(interaction: Interaction) = interaction.isSynchronousRequestResponse()
 }

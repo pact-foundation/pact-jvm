@@ -11,6 +11,7 @@ dependencies {
     compile 'javax.mail:mail:1.5.0-b01'
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.45'
+    testCompile 'com.github.tomakehurst:wiremock-jre8:2.27.2'
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'org.apache.commons:commons-collections4:4.1'
     // Required for Java 9

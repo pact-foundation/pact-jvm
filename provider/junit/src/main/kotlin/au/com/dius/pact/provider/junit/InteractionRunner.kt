@@ -134,8 +134,8 @@ open class InteractionRunner(
 
   private fun validateTestTarget(errors: MutableList<Throwable>) {
     val annotatedFields = testClass.getAnnotatedFields(TestTarget::class.java)
-    if (annotatedFields.size != 1) {
-      errors.add(Exception("Test class should have exactly one field annotated with ${TestTarget::class.java.name}"))
+    if (annotatedFields.isEmpty()) {
+      errors.add(Exception("Test class should have at least one field annotated with ${TestTarget::class.java.name}"))
     } else if (!Target::class.java.isAssignableFrom(annotatedFields[0].type)) {
       errors.add(Exception("Field annotated with ${TestTarget::class.java.name} should implement " +
         "${Target::class.java.name} interface"))
@@ -243,7 +243,7 @@ open class InteractionRunner(
       return Fail(e)
     }
 
-    val target = lookupTarget(testInstance)
+    val target = lookupTarget(testInstance, interaction)
     target.configureVerifier(source, pact.consumer.name, interaction)
     target.verifier.reportInteractionDescription(interaction)
 
@@ -268,13 +268,14 @@ open class InteractionRunner(
 
   protected open fun setupTargetForInteraction(target: Target) { }
 
-  protected fun lookupTarget(testInstance: Any): Target {
-    val targetField = testClass.getAnnotatedFields(TestTarget::class.java).first()
-    val target = if (targetField.field.kotlinProperty != null) {
-      targetField.field.kotlinProperty!!.getter.call(testInstance)
-    } else {
-      targetField.get(testInstance)
-    }
+  protected fun lookupTarget(testInstance: Any, interaction: Interaction): Target {
+    val target = testClass.getAnnotatedFields(TestTarget::class.java).map {
+      if (it.field.kotlinProperty != null) {
+        it.field.kotlinProperty!!.getter.call(testInstance)
+      } else {
+        it.get(testInstance)
+      }
+    }.first { (it as Target).validForInteraction(interaction) }
     if (target is TestClassAwareTarget) {
       target.setTestClass(testClass, testInstance)
     }

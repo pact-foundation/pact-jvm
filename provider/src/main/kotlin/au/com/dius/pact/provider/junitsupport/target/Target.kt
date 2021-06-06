@@ -63,5 +63,10 @@ interface Target {
 
   fun configureVerifier(source: PactSource, consumerName: String, interaction: Interaction)
 
+  /**
+   * If this target can verify the interaction
+   */
+  fun validForInteraction(interaction: Interaction): Boolean
+
   val verifier: IProviderVerifier
 }

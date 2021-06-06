@@ -96,6 +96,9 @@ class InteractionRunnerSpec extends Specification {
 
     @SuppressWarnings('GetterMethodCouldBeProperty')
     Class getRequestClass() { null }
+
+    @SuppressWarnings('UnusedMethodParameter')
+    boolean validForInteraction(Interaction interaction) { true }
   }
 
   @SuppressWarnings('PublicInstanceField')
@@ -153,6 +156,9 @@ class InteractionRunnerSpec extends Specification {
 
     @SuppressWarnings('GetterMethodCouldBeProperty')
     Class getRequestClass() { null }
+
+    @SuppressWarnings('UnusedMethodParameter')
+    boolean validForInteraction(Interaction interaction) { true }
   }
 
   @SuppressWarnings('PublicInstanceField')
