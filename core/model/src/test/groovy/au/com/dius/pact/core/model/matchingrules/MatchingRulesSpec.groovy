@@ -260,4 +260,47 @@ class MatchingRulesSpec extends Specification {
       content: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']
     ]
   }
+
+  def 'status code matcher to map for JSON'() {
+    expect:
+    new StatusCodeMatcher(HttpStatus.ClientError, []).toMap(PactSpecVersion.V4) == [
+      match: 'statusCode', status: 'clientError'
+    ]
+    new StatusCodeMatcher(HttpStatus.StatusCodes, [501, 503]).toMap(PactSpecVersion.V4) == [
+      match: 'statusCode',
+      status: [501, 503]
+    ]
+  }
+
+  def 'Load status code matcher from json'() {
+    given:
+    def matchingRulesMap = [
+      body: [
+        '$': [
+          matchers: [
+            [
+              match: 'statusCode',
+              status: 'redirect'
+            ],
+            [
+              match: 'statusCode',
+              status: [100, 200]
+            ]
+          ]
+        ]
+      ]
+    ]
+
+    when:
+    def matchingRules = MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(matchingRulesMap))
+
+    then:
+    !matchingRules.empty
+    matchingRules.categories == ['body'] as Set
+    matchingRules.rulesForCategory('body').matchingRules.size() == 1
+    matchingRules.rulesForCategory('body').matchingRules['$'] == new MatchingRuleGroup([
+      new StatusCodeMatcher(HttpStatus.Redirect, []),
+      new StatusCodeMatcher(HttpStatus.StatusCodes, [100, 200])
+    ])
+  }
 }

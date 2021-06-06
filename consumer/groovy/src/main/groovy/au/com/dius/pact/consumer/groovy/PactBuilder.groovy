@@ -161,7 +161,12 @@ class PactBuilder extends GroovyBuilder {
     MatchingRules responseMatchers = currentInteraction.response.matchingRules
     Generators responseGenerators = currentInteraction.response.generators
     Map responseHeaders = setupHeaders(responseData.headers ?: [:], responseMatchers, responseGenerators)
-    this.currentInteraction.response.status = responseData.status ?: 200
+    if (responseData.status instanceof StatusCodeMatcher) {
+      this.currentInteraction.response.status = responseData.status.defaultStatus()
+      responseMatchers.addCategory("status").addRule(responseData.status.matcher)
+    } else {
+      this.currentInteraction.response.status = responseData.status ?: 200
+    }
     this.currentInteraction.response.headers.putAll(responseHeaders)
     def responseBody = setupBody(responseData, currentInteraction.response)
     this.currentInteraction.response.body = responseBody
@@ -257,8 +262,7 @@ class PactBuilder extends GroovyBuilder {
     updateInteractions()
     this.pact.interactions.addAll(interactions)
 
-    def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
-    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion as PactSpecVersion,
+    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, specVersion,
       MockServerImplementation.Default)
 
     def runTest = closure

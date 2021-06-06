@@ -205,7 +205,9 @@ object Matching : KLogging() {
     else PathMismatch(expected.path, replacedActual)
   }
 
-  fun matchStatus(expected: Int, actual: Int) = if (expected == actual) null else StatusMismatch(expected, actual)
+  fun matchStatus(expected: Int, actual: Int): StatusMismatch? {
+    return if (expected == actual) null else StatusMismatch(expected, actual)
+  }
 
   fun matchQuery(expected: IRequest, actual: IRequest, context: MatchingContext): List<QueryMatchResult> {
     return expected.query.entries.fold(emptyList<QueryMatchResult>()) { acc, entry ->

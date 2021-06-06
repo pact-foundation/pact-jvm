@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.NullGenerator
 import au.com.dius.pact.core.model.generators.lookupGenerator
 import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.json.map
 import mu.KLogging
 import java.lang.RuntimeException
 
@@ -122,6 +123,20 @@ interface MatchingRule {
         else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
       }
       "boolean" -> BooleanMatcher
+      "statusCode" -> if (j["status"].isArray) {
+        val asArray = j["status"].asArray()!!
+        StatusCodeMatcher(HttpStatus.StatusCodes, asArray.map {
+          if (it.isNumber) {
+            it.asNumber()!!.toInt()
+          } else {
+            throw InvalidMatcherJsonException(
+              "Status code matcher of type StatusCodes must have an array of integers, got $it"
+            )
+          }
+        })
+      } else {
+        StatusCodeMatcher(HttpStatus.fromJson(j["status"]))
+      }
       else -> {
         MatchingRuleGroup.logger.warn { "Unrecognised matcher ${j[MATCH]}, defaulting to equality matching" }
         EqualsMatcher
@@ -447,6 +462,25 @@ data class ArrayContainsMatcher(
     return listOf(ArrayContainsGenerator(variants))
   }
 }
+
+
+/**
+ * Matcher for HTTP status codes
+ */
+data class StatusCodeMatcher(val statusType: HttpStatus, val values: List<Int> = emptyList()) : MatchingRule {
+  override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
+    return mapOf("match" to "statusCode", "status" to statusType.toJson(values))
+  }
+
+  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    return if (pactVersion < PactSpecVersion.V4) {
+      listOf("Status code matchers can only be used with Pact specification versions >= V4")
+    } else {
+      listOf()
+    }
+  }
+}
+
 
 data class MatchingRuleGroup @JvmOverloads constructor(
   val rules: MutableList<MatchingRule> = mutableListOf(),

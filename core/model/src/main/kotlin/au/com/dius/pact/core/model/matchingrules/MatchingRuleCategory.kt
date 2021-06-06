@@ -234,7 +234,7 @@ data class MatchingRuleCategory @JvmOverloads constructor(
     return this
   }
 
-  private fun categoryRequiresSubkeys() = name != "path"
+  private fun categoryRequiresSubkeys() = name != "path" && name != "status"
 
   /**
    * Returns the number of rules stored at the key

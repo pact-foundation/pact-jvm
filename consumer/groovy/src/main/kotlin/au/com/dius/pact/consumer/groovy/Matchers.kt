@@ -15,6 +15,7 @@ import au.com.dius.pact.core.model.generators.RegexGenerator
 import au.com.dius.pact.core.model.generators.TimeGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
+import au.com.dius.pact.core.model.matchingrules.HttpStatus
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
@@ -262,6 +263,25 @@ class ArrayContainsMatcher(
       return variants.mapIndexed { index, variant ->
         Triple(index, variant.second, variant.third)
       }
+    }
+  }
+}
+
+/**
+ * Matcher for HTTP status codes
+ */
+class StatusCodeMatcher @JvmOverloads constructor(val status: HttpStatus, value: List<Int> = emptyList())
+  : Matcher(value, au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher(status, value)) {
+  fun defaultStatus(): Int {
+    return when (status) {
+      HttpStatus.Information -> 100
+      HttpStatus.Success -> 200
+      HttpStatus.Redirect -> 300
+      HttpStatus.ClientError -> 400
+      HttpStatus.ServerError -> 500
+      HttpStatus.StatusCodes -> (value as List<Int>).first()
+      HttpStatus.NonError -> 200
+      HttpStatus.Error -> 400
     }
   }
 }
@@ -630,5 +650,53 @@ open class Matchers {
     fun eachArrayLike(numberExamples: Int = 1, arg: Any): Matcher {
       return EachLikeMatcher(EachLikeMatcher(arg, numberExamples), numberExamples)
     }
+
+    /**
+     * Match any HTTP Information response status (100-199)
+     */
+    @JvmStatic
+    fun informationStatus() = StatusCodeMatcher(HttpStatus.Information)
+
+    /**
+     * Match any HTTP success response status (200-299)
+     */
+    @JvmStatic
+    fun successStatus() = StatusCodeMatcher(HttpStatus.Success)
+
+    /**
+     * Match any HTTP redirect response status (300-399)
+     */
+    @JvmStatic
+    fun redirectStatus() = StatusCodeMatcher(HttpStatus.Redirect)
+
+    /**
+     * Match any HTTP client error response status (400-499)
+     */
+    @JvmStatic
+    fun clientErrorStatus() = StatusCodeMatcher(HttpStatus.ClientError)
+
+    /**
+     * Match any HTTP server error response status (500-599)
+     */
+    @JvmStatic
+    fun serverErrorStatus() = StatusCodeMatcher(HttpStatus.ServerError)
+
+    /**
+     * Match any HTTP non-error response status (< 400)
+     */
+    @JvmStatic
+    fun nonErrorStatus() = StatusCodeMatcher(HttpStatus.NonError)
+
+    /**
+     * Match any HTTP error response status (>= 400)
+     */
+    @JvmStatic
+    fun errorStatus() = StatusCodeMatcher(HttpStatus.Error)
+
+    /**
+     * Match any HTTP status code in the provided list
+     */
+    @JvmStatic
+    fun statusCodes(statusCodes: List<Int>) = StatusCodeMatcher(HttpStatus.StatusCodes, statusCodes)
   }
 }
