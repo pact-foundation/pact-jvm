@@ -1,0 +1,33 @@
+{
+  "provider": {
+    "name": "test_provider"
+  },
+  "consumer": {
+    "name": "test_consumer"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "001",
+      "description": "test interaction",
+      "request": {
+        "method": "GET",
+        "path": "/data"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "contentType": "application/json",
+          "encoded": false,
+          "content": {"accountId": "4beb44f1-53f7-4281-abcd-12c06d682067"}
+        }
+      },
+      "pending": true
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  }
+}

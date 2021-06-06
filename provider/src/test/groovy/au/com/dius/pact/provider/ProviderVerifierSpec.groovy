@@ -4,6 +4,8 @@ import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.model.HttpRequest
+import au.com.dius.pact.core.model.HttpResponse
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
@@ -17,6 +19,7 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -563,7 +566,7 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.pactReader.loadPact(_) >> pact
     1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
-    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> new VerificationResult.Ok()
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _, false) >> new VerificationResult.Ok()
     0 * client.publishVerificationResults(_, new TestResult.Ok(), _, _)
   }
 
@@ -662,6 +665,23 @@ class ProviderVerifierSpec extends Specification {
     result.failures['1234'][0].e instanceof InvalidPathExpression
   }
 
+  def 'verifyInteraction sets the state change error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    provider.stateChangeUrl = new URL('http://localhost:66/statechange')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.SynchronousHttp('key', 'Test Interaction',
+      [new ProviderState('Test State')], new HttpRequest(), new HttpResponse(), '1234', [:], true)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
+
+    then:
+    result instanceof VerificationResult.Failed
+    result.pending == true
+  }
+
   def 'verifyResponseFromProvider returns an error result if the request to the provider fails with an exception'() {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
@@ -693,7 +713,7 @@ class ProviderVerifierSpec extends Specification {
 
     when:
     def result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
-      interactionMessage, failures)
+      interactionMessage, failures, false)
 
     then:
     result instanceof VerificationResult.Failed
@@ -701,5 +721,41 @@ class ProviderVerifierSpec extends Specification {
     result.failures.size() == 1
     result.failures['abc123'][0].description == 'Request to provider method failed with an exception'
     result.failures['abc123'][0].e instanceof RuntimeException
+  }
+
+  def 'verifyInteraction sets the verification error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.SynchronousHttp('key', 'Test Interaction',
+      [], new HttpRequest(), new HttpResponse(), '1234', [:], true)
+    def client = Mock(ProviderClient)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
+
+    then:
+    client.makeRequest(_) >> new ProviderResponse(500, [:], ContentType.JSON, '')
+    result instanceof VerificationResult.Failed
+    result.pending == true
+  }
+
+  def 'verifyInteraction sets the message verification error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    provider.verificationType = PactVerification.ANNOTATED_METHOD
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.AsynchronousMessage('key', 'Test Interaction',
+      OptionalBody.body('{}'.bytes, ContentType.JSON), [:], new MatchingRulesImpl(), new Generators(),
+      '1234', [], [:], true)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
+
+    then:
+    result instanceof VerificationResult.Failed
+    result.pending == true
   }
 }

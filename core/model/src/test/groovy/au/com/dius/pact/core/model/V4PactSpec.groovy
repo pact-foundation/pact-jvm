@@ -121,7 +121,9 @@ class V4PactSpec extends Specification {
     pact.interactions.size() == 2
     pact.interactions[0] instanceof V4Interaction
     pact.interactions[0].pending == true
-    pact.interactions[0] instanceof V4Interaction
-    pact.interactions[0].pending == true
+    pact.interactions[0].toString().startsWith('Interaction: test interaction with a binary body [PENDING]')
+    pact.interactions[1] instanceof V4Interaction
+    pact.interactions[1].pending == true
+    pact.interactions[1].toString().startsWith('Interaction: Test Message [PENDING]')
   }
 }

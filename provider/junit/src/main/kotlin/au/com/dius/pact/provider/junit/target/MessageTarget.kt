@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
@@ -42,7 +41,7 @@ open class MessageTarget @JvmOverloads constructor(
     context: MutableMap<String, Any>
   ) {
     val result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
-      interaction.description, mutableMapOf())
+      interaction.description, mutableMapOf(), false)
     reportTestResult(result, verifier)
 
     try {

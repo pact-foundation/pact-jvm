@@ -99,6 +99,8 @@ sealed class V4Interaction(
   /** Generate a unique key from the contents of the interaction */
   abstract fun generateKey(): String
 
+  override fun isV4() = true
+
   class SynchronousHttp @JvmOverloads constructor(
     key: String,
     description: String,
@@ -110,9 +112,11 @@ sealed class V4Interaction(
     pending: Boolean = false
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), SynchronousRequestResponse {
 
-    override fun toString() =
-      "Interaction: $description\n\tin states ${displayState()}\n" +
+    override fun toString(): String {
+      val pending = if (pending) " [PENDING]" else ""
+      return "Interaction: $description$pending\n\tin states ${displayState()}\n" +
         "request:\n$request\n\nresponse:\n$response\n\ncomments: $comments"
+    }
 
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
@@ -176,6 +180,13 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), MessageInteraction {
+
+    override fun toString(): String {
+      val pending = if (pending) " [PENDING]" else ""
+      return "Interaction: $description$pending\n\tin states ${displayState()}\n" +
+        "message:\n$contents\n\ncomments: $comments"
+    }
+
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
       return AsynchronousMessage(generateKey(), description, contents, metadata, matchingRules, generators,

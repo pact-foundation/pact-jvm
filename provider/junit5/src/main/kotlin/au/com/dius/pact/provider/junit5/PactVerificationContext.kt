@@ -75,8 +75,11 @@ data class PactVerificationContext @JvmOverloads constructor(
     context: MutableMap<String, Any>
   ): List<VerificationResult> {
     if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
-      val interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
+      var interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
         " - ${interaction.description}"
+      if (interaction.isV4() && interaction.asV4Interaction().pending) {
+        interactionMessage += " [PENDING]"
+      }
       return try {
         val reqResInteraction = if (interaction is V4Interaction.SynchronousHttp) {
           interaction.asV3Interaction()
@@ -100,7 +103,7 @@ data class PactVerificationContext @JvmOverloads constructor(
       }
     } else {
       return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
-        interaction.description, mutableMapOf()))
+        interaction.description, mutableMapOf(), false))
     }
   }
 

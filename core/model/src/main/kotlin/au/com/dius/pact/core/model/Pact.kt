@@ -108,6 +108,11 @@ interface Interaction {
   fun asSynchronousRequestResponse(): SynchronousRequestResponse? {
     return null
   }
+
+  /**
+   * If this interaction is V4 spec
+   */
+  fun isV4() = false
 }
 
 /**
