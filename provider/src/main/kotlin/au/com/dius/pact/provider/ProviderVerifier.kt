@@ -16,13 +16,12 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
-import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
@@ -237,12 +236,16 @@ interface IProviderVerifier {
   fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String
 
   fun reportStateChangeFailed(providerState: ProviderState, error: Exception, isSetup: Boolean)
+
+  fun initialiseReporters(provider: IProviderInfo)
+
+  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?)
 }
 
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 open class ProviderVerifier @JvmOverloads constructor (
   override var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
@@ -294,26 +297,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     val interactionId = interaction.interactionId
     try {
-      val classGraph = ClassGraph().enableAllInfo()
-      if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
-        classGraph.verbose()
-      }
-
-      val classLoader = projectClassLoader?.get()
-      if (classLoader == null) {
-        val urls = projectClasspath.get()
-        logger.debug { "projectClasspath = $urls" }
-        if (urls.isNotEmpty()) {
-          classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
-        }
-      } else {
-        classGraph.overrideClassLoaders(classLoader)
-      }
-
-      val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
-      if (scan.isNotEmpty()) {
-        classGraph.whitelistPackages(*scan.toTypedArray())
-      }
+      val classGraph = setupClassGraph(providerInfo, consumer)
 
       val methodsAnnotatedWith = classGraph.scan().use { scanResult ->
         scanResult.getClassesWithMethodAnnotation(PactVerifyProvider::class.qualifiedName)
@@ -363,6 +347,30 @@ open class ProviderVerifier @JvmOverloads constructor (
         "Request to provider method failed with an exception", interactionMessage,
         mapOf(interactionId.orEmpty() to errors), pending)
     }
+  }
+
+  private fun setupClassGraph(providerInfo: IProviderInfo, consumer: IConsumerInfo): ClassGraph {
+    val classGraph = ClassGraph().enableAllInfo()
+    if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
+      classGraph.verbose()
+    }
+
+    val classLoader = projectClassLoader?.get()
+    if (classLoader == null) {
+      val urls = projectClasspath.get()
+      logger.debug { "projectClasspath = $urls" }
+      if (urls.isNotEmpty()) {
+        classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
+      }
+    } else {
+      classGraph.overrideClassLoaders(classLoader)
+    }
+
+    val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
+    if (scan.isNotEmpty()) {
+      classGraph.whitelistPackages(*scan.toTypedArray())
+    }
+    return classGraph
   }
 
   private fun emitEvent(event: Event) {
@@ -678,7 +686,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  fun initialiseReporters(provider: IProviderInfo) {
+  override fun initialiseReporters(provider: IProviderInfo) {
     reporters.forEach {
       if (it.hasProperty("displayFullDiff")) {
         (it.property("displayFullDiff") as KMutableProperty1<VerifierReporter, Boolean>)
@@ -732,7 +740,11 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?) {
+  override fun reportVerificationForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    pactSource: PactSource?
+  ) {
     when (pactSource) {
       is BrokerUrlSource -> reporters.forEach { reporter ->
         reporter.reportVerificationForConsumer(consumer, provider, pactSource.tag)

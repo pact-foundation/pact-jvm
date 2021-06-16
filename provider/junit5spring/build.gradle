@@ -3,6 +3,7 @@ dependencies {
   api 'org.springframework:spring-context:5.2.3.RELEASE'
   api 'org.springframework:spring-test:5.2.3.RELEASE'
   api 'org.springframework:spring-web:5.2.3.RELEASE'
+  api 'org.springframework:spring-webflux:5.2.3.RELEASE'
   api 'javax.servlet:javax.servlet-api:3.1.0'
   api 'org.hamcrest:hamcrest:2.1'
 
