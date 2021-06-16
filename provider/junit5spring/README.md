@@ -7,7 +7,7 @@ The combined library (JUnit5 + Spring) is available on maven central using:
 
 group-id = au.com.dius.pact.provider
 artifact-id = junit5spring
-version-id = 4.1.x
+version-id = 4.2.x
 
 ## Usage
 For writing Spring Pact verification tests with JUnit 5, there is an JUnit 5 Invocation Context Provider that you can use with 
@@ -108,13 +108,40 @@ class MockMvcTestTargetStandaloneMockMvcTestJava {
 **Important:** Since `@WebMvcTest` starts only Spring MVC components you can't use `PactVerificationSpringProvider` 
 and need to fallback to `PactVerificationInvocationContextProvider`
 
+## Webflux tests
+
+You can test Webflux routing functions using the `WebFluxTarget` target class. The easiest way to do it is to get Spring to
+autowire your handler and router into the test and then pass the routing function to the target.
+
+For example:
+
+```java
+  @Autowired
+  YourRouter router;
+
+  @Autowired
+  YourHandler handler;
+
+  @BeforeEach
+  void setup(PactVerificationContext context) {
+    context.setTarget(new WebFluxTarget(router.route(handler)));
+  }
+
+  @TestTemplate
+  @ExtendWith(PactVerificationSpringProvider.class)
+  void pactVerificationTestTemplate(PactVerificationContext context) {
+    context.verifyInteraction();
+  }
+```
+
 ## Modifying requests
 
 As documented in [Pact JUnit5 module](/provider/junit5/README.md#modifying-the-requests-before-they-are-sent), you can
-inject a request object to modifiy the requests made. However, depending on the Pact test target you are using,
+inject a request object to modify the requests made. However, depending on the Pact test target you are using,
 you need to use a different class.
 
 | Test Target | Class to use |
 |-------------|--------------|
 | HttpTarget, HttpsTarget, SpringBootHttpTarget | org.apache.http.HttpRequest |
 | MockMvcTestTarget | MockHttpServletRequestBuilder |
+| WebFluxTarget | WebTestClient.RequestHeadersSpec |
