@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.23 - Bugfix Release
+
+* eedf59cc3 - Merge pull request #1387 from mselvaku/PactBrokerUrlJavaSystemPropertiesFix (Ronald Holshausen, Thu Jun 24 11:24:03 2021 +1000)
+* b46a5274f - fix: When using url in PactBroker annotation, the default value is broken if it contains a colon (Mahendar Selvakumar, Mon Jun 21 15:52:09 2021 +1000)
+* 829ebdefb - fix: using :pact-file source with Leiningen was broken #1372 (Ronald Holshausen, Sat Jun 12 12:26:49 2021 +1000)
+* 5fa0ead73 - bump version to 4.1.23 (Ronald Holshausen, Sun Jun 6 09:51:07 2021 +1000)
+
 # 4.1.22 - Backported Fix
 
 * c7895cc0b - fix(backport): handle exceptions correctly when @IgnoreNoPactsToVerify is present #1324 (Ronald Holshausen, Sat Mar 27 16:32:38 2021 +1100)
