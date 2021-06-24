@@ -24,7 +24,7 @@ dependencies {
   }
   testCompile "junit:junit:${project.junitVersion}"
 
-  antlr "org.antlr:antlr4:4.7.2"
+  antlr "org.antlr:antlr4:4.9.2"
 }
 
 compileJava {
