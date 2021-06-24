@@ -40,6 +40,12 @@ class SystemPropertyResolverTest {
   }
 
   @Test
+  void 'Defaults to default value when the default value contains a colon'() {
+    assertThat(resolver.resolveValue('value.not.found!:https://go.com'), is(equalTo('https://go.com')))
+    assertThat(resolver.resolveValue('value.not.found!:value:separated'), is(equalTo('value:separated')))
+  }
+
+  @Test
   void 'Returns True if there is a System Property With The Provided Name'() {
     assertThat(resolver.propertyDefined('java.version'), is(true))
   }
