@@ -34,7 +34,7 @@ class LeinVerifierProxy {
       this.getProperty.invoke(Clojure.read(":$property"), args)
     }
     verifier.pactLoadFailureMessage = { ConsumerInfo consumer ->
-      "You must specify the pactfile to execute for consumer '${consumer.name}' (use :pact-file)"
+      "You must specify the pact file to execute for consumer '${consumer.name}' (use :pact-file or :pact-source)"
     }
     verifier.checkBuildSpecificTask = { false }
 
