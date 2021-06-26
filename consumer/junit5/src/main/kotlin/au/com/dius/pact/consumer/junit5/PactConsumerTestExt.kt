@@ -19,6 +19,7 @@ import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
@@ -26,6 +27,7 @@ import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpressio
 import com.github.michaelbull.result.unwrap
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
@@ -39,7 +41,9 @@ import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
 import org.junit.platform.commons.util.AnnotationUtils.isAnnotated
 import java.lang.reflect.Method
+import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.reflect.full.findAnnotation
 
 class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : AbstractBaseMockServer(),
   ExtensionContext.Store.CloseableResource {
@@ -157,26 +161,36 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   fun lookupProviderInfo(context: ExtensionContext): List<Pair<ProviderInfo, String>> {
+    logger.trace { "lookupProviderInfo($context)" }
     val store = context.getStore(NAMESPACE)
-    return when {
+    val providerInfo = when {
       store["providers"] != null -> store["providers"] as List<Pair<ProviderInfo, String>>
       else -> {
         val methodAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestMethod, PactTestFor::class.java)) {
-          logger.debug { "Found @PactTestFor annotation on test method" }
+          logger.debug { "Found @PactTestFor annotation on test method ${context.requiredTestMethod}" }
           AnnotationSupport.findAnnotation(context.requiredTestMethod, PactTestFor::class.java).get()
         } else {
           null
         }
 
         val classAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestClass, PactTestFor::class.java)) {
-          logger.debug { "Found @PactTestFor annotation on test class" }
+          logger.debug { "Found @PactTestFor annotation on test ${context.requiredTestClass}" }
           AnnotationSupport.findAnnotation(context.requiredTestClass, PactTestFor::class.java).get()
+        } else if (AnnotationSupport.isAnnotated(context.requiredTestClass, Nested::class.java)) {
+          logger.debug { "Found @Nested annotation on test class ${context.requiredTestClass}, will search the enclosing classes" }
+          val searchResult = Annotations.searchForAnnotation(context.requiredTestClass.kotlin, PactTestFor::class)
+          if (searchResult != null) {
+            logger.debug { "Found @PactTestFor annotation on outer $searchResult" }
+            searchResult.findAnnotation()
+          } else {
+            null
+          }
         } else {
           null
         }
 
         val providers = when {
-          classAnnotation != null && methodAnnotation != null ->  {
+          classAnnotation != null && methodAnnotation != null -> {
             val provider = ProviderInfo.fromAnnotation(methodAnnotation)
               .merge(ProviderInfo.fromAnnotation(classAnnotation))
             when {
@@ -224,6 +238,8 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         providers
       }
     }
+    logger.trace { "providers = $providerInfo" }
+    return providerInfo
   }
 
   private fun providerNameFromPactMethod(methodName: String, context: ExtensionContext): String {
@@ -356,14 +372,33 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   private fun lookupPactDirectory(context: ExtensionContext): String {
+    logger.trace { "lookupPactDirectory($context)" }
     val pactFolder = AnnotationSupport.findAnnotation(context.requiredTestClass, PactFolder::class.java)
-    val pactDirectory = AnnotationSupport.findAnnotation(context.requiredTestClass, PactDirectory::class.java)
-    return if (pactFolder.isPresent)
-      pactFolder.get().value
-    else if (pactDirectory.isPresent)
-      pactDirectory.get().value
-    else
-      BuiltToolConfig.pactDirectory
+    val pactDirectory = if (AnnotationSupport.isAnnotated(context.requiredTestClass, Nested::class.java)) {
+      val search = Annotations.searchForAnnotation(context.requiredTestClass.kotlin, PactDirectory::class)
+      if (search != null) {
+        Optional.of(search.findAnnotation()!!)
+      } else {
+        Optional.empty()
+      }
+    } else {
+      AnnotationSupport.findAnnotation(context.requiredTestClass, PactDirectory::class.java)
+    }
+    return when {
+      pactFolder.isPresent -> {
+        logger.info { "Writing pacts out to directory from @PactFolder annotation" }
+        logger.warn { "DEPRECATED: Annotation @PactFolder is deprecated and has been replaced with @PactDirectory" }
+        pactFolder.get().value
+      }
+      pactDirectory.isPresent -> {
+        logger.info { "Writing pacts out to directory from @PactDirectory annotation" }
+        pactDirectory.get().value
+      }
+      else -> {
+        logger.info { "Writing pacts out to default directory" }
+        BuiltToolConfig.pactDirectory
+      }
+    }
   }
 
   override fun afterAll(context: ExtensionContext) {
