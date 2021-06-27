@@ -25,7 +25,6 @@ allprojects {
   repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
   }
 
   targetCompatibility = '11'
