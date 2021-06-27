@@ -40,7 +40,8 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val port: Int = 0,
   open val pactVersion: PactSpecVersion = PactSpecVersion.V3,
   open val scheme: String = HTTP,
-  open val mockServerImplementation: MockServerImplementation = MockServerImplementation.JavaHttpServer
+  open val mockServerImplementation: MockServerImplementation = MockServerImplementation.JavaHttpServer,
+  open val addCloseHeader: Boolean = false
 ) {
 
   fun url() = "$scheme://$hostname:$port"
@@ -52,12 +53,15 @@ open class MockProviderConfig @JvmOverloads constructor (
     const val HTTP = "http"
 
     @JvmStatic
+    @JvmOverloads
     fun httpConfig(
       hostname: String = LOCALHOST,
       port: Int = 0,
       pactVersion: PactSpecVersion = PactSpecVersion.V3,
-      implementation: MockServerImplementation = MockServerImplementation.JavaHttpServer
-    ) = MockProviderConfig(hostname, port, pactVersion, HTTP, implementation.merge(MockServerImplementation.JavaHttpServer))
+      implementation: MockServerImplementation = MockServerImplementation.JavaHttpServer,
+      addCloseHeader: Boolean = System.getProperty("pact.mockserver.addCloseHeader") == "true"
+    ) = MockProviderConfig(hostname, port, pactVersion, HTTP,
+      implementation.merge(MockServerImplementation.JavaHttpServer), addCloseHeader)
 
     @JvmStatic
     fun createDefault() = createDefault(LOCALHOST, PactSpecVersion.V3)
@@ -67,6 +71,7 @@ open class MockProviderConfig @JvmOverloads constructor (
 
     @JvmStatic
     fun createDefault(host: String, pactVersion: PactSpecVersion) =
-      MockProviderConfig(hostname = host, pactVersion = pactVersion)
+      MockProviderConfig(hostname = host, pactVersion = pactVersion,
+        addCloseHeader = System.getProperty("pact.mockserver.addCloseHeader") == "true")
   }
 }

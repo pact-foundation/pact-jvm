@@ -227,6 +227,9 @@ abstract class BaseJdkMockServer(
   private fun pactResponseToHttpExchange(response: Response, exchange: HttpExchange) {
     val headers = response.headers
     exchange.responseHeaders.putAll(headers)
+    if (config.addCloseHeader) {
+      exchange.responseHeaders.add("Connection", "close")
+    }
     val body = response.body
     if (body.isPresent()) {
       val bytes = body.unwrap()
