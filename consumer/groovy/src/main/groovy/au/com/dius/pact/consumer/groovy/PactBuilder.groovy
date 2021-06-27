@@ -285,7 +285,8 @@ class PactBuilder extends GroovyBuilder {
   void withFileUpload(String partName, String fileName, String fileContentType, byte[] data) {
     def multipart = MultipartEntityBuilder.create()
       .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-      .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
+      .addBinaryBody(partName, data, fileContentType ? ContentType.create(fileContentType) :
+        ContentType.DEFAULT_TEXT, fileName)
       .build()
     ByteArrayOutputStream os = new ByteArrayOutputStream()
     multipart.writeTo(os)

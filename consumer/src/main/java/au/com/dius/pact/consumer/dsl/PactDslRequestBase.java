@@ -48,10 +48,19 @@ public abstract class PactDslRequestBase {
     }
   }
 
-  protected void setupFileUpload(String partName, String fileName, String fileContentType, byte[] data) throws IOException {
+  protected void setupFileUpload(
+    String partName,
+    String fileName,
+    String fileContentType,
+    byte[] data
+  ) throws IOException {
+    ContentType contentType = ContentType.DEFAULT_TEXT;
+    if (!fileContentType.isEmpty()) {
+      contentType = ContentType.create(fileContentType);
+    }
     HttpEntity multipart = MultipartEntityBuilder.create()
       .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-      .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
+      .addBinaryBody(partName, data, contentType, fileName)
       .build();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     multipart.writeTo(os);
