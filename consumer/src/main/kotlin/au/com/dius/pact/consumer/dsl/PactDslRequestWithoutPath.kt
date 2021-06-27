@@ -307,7 +307,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
   fun withFileUpload(
     partName: String,
     fileName: String,
-    fileContentType: String,
+    fileContentType: String?,
     data: ByteArray
   ): PactDslRequestWithoutPath {
     setupFileUpload(partName, fileName, fileContentType, data)

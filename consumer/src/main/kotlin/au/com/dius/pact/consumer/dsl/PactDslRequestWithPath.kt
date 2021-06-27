@@ -434,7 +434,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   fun withFileUpload(
     partName: String,
     fileName: String,
-    fileContentType: String,
+    fileContentType: String?,
     data: ByteArray
   ): PactDslRequestWithPath {
     setupFileUpload(partName, fileName, fileContentType, data)
