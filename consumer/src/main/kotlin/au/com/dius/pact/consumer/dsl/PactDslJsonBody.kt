@@ -1018,7 +1018,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun uuid(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), UuidGenerator)
+    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), UuidGenerator())
     return uuid(name, "e2490de5-5bd3-43d5-b7c4-526e33f71304")
   }
 

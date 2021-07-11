@@ -147,7 +147,7 @@ class UuidMatcher @JvmOverloads constructor(
 ) : Matcher(
   value ?: "e2490de5-5bd3-43d5-b7c4-526e33f71304",
   RegexMatcher(UUID_REGEX),
-  if (value == null) UuidGenerator else null
+  if (value == null) UuidGenerator() else null
 )
 
 /**

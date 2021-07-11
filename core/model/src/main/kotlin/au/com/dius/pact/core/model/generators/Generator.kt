@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.generators
 
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.getOr
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
@@ -9,6 +10,9 @@ import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpres
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.get
 import com.mifmif.common.regex.Generex
 import mu.KLogging
 import mu.KotlinLogging
@@ -237,20 +241,79 @@ data class RegexGenerator(val regex: String) : Generator {
 }
 
 /**
+ * Format of the UUID to generate
+ */
+enum class UuidFormat {
+  /**
+   * Simple UUID (e.g 936DA01f9abd4d9d80c702af85c822a8)
+   */
+  Simple,
+  /**
+   * lower-case hyphenated (e.g 936da01f-9abd-4d9d-80c7-02af85c822a8)
+   */
+  LowerCaseHyphenated,
+  /**
+   * Upper-case hyphenated (e.g 936DA01F-9ABD-4D9D-80C7-02AF85C822A8)
+   */
+  UpperCaseHyphenated,
+  /**
+   * URN (e.g. urn:uuid:936da01f-9abd-4d9d-80c7-02af85c822a8)
+   */
+  Urn;
+
+  override fun toString(): String {
+    return when (this) {
+      Simple -> "simple"
+      LowerCaseHyphenated -> "lower-case-hyphenated"
+      UpperCaseHyphenated -> "upper-case-hyphenated"
+      Urn -> "URN"
+    }
+  }
+
+  companion object : KLogging() {
+    fun fromString(s: String?): Result<UuidFormat, String> {
+      return when(s) {
+        "simple" -> Ok(Simple)
+        null, "lower-case-hyphenated" -> Ok(LowerCaseHyphenated)
+        "upper-case-hyphenated" -> Ok(UpperCaseHyphenated)
+        "URN" -> Ok(Urn)
+        else -> Err("'$s' is not a valid UUID format")
+      }
+    }
+  }
+}
+
+/**
  * Generates a random UUID
  */
-object UuidGenerator : Generator {
+data class UuidGenerator @JvmOverloads constructor(val format: UuidFormat? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    return mapOf("type" to "Uuid")
+    return if (format != null) {
+      mapOf("type" to "Uuid", "format" to format.toString())
+    } else {
+      mapOf("type" to "Uuid")
+    }
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
-    return UUID.randomUUID().toString()
+    return if (format != null) {
+      when (format) {
+        UuidFormat.Simple -> UUID.randomUUID().toString().replace("-", "")
+        UuidFormat.LowerCaseHyphenated -> UUID.randomUUID().toString().toLowerCase()
+        UuidFormat.UpperCaseHyphenated -> UUID.randomUUID().toString().toUpperCase()
+        UuidFormat.Urn -> "urn:uuid:" + UUID.randomUUID().toString()
+      }
+    } else {
+      UUID.randomUUID().toString()
+    }
   }
 
-  @Suppress("UNUSED_PARAMETER")
-  fun fromJson(json: JsonValue.Object): UuidGenerator {
-    return UuidGenerator
+  companion object {
+    @JvmStatic
+    fun fromJson(json: JsonValue.Object): UuidGenerator {
+      val format = if (json["format"].isString) UuidFormat.fromString(json["format"].asString()) else null
+      return UuidGenerator(format?.get())
+    }
   }
 }
 

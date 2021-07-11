@@ -70,7 +70,7 @@ data class DateMatcher(
 
 data class UuidMatcher(override val value: String?) :
   Matcher(value, RegexMatcher(Matchers.UUID_REGEX.toString(), value),
-    if (value == null) UuidGenerator else null)
+    if (value == null) UuidGenerator() else null)
 
 data class EqualsMatcher(override val value: Any?) : Matcher(value, au.com.dius.pact.core.model.matchingrules.EqualsMatcher)
 
