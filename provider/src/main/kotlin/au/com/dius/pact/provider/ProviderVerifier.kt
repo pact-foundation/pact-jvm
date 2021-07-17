@@ -806,7 +806,6 @@ open class ProviderVerifier @JvmOverloads constructor (
     return when (val callback = pactLoadFailureMessage) {
       is Closure<*> -> callback.call(consumer).toString()
       is Function<*, *> -> (callback as Function<Any, Any>).apply(consumer).toString()
-      is scala.Function1<*, *> -> (callback as scala.Function1<Any, Any>).apply(consumer).toString()
       else -> callback as String
     }
   }
