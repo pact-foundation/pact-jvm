@@ -531,6 +531,7 @@ open class PactBrokerClient(
   open fun canIDeploy(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): CanIDeployResult {
     val halClient = newHalClient()
     val path = "/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to)
+    logger.debug { "Matrix Query: $path" }
     return retryWith(
       "canIDeploy: Retrying request as there are unknown results",
       config.retryCountWhileUnknown,
