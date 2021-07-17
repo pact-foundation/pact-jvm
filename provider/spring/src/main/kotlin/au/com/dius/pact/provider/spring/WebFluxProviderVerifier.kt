@@ -21,7 +21,6 @@ import org.springframework.test.web.reactive.server.EntityExchangeResult
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.util.UriComponentsBuilder
-import scala.Function1
 import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
@@ -132,8 +131,6 @@ class WebFluxProviderVerifier : ProviderVerifier() {
     if (requestFilter != null) {
       when (requestFilter) {
         is Closure<*> -> requestFilter.call(requestBuilder)
-        is Function1<*, *> ->
-          (requestFilter as Function1<WebTestClient.RequestHeadersSpec<*>, *>).apply(requestBuilder)
         is org.apache.commons.collections4.Closure<*> ->
           (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(requestBuilder)
         else -> {

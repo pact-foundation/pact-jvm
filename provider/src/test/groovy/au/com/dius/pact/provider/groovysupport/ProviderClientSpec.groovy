@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.model.ContentType as PactContentType
-import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
@@ -281,19 +280,6 @@ class ProviderClientSpec extends Specification {
     then:
     closureCalled
     1 * httpRequest.addHeader('A', 'B')
-    1 * client.executeRequestFilter(_)
-    0 * _
-  }
-
-  def 'execute request filter executes any scala closure'() {
-    given:
-    provider.requestFilter = GroovyScalaUtils$.MODULE$.testRequestFilter()
-
-    when:
-    client.executeRequestFilter(httpRequest)
-
-    then:
-    1 * httpRequest.addHeader('Scala', 'Was Called')
     1 * client.executeRequestFilter(_)
     0 * _
   }

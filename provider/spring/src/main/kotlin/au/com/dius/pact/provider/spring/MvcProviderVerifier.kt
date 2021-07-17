@@ -2,7 +2,6 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IRequest
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
@@ -31,7 +30,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.async
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.web.util.UriComponentsBuilder
-import scala.Function1
 import java.net.URI
 import java.util.concurrent.Callable
 import java.util.function.Consumer
@@ -119,7 +117,6 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     if (requestFilter != null) {
       when (requestFilter) {
         is Closure<*> -> requestFilter.call(requestBuilder)
-        is Function1<*, *> -> (requestFilter as Function1<MockHttpServletRequestBuilder, *>).apply(requestBuilder)
         is org.apache.commons.collections4.Closure<*> ->
           (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(requestBuilder)
         else -> {

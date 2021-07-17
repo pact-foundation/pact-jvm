@@ -10,7 +10,6 @@ dependencies {
     compile'commons-io:commons-io:2.5',
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-    implementation "org.scala-lang:scala-library:${project.scalaVersion}"
     api 'io.github.classgraph:classgraph:4.8.105'
     implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
     api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'

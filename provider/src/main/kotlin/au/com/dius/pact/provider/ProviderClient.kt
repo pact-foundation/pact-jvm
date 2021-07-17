@@ -6,7 +6,6 @@ import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.VerificationNotice
@@ -34,7 +33,6 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
-import scala.Function1
 import java.io.File
 import java.lang.Boolean.getBoolean
 import java.net.URI
@@ -258,7 +256,6 @@ open class ProviderClient(
     if (requestFilter != null) {
       when (requestFilter) {
         is Closure<*> -> requestFilter.call(method)
-        is Function1<*, *> -> (requestFilter as Function1<HttpRequest, *>).apply(method)
         is org.apache.commons.collections4.Closure<*> ->
           (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(method)
         else -> {
@@ -360,7 +357,6 @@ open class ProviderClient(
       if (provider.stateChangeRequestFilter != null) {
         when (provider.stateChangeRequestFilter) {
           is Closure<*> -> (provider.stateChangeRequestFilter as Closure<*>).call(method)
-          is Function1<*, *> -> (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
           else -> {
             val binding = Binding()
             binding.setVariable(REQUEST, method)
