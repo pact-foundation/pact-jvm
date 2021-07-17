@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.consumer`
 * artifact-id = `junit5`
-* version-id = `4.1.0`
+* version-id = `4.2.X`
 
 ## Usage
 
@@ -184,6 +184,12 @@ You can also just use the key instead of an expression:
 
 You can enable a HTTPS mock server by setting `https=true` on the `@PactTestFor` annotation. Note that this mock
 server will use a self-signed certificate, so any client code will need to accept self-signed certificates.
+
+## Using own KeyStore
+
+You can provide your own KeyStore file to be loaded on the MockServer. In order to do so you should fulfill the 
+properties `keyStorePath`, `keyStoreAlias`, `keyStorePassword`, `privateKeyPassword` on the `@PactTestFor` annotation.
+Please bear in mind you should also enable HTTPS flag.
 
 ## Using multiple providers in a test (4.2.5+)
 
