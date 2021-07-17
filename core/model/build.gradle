@@ -23,7 +23,7 @@ dependencies {
   implementation 'javax.mail:mail:1.5.0-b01'
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  implementation 'org.apache.tika:tika-core:1.24.1'
+  implementation 'org.apache.tika:tika-core:1.27'
 
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testImplementation "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
