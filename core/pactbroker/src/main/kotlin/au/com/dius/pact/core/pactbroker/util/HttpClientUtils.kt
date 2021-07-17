@@ -32,7 +32,7 @@ object HttpClientUtils {
         val builder = URIBuilder(baseUrl)
         pathCombiner(builder, url)
       } else {
-        URI(baseUrl + url)
+        URI(baseUrl + url).normalize()
       }
     }
   }

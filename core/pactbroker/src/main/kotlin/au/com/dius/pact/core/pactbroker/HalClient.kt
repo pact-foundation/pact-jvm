@@ -31,7 +31,6 @@ import org.apache.http.impl.client.BasicAuthCache
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 import java.net.URI
-import java.net.URLDecoder
 import java.util.function.BiFunction
 import java.util.function.Consumer
 
@@ -259,7 +258,7 @@ open class HalClient @JvmOverloads constructor(
       it.key to when (it.value) {
         is Map<*, *> -> jsonObject((it.value as Map<*, *>).entries.map { entry ->
           if (entry.key == "href") {
-            entry.key.toString() to URLDecoder.decode(entry.value.toString(), "UTF-8")
+            entry.key.toString() to entry.value.toString()
           } else {
             entry.key.toString() to entry.value
           }
@@ -312,10 +311,10 @@ open class HalClient @JvmOverloads constructor(
 
   private fun fetchLink(link: String, options: Map<String, Any>): JsonValue.Object {
     val href = hrefForLink(link, options)
-    return this.fetch(href.first, href.second).unwrap()
+    return this.fetch(href, false).unwrap()
   }
 
-  private fun hrefForLink(link: String, options: Map<String, Any>): Pair<String, Boolean> {
+  private fun hrefForLink(link: String, options: Map<String, Any>): String {
     if (pathInfo[LINKS].isNull) {
       throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got " +
         "a response with no '_links'. URL: '$baseUrl', LINK: '$link'")
@@ -332,9 +331,9 @@ open class HalClient @JvmOverloads constructor(
         if (options.containsKey("name")) {
           val linkByName = linkData.find { it is JsonValue.Object && it["name"] == options["name"] }
           return if (linkByName is JsonValue.Object && linkByName["templated"].isBoolean) {
-            parseLinkUrl(linkByName["href"].toString(), options) to false
+            parseLinkUrl(linkByName["href"].toString(), options)
           } else if (linkByName is JsonValue.Object) {
-            linkByName["href"].asString() to true
+            linkByName["href"].asString()
           } else {
             throw InvalidNavigationRequest("Link '$link' does not have an entry with name '${options["name"]}'. " +
               "URL: '$baseUrl', LINK: '$link'")
@@ -345,9 +344,9 @@ open class HalClient @JvmOverloads constructor(
         }
       } else if (linkData is JsonValue.Object) {
         return if (linkData.has("templated") && linkData["templated"].isBoolean) {
-          parseLinkUrl(linkData["href"].asString(), options) to false
+          parseLinkUrl(linkData["href"].asString(), options)
         } else {
-          linkData["href"].asString() to true
+          linkData["href"].asString()
         }
       } else {
         throw InvalidHalResponse("Expected link in map form in the response, but " +
@@ -449,7 +448,7 @@ open class HalClient @JvmOverloads constructor(
 
   override fun putJson(link: String, options: Map<String, Any>, json: String): Result<String?, Exception> {
     val href = hrefForLink(link, options)
-    val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href.first, href.second)))
+    val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href, false)))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(json, ContentType.APPLICATION_JSON)
 
@@ -468,14 +467,14 @@ open class HalClient @JvmOverloads constructor(
 
   override fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonValue.Object, Exception> {
     val href = hrefForLink(link, options)
-    val http = initialiseRequest(HttpPost(buildUrl(baseUrl, href.first, href.second)))
+    val http = initialiseRequest(HttpPost(buildUrl(baseUrl, href, false)))
     http.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     http.addHeader("Accept", "application/hal+json, application/json")
     http.entity = StringEntity(json, ContentType.APPLICATION_JSON)
 
     return handleWith {
       httpClient!!.execute(http, httpContext).use {
-        return@handleWith handleHalResponse(it, href.first)
+        return@handleWith handleHalResponse(it, href)
       }
     }
   }
