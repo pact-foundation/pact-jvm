@@ -46,7 +46,9 @@ class PactCanIDeployTask extends PactCanIDeployBaseTask {
       to = project.property(TO)
     }
     def t = new TermColors()
-    logger.debug("Calling canIDeploy(pacticipant=$pacticipant, pacticipantVersion=$pacticipantVersion, latest=$latest, to=$to)")
+    logger.debug(
+      "Calling canIDeploy(pacticipant=$pacticipant, pacticipantVersion=$pacticipantVersion, latest=$latest, to=$to)"
+    )
     def result = brokerClient.canIDeploy(pacticipant, pacticipantVersion, latest, to)
     if (result.ok) {
       println("Computer says yes \\o/ ${result.message}\n\n${t.green.invoke(result.reason)}")
