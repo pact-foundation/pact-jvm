@@ -232,7 +232,7 @@ class MarkdownReporter(
           }
           if (consumerRow != null) {
             val stateCell = consumerRow.lastChild as TableCell
-            stateCell.text = BasedSequence.of(state)
+            stateCell.text = BasedSequence.of(mergeSummaryStatus(stateCell.text, state))
           } else {
             val row = TableRow()
             val pending = if (consumer.pending) " [Pending]" else ""
@@ -247,6 +247,14 @@ class MarkdownReporter(
           }
         }
       }
+    }
+  }
+
+  private fun mergeSummaryStatus(old: CharSequence, new: CharSequence): CharSequence {
+    return when {
+        old == new -> old
+        old.contains("OK") -> new
+        else -> "Failed"
     }
   }
 
