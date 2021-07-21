@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.8 - Bugfix Release
+
+* 0ca295d3b - Merge pull request #1403 from llorentejavier/adding_external_keystore_for_mockserver (Ronald Holshausen, Wed Jul 21 16:18:32 2021 +1000)
+* 34de335e1 - fix: failing test (Ronald Holshausen, Wed Jul 21 16:15:42 2021 +1000)
+* 1979dcb63 - Merge pull request #1406 from bawoodruff/master (Ronald Holshausen, Wed Jul 21 16:01:15 2021 +1000)
+* f55168459 - fix: retry condition for the pactbroker unknown response #1405 (Bryan Woodruff, Tue Jul 20 17:13:40 2021 -0700)
+* a8e5d542a - feat: Enable HTTPS MockServer to use provided KeyStore (Javier Llorente, Sat Jul 17 16:20:06 2021 +0200)
+* 8e0157c7e - Merge pull request #1401 from daniel-grech/fix-1128 (Ronald Holshausen, Sun Jul 18 19:44:06 2021 +1000)
+* 527852f34 - chore: Missed one place scala.Function was used #1395 (Ronald Holshausen, Sat Jul 17 16:41:54 2021 +1000)
+* 6e4017862 - chore: Remove support for scala.Function for request filters #1395 (Ronald Holshausen, Sat Jul 17 16:24:13 2021 +1000)
+* d74ddf96b - fix: don't encode URLs when making requests from HAL links #1388 (Ronald Holshausen, Sat Jul 17 15:58:51 2021 +1000)
+* 5cffbd7ee - chore: upgrade Tika to 1.27 #1392 (Ronald Holshausen, Sat Jul 17 14:22:08 2021 +1000)
+* 7537d6762 - chore: fix codenarc voilation (Ronald Holshausen, Sat Jul 17 14:13:31 2021 +1000)
+* 66cafb267 - chore: add debug logging to canIDeploy task (Ronald Holshausen, Sat Jul 17 12:16:18 2021 +1000)
+* 44e481444 - fix: retain previous summary state when updating markdown report #1128 (Daniel Grech, Thu Jul 15 07:55:07 2021 +0200)
+* 7d87ef6bb - feat: support generating UUIDs with different formats (Ronald Holshausen, Sun Jul 11 14:07:45 2021 +1000)
+* 1bac7c3f5 - chore: upgrade detekt to 1.17.1 (Ronald Holshausen, Sun Jun 27 17:24:14 2021 +1000)
+* 8264d42f5 - chore: remove JCenter (Ronald Holshausen, Sun Jun 27 17:18:37 2021 +1000)
+* 30433a94c - chore: remove JCenter (Ronald Holshausen, Sun Jun 27 17:10:30 2021 +1000)
+* 80012e0be - chore: upgrade Dokka to 1.4.32 (Ronald Holshausen, Sun Jun 27 17:09:59 2021 +1000)
+* 0bedaaef0 - Update README.md (Ronald Holshausen, Sun Jun 27 16:49:14 2021 +1000)
+* 9fcadb540 - bump version to 4.2.8 (Ronald Holshausen, Sun Jun 27 16:38:18 2021 +1000)
+
 # 4.2.7 - V4 features + bugfixes
 
 * a84d47a09 - feat: Ignore missing part content type headers with multipart bodies #1385 (Ronald Holshausen, Sun Jun 27 15:55:04 2021 +1000)
