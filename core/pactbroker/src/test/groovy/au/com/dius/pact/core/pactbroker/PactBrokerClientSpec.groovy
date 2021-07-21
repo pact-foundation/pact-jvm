@@ -544,7 +544,7 @@ class PactBrokerClientSpec extends Specification {
     def json1 = JsonParser.parseString('''
     |{
     |  "summary": {
-    |      "deployable": true,
+    |      "deployable": null,
     |      "reason": "some text",
     |      "unknown": 1
     |  }
