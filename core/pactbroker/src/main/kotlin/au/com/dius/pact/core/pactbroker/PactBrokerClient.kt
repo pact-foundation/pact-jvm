@@ -537,7 +537,7 @@ open class PactBrokerClient(
       "canIDeploy: Retrying request as there are unknown results",
       config.retryCountWhileUnknown,
       config.retryWhileUnknownInterval,
-      { result -> result.ok && result.unknown != null && result.unknown > 0 }
+      { result -> !result.ok && result.unknown != null && result.unknown > 0 }
     ) {
       when (val result = halClient.getJson(path, false)) {
         is Ok<JsonValue> -> {
