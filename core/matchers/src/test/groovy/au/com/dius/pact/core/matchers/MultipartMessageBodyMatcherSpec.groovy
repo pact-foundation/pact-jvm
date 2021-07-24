@@ -59,7 +59,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'Ignores missing content type header, which is optional'() {
     expect:
-    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
+    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).mismatches.empty
 
     where:
 
