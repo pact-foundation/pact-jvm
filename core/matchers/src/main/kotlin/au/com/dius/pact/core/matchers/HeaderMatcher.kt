@@ -31,7 +31,9 @@ object HeaderMatcher : KLogging() {
 
   @JvmStatic
   fun parseParameters(values: List<String>): Map<String, String> {
-    return values.map { it.split('=').map { it.trim() } }.associate { it.first() to it.component2() }
+    return values.map { value ->
+      value.split('=').map { it.trim() }
+    }.associate { it.first() to it.component2() }
   }
 
   fun stripWhiteSpaceAfterCommas(str: String): String = Regex(",\\s*").replace(str, ",")

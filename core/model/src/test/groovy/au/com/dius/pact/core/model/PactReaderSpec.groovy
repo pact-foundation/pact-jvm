@@ -33,28 +33,44 @@ class PactReaderSpec extends Specification {
   }
 
   def 'loads a pact with V1 version using existing loader'() {
-      given:
-      def pactUrl = PactReaderSpec.classLoader.getResource('v1-pact.json')
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('v1-pact.json')
 
-      when:
-      def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+    def interaction = pact.interactions.first()
 
-      then:
-      pact instanceof RequestResponsePact
-      pact.source instanceof UrlPactSource
-      pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
+    then:
+    pact instanceof RequestResponsePact
+    pact.source instanceof UrlPactSource
+    pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
+
+    interaction instanceof RequestResponseInteraction
+    interaction.response.headers['Content-Type'] == ['text/html']
+    interaction.response.headers['access-control-allow-credentials'] == ['true']
+    interaction.response.headers['access-control-allow-headers'] == ['Content-Type', 'Authorization']
+    interaction.response.headers['access-control-allow-methods'] == ['POST', 'GET', 'PUT', 'HEAD', 'DELETE', 'OPTIONS',
+                                                                     'PATCH']
   }
 
   def 'loads a pact with V2 version using existing loader'() {
-      given:
-      def pactUrl = PactReaderSpec.classLoader.getResource('v2-pact.json')
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('v2-pact.json')
 
-      when:
-      def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+    def interaction = pact.interactions.first()
 
-      then:
-      pact instanceof RequestResponsePact
-      pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
+    then:
+    pact instanceof RequestResponsePact
+    pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
+
+    interaction instanceof RequestResponseInteraction
+    interaction.response.headers['Content-Type'] == ['text/html']
+    interaction.response.headers['access-control-allow-credentials'] == ['true']
+    interaction.response.headers['access-control-allow-headers'] == ['Content-Type', 'Authorization']
+    interaction.response.headers['access-control-allow-methods'] == ['POST', 'GET', 'PUT', 'HEAD', 'DELETE', 'OPTIONS',
+                                                                     'PATCH']
   }
 
   def 'loads a pact with V3 version using V3 loader'() {

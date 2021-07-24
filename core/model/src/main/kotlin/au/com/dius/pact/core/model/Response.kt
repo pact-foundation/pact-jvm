@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 
@@ -34,7 +33,7 @@ class Response @JvmOverloads constructor(
     generators.applyGenerator(Category.HEADER, mode) { key, g ->
       r.headers[key] = listOf(g.generate(context).toString())
     }
-    r.body = generators.applyBodyGenerators(r.body, ContentType.fromString(contentType()), context, mode)
+    r.body = generators.applyBodyGenerators(r.body, determineContentType(), context, mode)
     return r
   }
 
@@ -80,11 +79,7 @@ class Response @JvmOverloads constructor(
       }
       val headers = if (json.has("headers") && json["headers"] is JsonValue.Object) {
         json["headers"].asObject().entries.entries.associate { (key, value) ->
-          if (value is JsonValue.Array) {
-            key to value.values.map { Json.toString(it) }
-          } else {
-            key to listOf(Json.toString(value).trim())
-          }
+          key to HeaderParser.fromJson(key, value)
         }
       } else {
         emptyMap()

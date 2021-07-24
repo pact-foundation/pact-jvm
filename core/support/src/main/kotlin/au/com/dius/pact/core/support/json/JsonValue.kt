@@ -15,8 +15,10 @@ sealed class JsonValue {
 
   class StringValue(val value: JsonToken.StringValue) : JsonValue() {
     constructor(value: CharArray) : this(JsonToken.StringValue(value))
+    constructor(value: String) : this(JsonToken.StringValue(value.toCharArray()))
     override fun toString() = String(value.chars)
   }
+
   object True : JsonValue()
   object False : JsonValue()
   object Null : JsonValue()

@@ -105,11 +105,7 @@ class Request @JvmOverloads constructor(
       val query = parseQueryParametersToMap(json["query"])
       val headers = if (json.has("headers") && json["headers"] is JsonValue.Object) {
         json["headers"].asObject().entries.entries.associate { (key, value) ->
-          if (value is JsonValue.Array) {
-            key to value.values.map { Json.toString(it) }
-          } else {
-            key to listOf(Json.toString(value).trim())
-          }
+          key to HeaderParser.fromJson(key, value)
         }
       } else {
         emptyMap()

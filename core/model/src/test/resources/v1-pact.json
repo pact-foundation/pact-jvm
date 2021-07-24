@@ -16,7 +16,10 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "text/html"
+          "Content-Type": "text/html",
+          "access-control-allow-credentials": "true",
+          "access-control-allow-headers": "Content-Type, Authorization",
+          "access-control-allow-methods": "POST, GET, PUT, HEAD, DELETE, OPTIONS, PATCH"
         },
         "body": "\"That is some good Mallory.\""
       }
