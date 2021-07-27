@@ -8,7 +8,7 @@ dependencies {
     "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testImplementation "org.codehaus.groovy:groovy-xml:${project.groovy2Version}"
   testImplementation "org.codehaus.groovy:groovy-dateutil:${project.groovy2Version}"
-  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation('org.spockframework:spock-core:2.0-M2-groovy-2.5') {
       exclude group: 'org.codehaus.groovy'
   }

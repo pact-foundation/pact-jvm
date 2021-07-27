@@ -7,7 +7,7 @@ dependencies {
     api project(path: ":core:pactbroker", configuration: 'default')
     api project(path: ":core:matchers", configuration: 'default')
     api project(path: ":core:support", configuration: 'default')
-    compile'commons-io:commons-io:2.5',
+    implementation'commons-io:commons-io:2.5',
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     api 'io.github.classgraph:classgraph:4.8.105'
@@ -17,17 +17,17 @@ dependencies {
     implementation 'com.vladsch.flexmark:flexmark:0.62.2'
     implementation 'com.vladsch.flexmark:flexmark-ext-tables:0.62.2'
 
-    testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-    testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
-    testCompile 'io.dropwizard:dropwizard-testing:1.3.7'
-    testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-    testCompile 'org.mockito:mockito-core:2.28.2'
-    testCompile 'javax.xml.bind:jaxb-api:2.3.1'
-    testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
+    testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+    testRuntimeOnly "ch.qos.logback:logback-classic:${project.logbackVersion}"
+    testImplementation 'io.dropwizard:dropwizard-testing:1.3.7'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'javax.xml.bind:jaxb-api:2.3.1'
+    testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
         exclude group: 'org.codehaus.groovy'
     }
-    testCompile 'org.hamcrest:hamcrest:2.1'
+    testImplementation 'org.hamcrest:hamcrest:2.1'
 }
 
 compileTestGroovy {

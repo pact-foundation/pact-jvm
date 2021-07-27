@@ -13,16 +13,16 @@ dependencies {
   api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   api 'com.michael-bull.kotlin-result:kotlin-result:1.1.9'
 
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-  testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
-  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
-  testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation 'org.hamcrest:hamcrest:2.1'
+  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile "junit:junit:${project.junitVersion}"
+  testImplementation "junit:junit:${project.junitVersion}"
 
   antlr "org.antlr:antlr4:4.9.2"
 }

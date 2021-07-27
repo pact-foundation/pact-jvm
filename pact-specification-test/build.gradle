@@ -1,13 +1,13 @@
 
 dependencies {
-  testCompile project(":core:matchers"),
+  testImplementation project(":core:matchers"),
     project(":provider")
-  testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
+  testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
       exclude group: 'org.codehaus.groovy'
   }
 }

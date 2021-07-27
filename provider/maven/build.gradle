@@ -1,21 +1,21 @@
 dependencies {
   api project(":provider")
-  compile 'org.apache.maven:maven-plugin-api:3.8.1',
+  implementation 'org.apache.maven:maven-plugin-api:3.8.1',
     'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1'
-  compile 'org.apache.maven:maven-core:3.8.1'
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  implementation 'org.apache.maven:maven-core:3.8.1'
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'com.github.ajalt:mordant:1.2.1'
 
   testImplementation "junit:junit:${project.junitVersion}"
-  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.codehaus.groovy:groovy-nio:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
-  testRuntime 'org.objenesis:objenesis:3.1'
+  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntimeOnly 'org.objenesis:objenesis:3.1'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os

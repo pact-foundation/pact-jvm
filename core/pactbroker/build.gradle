@@ -1,21 +1,21 @@
 dependencies {
   api project(path: ":core:support", configuration: 'default')
-  compile "org.apache.commons:commons-lang3:$commonsLang3Version"
-  compile "com.google.guava:guava:${project.guavaVersion}"
+  implementation "org.apache.commons:commons-lang3:$commonsLang3Version"
+  implementation "com.google.guava:guava:${project.guavaVersion}"
   implementation('io.github.microutils:kotlin-logging:2.0.3') {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
-  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-  testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 }
