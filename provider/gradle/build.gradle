@@ -7,9 +7,10 @@ dependencies {
   implementation gradleApi()
   implementation 'com.github.ajalt:mordant:1.2.1'
 
+  testImplementation "junit:junit:${project.junitVersion}"
   testImplementation 'org.mockito:mockito-core:2.28.2'
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation('org.spockframework:spock-core:2.0-M2-groovy-2.5') {
+  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
 }

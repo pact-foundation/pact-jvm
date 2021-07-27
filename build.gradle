@@ -52,9 +52,9 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'groovy'
   apply plugin: 'codenarc'
-  if (System.env.JACOCO) {
+//  if (System.env.JACOCO) {
     apply plugin: 'jacoco'
-  }
+//  }
   apply plugin: 'org.jetbrains.kotlin.jvm'
   apply plugin: 'io.gitlab.arturbosch.detekt'
   if (System.env.CI != 'true') {
@@ -195,10 +195,6 @@ subprojects {
     }
   }
 
-  codenarc {
-    toolVersion = "1.6.1"
-  }
-
   codenarcMain {
       configFile = rootProject.file('config/codenarc/ruleset.groovy')
   }
@@ -207,9 +203,9 @@ subprojects {
       configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
   }
 
-  if (System.env.JACOCO) {
+//  if (System.env.JACOCO) {
     check.dependsOn << 'jacocoTestReport'
-  }
+//  }
 
   detekt {
     failFast = false
