@@ -11,9 +11,6 @@ include 'consumer:junit'
 include 'consumer:junit5'
 include 'consumer:kotlin'
 
-include 'consumer:specs2_2.13'
-project(':consumer:specs2_2.13').projectDir = file('consumer/specs2')
-
 include 'provider'
 include 'provider:gradle'
 include 'provider:maven'
@@ -26,14 +23,6 @@ if (System.getenv('GITHUB_WORKFLOW') == null) {
   include 'provider:lein'
 }
 
-include 'provider:specs2_2.13'
-project(':provider:specs2_2.13').projectDir = file('provider/specs2')
-include 'provider:scalatest_2.13'
-project(':provider:scalatest_2.13').projectDir = file('provider/scalatest')
-include 'provider:scalasupport_2.13'
-project(':provider:scalasupport_2.13').projectDir = file('provider/scalasupport')
-
 include 'pact-jvm-server'
 include 'pact-specification-test'
 include 'pact-publish'
-

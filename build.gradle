@@ -36,7 +36,7 @@ subprojects {
     return
   }
 
-  version = '4.2.9'
+  version = '4.3.0'
   
   buildscript {
     repositories {
@@ -157,8 +157,8 @@ subprojects {
             }
           }
           scm {
-            url = 'https://github.com/DiUS/pact-jvm'
-            connection = 'https://github.com/DiUS/pact-jvm.git'
+            url = 'https://github.com/pact-foundation/pact-jvm'
+            connection = 'https://github.com/pact-foundation/pact-jvm.git'
           }
 
           developers {

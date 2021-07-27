@@ -1,8 +1,0 @@
-{
-    "providerRoot": {
-        "scheme": "http",
-        "host": "localhost",
-        "port": 8888,
-        "path": ""
-    }
-}

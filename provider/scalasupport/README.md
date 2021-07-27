@@ -1,2 +1,0 @@
-Scala Support classes
-=====================
