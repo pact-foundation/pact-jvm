@@ -18,8 +18,6 @@ import java.net.URL
  */
 open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo(name) {
   var providerVersion: Any? = null
-  @Deprecated("Use providerTags instead")
-  var providerTag: String? = null
   var providerTags: Closure<List<String>>? = null
   var brokerConfig: PactBrokerConsumerConfig? = null
 

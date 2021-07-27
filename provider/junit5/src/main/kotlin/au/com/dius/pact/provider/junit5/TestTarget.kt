@@ -206,6 +206,3 @@ open class MessageTestTarget @JvmOverloads constructor(
     return ProviderResponse(200)
   }
 }
-
-@Deprecated("Use MessageTestTarget")
-open class AmpqTestTarget(packagesToScan: List<String> = emptyList()) : MessageTestTarget(packagesToScan)

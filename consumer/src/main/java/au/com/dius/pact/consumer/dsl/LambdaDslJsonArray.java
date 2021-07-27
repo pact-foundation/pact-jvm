@@ -269,9 +269,11 @@ public class LambdaDslJsonArray {
 
     /**
      * Element that must be an ISO formatted timestamp
+     * @deprecated Use datetime
      */
+    @Deprecated
     public LambdaDslJsonArray timestamp() {
-        pactArray.timestamp();
+        pactArray.datetime();
         return this;
     }
 
@@ -279,9 +281,11 @@ public class LambdaDslJsonArray {
      * Element that must match the given timestamp format
      *
      * @param format timestamp format
+     * @deprecated Use datetime
      */
+    @Deprecated
     public LambdaDslJsonArray timestamp(final String format) {
-        pactArray.timestamp(format);
+        pactArray.datetime(format);
         return this;
     }
 
@@ -290,9 +294,11 @@ public class LambdaDslJsonArray {
      *
      * @param format  timestamp format
      * @param example example date and time to use for generated bodies
+     * @deprecated Use datetime
      */
+    @Deprecated
     public LambdaDslJsonArray timestamp(final String format, final Date example) {
-        pactArray.timestamp(format, example);
+        pactArray.datetime(format, example);
         return this;
     }
 
@@ -301,9 +307,11 @@ public class LambdaDslJsonArray {
      *
      * @param format  timestamp format
      * @param example example date and time to use for generated bodies
+     * @deprecated Use datetime
      */
+    @Deprecated
     public LambdaDslJsonArray timestamp(final String format, final Instant example) {
-        pactArray.timestamp(format, example);
+        pactArray.datetime(format, example);
         return this;
     }
 

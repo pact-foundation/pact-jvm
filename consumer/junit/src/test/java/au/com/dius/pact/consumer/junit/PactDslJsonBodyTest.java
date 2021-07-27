@@ -34,7 +34,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
                 .object()
                     .id()
                     .stringValue("full_name", "Rogger the Dogger")
-                    .timestamp()
+                    .datetime("timestamp")
                     .date("date_of_birth", "MM/dd/yyyy")
                 .closeObject()
             .closeArray();

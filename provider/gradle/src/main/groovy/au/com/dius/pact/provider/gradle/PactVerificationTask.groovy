@@ -29,15 +29,7 @@ class PactVerificationTask extends PactVerificationBaseTask {
         project.sourceSets.test.runtimeClasspath*.toURL()
       }
       providerVersion = providerToVerify.providerVersion ?: { project.version }
-      if (providerToVerify.providerTags) {
-        providerTags = providerToVerify.providerTags
-      } else if (providerToVerify.providerTag) {
-        if (providerToVerify.providerTag instanceof Closure) {
-          providerTags = { [ providerToVerify.providerTag.call() ] }
-        } else {
-          providerTags = { [ providerToVerify.providerTag ] }
-        }
-      }
+      providerTags = providerToVerify.providerTags
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')

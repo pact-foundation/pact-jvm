@@ -44,8 +44,8 @@ class LambdaDslSpec extends Specification {
     given:
     Consumer<LambdaDslObject> snackJsonResponseFragment = { snackObject ->
       snackObject.numberType('id', 1)
-      snackObject.timestamp('created', "yyyy-MM-dd'T'HH:mm:ss.SSS")
-      snackObject.timestamp('lastModified', "yyyy-MM-dd'T'HH:mm:ss.SSS")
+      snackObject.datetime('created', "yyyy-MM-dd'T'HH:mm:ss.SSS")
+      snackObject.datetime('lastModified', "yyyy-MM-dd'T'HH:mm:ss.SSS")
       snackObject.stringType('creator', 'Loren')
       snackObject.numberType('quantity', 5)
       snackObject.stringType('description', 'donuts')

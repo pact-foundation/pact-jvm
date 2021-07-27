@@ -2,14 +2,20 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
 
 data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpectedKeys: Boolean) {
+  @JvmOverloads
   fun matcherDefined(path: List<String>, pathComparator: Comparator<String> = Comparator.naturalOrder()): Boolean {
     return resolveMatchers(path, pathComparator).filter2 { (p, rule) ->
       if (rule.rules.any { it is ValuesMatcher }) {
@@ -29,6 +35,7 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
       matchers
   }
 
+  @JvmOverloads
   fun selectBestMatcher(
     path: List<String>,
     pathComparator: Comparator<String> = Comparator.naturalOrder()
@@ -99,6 +106,19 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
       parsePath(it).size == path.size
     }
     return resolveMatchers.isNotEmpty()
+  }
+
+  /**
+   * Determines if any ignore-order matcher is defined for path or ancestor of path.
+   */
+  fun isEqualsIgnoreOrderMatcherDefined(path: List<String>) {
+    val matcherDef = selectBestMatcher(path)
+    matcherDef.rules.any {
+      it is EqualsIgnoreOrderMatcher ||
+        it is MinEqualsIgnoreOrderMatcher ||
+        it is MaxEqualsIgnoreOrderMatcher ||
+        it is MinMaxEqualsIgnoreOrderMatcher
+    }
   }
 }
 

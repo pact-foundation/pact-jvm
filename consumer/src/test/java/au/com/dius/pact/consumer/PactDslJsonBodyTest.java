@@ -57,7 +57,7 @@ public class PactDslJsonBodyTest {
             .object()
                 .id()
                 .stringValue("name", "Rogger the Dogger")
-                .timestamp()
+                .datetime("timestamp")
                 .date("dob", "MM/dd/yyyy")
                 .object(K_DEPRECIATION_BIPS)
                     .id()

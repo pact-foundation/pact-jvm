@@ -201,7 +201,7 @@ public class LambdaDslObjectTest {
         final LambdaDslObject object = new LambdaDslObject(actualPactDsl);
         final ZonedDateTime example = ZonedDateTime.of(LocalDateTime.of(2016, 10, 16, 02, 12, 45), ZoneId.of("America/Los_Angeles"));
         object
-            .timestamp("timestamp", "yyyy-MM-dd'T'HH:mm:ssZ", example)
+            .datetime("timestamp", "yyyy-MM-dd'T'HH:mm:ssZ", example)
             .time("time", "HH:mm:ssZ", example)
             .date("date", "yyyy-MM-dd", example);
         actualPactDsl.close();

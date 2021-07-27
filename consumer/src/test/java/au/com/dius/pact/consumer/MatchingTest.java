@@ -57,7 +57,7 @@ public class MatchingTest {
             .numberValue("age", 100)
             .numberType("ageAverage", 150.0)
             .integerType("age2", 200)
-            .timestamp();
+            .datetime("timestamp");
 
         PactDslJsonBody responseBody = new PactDslJsonBody();
 

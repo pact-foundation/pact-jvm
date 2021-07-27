@@ -442,61 +442,6 @@ open class PactDslJsonArray : DslPart {
   /**
    * Element that must be an ISO formatted timestamp
    */
-  @Deprecated("use datetime")
-  fun timestamp(): PactDslJsonArray {
-    val pattern = DateFormatUtils.ISO_DATETIME_FORMAT.pattern
-    body.add(JsonValue.StringValue(
-      DateFormatUtils.ISO_DATETIME_FORMAT.format(Date(DATE_2000)).toCharArray()))
-    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), DateTimeGenerator(pattern))
-    matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(pattern))
-    return this
-  }
-
-  /**
-   * Element that must match the given timestamp format
-   *
-   * @param format timestamp format
-   */
-  @Deprecated("use datetime")
-  fun timestamp(format: String): PactDslJsonArray {
-    val instance = FastDateFormat.getInstance(format)
-    body.add(JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
-    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), DateTimeGenerator(format))
-    matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format))
-    return this
-  }
-
-  /**
-   * Element that must match the given timestamp format
-   *
-   * @param format  timestamp format
-   * @param example example date and time to use for generated bodies
-   */
-  @Deprecated("use datetime")
-  fun timestamp(format: String, example: Date): PactDslJsonArray {
-    val instance = FastDateFormat.getInstance(format)
-    body.add(JsonValue.StringValue(instance.format(example).toCharArray()))
-    matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format))
-    return this
-  }
-
-  /**
-   * Element that must match the given timestamp format
-   *
-   * @param format  timestamp format
-   * @param example example date and time to use for generated bodies
-   */
-  @Deprecated("use datetime")
-  fun timestamp(format: String, example: Instant): PactDslJsonArray {
-    val formatter = DateTimeFormatter.ofPattern(format)
-    body.add(JsonValue.StringValue(formatter.format(example).toCharArray()))
-    matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format))
-    return this
-  }
-
-  /**
-   * Element that must be an ISO formatted timestamp
-   */
   fun datetime(): PactDslJsonArray {
     val pattern = DateFormatUtils.ISO_DATETIME_FORMAT.pattern
     body.add(JsonValue.StringValue(

@@ -61,77 +61,6 @@ object Matchers : KLogging() {
     }.reduce { acc, i -> acc * i }
   }
 
-  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
-  fun resolveMatchers(
-    matchers: MatchingRules,
-    category: String,
-    items: List<String>,
-    pathComparator: Comparator<String>
-  ) = if (category == "body")
-      matchers.rulesForCategory(category).filter(Predicate {
-        matchesPath(it, items) > 0
-      })
-    else if (category == "header" || category == "query" || category == "metadata")
-      matchers.rulesForCategory(category).filter(Predicate { key ->
-        items.all { pathComparator.compare(key, it) == 0 }
-      })
-    else matchers.rulesForCategory(category)
-
-  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
-  @JvmStatic
-  @JvmOverloads
-  fun matcherDefined(
-    category: String,
-    path: List<String>,
-    matchers: MatchingRules?,
-    pathComparator: Comparator<String> = Comparator.naturalOrder()
-  ): Boolean =
-    if (matchers != null)
-      resolveMatchers(matchers, category, path, pathComparator).isNotEmpty()
-    else false
-
-  /**
-   * Determines if a matcher of the form '[*]' exists for the path
-   */
-  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
-  @JvmStatic
-  fun wildcardIndexMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
-    if (matchers != null) {
-      val resolvedMatchers = matchers.rulesForCategory(category).filter(Predicate {
-        matchesPath(it, path) == path.size
-      })
-      resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith("[*]") }
-    } else false
-
-  /**
-   * Determines if any ignore-order matcher is defined for path or ancestor of path.
-   */
-  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
-  @JvmStatic
-  fun isEqualsIgnoreOrderMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
-    if (matchers != null) {
-      val matcherDef = selectBestMatcher(matchers, category, path)
-      matcherDef.rules.any {
-        it is EqualsIgnoreOrderMatcher ||
-        it is MinEqualsIgnoreOrderMatcher ||
-        it is MaxEqualsIgnoreOrderMatcher ||
-        it is MinMaxEqualsIgnoreOrderMatcher
-      }
-    } else false
-
-  /**
-   * Determines if a matcher of the form '.*' exists for the path
-   */
-  @JvmStatic
-  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
-  fun wildcardMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
-    if (matchers != null) {
-      val resolvedMatchers = matchers.rulesForCategory(category).filter(Predicate {
-        matchesPath(it, path) == path.size
-      })
-      resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith(".*") }
-    } else false
-
   @JvmStatic
   @JvmOverloads
   fun <M : Mismatch> domatch(
@@ -144,41 +73,6 @@ object Matchers : KLogging() {
   ): List<M> {
     val matcherDef = context.selectBestMatcher(path, pathComparator)
     return domatch(matcherDef, path, expected, actual, mismatchFn)
-  }
-
-  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
-  @JvmStatic
-  @JvmOverloads
-  fun selectBestMatcher(
-    matchers: MatchingRules,
-    category: String,
-    path: List<String>,
-    pathComparator: Comparator<String> = Comparator.naturalOrder()
-  ): MatchingRuleGroup {
-    val matcherCategory = resolveMatchers(matchers, category, path, pathComparator)
-    return if (category == "body")
-      matcherCategory.maxBy(Comparator { a, b ->
-        val weightA = calculatePathWeight(a, path)
-        val weightB = calculatePathWeight(b, path)
-        when {
-          weightA == weightB -> when {
-            a.length > b.length -> 1
-            a.length < b.length -> -1
-            else -> 0
-          }
-          weightA > weightB -> 1
-          else -> -1
-        }
-      })
-    else {
-      matcherCategory.matchingRules.values.first()
-    }
-  }
-
-  @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
-  fun typeMatcherDefined(category: String, path: List<String>, matchingRules: MatchingRules): Boolean {
-    val resolvedMatchers = resolveMatchers(matchingRules, category, path, Comparator.naturalOrder())
-    return resolvedMatchers.allMatchingRules().any { it is TypeMatcher }
   }
 
   /**
