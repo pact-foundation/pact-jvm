@@ -7,7 +7,6 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.support.json.JsonParser;
 import au.com.dius.pact.core.support.json.JsonValue;
-import com.google.gson.Gson;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.fluent.Request;
 import org.httpkit.HttpMethod;
@@ -71,7 +70,6 @@ public class Defect464Test {
   }
 
   private static class ElementOfMyArray {
-
     String id;
 
     public ElementOfMyArray(String id) {

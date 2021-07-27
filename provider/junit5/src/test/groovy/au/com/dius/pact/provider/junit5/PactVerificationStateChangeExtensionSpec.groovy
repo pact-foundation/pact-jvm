@@ -71,11 +71,13 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     pactSource = new DirectorySource('/tmp' as File)
     verificationExtension = new PactVerificationStateChangeExtension(interaction, pactSource)
     testInstance = new TestClass()
-    testContext = [
-      'getTestClass': { Optional.of(TestClass) },
-      'getTestInstance': { Optional.of(testInstance) }
-    ] as ExtensionContext
-    store = [:] as ExtensionContext.Store
+    testContext = Mock(ExtensionContext) {
+      getTestClass() >> Optional.of(TestClass)
+      getTestInstance() >> Optional.of(testInstance)
+      getRequiredTestInstance() >> testInstance
+      getRequiredTestClass() >> TestClass
+    }
+    store = Mock(ExtensionContext.Store)
     provider = Mock()
     consumer = Mock()
     pactContext = new PactVerificationContext(store, testContext, provider, consumer, interaction)
@@ -118,7 +120,6 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     given:
     def state = new ProviderState('test state')
     def interaction = new RequestResponseInteraction('test', [ state ])
-    def store = Mock(ExtensionContext.Store)
     def context = Mock(ExtensionContext) {
       getStore(_) >> store
       getRequiredTestClass() >> TestClass

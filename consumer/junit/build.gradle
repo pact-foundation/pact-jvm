@@ -1,6 +1,5 @@
 buildscript {
   repositories {
-    jcenter()
     mavenCentral()
     mavenLocal()
   }
@@ -25,9 +24,9 @@ dependencies {
   testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}",
     'org.apache.commons:commons-collections4:4.1',
-    "com.google.code.gson:gson:${project.gsonVersion}",
     "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
     "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
   testImplementation('com.jayway.restassured:rest-assured:2.9.0') {
     exclude group: 'org.codehaus.groovy'
   }

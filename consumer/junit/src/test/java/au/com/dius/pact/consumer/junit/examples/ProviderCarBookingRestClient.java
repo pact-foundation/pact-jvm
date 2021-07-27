@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.junit.examples;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class ProviderCarBookingRestClient {
 
-    public class Person {
+    public static class Person {
         private String id;
         private String firstName;
         private String lastName;
@@ -39,7 +39,7 @@ public class ProviderCarBookingRestClient {
         }
     }
 
-    public class Car {
+    public static class Car {
         private String id;
         private String brand;
         private String model;
@@ -80,18 +80,18 @@ public class ProviderCarBookingRestClient {
 
     public HttpResponse placeOrder(String baseUrl, String personId, String carId, String date)
         throws IOException {
-        Gson gson = new Gson();
         String personStr = Request.Get(baseUrl + "/persons/" + personId)
             .execute().returnContent().asString();
-        Person person = gson.fromJson(personStr, Person.class);
+        ObjectMapper mapper = new ObjectMapper();
+        Person person = mapper.readValue(personStr, Person.class);
 
         String carDetails = Request.Get(baseUrl + "/cars/" + carId)
             .execute().returnContent().asString();
-        Car car = gson.fromJson(carDetails, Car.class);
+        Car car = mapper.readValue(carDetails, Car.class);
 
         String body = "{\n" +
-            "\"person\": " + gson.toJson(person) + ",\n" +
-            "\"cars\": " + gson.toJson(car) + "\n" +
+            "\"person\": " + mapper.writeValueAsString(person) + ",\n" +
+            "\"cars\": " + mapper.writeValueAsString(car) + "\n" +
             "}\n";
         return Request.Post(baseUrl + "/orders/").bodyString(body, ContentType.APPLICATION_JSON)
             .execute().returnResponse();

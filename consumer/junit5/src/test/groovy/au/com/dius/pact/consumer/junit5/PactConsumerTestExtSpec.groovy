@@ -75,21 +75,21 @@ class PactConsumerTestExtSpec extends Specification {
     Mockito.when(mockServer.validateMockServerState(Mockito.any())).then {
       new PactVerificationResult.Ok()
     }
-    def mockStore = [
+    def mockStoreData = [
       'mockServer:provider': new JUnit5MockServerSupport(mockServer),
       'mockServerConfig:provider': new MockProviderConfig(),
       'providers': [new Pair(new ProviderInfo('provider'), 'test')]
     ]
-    def mockContext = [
-      'getTestClass': { Optional.of(Object) },
-      'getExecutionException': { Optional.empty() },
-      'getStore': {
-        [
-          'get': { mockStore.get(it) },
-          'put': { k, v -> mockStore.put(k, v) }
-        ] as ExtensionContext.Store
-      }
-    ] as ExtensionContext
+    def mockStore = Mock(ExtensionContext.Store) {
+      get(_) >> { p -> mockStoreData.get(p[0]) }
+      put(_, _) >> { k, v -> mockStoreData.put(k, v) }
+    }
+    ExtensionContext mockContext = Mock() {
+      getRequiredTestClass() >> PactConsumerTestExtSpec
+      getTestClass() >> Optional.of(PactConsumerTestExtSpec)
+      getExecutionException() >> Optional.empty()
+      getStore(_) >> mockStore
+    }
 
     def provider = new Provider('provider')
     def consumer = new Consumer('consumer')
@@ -98,9 +98,9 @@ class PactConsumerTestExtSpec extends Specification {
 
     when:
     testExt.beforeAll(mockContext)
-    mockStore['pact:provider'] = first  // normally set by testExt.resolveParameter()
+    mockStoreData['pact:provider'] = first  // normally set by testExt.resolveParameter()
     testExt.afterTestExecution(mockContext)
-    mockStore['pact:provider'] = second  // normally set by testExt.resolveParameter()
+    mockStoreData['pact:provider'] = second  // normally set by testExt.resolveParameter()
     testExt.afterTestExecution(mockContext)
     testExt.afterAll(mockContext)
     def pactFile = new File("${BuiltToolConfig.pactDirectory}/consumer-provider.json")
