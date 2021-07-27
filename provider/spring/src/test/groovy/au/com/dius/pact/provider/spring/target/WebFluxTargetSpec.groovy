@@ -65,7 +65,7 @@ class WebFluxTargetSpec extends Specification {
     target.routerFunction = RouterFunctions.route(GET('/'), handler.&test)
 
     when:
-    target.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:])
+    target.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:], false)
 
     then:
     1 * handler.test(_)
@@ -80,7 +80,7 @@ class WebFluxTargetSpec extends Specification {
     target.controllers = [controller]
 
     when:
-    target.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:])
+    target.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:], false)
 
     then:
     1 * controller.test()
@@ -96,10 +96,9 @@ class WebFluxTargetSpec extends Specification {
     target.routerFunction = RouterFunctions.route(GET('/'), handler.&testXContentType)
 
     when:
-    target.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:])
+    target.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:], false)
 
     then:
     1 * testInstance.requestFilter(_)
   }
-
 }

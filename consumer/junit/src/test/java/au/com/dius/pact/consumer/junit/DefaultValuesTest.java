@@ -45,9 +45,11 @@ public class DefaultValuesTest {
         .status(200)
         .toPact();
 
-      assertThat(pact.getInteractions().get(0).getRequest().getHeaders(), hasEntry("Content-Type",
+      assertThat(pact.getInteractions().get(0).asSynchronousRequestResponse()
+        .getRequest().getHeaders(), hasEntry("Content-Type",
         Collections.singletonList("application/json")));
-      assertThat(pact.getInteractions().get(1).getRequest().getHeaders(), hasEntry("Content-Type",
+      assertThat(pact.getInteractions().get(1)
+        .asSynchronousRequestResponse().getRequest().getHeaders(), hasEntry("Content-Type",
         Collections.singletonList("application/json")));
 
       return pact;

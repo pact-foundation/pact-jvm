@@ -1,8 +1,8 @@
 dependencies {
   api project(":provider")
-  compile 'org.apache.maven:maven-plugin-api:3.6.0',
-    'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0'
-  compile 'org.apache.maven:maven-core:3.6.0'
+  compile 'org.apache.maven:maven-plugin-api:3.8.1',
+    'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1'
+  compile 'org.apache.maven:maven-core:3.8.1'
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'com.github.ajalt:mordant:1.2.1'
@@ -11,7 +11,7 @@ dependencies {
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
+  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
@@ -53,9 +53,9 @@ if (System.env.CI != 'true') {
   task pluginDescriptor(type: Exec, dependsOn: generatePom) {
     if (isWindows()) {
       commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
-        'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.0:descriptor'
+        'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
     } else {
-      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.0:descriptor"
+      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
     }
 
       doLast {

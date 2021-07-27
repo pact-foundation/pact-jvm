@@ -24,6 +24,7 @@ import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
+import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.junit.After
 import org.junit.Before
@@ -44,8 +45,8 @@ import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
+import java.lang.RuntimeException
 import java.util.concurrent.ConcurrentHashMap
-import java.util.function.BiConsumer
 import java.util.function.Supplier
 import kotlin.reflect.jvm.kotlinProperty
 import org.apache.commons.lang3.tuple.Pair as TuplePair
@@ -133,8 +134,8 @@ open class InteractionRunner(
 
   private fun validateTestTarget(errors: MutableList<Throwable>) {
     val annotatedFields = testClass.getAnnotatedFields(TestTarget::class.java)
-    if (annotatedFields.size != 1) {
-      errors.add(Exception("Test class should have exactly one field annotated with ${TestTarget::class.java.name}"))
+    if (annotatedFields.isEmpty()) {
+      errors.add(Exception("Test class should have at least one field annotated with ${TestTarget::class.java.name}"))
     } else if (!Target::class.java.isAssignableFrom(annotatedFields[0].type)) {
       errors.add(Exception("Field annotated with ${TestTarget::class.java.name} should implement " +
         "${Target::class.java.name} interface"))
@@ -152,7 +153,11 @@ open class InteractionRunner(
       val description = describeChild(interaction)
       val interactionId = interaction.interactionId
       var testResult: VerificationResult = VerificationResult.Ok(interactionId)
-      val pending = pact.source is BrokerUrlSource && (pact.source as BrokerUrlSource).result?.pending == true
+      val pending = when {
+        interaction.isV4() && interaction.asV4Interaction().pending -> true
+        pact.source is BrokerUrlSource -> (pact.source as BrokerUrlSource).result?.pending == true
+        else -> false
+      }
       val included = interactionIncluded(interaction)
       if (!pending && included) {
         notifier.fireTestStarted(description)
@@ -166,26 +171,35 @@ open class InteractionRunner(
 
       if (included) {
         try {
-          interactionBlock(interaction, pactSource, testContext).evaluate()
-          if (!pending) {
-            notifier.fireTestFinished(description)
-          }
+          interactionBlock(interaction, pactSource, testContext, pending).evaluate()
         } catch (e: Throwable) {
-          if (!pending) {
-            notifier.fireTestFailure(Failure(description, e))
-            notifier.fireTestFinished(description)
-          }
           testResult = VerificationResult.Failed("Request to provider failed with an exception", description.displayName,
             mapOf(interaction.interactionId.orEmpty() to
               listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
             pending)
         } finally {
-          if (pact is FilteredPact) {
-            testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource,
-              propertyResolver)
-          } else {
-            testResultAccumulator.updateTestResult(pact, interaction, testResult.toTestResult(), pactSource,
-              propertyResolver)
+          val updateTestResult = testResultAccumulator.updateTestResult(if (pact is FilteredPact) pact.pact else pact, interaction,
+            testResult.toTestResult(), pactSource, propertyResolver)
+          if (testResult is VerificationResult.Ok && updateTestResult is Err) {
+            testResult = VerificationResult.Failed("Failed to publish results to Pact broker",
+              description.displayName, mapOf(interaction.interactionId.orEmpty() to
+                listOf(VerificationFailureType.PublishResultsFailure(updateTestResult.error))),
+              pending)
+          }
+
+          if (!pending) {
+            when (testResult) {
+              is VerificationResult.Ok -> notifier.fireTestFinished(description)
+              is VerificationResult.Failed -> {
+                val failure = testResult.failures[interactionId.orEmpty()]?.first()
+                if (failure is VerificationFailureType.ExceptionFailure) {
+                  notifier.fireTestFailure(Failure(description, failure.getException()))
+                } else {
+                  notifier.fireTestFailure(Failure(description, RuntimeException()))
+                }
+                notifier.fireTestFinished(description)
+              }
+            }
           }
         }
       }
@@ -205,7 +219,12 @@ open class InteractionRunner(
     return testClass.javaClass.newInstance()
   }
 
-  protected fun interactionBlock(interaction: Interaction, source: PactSource, context: Map<String, Any>): Statement {
+  protected fun interactionBlock(
+    interaction: Interaction,
+    source: PactSource,
+    context: Map<String, Any>,
+    pending: Boolean
+  ): Statement {
 
     // 1. prepare object
     // 2. get Target
@@ -224,7 +243,7 @@ open class InteractionRunner(
       return Fail(e)
     }
 
-    val target = lookupTarget(testInstance)
+    val target = lookupTarget(testInstance, interaction)
     target.configureVerifier(source, pact.consumer.name, interaction)
     target.verifier.reportInteractionDescription(interaction)
 
@@ -235,7 +254,9 @@ open class InteractionRunner(
           results[interaction.uniqueKey()] = Pair(result, verifier)
         }
         target.testInteraction(pact.consumer.name, interaction, source,
-          mutableMapOf("providerState" to context, "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator))
+          mutableMapOf("providerState" to context, "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator),
+          pending
+        )
       }
     }
     statement = withStateChanges(interaction, testInstance, statement, target)
@@ -247,13 +268,14 @@ open class InteractionRunner(
 
   protected open fun setupTargetForInteraction(target: Target) { }
 
-  protected fun lookupTarget(testInstance: Any): Target {
-    val targetField = testClass.getAnnotatedFields(TestTarget::class.java).first()
-    val target = if (targetField.field.kotlinProperty != null) {
-      targetField.field.kotlinProperty!!.getter.call(testInstance)
-    } else {
-      targetField.get(testInstance)
-    }
+  protected fun lookupTarget(testInstance: Any, interaction: Interaction): Target {
+    val target = testClass.getAnnotatedFields(TestTarget::class.java).map {
+      if (it.field.kotlinProperty != null) {
+        it.field.kotlinProperty!!.getter.call(testInstance)
+      } else {
+        it.get(testInstance)
+      }
+    }.first { (it as Target).validForInteraction(interaction) }
     if (target is TestClassAwareTarget) {
       target.setTestClass(testClass, testInstance)
     }

@@ -193,7 +193,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
         ), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
-        val interaction = matchResult.problems.keys.first() as RequestResponseInteraction
+        val interaction = matchResult.problems.keys.first().asSynchronousRequestResponse()!!
         mismatchedRequests.putIfAbsent(interaction.request, mutableListOf())
         mismatchedRequests[interaction.request]?.add(PactVerificationResult.PartialMismatch(
           matchResult.problems[interaction]!!.mismatches))
@@ -246,6 +246,9 @@ abstract class BaseJdkMockServer(
   private fun pactResponseToHttpExchange(response: IResponse, exchange: HttpExchange) {
     val headers = response.headers
     exchange.responseHeaders.putAll(headers)
+    if (config.addCloseHeader) {
+      exchange.responseHeaders.add("Connection", "close")
+    }
     val body = response.body
     if (body.isPresent()) {
       val bytes = body.unwrap()

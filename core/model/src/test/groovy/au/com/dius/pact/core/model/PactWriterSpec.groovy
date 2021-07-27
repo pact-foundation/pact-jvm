@@ -246,6 +246,7 @@ class PactWriterSpec extends Specification {
   }
 
   def 'writing V4 pacts with comments'() {
+    given:
     def comments = [
       text: new JsonValue.Array([
         new JsonValue.StringValue('This allows me to specify just a bit more information about the interaction'.chars),
@@ -254,13 +255,12 @@ class PactWriterSpec extends Specification {
       ]),
       testname: new JsonValue.StringValue('example_test.groovy'.chars)
     ]
-    given:
     def pact = new V4Pact(
       new Consumer('PactWriterSpecConsumer'),
       new Provider('PactWriterSpecProvider'),
       [
-        new V4Interaction.SynchronousHttp('A1', 'A1', new HttpRequest(), new HttpResponse(), null,
-          [], comments),
+        new V4Interaction.SynchronousHttp('A1', 'A1', [], new HttpRequest(), new HttpResponse(), null,
+          comments),
         new V4Interaction.AsynchronousMessage('A2', 'A2', OptionalBody.missing(), [:],
           new MatchingRulesImpl(), new Generators(), null, [], comments)
       ])
@@ -283,5 +283,28 @@ class PactWriterSpec extends Specification {
       'This allows me to specify just a bit more information about the interaction',
       'It has no functional impact, but can be displayed in the broker HTML page, and potentially in the test output'
     ]
+  }
+
+  def 'writing V4 pacts with pending interactions'() {
+    given:
+    def pact = new V4Pact(
+      new Consumer('PactWriterSpecConsumer'),
+      new Provider('PactWriterSpecProvider'),
+      [
+        new V4Interaction.SynchronousHttp('A1', 'A1', [], new HttpRequest(), new HttpResponse(), null, [:], false),
+        new V4Interaction.AsynchronousMessage('A2', 'A2', OptionalBody.missing(), [:],
+          new MatchingRulesImpl(), new Generators(), null, [], [:], true)
+      ])
+    def sw = new StringWriter()
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
+    def json = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(sw.toString()))
+    def interactionJson = json['interactions'][0]
+    def interaction2Json = json['interactions'][1]
+
+    then:
+    interactionJson['pending'] == false
+    interaction2Json['pending'] == true
   }
 }

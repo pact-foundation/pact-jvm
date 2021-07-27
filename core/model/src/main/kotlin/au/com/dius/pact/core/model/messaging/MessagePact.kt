@@ -87,11 +87,11 @@ class MessagePact @JvmOverloads constructor (
   override fun asMessagePact() = Ok(this)
 
   override fun asV4Pact(): Result<V4Pact, String> {
-    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }, metadata))
+    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }.toMutableList(), metadata))
   }
 
-  override val interactions: List<Message>
-    get() = messages
+  override val interactions: MutableList<Interaction>
+    get() = messages.toMutableList()
 
   override fun sortInteractions(): Pact {
     messages.sortBy { message -> message.providerStates.joinToString { it.name.toString() } + message.description }

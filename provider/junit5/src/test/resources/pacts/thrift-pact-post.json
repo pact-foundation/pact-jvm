@@ -1,0 +1,73 @@
+{
+  "provider": {
+    "name": "ThriftJsonPostService"
+  },
+  "consumer": {
+    "name": "ThriftJsonConsumer"
+  },
+  "interactions": [
+    {
+      "providerStates": [
+        {
+          "name": "default state"
+        }
+      ],
+      "description": "Thrift request",
+      "request": {
+        "method": "POST",
+        "path": "/data/1234",
+        "body": {
+          "id": "xyz"
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "expression": "${id}",
+              "type": "ProviderState"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/x-thrift"]
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": ["application/x-thrift"]
+        },
+        "body": {
+          "accountId": "4beb44f1-53f7-4281-a78b-12c06d682067"
+        },
+        "matchingRules": {
+          "body": {
+            "$.accountId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$.accountId": {
+              "type": "ProviderState",
+              "expression": "${accountId}"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.2.2"
+    }
+  }
+}

@@ -54,7 +54,7 @@ class PactVerificationTaskSpec extends Specification {
     def ex = thrown(GradleScriptException)
     ex.message == 'There were 1 non-pending pact failures for provider Test Service'
     1 * verifier.verifyProvider(_) >> [new VerificationResult.Failed('', '', ['': [
-      new VerificationFailureType.MismatchFailure(new StatusMismatch(200, 400),
+      new VerificationFailureType.MismatchFailure(new StatusMismatch(200, 400, null, []),
         new RequestResponseInteraction('Test'), new RequestResponsePact(provider, consumer))
     ]], false) ]
   }

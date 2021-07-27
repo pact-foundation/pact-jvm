@@ -32,14 +32,12 @@ class TestDescription(
   }
 
   private fun pending(): String {
-    return if (pactSource is BrokerUrlSource) {
-      if (pactSource.result != null && pactSource.result!!.pending) {
+    return when {
+      interaction.isV4() && interaction.asV4Interaction().pending -> " <PENDING>"
+      pactSource is BrokerUrlSource -> if (pactSource.result != null && pactSource.result!!.pending) {
         " <PENDING>"
-      } else {
-        ""
-      }
-    } else {
-      ""
+      } else ""
+      else -> ""
     }
   }
 

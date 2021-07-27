@@ -643,3 +643,13 @@ newJsonArray {
     }
  }
 ```
+
+## Dealing with persistent HTTP/1.1 connections (Keep Alive)
+
+As each test will get a new mock server, connections can not be persisted between tests. HTTP clients can cache
+connections with HTTP/1.1, and this can cause subsequent tests to fail. See [#342](https://github.com/pact-foundation/pact-jvm/issues/342)
+and [#1383](https://github.com/pact-foundation/pact-jvm/issues/1383).
+
+One option (if the HTTP client supports it, Apache HTTP Client does) is to set the system property `http.keepAlive` to `false` in 
+the test JVM. The other option is to set `pact.mockserver.addCloseHeader` to `true` to force the mock server to
+send a `Connection: close` header with every response (supported with Pact-JVM 4.2.7+).

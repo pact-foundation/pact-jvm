@@ -24,44 +24,44 @@ class XMLPactTest {
       .uponReceiving('a POST request with an XML message')
       .method('POST')
       .path('/message')
-      .body(new PactXmlBuilder('Message').build(message -> {
+      .body(new PactXmlBuilder('Message').build { message ->
         message.setAttributes([type: 'Request'])
-        message.appendElement('Head', [:], head -> {
-          head.appendElement('Client', [name: 'WebCheck'], client -> {
-            client.appendElement('Version', regexp(/\d+\.\d+\.\d+\.\d+/, "2.2.8.2"))
-          })
-          head.appendElement('Server', [:], server -> {
-            server.appendElement('Name', [:], "SrvCheck")
-            server.appendElement('Version', [:], "3.0")
-          })
-          head.appendElement('Authentication', [:], authentication -> {
-            authentication.appendElement('User', [:], regexp(/\w+/, "user_name"))
-            authentication.appendElement('Password', [:], regexp(/\w+/, "password"))
-          })
+        message.appendElement('Head', [:]) { head ->
+          head.appendElement('Client', [name: 'WebCheck']) { client ->
+            client.appendElement('Version', regexp(/\d+\.\d+\.\d+\.\d+/, '2.2.8.2'))
+          }
+          head.appendElement('Server', [:]) { server ->
+            server.appendElement('Name', [:], 'SrvCheck')
+            server.appendElement('Version', [:], '3.0')
+          }
+          head.appendElement('Authentication', [:]) { authentication ->
+            authentication.appendElement('User', [:], regexp(/\w+/, 'user_name'))
+            authentication.appendElement('Password', [:], regexp(/\w+/, 'password'))
+          }
           head.appendElement('Token', [:], '1234567323211242144')
-        })
-        message.appendElement('Body', [:], body -> {
-          body.appendElement('Call', [method: 'getInfo', service: 'CheckRpcService'], call -> {
-            call.appendElement('Param', [name: regexp(/exportId|mtpId/, 'exportId')], param -> {
+        }
+        message.appendElement('Body', [:]) { body ->
+          body.appendElement('Call', [method: 'getInfo', service: 'CheckRpcService']) { call ->
+            call.appendElement('Param', [name: regexp(/exportId|mtpId/, 'exportId')]) { param ->
               param.appendElement('ExportId', regexp(/\d+/, '1234567890'))
-            })
-          })
-        })
-      }))
+            }
+          }
+        }
+      })
       .willRespondWith()
       .status(200)
-      .body(new PactXmlBuilder("Message").build(message -> {
-        message.appendElement('Head', [:], head -> {
-          head.appendElement('Server', [:], server -> {
+      .body(new PactXmlBuilder('Message').build { message ->
+        message.appendElement('Head', [:]) { head ->
+          head.appendElement('Server', [:]) { server ->
             server.appendElement('Name', [:], regexp(/\w+/, 'server_name'))
             server.appendElement('Version', [:], regexp(/.+/, 'server_version'))
             server.appendElement('Timestamp', [:], regexp(/.+/, 'server_timestamp'))
-          })
-        })
-        message.appendElement('Body', [:], body -> {
+          }
+        }
+        message.appendElement('Body', [:]) { body ->
           body.appendElement('Result', [state: 'SUCCESS'])
-        })
-      }))
+        }
+      })
       .toPact()
   }
 

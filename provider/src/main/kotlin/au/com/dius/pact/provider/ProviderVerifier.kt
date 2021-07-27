@@ -16,15 +16,13 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
-import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.model.messaging.MessageInteraction
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
@@ -44,7 +42,6 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.util.function.BiConsumer
 import java.util.function.Function
-import java.util.function.Predicate
 import java.util.function.Supplier
 import kotlin.reflect.KMutableProperty1
 
@@ -210,7 +207,8 @@ interface IProviderVerifier {
     consumer: IConsumerInfo,
     interaction: Interaction,
     interactionMessage: String,
-    failures: MutableMap<String, Any>
+    failures: MutableMap<String, Any>,
+    pending: Boolean
   ): VerificationResult
 
   /**
@@ -238,12 +236,16 @@ interface IProviderVerifier {
   fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String
 
   fun reportStateChangeFailed(providerState: ProviderState, error: Exception, isSetup: Boolean)
+
+  fun initialiseReporters(provider: IProviderInfo)
+
+  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?)
 }
 
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 open class ProviderVerifier @JvmOverloads constructor (
   override var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
@@ -251,10 +253,18 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
-  override var providerVersion: Supplier<String> = ProviderVersion { System.getProperty(PACT_PROVIDER_VERSION) },
-  override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) },
+  override var providerVersion: Supplier<String> = ProviderVersion {
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_VERSION, "")
+  },
+  override var providerTag: Supplier<String?>? = Supplier {
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_TAG, "")
+  },
   override var providerTags: Supplier<List<String>>? = Supplier {
-    System.getProperty(PACT_PROVIDER_TAG).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_TAG, "")
+      .orEmpty()
+      .split(',')
+      .map { it.trim() }
+      .filter { it.isNotEmpty() }
   },
   override var projectClassLoader: Supplier<ClassLoader?>? = null
 ) : IProviderVerifier {
@@ -282,30 +292,12 @@ open class ProviderVerifier @JvmOverloads constructor (
     consumer: IConsumerInfo,
     interaction: Interaction,
     interactionMessage: String,
-    failures: MutableMap<String, Any>
+    failures: MutableMap<String, Any>,
+    pending: Boolean
   ): VerificationResult {
     val interactionId = interaction.interactionId
     try {
-      val classGraph = ClassGraph().enableAllInfo()
-      if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
-        classGraph.verbose()
-      }
-
-      val classLoader = projectClassLoader?.get()
-      if (classLoader == null) {
-        val urls = projectClasspath.get()
-        logger.debug { "projectClasspath = $urls" }
-        if (urls.isNotEmpty()) {
-          classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
-        }
-      } else {
-        classGraph.overrideClassLoaders(classLoader)
-      }
-
-      val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
-      if (scan.isNotEmpty()) {
-        classGraph.whitelistPackages(*scan.toTypedArray())
-      }
+      val classGraph = setupClassGraph(providerInfo, consumer)
 
       val methodsAnnotatedWith = classGraph.scan().use { scanResult ->
         scanResult.getClassesWithMethodAnnotation(PactVerifyProvider::class.qualifiedName)
@@ -331,16 +323,16 @@ open class ProviderVerifier @JvmOverloads constructor (
       } else {
         return if (interaction.isAsynchronousMessage()) {
           verifyMessage(methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage,
-            failures, consumer.pending)
+            failures, pending)
         } else {
-          val expectedResponse = (interaction as RequestResponseInteraction).response
+          val expectedResponse = (interaction as SynchronousRequestResponse).response
           var result: VerificationResult = VerificationResult.Ok(interactionId)
           methodsAnnotatedWith.forEach {
             val response = invokeProviderMethod(it, null) as Map<String, Any>
             val actualResponse = ProviderResponse(response["statusCode"] as Int,
               response["headers"] as Map<String, List<String>>, ContentType.UNKNOWN, response["data"] as String?)
             result = result.merge(this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage,
-              failures, interactionId.orEmpty(), consumer.pending))
+              failures, interactionId.orEmpty(), pending))
           }
           result
         }
@@ -353,8 +345,32 @@ open class ProviderVerifier @JvmOverloads constructor (
       )
       return VerificationResult.Failed(
         "Request to provider method failed with an exception", interactionMessage,
-        mapOf(interactionId.orEmpty() to errors), consumer.pending)
+        mapOf(interactionId.orEmpty() to errors), pending)
     }
+  }
+
+  private fun setupClassGraph(providerInfo: IProviderInfo, consumer: IConsumerInfo): ClassGraph {
+    val classGraph = ClassGraph().enableAllInfo()
+    if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
+      classGraph.verbose()
+    }
+
+    val classLoader = projectClassLoader?.get()
+    if (classLoader == null) {
+      val urls = projectClasspath.get()
+      logger.debug { "projectClasspath = $urls" }
+      if (urls.isNotEmpty()) {
+        classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
+      }
+    } else {
+      classGraph.overrideClassLoaders(classLoader)
+    }
+
+    val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
+    if (scan.isNotEmpty()) {
+      classGraph.whitelistPackages(*scan.toTypedArray())
+    }
+    return classGraph
   }
 
   private fun emitEvent(event: Event) {
@@ -490,6 +506,12 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
     interactionMessage += " - ${interaction.description}"
 
+    var pending = consumer.pending
+    if (interaction.isV4() && interaction.asV4Interaction().pending) {
+      interactionMessage += " [PENDING]"
+      pending = true
+    }
+
     val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer,
       interaction, interactionMessage, failures, providerClient)
     if (stateChangeResult.stateChangeResult is Ok) {
@@ -506,10 +528,10 @@ open class ProviderVerifier @JvmOverloads constructor (
       val result = if (ProviderUtils.verificationType(provider, consumer) == REQUEST_RESPONSE) {
         logger.debug { "Verifying via request/response" }
         verifyResponseFromProvider(provider, interaction.asSynchronousRequestResponse()!!, interactionMessage, failures,
-          providerClient, context, consumer.pending)
+          providerClient, context, pending)
       } else {
         logger.debug { "Verifying via annotated test method" }
-        verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
+        verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures, pending)
       }
 
       if (provider.stateChangeTeardown) {
@@ -522,7 +544,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         stateChangeResult.message,
         mapOf(interaction.interactionId.orEmpty() to
           listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", stateChangeResult))
-        ), consumer.pending)
+        ), pending)
     }
   }
 
@@ -664,7 +686,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  fun initialiseReporters(provider: IProviderInfo) {
+  override fun initialiseReporters(provider: IProviderInfo) {
     reporters.forEach {
       if (it.hasProperty("displayFullDiff")) {
         (it.property("displayFullDiff") as KMutableProperty1<VerifierReporter, Boolean>)
@@ -680,10 +702,9 @@ open class ProviderVerifier @JvmOverloads constructor (
     failures: MutableMap<String, Any>,
     provider: IProviderInfo,
     consumer: IConsumerInfo,
-    client: PactBrokerClient? = null
+    client: IPactBrokerClient? = null
   ): VerificationResult {
-    val pact = FilteredPact(loadPactFileForConsumer(consumer),
-      Predicate { filterInteractions(it) })
+    val pact = FilteredPact(loadPactFileForConsumer(consumer)) { filterInteractions(it) }
     reportVerificationForConsumer(consumer, provider, pact.source)
     return if (pact.interactions.isEmpty()) {
       reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact) }
@@ -692,22 +713,38 @@ open class ProviderVerifier @JvmOverloads constructor (
       val result = pact.interactions.map {
         verifyInteraction(provider, consumer, failures, it)
       }.reduce { acc, result -> acc.merge(result) }
-      when {
-        pact.isFiltered() -> reporters.forEach { it.warnPublishResultsSkippedBecauseFiltered() }
-        publishingResultsDisabled() -> reporters.forEach {
-          it.warnPublishResultsSkippedBecauseDisabled(PACT_VERIFIER_PUBLISH_RESULTS)
+      result.merge(when {
+        pact.isFiltered() -> {
+          reporters.forEach { it.warnPublishResultsSkippedBecauseFiltered() }
+          VerificationResult.Ok()
         }
-        else -> verificationReporter.reportResults(pact,
-          result.toTestResult(),
-          providerVersion.get(),
-          client,
-          providerTags?.get().orEmpty())
-      }
-      result
+        publishingResultsDisabled() -> {
+          reporters.forEach {
+            it.warnPublishResultsSkippedBecauseDisabled(PACT_VERIFIER_PUBLISH_RESULTS)
+          }
+          VerificationResult.Ok()
+        }
+        else -> {
+          val reportResults = verificationReporter.reportResults(pact,
+            result.toTestResult(),
+            providerVersion.get(),
+            client,
+            providerTags?.get().orEmpty())
+          when (reportResults) {
+            is Ok -> VerificationResult.Ok()
+            is Err -> VerificationResult.Failed("Failed to publish results to the Pact broker", "",
+              mapOf("" to listOf(VerificationFailureType.PublishResultsFailure(reportResults.error))))
+          }
+        }
+      })
     }
   }
 
-  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?) {
+  override fun reportVerificationForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    pactSource: PactSource?
+  ) {
     when (pactSource) {
       is BrokerUrlSource -> reporters.forEach { reporter ->
         reporter.reportVerificationForConsumer(consumer, provider, pactSource.tag)
@@ -769,7 +806,6 @@ open class ProviderVerifier @JvmOverloads constructor (
     return when (val callback = pactLoadFailureMessage) {
       is Closure<*> -> callback.call(consumer).toString()
       is Function<*, *> -> (callback as Function<Any, Any>).apply(consumer).toString()
-      is scala.Function1<*, *> -> (callback as scala.Function1<Any, Any>).apply(consumer).toString()
       else -> callback as String
     }
   }

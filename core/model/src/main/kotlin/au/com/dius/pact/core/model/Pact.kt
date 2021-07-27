@@ -102,9 +102,17 @@ interface Interaction {
     return false
   }
 
+  /**
+   * If this interaction is synchronous request/response, returns it. Otherwise returns null.
+   */
   fun asSynchronousRequestResponse(): SynchronousRequestResponse? {
     return null
   }
+
+  /**
+   * If this interaction is V4 spec
+   */
+  fun isV4() = false
 }
 
 /**
@@ -139,7 +147,7 @@ interface Pact {
   /**
    * Returns all the interactions of the pact
    */
-  val interactions: List<Interaction>
+  val interactions: MutableList<Interaction>
 
   /**
    * The source that this pact was loaded from

@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
@@ -14,7 +14,7 @@ import mu.KLogging
 import java.util.regex.Pattern
 
 open class BaseBuilder : Matchers() {
-  protected fun setupBody(data: Map<String, Any>, httpPart: HttpPart): OptionalBody {
+  protected fun setupBody(data: Map<String, Any>, httpPart: IHttpPart): OptionalBody {
     return if (data.containsKey(BODY)) {
       val body = data[BODY]
       val contentType = httpPart.determineContentType()

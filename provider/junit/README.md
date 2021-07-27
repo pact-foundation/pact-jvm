@@ -299,7 +299,7 @@ include pacts for the latest version of a tag, or all versions of a tag.
 )
 ```
 
-#### Using authentication with the with the pact broker
+#### Using authentication with the pact broker
 
 You can use basic authentication with the `@PactBroker` annotation by setting the `authentication` value to a `@PactBrokerAuth`
 annotation. For example:
@@ -453,6 +453,18 @@ By default, bodies will be handled based on their content types. For binary cont
 encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
 an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary`. For instance, setting 
 `pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
+
+### Controlling the generation of diffs
+
+**NOTE: version 4.2.7+**
+
+When there are mismatches with large bodies the calculation of the diff can take a long time . You can turn off the 
+generation of the diffs with the JVM system property: `pact.verifier.generateDiff=true|false|<dataSize>`, where 
+`dataSize`, if specified, must be a valid data size (for instance `100kb` or `1mb`). This will turn off the diff
+calculation for payloads that exceed this size. 
+
+For instance, setting `pact.verifier.generateDiff=false` will turn off the generation of diffs for all bodies, while
+`pact.verifier.generateDiff=512kb` will only turn off the diffs if the actual or expected body is larger than 512kb.
 
 ## Test target
 

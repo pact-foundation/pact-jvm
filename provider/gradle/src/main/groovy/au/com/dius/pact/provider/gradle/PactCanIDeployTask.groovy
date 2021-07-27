@@ -7,7 +7,7 @@ import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.TaskAction
 
 /**
- * Task to push pact files to a pact broker
+ * Task to verify the deployment state using a pact broker
  */
 @SuppressWarnings(['Println', 'DuplicateStringLiteral'])
 class PactCanIDeployTask extends PactCanIDeployBaseTask {
@@ -46,6 +46,9 @@ class PactCanIDeployTask extends PactCanIDeployBaseTask {
       to = project.property(TO)
     }
     def t = new TermColors()
+    logger.debug(
+      "Calling canIDeploy(pacticipant=$pacticipant, pacticipantVersion=$pacticipantVersion, latest=$latest, to=$to)"
+    )
     def result = brokerClient.canIDeploy(pacticipant, pacticipantVersion, latest, to)
     if (result.ok) {
       println("Computer says yes \\o/ ${result.message}\n\n${t.green.invoke(result.reason)}")

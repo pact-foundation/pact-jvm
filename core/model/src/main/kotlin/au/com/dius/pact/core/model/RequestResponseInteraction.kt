@@ -68,8 +68,8 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   }
 
   override fun asV4Interaction(): V4Interaction {
-    return V4Interaction.SynchronousHttp("", description, request.asV4Request(), response.asV4Response(),
-      interactionId, providerStates).withGeneratedKey()
+    return V4Interaction.SynchronousHttp("", description, providerStates, request.asV4Request(),
+      response.asV4Response(), interactionId).withGeneratedKey()
   }
 
   override fun isSynchronousRequestResponse() = true

@@ -725,7 +725,7 @@ open class PactDslJsonRootValue : DslPart("", "") {
     @JvmStatic
     fun uuid(): PactDslJsonRootValue {
       val value = PactDslJsonRootValue()
-      value.generators.addGenerator(Category.BODY, "", UuidGenerator)
+      value.generators.addGenerator(Category.BODY, "", UuidGenerator())
       value.value = "e2490de5-5bd3-43d5-b7c4-526e33f71304"
       value.setMatcher(value.regexp(UUID_REGEX.pattern))
       return value

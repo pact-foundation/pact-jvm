@@ -16,6 +16,7 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
+import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.apache.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -42,21 +43,23 @@ open class PactVerificationExtension(
 ) : TestTemplateInvocationContext, ParameterResolver, BeforeEachCallback, BeforeTestExecutionCallback,
   AfterTestExecutionCallback {
 
-  private val testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
+  var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
   override fun getDisplayName(invocationIndex: Int): String {
-    return when {
+    var displayName = when {
       pactSource is BrokerUrlSource && pactSource.result != null -> {
         var displayName = pactSource.result!!.name + " - ${interaction.description}"
         if (pactSource.tag.isNotEmpty()) displayName += " (tag ${pactSource.tag})"
-        if (pactSource.result!!.pending) {
-          "$displayName [PENDING]"
-        } else {
-          displayName
-        }
+        displayName
       }
-      pactSource is BrokerUrlSource && pactSource.tag.isNotEmpty() -> "${pact.consumer.name} - ${interaction.description} (tag ${pactSource.tag})"
+      pactSource is BrokerUrlSource && pactSource.tag.isNotEmpty() ->
+        "${pact.consumer.name} - ${interaction.description} (tag ${pactSource.tag})"
       else -> "${pact.consumer.name} - ${interaction.description}"
+    }
+    return when {
+      interaction.isV4() && interaction.asV4Interaction().pending -> "$displayName [PENDING]"
+      pactSource is BrokerUrlSource && pactSource.result?.pending == true -> "$displayName [PENDING]"
+      else -> displayName
     }
   }
 
@@ -91,7 +94,8 @@ open class PactVerificationExtension(
 
   override fun beforeEach(context: ExtensionContext) {
     val store = context.getStore(namespace)
-    val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
+    val pending = interaction.isV4() && interaction.asV4Interaction().pending ||
+      pactSource is BrokerUrlSource && pactSource.result?.pending == true
     val verificationContext = PactVerificationContext(store, context,
       consumer = ConsumerInfo(pact.consumer.name, pactSource = pactSource, pending = pending),
       interaction = interaction, providerInfo = ProviderInfo(serviceName))
@@ -186,8 +190,11 @@ open class PactVerificationExtension(
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
     val pact = if (this.pact is FilteredPact) pact.pact else pact
-    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult,
+    val updateTestResult = testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult,
       pactSource, propertyResolver)
+    if (updateTestResult is Err) {
+      throw AssertionError("Failed to update the test results: " + updateTestResult.error.joinToString("\n"))
+    }
   }
 
   companion object : KLogging()

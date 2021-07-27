@@ -1,15 +1,20 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import groovy.json.JsonSlurper
+import kotlin.Triple
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody
 
 class LambdaDslJsonBodySpec extends Specification {
 
@@ -29,7 +34,7 @@ class LambdaDslJsonBodySpec extends Specification {
   @Unroll
   def 'generates an array with ignore-order #expectedMatcher.class.simpleName matching'() {
     given:
-    def root = LambdaDsl.newJsonBody { }
+    def root = newJsonBody { }
     root."$method"('a', *params) {
       it.stringValue('a')
         .stringType('b')
@@ -54,4 +59,43 @@ class LambdaDslJsonBodySpec extends Specification {
     'unorderedMinMaxArray' | [2, 4] | new MinMaxEqualsIgnoreOrderMatcher(2, 4)
   }
 
+  @Issue('#1367')
+  def 'array contains test'() {
+    when:
+    def result = newJsonBody(o -> {
+      o.arrayContaining('output', a -> {
+        a.stringValue('a')
+      });
+    }).build()
+
+    then:
+    result.body.toString() == '{"output":["a"]}'
+    result.matchers.matchingRules == [
+      '$.output': new MatchingRuleGroup([
+        new ArrayContainsMatcher([new Triple(0, new MatchingRuleCategory('body'), [:])])
+      ])
+    ]
+  }
+
+  @Issue('#1367')
+  def 'array contains test with two variants'() {
+    when:
+    def result = newJsonBody(o -> {
+      o.arrayContaining('output', a -> {
+        a.stringValue('a')
+        a.numberValue(1)
+      });
+    }).build()
+
+    then:
+    result.body.toString() == '{"output":["a",1]}'
+    result.matchers.matchingRules == [
+      '$.output': new MatchingRuleGroup([
+        new ArrayContainsMatcher([
+          new Triple(0, new MatchingRuleCategory('body'), [:]),
+          new Triple(1, new MatchingRuleCategory('body'), [:])
+        ])
+      ])
+    ]
+  }
 }

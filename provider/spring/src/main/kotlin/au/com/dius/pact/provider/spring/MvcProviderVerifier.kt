@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.ContentType
-import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.async
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.web.util.UriComponentsBuilder
-import scala.Function1
 import java.net.URI
 import java.util.concurrent.Callable
 import java.util.function.Consumer
@@ -46,7 +45,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
 
   fun verifyResponseFromProvider(
     provider: ProviderInfo,
-    interaction: RequestResponseInteraction,
+    interaction: SynchronousRequestResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     mockMvc: MockMvc,
@@ -74,7 +73,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     }
   }
 
-  fun executeMockMvcRequest(mockMvc: MockMvc, request: Request, provider: ProviderInfo): MvcResult {
+  fun executeMockMvcRequest(mockMvc: MockMvc, request: IRequest, provider: ProviderInfo): MvcResult {
     val body = request.body
     val requestBuilder = if (body.isPresent()) {
       if (request.isMultipartFileUpload()) {
@@ -118,7 +117,6 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     if (requestFilter != null) {
       when (requestFilter) {
         is Closure<*> -> requestFilter.call(requestBuilder)
-        is Function1<*, *> -> (requestFilter as Function1<MockHttpServletRequestBuilder, *>).apply(requestBuilder)
         is org.apache.commons.collections4.Closure<*> ->
           (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(requestBuilder)
         else -> {
@@ -156,7 +154,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     }
   }
 
-  fun requestUriString(request: Request): URI {
+  fun requestUriString(request: IRequest): URI {
     val uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
     val query = request.query
@@ -169,7 +167,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     return URI.create(uriBuilder.toUriString())
   }
 
-  fun mapHeaders(request: Request, hasBody: Boolean): HttpHeaders {
+  fun mapHeaders(request: IRequest, hasBody: Boolean): HttpHeaders {
     val httpHeaders = HttpHeaders()
 
     request.headers.forEach { (k, v) ->

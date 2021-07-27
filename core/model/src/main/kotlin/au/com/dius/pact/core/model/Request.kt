@@ -13,14 +13,14 @@ import mu.KLogging
 /**
  * Request made by a consumer to a provider
  */
-interface IRequest {
-  val method: String
-  val path: String
-  val query: Map<String, List<String>>
-  val headers: Map<String, List<String>>
-  val body: OptionalBody
-  val matchingRules: MatchingRules
-  val generators: Generators
+interface IRequest: IHttpPart {
+  var method: String
+  var path: String
+  val query: MutableMap<String, List<String>>
+  override val headers: MutableMap<String, List<String>>
+  override var body: OptionalBody
+  override val matchingRules: MatchingRules
+  override val generators: Generators
 
   fun cookies(): List<String>
   fun headersWithoutCookie(): Map<String, List<String>>
@@ -31,6 +31,8 @@ interface IRequest {
    * If this request represents a multipart file upload
    */
   fun isMultipartFileUpload(): Boolean
+
+  fun copy(): IRequest
 }
 
 /**
@@ -48,8 +50,8 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
 
   override fun compareTo(other: IRequest) = if (equals(other)) 0 else 1
 
-  fun copy() = Request(method, path, query.toMutableMap(), headers.toMutableMap(), body.copy(), matchingRules.copy(),
-    generators.copy())
+  override fun copy() = Request(method, path, query.toMutableMap(), headers.toMutableMap(), body.copy(),
+    matchingRules.copy(), generators.copy())
 
   override fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest {
     val r = this.copy()
@@ -147,11 +149,7 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
       val query = parseQueryParametersToMap(json["query"])
       val headers = if (json.has("headers") && json["headers"] is JsonValue.Object) {
         json["headers"].asObject()!!.entries.entries.associate { (key, value) ->
-          if (value is JsonValue.Array) {
-            key to value.values.map { Json.toString(it) }
-          } else {
-            key to listOf(Json.toString(value).trim())
-          }
+          key to HeaderParser.fromJson(key, value)
         }
       } else {
         emptyMap()

@@ -3,6 +3,8 @@ package au.com.dius.pact.core.support
 import kotlin.Pair
 import spock.lang.Specification
 import spock.lang.Unroll
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 
 @SuppressWarnings('UnnecessaryBooleanExpression')
 class UtilsSpec extends Specification {
@@ -81,5 +83,24 @@ class UtilsSpec extends Specification {
 
     then:
     result == []
+  }
+
+  @Unroll
+  def 'sizeOf "#size"'() {
+    expect:
+    Utils.INSTANCE.sizeOf(size) == result
+
+    where:
+
+    size       || result
+    ''         || new Err("'' is not a valid data size")
+    '100'      || new Err("'100' is not a valid data size")
+    'aksldjsk' || new Err("'aksldjsk' is not a valid data size")
+    '-kb'      || new Err("'-kb' is not a valid data size")
+    '-1kb'     || new Err("'-1kb' is not a valid data size")
+    '22b'      || new Ok(22)
+    '2kb'      || new Ok(2048)
+    '2KB'      || new Ok(2048)
+    '2mb'      || new Ok(2048 * 1024)
   }
 }

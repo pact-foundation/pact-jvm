@@ -267,6 +267,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|
 |`pact.content_type.override.<TYPE>.<SUBTYPE>=text\|json\|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
 |`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
+|`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
 
 Example in the configuration section:
 

@@ -17,7 +17,7 @@ class ProviderVersion(val source: () -> String?) : Supplier<String> {
   }
 
   override fun get(): String {
-    val version = source() ?: FALLBACK_VALUE
+    val version = source().orEmpty().ifEmpty { FALLBACK_VALUE }
 
     if (version == FALLBACK_VALUE) {
       logger.warn("Provider version not set, defaulting to '$FALLBACK_VALUE'")

@@ -23,10 +23,12 @@ import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.HttpStatus
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.jsonArray
 import com.mifmif.common.regex.Generex
@@ -284,11 +286,11 @@ open class PactDslResponse @JvmOverloads constructor(
       consumerPactBuilder.interactions.add(V4Interaction.SynchronousHttp(
         "",
         request!!.description,
+        request.state,
         HttpRequest(request.requestMethod, request.path, request.query,
           request.requestHeaders, request.requestBody, request.requestMatchers, request.requestGenerators),
         HttpResponse(responseStatus, responseHeaders, responseBody, responseMatchers, responseGenerators),
-        null,
-        request.state, mutableMapOf("text" to jsonArray(comments))).withGeneratedKey())
+        null, mutableMapOf("text" to jsonArray(comments))).withGeneratedKey())
     } else {
       consumerPactBuilder.interactions.add(RequestResponseInteraction(
         request!!.description,
@@ -309,12 +311,12 @@ open class PactDslResponse @JvmOverloads constructor(
     return when {
       pactClass.isAssignableFrom(V4Pact::class.java) -> {
         V4Pact(request!!.consumer, request.provider,
-          consumerPactBuilder.interactions.map { obj -> obj.asV4Interaction() }, DEFAULT_METADATA,
+          consumerPactBuilder.interactions.map { obj -> obj.asV4Interaction() }.toMutableList(), DEFAULT_METADATA,
           UnknownPactSource) as P
       }
       pactClass.isAssignableFrom(RequestResponsePact::class.java) -> {
         RequestResponsePact(request!!.provider, request.consumer,
-          consumerPactBuilder.interactions.map { it.asSynchronousRequestResponse() as RequestResponseInteraction }) as P
+          consumerPactBuilder.interactions.map { it.asSynchronousRequestResponse()!! }.toMutableList()) as P
       }
       else -> throw IllegalArgumentException(pactClass.simpleName + " is not a valid Pact class")
     }
@@ -418,6 +420,86 @@ open class PactDslResponse @JvmOverloads constructor(
    */
   fun comment(comment: String): PactDslResponse {
     this.comments.add(comment)
+    return this
+  }
+
+  /**
+   * Match any HTTP Information response status (100-199)
+   */
+  fun informationStatus(): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.Information)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = 100
+    return this
+  }
+
+  /**
+   * Match any HTTP success response status (200-299)
+   */
+  fun successStatus(): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.Success)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = 200
+    return this
+  }
+
+  /**
+   * Match any HTTP redirect response status (300-399)
+   */
+  fun redirectStatus(): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.Redirect)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = 300
+    return this
+  }
+
+  /**
+   * Match any HTTP client error response status (400-499)
+   */
+  fun clientErrorStatus(): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.ClientError)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = 400
+    return this
+  }
+
+  /**
+   * Match any HTTP server error response status (500-599)
+   */
+  fun serverErrorStatus(): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.ServerError)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = 500
+    return this
+  }
+
+  /**
+   * Match any HTTP non-error response status (< 400)
+   */
+  fun nonErrorStatus(): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.NonError)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = 200
+    return this
+  }
+
+  /**
+   * Match any HTTP error response status (>= 400)
+   */
+  fun errorStatus(): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.Error)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = 400
+    return this
+  }
+
+  /**
+   * Match any HTTP status code in the provided list
+   */
+  fun statusCodes(statusCodes: List<Int>): PactDslResponse {
+    val matcher = StatusCodeMatcher(HttpStatus.StatusCodes, statusCodes)
+    responseMatchers.addCategory("status").addRule(matcher)
+    responseStatus = statusCodes.first()
     return this
   }
 

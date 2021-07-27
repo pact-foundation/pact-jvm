@@ -45,6 +45,7 @@ public class PactDslRootValueTest {
         Assert.assertEquals(1, frag.getInteractions().size());
         Map<String, MatchingRuleGroup> matchingGroups = frag.getInteractions()
                 .get(0)
+                .asSynchronousRequestResponse()
                 .getResponse()
                 .getMatchingRules()
                 .rulesForCategory("body")

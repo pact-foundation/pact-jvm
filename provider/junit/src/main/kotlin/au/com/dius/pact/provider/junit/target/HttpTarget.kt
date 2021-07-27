@@ -2,7 +2,6 @@ package au.com.dius.pact.provider.junit.target
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IHttpClientFactory
@@ -12,6 +11,7 @@ import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
@@ -67,11 +67,23 @@ open class HttpTarget
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: MutableMap<String, Any>
+    context: MutableMap<String, Any>,
+    pending: Boolean
   ) {
     val client = ProviderClient(provider, this.httpClientFactory.invoke())
-    val result = verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction,
-      interaction.description, mutableMapOf(), client, context, consumer.pending)
+
+    val requestResponse = interaction.asSynchronousRequestResponse()
+    val result = if (requestResponse == null) {
+      val message = "HttpTarget can only be used with Request/Response interactions, got $interaction"
+      VerificationResult.Failed(message, message,
+        mapOf(
+          interaction.interactionId.orEmpty() to listOf(VerificationFailureType.InvalidInteractionFailure(message))
+        ), pending)
+    } else {
+      verifier.verifyResponseFromProvider(provider, requestResponse, interaction.description, mutableMapOf(), client,
+        context, pending)
+    }
+
     reportTestResult(result, verifier)
 
     try {
@@ -83,6 +95,8 @@ open class HttpTarget
       verifier.finaliseReports()
     }
   }
+
+  override fun validForInteraction(interaction: Interaction) = interaction.isSynchronousRequestResponse()
 
   override fun setupVerifier(
     interaction: Interaction,

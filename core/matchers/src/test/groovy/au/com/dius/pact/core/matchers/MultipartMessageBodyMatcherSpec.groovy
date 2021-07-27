@@ -59,6 +59,16 @@ class MultipartMessageBodyMatcherSpec extends Specification {
     expectedBody = multipart('form-data', 'file', '476.csv', 'text/plain', 'Test: true\n', '1234')
   }
 
+  def 'Ignores missing content type header, which is optional'() {
+    expect:
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
+
+    where:
+
+    actualBody = multipart('form-data', 'file', '476.csv', null, '', '1234')
+    expectedBody = multipart('form-data', 'file', '476.csv', 'text/plain', '', '1234')
+  }
+
   def 'returns a mismatch - when the headers do not match'() {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
@@ -87,16 +97,26 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   @SuppressWarnings('ParameterCount')
   OptionalBody multipart(disposition, name, filename, contentType, headers, body) {
+    def contentTypeLine = ''
+    def headersLine = ''
+    if (contentType) {
+      contentTypeLine = "Content-Type: $contentType"
+      if (headers) {
+        headersLine = "$contentTypeLine\n$headers"
+      } else {
+        headersLine = contentTypeLine
+      }
+    } else if (headers) {
+      headersLine = headers
+    }
     OptionalBody.body(
       """--XXX
         |Content-Disposition: $disposition; name=\"$name\"; filename=\"$filename\"
-        |Content-Type: $contentType
-        |$headers
+        |$headersLine
         |
         |$body
         |--XXX
        """.stripMargin().bytes, new ContentType('multipart/form-data; boundary=XXX')
     )
   }
-
 }

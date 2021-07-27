@@ -11,13 +11,14 @@ dependencies {
     compile 'javax.mail:mail:1.5.0-b01'
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.45'
+    testCompile 'com.github.tomakehurst:wiremock-jre8:2.27.2'
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'org.apache.commons:commons-collections4:4.1'
     // Required for Java 9
     testCompile 'javax.xml.bind:jaxb-api:2.3.0'
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-    testCompile('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
+    testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
         exclude group: 'org.codehaus.groovy'
     }
     testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

@@ -35,21 +35,21 @@ how to get going.
 
 ## Tutorial (60 minutes)
 
-Learn everything in Pact in 60 minutes: https://github.com/DiUS/pact-workshop-jvm.
+Learn everything in Pact in 60 minutes: https://github.com/pact-foundation/pact-workshop-jvm-spring.
 
 The workshop takes you through all of the key concepts of consumer and provider testing using a Spring boot application.
 
 ## Documentation
 
 Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
-and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overflow](https://stackoverflow.com/questions/tagged/pact) is also a good source of help.
+and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overflow](https://stackoverflow.com/questions/tagged/pact) is also a good source of help, as is the [Slack workspace](https://slack.pact.io).
 
 ## Supported JDK and specification versions:
 
 | Branch | Specification | JDK | Kotlin Version | Latest Version |
 | ------ | ------------- | --- | -------------- | -------------- |
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4* | 11+ | 1.4.21 | 4.2.2 |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.18 |
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4* | 11+ | 1.4.32 | 4.2.7 |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.23 |
 
 ### Previous versions (not actively supported)
 
@@ -102,7 +102,7 @@ You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [specs2]
 ### I Use Java
 
 You want to look at: [junit](consumer/junit) for JUnit 4 tests and
-[junit5](consumer/junit5) for JUnit 5 tests. Also, if you are using Java 8, there is [an
+[junit5](consumer/junit5) for JUnit 5 tests. Also, if you are using Java 8 or above, there is [an
 updated DSL for consumer tests](consumer/java8).
 
 ### I Use Groovy or Grails

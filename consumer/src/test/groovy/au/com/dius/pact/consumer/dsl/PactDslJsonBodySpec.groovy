@@ -1,11 +1,14 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
+import kotlin.Triple
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -366,6 +369,27 @@ class PactDslJsonBodySpec extends Specification {
     body.matchers.toMap(PactSpecVersion.V2) == [
       '$.body[\'01/01/2001\']': [match: 'type'],
       '$.body[\'01/01/1900\']': [match: 'type']
+    ]
+  }
+
+  @Issue('#1367')
+  def 'array contains test with two variants'() {
+    when:
+    PactDslJsonBody body = new PactDslJsonBody()
+      .arrayContaining('output')
+        .stringValue('a')
+        .numberValue(1)
+        .close()
+
+    then:
+    body.toString() == '{"output":["a",1]}'
+    body.matchers.matchingRules == [
+      '$.output': new MatchingRuleGroup([
+        new ArrayContainsMatcher([
+          new Triple(0, new MatchingRuleCategory('body'), [:]),
+          new Triple(1, new MatchingRuleCategory('body'), [:])
+        ])
+      ])
     ]
   }
 }

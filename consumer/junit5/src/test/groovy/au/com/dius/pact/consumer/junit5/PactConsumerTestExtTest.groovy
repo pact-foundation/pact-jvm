@@ -152,7 +152,7 @@ class PactConsumerTestExtTest {
       'getTestMethod': { Optional.of(TestClass.methods.find { it.name == 'pactMethod' }) },
       'getStore': { mockStore }
     ] as ExtensionContext
-    def providerInfo = subject.lookupProviderInfo(context)
+    def providerInfo = subject.lookupProviderInfo(context)[0]
     assertThat(providerInfo.first.providerName, Matchers.is(''))
     assertThat(providerInfo.first.hostInterface, Matchers.is(''))
     assertThat(providerInfo.first.port, Matchers.is(''))
@@ -170,7 +170,7 @@ class PactConsumerTestExtTest {
       'getTestMethod': { Optional.of(TestClassWithClassLevelAnnotation.methods.find { it.name == 'pactMethod' }) },
       'getStore': { mockStore }
     ] as ExtensionContext
-    def providerInfo = subject.lookupProviderInfo(context)
+    def providerInfo = subject.lookupProviderInfo(context)[0]
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithClassLevelAnnotation'))
     assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
     assertThat(providerInfo.first.port, Matchers.is('8080'))
@@ -188,7 +188,7 @@ class PactConsumerTestExtTest {
       'getTestMethod': { Optional.of(TestClassWithMethodLevelAnnotation.methods.find { it.name == 'pactMethod' }) },
       'getStore': { mockStore }
     ] as ExtensionContext
-    def providerInfo = subject.lookupProviderInfo(context)
+    def providerInfo = subject.lookupProviderInfo(context)[0]
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodLevelAnnotation'))
     assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
     assertThat(providerInfo.first.port, Matchers.is('8080'))
@@ -208,7 +208,7 @@ class PactConsumerTestExtTest {
       },
       'getStore': { mockStore }
     ] as ExtensionContext
-    def providerInfo = subject.lookupProviderInfo(context)
+    def providerInfo = subject.lookupProviderInfo(context)[0]
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodAndClassLevelAnnotation'))
     assertThat(providerInfo.first.hostInterface, Matchers.is('testServer'))
     assertThat(providerInfo.first.port, Matchers.is('1234'))
@@ -228,8 +228,7 @@ class PactConsumerTestExtTest {
       },
       'getStore': { mockStore }
     ] as ExtensionContext
-    def providerInfo = subject.lookupProviderInfo(context)
+    def providerInfo = subject.lookupProviderInfo(context)[0]
     assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V3))
   }
-
 }

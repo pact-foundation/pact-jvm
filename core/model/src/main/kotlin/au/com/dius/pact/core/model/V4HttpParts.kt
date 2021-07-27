@@ -22,14 +22,14 @@ private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
 }
 
 data class HttpRequest @JvmOverloads constructor(
-  override val method: String = "GET",
-  override val path: String = "/",
-  override val query: Map<String, List<String>> = mapOf(),
-  override val headers: Map<String, List<String>> = mapOf(),
-  override val body: OptionalBody = OptionalBody.missing(),
+  override var method: String = "GET",
+  override var path: String = "/",
+  override val query: MutableMap<String, List<String>> = mutableMapOf(),
+  override val headers: MutableMap<String, List<String>> = mutableMapOf(),
+  override var body: OptionalBody = OptionalBody.missing(),
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
-): IRequest {
+): IRequest, IHttpPart {
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
@@ -88,6 +88,9 @@ data class HttpRequest @JvmOverloads constructor(
 
   override fun isMultipartFileUpload() = asHttpPart().isMultipartFileUpload()
 
+  override fun copy(): IRequest = this.copy(body = this.body.copy(), matchingRules = this.matchingRules.copy(),
+    generators = this.generators.copy())
+
   companion object {
     @JvmStatic
     fun fromJson(json: JsonValue): HttpRequest {
@@ -103,18 +106,18 @@ data class HttpRequest @JvmOverloads constructor(
         Generators.fromJson(json["generators"])
       else Generators()
 
-      return HttpRequest(method, path, query, headers, body, matchingRules, generators)
+      return HttpRequest(method, path, query.toMutableMap(), headers.toMutableMap(), body, matchingRules, generators)
     }
   }
 }
 
 data class HttpResponse @JvmOverloads constructor(
-  override val status: Int = 200,
-  override val headers: Map<String, List<String>> = mapOf(),
-  override val body: OptionalBody = OptionalBody.missing(),
+  override var status: Int = 200,
+  override val headers: MutableMap<String, List<String>> = mutableMapOf(),
+  override var body: OptionalBody = OptionalBody.missing(),
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
-) : IResponse {
+) : IResponse, IHttpPart {
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
@@ -170,7 +173,7 @@ data class HttpResponse @JvmOverloads constructor(
       val generators = if (json.has("generators") && json["generators"] is JsonValue.Object)
         Generators.fromJson(json["generators"])
       else Generators()
-      return HttpResponse(status, headers, body, matchingRules, generators)
+      return HttpResponse(status, headers.toMutableMap(), body, matchingRules, generators)
     }
   }
 }

@@ -17,8 +17,8 @@ class GeneratedRequestSpec extends Specification {
   def setup() {
     generators = new Generators()
     generators.addGenerator(Category.PATH, new RandomIntGenerator(400, 499))
-    generators.addGenerator(Category.HEADER, 'A', UuidGenerator.INSTANCE)
-    generators.addGenerator(Category.QUERY, 'A', UuidGenerator.INSTANCE)
+    generators.addGenerator(Category.HEADER, 'A', new UuidGenerator())
+    generators.addGenerator(Category.QUERY, 'A', new UuidGenerator())
     generators.addGenerator(Category.BODY, '$.a', new RandomStringGenerator())
     request = new Request(generators: generators)
   }

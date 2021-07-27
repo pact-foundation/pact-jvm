@@ -15,7 +15,8 @@ fun generateDiff(expectedBodyString: String, actualBodyString: String): List<Str
   patch.deltas.forEach { delta ->
     when (delta) {
       is ChangeDelta<*> -> {
-        if (delta.original.position >= 1 && (diff.isEmpty() || expectedLines[delta.original.position - 1] != diff.last())) {
+        if (delta.original.position >= 1 && (diff.isEmpty() ||
+            expectedLines[delta.original.position - 1] != diff.last())) {
           diff.addAll(expectedLines.slice(line until delta.original.position))
         }
 

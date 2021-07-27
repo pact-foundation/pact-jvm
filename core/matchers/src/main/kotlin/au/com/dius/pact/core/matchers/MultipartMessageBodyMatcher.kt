@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
+import mu.KLogging
 import java.util.Enumeration
 import javax.mail.BodyPart
 import javax.mail.Header
@@ -62,8 +63,12 @@ class MultipartMessageBodyMatcher : BodyMatcher {
                   "Expected a multipart header '${it.name}' with value '${it.value}', but was '$actualValue'"))))
         }
       } else {
-        mismatches.add(BodyItemMatchResult(it.name, listOf(BodyMismatch(it.toString(), null,
-          "Expected a multipart header '${it.name}', but was missing"))))
+        if (it.name.equals("Content-Type", ignoreCase = true)) {
+          logger.debug { "Ignoring missing Content-Type header" }
+        } else {
+          mismatches.add(BodyItemMatchResult(it.name, listOf(BodyMismatch(it.toString(), null,
+            "Expected a multipart header '${it.name}', but was missing"))))
+        }
       }
     }
 
@@ -74,4 +79,6 @@ class MultipartMessageBodyMatcher : BodyMatcher {
     val multipart = MimeMultipart(ByteArrayDataSource(body, contentType))
     return multipart.getBodyPart(0)
   }
+
+  companion object : KLogging()
 }

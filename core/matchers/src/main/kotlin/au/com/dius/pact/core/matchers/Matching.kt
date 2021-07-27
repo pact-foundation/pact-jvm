@@ -2,16 +2,22 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.IRequest
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
 
 data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpectedKeys: Boolean) {
   fun matcherDefined(path: List<String>, pathComparator: Comparator<String> = Comparator.naturalOrder()): Boolean {
-    return resolveMatchers(path, pathComparator).isNotEmpty()
+    return resolveMatchers(path, pathComparator).filter2 { (p, rule) ->
+      if (rule.rules.any { it is ValuesMatcher }) {
+        parsePath(p).size == path.size
+      } else {
+        true
+      }
+    }.isNotEmpty()
   }
 
   private fun resolveMatchers(path: List<String>, pathComparator: Comparator<String>): MatchingRuleCategory {
@@ -29,7 +35,13 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
   ): MatchingRuleGroup {
     val matcherCategory = resolveMatchers(path, pathComparator)
     return if (matchers.name == "body")
-      matcherCategory.maxBy { a, b ->
+      matcherCategory.filter2 { (p, rule) ->
+        if (rule.rules.any { it is ValuesMatcher }) {
+          parsePath(p).size == path.size
+        } else {
+          true
+        }
+      }.maxBy { a, b ->
         val weightA = Matchers.calculatePathWeight(a, path)
         val weightB = Matchers.calculatePathWeight(b, path)
         when {
@@ -192,7 +204,17 @@ object Matching : KLogging() {
     else PathMismatch(expected.path, replacedActual)
   }
 
-  fun matchStatus(expected: Int, actual: Int) = if (expected == actual) null else StatusMismatch(expected, actual)
+  fun matchStatus(expected: Int, actual: Int, context: MatchingContext): StatusMismatch? {
+    return when {
+      context.matcherDefined(emptyList()) -> {
+        logger.debug { "Matcher defined for status" }
+        val mismatch = Matchers.domatch(context, emptyList(), expected, actual, StatusMismatchFactory)
+        mismatch.firstOrNull()
+      }
+      expected == actual -> null
+      else -> StatusMismatch(expected, actual)
+    }
+  }
 
   fun matchQuery(expected: IRequest, actual: IRequest, context: MatchingContext): List<QueryMatchResult> {
     return expected.query.entries.fold(emptyList<QueryMatchResult>()) { acc, entry ->

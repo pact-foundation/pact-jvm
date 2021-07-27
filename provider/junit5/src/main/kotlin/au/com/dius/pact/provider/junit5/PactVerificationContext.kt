@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -74,10 +75,17 @@ data class PactVerificationContext @JvmOverloads constructor(
     context: MutableMap<String, Any>
   ): List<VerificationResult> {
     if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
-      val interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
+      var interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
         " - ${interaction.description}"
+      if (interaction.isV4() && interaction.asV4Interaction().pending) {
+        interactionMessage += " [PENDING]"
+      }
       return try {
-        val reqResInteraction = interaction as RequestResponseInteraction
+        val reqResInteraction = if (interaction is V4Interaction.SynchronousHttp) {
+          interaction.asV3Interaction()
+        } else {
+          interaction as RequestResponseInteraction
+        }
         val expectedResponse = reqResInteraction.response.generatedResponse(context, GeneratorTestMode.Provider)
         val actualResponse = target.executeInteraction(client, request)
 
@@ -95,7 +103,7 @@ data class PactVerificationContext @JvmOverloads constructor(
       }
     } else {
       return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
-        interaction.description, mutableMapOf()))
+        interaction.description, mutableMapOf(), false))
     }
   }
 

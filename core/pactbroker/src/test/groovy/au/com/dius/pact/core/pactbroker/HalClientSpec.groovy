@@ -16,6 +16,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
+import spock.lang.Issue
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -296,13 +297,13 @@ class HalClientSpec extends Specification {
     mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), status, 'OK')
 
     expect:
-    client.postJson('path', 'body') == expectedResult
+    client.postJson('path', 'body').class == expectedResult
 
     where:
 
     success   | status | expectedResult
-    'success' | 200    | new Ok(true)
-    'failure' | 400    | new Ok(false)
+    'success' | 200    | Ok
+    'failure' | 400    | Err
   }
 
   def 'post URL returns a failure result if an exception is thrown'() {
@@ -470,5 +471,28 @@ class HalClientSpec extends Specification {
 
     then:
     request.allHeaders.collectEntries { [it.name, it.value] } == [A: 'a', B: 'b']
+  }
+
+  @Issue('#1388')
+  def "don't decode/encode URLs from links"() {
+    given:
+    def docAttributes = [
+      'pb:provider': [
+        title: 'Provider',
+        name: 'my/provider-name',
+        href: 'http://localhost:9292/pacticipants/my%2Fprovider-name'
+      ]
+    ]
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{}', ContentType.create('application/hal+json'))
+    }
+
+    when:
+    client.withDocContext(docAttributes).navigate('pb:provider')
+
+    then:
+    1 * mockClient.execute({ it.URI.rawPath == '/pacticipants/my%2Fprovider-name' }, _) >> mockResponse
   }
 }

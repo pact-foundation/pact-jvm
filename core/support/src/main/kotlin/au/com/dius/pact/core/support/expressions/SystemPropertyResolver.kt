@@ -66,7 +66,7 @@ object SystemPropertyResolver : ValueResolver {
 
     operator fun invoke(): PropertyValueTuple {
       if (propertyName.contains(":")) {
-        val kv = StringUtils.splitPreserveAllTokens(propertyName, ':')
+        val kv = StringUtils.splitPreserveAllTokens(propertyName, ":", 2)
         propertyName = kv[0]
         if (kv.size > 1) {
           defaultValue = kv[1]

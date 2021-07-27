@@ -211,7 +211,7 @@ class MessagePactBuilder @JvmOverloads constructor(
   fun <P : Pact?> toPact(pactClass: Class<P>): P {
     return when {
       pactClass.isAssignableFrom(V4Pact::class.java) -> {
-        V4Pact(consumer, provider, messages.map { it.asV4Interaction() }) as P
+        V4Pact(consumer, provider, messages.map { it.asV4Interaction() }.toMutableList()) as P
       }
       pactClass.isAssignableFrom(MessagePact::class.java) -> {
         return MessagePact(provider, consumer, messages) as P
@@ -227,7 +227,7 @@ class MessagePactBuilder @JvmOverloads constructor(
    */
   fun <P : Pact> toPact(): P {
     return if (specVersion == PactSpecVersion.V4) {
-      V4Pact(consumer, provider, messages.map { it.asV4Interaction() }) as P
+      V4Pact(consumer, provider, messages.map { it.asV4Interaction() }.toMutableList()) as P
     } else {
       MessagePact(provider, consumer, messages) as P
     }

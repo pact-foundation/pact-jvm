@@ -16,11 +16,11 @@ class MatchingRulesImpl : MatchingRules {
         return category
     }
 
-    override fun addCategory(category: String): MatchingRuleCategory = rules.getOrPut(category, {
+    override fun addCategory(category: String): MatchingRuleCategory = rules.getOrPut(category) {
       MatchingRuleCategory(category)
-    })
+    }
 
-    override fun copy(): MatchingRules {
+  override fun copy(): MatchingRules {
         val copy = MatchingRulesImpl()
         rules.map { it.value }.forEach { copy.addCategory(it) }
         return copy

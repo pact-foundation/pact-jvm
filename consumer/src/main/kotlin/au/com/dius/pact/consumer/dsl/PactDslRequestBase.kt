@@ -57,10 +57,19 @@ open class PactDslRequestBase(
   }
 
   @Throws(IOException::class)
-  protected fun setupFileUpload(partName: String?, fileName: String?, fileContentType: String?, data: ByteArray?) {
+  protected fun setupFileUpload(
+    partName: String,
+    fileName: String,
+    fileContentType: String?,
+    data: ByteArray
+  ) {
+    val contentType = if (fileContentType.isNotEmpty())
+      ContentType.create(fileContentType)
+    else
+      ContentType.DEFAULT_TEXT
     val multipart = MultipartEntityBuilder.create()
       .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-      .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
+      .addBinaryBody(partName, data, contentType, fileName)
       .build()
     val os = ByteArrayOutputStream()
     multipart.writeTo(os)

@@ -4,18 +4,18 @@ import java.nio.charset.Charset
 import java.util
 
 import au.com.dius.pact.core.model.{OptionalBody, Response}
-import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.IRequest
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.commons.lang3.StringUtils
 import org.asynchttpclient.{DefaultAsyncHttpClient, RequestBuilder}
 
 import scala.compat.java8.FutureConverters
 import scala.concurrent.Future
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object HttpClient extends StrictLogging {
 
-  def run(request: Request): Future[Response] = {
+  def run(request: IRequest): Future[Response] = {
     logger.debug("request=" + request)
     val req = new RequestBuilder(request.getMethod)
       .setUrl(request.getPath)

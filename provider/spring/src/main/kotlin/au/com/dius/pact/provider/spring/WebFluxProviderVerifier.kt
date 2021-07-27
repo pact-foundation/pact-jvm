@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.ContentType
-import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
@@ -21,7 +21,6 @@ import org.springframework.test.web.reactive.server.EntityExchangeResult
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.util.UriComponentsBuilder
-import scala.Function1
 import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
@@ -33,7 +32,7 @@ class WebFluxProviderVerifier : ProviderVerifier() {
 
   fun verifyResponseFromProvider(
     provider: ProviderInfo,
-    interaction: RequestResponseInteraction,
+    interaction: SynchronousRequestResponse,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     webClient: WebTestClient,
@@ -68,7 +67,7 @@ class WebFluxProviderVerifier : ProviderVerifier() {
 
   fun executeWebFluxRequest(
     webTestClient: WebTestClient,
-    request: Request,
+    request: IRequest,
     provider: ProviderInfo
   ): EntityExchangeResult<ByteArray> {
     val body = request.body
@@ -132,8 +131,6 @@ class WebFluxProviderVerifier : ProviderVerifier() {
     if (requestFilter != null) {
       when (requestFilter) {
         is Closure<*> -> requestFilter.call(requestBuilder)
-        is Function1<*, *> ->
-          (requestFilter as Function1<WebTestClient.RequestHeadersSpec<*>, *>).apply(requestBuilder)
         is org.apache.commons.collections4.Closure<*> ->
           (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(requestBuilder)
         else -> {
@@ -167,7 +164,7 @@ class WebFluxProviderVerifier : ProviderVerifier() {
     }
   }
 
-  fun requestUriString(request: Request): String {
+  fun requestUriString(request: IRequest): String {
     val uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
     request.query.forEach { (key, value) ->

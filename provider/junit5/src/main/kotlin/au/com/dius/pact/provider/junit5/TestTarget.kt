@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.Message

@@ -2,14 +2,10 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.Matchers.compareListContent
 import au.com.dius.pact.core.matchers.Matchers.compareLists
-import au.com.dius.pact.core.matchers.util.IndicesCombination
-import au.com.dius.pact.core.matchers.util.LargestKeyValue
-import au.com.dius.pact.core.matchers.util.memoizeFixed
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
-import java.math.BigInteger
 
 object JsonBodyMatcher : BodyMatcher, KLogging() {
 

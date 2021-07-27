@@ -7,6 +7,7 @@ import au.com.dius.pact.provider.junit5.PactVerificationContext
 import au.com.dius.pact.provider.junit5.PactVerificationExtension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
+import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 
 open class PactVerificationSpringExtension(
@@ -24,6 +25,7 @@ open class PactVerificationSpringExtension(
     val testContext = store.get("interactionContext") as PactVerificationContext
     return when (parameterContext.parameter.type) {
       MockHttpServletRequestBuilder::class.java -> testContext.target is MockMvcTestTarget
+      WebTestClient.RequestHeadersSpec::class.java -> testContext.target is WebFluxTarget
       else -> super.supportsParameter(parameterContext, extensionContext)
     }
   }
@@ -32,6 +34,7 @@ open class PactVerificationSpringExtension(
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     return when (parameterContext.parameter.type) {
       MockHttpServletRequestBuilder::class.java -> store.get("request")
+      WebTestClient.RequestHeadersSpec::class.java -> store.get("request")
       else -> super.resolveParameter(parameterContext, extensionContext)
     }
   }

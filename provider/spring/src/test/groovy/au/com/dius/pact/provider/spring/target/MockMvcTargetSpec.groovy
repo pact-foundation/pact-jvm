@@ -45,7 +45,7 @@ class MockMvcTargetSpec extends Specification {
     mockMvcTarget.controllers = [ controller ]
 
     when:
-    mockMvcTarget.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:])
+    mockMvcTarget.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:], false)
 
     then:
     1 * controller.test()
@@ -60,10 +60,9 @@ class MockMvcTargetSpec extends Specification {
     mockMvcTarget.controllers = [ controller ]
 
     when:
-    mockMvcTarget.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:])
+    mockMvcTarget.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:], false)
 
     then:
     1 * testInstance.requestFilter(_)
   }
-
 }

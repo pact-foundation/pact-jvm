@@ -4,6 +4,8 @@ import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.model.HttpRequest
+import au.com.dius.pact.core.model.HttpResponse
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
@@ -17,11 +19,13 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -34,6 +38,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
+@SuppressWarnings('UnnecessaryGetter')
 class ProviderVerifierSpec extends Specification {
 
   ProviderVerifier verifier
@@ -432,13 +437,14 @@ class ProviderVerifierSpec extends Specification {
     verifier.pactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
 
+    def tags = ['tag1', 'tag2', 'tag3']
     System.setProperty('pact.provider.tag', 'tag1,tag2 , tag3 ')
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, ['tag1', 'tag2', 'tag3'])
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags) >> new Ok(true)
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
@@ -449,6 +455,43 @@ class ProviderVerifierSpec extends Specification {
     new VerificationResult.Ok()     | new VerificationResult.Failed() | new TestResult.Failed()
     new VerificationResult.Failed() | new VerificationResult.Ok()     | new TestResult.Failed()
     new VerificationResult.Failed() | new VerificationResult.Failed() | new TestResult.Failed()
+  }
+
+  def 'return a failed result if reportVerificationResults returns an error'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    IPactBrokerClient pactBrokerClient = Mock(IPactBrokerClient)
+    verifier.verificationReporter = Mock(VerificationReporter)
+    verifier.pactReader = Stub(PactReader)
+    def statechange = Stub(StateChange) {
+      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+    }
+    def interaction1 = Stub(RequestResponseInteraction)
+    def interaction2 = Stub(RequestResponseInteraction)
+    def mockPact = Stub(Pact) {
+      getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
+    }
+
+    verifier.projectHasProperty = { it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS }
+    verifier.projectGetProperty = {
+      (it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS).toString()
+    }
+    verifier.stateChangeHandler = statechange
+
+    verifier.pactReader.loadPact(_) >> mockPact
+    mockPact.interactions >> [interaction1, interaction2]
+
+    when:
+    def result = verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
+
+    then:
+    1 * verifier.verificationReporter.reportResults(_, _, '0.0.0', pactBrokerClient, []) >> new Err(['failed'])
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> new VerificationResult.Ok()
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> new VerificationResult.Ok()
+    result instanceof VerificationResult.Failed
+    result.description == 'Failed to publish results to the Pact broker'
+    result.failures == ['': [new VerificationFailureType.PublishResultsFailure(['failed'])]]
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -491,37 +534,6 @@ class ProviderVerifierSpec extends Specification {
     0 * verifier.verificationReporter.reportResults(_, _, _, _, _)
   }
 
-  @SuppressWarnings('UnnecessaryGetter')
-  def 'If the pact source is from a pact broker, publish the verification results back'() {
-    given:
-    def links = ['publish': 'true']
-    def pact = Mock(Pact) {
-      getSource() >> new BrokerUrlSource('url', 'url', links)
-    }
-    def client = Mock(PactBrokerClient)
-
-    when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(), '0', client, [])
-
-    then:
-    1 * client.publishVerificationResults(links, new TestResult.Ok(), '0', null) >> new Ok(true)
-  }
-
-  @SuppressWarnings('UnnecessaryGetter')
-  def 'If the pact source is not from a pact broker, ignore the verification results'() {
-    given:
-    def pact = Mock(Pact) {
-      getSource() >> new UrlSource('url', null)
-    }
-    def client = Mock(PactBrokerClient)
-
-    when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, new TestResult.Ok(), '0', client, [])
-
-    then:
-    0 * client.publishVerificationResults(_, new TestResult.Ok(), '0', null)
-  }
-
   @SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
   def 'Ignore the verification results if publishing is disabled'() {
     given:
@@ -554,7 +566,7 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.pactReader.loadPact(_) >> pact
     1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
-    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> new VerificationResult.Ok()
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _, false) >> new VerificationResult.Ok()
     0 * client.publishVerificationResults(_, new TestResult.Ok(), _, _)
   }
 
@@ -653,6 +665,23 @@ class ProviderVerifierSpec extends Specification {
     result.failures['1234'][0].e instanceof InvalidPathExpression
   }
 
+  def 'verifyInteraction sets the state change error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    provider.stateChangeUrl = new URL('http://localhost:66/statechange')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.SynchronousHttp('key', 'Test Interaction',
+      [new ProviderState('Test State')], new HttpRequest(), new HttpResponse(), '1234', [:], true)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
+
+    then:
+    result instanceof VerificationResult.Failed
+    result.pending == true
+  }
+
   def 'verifyResponseFromProvider returns an error result if the request to the provider fails with an exception'() {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
@@ -684,7 +713,7 @@ class ProviderVerifierSpec extends Specification {
 
     when:
     def result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
-      interactionMessage, failures)
+      interactionMessage, failures, false)
 
     then:
     result instanceof VerificationResult.Failed
@@ -692,5 +721,41 @@ class ProviderVerifierSpec extends Specification {
     result.failures.size() == 1
     result.failures['abc123'][0].description == 'Request to provider method failed with an exception'
     result.failures['abc123'][0].e instanceof RuntimeException
+  }
+
+  def 'verifyInteraction sets the verification error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.SynchronousHttp('key', 'Test Interaction',
+      [], new HttpRequest(), new HttpResponse(), '1234', [:], true)
+    def client = Mock(ProviderClient)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
+
+    then:
+    client.makeRequest(_) >> new ProviderResponse(500, [:], ContentType.JSON, '')
+    result instanceof VerificationResult.Failed
+    result.pending == true
+  }
+
+  def 'verifyInteraction sets the message verification error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    provider.verificationType = PactVerification.ANNOTATED_METHOD
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.AsynchronousMessage('key', 'Test Interaction',
+      OptionalBody.body('{}'.bytes, ContentType.JSON), [:], new MatchingRulesImpl(), new Generators(),
+      '1234', [], [:], true)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
+
+    then:
+    result instanceof VerificationResult.Failed
+    result.pending == true
   }
 }

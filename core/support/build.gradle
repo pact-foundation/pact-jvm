@@ -19,12 +19,12 @@ dependencies {
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
   testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
+  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testCompile "junit:junit:${project.junitVersion}"
 
-  antlr "org.antlr:antlr4:4.7.2"
+  antlr "org.antlr:antlr4:4.9.2"
 }
 
 compileJava {

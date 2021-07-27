@@ -8,10 +8,13 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
 class ResponseComparisonSpec extends Specification {
@@ -143,5 +146,46 @@ class ResponseComparisonSpec extends Specification {
     ''                                         | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
     null                                       | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
 
+  }
+
+  @Issue('#1375')
+  @Unroll
+  @RestoreSystemProperties
+  def 'shouldGenerateDiff - #desc'() {
+    given:
+    if (value != null) {
+      System.setProperty('pact.verifier.generateDiff', value)
+    }
+
+    expect:
+    ResponseComparison.shouldGenerateDiff(SystemPropertyResolver.INSTANCE, 4 * 1024) == result
+
+    where:
+
+    desc                       | value   || result
+    'if property is not set'   | null    || new Ok(true)
+    'if property is empty'     | ''      || new Ok(false)
+    'if property is true'      | 'true'  || new Ok(true)
+    'if property is false'     | 'FALSE' || new Ok(false)
+    'if property > data size'  | '2kb'   || new Ok(false)
+    'if property == data size' | '4kb'   || new Ok(true)
+    'if property < data size'  | '8kb'   || new Ok(true)
+    'if property is invalid'   | 'jhjhj' || new Err("'jhjhj' is not a valid data size")
+  }
+
+  @Issue('#1375')
+  @RestoreSystemProperties
+  def 'comparing bodies should not show all the differences if it is disabled'() {
+    given:
+    System.setProperty('pact.verifier.generateDiff', 'false')
+    actualBody = '{"stuff": "should make the test fail"}'
+    def result = subject().bodyMismatches
+
+    expect:
+    result instanceof Ok
+    result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
+      '$.stuff': ["Expected 'is good' (String) but received 'should make the test fail' (String)"]
+    ]
+    result.value.diff.empty
   }
 }

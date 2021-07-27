@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
@@ -39,10 +38,11 @@ open class MessageTarget @JvmOverloads constructor(
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: MutableMap<String, Any>
+    context: MutableMap<String, Any>,
+    pending: Boolean
   ) {
     val result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
-      interaction.description, mutableMapOf())
+      interaction.description, mutableMapOf(), false)
     reportTestResult(result, verifier)
 
     try {
@@ -113,6 +113,8 @@ open class MessageTarget @JvmOverloads constructor(
 
     return providerInfo
   }
+
+  override fun validForInteraction(interaction: Interaction) = interaction.isAsynchronousMessage()
 
   companion object : KLogging()
 }

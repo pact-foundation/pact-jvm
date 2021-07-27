@@ -1,5 +1,4 @@
-Gradle
-======
+# Gradle plugin to verify a provider
 
 Gradle plugin for verifying pacts against a provider.
 
@@ -95,12 +94,18 @@ The following project properties can be specified with `-Pproperty=value` on the
 |`pact.filter.providerState`|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |`pact.filter.pacturl`|This filter allows just the just the changed pact specified in a webhook to be run. It should be used in conjunction with `pact.filter.consumers` |
 |`pact.verifier.publishResults`|Publishing of verification results will be skipped unless this property is set to 'true'|
+|`pact.verifier.ignoreNoConsumers`|If set to `true`, don't fail the build if there are no consumers to verify [4.1.19+]|
+
+The following project properties must be specified as system properties:
+
+|Property|Description|
+|--------|-----------|
 |`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
 |`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
 |`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|
 |`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
 |`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
-|`pact.verifier.ignoreNoConsumers`|If set to `true`, don't fail the build if there are no consumers to verify [4.1.19+]|
+|`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
 
 ## Specifying the provider hostname at runtime
 
@@ -642,16 +647,15 @@ Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpcli
 ### Allowing just the changed pact specified in a webhook to be verified [4.0.6+]
 
 When a consumer publishes a new version of a pact file, the Pact broker can fire off a webhook with the URL of the changed 
-pact file. To allow only the changed pact file to be verified, you can override the URL by using the `pact.filter.consumers`
-and `pact.filter.pacturl` project properties.
+pact file. To allow only the changed pact file to be verified, you can override the URL by using the `pact.filter.pacturl` project properties.
 
 For example, running:
 
 ```console
-gradle pactVerify -Ppact.filter.consumers='Foo Web Client' -Ppact.filter.pacturl=https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.1
-```  
+gradle pactVerify -Ppact.filter.pacturl=https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.1
+```
 
-will only run the verification for Foo Web Client with the given pact file URL.
+will only run the verification with the given pact file URL.
 
 ## Verifying pact files from a S3 bucket
 

@@ -18,14 +18,18 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
-import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Utils.sizeOf
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import mu.KLogging
+import java.lang.Integer.max
 
 data class BodyComparisonResult(
   val mismatches: Map<String, List<BodyMismatch>> = emptyMap(),
@@ -69,7 +73,10 @@ class ResponseComparison(
     }
   }
 
-  fun bodyResult(mismatches: List<Mismatch>): Result<BodyComparisonResult, BodyTypeMismatch> {
+  fun bodyResult(
+    mismatches: List<Mismatch>,
+    resolver: ValueResolver
+  ): Result<BodyComparisonResult, BodyTypeMismatch> {
     val bodyTypeMismatch = mismatches.filterIsInstance<BodyTypeMismatch>().firstOrNull()
     return if (bodyTypeMismatch != null) {
       Err(bodyTypeMismatch)
@@ -79,13 +86,24 @@ class ResponseComparison(
         .groupBy { bm -> bm.path }
 
       val contentType = this.actualResponseContentType
-      val diff = generateFullDiff(actualBody.orEmpty(), contentType, expectedBody.valueAsString(), isJsonBody)
+      val expected = expectedBody.valueAsString()
+      val actual = actualBody.orEmpty()
+      val diff = when (val shouldIncludeDiff = shouldGenerateDiff(resolver, max(actual.length, expected.length))) {
+        is Ok -> if (shouldIncludeDiff.value) {
+          generateFullDiff(actual, contentType, expected, isJsonBody)
+        } else {
+          emptyList()
+        }
+        is Err -> {
+          logger.warn { "Invalid value for property 'pact.verifier.generateDiff' - ${shouldIncludeDiff.error}" }
+          emptyList()
+        }
+      }
       Ok(BodyComparisonResult(bodyMismatches, diff))
     }
   }
 
   companion object : KLogging() {
-
     private fun generateFullDiff(
       actual: String,
       contentType: ContentType,
@@ -114,6 +132,23 @@ class ResponseComparison(
     }
 
     @JvmStatic
+    fun shouldGenerateDiff(resolver: ValueResolver, length: Int): Result<Boolean, String> {
+      val shouldIncludeDiff = resolver.resolveValue("pact.verifier.generateDiff", "NOT_SET")
+      return when (val v = shouldIncludeDiff?.toLowerCase()) {
+        "true", "not_set" -> Ok(true)
+        "false" -> Ok(false)
+        else -> if (v.isNotEmpty()) {
+          when (val result = sizeOf(v!!)) {
+            is Ok -> Ok(length <= result.value)
+            is Err -> result
+          }
+        } else {
+          Ok(false)
+        }
+      }
+    }
+
+    @JvmStatic
     fun compareResponse(response: IResponse, actualResponse: ProviderResponse): ComparisonResult {
       val actualResponseContentType = actualResponse.contentType
       val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
@@ -122,7 +157,7 @@ class ResponseComparison(
         actualResponse.headers.toMutableMap(), OptionalBody.body(actualResponse.body?.toByteArray(
         actualResponseContentType.asCharset()))))
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
-        comparison.bodyResult(mismatches))
+        comparison.bodyResult(mismatches, SystemPropertyResolver))
     }
 
     @JvmStatic
@@ -151,7 +186,7 @@ class ResponseComparison(
       val responseComparison = ResponseComparison(
         mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents,
         messageContentType.isJson(), messageContentType, actual.valueAsString())
-      return ComparisonResult(bodyMismatches = responseComparison.bodyResult(bodyMismatches),
+      return ComparisonResult(bodyMismatches = responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver),
         metadataMismatches = metadataMismatches.groupBy { it.key })
     }
 

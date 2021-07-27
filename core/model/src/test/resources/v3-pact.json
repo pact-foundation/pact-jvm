@@ -19,7 +19,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "text/html"
+          "Content-Type": ["text/html"]
         },
         "body": "\"That is some good Mallory.\""
       }

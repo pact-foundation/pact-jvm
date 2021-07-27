@@ -297,7 +297,7 @@ class FormPostBuilder(
    * @param name attribute name
    */
   fun uuid(name: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, UuidGenerator)
+    generators.addGenerator(Category.BODY, name, UuidGenerator())
     return uuid(name, "e2490de5-5bd3-43d5-b7c4-526e33f71304")
   }
 

@@ -10,11 +10,10 @@ configured pacts against your provider.
 ```clojure
   :profiles {
              :pact {
-                    :plugins [[au.com.dius.pact.provider/lein "4.1.0" :exclusions [commons-logging]]]
-                    :dependencies [[ch.qos.logback/logback-core "1.1.3"]
-                                   [ch.qos.logback/logback-classic "1.1.3"]
-                                   [org.apache.httpcomponents/httpclient "4.4.1"]]
-                    }}}
+                    :plugins [[au.com.dius.pact.provider/lein "4.1.20" :exclusions [commons-logging]]]
+                    :dependencies [[ch.qos.logback/logback-core "1.2.3"]
+                                   [ch.qos.logback/logback-classic "1.2.3"]]
+                    }}
 ```
 
 ### 2. Define the pacts between your consumers and providers

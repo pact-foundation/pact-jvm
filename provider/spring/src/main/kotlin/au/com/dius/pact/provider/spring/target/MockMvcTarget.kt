@@ -3,6 +3,8 @@ package au.com.dius.pact.provider.spring.target
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.provider.VerificationFailureType
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.spring.MvcProviderVerifier
 import org.springframework.http.converter.HttpMessageConverter
@@ -47,13 +49,23 @@ class MockMvcTarget @JvmOverloads constructor(
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: MutableMap<String, Any>
+    context: MutableMap<String, Any>,
+    pending: Boolean
   ) {
     val mockMvc = buildMockMvc()
     doTestInteraction(consumerName, interaction, source) { provider, consumer, verifier, failures ->
       val mvcVerifier = verifier as MvcProviderVerifier
-      mvcVerifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interaction.description,
-              failures, mockMvc, consumer.pending)
+      val requestResponse = interaction.asSynchronousRequestResponse()
+      if (requestResponse == null) {
+        val message = "MockMvcTarget can only be used with Request/Response interactions, got $interaction"
+        VerificationResult.Failed(message, message,
+          mapOf(
+            interaction.interactionId.orEmpty() to listOf(VerificationFailureType.InvalidInteractionFailure(message))
+          ), pending)
+      } else {
+        mvcVerifier.verifyResponseFromProvider(provider, requestResponse, interaction.description,
+          failures, mockMvc, pending)
+      }
     }
   }
 
@@ -77,4 +89,6 @@ class MockMvcTarget @JvmOverloads constructor(
   override fun getRequestClass(): Class<*> = MockHttpServletRequestBuilder::class.java
 
   override fun createProviderVerifier() = MvcProviderVerifier(printRequestResponse)
+
+  override fun validForInteraction(interaction: Interaction) = interaction.isSynchronousRequestResponse()
 }

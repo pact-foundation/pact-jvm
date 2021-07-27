@@ -9,17 +9,18 @@ include 'consumer'
 include 'consumer:groovy'
 include 'consumer:junit'
 include 'consumer:junit5'
+include 'consumer:kotlin'
 
 include 'consumer:specs2_2.13'
 project(':consumer:specs2_2.13').projectDir = file('consumer/specs2')
 
-include   'provider'
-include   'provider:gradle'
-include   'provider:maven'
-include   'provider:junit'
-include   'provider:junit5'
-include   'provider:spring'
-include   'provider:junit5spring'
+include 'provider'
+include 'provider:gradle'
+include 'provider:maven'
+include 'provider:junit'
+include 'provider:junit5'
+include 'provider:spring'
+include 'provider:junit5spring'
 
 if (System.getenv('GITHUB_WORKFLOW') == null) {
   include 'provider:lein'
@@ -33,5 +34,6 @@ include 'provider:scalasupport_2.13'
 project(':provider:scalasupport_2.13').projectDir = file('provider/scalasupport')
 
 include 'pact-jvm-server'
-include   'pact-specification-test'
+include 'pact-specification-test'
 include 'pact-publish'
+

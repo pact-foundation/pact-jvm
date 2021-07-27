@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.consumer`
 * artifact-id = `junit5`
-* version-id = `4.1.0`
+* version-id = `4.2.X`
 
 ## Usage
 
@@ -184,3 +184,42 @@ You can also just use the key instead of an expression:
 
 You can enable a HTTPS mock server by setting `https=true` on the `@PactTestFor` annotation. Note that this mock
 server will use a self-signed certificate, so any client code will need to accept self-signed certificates.
+
+## Using own KeyStore
+
+You can provide your own KeyStore file to be loaded on the MockServer. In order to do so you should fulfill the 
+properties `keyStorePath`, `keyStoreAlias`, `keyStorePassword`, `privateKeyPassword` on the `@PactTestFor` annotation.
+Please bear in mind you should also enable HTTPS flag.
+
+## Using multiple providers in a test (4.2.5+)
+
+It is advisable to focus on a single interaction with each test, but you can enable multiple providers in a single test.
+In this case, a separate mock server will be started for each configured provider.
+
+To enable this:
+
+1. Create a method to create the Pact for each provider annotated with the `@Pact(provider = "....")` annotation. The
+    provider name must be set on the annotation. You can create as many of these as required, but each must have a unique 
+    provider name.
+2. In the test method, use the `pactMethods` attribute on the `@PactTestFor` annotation with the names of all the 
+    methods defined in step 1.
+3. Add a MockServer parameter to the test method for each provider configured in step 1 with a `@ForProvider` 
+    annotation with the name of the provider.
+4. In your test method, interact with each of the mock servers passed in step 3. Note that if any mock server does not
+    get the requests it expects, it will fail the test.
+   
+For an example, see [MultiProviderTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/MultiProviderTest.groovy).
+
+## Dealing with persistent HTTP/1.1 connections (Keep Alive)
+
+As each test will get a new mock server, connections can not be persisted between tests. HTTP clients can cache
+connections with HTTP/1.1, and this can cause subsequent tests to fail. See [#342](https://github.com/pact-foundation/pact-jvm/issues/342)
+and [#1383](https://github.com/pact-foundation/pact-jvm/issues/1383).
+
+One option (if the HTTP client supports it, Apache HTTP Client does) is to set the system property `http.keepAlive` to `false` in
+the test JVM. The other option is to set `pact.mockserver.addCloseHeader` to `true` to force the mock server to
+send a `Connection: close` header with every response (supported with Pact-JVM 4.2.7+).
+
+# Message Pacts
+## Consumer test for a message consumer
+For testing a consumer of messages from a message queue using JUnit 5 and Pact V4, see [AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/ac6a0eae0b18183f6f453eafddb89b90741ace42/consumer/junit5/src/test/java/au/com/dius/pact/consumer/junit5/AsyncMessageTest.java).

@@ -10,7 +10,7 @@ class MinEqualsIgnoreOrderMatcherSpec extends Specification {
   def path
 
   def setup() {
-    mismatchFactory = [create: { p0, p1, p2, p3 -> new StatusMismatch(1, 1) }] as MismatchFactory
+    mismatchFactory = [create: { p0, p1, p2, p3 -> new StatusMismatch(1, 1, null, []) }] as MismatchFactory
     path = ['$', 'animals', '0']
   }
 

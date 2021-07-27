@@ -1,6 +1,5 @@
 buildscript {
   repositories {
-    jcenter()
     mavenCentral()
     mavenLocal()
   }
@@ -10,9 +9,9 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.4.31'
-  id 'io.gitlab.arturbosch.detekt' version '1.14.1'
-  id 'org.jetbrains.dokka' version '1.4.10' apply false
+  id 'org.jetbrains.kotlin.jvm' version '1.4.32'
+  id 'io.gitlab.arturbosch.detekt' version '1.17.1'
+  id 'org.jetbrains.dokka' version '1.4.32' apply false
   id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
 }
 
@@ -25,7 +24,6 @@ allprojects {
   repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
   }
 
   targetCompatibility = '11'
@@ -38,11 +36,10 @@ subprojects {
     return
   }
 
-  version = '4.2.5'
+  version = '4.2.9'
   
   buildscript {
     repositories {
-      jcenter()
       mavenCentral()
       mavenLocal()
     }
@@ -71,7 +68,7 @@ subprojects {
   }
 
   java {
-    modularity.inferModulePath = true
+//    modularity.inferModulePath = true
   }
 
     compileTestGroovy {

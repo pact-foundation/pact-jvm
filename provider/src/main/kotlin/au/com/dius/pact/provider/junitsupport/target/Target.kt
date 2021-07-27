@@ -24,8 +24,15 @@ interface Target {
    * @param interaction interaction to be tested
    * @param source Source of the Pact interaction
    * @param context Context map for the test
+   * @param pending if the Pact or Interaction is pending
    */
-  fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource, context: MutableMap<String, Any>)
+  fun testInteraction(
+    consumerName: String,
+    interaction: Interaction,
+    source: PactSource,
+    context: MutableMap<String, Any>,
+    pending: Boolean
+  )
 
   /**
    * Add a callback to receive the test interaction result
@@ -55,6 +62,11 @@ interface Target {
   fun getRequestClass(): Class<*> = HttpRequest::class.java
 
   fun configureVerifier(source: PactSource, consumerName: String, interaction: Interaction)
+
+  /**
+   * If this target can verify the interaction
+   */
+  fun validForInteraction(interaction: Interaction): Boolean
 
   val verifier: IProviderVerifier
 }

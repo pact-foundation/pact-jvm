@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
@@ -10,6 +11,7 @@ import java.util.TimeZone;
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.core.support.json.JsonParser;
 import au.com.dius.pact.core.support.json.JsonValue;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -266,6 +268,14 @@ public class PactDslJsonBodyTest {
     assertThat(jsonObject.get("dateBerlin").toString(), is(equalTo("1970-01-01")));
     assertThat(jsonObject.get("timeLosAngeles").toString(), is(equalTo("16:00:00")));
     assertThat(jsonObject.get("timeBerlin").toString(), is(equalTo("01:00:00")));
+  }
+
+  @Test
+  public void testExampleLocalDate() throws Exception {
+    final PactDslJsonBody response = new PactDslJsonBody();
+    response.localDate("localDateExample", "yyyy-MM-dd", LocalDate.EPOCH);
+    JsonValue.Object jsonObject = response.getBody().asObject();
+    assertThat(jsonObject.get("localDateExample").toString(), is(equalTo("1970-01-01")));
   }
 
   @Test

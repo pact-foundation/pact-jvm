@@ -773,7 +773,7 @@ open class PactDslJsonArray : DslPart {
    * Element that must be encoded as an UUID
    */
   fun uuid(): PactDslJsonArray {
-    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), UuidGenerator)
+    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), UuidGenerator())
     return uuid("e2490de5-5bd3-43d5-b7c4-526e33f71304")
   }
 

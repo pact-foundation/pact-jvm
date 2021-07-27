@@ -28,12 +28,12 @@ class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit ti
         
         val pactResponseFuture: Future[Response] = for {
           _ <- stateChangeFuture
-          response <- HttpClient.run(ServiceInvokeRequest(config.getProviderRoot.url, interaction.getRequest))
+          response <- HttpClient.run(ServiceInvokeRequest(config.getProviderRoot.url, interaction.asSynchronousRequestResponse().getRequest))
         } yield response
 
         val actualResponse = Await.result(pactResponseFuture, timeout)
 
-      val responseMismatches = ResponseMatching.responseMismatches(interaction.getResponse, actualResponse)
+      val responseMismatches = ResponseMatching.responseMismatches(interaction.asSynchronousRequestResponse().getResponse, actualResponse)
       if (!responseMismatches.isEmpty) {
           throw new TestFailedException(s"There were response mismatches: \n${responseMismatches.asScala.mkString("\n")}", 10)
         }

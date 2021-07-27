@@ -14,9 +14,10 @@ class SpringBootHttpTarget(override var port: Int = 0) : HttpTarget(port = port)
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: MutableMap<String, Any>
+    context: MutableMap<String, Any>,
+    pending: Boolean
   ) {
     provider.port = port
-    super.testInteraction(consumerName, interaction, source, context)
+    super.testInteraction(consumerName, interaction, source, context, pending)
   }
 }

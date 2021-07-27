@@ -2,11 +2,15 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
 import mu.KLogging
 
 /**
@@ -21,7 +25,7 @@ interface VerificationReporter {
     pact: Pact,
     result: TestResult,
     version: String,
-    client: PactBrokerClient? = null,
+    client: IPactBrokerClient? = null,
     tag: String? = null
   )
 
@@ -32,9 +36,9 @@ interface VerificationReporter {
     pact: Pact,
     result: TestResult,
     version: String,
-    client: PactBrokerClient? = null,
+    client: IPactBrokerClient? = null,
     tags: List<String> = emptyList()
-  )
+  ): Result<Boolean, List<String>>
 
   /**
    * This must return true unless the pact.verifier.publishResults property has the value of "true"
@@ -57,7 +61,7 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     pact: Pact,
     result: TestResult,
     version: String,
-    client: PactBrokerClient?,
+    client: IPactBrokerClient?,
     tag: String?
   ) {
     if (tag.isNullOrEmpty()) {
@@ -71,34 +75,45 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     pact: Pact,
     result: TestResult,
     version: String,
-    client: PactBrokerClient?,
+    client: IPactBrokerClient?,
     tags: List<String>
-  ) {
-    when (val source = pact.source) {
+  ): Result<Boolean, List<String>> {
+    return when (val source = pact.source) {
       is BrokerUrlSource -> {
         val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options.toMutableMap())
         publishResult(brokerClient, source, result, version, pact, tags)
       }
-      else -> logger.info { "Skipping publishing verification results for source $source" }
+      else -> {
+        logger.info { "Skipping publishing verification results for source $source" }
+        Ok(false)
+      }
     }
   }
 
   private fun publishResult(
-    brokerClient: PactBrokerClient,
+    brokerClient: IPactBrokerClient,
     source: BrokerUrlSource,
     result: TestResult,
     version: String,
     pact: Pact,
     tags: List<String>
-  ) {
-    if (tags.isNotEmpty()) {
+  ): Result<Boolean, List<String>> {
+    val tagsResult = if (tags.isNotEmpty()) {
       brokerClient.publishProviderTags(source.attributes, pact.provider.name, tags, version)
+    } else {
+      Ok(true)
     }
     val publishResult = brokerClient.publishVerificationResults(source.attributes, result, version)
     if (publishResult is Err) {
       logger.error { "Failed to publish verification results - ${publishResult.error}" }
     } else {
       logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
+    }
+
+    return when {
+      tagsResult is Err && publishResult is Ok -> tagsResult
+      tagsResult is Err && publishResult is Err -> Err(tagsResult.error + publishResult.error)
+      else -> publishResult.mapError { listOf(it) }
     }
   }
 

@@ -33,6 +33,7 @@ class ContentTypeSpec extends Specification {
     'application/HAL+JSON' || true
     'application/x-thrift' || true
     'application/x-other'  || false
+    'application/graphql'  || true
 
     contentType = new ContentType(value)
   }
