@@ -217,7 +217,7 @@ open class ProviderClient(
       requestFilter::class.java.interfaces.any { it.isAnnotationPresent(FunctionalInterface::class.java) }
 
     @JvmStatic
-    private fun stripTrailingSlash(basePath: String): String {
+    fun stripTrailingSlash(basePath: String): String {
       return when {
         basePath == "/" -> ""
         basePath.isNotEmpty() && basePath.last() == '/' -> basePath.substring(0, basePath.length - 1)

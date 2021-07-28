@@ -16,7 +16,7 @@ import java.io.File
 @Mojo(name = "publish")
 open class PactPublishMojo : PactBaseMojo() {
 
-    @Parameter(defaultValue = "false", expression = "\${skipPactPublish}")
+    @Parameter(defaultValue = "false", property = "skipPactPublish")
     private var skipPactPublish: Boolean = false
 
     @Parameter(required = true, defaultValue = "\${project.version}", property = "pact.projectVersion")

@@ -9,9 +9,9 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.4.32'
+  id 'org.jetbrains.kotlin.jvm' version '1.5.21'
   id 'io.gitlab.arturbosch.detekt' version '1.17.1'
-  id 'org.jetbrains.dokka' version '1.4.32' apply false
+  id 'org.jetbrains.dokka' version '1.5.0' apply false
   id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
 }
 
@@ -103,11 +103,13 @@ subprojects {
   if (System.env.CI != 'true') {
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
       archiveClassifier = 'javadoc'
+      duplicatesStrategy = 'exclude'
       from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
     }
   } else {
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc]) {
       archiveClassifier = 'javadoc'
+      duplicatesStrategy = 'exclude'
       from javadoc.destinationDir, groovydoc.destinationDir
     }
   }

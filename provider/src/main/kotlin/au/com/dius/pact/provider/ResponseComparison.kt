@@ -191,7 +191,7 @@ class ResponseComparison(
     }
 
     @JvmStatic
-    private fun compareMessageBody(
+    fun compareMessageBody(
       message: MessageInteraction,
       actual: OptionalBody,
       context: MatchingContext

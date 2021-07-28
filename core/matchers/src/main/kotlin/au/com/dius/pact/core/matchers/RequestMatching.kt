@@ -52,7 +52,7 @@ data class PartialRequestMatch(val problems: Map<Interaction, RequestMatchResult
     return s
   }
 
-  fun calculateScore() = problems.values.map { it.calculateScore() }.max() ?: 0
+  fun calculateScore() = problems.values.map { it.calculateScore() }.maxOrNull() ?: 0
 }
 
 object RequestMismatch : RequestMatch()
