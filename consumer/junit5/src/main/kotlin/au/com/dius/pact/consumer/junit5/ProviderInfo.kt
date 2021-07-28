@@ -47,14 +47,14 @@ data class ProviderInfo @JvmOverloads constructor(
     MockProviderConfig.httpConfig(
             hostInterface.ifEmpty { MockProviderConfig.LOCALHOST },
             if (port.isEmpty()) 0 else port.toInt(),
-            pactVersion ?: PactSpecVersion.V3,
+            pactVersion ?: PactSpecVersion.V4,
             mockServerImplementation
     )
   }
 
   private fun httpsProviderConfig() : MockHttpsProviderConfig {
     return MockHttpsProviderConfig.httpsConfig(
-            if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
+      hostInterface.ifEmpty { MockProviderConfig.LOCALHOST },
             if (port.isEmpty()) 0 else port.toInt(),
             pactVersion ?: PactSpecVersion.V3,
             mockServerImplementation)
@@ -63,7 +63,7 @@ data class ProviderInfo @JvmOverloads constructor(
   private fun httpsKeyStoreProviderConfig() : MockHttpsProviderConfig {
     val loadedKeyStore = KeyStore.getInstance(File(keyStorePath), keyStorePassword.toCharArray())
     return MockHttpsProviderConfig(if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
-            if (port.isEmpty() || port.equals("0")) randomPort() else port.toInt(),
+            if (port.isEmpty() || port == "0") randomPort() else port.toInt(),
             pactVersion ?: PactSpecVersion.V3,
             loadedKeyStore,
             keyStoreAlias,

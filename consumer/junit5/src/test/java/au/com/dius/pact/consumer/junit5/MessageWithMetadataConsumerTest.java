@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.junit5;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.core.model.messaging.Message;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "MessageProvider", providerType = ProviderType.ASYNCH)
+@PactTestFor(providerName = "MessageProvider", providerType = ProviderType.ASYNCH, pactVersion = PactSpecVersion.V3)
 public class MessageWithMetadataConsumerTest {
 
   @Pact(consumer = "test_consumer_v3")

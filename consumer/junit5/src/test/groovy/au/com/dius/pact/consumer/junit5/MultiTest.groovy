@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.MockServer
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
@@ -60,7 +61,7 @@ class MultiTest {
   }
 
   @Test
-  @PactTestFor(pactMethod = 'createFragment1')
+  @PactTestFor(pactMethod = 'createFragment1', pactVersion = PactSpecVersion.V3)
   void runTest1(MockServer mockServer) {
     def http = HttpBuilder.configure { request.uri = mockServer.url }
 
@@ -100,7 +101,7 @@ class MultiTest {
   }
 
   @Test
-  @PactTestFor(pactMethod = 'createFragment2')
+  @PactTestFor(pactMethod = 'createFragment2', pactVersion = PactSpecVersion.V3)
   void runTest2(MockServer mockServer) {
     assert Request.Put(mockServer.url + '/numbertest')
       .addHeader('Accept', 'application/json')
@@ -145,13 +146,13 @@ class MultiTest {
   }
 
   @Test
-  @PactTestFor(pactMethod = 'getUsersFragment')
+  @PactTestFor(pactMethod = 'getUsersFragment', pactVersion = PactSpecVersion.V3)
   void runTest3(MockServer mockServer) {
     assert Request.Get(mockServer.url + '/idm/user').execute().returnContent().asString()
   }
 
   @Test
-  @PactTestFor(pactMethod = 'getUsersFragment2')
+  @PactTestFor(pactMethod = 'getUsersFragment2', pactVersion = PactSpecVersion.V3)
   void runTest4(MockServer mockServer) {
     assert Request.Get(mockServer.url + '/idm/user').execute().returnContent().asString()
   }

@@ -7,6 +7,7 @@ import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.PactTestRun
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.consumer.dsl.PactBuilder
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
 import au.com.dius.pact.core.model.BasePact
@@ -261,10 +262,10 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       if (method == null) {
         throw UnsupportedOperationException("No method annotated with @Pact was found on test class " +
           context.requiredTestClass.simpleName + " for provider '${providerInfo.providerName}'")
-      } else if (providerType == ProviderType.SYNCH && !JUnitTestSupport.conformsToSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V3)) {
+      } else if (providerType == ProviderType.SYNCH && !JUnitTestSupport.conformsToSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
         throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
-          "'public [RequestResponsePact|V4Pact] xxx(PactDslWithProvider builder)'")
-      } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V3)) {
+          "'public [RequestResponsePact|V4Pact] xxx(PactBuilder builder)'")
+      } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
         throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
           "'public [MessagePact|V4Pact] xxx(MessagePactBuilder builder)'")
       }
@@ -280,12 +281,20 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       val providerNameToUse = if (provider.isNullOrEmpty()) providerName else provider
       val pact = when (providerType) {
         ProviderType.SYNCH, ProviderType.UNSPECIFIED -> {
-          val consumerPactBuilder = ConsumerPactBuilder.consumer(pactConsumer)
-          if (providerInfo.pactVersion != null) {
-            consumerPactBuilder.pactSpecVersion(providerInfo.pactVersion)
+          if (method.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.PactDslWithProvider"))) {
+            val consumerPactBuilder = ConsumerPactBuilder.consumer(pactConsumer)
+            if (providerInfo.pactVersion != null) {
+              consumerPactBuilder.pactSpecVersion(providerInfo.pactVersion)
+            }
+            ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
+              consumerPactBuilder.hasPactWith(providerNameToUse)) as BasePact
+          } else {
+            val pactBuilder = PactBuilder(pactConsumer, providerNameToUse)
+            if (providerInfo.pactVersion != null) {
+              pactBuilder.pactSpecVersion(providerInfo.pactVersion)
+            }
+            ReflectionSupport.invokeMethod(method, context.requiredTestInstance, pactBuilder) as BasePact
           }
-          ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-            consumerPactBuilder.hasPactWith(providerNameToUse)) as BasePact
         }
         ProviderType.ASYNCH -> {
           ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
@@ -360,7 +369,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     @Suppress("UNCHECKED_CAST")
     val pactsToWrite = store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact, PactSpecVersion>>
     val pact = store["pact:${providerInfo.providerName}"] as BasePact
-    val version = providerInfo.pactVersion ?: PactSpecVersion.V3
+    val version = providerInfo.pactVersion ?: PactSpecVersion.V4
 
     pactsToWrite.merge(
       Pair(pact.consumer, pact.provider),

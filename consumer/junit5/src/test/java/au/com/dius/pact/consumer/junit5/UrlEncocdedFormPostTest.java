@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit5;
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.FormPostBuilder;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.http.HttpResponse;
@@ -20,7 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "FormPostProvider")
+@PactTestFor(providerName = "FormPostProvider", pactVersion = PactSpecVersion.V3)
 public class UrlEncocdedFormPostTest {
   @Pact(consumer = "FormPostConsumer")
   public RequestResponsePact formpost(PactDslWithProvider builder) {

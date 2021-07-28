@@ -3,6 +3,8 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import mu.KLogging
 import java.io.File
@@ -26,8 +28,15 @@ abstract class BasePact @JvmOverloads constructor(
 
   open fun fileForPact(pactDir: String) = File(pactDir, "${consumer.name}-${provider.name}.json")
 
-  override fun compatibleTo(other: Pact) = provider == other.provider &&
-    this::class.java.isAssignableFrom(other::class.java)
+  override fun compatibleTo(other: Pact): Result<Boolean, String> {
+    return if (provider != other.provider) {
+      Err("Provider names are different: '$provider' and '${other.provider}'")
+    } else if (!this::class.java.isAssignableFrom(other::class.java)) {
+      Err("Pact types different: '${other::class.simpleName}' can not be assigned to '${this::class.simpleName}'")
+    } else {
+      Ok(true)
+    }
+  }
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -59,7 +68,7 @@ abstract class BasePact @JvmOverloads constructor(
     @JvmStatic
     val DEFAULT_METADATA: Map<String, Map<String, Any?>> by lazy {
       Collections.unmodifiableMap(mapOf(
-        "pactSpecification" to mapOf("version" to "3.0.0"),
+        "pactSpecification" to mapOf("version" to "4.0"),
         "pact-jvm" to mapOf("version" to lookupVersion())
       ))
     }

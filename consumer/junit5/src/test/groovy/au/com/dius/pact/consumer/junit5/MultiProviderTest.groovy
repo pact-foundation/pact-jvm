@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonOutput
@@ -46,7 +47,7 @@ class MultiProviderTest {
   }
 
   @Test
-  @PactTestFor(pactMethods = ['pact1', 'pact2'])
+  @PactTestFor(pactMethods = ['pact1', 'pact2'], pactVersion = PactSpecVersion.V3)
   void runTest(@ForProvider('provider1') MockServer mockServer1, @ForProvider('provider2') MockServer mockServer2) {
     def http = HttpBuilder.configure { request.uri = mockServer1.url }
 

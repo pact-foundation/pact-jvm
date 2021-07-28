@@ -370,4 +370,12 @@ open class V4Pact @JvmOverloads constructor(
   override fun asV4Pact() = Ok(this)
 
   override fun isRequestResponsePact() = interactions.any { it is V4Interaction.SynchronousHttp }
+
+  override fun compatibleTo(other: Pact): Result<Boolean, String> {
+    return if (provider != other.provider) {
+      Err("Provider names are different: '$provider' and '${other.provider}'")
+    } else {
+      Ok(true)
+    }
+  }
 }

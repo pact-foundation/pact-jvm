@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.consumer.model.MockServerImplementation
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import org.apache.http.client.HttpClient
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'ProviderThatAcceptsGZippedBodies', port = '42567',
-  mockServerImplementation = MockServerImplementation.KTorServer)
+  mockServerImplementation = MockServerImplementation.KTorServer, pactVersion = PactSpecVersion.V3)
 class KTorGZippedBodyTest {
   @Pact(consumer = 'KTorGZippedBodyTestConsumer')
   RequestResponsePact pact(PactDslWithProvider builder) {

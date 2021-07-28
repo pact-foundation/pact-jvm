@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import groovy.json.JsonSlurper;
@@ -22,7 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "Siren Order Service")
+@PactTestFor(providerName = "Siren Order Service", pactVersion = PactSpecVersion.V3)
 public class ArrayContainsExampleTest {
   @Pact(consumer = "Order Processor")
   public RequestResponsePact articles(PactDslWithProvider builder) {

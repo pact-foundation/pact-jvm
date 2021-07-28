@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt
 import au.com.dius.pact.consumer.junit5.PactTestFor
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import org.apache.http.HttpResponse
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import static au.com.dius.pact.consumer.dsl.Matchers.regexp
 
 @ExtendWith(PactConsumerTestExt)
-@PactTestFor(providerName = 'XMLProvider')
+@PactTestFor(providerName = 'XMLProvider', pactVersion = PactSpecVersion.V3)
 class XMLPactTest {
   @Pact(consumer = 'XMLConsumer')
   RequestResponsePact xmlMessage(PactDslWithProvider builder) {

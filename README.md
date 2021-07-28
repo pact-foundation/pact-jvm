@@ -46,9 +46,10 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 ## Supported JDK and specification versions:
 
-| Branch | Specification | JDK | Kotlin Version | Latest Version |
-| ------ | ------------- | --- | -------------- | -------------- |
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4* | 11+ | 1.4.32 | 4.2.7 |
+| Branch | Specification | JDK | Kotlin Version | Latest Version | Notes |
+| ------ | ------------- | --- | -------------- | -------------- | ----- |
+| [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md) | V4 | 11+ | 1.5.21 | | [Upgrade notes](./upgrade-to-4.3.x.md) |
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4* | 11-15 | 1.4.32 | 4.2.8 |
 | [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.23 |
 
 ### Previous versions (not actively supported)

@@ -171,7 +171,7 @@ interface Pact {
    * If this pact is compatible with the other pact. Pacts are compatible if they have the
    * same provider and they are the same type
    */
-  fun compatibleTo(other: Pact): Boolean
+  fun compatibleTo(other: Pact): Result<Boolean, String>
 
   /**
    * Merges all the interactions into this Pact

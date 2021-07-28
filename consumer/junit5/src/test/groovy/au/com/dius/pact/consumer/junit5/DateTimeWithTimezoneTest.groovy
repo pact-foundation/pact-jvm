@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit5
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import org.apache.http.HttpResponse
@@ -15,7 +16,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @ExtendWith(PactConsumerTestExt)
-@PactTestFor(providerName = 'ProviderWithDateTime')
+@PactTestFor(providerName = 'ProviderWithDateTime', pactVersion = PactSpecVersion.V3)
 class DateTimeWithTimezoneTest {
   @Pact(consumer = 'Consumer')
   RequestResponsePact pactWithTimezone(PactDslWithProvider builder) {

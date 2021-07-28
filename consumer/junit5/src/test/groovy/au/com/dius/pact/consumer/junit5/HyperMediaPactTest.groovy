@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.dsl.LambdaDsl
 import au.com.dius.pact.consumer.dsl.PM
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonSlurper
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
-@PactTestFor(providerName = 'Siren Order Provider')
+@PactTestFor(providerName = 'Siren Order Provider', pactVersion = PactSpecVersion.V3)
 class HyperMediaPactTest {
 
   @Canonical

@@ -107,7 +107,7 @@ class PactConsumerTestExtSpec extends Specification {
     def json = new JsonSlurper().parse(pactFile)
 
     then:
-    json.metadata.pactSpecification.version == '3.0.0'
+    json.metadata.pactSpecification.version == '4.0'
     json.interactions[0].description == 'first'
     json.interactions[1].description == 'second'
   }

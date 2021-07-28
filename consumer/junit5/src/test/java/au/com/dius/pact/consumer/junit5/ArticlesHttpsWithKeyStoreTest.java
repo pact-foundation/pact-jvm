@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit5;
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.commons.collections4.MapUtils;
@@ -33,7 +34,8 @@ import static org.hamcrest.Matchers.startsWith;
         keyStorePath = "src/test/resources/keystore/pact-jvm-2048.jks",
         keyStoreAlias = "localhost",
         keyStorePassword = "coderswerehere",
-        privateKeyPassword = "coderswerehere")
+        privateKeyPassword = "coderswerehere",
+  pactVersion = PactSpecVersion.V3)
 public class ArticlesHttpsWithKeyStoreTest {
   private Map<String, String> headers = MapUtils.putAll(new HashMap<>(), new String[] {
     "Content-Type", "application/json"

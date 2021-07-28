@@ -41,7 +41,7 @@ class PactMergeSpec extends Specification {
   def 'Pacts with different providers are not compatible for #type'() {
     expect:
     !result.ok
-    result.message == 'Cannot merge pacts as they are not compatible'
+    result.message.startsWith 'Cannot merge pacts as they are not compatible - Provider names are different'
 
     where:
     type << [RequestResponsePact, MessagePact]
@@ -53,14 +53,14 @@ class PactMergeSpec extends Specification {
   def 'Pacts with different types are not compatible'() {
     given:
     def newPact = new RequestResponsePact(provider, consumer, [])
-    def existingPact = new MessagePact(new Provider('other provider'), consumer, [])
+    def existingPact = new MessagePact(provider, consumer, [])
 
     when:
     def result = PactMerge.merge(newPact, existingPact)
 
     then:
     !result.ok
-    result.message == 'Cannot merge pacts as they are not compatible'
+    result.message.startsWith 'Cannot merge pacts as they are not compatible - Pact types different'
   }
 
   @Unroll
@@ -275,45 +275,4 @@ class PactMergeSpec extends Specification {
     ]
     result = PactMerge.merge(identicalPact, identicalPact)
   }
-
-  @Unroll
-  @Ignore('conflict logic needs to be fixed')
-  def 'Pact merge should refuse different requests for identical description and states for #type'() {
-    expect:
-    !result.ok
-
-    where:
-    type << [RequestResponsePact, MessagePact]
-    basePact << [
-      pact,
-      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')]) ])
-    ]
-    newPact << [
-      new RequestResponsePact(pact.provider, pact.consumer, [
-        new RequestResponseInteraction('test interaction', [new ProviderState('test state')],
-          new Request('Get', '/different', PactReader.queryStringToMap('q=p&q=p2&r=s'),
-            [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}')), response, null)
-      ]),
-      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')],
-        OptionalBody.body('a b c'.bytes)) ])
-    ]
-    result = PactMerge.merge(basePact, newPact)
-  }
-
-  @Ignore('conflict logic needs to be fixed')
-  def 'Pact merge should refuse different responses for identical description and states'() {
-    given:
-    def differentResponse = response.copy()
-    differentResponse.status = 503
-    def newInteraction = new RequestResponseInteraction('test interaction',
-      [new ProviderState('test state')], request, differentResponse, null)
-    def pactCopy = new RequestResponsePact(pact.provider, pact.consumer, [newInteraction])
-
-    when:
-    def result = PactMerge.merge(pact, pactCopy)
-
-    then:
-    !result.ok
-  }
-
 }

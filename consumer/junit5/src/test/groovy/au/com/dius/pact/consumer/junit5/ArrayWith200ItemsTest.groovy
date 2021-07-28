@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit5
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.dsl.LambdaDslObject
@@ -16,7 +17,7 @@ import java.util.function.Consumer
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray
 
 @ExtendWith(PactConsumerTestExt)
-@PactTestFor(providerName = 'ProviderWith200Items')
+@PactTestFor(providerName = 'ProviderWith200Items', pactVersion = PactSpecVersion.V3)
 @SuppressWarnings(['JUnitPublicNonTestMethod', 'PropertyName', 'UnnecessaryObjectReferences',
   'ClosureAsLastMethodParameter'])
 class ArrayWith200ItemsTest {

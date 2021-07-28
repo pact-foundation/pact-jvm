@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.BasePact.Companion.DEFAULT_METADATA
+import au.com.dius.pact.core.model.BasePact.Companion.metaData
 import au.com.dius.pact.core.model.ContentType.Companion.fromString
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.HttpResponse
@@ -311,7 +312,8 @@ open class PactDslResponse @JvmOverloads constructor(
     return when {
       pactClass.isAssignableFrom(V4Pact::class.java) -> {
         V4Pact(request!!.consumer, request.provider,
-          consumerPactBuilder.interactions.map { obj -> obj.asV4Interaction() }.toMutableList(), DEFAULT_METADATA,
+          consumerPactBuilder.interactions.map { obj -> obj.asV4Interaction() }.toMutableList(),
+          metaData(null, PactSpecVersion.V4),
           UnknownPactSource) as P
       }
       pactClass.isAssignableFrom(RequestResponsePact::class.java) -> {
