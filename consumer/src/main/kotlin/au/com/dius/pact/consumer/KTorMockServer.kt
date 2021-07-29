@@ -28,6 +28,8 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import mu.KLogging
 import java.util.zip.DeflaterInputStream
 import java.util.zip.GZIPInputStream
@@ -94,20 +96,23 @@ class KTorMockServer(
   }
 
   private suspend fun toPactRequest(call: ApplicationCall): Request {
-    val headers = call.request.headers
-    val stream = call.receiveStream()
-    val bodyContents = when (bodyIsCompressed(headers["Content-Encoding"])) {
-      "gzip" -> GZIPInputStream(stream).readBytes()
-      "deflate" -> DeflaterInputStream(stream).readBytes()
-      else -> stream.readBytes()
+    val request = call.request
+    val headers = request.headers
+    val bodyContents = withContext(Dispatchers.IO) {
+      val stream = call.receiveStream()
+      when (bodyIsCompressed(headers["Content-Encoding"])) {
+        "gzip" -> GZIPInputStream(stream).readBytes()
+        "deflate" -> DeflaterInputStream(stream).readBytes()
+        else -> stream.readBytes()
+      }
     }
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
       OptionalBody.body(bodyContents, ContentType.fromString(headers["Content-Type"]).or(ContentType.JSON))
     }
-    return Request(call.request.httpMethod.value, call.request.path(),
-      call.request.queryParameters.entries().associate { it.toPair() }.toMutableMap(),
+    return Request(request.httpMethod.value, request.path(),
+      request.queryParameters.entries().associate { it.toPair() }.toMutableMap(),
       headers.entries().associate { it.toPair() }.toMutableMap(), body)
   }
 
