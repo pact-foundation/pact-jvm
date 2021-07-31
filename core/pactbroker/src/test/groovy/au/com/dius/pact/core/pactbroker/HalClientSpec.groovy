@@ -504,7 +504,7 @@ class HalClientSpec extends Specification {
     client.httpClient = mockClient
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
-      getEntity() >> new StringEntity("{}", ContentType.APPLICATION_JSON)
+      getEntity() >> new StringEntity('{}', ContentType.APPLICATION_JSON)
     }
 
     when:
