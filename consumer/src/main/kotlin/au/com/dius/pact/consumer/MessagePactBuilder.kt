@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.Matcher
+import au.com.dius.pact.consumer.dsl.MetadataBuilder
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
@@ -9,6 +10,7 @@ import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 
@@ -113,6 +115,23 @@ class MessagePactBuilder(
         value
       }
     }.toMutableMap()
+    return this
+  }
+
+  /**
+   *  Adds the expected metadata to the message using a builder
+   */
+  fun withMetadata(consumer: java.util.function.Consumer<MetadataBuilder>): MessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before withMetaData")
+    }
+
+    val message = messages.last()
+    val metadataBuilder = MetadataBuilder()
+    consumer.accept(metadataBuilder)
+    message.metaData = metadataBuilder.values
+    message.matchingRules.addCategory(metadataBuilder.matchers)
+    message.generators.addGenerators(Category.METADATA, metadataBuilder.generators)
     return this
   }
 
