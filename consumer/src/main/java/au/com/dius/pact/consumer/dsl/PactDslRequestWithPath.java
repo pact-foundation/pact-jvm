@@ -22,6 +22,7 @@ import org.w3c.dom.Document;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +90,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
     this.consumerPactBuilder = consumerPactBuilder;
     this.consumer = existing.consumer;
     this.provider = existing.provider;
-    this.state = existing.state;
+    this.state = new ArrayList<>();
     this.description = description;
     this.defaultResponseValues = defaultResponseValues;
     this.path = existing.path;
