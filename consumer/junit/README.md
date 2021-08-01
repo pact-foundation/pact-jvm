@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.consumer`
 * artifact-id = `junit`
-* version-id = `4.1.22`
+* version-id = `4.2.9`
 
 ## Usage
 
@@ -745,6 +745,26 @@ For testing a consumer of messages from a message queue, the `MessagePactProvide
 same way as the `PactProviderRule` class for Request-Response interactions, but will generate a V3 format message pact file.
 
 For an example, look at [ExampleMessageConsumerTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/v3/ExampleMessageConsumerTest.java)
+
+### Matching message metadata
+
+You can also use matching rules for the metadata associated with the message. There is a `MetadataBuilder` class to
+help with this. You can access it via the `withMetadata` method that takes a Java Consumer on the `MessagePactBuilder` class.
+
+For example:
+
+```java
+builder.given("SomeProviderState")
+    .expectsToReceive("a test message with metadata")
+    .withMetadata(md -> {
+        md.add("metadata1", "metadataValue1");
+        md.add("metadata2", "metadataValue2");
+        md.add("metadata3", 10L);
+        md.matchRegex("partitionKey", "[A-Z]{3}\\d{2}", "ABC01");
+    })
+    .withContent(body)
+    .toPact();
+```
 
 # Having values injected from provider state callbacks (3.6.11+)
 

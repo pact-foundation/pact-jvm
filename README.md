@@ -1,4 +1,4 @@
-pact-jvm
+Pact-JVM
 ========
 
 [![Pact-JVM Build](https://github.com/pact-foundation/pact-jvm/workflows/Pact-JVM%20Build/badge.svg)](https://github.com/pact-foundation/pact-jvm/actions?query=workflow%3A%22Pact-JVM+Build%22)
@@ -48,8 +48,12 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch | Specification | JDK | Kotlin Version | Latest Version |
 | ------ | ------------- | --- | -------------- | -------------- |
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4* | 11+ | 1.4.32 | 4.2.7 |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.23 |
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4 (1) | 11-15 (2) | 1.4.32 | 4.2.9 |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.24 |
+
+**Notes:**
+* **1:** V4 specification support is a work in progress. See [Pact V4 RFC](https://github.com/pact-foundation/pact-specification/issues/71).
+* **2:** v4.2.x may run on JDK 16, but the build for it does not.
 
 ### Previous versions (not actively supported)
 
@@ -60,8 +64,6 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 | [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md) | V3 | 8 | 1.1.4-2 | 2.12, 2.11 | 3.5.25 |
 | [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3 | 7 | 1.1.4-2 | 2.11 | 3.5.7-jre7.0 |
 | [2.4.x](https://github.com/DiUS/pact-jvm/blob/v2.x/README.md) | V2 | 6 | N/A | 2.10, 2.11 | 2.4.20 |
-
-**NOTE:** V4 specification support is a work in progress. See [Pact V4 RFC](https://github.com/pact-foundation/pact-specification/issues/71).
 
 **NOTE:** The JARs produced by this project have changed with 4.1.x to better align with Java 9 JPMS. The artefacts are now:
 
@@ -97,7 +99,7 @@ Pact-JVM has a number of ways you can write your service consumer tests.
 
 ### I Use Scala
 
-You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [specs2](consumer/specs2)
+You want to look at: [pact4s](https://github.com/jbwheatley/pact4s) or [scala-pact](https://github.com/ITV/scala-pact)
 
 ### I Use Java
 
@@ -132,7 +134,7 @@ with these files.
 
 #### verify pacts with SBT
 
-You want to look at: [scala-pact](https://github.com/ITV/scala-pact)
+You want to look at: [pact4s](https://github.com/jbwheatley/pact4s) or [scala-pact](https://github.com/ITV/scala-pact)
 
 #### verify pacts with Gradle
 
@@ -151,10 +153,6 @@ You want to look at: [junit provider support](provider/junit) for JUnit 4 tests 
 
 You want to look at: [pact leiningen plugin](provider/lein)
 
-#### verify pacts with Specs2
-
-Have a look at [specs2](provider/specs2)
-
 #### verify pacts with a Spring MVC project
 
 Have a look at [spring](provider/spring) or [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc) (Not maintained).
@@ -172,14 +170,16 @@ The JUnit pact library also supports verification of V3 message pacts, have a lo
 ### I Use Ruby or Go or something else
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
 
-However if you have a ruby provider, the json produced by this library is compatible with the ruby pact library.
-You'll want to look at: [Ruby Pact](https://github.com/realestate-com-au/pact).
+However, if you have a ruby provider, the json produced by this library is compatible with the ruby pact library.
+You'll want to look at: [Ruby Pact](https://github.com/pact-foundation/pact-ruby).
 
-For .Net, there is [Pact-net](https://github.com/SEEK-Jobs/pact-net).
+For .Net, there is [Pact-net](https://github.com/pact-foundation/pact-net).
 
 For JS, there is [Pact-JS](https://github.com/pact-foundation/pact-js).
 
 For Go, there is [Pact-go](https://github.com/pact-foundation/pact-go).
+
+For Rust, there is [Pact-Rust](https://github.com/pact-foundation/pact-reference/tree/master/rust/pact_consumer).
 
 Have a look at [implementations in other languages](https://github.com/realestate-com-au/pact/wiki#implementations-in-other-languages).
 

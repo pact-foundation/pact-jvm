@@ -149,10 +149,6 @@ class.
 By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
 overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
-## Unsupported
-
-The current implementation does not support tests with multiple providers. This will be added in a later release.
-
 # Having values injected from provider state callbacks
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
@@ -221,5 +217,26 @@ the test JVM. The other option is to set `pact.mockserver.addCloseHeader` to `tr
 send a `Connection: close` header with every response (supported with Pact-JVM 4.2.7+).
 
 # Message Pacts
+
 ## Consumer test for a message consumer
 For testing a consumer of messages from a message queue using JUnit 5 and Pact V4, see [AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/ac6a0eae0b18183f6f453eafddb89b90741ace42/consumer/junit5/src/test/java/au/com/dius/pact/consumer/junit5/AsyncMessageTest.java).
+
+### Matching message metadata
+
+You can also use matching rules for the metadata associated with the message. There is a `MetadataBuilder` class to
+help with this. You can access it via the `withMetadata` method that takes a Java Consumer on the `MessagePactBuilder` class.
+
+For example:
+
+```java
+builder.given("SomeProviderState")
+    .expectsToReceive("a test message with metadata")
+    .withMetadata(md -> {
+        md.add("metadata1", "metadataValue1");
+        md.add("metadata2", "metadataValue2");
+        md.add("metadata3", 10L);
+        md.matchRegex("partitionKey", "[A-Z]{3}\\d{2}", "ABC01");
+    })
+    .withContent(body)
+    .toPact();
+```
