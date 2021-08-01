@@ -297,4 +297,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
       listOf()
     }
   }
+
+  fun addGenerators(category: Category, generators: Map<String, Generator>) {
+    categories[category] = generators.toMutableMap()
+  }
 }

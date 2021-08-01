@@ -32,7 +32,6 @@ import org.apache.http.impl.client.BasicAuthCache
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 import java.net.URI
-import java.net.URLDecoder
 import java.util.function.BiFunction
 import java.util.function.Consumer
 

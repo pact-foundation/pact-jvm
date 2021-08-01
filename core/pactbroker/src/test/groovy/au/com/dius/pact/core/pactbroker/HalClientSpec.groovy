@@ -495,4 +495,25 @@ class HalClientSpec extends Specification {
     then:
     1 * mockClient.execute({ it.URI.rawPath == '/pacticipants/my%2Fprovider-name' }, _) >> mockResponse
   }
+
+  @Issue('1399')
+  def 'navigating with a base URL containing a path'() {
+    given:
+    HalClient client = Spy(HalClient, constructorArgs: ['http://localhost:1234/subpath/one/two'])
+    client.pathInfo = null
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+      getEntity() >> new StringEntity('{}', ContentType.APPLICATION_JSON)
+    }
+
+    when:
+    client.navigate()
+
+    then:
+    1 * mockClient.execute(_, _) >> { args ->
+      assert args[0].getURI().toString() == 'http://localhost:1234/subpath/one/two/'
+      mockResponse
+    }
+  }
 }
