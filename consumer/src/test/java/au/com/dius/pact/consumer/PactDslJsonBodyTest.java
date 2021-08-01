@@ -220,7 +220,7 @@ public class PactDslJsonBodyTest {
       .id()
       .object("2")
         .id()
-        .stringValue("test", null)
+        .stringValue("test", (String) null)
         .nullValue("nullValue")
       .closeObject()
       .array(NUMBERS)

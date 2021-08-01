@@ -173,7 +173,7 @@ public class LambdaDslObjectTest {
 
         // Old DSL
         final String pactDslJson = new PactDslJsonBody()
-                .stringType(new String[]{"foo", "bar"})
+                .stringTypes("foo", "bar")
                 .getBody().toString();
 
         // Lambda DSL

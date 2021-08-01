@@ -23,7 +23,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
             .id()
             .object("2")
                 .id()
-                .stringValue("test", null)
+                .stringValue("test", (String) null)
                 .includesStr("v1", "test")
             .closeObject()
             .array("numbers")
