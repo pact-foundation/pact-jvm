@@ -1,0 +1,32 @@
+{
+  "provider": {
+    "name": "Issue298Service"
+  },
+  "consumer": {
+    "name": "consumer"
+  },
+  "interactions": [
+    {
+      "description": "Get data",
+      "request": {
+        "method": "GET",
+        "path": "/data"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "name": {
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "2.0.0"
+    },
+    "pact-jvm": {
+      "version": "3.1.1"
+    }
+  }
+}
