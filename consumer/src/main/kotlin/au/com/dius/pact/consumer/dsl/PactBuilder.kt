@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.PactSpecVersion
+import mu.KLogging
 
 open class PactBuilder(
   var consumer: String = "consumer",
@@ -27,6 +28,8 @@ open class PactBuilder(
    */
   @JvmOverloads
   fun usingPlugin(name: String, version: String? = null) {
-
+    logger.debug("usingPlugin($name, $version)")
   }
+
+  companion object : KLogging()
 }

@@ -242,8 +242,13 @@ open class PactDslJsonArray : DslPart {
         obj.matchers.matchingRules[matcherName]!!)
     }
     generators.addGenerators(obj.generators, rootPath + appendArrayIndex(1))
-    for (i in 0 until numberExamples) {
-      body.add(obj.body)
+
+    if (obj is PactDslJsonBody && obj.body is JsonValue.Array) {
+      body = obj.body
+    } else {
+      repeat(numberExamples) {
+        body.add(obj.body)
+      }
     }
   }
 

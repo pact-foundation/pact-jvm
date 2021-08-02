@@ -91,7 +91,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     this.consumerPactBuilder = consumerPactBuilder
     consumer = existing.consumer
     provider = existing.provider
-    state = existing.state
+    state = mutableListOf()
     this.description = description
     this.defaultResponseValues = defaultResponseValues
     path = existing.path

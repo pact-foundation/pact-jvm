@@ -70,4 +70,25 @@ class KotlinLanguageSupportTest {
       assertThat(pair.second, `is`(index + 1))
     }
   }
+
+  @Test
+  fun padToReturnsAnEmptyListWhenIfTheArrayIsEmpty() {
+    assertThat(emptyArray<Int>().padTo(100), `is`(empty()))
+  }
+
+  @Test
+  fun padToReturnsTheListIfTheArrayIsBiggerThanThePad() {
+    assertThat(arrayOf(1, 2, 3, 4).padTo(2), hasSize(4))
+  }
+
+  @Test
+  fun padToReturnsTheListIfTheArrayIsHasTheSameSizeAsThePad() {
+    assertThat(arrayOf(1, 2, 3, 4).padTo(4), hasSize(4))
+  }
+
+  @Test
+  fun padToPadsTheArrayByCyclingTheElements() {
+    assertThat(arrayOf(1, 2, 3, 4).padTo(8), `is`(listOf(1, 2, 3, 4, 1, 2, 3, 4)))
+    assertThat(arrayOf(1, 2, 3, 4).padTo(5), `is`(listOf(1, 2, 3, 4, 1)))
+  }
 }

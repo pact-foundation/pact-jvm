@@ -1,0 +1,40 @@
+{
+  "provider": {
+    "name": "NumberService"
+  },
+  "consumer": {
+    "name": "consumer"
+  },
+  "interactions": [
+    {
+      "description": "Get data",
+      "request": {
+        "method": "GET",
+        "path": "/data"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "number": 1234.5677
+        },
+        "matchingRules": {
+          "body": {
+            "$.number": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d+\\.\\d{4}"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "3.0.0"
+    }
+  }
+}
