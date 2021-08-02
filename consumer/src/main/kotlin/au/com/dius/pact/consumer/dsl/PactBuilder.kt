@@ -90,12 +90,13 @@ open class PactBuilder(
   }
 
   private fun forEntry(entry: CatalogueEntry, description: String, key: String?): V4Interaction {
-    when (entry.providerType) {
-      CatalogueEntryProviderType.CORE -> when (entry.key) {
-
-      }
-      CatalogueEntryProviderType.PLUGIN -> TODO()
-    }
+//    when (entry.providerType) {
+//      CatalogueEntryProviderType.CORE -> when (entry.key) {
+//
+//      }
+//      CatalogueEntryProviderType.PLUGIN -> TODO()
+//    }
+    TODO()
   }
 
   companion object : KLogging()

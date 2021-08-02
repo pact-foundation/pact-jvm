@@ -78,6 +78,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   }
 
   @JvmOverloads
+  @Suppress("LongParameterList")
   internal constructor(
     consumerPactBuilder: ConsumerPactBuilder,
     existing: PactDslRequestWithPath,

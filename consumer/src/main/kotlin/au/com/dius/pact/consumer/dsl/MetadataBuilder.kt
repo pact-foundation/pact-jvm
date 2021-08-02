@@ -28,6 +28,7 @@ import java.util.Date
 import java.util.TimeZone
 import java.util.UUID
 
+@Suppress("TooManyFunctions")
 open class MetadataBuilder(
   val values: MutableMap<String, Any?> = mutableMapOf(),
   val matchers: MatchingRuleCategory = MatchingRuleCategory("metadata"),

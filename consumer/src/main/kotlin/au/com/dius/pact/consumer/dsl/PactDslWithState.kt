@@ -16,6 +16,7 @@ open class PactDslWithState @JvmOverloads constructor(
   var state: MutableList<ProviderState> = mutableListOf()
   val comments = mutableListOf<String>()
 
+  @Suppress("LongParameterList")
   internal constructor(
     consumerPactBuilder: ConsumerPactBuilder,
     consumerName: String,

@@ -7,13 +7,13 @@ import kotlin.reflect.full.createInstance
 
 object MatchingConfig {
   private val coreBodyMatchers = mapOf(
-    "application/.*xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
-    "text/xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
-    ".*json.*" to "au.com.dius.pact.core.matchers.JsonBodyMatcher",
-    "text/plain" to "au.com.dius.pact.core.matchers.PlainTextBodyMatcher",
-    "multipart/form-data" to "au.com.dius.pact.core.matchers.MultipartMessageBodyMatcher",
-    "multipart/mixed" to "au.com.dius.pact.core.matchers.MultipartMessageBodyMatcher",
-    "application/x-www-form-urlencoded" to "au.com.dius.pact.core.matchers.FormPostBodyMatcher"
+    "application/.*xml" to "au.com.dius.pact.core.matchers.XmlContentMatcher",
+    "text/xml" to "au.com.dius.pact.core.matchers.XmlContentMatcher",
+    ".*json.*" to "au.com.dius.pact.core.matchers.JsonContentMatcher",
+    "text/plain" to "au.com.dius.pact.core.matchers.PlainTextContentMatcher",
+    "multipart/form-data" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
+    "multipart/mixed" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
+    "application/x-www-form-urlencoded" to "au.com.dius.pact.core.matchers.FormPostContentMatcher"
   )
 
   @JvmStatic

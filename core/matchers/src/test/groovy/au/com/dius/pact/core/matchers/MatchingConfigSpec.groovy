@@ -19,14 +19,14 @@ class MatchingConfigSpec extends Specification {
 
     where:
     contentType               | matcherClass
-    'application/json'        | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
-    'application/xml'         | 'au.com.dius.pact.core.matchers.XmlBodyMatcher'
-    'application/hal+json'    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
-    'application/thrift+json' | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
-    'application/stuff+xml'   | 'au.com.dius.pact.core.matchers.XmlBodyMatcher'
-    'application/json-rpc'    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
-    'application/jsonrequest' | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
-    'application/x-thrift'    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
-    'application/x-other'     | 'au.com.dius.pact.core.matchers.PlainTextBodyMatcher'
+    'application/json'        | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
+    'application/xml'         | 'au.com.dius.pact.core.matchers.XmlContentMatcher'
+    'application/hal+json'    | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
+    'application/thrift+json' | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
+    'application/stuff+xml'   | 'au.com.dius.pact.core.matchers.XmlContentMatcher'
+    'application/json-rpc'    | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
+    'application/jsonrequest' | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
+    'application/x-thrift'    | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
+    'application/x-other'     | 'au.com.dius.pact.core.matchers.PlainTextContentMatcher'
   }
 }
