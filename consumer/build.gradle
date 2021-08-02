@@ -12,6 +12,7 @@ dependencies {
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   implementation 'io.ktor:ktor-server-netty:1.6.1'
   implementation "io.ktor:ktor-network-tls-certificates:1.6.1"
+  implementation "io.pact.plugins.jvm:core:0.0.0"
 
   testImplementation "junit:junit:${project.junitVersion}"
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"

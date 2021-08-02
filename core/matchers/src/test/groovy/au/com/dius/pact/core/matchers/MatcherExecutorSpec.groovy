@@ -30,7 +30,7 @@ class MatcherExecutorSpec extends Specification {
   def path
 
   static xml(String xml) {
-    XmlBodyMatcher.INSTANCE.parse(xml)
+    XmlContentMatcher.INSTANCE.parse(xml)
   }
 
   static json(String json) {

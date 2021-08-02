@@ -163,7 +163,7 @@ class MatchingContextSpec extends Specification {
     def actual = OptionalBody.body('{"value": ["200.3"]}'.bytes)
 
     when:
-    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, context).mismatches
+    def mismatches = new JsonContentMatcher().matchBody(expected, actual, context).mismatches
 
     then:
     !mismatches.empty
@@ -178,7 +178,7 @@ class MatchingContextSpec extends Specification {
     def actual = OptionalBody.body('{"value": {"a": "200.3", "b": 200, "c": 300} }'.bytes)
 
     when:
-    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, context).mismatches
+    def mismatches = new JsonContentMatcher().matchBody(expected, actual, context).mismatches
 
     then:
     !mismatches.empty

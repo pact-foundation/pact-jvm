@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.matchers.generators
 
-import au.com.dius.pact.core.matchers.JsonBodyMatcher
+import au.com.dius.pact.core.matchers.JsonContentMatcher
 import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Generator
@@ -42,7 +42,7 @@ object ArrayContainsJsonGenerator : KLogging(), Generator {
     return variants.firstOrNull { (index, rules, _) ->
       logger.debug { "Comparing variant $index with value '$example'" }
       val matchingContext = MatchingContext(rules, true)
-      val matches = JsonBodyMatcher.compare(listOf("$"), example, example, matchingContext)
+      val matches = JsonContentMatcher.compare(listOf("$"), example, example, matchingContext)
       logger.debug { "Comparing variant $index => $matches" }
       matches.flatMap { it.result }.isEmpty()
     }

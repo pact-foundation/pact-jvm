@@ -17,10 +17,10 @@ import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['BracesForMethod', 'PrivateFieldCouldBeFinal'])
-class JsonBodyMatcherSpec extends Specification {
+class JsonContentMatcherSpec extends Specification {
 
   private MatchingContext context
-  private JsonBodyMatcher matcher = new JsonBodyMatcher()
+  private JsonContentMatcher matcher = new JsonContentMatcher()
 
   def setup() {
     context = new MatchingContext(new MatchingRuleCategory('body'), true)

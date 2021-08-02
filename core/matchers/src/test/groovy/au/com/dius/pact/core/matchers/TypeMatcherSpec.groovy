@@ -15,7 +15,7 @@ class TypeMatcherSpec extends Specification {
     def actual = OptionalBody.body('{"value": 456}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, context)
+    def result = new JsonContentMatcher().matchBody(expected, actual, context)
 
     then:
     result.mismatches.empty
@@ -29,7 +29,7 @@ class TypeMatcherSpec extends Specification {
     def actual = OptionalBody.body('{"value": null}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, context)
+    def result = new JsonContentMatcher().matchBody(expected, actual, context)
 
     then:
     !result.mismatches.empty
@@ -43,7 +43,7 @@ class TypeMatcherSpec extends Specification {
     def actual = OptionalBody.body('{"value": 123.10}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, context)
+    def result = new JsonContentMatcher().matchBody(expected, actual, context)
 
     then:
     !result.mismatches.empty
@@ -57,7 +57,7 @@ class TypeMatcherSpec extends Specification {
     def actual = OptionalBody.body('{"value": 456.20}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, context)
+    def result = new JsonContentMatcher().matchBody(expected, actual, context)
 
     then:
     result.mismatches.empty
@@ -71,7 +71,7 @@ class TypeMatcherSpec extends Specification {
     def actual = OptionalBody.body('{"value": null}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, context)
+    def result = new JsonContentMatcher().matchBody(expected, actual, context)
 
     then:
     !result.mismatches.empty
@@ -85,7 +85,7 @@ class TypeMatcherSpec extends Specification {
     def actual = OptionalBody.body('{"value": 123}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, context)
+    def result = new JsonContentMatcher().matchBody(expected, actual, context)
 
     then:
     !result.mismatches.empty

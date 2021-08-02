@@ -15,7 +15,7 @@ class MatchingConfigSpec extends Specification {
   @Unroll
   def 'maps JSON content types to JSON body matcher'() {
     expect:
-    MatchingConfig.lookupBodyMatcher(contentType).class.name == matcherClass
+    MatchingConfig.lookupContentMatcher(contentType).class.name == matcherClass
 
     where:
     contentType               | matcherClass

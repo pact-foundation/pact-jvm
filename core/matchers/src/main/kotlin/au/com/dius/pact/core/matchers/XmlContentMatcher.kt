@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.support.zipAll
 import mu.KLogging
 import org.apache.xerces.dom.TextImpl
@@ -16,7 +15,7 @@ import java.io.StringReader
 import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
 
-object XmlBodyMatcher : BodyMatcher, KLogging() {
+object XmlContentMatcher : ContentMatcher, KLogging() {
 
   override fun matchBody(
     expected: OptionalBody,

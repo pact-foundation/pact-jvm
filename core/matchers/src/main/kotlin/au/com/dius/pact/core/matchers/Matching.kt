@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
@@ -174,7 +173,7 @@ object Matching : KLogging() {
     val expectedContentType = expected.determineContentType()
     val actualContentType = actual.determineContentType()
     return if (expectedContentType.getBaseType() == actualContentType.getBaseType()) {
-      val matcher = MatchingConfig.lookupBodyMatcher(actualContentType.getBaseType())
+      val matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
       if (matcher != null) {
         logger.debug { "Found a matcher for $actualContentType -> $matcher" }
         matcher.matchBody(expected.body, actual.body, context)

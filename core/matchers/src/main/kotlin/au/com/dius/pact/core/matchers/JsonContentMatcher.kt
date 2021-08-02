@@ -7,7 +7,7 @@ import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 
-object JsonBodyMatcher : BodyMatcher, KLogging() {
+object JsonContentMatcher : ContentMatcher, KLogging() {
 
   override fun matchBody(
     expected: OptionalBody,

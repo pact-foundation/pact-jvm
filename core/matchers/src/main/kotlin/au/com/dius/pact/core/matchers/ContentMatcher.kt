@@ -2,7 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
 
-interface BodyMatcher {
+interface ContentMatcher {
   fun matchBody(
     expected: OptionalBody,
     actual: OptionalBody,

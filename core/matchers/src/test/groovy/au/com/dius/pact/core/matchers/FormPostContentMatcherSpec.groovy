@@ -6,13 +6,13 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 
 @SuppressWarnings(['PrivateFieldCouldBeFinal', 'LineLength'])
-class FormPostBodyMatcherSpec extends Specification {
+class FormPostContentMatcherSpec extends Specification {
 
-  private FormPostBodyMatcher matcher
+  private FormPostContentMatcher matcher
   private MatchingContext context
 
   def setup() {
-    matcher = new FormPostBodyMatcher()
+    matcher = new FormPostContentMatcher()
     context = new MatchingContext(new MatchingRuleCategory('body'), true)
   }
 

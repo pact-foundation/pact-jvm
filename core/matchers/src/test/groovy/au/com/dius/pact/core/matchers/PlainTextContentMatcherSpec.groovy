@@ -6,12 +6,12 @@ import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class PlainTextBodyMatcherSpec extends Specification {
+class PlainTextContentMatcherSpec extends Specification {
 
-  private PlainTextBodyMatcher matcher
+  private PlainTextContentMatcher matcher
 
   def setup() {
-    matcher = new PlainTextBodyMatcher()
+    matcher = new PlainTextContentMatcher()
   }
 
   @Unroll

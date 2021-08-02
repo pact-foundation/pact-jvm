@@ -15,7 +15,7 @@ import groovy.json.JsonSlurper
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class PactDslJsonBodyMatcherSpec extends Specification {
+class PactDslJsonContentMatcherSpec extends Specification {
 
   private PactDslJsonBody subject
 

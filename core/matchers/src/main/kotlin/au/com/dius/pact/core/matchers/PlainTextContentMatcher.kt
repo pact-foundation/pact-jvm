@@ -1,11 +1,10 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import mu.KLogging
 
-class PlainTextBodyMatcher : BodyMatcher {
+class PlainTextContentMatcher : ContentMatcher {
 
   override fun matchBody(
     expected: OptionalBody,

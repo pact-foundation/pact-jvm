@@ -1,12 +1,11 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import mu.KLogging
 import org.apache.http.NameValuePair
 import org.apache.http.client.utils.URLEncodedUtils
 
-class FormPostBodyMatcher : BodyMatcher {
+class FormPostContentMatcher : ContentMatcher {
   override fun matchBody(
     expected: OptionalBody,
     actual: OptionalBody,

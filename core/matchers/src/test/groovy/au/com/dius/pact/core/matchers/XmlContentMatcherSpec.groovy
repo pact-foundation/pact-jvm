@@ -11,17 +11,17 @@ import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['LineLength', 'PrivateFieldCouldBeFinal'])
-class XmlBodyMatcherSpec extends Specification {
+class XmlContentMatcherSpec extends Specification {
 
   private OptionalBody expectedBody, actualBody
-  private XmlBodyMatcher matcher
+  private XmlContentMatcher matcher
   private MatchingContext context
   private MatchingContext noUnexpectedKeysContext
 
   def setup() {
     System.clearProperty('pact.matching.xml.namespace-aware')
 
-    matcher = new XmlBodyMatcher()
+    matcher = new XmlContentMatcher()
     expectedBody = OptionalBody.missing()
     actualBody = OptionalBody.missing()
     context = new MatchingContext(new MatchingRuleCategory('body'), true)

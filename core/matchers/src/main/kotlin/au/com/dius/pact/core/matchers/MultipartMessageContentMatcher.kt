@@ -8,7 +8,7 @@ import javax.mail.Header
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 
-class MultipartMessageBodyMatcher : BodyMatcher {
+class MultipartMessageContentMatcher : ContentMatcher {
 
   override fun matchBody(
     expected: OptionalBody,

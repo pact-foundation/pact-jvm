@@ -7,6 +7,7 @@ dependencies {
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   implementation 'org.atteo:evo-inflector:1.3'
   implementation 'com.github.ajalt:mordant:1.2.1'
+  implementation "io.pact.plugins.jvm:core:0.0.0"
 
   testRuntimeOnly "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"

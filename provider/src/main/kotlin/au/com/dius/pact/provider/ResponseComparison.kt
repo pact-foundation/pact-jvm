@@ -196,7 +196,7 @@ class ResponseComparison(
       actual: OptionalBody,
       context: MatchingContext
     ): MutableList<BodyMismatch> {
-      val result = MatchingConfig.lookupBodyMatcher(message.getContentType().getBaseType())
+      val result = MatchingConfig.lookupContentMatcher(message.getContentType().getBaseType())
       var bodyMismatches = mutableListOf<BodyMismatch>()
       if (result != null) {
         bodyMismatches = result.matchBody(message.contents, actual, context)

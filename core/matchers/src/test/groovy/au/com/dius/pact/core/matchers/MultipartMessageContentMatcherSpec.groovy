@@ -5,13 +5,13 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import spock.lang.Specification
 
-class MultipartMessageBodyMatcherSpec extends Specification {
+class MultipartMessageContentMatcherSpec extends Specification {
 
-  private MultipartMessageBodyMatcher matcher
+  private MultipartMessageContentMatcher matcher
   private MatchingContext context
 
   def setup() {
-    matcher = new MultipartMessageBodyMatcher()
+    matcher = new MultipartMessageContentMatcher()
     context = new MatchingContext(new MatchingRuleCategory('body'), true)
   }
 

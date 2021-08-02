@@ -1,9 +1,12 @@
 package au.com.dius.pact.core.matchers
 
+import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.CatalogueEntryProviderType
+import io.pact.plugins.jvm.core.CatalogueEntryType
 import kotlin.reflect.full.createInstance
 
 object MatchingConfig {
-  val bodyMatchers = mapOf(
+  private val coreBodyMatchers = mapOf(
     "application/.*xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
     "text/xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
     ".*json.*" to "au.com.dius.pact.core.matchers.JsonBodyMatcher",
@@ -14,21 +17,56 @@ object MatchingConfig {
   )
 
   @JvmStatic
-  fun lookupBodyMatcher(contentType: String?): BodyMatcher? {
+  fun lookupContentMatcher(contentType: String?): ContentMatcher? {
     return if (contentType != null) {
-      val matcher = bodyMatchers.entries.find { contentType.matches(Regex(it.key)) }?.value
+      val matcher = coreBodyMatchers.entries.find { contentType.matches(Regex(it.key)) }?.value
       if (matcher != null) {
         val clazz = Class.forName(matcher).kotlin
-        (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
+        (clazz.objectInstance ?: clazz.createInstance()) as ContentMatcher?
       } else {
         when (System.getProperty("pact.content_type.override.$contentType")) {
-          "json" -> JsonBodyMatcher
-          "text" -> PlainTextBodyMatcher()
+          "json" -> JsonContentMatcher
+          "text" -> PlainTextContentMatcher()
           else -> null
         }
       }
     } else {
       null
     }
+  }
+
+  fun contentMatcherCatalogueEntries(): List<CatalogueEntry> {
+    return listOf(
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "xml",
+        mapOf(
+          "content-types" to "application/.*xml,text/xml",
+          "implementation" to "io.pact.core.matchers.XmlBodyMatcher"
+        )
+      ),
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "json",
+        mapOf(
+          "content-types" to "application/.*json,application/json-rpc,application/jsonrequest",
+          "implementation" to "io.pact.core.matchers.JsonBodyMatcher"
+        )
+      ),
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "text",
+        mapOf(
+          "content-types" to "text/plain",
+          "implementation" to "io.pact.core.matchers.PlainTextBodyMatcher"
+        )
+      ),
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "multipart-form-data",
+        mapOf(
+          "content-types" to "multipart/form-data,multipart/mixed",
+          "implementation" to "io.pact.core.matchers.MultipartMessageBodyMatcher"
+        )
+      ),
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "form-urlencoded",
+        mapOf(
+          "content-types" to "application/x-www-form-urlencoded",
+          "implementation" to "io.pact.core.matchers.FormPostBodyMatcher"
+        )
+      )
+    )
   }
 }
