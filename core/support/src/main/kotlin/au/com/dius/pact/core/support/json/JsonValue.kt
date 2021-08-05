@@ -10,6 +10,7 @@ sealed class JsonValue {
 
   class Decimal(val value: JsonToken.Decimal) : JsonValue() {
     constructor(value: CharArray) : this(JsonToken.Decimal(value))
+    constructor(value: Number) : this(JsonToken.Decimal(value.toString().toCharArray()))
     fun toBigDecimal() = String(this.value.chars).toBigDecimal()
   }
 

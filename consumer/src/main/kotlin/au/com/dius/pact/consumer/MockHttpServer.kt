@@ -27,6 +27,9 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
+import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.CatalogueEntryProviderType
+import io.pact.plugins.jvm.core.CatalogueEntryType
 import mu.KLogging
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.http.client.methods.HttpOptions
@@ -338,4 +341,9 @@ fun calculateCharset(headers: Map<String, List<String?>>): Charset {
     }
   }
   return default
+}
+
+fun interactionCatalogueEntries(): List<CatalogueEntry> {
+  return listOf(CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "http", mapOf()),
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "https", mapOf()))
 }

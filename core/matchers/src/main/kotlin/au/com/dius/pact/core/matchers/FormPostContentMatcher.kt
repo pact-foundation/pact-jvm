@@ -1,6 +1,9 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import mu.KLogging
 import org.apache.http.NameValuePair
 import org.apache.http.client.utils.URLEncodedUtils
@@ -27,6 +30,19 @@ class FormPostContentMatcher : ContentMatcher {
         BodyMatchResult(null, compareParameters(expectedParameters, actualParameters, context))
       }
     }
+  }
+
+  override fun setupBodyFromConfig(
+    bodyConfig: Map<String, Any?>
+  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
+    return Triple(
+      OptionalBody.body(
+        bodyConfig["body"].toString().toByteArray(),
+        ContentType("application/x-www-form-urlencoded")
+      ),
+      null,
+      null
+    )
   }
 
   private fun compareParameters(

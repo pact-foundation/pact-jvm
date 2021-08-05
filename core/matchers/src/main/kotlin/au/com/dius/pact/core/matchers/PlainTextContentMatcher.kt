@@ -1,6 +1,9 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import mu.KLogging
 
@@ -46,6 +49,19 @@ class PlainTextContentMatcher : ContentMatcher {
       listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expected, actual,
         "Expected body '$expected' to match '$actual' using regex '${regex.regex}' but did not match"))))
     }
+  }
+
+  override fun setupBodyFromConfig(
+    bodyConfig: Map<String, Any?>
+  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
+    return Triple(
+      OptionalBody.body(
+        bodyConfig["body"].toString().toByteArray(),
+        ContentType("text/plain")
+      ),
+      null,
+      null
+    )
   }
 
   companion object : KLogging()

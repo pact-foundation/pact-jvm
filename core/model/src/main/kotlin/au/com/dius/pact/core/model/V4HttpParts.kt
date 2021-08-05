@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
+import org.apache.commons.beanutils.BeanUtils
 
 private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
   return if (json.has("headers") && json["headers"] is JsonValue.Object) {
@@ -91,6 +92,8 @@ data class HttpRequest @JvmOverloads constructor(
   override fun copy(): IRequest = this.copy(body = this.body.copy(), matchingRules = this.matchingRules.copy(),
     generators = this.generators.copy())
 
+  override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
+
   companion object {
     @JvmStatic
     fun fromJson(json: JsonValue): HttpRequest {
@@ -151,6 +154,14 @@ data class HttpResponse @JvmOverloads constructor(
   }
 
   override fun asHttpPart() = toV3Response()
+
+  fun updateProperties(values: Map<String, Any?>) {
+    values.forEach { (key, value) ->
+      BeanUtils.setProperty(this, key, value)
+    }
+  }
+
+  override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
 
   companion object {
     fun fromJson(json: JsonValue): HttpResponse {

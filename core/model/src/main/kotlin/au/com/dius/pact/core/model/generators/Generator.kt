@@ -43,23 +43,11 @@ fun lookupGenerator(generatorJson: JsonValue?): Generator? {
 
   if (generatorJson is JsonValue.Object) {
     try {
-      val generatorClass = findGeneratorClass(Json.toString(generatorJson["type"])).kotlin
-      val fromJson = when {
-        generatorClass.companionObject != null ->
-          generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find {
-            it.name == "fromJson"
-          }
-        generatorClass.objectInstance != null ->
-          generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromJson" }
-        else -> null
-      }
-      if (fromJson?.second != null) {
-        generator = fromJson.second!!.call(fromJson.first, generatorJson) as Generator?
-      } else {
-        logger.warn { "Could not invoke generator class 'fromJson' for generator config '$generatorJson'" }
-      }
+      generator = createGenerator(Json.toString(generatorJson["type"]), generatorJson)
     } catch (e: ClassNotFoundException) {
       logger.warn(e) { "Could not find generator class for generator config '$generatorJson'" }
+    } catch (e: InvalidGeneratorException) {
+      logger.warn(e) { e.message }
     }
   } else {
     logger.warn { "'$generatorJson' is not a valid generator JSON value" }
@@ -67,6 +55,26 @@ fun lookupGenerator(generatorJson: JsonValue?): Generator? {
 
   return generator
 }
+
+fun createGenerator(type: String, generatorJson: JsonValue): Generator {
+  val generatorClass = findGeneratorClass(type).kotlin
+  val (instance, fromJson) = when {
+    generatorClass.companionObject != null ->
+      generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find {
+        it.name == "fromJson"
+      }
+    generatorClass.objectInstance != null ->
+      generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromJson" }
+    else -> null to null
+  }
+  if (fromJson != null) {
+    return fromJson.call(instance, generatorJson) as Generator
+  } else {
+    throw InvalidGeneratorException("Could not invoke generator class 'fromJson' for generator config '$generatorJson'")
+  }
+}
+
+class InvalidGeneratorException(message: String) : RuntimeException(message)
 
 fun findGeneratorClass(generatorType: String): Class<*> {
   val generatorPackages = System.getProperty("pact.generators.packages")

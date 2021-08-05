@@ -25,6 +25,9 @@ import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.json.JsonValue
+import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.CatalogueEntryProviderType
+import io.pact.plugins.jvm.core.CatalogueEntryType
 import mu.KotlinLogging
 import org.apache.commons.lang3.time.DateUtils
 import org.apache.tika.config.TikaConfig
@@ -642,4 +645,29 @@ fun matchStatusCode(
   } else {
     listOf(StatusMismatch(expected, actual, statusType, statusCodes))
   }
+}
+
+fun matcherCatalogueEntries(): List<CatalogueEntry> {
+  return listOf(
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-regex"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-number-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-integer-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-decimal-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-date"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-time"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-datetime"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-min-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-max-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-minmax-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-includes"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-null"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-equals-ignore-order"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-min-equals-ignore-order"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-max-equals-ignore-order"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-minmax-equals-ignore-order"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-content-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-array-contains"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v1-equality")
+  )
 }

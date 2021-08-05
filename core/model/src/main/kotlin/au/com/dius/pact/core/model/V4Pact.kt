@@ -16,6 +16,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import mu.KLogging
 import mu.KotlinLogging
+import org.apache.commons.beanutils.BeanUtils
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
 
@@ -101,6 +102,8 @@ sealed class V4Interaction(
 
   override fun isV4() = true
 
+  abstract fun updateProperties(values: Map<String, Any?>)
+
   class SynchronousHttp @JvmOverloads constructor(
     key: String,
     description: String,
@@ -129,6 +132,12 @@ sealed class V4Interaction(
         .append(description)
         .append(providerStates.hashCode())
         .build().toUInt().toString(16)
+    }
+
+    override fun updateProperties(values: Map<String, Any?>) {
+      values.forEach { (key, value) ->
+        BeanUtils.setProperty(this, key, value)
+      }
     }
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
@@ -201,6 +210,10 @@ sealed class V4Interaction(
         builder.append(state.uniqueKey())
       }
       return builder.build().toUInt().toString(16)
+    }
+
+    override fun updateProperties(values: Map<String, Any?>) {
+      TODO("Not yet implemented")
     }
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {

@@ -24,6 +24,7 @@ interface IResponse: IHttpPart {
   fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse
 
   fun asHttpPart() : HttpPart
+  fun hasHeader(name: String): Boolean
 }
 
 /**
@@ -92,6 +93,8 @@ class Response @JvmOverloads constructor(
   }
 
   override fun asHttpPart() = this
+
+  override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
 
   companion object : KLogging() {
     const val DEFAULT_STATUS = 200

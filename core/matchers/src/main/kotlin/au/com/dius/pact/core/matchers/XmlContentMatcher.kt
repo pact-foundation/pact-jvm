@@ -1,6 +1,9 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.zipAll
 import mu.KLogging
 import org.apache.xerces.dom.TextImpl
@@ -34,6 +37,19 @@ object XmlContentMatcher : ContentMatcher, KLogging() {
           context))
       }
     }
+  }
+
+  override fun setupBodyFromConfig(
+    bodyConfig: Map<String, Any?>
+  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
+    return Triple(
+      OptionalBody.body(
+        bodyConfig["body"].toString().toByteArray(),
+        ContentType("application/xml")
+      ),
+      null,
+      null
+    )
   }
 
   fun parse(xmlData: String): Node {

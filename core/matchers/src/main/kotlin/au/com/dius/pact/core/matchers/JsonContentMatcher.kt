@@ -2,7 +2,11 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.Matchers.compareListContent
 import au.com.dius.pact.core.matchers.Matchers.compareLists
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
@@ -32,6 +36,19 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
           JsonParser.parseString(actual.valueAsString()), context))
       }
     }
+  }
+
+  override fun setupBodyFromConfig(
+    bodyConfig: Map<String, Any?>
+  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
+    return Triple(
+      OptionalBody.body(
+        toJson(bodyConfig["body"]).serialise().toByteArray(),
+        ContentType("application/json")
+      ),
+      null,
+      null
+    )
   }
 
   private fun valueOf(value: Any?) = when (value) {

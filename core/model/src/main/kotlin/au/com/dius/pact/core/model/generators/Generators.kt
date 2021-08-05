@@ -12,6 +12,7 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.orNull
 import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
+import java.util.Locale
 
 enum class Category {
   METHOD, PATH, HEADER, QUERY, BODY, STATUS, METADATA, CONTENT
@@ -109,7 +110,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
       if (json is JsonValue.Object) {
         json.entries.forEach { (key, generatorJson) ->
           try {
-            when (val category = Category.valueOf(key.toUpperCase())) {
+            when (val category = Category.valueOf(key.uppercase(Locale.getDefault()))) {
               Category.STATUS, Category.PATH, Category.METHOD -> if (generatorJson.has("type")) {
                 val generator = lookupGenerator(generatorJson.asObject())
                 if (generator != null) {

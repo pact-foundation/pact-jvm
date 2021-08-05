@@ -37,31 +37,31 @@ object MatchingConfig {
 
   fun contentMatcherCatalogueEntries(): List<CatalogueEntry> {
     return listOf(
-      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "xml",
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "core", "xml",
         mapOf(
           "content-types" to "application/.*xml,text/xml",
           "implementation" to "io.pact.core.matchers.XmlBodyMatcher"
         )
       ),
-      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "json",
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "core", "json",
         mapOf(
           "content-types" to "application/.*json,application/json-rpc,application/jsonrequest",
           "implementation" to "io.pact.core.matchers.JsonBodyMatcher"
         )
       ),
-      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "text",
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "core", "text",
         mapOf(
           "content-types" to "text/plain",
           "implementation" to "io.pact.core.matchers.PlainTextBodyMatcher"
         )
       ),
-      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "multipart-form-data",
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "core", "multipart-form-data",
         mapOf(
           "content-types" to "multipart/form-data,multipart/mixed",
           "implementation" to "io.pact.core.matchers.MultipartMessageBodyMatcher"
         )
       ),
-      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "form-urlencoded",
+      CatalogueEntry(CatalogueEntryType.CONTENT_MATCHER, CatalogueEntryProviderType.CORE, "core", "form-urlencoded",
         mapOf(
           "content-types" to "application/x-www-form-urlencoded",
           "implementation" to "io.pact.core.matchers.FormPostBodyMatcher"

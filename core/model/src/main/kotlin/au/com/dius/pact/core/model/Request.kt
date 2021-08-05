@@ -26,6 +26,7 @@ interface IRequest: IHttpPart {
   fun headersWithoutCookie(): Map<String, List<String>>
   fun asHttpPart() : HttpPart
   fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest
+  fun hasHeader(name: String): Boolean
 
   /**
    * If this request represents a multipart file upload
@@ -79,6 +80,8 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
     }
     return r
   }
+
+  override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
 
   override fun toString(): String {
     return "\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchingRules\n\t" +

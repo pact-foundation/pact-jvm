@@ -41,21 +41,15 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:publishToMavenLo
         pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
         pluginNode.appendNode('version', project.mavenPluginPluginVersion)
         pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
-
-      def repository = asNode().appendNode('repositories').appendNode('repository')
-      repository.appendNode('id', 'jcenter')
-      repository.appendNode('name', 'jcenter')
-      repository.appendNode('url', 'https://jcenter.bintray.com')
     }
 }
 
 if (System.env.CI != 'true') {
   task pluginDescriptor(type: Exec, dependsOn: generatePom) {
     if (isWindows()) {
-      commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
-        'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+      commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
     } else {
-      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
+      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
     }
 
       doLast {

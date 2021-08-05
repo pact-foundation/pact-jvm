@@ -4,7 +4,6 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
 
-@Deprecated("Use PactBuilder", replaceWith = ReplaceWith("PactBuilder"))
 open class PactDslWithProvider @JvmOverloads constructor(
   val consumerPactBuilder: ConsumerPactBuilder,
   private val providerName: String,

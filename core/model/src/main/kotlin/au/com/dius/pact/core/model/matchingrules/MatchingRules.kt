@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.generators.ArrayContainsGenerator
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.NullGenerator
 import au.com.dius.pact.core.model.generators.lookupGenerator
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import mu.KLogging
@@ -47,7 +48,7 @@ interface MatchingRule {
    */
   fun hasGenerators(): Boolean = false
 
-  companion object {
+  companion object : KLogging() {
     private const val MATCH = "match"
     private const val MIN = "min"
     private const val MAX = "max"
@@ -61,7 +62,7 @@ interface MatchingRule {
       return if (json.isObject) {
         val j: JsonValue.Object = json.downcast()
         when {
-          j.has(MATCH) -> matchingRule(j)
+          j.has(MATCH) -> create(Json.toString(j[MATCH]), j)
           j.has(REGEX) -> RegexMatcher(j[REGEX].asString()!!)
           j.has(MIN) -> MinTypeMatcher(j[MIN].asNumber()!!.toInt())
           j.has(MAX) -> MaxTypeMatcher(j[MAX].asNumber()!!.toInt())
@@ -79,67 +80,70 @@ interface MatchingRule {
       }
     }
 
-    private fun matchingRule(j: JsonValue.Object) = when (j[MATCH].toString()) {
-      REGEX -> RegexMatcher(j[REGEX].asString()!!)
-      "equality" -> EqualsMatcher
-      "null" -> NullMatcher
-      "include" -> IncludeMatcher(j["value"].toString())
-      "type" -> ruleForType(j)
-      "number" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
-      "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
-      "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
-      "real" -> {
-        MatchingRuleGroup.logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
-        NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
-      }
-      MIN -> MinTypeMatcher(j[MIN].asNumber()!!.toInt())
-      MAX -> MaxTypeMatcher(j[MAX].asNumber()!!.toInt())
-      TIMESTAMP ->
-        if (j.has(TIMESTAMP)) TimestampMatcher(j[TIMESTAMP].toString())
-        else TimestampMatcher()
-      TIME ->
-        if (j.has(TIME)) TimeMatcher(j[TIME].toString())
-        else TimeMatcher()
-      DATE ->
-        if (j.has(DATE)) DateMatcher(j[DATE].toString())
-        else DateMatcher()
-      "values" -> ValuesMatcher
-      "ignore-order" -> ruleForIgnoreOrder(j)
-      "contentType" -> ContentTypeMatcher(j["value"].toString())
-      "arrayContains" -> when (val variants = j["variants"]) {
-        is JsonValue.Array -> ArrayContainsMatcher(variants.values.mapIndexed { index, variant ->
-          when (variant) {
-            is JsonValue.Object -> Triple(
-              variant["index"].asNumber()!!.toInt(),
-              MatchingRuleCategory("body").fromJson(variant["rules"]),
-              variant["generators"].asObject()?.entries?.mapValues {
-                lookupGenerator(it.value) ?: NullGenerator
-              } ?: emptyMap()
-            )
-            else ->
-              throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
-          }
-        })
-        else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
-      }
-      "boolean" -> BooleanMatcher
-      "statusCode" -> if (j["status"].isArray) {
-        val asArray = j["status"].asArray()!!
-        StatusCodeMatcher(HttpStatus.StatusCodes, asArray.map {
-          if (it.isNumber) {
-            it.asNumber()!!.toInt()
-          } else {
-            throw InvalidMatcherJsonException(
-              "Status code matcher of type StatusCodes must have an array of integers, got $it"
-            )
-          }
-        })
-      } else {
-        StatusCodeMatcher(HttpStatus.fromJson(j["status"]))
-      }
-      else -> {
-        MatchingRuleGroup.logger.warn { "Unrecognised matcher ${j[MATCH]}, defaulting to equality matching" }
-        EqualsMatcher
+    fun create(type: String, values: JsonValue): MatchingRule {
+      logger.debug { "MatchingRule.create($type, $values)" }
+      return when (type) {
+        REGEX -> RegexMatcher(values[REGEX].asString()!!)
+        "equality" -> EqualsMatcher
+        "null" -> NullMatcher
+        "include" -> IncludeMatcher(values["value"].toString())
+        "type" -> ruleForType(values)
+        "number" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
+        "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
+        "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+        "real" -> {
+          MatchingRuleGroup.logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
+          NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+        }
+        MIN -> MinTypeMatcher(values[MIN].asNumber()!!.toInt())
+        MAX -> MaxTypeMatcher(values[MAX].asNumber()!!.toInt())
+        TIMESTAMP, "datetime" ->
+          if (values.has("format")) TimestampMatcher(values["format"].toString())
+          else TimestampMatcher()
+        TIME ->
+          if (values.has("format")) TimeMatcher(values["format"].toString())
+          else TimeMatcher()
+        DATE ->
+          if (values.has("format")) DateMatcher(values["format"].toString())
+          else DateMatcher()
+        "values" -> ValuesMatcher
+        "ignore-order" -> ruleForIgnoreOrder(values)
+        "contentType" -> ContentTypeMatcher(values["value"].toString())
+        "arrayContains" -> when (val variants = values["variants"]) {
+          is JsonValue.Array -> ArrayContainsMatcher(variants.values.mapIndexed { index, variant ->
+            when (variant) {
+              is JsonValue.Object -> Triple(
+                variant["index"].asNumber()!!.toInt(),
+                MatchingRuleCategory("body").fromJson(variant["rules"]),
+                variant["generators"].asObject()?.entries?.mapValues {
+                  lookupGenerator(it.value) ?: NullGenerator
+                } ?: emptyMap()
+              )
+              else ->
+                throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
+            }
+          })
+          else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
+        }
+        "boolean" -> BooleanMatcher
+        "statusCode" -> if (values["status"].isArray) {
+          val asArray = values["status"].asArray()!!
+          StatusCodeMatcher(HttpStatus.StatusCodes, asArray.map {
+            if (it.isNumber) {
+              it.asNumber()!!.toInt()
+            } else {
+              throw InvalidMatcherJsonException(
+                "Status code matcher of type StatusCodes must have an array of integers, got $it"
+              )
+            }
+          })
+        } else {
+          StatusCodeMatcher(HttpStatus.fromJson(values["status"]))
+        }
+        else -> {
+          MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
+          EqualsMatcher
+        }
       }
     }
 
