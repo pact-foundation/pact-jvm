@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.junit.xml;
 
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -20,7 +20,7 @@ public class TodoApp {
     if (format.equalsIgnoreCase("xml")) {
       contentType = "application/xml";
     }
-    return (Projects) Request.Get(this.url + "/projects?from=today")
+    return (Projects) Request.get(this.url + "/projects?from=today")
       .addHeader("Accept", contentType)
       .execute().handleResponse(httpResponse -> {
         try {

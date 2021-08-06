@@ -4,10 +4,8 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
 import com.github.michaelbull.result.Ok
-import org.apache.http.HttpEntity
-import org.apache.http.ProtocolVersion
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.message.BasicStatusLine
+import org.apache.hc.core5.http.ClassicHttpResponse
+import org.apache.hc.core5.http.HttpEntity
 import spock.lang.Specification
 
 @SuppressWarnings('PrivateFieldCouldBeFinal')
@@ -97,9 +95,9 @@ class StateChangeSpec extends Specification {
     def entity = [getContentType: { null }] as HttpEntity
     stateChangeResponse = [
       getEntity: { entity },
-      getStatusLine: { new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 200, 'OK') },
+      getCode: { 200 },
       close: { }
-    ] as CloseableHttpResponse
+    ] as ClassicHttpResponse
 
     when:
     def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,

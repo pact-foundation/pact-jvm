@@ -4,8 +4,8 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonSlurper
-import org.apache.http.client.fluent.Request
-import org.apache.http.entity.ContentType
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
 import org.junit.AfterClass
 import org.junit.Rule
 import org.junit.Test
@@ -41,7 +41,7 @@ class ProviderStateWithComplexParametersTest {
     @Test
     @PactVerification
     void runTest() {
-      def result = new JsonSlurper().parseText(Request.Put('http://localhost:8113/numbertest')
+      def result = new JsonSlurper().parseText(Request.put('http://localhost:8113/numbertest')
         .addHeader('Accept', APPLICATION_JSON)
         .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
         .execute().returnContent().asString())

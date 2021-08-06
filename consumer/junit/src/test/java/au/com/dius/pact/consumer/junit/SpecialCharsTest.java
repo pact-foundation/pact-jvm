@@ -2,11 +2,9 @@ package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -34,7 +32,7 @@ public class SpecialCharsTest {
   @Test
   @PactVerification("specialchars_provider")
   public void runTest() throws IOException {
-    assertEquals("\"Pong\"", Request.Get(provider.getUrl() + "/ping")
+    assertEquals("\"Pong\"", Request.get(provider.getUrl() + "/ping")
       .execute().returnContent().asString());
   }
 }

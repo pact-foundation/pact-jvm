@@ -7,7 +7,7 @@ import au.com.dius.pact.provider.VerificationResult
 import java.util.function.BiConsumer
 import java.util.function.Supplier
 import org.apache.commons.lang3.tuple.Pair
-import org.apache.http.HttpRequest
+import org.apache.hc.core5.http.HttpRequest
 
 /**
  * Run [Interaction] and perform response verification

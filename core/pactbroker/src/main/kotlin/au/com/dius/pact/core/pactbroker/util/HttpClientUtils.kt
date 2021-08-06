@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.pactbroker.util
 
-import org.apache.http.client.utils.URIBuilder
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.net.URIBuilder
 import java.net.URI
 
 object HttpClientUtils {

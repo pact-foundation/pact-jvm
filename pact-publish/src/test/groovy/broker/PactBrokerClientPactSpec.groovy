@@ -59,7 +59,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimetype: 'application/json') {
         _links {
           'pb:publish-pact' {
-            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            href url('http://localhost:9876', 'pacts', 'provider', '{provider}', 'consumer', '{consumer}', 'version', '{consumerApplicationVersion}')
             title 'Publish a pact'
             templated true
           }
@@ -91,7 +91,7 @@ class PactBrokerClientPactSpec extends Specification {
         withBody(mimetype: 'application/json') {
           _links {
             'pb:pacticipant-version-tag' {
-              href url('http://localhost:9876', '/pacticipants/{pacticipant}/versions/{version}/tags/{tag}')
+              href url('http://localhost:9876', 'pacticipants', '{pacticipant}', 'versions', '{version}', 'tags', '{tag}')
               title 'Create a tag'
               templated true
             }
@@ -123,7 +123,7 @@ class PactBrokerClientPactSpec extends Specification {
       withBody(mimetype: 'application/json') {
         _links {
           'pb:pacticipant-version-tag' {
-            href url('http://localhost:9876', '/pacticipants/{pacticipant}/versions/{version}/tags/{tag}')
+            href url('http://localhost:9876', 'pacticipants', '{pacticipant}', 'versions', '{version}', 'tags', '{tag}')
             title 'Create a tag'
             templated true
           }

@@ -5,8 +5,8 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
-import org.apache.http.HttpResponse
-import org.apache.http.client.fluent.Request
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.HttpResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -25,8 +25,8 @@ class PathWithValueWithSlashTest {
 
   @Test
   void testFiles(MockServer mockServer) {
-    HttpResponse httpResponse = Request.Get("${mockServer.url}/endpoint/Some%2FValue")
+    HttpResponse httpResponse = Request.get("${mockServer.url}/endpoint/Some%2FValue")
       .execute().returnResponse()
-    assert httpResponse.statusLine.statusCode == 200
+    assert httpResponse.code == 200
   }
 }

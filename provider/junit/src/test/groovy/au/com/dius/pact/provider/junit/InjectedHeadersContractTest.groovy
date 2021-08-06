@@ -9,7 +9,7 @@ import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import com.github.restdriver.clientdriver.ClientDriverRule
 import groovy.util.logging.Slf4j
-import org.apache.http.HttpRequest
+import org.apache.hc.core5.http.ClassicHttpRequest
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.runner.RunWith
@@ -44,7 +44,7 @@ class InjectedHeadersContractTest {
   }
 
   @TargetRequestFilter
-  void exampleRequestFilter(HttpRequest request) {
+  void exampleRequestFilter(ClassicHttpRequest request) {
     request.addHeader('X-ContractTest', 'true')
   }
 

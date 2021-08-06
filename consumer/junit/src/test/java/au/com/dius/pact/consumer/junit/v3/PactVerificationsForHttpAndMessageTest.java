@@ -72,6 +72,6 @@ public class PactVerificationsForHttpAndMessageTest {
         Map<String, Object> expectedResponse = new HashMap<>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(httpProvider.getUrl()).getAsMap("/", ""), expectedResponse);
+        assertEquals(expectedResponse, new ConsumerClient(httpProvider.getUrl()).getAsMap("/", ""));
     }
 }

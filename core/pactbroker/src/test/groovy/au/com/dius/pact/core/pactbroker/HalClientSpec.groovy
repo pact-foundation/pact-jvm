@@ -1,21 +1,20 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.json.JsonParser
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import org.apache.http.HttpEntity
-import org.apache.http.HttpHost
-import org.apache.http.HttpResponse
-import org.apache.http.ProtocolVersion
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.BasicCredentialsProvider
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.message.BasicHeader
-import org.apache.http.message.BasicStatusLine
+import org.apache.hc.client5.http.classic.methods.HttpPost
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
+import org.apache.hc.client5.http.impl.auth.BasicScheme
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.RedirectExec
+import org.apache.hc.client5.http.protocol.RedirectStrategy
+import org.apache.hc.core5.http.ClassicHttpResponse
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpEntity
+import org.apache.hc.core5.http.HttpHost
+import org.apache.hc.core5.http.io.entity.StringEntity
+import org.apache.hc.core5.http.message.BasicHeader
 import spock.lang.Issue
 import spock.lang.Shared
 import spock.lang.Specification
@@ -71,7 +70,7 @@ class HalClientSpec extends Specification {
     given:
     client.options = [authentication: ['basic', '1', '2']]
     System.setProperty('pact.pactbroker.httpclient.usePreemptiveAuthentication', 'true')
-    def host = new HttpHost('localhost', 1234, 'http')
+    def host = new HttpHost('http', 'localhost', 1234)
 
     when:
     client.setupHttpClient()
@@ -79,29 +78,30 @@ class HalClientSpec extends Specification {
     then:
     client.httpClient.credentialsProvider instanceof BasicCredentialsProvider
     client.httpContext != null
-    client.httpContext.authCache.get(host).toString().startsWith('BASIC')
+    client.httpContext.authCache.get(host) instanceof BasicScheme
   }
 
-  def 'custom retry strategy is added to execution chain of client'() {
+  def 'retry strategy is added to execution chain of client'() {
     when:
     client.setupHttpClient()
 
     then:
-    client.httpClient.execChain.requestExecutor.retryStrategy instanceof CustomServiceUnavailableRetryStrategy
+    client.httpClient.execChain.handler instanceof RedirectExec
+    client.httpClient.execChain.handler.redirectStrategy instanceof RedirectStrategy
   }
 
   def 'throws an exception if the response is 404 Not Found'() {
     given:
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 404, 'Not Found')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 404
     }
 
     when:
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute(_, _) >> mockResponse
+    1 * mockClient.execute(_, _, _) >> { req, context, handler -> handler.handleResponse(mockResponse) }
     thrown(NotFoundHalResponse)
   }
 
@@ -113,7 +113,7 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute(_, _) >> { throw new SSLHandshakeException('PKIX path building failed')  }
+    1 * mockClient.execute(_, _, _) >> { throw new SSLHandshakeException('PKIX path building failed')  }
     thrown(SSLHandshakeException)
   }
 
@@ -124,8 +124,8 @@ class HalClientSpec extends Specification {
     def mockBody = Mock(HttpEntity) {
       getContentType() >> contentType
     }
-    def mockRootResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockRootResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> mockBody
     }
 
@@ -133,7 +133,7 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockRootResponse) }
     thrown(InvalidHalResponse)
   }
 
@@ -141,8 +141,8 @@ class HalClientSpec extends Specification {
     given:
     client.httpClient = mockClient
     def body = new StringEntity('{}', ContentType.APPLICATION_JSON)
-    def mockRootResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockRootResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> body
     }
 
@@ -150,7 +150,7 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockRootResponse) }
     thrown(InvalidHalResponse)
   }
 
@@ -158,8 +158,8 @@ class HalClientSpec extends Specification {
     given:
     client.httpClient = mockClient
     def body = new StringEntity('{"_links":{}}', ContentType.APPLICATION_JSON)
-    def mockRootResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockRootResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> body
     }
 
@@ -167,24 +167,23 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockRootResponse) }
     thrown(InvalidHalResponse)
   }
 
   def 'Handles responses with charset attributes'() {
     given:
     client.httpClient = mockClient
-    def contentType = new BasicHeader('Content-Type', 'application/hal+json;charset=UTF-8')
     def mockBody = Mock(HttpEntity) {
-      getContentType() >> contentType
+      getContentType() >> 'application/hal+json;charset=UTF-8'
       getContent() >> new ByteArrayInputStream('{"_links": {"pb:latest-provider-pacts":{"href":"/link"}}}'.bytes)
     }
-    def mockRootResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockRootResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> mockBody
     }
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{"_links":{}}', ContentType.create('application/hal+json'))
     }
 
@@ -192,16 +191,16 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
-    1 * mockClient.execute({ it.getURI().path == '/link' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockRootResponse) }
+    1 * mockClient.execute({ it.uri.path == '/link' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     notThrown(InvalidHalResponse)
   }
 
   def 'does not throw an exception if the required link is empty'() {
     given:
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{"_links":{"pacts": []}}', ContentType.create('application/hal+json'))
     }
 
@@ -210,7 +209,7 @@ class HalClientSpec extends Specification {
     client.forAll('pacts') { called = true }
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     !called
   }
 
@@ -218,15 +217,15 @@ class HalClientSpec extends Specification {
     given:
     client.httpClient = mockClient
     client.pathInfo = JsonParser.INSTANCE.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
     }
 
     when:
     def result = client.putJson('link', [:], '{}')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     result instanceof Ok
   }
 
@@ -234,8 +233,8 @@ class HalClientSpec extends Specification {
     given:
     client.httpClient = mockClient
     client.pathInfo = JsonParser.INSTANCE.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 400, 'Not OK')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 400
       getEntity() >> new StringEntity('{"errors":["1","2","3"]}', ContentType.create('application/json'))
     }
 
@@ -243,7 +242,7 @@ class HalClientSpec extends Specification {
     def result = client.putJson('link', [:], '{}')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     result instanceof Err
   }
 
@@ -251,8 +250,8 @@ class HalClientSpec extends Specification {
     given:
     client.httpClient = mockClient
     client.pathInfo = JsonParser.INSTANCE.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 409, 'Not OK')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 409
       getEntity() >> new StringEntity('error line')
     }
 
@@ -260,7 +259,7 @@ class HalClientSpec extends Specification {
     def result = client.putJson('link', [:], '{}')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     result instanceof Err
   }
 
@@ -268,11 +267,11 @@ class HalClientSpec extends Specification {
   def 'failure handling - #description'() {
     given:
     client.httpClient = mockClient
-    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 400, 'Not OK')
     def resp = [
-      getStatusLine: { statusLine },
-      getEntity: { [getContentType: { new BasicHeader('Content-Type', 'application/json') } ] as HttpEntity }
-    ] as HttpResponse
+      getCode: { 400 },
+      getReasonPhrase: { 'Not OK' },
+      getEntity: { [getContentType: { 'application/json' } ] as HttpEntity }
+    ] as ClassicHttpResponse
 
     expect:
     client.handleFailure(resp, body) { arg1, arg2 -> [arg1, arg2] } == [firstArg, secondArg]
@@ -292,9 +291,10 @@ class HalClientSpec extends Specification {
     given:
     def mockClient = Mock(CloseableHttpClient)
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse)
-    1 * mockClient.execute(_, _) >> mockResponse
-    mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), status, 'OK')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> status
+    }
+    mockClient.execute(_, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
 
     expect:
     client.postJson('path', 'body').class == expectedResult
@@ -315,7 +315,7 @@ class HalClientSpec extends Specification {
     def result = client.postJson('path', 'body')
 
     then:
-    1 * mockClient.execute(_, _) >> { throw new IOException('Boom!') }
+    1 * mockClient.execute(_, _, _) >> { throw new IOException('Boom!') }
     result instanceof Err
   }
 
@@ -324,22 +324,23 @@ class HalClientSpec extends Specification {
     given:
     def mockClient = Mock(CloseableHttpClient)
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse)
-    1 * mockClient.execute(_, _) >> mockResponse
-    mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
+    }
+    mockClient.execute(_, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
 
     when:
-    def result = client.postJson('path', 'body') { status, resp -> false }
+    def result = client.postJson('path', 'body') { status, resp -> 'handler was called' }
 
     then:
-    !result.value
+    result.value == 'handler was called'
   }
 
   def 'forAll does nothing if there is no matching link'() {
     given:
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{"_links":{}}', ContentType.create('application/hal+json'))
     }
     def closure = Mock(Consumer)
@@ -348,15 +349,15 @@ class HalClientSpec extends Specification {
     client.forAll('missingLink', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     0 * closure.accept(_)
   }
 
   def 'forAll calls the closure with the link data'() {
     given:
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{"_links":{"simpleLink": {"link": "linkData"}}}',
         ContentType.create('application/hal+json'))
     }
@@ -366,15 +367,15 @@ class HalClientSpec extends Specification {
     client.forAll('simpleLink', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     1 * closure.accept([link: 'linkData'])
   }
 
   def 'forAll calls the closure with each link data when the link is a collection'() {
     given:
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{"_links":{"multipleLink": [{"href":"one"}, {"href":"two"}, {"href":"three"}]}}',
         ContentType.create('application/hal+json'))
     }
@@ -384,7 +385,7 @@ class HalClientSpec extends Specification {
     client.forAll('multipleLink', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
     1 * closure.accept([href: 'one'])
     1 * closure.accept([href: 'two'])
     1 * closure.accept([href: 'three'])
@@ -397,33 +398,34 @@ class HalClientSpec extends Specification {
     client.httpClient = mockClient
     def body = new StringEntity('{"_links":{"pb:latest-provider-pacts-with-tag": ' +
       '{"href": "http://localhost/{provider}/tag/{tag}", "templated": true}}}', ContentType.APPLICATION_JSON)
-    def mockRootResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockRootResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> body
     }
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{"_links":{"linkA": "ValueA"}}', ContentType.create('application/hal+json'))
     }
-    def notFoundResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 404, 'Not Found')
+    def notFoundResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 404
     }
 
     when:
     client.navigate('pb:latest-provider-pacts-with-tag', provider: providerName, tag: tag)
 
     then:
-    1 * mockClient.execute({ it.URI.path == '/' }, _) >> mockRootResponse
-    1 * mockClient.execute({ it.URI.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }, _) >> mockResponse
-    _ * mockClient.execute(_, _) >> notFoundResponse
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockRootResponse) }
+    1 * mockClient.execute({ it.uri.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }, _, _) >>
+      { r, c, handler -> handler.handleResponse(mockResponse) }
+    _ * mockClient.execute(_, _, _) >> { r, c, handler -> handler.handleResponse(notFoundResponse) }
     client.pathInfo['_links']['linkA'].serialise() == '"ValueA"'
   }
 
   def 'handles invalid URL characters when fetching documents from the broker'() {
     given:
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{"_links":{"multipleLink": ["one", "two", "three"]}}',
         ContentType.create('application/hal+json'))
     }
@@ -432,7 +434,8 @@ class HalClientSpec extends Specification {
     def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2').value
 
     then:
-    1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }, _, _) >>
+      { r, c, handler -> handler.handleResponse(mockResponse) }
     result['_links']['multipleLink'].values*.serialise() == ['"one"', '"two"', '"three"']
   }
 
@@ -470,7 +473,7 @@ class HalClientSpec extends Specification {
     def request = client.initialiseRequest(new HttpPost('/'))
 
     then:
-    request.allHeaders.collectEntries { [it.name, it.value] } == [A: 'a', B: 'b']
+    request.headers.collectEntries { [it.name, it.value] } == [A: 'a', B: 'b']
   }
 
   @Issue('#1388')
@@ -484,8 +487,8 @@ class HalClientSpec extends Specification {
       ]
     ]
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{}', ContentType.create('application/hal+json'))
     }
 
@@ -493,7 +496,8 @@ class HalClientSpec extends Specification {
     client.withDocContext(docAttributes).navigate('pb:provider')
 
     then:
-    1 * mockClient.execute({ it.URI.rawPath == '/pacticipants/my%2Fprovider-name' }, _) >> mockResponse
+    1 * mockClient.execute({ it.uri.rawPath == '/pacticipants/my%2Fprovider-name' }, _, _) >>
+      { r, c, handler -> handler.handleResponse(mockResponse) }
   }
 
   @Issue('1399')
@@ -502,8 +506,8 @@ class HalClientSpec extends Specification {
     HalClient client = Spy(HalClient, constructorArgs: ['http://localhost:1234/subpath/one/two'])
     client.pathInfo = null
     client.httpClient = mockClient
-    def mockResponse = Mock(CloseableHttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
       getEntity() >> new StringEntity('{}', ContentType.APPLICATION_JSON)
     }
 
@@ -511,9 +515,9 @@ class HalClientSpec extends Specification {
     client.navigate()
 
     then:
-    1 * mockClient.execute(_, _) >> { args ->
-      assert args[0].getURI().toString() == 'http://localhost:1234/subpath/one/two/'
-      mockResponse
+    1 * mockClient.execute(_, _, _) >> { req, c, handler ->
+      assert req.uri.toString() == 'http://localhost:1234/subpath/one/two/'
+      handler.handleResponse(mockResponse)
     }
   }
 }

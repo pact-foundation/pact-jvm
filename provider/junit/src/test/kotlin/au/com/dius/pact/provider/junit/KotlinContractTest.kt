@@ -9,7 +9,6 @@ import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import com.github.restdriver.clientdriver.ClientDriverRule
 import com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse
 import com.github.restdriver.clientdriver.RestClientDriver.onRequestTo
-import org.apache.http.HttpRequest
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.ClassRule
@@ -48,7 +47,7 @@ class KotlinContractTest {
   }
 
   @TargetRequestFilter
-  fun exampleRequestFilter(request: HttpRequest) {
+  fun exampleRequestFilter(request: org.apache.hc.core5.http.ClassicHttpRequest) {
     LOGGER.info("exampleRequestFilter called: $request")
   }
 

@@ -2,11 +2,9 @@ package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -40,7 +38,7 @@ public class Defect369Test {
     @Test
     @PactVerification("369_provider")
     public void runTest() throws IOException {
-        assertEquals("\"Example\"", Request.Get(provider.getUrl() + "/provider/uri")
+        assertEquals("\"Example\"", Request.get(provider.getUrl() + "/provider/uri")
             .addHeader("Accept", APPLICATION_JSON)
             .execute().returnContent().asString());
     }

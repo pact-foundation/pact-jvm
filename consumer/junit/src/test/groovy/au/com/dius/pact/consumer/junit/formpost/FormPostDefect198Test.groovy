@@ -5,11 +5,11 @@ import au.com.dius.pact.consumer.junit.PactProviderRule
 import au.com.dius.pact.consumer.junit.PactVerification
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
-import org.apache.http.HttpResponse
-import org.apache.http.NameValuePair
-import org.apache.http.client.fluent.Form
-import org.apache.http.client.fluent.Request
-import org.apache.http.entity.ContentType
+import org.apache.hc.client5.http.fluent.Form
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpResponse
+import org.apache.hc.core5.http.NameValuePair
 import org.junit.Rule
 import org.junit.Test
 
@@ -40,12 +40,12 @@ class FormPostDefect198Test {
       .add('password', 'foobar')
       .build())
 
-    assert response.statusLine.statusCode == 404
+    assert response.code == 404
   }
 
   private HttpResponse authenticateRequestWith(List<NameValuePair> formParams) {
     Request
-      .Post(mockProvider.url + '/authentication-service/authenticate')
+      .post(mockProvider.url + '/authentication-service/authenticate')
       .bodyForm(formParams, null)
       .execute()
       .returnResponse()

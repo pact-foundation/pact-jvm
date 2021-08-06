@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.provider.ProviderVerifier
-import org.apache.http.HttpRequest
+import org.apache.hc.core5.http.ClassicHttpRequest
 import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
@@ -22,7 +22,7 @@ object DummyTestTemplate : TestTemplateInvocationContext, ParameterResolver {
     return when (parameterContext.parameter.type) {
       Pact::class.java -> true
       Interaction::class.java -> true
-      HttpRequest::class.java -> true
+      ClassicHttpRequest::class.java -> true
       PactVerificationContext::class.java -> true
       ProviderVerifier::class.java -> true
       else -> false

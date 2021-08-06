@@ -7,7 +7,7 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import groovy.json.JsonSlurper;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static au.com.dius.pact.consumer.dsl.DslPart.regex;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class ArrayContainsExampleTest {
   @Rule
@@ -84,7 +84,7 @@ public class ArrayContainsExampleTest {
   @Test
   @PactVerification
   public void exampleWithArrayContains() throws IOException {
-    final String response = Request.Get(provider.getUrl() + "/orders")
+    final String response = Request.get(provider.getUrl() + "/orders")
       .addHeader("Accept", "application/vnd.siren+json")
       .execute()
       .returnContent()

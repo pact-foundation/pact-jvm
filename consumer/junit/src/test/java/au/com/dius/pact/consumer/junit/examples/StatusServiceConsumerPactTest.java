@@ -5,7 +5,7 @@ import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.PactTestExecutionContext;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -58,7 +58,7 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTest {
         }
 
         public String getCurrentQuestionnairePage(Object page) throws IOException {
-            Request.Get(baseUrl + "/status")
+            Request.get(baseUrl + "/status")
                 .addHeader("testreqheader", "testreqheadervalue")
                 .execute();
             return "my_home_1";

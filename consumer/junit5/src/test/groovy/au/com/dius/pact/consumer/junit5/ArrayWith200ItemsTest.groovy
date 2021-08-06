@@ -7,8 +7,8 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.dsl.LambdaDslObject
-import org.apache.http.HttpResponse
-import org.apache.http.client.fluent.Request
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.HttpResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -73,8 +73,8 @@ class ArrayWith200ItemsTest {
 
   @Test
   void testFiles(MockServer mockServer) {
-    HttpResponse httpResponse = Request.Get("${mockServer.url}/values")
+    HttpResponse httpResponse = Request.get("${mockServer.url}/values")
       .execute().returnResponse()
-    assert httpResponse.statusLine.statusCode == 200
+    assert httpResponse.code == 200
   }
 }

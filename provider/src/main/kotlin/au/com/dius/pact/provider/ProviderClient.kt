@@ -14,25 +14,24 @@ import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
 import mu.KLogging
-import org.apache.http.HttpEntityEnclosingRequest
-import org.apache.http.HttpRequest
-import org.apache.http.HttpResponse
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpDelete
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpHead
-import org.apache.http.client.methods.HttpOptions
-import org.apache.http.client.methods.HttpPatch
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpTrace
-import org.apache.http.client.methods.HttpUriRequest
-import org.apache.http.client.utils.URIBuilder
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.util.EntityUtils
+import org.apache.hc.client5.http.classic.methods.HttpDelete
+import org.apache.hc.client5.http.classic.methods.HttpGet
+import org.apache.hc.client5.http.classic.methods.HttpHead
+import org.apache.hc.client5.http.classic.methods.HttpOptions
+import org.apache.hc.client5.http.classic.methods.HttpPatch
+import org.apache.hc.client5.http.classic.methods.HttpPost
+import org.apache.hc.client5.http.classic.methods.HttpPut
+import org.apache.hc.client5.http.classic.methods.HttpTrace
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.core5.http.ClassicHttpResponse
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpEntityContainer
+import org.apache.hc.core5.http.HttpRequest
+import org.apache.hc.core5.http.io.HttpClientResponseHandler
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.io.entity.StringEntity
+import org.apache.hc.core5.net.URIBuilder
 import java.io.File
 import java.lang.Boolean.getBoolean
 import java.net.URI
@@ -172,7 +171,7 @@ open class ConsumerInfo @JvmOverloads constructor (
   }
 }
 
-data class ProviderResponse(
+data class ProviderResponse @JvmOverloads constructor(
   val statusCode: Int,
   val headers: Map<String, List<String>> = emptyMap(),
   val contentType: au.com.dius.pact.core.model.ContentType = au.com.dius.pact.core.model.ContentType.UNKNOWN,
@@ -210,8 +209,8 @@ open class ProviderClient(
     }
 
     @JvmStatic
-    fun urlEncodedFormPost(request: Request) = request.method.toLowerCase() == "post" &&
-      request.contentType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
+    fun urlEncodedFormPost(request: Request) = request.method.lowercase() == "post" &&
+      request.determineContentType().getBaseType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
 
     fun isFunctionalInterface(requestFilter: Any) =
       requestFilter::class.java.interfaces.any { it.isAnnotationPresent(FunctionalInterface::class.java) }
@@ -233,9 +232,7 @@ open class ProviderClient(
   }
 
   open fun executeRequest(httpclient: CloseableHttpClient, method: HttpUriRequest): ProviderResponse {
-    return httpclient.execute(method).use {
-      handleResponse(it)
-    }
+    return httpclient.execute(method) { response -> handleResponse(response) }
   }
 
   open fun prepareRequest(request: IRequest): HttpUriRequest {
@@ -283,7 +280,7 @@ open class ProviderClient(
   }
 
   open fun setupBody(request: IRequest, method: HttpRequest) {
-    if (method is HttpEntityEnclosingRequest && request.body.isPresent()) {
+    if (method is HttpEntityContainer && request.body.isPresent()) {
       val contentTypeHeader = request.asHttpPart().contentTypeHeader()
       if (null != contentTypeHeader) {
         try {
@@ -321,7 +318,7 @@ open class ProviderClient(
     postStateInBody: Boolean,
     isSetup: Boolean,
     stateChangeTeardown: Boolean
-  ): CloseableHttpResponse? {
+  ): ClassicHttpResponse? {
     return if (stateChangeUrl != null) {
       val httpclient = getHttpClient()
       val urlBuilder = if (stateChangeUrl is URI) {
@@ -374,13 +371,13 @@ open class ProviderClient(
 
   fun getHttpClient() = httpClientFactory.newClient(provider)
 
-  fun handleResponse(httpResponse: HttpResponse): ProviderResponse {
-    logger.debug { "Received response: ${httpResponse.statusLine}" }
+  fun handleResponse(httpResponse: ClassicHttpResponse): ProviderResponse {
+    logger.debug { "Received response: ${httpResponse.code}" }
 
     var contentType = PactContentType.TEXT_PLAIN
-    val headers = httpResponse.allHeaders
+    val headers = httpResponse.headers
       .groupBy({ header -> header.name }, { header ->
-        if (SINGLE_VALUE_HEADERS.contains(header.name.toLowerCase())) {
+        if (SINGLE_VALUE_HEADERS.contains(header.name.lowercase())) {
           listOf(header.value.trim())
         } else {
           header.value.split(',').map { it.trim() }
@@ -392,13 +389,13 @@ open class ProviderClient(
     val entity = httpResponse.entity
     if (entity != null) {
       if (entity.contentType != null) {
-        contentType = PactContentType.fromString(entity.contentType.value)
+        contentType = PactContentType.fromString(entity.contentType)
       }
       body = EntityUtils.toString(entity, contentType.asCharset())
     }
 
     val response = ProviderResponse(
-      httpResponse.statusLine.statusCode,
+      httpResponse.code,
       headers,
       contentType,
       body
@@ -434,11 +431,11 @@ open class ProviderClient(
     }
 
     val url = urlBuilder.build().toString()
-    return when (request.method.toLowerCase()) {
+    return when (request.method.lowercase()) {
       "post" -> HttpPost(url)
       "put" -> HttpPut(url)
       "options" -> HttpOptions(url)
-      "delete" -> HttpDeleteWithEntity(url)
+      "delete" -> HttpDelete(url)
       "head" -> HttpHead(url)
       "patch" -> HttpPatch(url)
       "trace" -> HttpTrace(url)
@@ -447,14 +444,4 @@ open class ProviderClient(
   }
 
   open fun systemPropertySet(property: String) = getBoolean(property)
-
-  internal class HttpDeleteWithEntity(uri: String) : HttpEntityEnclosingRequestBase() {
-    init {
-      setURI(URI.create(uri))
-    }
-
-    override fun getMethod(): String {
-      return HttpDelete.METHOD_NAME
-    }
-  }
 }

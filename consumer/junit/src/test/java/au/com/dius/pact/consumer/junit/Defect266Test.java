@@ -3,8 +3,6 @@ package au.com.dius.pact.consumer.junit;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
@@ -14,7 +12,7 @@ import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import com.google.common.collect.Sets;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -91,12 +89,12 @@ public class Defect266Test {
   @Test
   @PactVerification(value = "266_provider", fragment = "getUsersFragment")
   public void runTest() throws IOException {
-    Request.Get(provider.getUrl() + "/idm/user").execute().returnContent().asString();
+    Request.get(provider.getUrl() + "/idm/user").execute().returnContent().asString();
   }
 
   @Test
   @PactVerification(value = "266_provider", fragment = "getUsersFragment2")
   public void runTest2() throws IOException {
-    Request.Get(provider.getUrl() + "/idm/user").execute().returnContent().asString();
+    Request.get(provider.getUrl() + "/idm/user").execute().returnContent().asString();
   }
 }

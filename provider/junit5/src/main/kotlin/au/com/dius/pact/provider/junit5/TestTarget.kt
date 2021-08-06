@@ -15,7 +15,7 @@ import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
-import org.apache.http.client.methods.HttpUriRequest
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.function.Function

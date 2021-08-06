@@ -7,7 +7,7 @@ import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.StateChangeAction;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -40,7 +40,7 @@ public class ContractTest {
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
-    void testTemplate(Pact pact, Interaction interaction, HttpRequest request, PactVerificationContext context) {
+    void testTemplate(Pact pact, Interaction interaction, ClassicHttpRequest request, PactVerificationContext context) {
       LOGGER.info("testTemplate called: " + pact.getProvider().getName() + ", " + interaction.getDescription());
       request.addHeader("X-ContractTest", "true");
 

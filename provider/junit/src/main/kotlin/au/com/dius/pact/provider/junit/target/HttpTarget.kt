@@ -15,7 +15,7 @@ import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
-import org.apache.http.HttpRequest
+import org.apache.hc.core5.http.ClassicHttpRequest
 import java.net.URL
 import java.util.function.Consumer
 
@@ -133,7 +133,7 @@ open class HttpTarget
     if (methods.isNotEmpty()) {
       validateTargetRequestFilters(methods)
 
-      providerInfo.requestFilter = Consumer { httpRequest: HttpRequest ->
+      providerInfo.requestFilter = Consumer { httpRequest: ClassicHttpRequest ->
         methods.forEach { method ->
           try {
             method.invokeExplosively(testTarget, httpRequest)

@@ -7,13 +7,14 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,9 +59,9 @@ public class Defect1070Test {
   @Test
   @PactTestFor
   void testApi(MockServer mockServer) throws IOException {
-    HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/api/test/1234").execute().returnResponse();
-    assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
-    assertThat(IOUtils.toString(httpResponse.getEntity().getContent()),
+    ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/api/test/1234").execute().returnResponse();
+    assertThat(httpResponse.getCode(), is(equalTo(200)));
+    assertThat(IOUtils.toString(httpResponse.getEntity().getContent(), Charset.defaultCharset()),
       is(equalTo("[{\"id\":32432,\"name\":\"testId254\",\"size\":1445211}]")));
   }
 }

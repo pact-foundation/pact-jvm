@@ -12,15 +12,11 @@ import au.com.dius.pact.core.model.DefaultPactWriter
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
-import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.unwrap
 import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
@@ -32,15 +28,18 @@ import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
 import mu.KLogging
 import org.apache.commons.lang3.StringEscapeUtils
-import org.apache.http.client.methods.HttpOptions
-import org.apache.http.config.RegistryBuilder
-import org.apache.http.conn.socket.ConnectionSocketFactory
-import org.apache.http.conn.socket.PlainConnectionSocketFactory
-import org.apache.http.conn.ssl.SSLSocketFactory
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy
-import org.apache.http.entity.ContentType
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager
+import org.apache.hc.client5.http.classic.methods.HttpOptions
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.config.RegistryBuilder
+import org.apache.hc.core5.ssl.SSLContexts
+import org.apache.hc.core5.util.TimeValue
 import java.lang.Thread.sleep
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
@@ -107,19 +106,19 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
   private val requestMatcher = RequestMatching(pact.interactions)
 
   override fun waitForServer() {
-    val sf = SSLSocketFactory(TrustSelfSignedStrategy())
-    val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 500)
+    val sslcontext = SSLContexts.custom().loadTrustMaterial(TrustSelfSignedStrategy()).build()
+    val sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+      .setSslContext(sslcontext).build()
     val httpclient = HttpClientBuilder.create()
       .setConnectionManager(
         BasicHttpClientConnectionManager(
           RegistryBuilder.create<ConnectionSocketFactory>()
             .register("http", PlainConnectionSocketFactory.getSocketFactory())
-            .register("https", sf)
+            .register("https", sslSocketFactory)
             .build()
         )
       )
-      .setSSLSocketFactory(sf)
-      .setServiceUnavailableRetryStrategy(retryStrategy)
+      .setRetryStrategy(DefaultHttpRequestRetryStrategy(5, TimeValue.ofMilliseconds(500)))
       .build()
 
     val httpOptions = HttpOptions(getUrl())
@@ -331,7 +330,7 @@ open class MockHttpsServer(pact: BasePact, config: MockProviderConfig) :
   BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
 fun calculateCharset(headers: Map<String, List<String?>>): Charset {
-  val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+  val contentType = headers.entries.find { it.key.lowercase() == "content-type" }
   val default = Charset.forName("UTF-8")
   if (contentType != null && contentType.value.isNotEmpty() && !contentType.value.first().isNullOrEmpty()) {
     try {

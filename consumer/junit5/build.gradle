@@ -17,7 +17,7 @@ dependencies {
   testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testImplementation "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+  testImplementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
   testImplementation 'com.jayway.restassured:rest-assured:2.9.0'
 
   // JAX-B dependencies for JDK 9+

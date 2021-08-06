@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.exampleclients.ConsumerClient;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.http.client.HttpResponseException;
+import org.apache.hc.client5.http.HttpResponseException;
 import org.junit.Rule;
 import org.junit.Test;
 

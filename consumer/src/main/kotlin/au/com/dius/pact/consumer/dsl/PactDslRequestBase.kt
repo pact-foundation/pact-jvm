@@ -18,9 +18,9 @@ import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.support.isNotEmpty
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.FastDateFormat
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.HttpMultipartMode
-import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
+import org.apache.hc.core5.http.ContentType
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.Date
@@ -68,16 +68,16 @@ open class PactDslRequestBase(
     else
       ContentType.DEFAULT_TEXT
     val multipart = MultipartEntityBuilder.create()
-      .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+      .setMode(HttpMultipartMode.EXTENDED)
       .addBinaryBody(partName, data, contentType, fileName)
       .build()
     val os = ByteArrayOutputStream()
     multipart.writeTo(os)
     requestBody = body(os.toByteArray(),
-      au.com.dius.pact.core.model.ContentType(multipart.contentType.value))
+      au.com.dius.pact.core.model.ContentType(multipart.contentType))
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, RegexMatcher(MULTIPART_HEADER_REGEX,
-      multipart.contentType.value))
-    requestHeaders[CONTENT_TYPE] = listOf(multipart.contentType.value)
+      multipart.contentType))
+    requestHeaders[CONTENT_TYPE] = listOf(multipart.contentType)
   }
 
   protected fun queryMatchingDateBase(field: String, pattern: String?, example: String?): PactDslRequestBase {

@@ -1,11 +1,9 @@
 package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -48,7 +46,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
     @Test
     @PactVerification("test_provider")
     public void runTest() throws IOException {
-        assertEquals(Request.Get("http://localhost:8114/persons/429605785802342400")
+        assertEquals(Request.get("http://localhost:8114/persons/429605785802342400")
             .addHeader("Accept", "application/x-thrift+json")
             .execute().returnContent().getType().getMimeType(), "application/x-thrift+json");
     }

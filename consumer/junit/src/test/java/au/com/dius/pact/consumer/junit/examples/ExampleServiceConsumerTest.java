@@ -7,8 +7,10 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -91,11 +93,11 @@ public class ExampleServiceConsumerTest {
 
     @PactVerification("CarBookingProvider")
     @Test
-    public void testBookCar() throws IOException {
+    public void testBookCar() throws IOException, ParseException {
         ProviderCarBookingRestClient providerRestClient = new ProviderCarBookingRestClient();
-        HttpResponse response = providerRestClient.placeOrder(provider.getUrl(), DATA_A_ID, DATA_B_ID, "2015-03-15");
+        ClassicHttpResponse response = providerRestClient.placeOrder(provider.getUrl(), DATA_A_ID, DATA_B_ID, "2015-03-15");
 
-        Assert.assertEquals(201, response.getStatusLine().getStatusCode());
+        Assert.assertEquals(201, response.getCode());
         String orderDetails = EntityUtils.toString(response.getEntity());
         Assert.assertEquals("{\"id\":\"ORDER_ID_123456\"}", orderDetails);
     }

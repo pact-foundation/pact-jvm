@@ -1,14 +1,14 @@
 package au.com.dius.pact.provider.junit;
 
+import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
-import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.target.Target;
 import au.com.dius.pact.provider.junitsupport.target.TestTarget;
 import com.github.restdriver.clientdriver.ClientDriverRule;
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 
 import static com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
-import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(PactRunner.class)
@@ -47,7 +46,7 @@ public class InjectedStateParametersContractTest {
   }
 
   @TargetRequestFilter
-  public void exampleRequestFilter(HttpRequest request) {
+  public void exampleRequestFilter(ClassicHttpRequest request) {
     request.addHeader("X-ContractTest", "true");
   }
 

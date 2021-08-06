@@ -6,9 +6,10 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
-import org.apache.http.HttpResponse
-import org.apache.http.client.fluent.Request
-import org.apache.http.entity.StringEntity
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpResponse
+import org.apache.hc.core5.http.io.entity.StringEntity
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -33,11 +34,11 @@ class DateTimeWithTimezoneTest {
 
   @Test
   void testFiles(MockServer mockServer) {
-    HttpResponse httpResponse = Request.Post("${mockServer.url}/values")
+    HttpResponse httpResponse = Request.post("${mockServer.url}/values")
       .body(new StringEntity('{"datetime": "' +
         DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss.SSSXXX").format(ZonedDateTime.now())
-        + '"}', 'application/json', 'UTF-8'))
+        + '"}', ContentType.APPLICATION_JSON))
       .execute().returnResponse()
-    assert httpResponse.statusLine.statusCode == 200
+    assert httpResponse.code == 200
   }
 }

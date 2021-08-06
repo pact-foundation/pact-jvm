@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.BasePact;
 import au.com.dius.pact.core.model.PactSpecVersion;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.core5.http.ContentType;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

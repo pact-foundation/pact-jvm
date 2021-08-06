@@ -431,7 +431,7 @@ class FormPostBuilder(
   }
 
   companion object {
-    val APPLICATION_FORM_URLENCODED = org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED.toString()
+    val APPLICATION_FORM_URLENCODED = org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED.toString()
     const val ROOT = "$."
   }
 }

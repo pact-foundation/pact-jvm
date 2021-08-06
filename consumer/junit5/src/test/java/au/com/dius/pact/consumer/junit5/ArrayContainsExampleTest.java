@@ -8,11 +8,12 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import groovy.json.JsonSlurper;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,11 +85,11 @@ public class ArrayContainsExampleTest {
   @Test
   @PactTestFor
   void testArticles(MockServer mockServer) throws IOException {
-    final String response = Request.Get(mockServer.getUrl() + "/orders")
+    final String response = Request.get(mockServer.getUrl() + "/orders")
       .addHeader("Accept", "application/vnd.siren+json")
       .execute()
       .returnContent()
-      .asString();
+      .asString(Charset.defaultCharset());
 
     final Map<String, Object> jsonResponse = (Map<String, Object>) new JsonSlurper().parseText(response);
 

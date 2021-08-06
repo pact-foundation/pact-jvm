@@ -11,9 +11,9 @@ import com.github.michaelbull.result.mapEither
 import com.github.michaelbull.result.unwrap
 import groovy.lang.Closure
 import mu.KLogging
-import org.apache.http.HttpEntity
-import org.apache.http.entity.ContentType
-import org.apache.http.util.EntityUtils
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpEntity
+import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
@@ -163,13 +163,13 @@ object DefaultStateChange : StateChange, KLogging() {
     return try {
       val url = stateChangeHandler as? URI ?: URI(stateChangeHandler.toString())
       val response = providerClient.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
-      logger.debug { "Invoked state change $url -> ${response?.statusLine}" }
+      logger.debug { "Invoked state change $url -> ${response?.code}" }
       response?.use {
-        if (response.statusLine.statusCode >= 400) {
+        if (response.code >= 400) {
           verifier.reporters.forEach {
-            it.stateChangeRequestFailed(state.name.toString(), provider, isSetup, response.statusLine.toString())
+            it.stateChangeRequestFailed(state.name.toString(), provider, isSetup, "${response.code} ${response.reasonPhrase}")
           }
-          Err(Exception("State Change Request Failed - ${response.statusLine}"))
+          Err(Exception("State Change Request Failed - ${response.code} ${response.reasonPhrase}"))
         } else {
           parseJsonResponse(response.entity)
         }
@@ -184,7 +184,7 @@ object DefaultStateChange : StateChange, KLogging() {
 
   private fun parseJsonResponse(entity: HttpEntity?): Result<Map<String, Any?>, Exception> {
     return if (entity != null) {
-      val contentType: ContentType? = ContentType.get(entity)
+      val contentType: ContentType? = ContentType.parse(entity.contentType)
       if (contentType != null && contentType.mimeType == ContentType.APPLICATION_JSON.mimeType) {
       val body = EntityUtils.toString(entity)
       Ok(Json.toMap(JsonParser.parseString(body)))

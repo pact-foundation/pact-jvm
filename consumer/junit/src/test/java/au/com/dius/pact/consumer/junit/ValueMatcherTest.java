@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import com.google.common.collect.Sets;
 import groovy.json.JsonSlurper;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -85,7 +85,7 @@ public class ValueMatcherTest {
     @Test
     @PactVerification("ValueMatcherProvider")
     public void runTest() throws IOException {
-      String result = Request.Get(provider.getUrl())
+      String result = Request.get(provider.getUrl())
         .addHeader("Accept", APPLICATION_JSON)
         .execute().returnContent().asString();
       Map<String, Object> body = (Map<String, Object>) new JsonSlurper().parseText(result);

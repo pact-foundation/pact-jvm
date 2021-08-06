@@ -12,6 +12,9 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +54,7 @@ public class ArticlesTest {
 
     @PactVerification("ArticlesProvider")
     @Test
-    public void testArticles() throws IOException {
+    public void testArticles() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         ArticlesRestClient providerRestClient = new ArticlesRestClient();
         providerRestClient.getArticles("http://localhost:1234");
     }

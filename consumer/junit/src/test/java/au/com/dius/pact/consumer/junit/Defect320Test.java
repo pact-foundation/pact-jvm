@@ -5,10 +5,9 @@ import au.com.dius.pact.consumer.PactTestExecutionContext;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.ConsumerPactTest;
 import au.com.dius.pact.core.model.RequestResponsePact;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ContentType;
 
 import java.io.IOException;
 
@@ -46,7 +45,7 @@ public class Defect320Test extends ConsumerPactTest {
 
   @Override
   protected void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException {
-    assertEquals(200, Request.Put(mockServer.getUrl() + "/json")
+    assertEquals(200, Request.put(mockServer.getUrl() + "/json")
       .addHeader("Accept", ContentType.APPLICATION_JSON.getMimeType())
       .bodyString("{" +
           "\"id\": \"any string\"," +
@@ -54,6 +53,6 @@ public class Defect320Test extends ConsumerPactTest {
           "\"jsonrpc\": \"2.0\"," +
           "\"params\": [\"any string\"]}",
         ContentType.APPLICATION_JSON)
-      .execute().returnResponse().getStatusLine().getStatusCode());
+      .execute().returnResponse().getCode());
   }
 }

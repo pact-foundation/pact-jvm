@@ -2,9 +2,9 @@ package au.com.dius.pact.consumer.junit.events;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.fluent.Content;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.client5.http.fluent.Content;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ContentType;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ public class EventsRepository {
   public List<Event> getEvents() {
     try {
       ObjectMapper mapper = new ObjectMapper();
-      Content content = Request.Post(baseUrl + "/all")
+      Content content = Request.post(baseUrl + "/all")
         .bodyString(mapper.writeValueAsString(new EventRequest("asdf")), ContentType.APPLICATION_JSON)
         .setHeader("Accept", ContentType.APPLICATION_JSON.toString())
         .execute().returnContent();
@@ -36,7 +36,7 @@ public class EventsRepository {
   public  Map<String, Map<String, List<Event>>> getEventsMapNestedArray() {
     try {
       ObjectMapper mapper = new ObjectMapper();
-      Content content = Request.Get(baseUrl + "/dictionaryNestedArray")
+      Content content = Request.get(baseUrl + "/dictionaryNestedArray")
         .setHeader("Accept", ContentType.APPLICATION_JSON.toString())
         .execute().returnContent();
       return mapper.readValue(content.asString(), new MapTypeReference());

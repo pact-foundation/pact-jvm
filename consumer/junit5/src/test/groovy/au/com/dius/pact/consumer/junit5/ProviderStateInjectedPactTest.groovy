@@ -7,9 +7,9 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonOutput
-import org.apache.http.HttpResponse
-import org.apache.http.client.fluent.Request
-import org.apache.http.entity.ContentType
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -45,10 +45,10 @@ class ProviderStateInjectedPactTest {
 
   @Test
   void testArticles(MockServer mockServer) {
-    HttpResponse httpResponse = Request.Post("${mockServer.url}/values")
+    HttpResponse httpResponse = Request.post("${mockServer.url}/values")
       .bodyString(JsonOutput.toJson([userName: 'Test', userClass: 'Shoddy']), ContentType.APPLICATION_JSON)
       .execute().returnResponse()
-    assert httpResponse.statusLine.statusCode == 200
+    assert httpResponse.code == 200
     assert httpResponse.entity.content.text == '{"userId":100,"userName":"Test"}'
   }
 }

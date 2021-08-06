@@ -1,25 +1,25 @@
 package au.com.dius.pact.provider.groovysupport
 
+import au.com.dius.pact.core.model.ContentType as PactContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactReaderKt
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.support.Json
-import au.com.dius.pact.core.model.ContentType as PactContentType
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
-import org.apache.http.Header
-import org.apache.http.HttpEntityEnclosingRequest
-import org.apache.http.HttpRequest
-import org.apache.http.HttpResponse
-import org.apache.http.ProtocolVersion
-import org.apache.http.StatusLine
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.message.BasicHeader
-import org.apache.http.message.BasicStatusLine
+import au.com.dius.pact.provider.ProviderResponse
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.core5.http.ClassicHttpRequest
+import org.apache.hc.core5.http.ClassicHttpResponse
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.Header
+import org.apache.hc.core5.http.HttpRequest
+import org.apache.hc.core5.http.io.entity.StringEntity
+import org.apache.hc.core5.http.message.BasicClassicHttpRequest
+import org.apache.hc.core5.http.message.BasicHeader
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -181,7 +181,7 @@ class ProviderClientSpec extends Specification {
 
   def 'setting up body does nothing if it is not a post and there is no body'() {
     given:
-    httpRequest = Mock HttpEntityEnclosingRequest
+    httpRequest = Mock ClassicHttpRequest
     request = new Request('PUT', '/')
 
     when:
@@ -193,7 +193,7 @@ class ProviderClientSpec extends Specification {
 
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
-    httpRequest = Mock HttpEntityEnclosingRequest
+    httpRequest = Mock ClassicHttpRequest
     request = new Request('PUT', '/', [:], [:], OptionalBody.body('{}'.bytes))
 
     when:
@@ -206,7 +206,7 @@ class ProviderClientSpec extends Specification {
 
   def 'setting up body sets a string entity  entity if it is a url encoded form post and there is no query string'() {
     given:
-    httpRequest = Mock HttpEntityEnclosingRequest
+    httpRequest = Mock ClassicHttpRequest
     request = new Request('POST', '/', [:], ['Content-Type': [ContentType.APPLICATION_FORM_URLENCODED.mimeType]],
       OptionalBody.body('A=B'.bytes))
 
@@ -220,7 +220,7 @@ class ProviderClientSpec extends Specification {
 
   def 'setting up body sets a StringEntity entity if it is urlencoded form post and there is a query string'() {
     given:
-    httpRequest = Mock HttpEntityEnclosingRequest
+    httpRequest = Mock ClassicHttpRequest
     request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': ['application/x-www-form-urlencoded']],
       OptionalBody.body('A=B'.bytes))
 
@@ -401,7 +401,9 @@ class ProviderClientSpec extends Specification {
     then:
     1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
-    1 * httpClient.execute({ it.method == 'POST' && it.requestLine.uri == stateChangeUrl })
+    1 * httpClient.execute({
+      it.method == 'POST' && it.authority.hostName == 'state.change' && it.authority.port == 1244
+    })
     0 * _
   }
 
@@ -415,7 +417,9 @@ class ProviderClientSpec extends Specification {
     then:
     1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
-    1 * httpClient.execute({ it.method == 'POST' && it.requestLine.uri == stateChangeUrl.toString() })
+    1 * httpClient.execute({
+      it.method == 'POST' && it.authority.hostName == 'state.change' && it.authority.port == 1244
+    })
     0 * _
   }
 
@@ -436,7 +440,8 @@ class ProviderClientSpec extends Specification {
     1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
     1 * httpClient.execute({
-      it.method == 'POST' && it.requestLine.uri == stateChangeUrl && it.entity.content.text == exepectedBody
+      it.method == 'POST' && it.authority.hostName == 'state.change' && it.authority.port == 1244 &&
+        it.entity.content.text == exepectedBody
     })
     0 * _
   }
@@ -453,7 +458,8 @@ class ProviderClientSpec extends Specification {
     1 * client.makeStateChangeRequest(stateChangeUrl, state, false, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
     1 * httpClient.execute({
-      it.method == 'POST' && it.requestLine.uri == 'http://state.change:1244?state=state+one&a=a&b=1&action=setup'
+      it.method == 'POST' && it.authority.hostName == 'state.change' && it.authority.port == 1244 &&
+        it.uri.toString() == 'http://state.change:1244/?state=state%20one&a=a&b=1&action=setup'
     })
     0 * _
   }
@@ -467,7 +473,7 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.toString() == 'http://my_host:8080/'
+    request.uri.toString() == 'http://my_host:8080/'
   }
 
   def 'handles a closure for the host'() {
@@ -479,7 +485,7 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.toString() == 'http://my_host_from_closure:8080/'
+    request.uri.toString() == 'http://my_host_from_closure:8080/'
   }
 
   def 'handles non-strings for the host'() {
@@ -491,7 +497,7 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.toString() == 'http://12345678:8080/'
+    request.uri.toString() == 'http://12345678:8080/'
   }
 
   def 'handles a number for the port'() {
@@ -503,7 +509,7 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.toString() == 'http://localhost:1234/'
+    request.uri.toString() == 'http://localhost:1234/'
   }
 
   def 'handles a closure for the port'() {
@@ -515,7 +521,7 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.toString() == 'http://localhost:2345/'
+    request.uri.toString() == 'http://localhost:2345/'
   }
 
   def 'handles strings for the port'() {
@@ -527,7 +533,7 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.toString() == 'http://localhost:2222/'
+    request.uri.toString() == 'http://localhost:2222/'
   }
 
   def 'fails in an appropriate way if the port is unable to be converted to an integer'() {
@@ -552,7 +558,7 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.toString() == 'http://localhost:8080/tenants/tester%2Ftoken/jobs/external-id'
+    request.uri.toString() == 'http://localhost:8080/tenants/tester%2Ftoken/jobs/external-id'
   }
 
   @Unroll
@@ -584,20 +590,19 @@ class ProviderClientSpec extends Specification {
     def request = client.newRequest(pactRequest)
 
     then:
-    request.URI.query == 'A=B&A=C'
+    request.uri.query == 'A=B&A=C'
   }
 
   def 'handles repeated headers when handling the response'() {
     given:
-    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
-    Header[] headers = [
+    def headers = [
       new BasicHeader('Server', 'Apigee-Edge'),
       new BasicHeader('Set-Cookie', 'JSESSIONID=alphabeta120394049; HttpOnly'),
       new BasicHeader('Set-Cookie', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha')
     ] as Header[]
-    HttpResponse response = Mock(HttpResponse) {
-      getStatusLine() >> statusLine
-      getAllHeaders() >> headers
+    ClassicHttpResponse response = Mock(ClassicHttpResponse) {
+      getCode() >> 200
+      getHeaders() >> headers
     }
 
     when:
@@ -613,15 +618,14 @@ class ProviderClientSpec extends Specification {
 
   def 'handles headers with comma-seperated values'() {
     given:
-    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
     Header[] headers = [
       new BasicHeader('Server', 'Apigee-Edge'),
       new BasicHeader('Access-Control-Expose-Headers', 'content-length,content-type'),
       new BasicHeader('Access-Control-Expose-Headers', 'accept')
     ] as Header[]
-    HttpResponse response = Mock(HttpResponse) {
-      getStatusLine() >> statusLine
-      getAllHeaders() >> headers
+    ClassicHttpResponse response = Mock(ClassicHttpResponse) {
+      getCode() >> 200
+      getHeaders() >> headers
     }
 
     when:
@@ -638,7 +642,6 @@ class ProviderClientSpec extends Specification {
   @Issue('#1159')
   def 'do not split header values for known single value headers'() {
     given:
-    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
     Header[] headers = [
       new BasicHeader('Set-Cookie', 'JSESSIONID=alphabeta120394049,baaadbeef6767676767690220; Path=/alpha'),
       new BasicHeader('WWW-Authenticate', 'Basic realm="Access to the staging site", charset="UTF-8"'),
@@ -649,9 +652,9 @@ class ProviderClientSpec extends Specification {
       new BasicHeader('If-Modified-Since', 'Wed, 21 Oct 2015 07:28:00 GMT'),
       new BasicHeader('If-Unmodified-Since', 'Wed, 21 Oct 2015 07:28:00 GMT')
     ] as Header[]
-    HttpResponse response = Mock(HttpResponse) {
-      getStatusLine() >> statusLine
-      getAllHeaders() >> headers
+    ClassicHttpResponse response = Mock(ClassicHttpResponse) {
+      getCode() >> 200
+      getHeaders() >> headers
     }
 
     when:
@@ -674,11 +677,10 @@ class ProviderClientSpec extends Specification {
   @Issue('#1013')
   def 'If no content type header is present, defaults to text/plain'() {
     given:
-    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
     Header[] headers = [] as Header[]
-    HttpResponse response = Mock(HttpResponse) {
-      getStatusLine() >> statusLine
-      getAllHeaders() >> headers
+    ClassicHttpResponse response = Mock(ClassicHttpResponse) {
+      getCode() >> 200
+      getHeaders() >> headers
       getEntity() >> new StringEntity('HELLO', null as ContentType)
     }
 
@@ -689,4 +691,78 @@ class ProviderClientSpec extends Specification {
     result.contentType.toString() == 'text/plain; charset=ISO-8859-1'
   }
 
+  def 'URL decodes the path'() {
+    given:
+    String path = '%2Fpath%2FTEST+PATH%2F2014-14-06+23%3A22%3A21'
+    def request = new Request('GET', path, [:], [:], OptionalBody.body(''.bytes))
+    Header[] headers = [] as Header[]
+    ClassicHttpResponse response = Mock(ClassicHttpResponse) {
+      getCode() >> 200
+      getHeaders() >> headers
+    }
+
+    when:
+    client.makeRequest(request)
+
+    then:
+    1 * httpClientFactory.newClient(_) >> httpClient
+    1 * httpClient.execute(_, _) >> { method, callback ->
+      assert method.uri.path == '/path/TEST PATH/2014-14-06 23:22:21'
+      callback.handleResponse(response)
+    }
+  }
+
+  def 'query parameters must NOT be placed in the body for URL encoded FORM POSTs'() {
+    given:
+    def request = new Request('POST', '/', PactReaderKt.queryStringToMap('a=1&b=11&c=Hello World'),
+      ['Content-Type': [ContentType.APPLICATION_FORM_URLENCODED.toString()]], OptionalBody.body('A=B'.bytes))
+
+    when:
+    client.makeRequest(request)
+
+    then:
+    1 * httpClientFactory.newClient(_) >> httpClient
+    1 * httpClient.execute(_, _) >> { method, callback ->
+      assert method.requestUri == '/?a=1&b=11&c=Hello%20World'
+      assert method.entity.content.text == 'A=B'
+      new ProviderResponse(200)
+    }
+  }
+
+  @Unroll
+  def 'setupBody() needs to take Content-Type header into account (#charset)'() {
+    given:
+    def headers = ['Content-Type': [contentType]]
+    def body = 'ÄÉÌÕÛ'
+    def method = new BasicClassicHttpRequest('PUT', '/')
+
+    when:
+    client.setupBody(new Request('PUT', '/', [:], headers, OptionalBody.body(body.bytes)), method)
+
+    then:
+    method.entity.contentType == contentType
+    method.entity.content.getText(charset) == body
+
+    where:
+
+    charset      | contentType
+    'UTF-8'      | 'text/plain; charset=UTF-8'
+    'ISO-8859-1' | 'text/plain; charset=ISO-8859-1'
+  }
+
+
+  def 'setupBody() Content-Type defaults to plain text with encoding'() {
+    given:
+    def contentType = 'text/plain; charset=ISO-8859-1'
+    def body = 'ÄÉÌÕÛ'
+    def request = new Request('PUT', '/', [:], [:], OptionalBody.body(body.bytes))
+    def method = new BasicClassicHttpRequest('PUT', '/')
+
+    when:
+    client.setupBody(request, method)
+
+    then:
+    method.entity.contentType == contentType
+    method.entity.content.getText('ISO-8859-1') == body
+  }
 }

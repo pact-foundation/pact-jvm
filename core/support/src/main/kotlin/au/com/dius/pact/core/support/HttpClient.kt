@@ -4,15 +4,17 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import mu.KLogging
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.client.CredentialsProvider
-import org.apache.http.impl.client.BasicCredentialsProvider
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.impl.client.SystemDefaultCredentialsProvider
-import org.apache.http.message.BasicHeader
+import org.apache.hc.client5.http.auth.AuthScope
+import org.apache.hc.client5.http.auth.CredentialsProvider
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
+import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.core5.http.message.BasicHeader
+import org.apache.hc.core5.util.TimeValue
 import java.net.URI
 
 sealed class Auth {
@@ -42,8 +44,9 @@ object HttpClient : KLogging() {
     maxPublishRetries: Int = 5,
     publishRetryInterval: Int = 3000
   ): Pair<CloseableHttpClient, CredentialsProvider?> {
-    val retryStrategy = CustomServiceUnavailableRetryStrategy(maxPublishRetries, publishRetryInterval)
-    val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
+    val builder = HttpClients.custom().useSystemProperties()
+      .setRetryStrategy(DefaultHttpRequestRetryStrategy(maxPublishRetries,
+        TimeValue.ofMilliseconds(publishRetryInterval.toLong())))
 
     val defaultHeaders = mutableMapOf<String, String>()
     val credsProvider = when (authentication) {
@@ -95,7 +98,7 @@ object HttpClient : KLogging() {
   ): CredentialsProvider {
     val credsProvider = BasicCredentialsProvider()
     credsProvider.setCredentials(AuthScope(uri.host, uri.port),
-      UsernamePasswordCredentials(username, password))
+      UsernamePasswordCredentials(username, password.toCharArray()))
     builder.setDefaultCredentialsProvider(credsProvider)
     return credsProvider
   }

@@ -5,20 +5,21 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import groovy.json.JsonSlurper
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.config.RegistryBuilder
-import org.apache.http.conn.ssl.SSLSocketFactory
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager
-import org.apache.http.util.EntityUtils
+import org.apache.hc.client5.http.classic.methods.HttpPost
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.config.RegistryBuilder
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.io.entity.StringEntity
+import org.apache.hc.core5.ssl.SSLContexts
 import org.junit.jupiter.api.Test
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
 import static io.ktor.network.tls.certificates.CertificatesKt.generateCertificate
-import static org.apache.http.conn.socket.PlainConnectionSocketFactory.socketFactory
 import static org.hamcrest.CoreMatchers.instanceOf
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
@@ -38,7 +39,7 @@ class PactTest {
         .body('{"name": "harry"}')
       .willRespondWith()
         .status(200)
-        .body('{"hello": "harry"}')
+        .body('{"hello": "harry"}', ContentType.APPLICATION_JSON.toString())
       .toPact()
 
     MockProviderConfig config = MockProviderConfig.createDefault()
@@ -83,13 +84,17 @@ class PactTest {
       Boolean run(MockServer mockServer, PactTestExecutionContext context) throws IOException {
         assert mockServer.url.startsWith('https://')
         Map expectedResponse = [hello: 'harry']
-        def sf = new SSLSocketFactory(new TrustSelfSignedStrategy())
+
+        def sslcontext = SSLContexts.custom().loadTrustMaterial(new TrustSelfSignedStrategy()).build()
+        def sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+          .setSslContext(sslcontext).build()
         def httpclient = HttpClientBuilder.create()
-          .setConnectionManager(new BasicHttpClientConnectionManager(RegistryBuilder.create()
-            .register('http', socketFactory)
-            .register('https', sf)
-            .build()))
-          .setSSLSocketFactory(sf)
+          .setConnectionManager(new BasicHttpClientConnectionManager(
+            RegistryBuilder.create()
+              .register("http", PlainConnectionSocketFactory.getSocketFactory())
+              .register("https", sslSocketFactory)
+              .build()
+          ))
           .build()
 
         def post = new HttpPost(mockServer.url + '/hello')
@@ -98,7 +103,7 @@ class PactTest {
         def actualResponse = null
         try {
           response = httpclient.execute(post)
-          if (response.statusLine.statusCode == 200) {
+          if (response.code == 200) {
             actualResponse = new JsonSlurper().parseText(EntityUtils.toString(response.entity))
           }
         } finally {
@@ -116,5 +121,4 @@ class PactTest {
 
     assertThat(result, is(instanceOf(PactVerificationResult.Ok)))
   }
-
 }

@@ -2,11 +2,9 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.BasePact;
-import au.com.dius.pact.core.model.Pact;
-import au.com.dius.pact.core.model.RequestResponsePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -119,11 +117,11 @@ public class PactQueryParameterTest {
   private void verifyRequestMatches(BasePact pact, String fullPath) {
     MockProviderConfig config = MockProviderConfig.createDefault();
     PactVerificationResult result = runConsumerTest(pact, config, (mockServer, context) -> {
-      String uri = mockServer.getUrl() + "/" + fullPath;
+      String uri = mockServer.getUrl() + fullPath;
 
-      Request.Get(uri).execute().handleResponse(httpResponse -> {
+      Request.get(uri).execute().handleResponse(httpResponse -> {
         String content = EntityUtils.toString(httpResponse.getEntity());
-        if (httpResponse.getStatusLine().getStatusCode() == 500) {
+        if (httpResponse.getCode() == 500) {
           Map map = new ObjectMapper().readValue(content, Map.class);
           Assert.fail((String) map.get("error"));
         }

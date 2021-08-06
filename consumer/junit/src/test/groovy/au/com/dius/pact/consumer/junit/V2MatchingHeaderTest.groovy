@@ -6,9 +6,9 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import org.apache.http.HttpStatus
-import org.apache.http.client.fluent.Request
-import org.apache.http.entity.ContentType
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpStatus
 import org.junit.Rule
 import org.junit.Test
 
@@ -48,7 +48,7 @@ class V2MatchingHeaderTest {
   @Test
   @PactVerification('786_provider')
   void runTest() {
-    Request.Get(provider.url).execute().returnContent().asString()
+    Request.get(provider.url).execute().returnContent().asString()
   }
 
 }

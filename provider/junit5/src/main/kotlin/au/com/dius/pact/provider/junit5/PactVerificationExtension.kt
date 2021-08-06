@@ -18,7 +18,7 @@ import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
 import com.github.michaelbull.result.Err
 import mu.KLogging
-import org.apache.http.HttpRequest
+import org.apache.hc.core5.http.ClassicHttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
@@ -73,7 +73,7 @@ open class PactVerificationExtension(
     return when (parameterContext.parameter.type) {
       Pact::class.java -> true
       Interaction::class.java -> true
-      HttpRequest::class.java -> testContext.target is HttpTestTarget || testContext.target is HttpsTestTarget
+      ClassicHttpRequest::class.java -> testContext.target is HttpTestTarget || testContext.target is HttpsTestTarget
       PactVerificationContext::class.java -> true
       ProviderVerifier::class.java -> true
       else -> false
@@ -85,7 +85,7 @@ open class PactVerificationExtension(
     return when (parameterContext.parameter.type) {
       Pact::class.java -> pact
       Interaction::class.java -> interaction
-      HttpRequest::class.java -> store.get("httpRequest")
+      ClassicHttpRequest::class.java -> store.get("httpRequest")
       PactVerificationContext::class.java -> store.get("interactionContext")
       ProviderVerifier::class.java -> store.get("verifier")
       else -> null

@@ -9,8 +9,8 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
-import org.apache.http.HttpResponse
-import org.apache.http.client.fluent.Request
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.HttpResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -24,16 +24,16 @@ class HyperMediaPactTest {
 
     @SuppressWarnings('UnnecessaryIfStatement')
     boolean execute() {
-      HttpResponse httpResponse = Request.Get(url).execute().returnResponse()
-      if (httpResponse.statusLine.statusCode == 200) {
+      HttpResponse httpResponse = Request.get(url).execute().returnResponse()
+      if (httpResponse.code == 200) {
         def root = httpResponse.entity.content.withCloseable { new JsonSlurper().parse(it) }
         def ordersUrl = root['links'].find { it['rel'] == ['orders'] }['href']
-        httpResponse = Request.Get(ordersUrl).execute().returnResponse()
-        if (httpResponse.statusLine.statusCode == 200) {
+        httpResponse = Request.get(ordersUrl).execute().returnResponse()
+        if (httpResponse.code == 200) {
           def orders = httpResponse.entity.content.withCloseable { new JsonSlurper().parse(it) }
           def deleteAction = orders['entities'][0]['actions'].find { it['name'] == 'delete' }
-          httpResponse = Request.Delete(deleteAction['href']).execute().returnResponse()
-          httpResponse.statusLine.statusCode == 204
+          httpResponse = Request.delete(deleteAction['href']).execute().returnResponse()
+          httpResponse.code == 204
         } else {
           false
         }

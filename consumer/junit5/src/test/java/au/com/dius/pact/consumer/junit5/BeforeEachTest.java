@@ -10,12 +10,13 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,8 +53,8 @@ public class BeforeEachTest {
   @Test
   @PactTestFor(pactMethod = "pactExecutedAfterBeforeEach")
   void testPactExecutedAfterBeforeEach(MockServer mockServer) throws IOException {
-    HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/").execute().returnResponse();
-    assertThat(IOUtils.toString(httpResponse.getEntity().getContent()),
+    ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/").execute().returnResponse();
+    assertThat(IOUtils.toString(httpResponse.getEntity().getContent(), Charset.defaultCharset()),
       is(equalTo(EXPECTED_RESPONSE)));
   }
 }

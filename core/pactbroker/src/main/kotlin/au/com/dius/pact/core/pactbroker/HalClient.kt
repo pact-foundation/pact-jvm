@@ -17,20 +17,19 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.google.common.net.UrlEscapers
 import mu.KLogging
-import org.apache.http.HttpHost
-import org.apache.http.HttpMessage
-import org.apache.http.HttpResponse
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.protocol.HttpClientContext
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.auth.BasicScheme
-import org.apache.http.impl.client.BasicAuthCache
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.util.EntityUtils
+import org.apache.hc.client5.http.classic.methods.HttpGet
+import org.apache.hc.client5.http.classic.methods.HttpPost
+import org.apache.hc.client5.http.classic.methods.HttpPut
+import org.apache.hc.client5.http.impl.auth.BasicAuthCache
+import org.apache.hc.client5.http.impl.auth.BasicScheme
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.protocol.HttpClientContext
+import org.apache.hc.core5.http.ClassicHttpResponse
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpHost
+import org.apache.hc.core5.http.HttpMessage
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.io.entity.StringEntity
 import java.net.URI
 import java.util.function.BiFunction
 import java.util.function.Consumer
@@ -87,7 +86,7 @@ interface IHalClient {
    * @return Returns a Success result object with the boolean value returned from the handler closure. Any
    * exception will be wrapped in a Failure
    */
-  fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Result<Boolean, Exception>
+  fun postJson(url: String, body: String, handler: ((status: Int, response: ClassicHttpResponse) -> Boolean)?): Result<Boolean, Exception>
 
   /**
    * Fetches the HAL document from the provided path
@@ -169,7 +168,7 @@ open class HalClient @JvmOverloads constructor(
   override fun postJson(
     url: String,
     body: String,
-    handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?
+    handler: ((status: Int, response: ClassicHttpResponse) -> Boolean)?
   ): Result<Boolean, Exception> {
     logger.debug { "Posting JSON to $url\n$body" }
     val client = setupHttpClient()
@@ -179,14 +178,14 @@ open class HalClient @JvmOverloads constructor(
       httpPost.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
 
-      client.execute(httpPost, httpContext).use {
-        logger.debug { "Got response ${it.statusLine}" }
+      client.execute(httpPost, httpContext) {
+        logger.debug { "Got response ${it.code} ${it.reasonPhrase}" }
         logger.debug { "Response body: ${it.entity?.content?.reader()?.readText()}" }
         if (handler != null) {
-          handler(it.statusLine.statusCode, it)
-        } else if (it.statusLine.statusCode >= 300) {
-          logger.error { "PUT JSON request failed with status ${it.statusLine}" }
-          Err(RequestFailedException(it.statusLine, if (it.entity != null) EntityUtils.toString(it.entity) else null))
+          handler(it.code, it)
+        } else if (it.code >= 300) {
+          logger.error { "PUT JSON request failed with status ${it.code} ${it.reasonPhrase}" }
+          Err(RequestFailedException(it.code, if (it.entity != null) EntityUtils.toString(it.entity) else null))
         } else {
           true
         }
@@ -205,7 +204,7 @@ open class HalClient @JvmOverloads constructor(
       httpClient = result.first
 
       if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {
-        val targetHost = HttpHost(uri.host, uri.port, uri.scheme)
+        val targetHost = HttpHost(uri.scheme, uri.host, uri.port)
         logger.warn { "Using preemptive basic authentication with the pact broker at $targetHost" }
         val authCache = BasicAuthCache()
         val basicAuth = BasicScheme()
@@ -285,26 +284,27 @@ open class HalClient @JvmOverloads constructor(
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
-      val response = httpClient!!.execute(httpGet, httpContext)
-      handleHalResponse(response, path)
+      httpClient!!.execute(httpGet, httpContext) {
+        handleHalResponse(it, path)
+      }
     }
   }
 
-  private fun handleHalResponse(response: CloseableHttpResponse, path: String): Result<JsonValue, Exception> {
-    return if (response.statusLine.statusCode < 300) {
-      val contentType = ContentType.getOrDefault(response.entity)
+  private fun handleHalResponse(response: ClassicHttpResponse, path: String): Result<JsonValue, Exception> {
+    return if (response.code < 300) {
+      val contentType = ContentType.parseLenient(response.entity.contentType)
       if (isJsonResponse(contentType)) {
         Ok(JsonParser.parseString(EntityUtils.toString(response.entity)))
       } else {
         Err(InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'"))
       }
     } else {
-      when (response.statusLine.statusCode) {
+      when (response.code) {
         404 -> Err(NotFoundHalResponse("No HAL document found at path '$path'"))
         else -> {
           val body = if (response.entity != null) EntityUtils.toString(response.entity) else null
-          Err(RequestFailedException(response.statusLine, body,
-            "Request to path '$path' failed with response '${response.statusLine}'"))
+          Err(RequestFailedException(response.code, body,
+            "Request to path '$path' failed with response ${response.code}"))
         }
       }
     }
@@ -389,9 +389,9 @@ open class HalClient @JvmOverloads constructor(
     pathInfo = pathInfo ?: fetch(ROOT).unwrap()
   }
 
-  fun handleFailure(resp: HttpResponse, body: String?, closure: BiFunction<String, String, Any?>): Any? {
+  fun handleFailure(resp: ClassicHttpResponse, body: String?, closure: BiFunction<String, String, Any?>): Any? {
     if (resp.entity.contentType != null) {
-      val contentType = ContentType.getOrDefault(resp.entity)
+      val contentType = ContentType.parseLenient(resp.entity.contentType)
       if (isJsonResponse(contentType)) {
         var error = ""
         if (body.isNotEmpty()) {
@@ -411,12 +411,12 @@ open class HalClient @JvmOverloads constructor(
             }
           }
         }
-        return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase}$error")
+        return closure.apply("FAILED", "${resp.code} ${resp.reasonPhrase}$error")
       } else {
-        return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - $body")
+        return closure.apply("FAILED", "${resp.code} ${resp.reasonPhrase} - $body")
       }
     } else {
-      return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - $body")
+      return closure.apply("FAILED", "${resp.code} ${resp.reasonPhrase} - $body")
     }
   }
 
@@ -454,12 +454,12 @@ open class HalClient @JvmOverloads constructor(
     httpPut.entity = StringEntity(json, ContentType.APPLICATION_JSON)
 
     return handleWith {
-      httpClient!!.execute(httpPut, httpContext).use {
+      httpClient!!.execute(httpPut, httpContext) {
         when {
-          it.statusLine.statusCode < 300 -> if (it.entity != null) EntityUtils.toString(it.entity) else null
+          it.code < 300 -> if (it.entity != null) EntityUtils.toString(it.entity) else null
           else -> {
-            logger.error { "PUT JSON request failed with status ${it.statusLine}" }
-            Err(RequestFailedException(it.statusLine, if (it.entity != null) EntityUtils.toString(it.entity) else null))
+            logger.error { "PUT JSON request failed with status ${it.code} ${it.reasonPhrase}" }
+            Err(RequestFailedException(it.code, if (it.entity != null) EntityUtils.toString(it.entity) else null))
           }
         }
       }
@@ -474,8 +474,8 @@ open class HalClient @JvmOverloads constructor(
     http.entity = StringEntity(json, ContentType.APPLICATION_JSON)
 
     return handleWith {
-      httpClient!!.execute(http, httpContext).use {
-        return@handleWith handleHalResponse(it, href)
+      httpClient!!.execute(http, httpContext) {
+        handleHalResponse(it, href)
       }
     }
   }

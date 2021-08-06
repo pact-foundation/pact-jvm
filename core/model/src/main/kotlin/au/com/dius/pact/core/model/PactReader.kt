@@ -6,7 +6,6 @@ import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.Auth
-import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Version
@@ -24,16 +23,18 @@ import com.github.michaelbull.result.expect
 import com.github.michaelbull.result.runCatching
 import mu.KLogging
 import mu.KotlinLogging
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.entity.ContentType
-import org.apache.http.impl.client.BasicCredentialsProvider
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.message.BasicHeader
-import org.apache.http.util.EntityUtils
+import org.apache.hc.client5.http.auth.AuthScope
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
+import org.apache.hc.client5.http.classic.methods.HttpGet
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.message.BasicHeader
+import org.apache.hc.core5.util.TimeValue
 import java.io.File
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -82,18 +83,18 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
         httpGet.addHeader("Accept", "application/hal+json, application/json")
 
         val response = http.execute(httpGet)
-        if (response.statusLine.statusCode < 300) {
-          val contentType = ContentType.getOrDefault(response.entity)
+        if (response.code < 300) {
+          val contentType = ContentType.parseLenient(response.entity.contentType)
           if (isJsonResponse(contentType)) {
             JsonParser.parseString(EntityUtils.toString(response.entity)) to source
           } else {
             throw InvalidHttpResponseException("Expected a JSON response, but got '$contentType'")
           }
         } else {
-          when (response.statusLine.statusCode) {
+          when (response.code) {
             404 -> throw InvalidHttpResponseException("No JSON document found at source '$source'")
             else -> throw InvalidHttpResponseException("Request to source '$source' failed with response " +
-              "'${response.statusLine}'")
+              "${response.code}")
           }
         }
       }
@@ -103,8 +104,8 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
 
 @Deprecated("Use HttpClient.newHttpClient instead")
 fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClient {
-  val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
-  val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
+  val builder = HttpClients.custom().useSystemProperties()
+    .setRetryStrategy(DefaultHttpRequestRetryStrategy(5, TimeValue.ofMilliseconds(3000)))
 
   when {
     options["authentication"] is Auth -> {
@@ -141,7 +142,7 @@ private fun basicAuth(baseUrl: String, username: String, password: String, build
   val credsProvider = BasicCredentialsProvider()
   val uri = URI(baseUrl)
   credsProvider.setCredentials(AuthScope(uri.host, uri.port),
-    UsernamePasswordCredentials(username, password))
+    UsernamePasswordCredentials(username, password.toCharArray()))
   builder.setDefaultCredentialsProvider(credsProvider)
 }
 

@@ -10,8 +10,8 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import groovy.json.JsonOutput
 import groovyx.net.http.FromServer
 import groovyx.net.http.HttpBuilder
-import org.apache.http.client.fluent.Request
-import org.apache.http.entity.ContentType
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -103,7 +103,7 @@ class MultiTest {
   @Test
   @PactTestFor(pactMethod = 'createFragment2', pactVersion = PactSpecVersion.V3)
   void runTest2(MockServer mockServer) {
-    assert Request.Put(mockServer.url + '/numbertest')
+    assert Request.put(mockServer.url + '/numbertest')
       .addHeader('Accept', 'application/json')
       .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
       .execute().returnContent().asString() == '{"responsetest": true, "name": "harry","data": 1234.0 }'
@@ -148,13 +148,13 @@ class MultiTest {
   @Test
   @PactTestFor(pactMethod = 'getUsersFragment', pactVersion = PactSpecVersion.V3)
   void runTest3(MockServer mockServer) {
-    assert Request.Get(mockServer.url + '/idm/user').execute().returnContent().asString()
+    assert Request.get(mockServer.url + '/idm/user').execute().returnContent().asString()
   }
 
   @Test
   @PactTestFor(pactMethod = 'getUsersFragment2', pactVersion = PactSpecVersion.V3)
   void runTest4(MockServer mockServer) {
-    assert Request.Get(mockServer.url + '/idm/user').execute().returnContent().asString()
+    assert Request.get(mockServer.url + '/idm/user').execute().returnContent().asString()
   }
 
   @Pact(provider = 'multitest_provider', consumer = 'test_consumer')

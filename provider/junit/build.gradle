@@ -1,11 +1,11 @@
 dependencies {
     api project(path: ":core:support", configuration: 'default'),
       project(path: ":provider", configuration: 'default')
-    implementation "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
-      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
-      "junit:junit:${project.junitVersion}",
+    implementation "junit:junit:${project.junitVersion}",
       "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
       'org.jooq:jool:0.9.14'
+    implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
+    implementation "org.apache.httpcomponents.client5:httpclient5-fluent:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     implementation 'com.github.rholder:guava-retrying:2.0.0'
     implementation 'javax.mail:mail:1.5.0-b01'

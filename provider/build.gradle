@@ -7,8 +7,8 @@ dependencies {
     api project(path: ":core:pactbroker", configuration: 'default')
     api project(path: ":core:matchers", configuration: 'default')
     api project(path: ":core:support", configuration: 'default')
-    implementation'commons-io:commons-io:2.5',
-      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+    implementation 'commons-io:commons-io:2.5'
+    implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     api 'io.github.classgraph:classgraph:4.8.105'
     implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"

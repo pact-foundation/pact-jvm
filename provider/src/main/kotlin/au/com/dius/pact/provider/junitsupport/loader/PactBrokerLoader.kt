@@ -21,7 +21,7 @@ import au.com.dius.pact.core.support.isNotEmpty
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import mu.KLogging
-import org.apache.http.client.utils.URIBuilder
+import org.apache.hc.core5.net.URIBuilder
 import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException

@@ -1,8 +1,8 @@
 package au.com.dius.pact.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ContentType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,19 +18,19 @@ public class ConsumerClient {
     }
 
     public Map getAsMap(String path) throws IOException {
-        return jsonToMap(Request.Get(url + path)
+        return jsonToMap(Request.get(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
                 .execute().returnContent().asString());
     }
 
 	public List getAsList(String path) throws IOException {
-		return jsonToList(Request.Get(url + path)
+		return jsonToList(Request.get(url + path)
 				.addHeader("testreqheader", "testreqheadervalue")
 				.execute().returnContent().asString());
 	}
 
     public Map post(String path, String body, ContentType mimeType) throws IOException {
-        String respBody = Request.Post(url + path)
+        String respBody = Request.post(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
                 .bodyString(body, mimeType)
                 .execute().returnContent().asString();
@@ -50,13 +50,13 @@ public class ConsumerClient {
 	}
 
     public int options(String path) throws IOException {
-        return Request.Options(url + path)
+        return Request.options(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
-                .execute().returnResponse().getStatusLine().getStatusCode();
+                .execute().returnResponse().getCode();
     }
 
     public String postBody(String path, String body, ContentType mimeType) throws IOException {
-        return Request.Post(url + path)
+        return Request.post(url + path)
             .bodyString(body, mimeType)
             .execute().returnContent().asString();
     }

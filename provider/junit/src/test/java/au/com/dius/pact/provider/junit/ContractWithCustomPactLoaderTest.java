@@ -8,7 +8,7 @@ import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junitsupport.target.Target;
 import au.com.dius.pact.provider.junitsupport.target.TestTarget;
 import com.github.restdriver.clientdriver.ClientDriverRule;
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -62,7 +62,7 @@ public class ContractWithCustomPactLoaderTest {
     }
 
     @TargetRequestFilter
-    public void exampleRequestFilter(HttpRequest request) {
+    public void exampleRequestFilter(ClassicHttpRequest request) {
         LOGGER.info("exampleRequestFilter called: " + request);
     }
 }

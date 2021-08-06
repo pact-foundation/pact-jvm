@@ -5,8 +5,8 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import mu.KLogging
-import org.apache.http.NameValuePair
-import org.apache.http.client.utils.URLEncodedUtils
+import org.apache.hc.core5.http.NameValuePair
+import org.apache.hc.core5.net.WWWFormCodec
 
 class FormPostContentMatcher : ContentMatcher {
   override fun matchBody(
@@ -23,10 +23,8 @@ class FormPostContentMatcher : ContentMatcher {
               null, "Expected a form post body but was missing")))))
       expectedBody.isEmpty() && actualBody.isEmpty() -> BodyMatchResult(null, emptyList())
       else -> {
-        val expectedParameters =
-          URLEncodedUtils.parse(expectedBody.valueAsString(), expected.contentType.asCharset(), '&')
-        val actualParameters =
-        URLEncodedUtils.parse(actualBody.valueAsString(), actual.contentType.asCharset(), '&')
+        val expectedParameters = WWWFormCodec.parse(expectedBody.valueAsString(), expected.contentType.asCharset())
+        val actualParameters = WWWFormCodec.parse(actualBody.valueAsString(), actual.contentType.asCharset())
         BodyMatchResult(null, compareParameters(expectedParameters, actualParameters, context))
       }
     }

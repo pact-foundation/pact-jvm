@@ -18,7 +18,7 @@ import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.expressions.DataType
 import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
 import org.json.JSONObject
 import org.w3c.dom.Document
 import java.io.IOException

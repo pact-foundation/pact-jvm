@@ -6,7 +6,7 @@ import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.core5.http.ContentType;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -87,7 +87,8 @@ public class MatchingTest {
             .method("POST")
             .body("{}", ContentType.APPLICATION_JSON)
             .willRespondWith()
-            .status(200);
+            .status(200)
+            .body("", "text/plain");
         Map expectedResponse = new HashMap();
         runTest(fragment, "{}", expectedResponse, "/hello/1234");
     }
@@ -104,7 +105,8 @@ public class MatchingTest {
                 .body("{}", ContentType.APPLICATION_JSON)
                 .willRespondWith()
                 .status(200)
-                    .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234");
+                    .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234")
+                    .body("", "text/plain");
         Map expectedResponse = new HashMap();
         runTest(fragment, "{}", expectedResponse, HELLO);
     }
@@ -135,7 +137,8 @@ public class MatchingTest {
           .matchQuery("c", "[A-Z]")
           .body("{}", ContentType.APPLICATION_JSON)
           .willRespondWith()
-          .status(200);
+          .status(200)
+          .body("", "text/plain");
         Map expectedResponse = new HashMap();
         runTest(fragment, "{}", expectedResponse, HELLO + "?a=100&b=200&c=X");
     }

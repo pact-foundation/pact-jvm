@@ -4,12 +4,13 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.messaging.MessagePact
-import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.json.JsonParser
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
-import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
+import org.apache.hc.client5.http.impl.classic.RedirectExec
+import org.apache.hc.client5.http.protocol.RedirectStrategy
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -171,7 +172,7 @@ class PactReaderSpec extends Specification {
     then:
     client.credentialsProvider instanceof BasicCredentialsProvider
     creds.principal.username == 'user'
-    creds.password == 'pwd'
+    creds.password == 'pwd'.toCharArray()
   }
 
   def 'custom retry strategy is added to execution chain of client'() {
@@ -182,7 +183,8 @@ class PactReaderSpec extends Specification {
     def client = PactReaderKt.newHttpClient(pactUrl.url, [:])
 
     then:
-    client.execChain.requestExecutor.retryStrategy instanceof CustomServiceUnavailableRetryStrategy
+    client.execChain.handler instanceof RedirectExec
+    client.execChain.handler.redirectStrategy instanceof RedirectStrategy
   }
 
   def 'correctly loads V2 pact query strings'() {

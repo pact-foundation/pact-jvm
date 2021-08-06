@@ -1,12 +1,11 @@
 package au.com.dius.pact.provider.groovysupport;
 
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequest;
 
 import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class GroovyJavaUtils {
 

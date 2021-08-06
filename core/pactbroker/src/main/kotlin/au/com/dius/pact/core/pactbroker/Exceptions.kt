@@ -1,6 +1,5 @@
 package au.com.dius.pact.core.pactbroker
 
-import org.apache.http.StatusLine
 import java.io.IOException
 
 /**
@@ -17,7 +16,7 @@ open class NotFoundHalResponse @JvmOverloads constructor(override val message: S
   * General request failed exception
   */
 open class RequestFailedException(
-  val status: StatusLine,
+  val status: Int,
   val body: String?,
   message: String = "Request failed with $status"
 ) : IOException(message)

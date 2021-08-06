@@ -3,14 +3,17 @@ package au.com.dius.pact.consumer.junit.exampleclients;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.UrlEscapers;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.fluent.Content;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.client5.http.fluent.Response;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.URIBuilder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,9 +40,10 @@ public class ConsumerClient{
         if (StringUtils.isNotEmpty(queryString)) {
             uriBuilder.setParameters(parseQueryString(queryString));
         }
-        return jsonToMap(Request.Get(uriBuilder.toString())
-                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
-                .execute().returnContent().asString());
+        Content response = Request.get(uriBuilder.toString())
+          .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
+          .execute().returnContent();
+        return jsonToMap(response.getType() != null ? response.asString() : response.asString(Charset.defaultCharset()));
     }
 
     private List<NameValuePair> parseQueryString(String queryString) {
@@ -54,13 +58,13 @@ public class ConsumerClient{
     }
 
     public List getAsList(String path) throws IOException {
-		return jsonToList(Request.Get(url + encodePath(path))
+		return jsonToList(Request.get(url + encodePath(path))
                 .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
 	}
 
     public Map post(String path, String body, ContentType mimeType) throws IOException {
-        String respBody = Request.Post(url + encodePath(path))
+        String respBody = Request.post(url + encodePath(path))
                 .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .bodyString(body, mimeType)
                 .execute().returnContent().asString();
@@ -79,22 +83,22 @@ public class ConsumerClient{
 	}
 
     public int options(String path) throws IOException {
-        return Request.Options(url + encodePath(path))
+        return Request.options(url + encodePath(path))
                 .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
-                .execute().returnResponse().getStatusLine().getStatusCode();
+                .execute().returnResponse().getCode();
     }
 
     public String postBody(String path, String body, ContentType mimeType) throws IOException {
-        return Request.Post(url + encodePath(path))
+        return Request.post(url + encodePath(path))
             .bodyString(body, mimeType)
-            .execute().returnContent().asString();
+            .execute().returnContent().asString(Charset.defaultCharset());
     }
 
     public Map putAsMap(String path, String body) throws IOException {
-        String respBody = Request.Put(url + encodePath(path))
+        String respBody = Request.put(url + encodePath(path))
                 .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .bodyString(body, ContentType.APPLICATION_JSON)
-                .execute().returnContent().asString();
+                .execute().returnContent().asString(Charset.defaultCharset());
         return jsonToMap(respBody);
     }
 }

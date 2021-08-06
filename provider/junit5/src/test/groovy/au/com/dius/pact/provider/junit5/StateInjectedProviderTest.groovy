@@ -8,7 +8,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactFolder
 import com.github.tomakehurst.wiremock.WireMockServer
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.RandomStringUtils
-import org.apache.http.HttpRequest
+import org.apache.hc.core5.http.ClassicHttpRequest
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestTemplate
@@ -33,7 +33,7 @@ class StateInjectedProviderTest {
 
   @TestTemplate
   @ExtendWith(PactVerificationInvocationContextProvider)
-  void testTemplate(Pact pact, Interaction interaction, HttpRequest request, PactVerificationContext context) {
+  void testTemplate(Pact pact, Interaction interaction, ClassicHttpRequest request, PactVerificationContext context) {
     log.info("testTemplate called: ${pact.provider.name}, ${interaction.description}")
     request.addHeader('X-ContractTest', 'true')
 

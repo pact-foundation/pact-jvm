@@ -7,8 +7,8 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.support.json.JsonParser;
 import au.com.dius.pact.core.support.json.JsonValue;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.HttpStatus;
 import org.httpkit.HttpMethod;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -50,7 +50,7 @@ public class Defect464Test {
   @PactVerification(PROVIDER_NAME)
   public void runTest() throws IOException {
     String jsonString
-      = Request.Get(provider.getUrl() + PROVIDER_URI).execute().returnContent().asString();
+      = Request.get(provider.getUrl() + PROVIDER_URI).execute().returnContent().asString();
     JsonValue root = JsonParser.parseString(jsonString);
     JsonValue.Array myArrayElement = root.asObject().get(JSON_ARRAY_MEMBER_NAME).asArray();
     List<ElementOfMyArray> myArray = myArrayElement.getValues().stream()

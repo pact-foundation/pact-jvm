@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import com.google.common.net.MediaType
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
 import spock.lang.Issue
 import spock.lang.Specification
 

@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.support
 
+import org.apache.hc.client5.http.impl.classic.ProtocolExec
+import org.apache.hc.client5.http.protocol.RequestDefaultHeaders
 import spock.lang.Specification
 
 class HttpClientSpec extends Specification {
@@ -11,7 +13,16 @@ class HttpClientSpec extends Specification {
 
     when:
     def result = HttpClient.INSTANCE.newHttpClient(authentication, uri, 1, 1)
-    def defaultHeaders = result.component1().closeables[0].this$0.defaultHeaders
+    def defaultHeaders = null
+    def execChain = result.component1().execChain
+    while (defaultHeaders == null && execChain != null) {
+      if (execChain.handler instanceof ProtocolExec) {
+        def interceptor = execChain.handler.httpProcessor.requestInterceptors.find { it instanceof RequestDefaultHeaders }
+        defaultHeaders = interceptor.defaultHeaders
+      } else {
+        execChain = execChain.next
+      }
+    }
 
     then:
     defaultHeaders[0].name == 'Authorization'

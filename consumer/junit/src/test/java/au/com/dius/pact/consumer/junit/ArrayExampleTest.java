@@ -3,12 +3,10 @@ package au.com.dius.pact.consumer.junit;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import groovy.json.JsonSlurper;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,8 +15,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.is;
 
 public class ArrayExampleTest {
 
@@ -50,7 +50,7 @@ public class ArrayExampleTest {
     @Test
     @PactVerification
     public void examplesAreGeneratedForArray() throws IOException {
-        final String response = Request.Get("http://localhost:8113/")
+        final String response = Request.get("http://localhost:8113/")
                                        .addHeader("Accept", APPLICATION_JSON)
                                        .execute()
                                        .returnContent()

@@ -7,7 +7,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.V4PactFeaturesException
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
 import org.junit.jupiter.api.Test
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
@@ -52,6 +52,7 @@ class V4FeaturesPactTest {
       .body(new PactDslJsonBody().unorderedArray('items').string('harry'))
       .willRespondWith()
       .status(200)
+      .body("", "text/plain")
       .toPact()
 
     MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V4)

@@ -3,7 +3,6 @@ package au.com.dius.pact.consumer.dsl
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.BasePact
-import au.com.dius.pact.core.model.BasePact.Companion.DEFAULT_METADATA
 import au.com.dius.pact.core.model.BasePact.Companion.metaData
 import au.com.dius.pact.core.model.ContentType.Companion.fromString
 import au.com.dius.pact.core.model.HttpRequest
@@ -16,7 +15,6 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
-import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
@@ -33,7 +31,7 @@ import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.jsonArray
 import com.mifmif.common.regex.Generex
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
 import org.json.JSONObject
 import org.w3c.dom.Document
 import java.nio.charset.Charset

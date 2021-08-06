@@ -61,7 +61,7 @@ object Publish extends StrictLogging {
 
     } catch {
       case e: IOException => new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(s"""{"error": "Got IO Exception while reading file. ${e.getMessage}"}""".getBytes()))
-      case e: RequestFailedException => new Response(e.getStatus.getStatusCode, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(e.getBody.getBytes()))
+      case e: RequestFailedException => new Response(e.getStatus, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(e.getBody.getBytes()))
       case t: Throwable => new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(t.getMessage.getBytes()))
     }
   }

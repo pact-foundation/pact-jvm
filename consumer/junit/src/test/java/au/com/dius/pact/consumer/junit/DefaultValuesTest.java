@@ -2,22 +2,19 @@ package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.DefaultRequestValues;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.client.fluent.Response;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.client5.http.fluent.Response;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collections;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class DefaultValuesTest {
 
@@ -58,18 +55,18 @@ public class DefaultValuesTest {
     @Test
     @PactVerification
     public void testWithDefaultValues() throws IOException {
-        Response response = Request.Get(provider.getUrl() + "/path")
+        Response response = Request.get(provider.getUrl() + "/path")
                                        .addHeader("Accept", APPLICATION_JSON)
                                        .addHeader("Content-Type", APPLICATION_JSON)
                                        .execute();
 
-        assertThat(response.returnResponse().getStatusLine().getStatusCode(), is(200));
+        assertThat(response.returnResponse().getCode(), is(200));
 
-        response = Request.Get(provider.getUrl() + "/path2?source_filename=test%20file")
+        response = Request.get(provider.getUrl() + "/path2?source_filename=test%20file")
           .addHeader("Accept", APPLICATION_JSON)
           .addHeader("Content-Type", APPLICATION_JSON)
           .execute();
 
-        assertThat(response.returnResponse().getStatusLine().getStatusCode(), is(200));
+        assertThat(response.returnResponse().getCode(), is(200));
     }
 }

@@ -12,7 +12,7 @@ import au.com.dius.pact.consumer.junit.exampleclients.ConsumerClient
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.support.unwrap
-import org.apache.http.client.HttpResponseException
+import org.apache.hc.client5.http.HttpResponseException
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers
 import org.junit.Assert

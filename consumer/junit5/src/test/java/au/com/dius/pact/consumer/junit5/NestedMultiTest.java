@@ -9,9 +9,9 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactDirectory;
 import groovy.json.JsonOutput;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,18 +72,18 @@ class NestedMultiTest {
 
     @Test
     void runTest1(MockServer mockServer) throws IOException {
-      HttpResponse postResponse = Request.Post(mockServer.getUrl() + "/some-service/users")
+      ClassicHttpResponse postResponse = (ClassicHttpResponse) Request.post(mockServer.getUrl() + "/some-service/users")
         .bodyString(JsonOutput.toJson(user()), ContentType.APPLICATION_JSON)
         .execute().returnResponse();
 
-      assertThat(postResponse.getStatusLine().getStatusCode(), is(equalTo(201)));
+      assertThat(postResponse.getCode(), is(equalTo(201)));
       assertThat(postResponse.getFirstHeader("Location").getValue(),
         is(equalTo("http://localhost:8080/some-service/user/abcdefghijklmnop")));
 
 
-      HttpResponse httpResponse = Request.Get(mockServer.getUrl() + SOME_SERVICE_USER + EXPECTED_USER_ID)
+      ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + SOME_SERVICE_USER + EXPECTED_USER_ID)
         .execute().returnResponse();
-      assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
+      assertThat(httpResponse.getCode(), is(equalTo(200)));
     }
   }
 
@@ -106,7 +106,7 @@ class NestedMultiTest {
     @Test
     @PactTestFor(pactMethod = "createFragment2")
     void runTest2(MockServer mockServer) throws IOException {
-      assert Request.Put(mockServer.getUrl() + "/numbertest")
+      assert Request.put(mockServer.getUrl() + "/numbertest")
         .addHeader("Accept", "application/json")
         .bodyString("{\"name\": \"harry\",\"data\": 1234.0 }", ContentType.APPLICATION_JSON)
         .execute().returnContent().asString().equals("{\"responsetest\": true, \"name\": \"harry\",\"data\": 1234.0 }");
@@ -133,7 +133,7 @@ class NestedMultiTest {
     @Test
     @PactTestFor(pactMethod = "getUsersFragment")
     void runTest3(MockServer mockServer) throws IOException {
-      assertThat(Request.Get(mockServer.getUrl() + "/idm/user").execute().returnContent().asString(),
+      assertThat(Request.get(mockServer.getUrl() + "/idm/user").execute().returnContent().asString(),
         is("[{\"email\":\"bob@bobville\",\"id\":\"7b374cc6-d644-11eb-a613-4ffac1365f0e\",\"userName\":\"Bob\"}]"));
     }
   }

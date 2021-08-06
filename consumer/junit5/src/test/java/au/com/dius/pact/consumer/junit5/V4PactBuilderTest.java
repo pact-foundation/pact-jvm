@@ -4,8 +4,9 @@ import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactBuilder;
 import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -38,8 +39,8 @@ public class V4PactBuilderTest {
 
   @Test
   void runTest(MockServer mockServer) throws IOException {
-    HttpResponse httpResponse = Request.Get(mockServer.getUrl()).execute().returnResponse();
-    assertThat(httpResponse.getStatusLine().getStatusCode(), is(200));
+    ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl()).execute().returnResponse();
+    assertThat(httpResponse.getCode(), is(200));
     assertThat(new String(httpResponse.getEntity().getContent().readAllBytes()),
       is(equalTo("{\"responsetest\": true, \"version\": \"v3\"}")));
   }

@@ -1,9 +1,9 @@
 package au.com.dius.pact.consumer.junit.examples;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 
 import java.io.IOException;
 
@@ -78,14 +78,14 @@ public class ProviderCarBookingRestClient {
         }
     }
 
-    public HttpResponse placeOrder(String baseUrl, String personId, String carId, String date)
+    public ClassicHttpResponse placeOrder(String baseUrl, String personId, String carId, String date)
         throws IOException {
-        String personStr = Request.Get(baseUrl + "/persons/" + personId)
+        String personStr = Request.get(baseUrl + "/persons/" + personId)
             .execute().returnContent().asString();
         ObjectMapper mapper = new ObjectMapper();
         Person person = mapper.readValue(personStr, Person.class);
 
-        String carDetails = Request.Get(baseUrl + "/cars/" + carId)
+        String carDetails = Request.get(baseUrl + "/cars/" + carId)
             .execute().returnContent().asString();
         Car car = mapper.readValue(carDetails, Car.class);
 
@@ -93,7 +93,7 @@ public class ProviderCarBookingRestClient {
             "\"person\": " + mapper.writeValueAsString(person) + ",\n" +
             "\"cars\": " + mapper.writeValueAsString(car) + "\n" +
             "}\n";
-        return Request.Post(baseUrl + "/orders/").bodyString(body, ContentType.APPLICATION_JSON)
+        return (ClassicHttpResponse) Request.post(baseUrl + "/orders/").bodyString(body, ContentType.APPLICATION_JSON)
             .execute().returnResponse();
     }
 }
