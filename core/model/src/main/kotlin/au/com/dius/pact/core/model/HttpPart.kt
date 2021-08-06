@@ -31,6 +31,8 @@ interface IHttpPart {
     val contentTypeKey = headers.keys.find { HttpPart.CONTENT_TYPE.equals(it, ignoreCase = true) }
     return headers[contentTypeKey]?.first()
   }
+
+  fun setupGenerators(category: Category, context: Map<String, Any>): Map<String, Generator>
 }
 
 /**
@@ -73,9 +75,9 @@ abstract class HttpPart: IHttpPart {
     return errors
   }
 
-  fun buildGenerators(category: Category, context: MutableMap<String, Any>): Map<String, Generator> {
+  override fun setupGenerators(category: Category, context: Map<String, Any>): Map<String, Generator> {
     val generators = generators.categories[category] ?: emptyMap()
-    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.toLowerCase()).generators(context)
+    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.lowercase()).generators(context)
     return generators + matchingRuleGenerators
   }
 

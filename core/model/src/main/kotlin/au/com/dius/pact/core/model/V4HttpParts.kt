@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -112,6 +114,12 @@ data class HttpRequest @JvmOverloads constructor(
       return HttpRequest(method, path, query.toMutableMap(), headers.toMutableMap(), body, matchingRules, generators)
     }
   }
+
+  override fun setupGenerators(category: Category, context: Map<String, Any>): Map<String, Generator> {
+    val generators = generators.categories[category] ?: emptyMap()
+    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.lowercase()).generators(context)
+    return generators + matchingRuleGenerators
+  }
 }
 
 data class HttpResponse @JvmOverloads constructor(
@@ -163,6 +171,8 @@ data class HttpResponse @JvmOverloads constructor(
 
   override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
 
+  override fun copyResponse() = this.copy()
+
   companion object {
     fun fromJson(json: JsonValue): HttpResponse {
       val status = when {
@@ -186,5 +196,11 @@ data class HttpResponse @JvmOverloads constructor(
       else Generators()
       return HttpResponse(status, headers.toMutableMap(), body, matchingRules, generators)
     }
+  }
+
+  override fun setupGenerators(category: Category, context: Map<String, Any>): Map<String, Generator> {
+    val generators = generators.categories[category] ?: emptyMap()
+    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.lowercase()).generators(context)
+    return generators + matchingRuleGenerators
   }
 }

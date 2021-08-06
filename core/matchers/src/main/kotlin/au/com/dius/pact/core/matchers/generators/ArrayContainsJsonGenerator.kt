@@ -11,6 +11,9 @@ import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
 
 object ArrayContainsJsonGenerator : KLogging(), Generator {
+  override val type: String
+    get() = "ArrayContains"
+
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
     return if (exampleValue is JsonValue.Array) {
       for ((index, example) in exampleValue.values.withIndex()) {

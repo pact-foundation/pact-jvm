@@ -21,10 +21,16 @@ interface IResponse: IHttpPart {
   /**
    * Create a new response by applying any generators to this response
    */
+  @Deprecated("Replaced with response generator class", replaceWith = ReplaceWith("ResponseGenerator"))
   fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse
 
   fun asHttpPart() : HttpPart
   fun hasHeader(name: String): Boolean
+
+  /**
+   * Make a copy of this response
+   */
+  fun copyResponse(): IResponse
 }
 
 /**
@@ -41,22 +47,22 @@ class Response @JvmOverloads constructor(
   override fun toString() =
     "\tstatus: $status\n\theaders: $headers\n\tmatchers: $matchingRules\n\tgenerators: $generators\n\tbody: $body"
 
-  fun copy() = Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
+  override fun copyResponse() = Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
 
   override fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse {
-    val r = this.copy()
-    val statusGenerators = r.buildGenerators(Category.STATUS, context)
+    val r = this.copyResponse()
+    val statusGenerators = r.setupGenerators(Category.STATUS, context)
     if (statusGenerators.isNotEmpty()) {
       Generators.applyGenerators(statusGenerators, mode) { _, g -> r.status = g.generate(context, r.status) as Int }
     }
-    val headerGenerators = r.buildGenerators(Category.HEADER, context)
+    val headerGenerators = r.setupGenerators(Category.HEADER, context)
     if (headerGenerators.isNotEmpty()) {
       Generators.applyGenerators(headerGenerators, mode) { key, g ->
         r.headers[key] = listOf(g.generate(context, r.headers[key]).toString())
       }
     }
     if (r.body.isPresent()) {
-      val bodyGenerators = r.buildGenerators(Category.BODY, context)
+      val bodyGenerators = r.setupGenerators(Category.BODY, context)
       if (bodyGenerators.isNotEmpty()) {
         r.body = Generators.applyBodyGenerators(bodyGenerators, r.body, determineContentType(), context, mode)
       }

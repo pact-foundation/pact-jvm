@@ -3,6 +3,8 @@ package au.com.dius.pact.consumer.dsl
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.interactionCatalogueEntries
 import au.com.dius.pact.core.matchers.MatchingConfig
+import au.com.dius.pact.core.matchers.MatchingConfig.contentHandlerCatalogueEntries
+import au.com.dius.pact.core.matchers.MatchingConfig.contentMatcherCatalogueEntries
 import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
@@ -14,7 +16,6 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
-import au.com.dius.pact.core.model.unwrap
 import au.com.dius.pact.core.support.Json.toJson
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -27,7 +28,6 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
-import io.pact.plugins.jvm.core.PluginManager
 import mu.KLogging
 
 open class PactBuilder(
@@ -40,8 +40,8 @@ open class PactBuilder(
   private var currentInteraction: V4Interaction? = null
 
   init {
-    CatalogueManager.registerCoreEntries(MatchingConfig.contentMatcherCatalogueEntries() +
-      matcherCatalogueEntries() + interactionCatalogueEntries())
+    CatalogueManager.registerCoreEntries(contentMatcherCatalogueEntries() +
+      matcherCatalogueEntries() + interactionCatalogueEntries() + contentHandlerCatalogueEntries())
   }
 
   /**
@@ -149,7 +149,7 @@ open class PactBuilder(
             is Map<*, *> -> if (contents.containsKey("content-type")) {
               val contentType = contents["content-type"].toString()
               val bodyConfig = contents.filter { it.key != "content-type" } as Map<String, Any?>
-              val matcher = CatalogueManager.findContentMatcher(io.pact.plugins.jvm.core.ContentType(contentType))
+              val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
               logger.debug { "Found a matcher for '$contentType': $matcher" }
               if (matcher == null || matcher.isCore) {
                 logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }

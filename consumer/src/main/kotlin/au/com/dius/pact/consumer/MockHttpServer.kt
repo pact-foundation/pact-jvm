@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.model.MockServerImplementation
+import au.com.dius.pact.core.matchers.DefaultResponseGenerator
 import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
@@ -188,7 +189,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
       is FullRequestMatch -> {
         val interaction = matchResult.interaction
         matchedRequests.add(interaction.request)
-        return interaction.response.generatedResponse(
+        return DefaultResponseGenerator.generateResponse(interaction.response,
           mutableMapOf(
             "mockServer" to mapOf("href" to getUrl(), "port" to getPort()),
             "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator

@@ -69,4 +69,15 @@ object MatchingConfig {
       )
     )
   }
+
+  fun contentHandlerCatalogueEntries(): List<CatalogueEntry> {
+    return listOf(
+      CatalogueEntry(CatalogueEntryType.CONTENT_GENERATOR, CatalogueEntryProviderType.CORE, "core", "json",
+        mapOf(
+          "content-types" to "application/.*json,application/json-rpc,application/jsonrequest",
+          "implementation" to "au.com.dius.pact.core.model.generators.JsonContentTypeHandler"
+        )
+      )
+    )
+  }
 }

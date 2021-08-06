@@ -55,7 +55,7 @@ class PactSerialiserSpec extends Specification {
 
     def requestWithGenerators = request.copy()
     requestWithGenerators.generators = new Generators([(Category.BODY): ['a': new RandomIntGenerator(10, 20)]])
-    def responseWithGenerators = response.copy()
+    def responseWithGenerators = response.copyResponse()
     responseWithGenerators.generators = new Generators([(Category.PATH): ['': new RandomStringGenerator(20)]])
     interactionsWithGenerators = new RequestResponseInteraction('test interaction with generators',
       [new ProviderState('test state')], requestWithGenerators, responseWithGenerators, null)
