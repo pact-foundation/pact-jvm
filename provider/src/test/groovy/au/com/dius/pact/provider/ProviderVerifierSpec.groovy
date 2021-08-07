@@ -25,6 +25,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
@@ -748,8 +749,8 @@ class ProviderVerifierSpec extends Specification {
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     def failures = [:]
     Interaction interaction = new V4Interaction.AsynchronousMessage('key', 'Test Interaction',
-      OptionalBody.body('{}'.bytes, ContentType.JSON), [:], new MatchingRulesImpl(), new Generators(),
-      '1234', [], [:], true)
+      new MessageContents(OptionalBody.body('{}'.bytes, ContentType.JSON), [:], new MatchingRulesImpl(),
+        new Generators()), '1234', [], [:], true)
 
     when:
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction)

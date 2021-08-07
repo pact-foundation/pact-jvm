@@ -1,0 +1,42 @@
+{
+  "consumer": {
+    "name": "test_consumer"
+  },
+  "interactions": [
+    {
+      "description": "A1",
+      "key": "m_001",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Good state to be in"
+        }
+      ],
+      "request": {
+        "contents": {
+          "content": "this is a message",
+          "contentType": "application/json",
+          "encoded": false
+        }
+      },
+      "response": [
+        {
+          "contents": {
+            "content": "this is a response",
+            "contentType": "application/json",
+            "encoded": false
+          }
+        }
+      ],
+      "type": "Synchronous/Messages"
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "test_provider"
+  }
+}
