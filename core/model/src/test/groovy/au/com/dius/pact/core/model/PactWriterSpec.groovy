@@ -327,7 +327,7 @@ class PactWriterSpec extends Specification {
     def pactStr = sw.toString()
 
     then:
-    pactStr == '''{
+    pactStr.trim() == '''{
     |  "consumer": {
     |    "name": "write_synchronous_message_pact_test_consumer"
     |  },
@@ -372,7 +372,7 @@ class PactWriterSpec extends Specification {
     |    "name": "write_synchronous_message_pact_test_provider"
     |  }
     |}
-    |'''.stripMargin()
+    |'''.stripMargin().trim()
   }
 
   def 'write synchronous message pact as V3 throws an exception'() {
