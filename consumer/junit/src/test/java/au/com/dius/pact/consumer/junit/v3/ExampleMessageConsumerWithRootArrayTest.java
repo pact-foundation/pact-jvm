@@ -39,7 +39,7 @@ public class ExampleMessageConsumerWithRootArrayTest {
     }
 
     @Test
-    @PactVerification({"test_provider", "SomeProviderState"})
+    @PactVerification({"test_provider"})
     public void test() throws Exception {
         assertThat(new String(currentMessage), is(equalTo("[100.1,\"Should be in an array\"]")));
     }
