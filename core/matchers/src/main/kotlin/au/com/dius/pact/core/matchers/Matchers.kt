@@ -53,15 +53,15 @@ object Matchers : KLogging() {
     category: String,
     items: List<String>,
     pathComparator: Comparator<String>
-  ) = if (category == "body")
-      matchers.rulesForCategory(category).filter(Predicate {
-        matchesPath(it, items) > 0
-      })
-    else if (category == "header" || category == "query" || category == "metadata")
-      matchers.rulesForCategory(category).filter(Predicate { key ->
-        items.all { pathComparator.compare(key, it) == 0 }
-      })
-    else matchers.rulesForCategory(category)
+  ) = when (category) {
+    "body" -> matchers.rulesForCategory(category).filter(Predicate {
+      matchesPath(it, items) > 0
+    })
+    "header", "query", "metadata" -> matchers.rulesForCategory(category).filter(Predicate { key ->
+      items.all { pathComparator.compare(key, it) == 0 }
+    })
+    else -> matchers.rulesForCategory(category)
+  }
 
   @JvmStatic
   @JvmOverloads
@@ -117,8 +117,8 @@ object Matchers : KLogging() {
     pathComparator: Comparator<String> = Comparator.naturalOrder()
   ): MatchingRuleGroup {
     val matcherCategory = resolveMatchers(matchers, category, path, pathComparator)
-    return if (category == "body")
-      matcherCategory.maxBy(Comparator { a, b ->
+    return if (category == "body") {
+      val result = matcherCategory.maxBy(Comparator { a, b ->
         val weightA = calculatePathWeight(a, path)
         val weightB = calculatePathWeight(b, path)
         when {
@@ -131,7 +131,8 @@ object Matchers : KLogging() {
           else -> -1
         }
       })
-    else {
+      result?.second?.copy(cascaded = parsePath(result.first).size != path.size) ?: MatchingRuleGroup()
+    } else {
       matcherCategory.matchingRules.values.first()
     }
   }

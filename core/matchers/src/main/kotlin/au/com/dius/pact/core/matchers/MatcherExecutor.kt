@@ -95,7 +95,7 @@ fun <M : Mismatch> domatch(
   mismatchFn: MismatchFactory<M>
 ): List<M> {
   val result = matchers.rules.map { matchingRule ->
-      domatch(matchingRule, path, expected, actual, mismatchFn)
+    domatch(matchingRule, path, expected, actual, mismatchFn, matchers.cascaded)
   }
 
   return if (matchers.ruleLogic == RuleLogic.AND) {
@@ -114,7 +114,8 @@ fun <M : Mismatch> domatch(
   path: List<String>,
   expected: Any?,
   actual: Any?,
-  mismatchFn: MismatchFactory<M>
+  mismatchFn: MismatchFactory<M>,
+  cascaded: Boolean
 ): List<M> {
   return when (matcher) {
     is RegexMatcher -> matchRegex(matcher.regex, path, expected, actual, mismatchFn)
@@ -123,10 +124,10 @@ fun <M : Mismatch> domatch(
     is DateMatcher -> matchDate(matcher.format, path, expected, actual, mismatchFn)
     is TimeMatcher -> matchTime(matcher.format, path, expected, actual, mismatchFn)
     is TimestampMatcher -> matchDateTime(matcher.format, path, expected, actual, mismatchFn)
-    is MinTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn)
-    is MaxTypeMatcher -> matchMaxType(matcher.max, path, expected, actual, mismatchFn)
-    is MinMaxTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn) +
-            matchMaxType(matcher.max, path, expected, actual, mismatchFn)
+    is MinTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn, cascaded)
+    is MaxTypeMatcher -> matchMaxType(matcher.max, path, expected, actual, mismatchFn, cascaded)
+    is MinMaxTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn, cascaded) +
+            matchMaxType(matcher.max, path, expected, actual, mismatchFn, cascaded)
     is IncludeMatcher -> matchInclude(matcher.value, path, expected, actual, mismatchFn)
     is NullMatcher -> matchNull(path, actual, mismatchFn)
     is ContentTypeMatcher -> matchContentType(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
@@ -381,29 +382,37 @@ fun <M : Mismatch> matchMinType(
   path: List<String>,
   expected: Any?,
   actual: Any?,
-  mismatchFactory: MismatchFactory<M>
+  mismatchFactory: MismatchFactory<M>,
+  cascaded: Boolean
 ): List<M> {
   logger.debug { "comparing ${valueOf(actual)} with minimum $min at $path" }
-  return if (actual is List<*>) {
-    if (actual.size < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
-    } else {
-      emptyList()
-    }
-  } else if (actual is JsonValue.Array) {
-    if (actual.size < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
-    } else {
-      emptyList()
-    }
-  } else if (actual is Element) {
-    if (actual.childNodes.length < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
-    } else {
-      emptyList()
+  return if (!cascaded) {
+    when (actual) {
+      is List<*> -> {
+        if (actual.size < min) {
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+        } else {
+          emptyList()
+        }
+      }
+      is JsonValue.Array -> {
+        if (actual.size < min) {
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+        } else {
+          emptyList()
+        }
+      }
+      is Element -> {
+        if (actual.childNodes.length < min) {
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+        } else {
+          emptyList()
+        }
+      }
+      else -> matchType(path, expected, actual, mismatchFactory)
     }
   } else {
-      matchType(path, expected, actual, mismatchFactory)
+    matchType(path, expected, actual, mismatchFactory)
   }
 }
 
@@ -412,29 +421,37 @@ fun <M : Mismatch> matchMaxType(
   path: List<String>,
   expected: Any?,
   actual: Any?,
-  mismatchFactory: MismatchFactory<M>
+  mismatchFactory: MismatchFactory<M>,
+  cascaded: Boolean
 ): List<M> {
   logger.debug { "comparing ${valueOf(actual)} with maximum $max at $path" }
-  return if (actual is List<*>) {
-    if (actual.size > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
-    } else {
-      emptyList()
-    }
-  } else if (actual is JsonValue.Array) {
-    if (actual.size > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
-    } else {
-      emptyList()
-    }
-  } else if (actual is Element) {
-    if (actual.childNodes.length > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
-    } else {
-      emptyList()
+  return if (!cascaded) {
+    when (actual) {
+      is List<*> -> {
+        if (actual.size > max) {
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+        } else {
+          emptyList()
+        }
+      }
+      is JsonValue.Array -> {
+        if (actual.size > max) {
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+        } else {
+          emptyList()
+        }
+      }
+      is Element -> {
+        if (actual.childNodes.length > max) {
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+        } else {
+          emptyList()
+        }
+      }
+      else -> matchType(path, expected, actual, mismatchFactory)
     }
   } else {
-      matchType(path, expected, actual, mismatchFactory)
+    matchType(path, expected, actual, mismatchFactory)
   }
 }
 

@@ -50,6 +50,7 @@ class MatchingRulesImpl : MatchingRules {
     override fun getCategories(): Set<String> = rules.keys
 
     override fun toString(): String = "MatchingRules(rules=$rules)"
+
     override fun equals(other: Any?): Boolean = when (other) {
         is MatchingRulesImpl -> other.rules == rules
         else -> false

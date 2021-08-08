@@ -133,7 +133,8 @@ data class ContentTypeMatcher @JvmOverloads constructor (val contentType: String
 
 data class MatchingRuleGroup @JvmOverloads constructor(
   val rules: MutableList<MatchingRule> = mutableListOf(),
-  val ruleLogic: RuleLogic = RuleLogic.AND
+  val ruleLogic: RuleLogic = RuleLogic.AND,
+  val cascaded: Boolean = false
 ) {
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     return if (pactSpecVersion < PactSpecVersion.V3) {
