@@ -18,7 +18,7 @@ class MinEqualsIgnoreOrderMatcherSpec extends Specification {
   def 'with an array match if the actual #condition'() {
     when:
     def mismatches =
-        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory)
+        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory, false)
 
     then:
     mismatches.empty == match
@@ -36,7 +36,7 @@ class MinEqualsIgnoreOrderMatcherSpec extends Specification {
   def 'with a non array default to a equality matcher'() {
     when:
     def mismatches =
-        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory)
+        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory, false)
 
     then:
     mismatches.empty == match

@@ -103,8 +103,9 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
     val generateDiff = { generateJsonDiff(expectedValues, actualValues) }
     if (context.matcherDefined(path)) {
       logger.debug { "compareLists: Matcher defined for path $path" }
-      for (matcher in context.selectBestMatcher(path).rules) {
-        result.addAll(compareLists(path, matcher, expectedList, actualList, context, generateDiff) {
+      val ruleGroup = context.selectBestMatcher(path)
+      for (matcher in ruleGroup.rules) {
+        result.addAll(compareLists(path, matcher, expectedList, actualList, context, generateDiff, ruleGroup.cascaded) {
           p, expected, actual, context -> compare(p, expected, actual, context)
         })
       }

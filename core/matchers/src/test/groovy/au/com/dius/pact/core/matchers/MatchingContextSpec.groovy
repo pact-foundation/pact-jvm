@@ -309,9 +309,9 @@ class MatchingContextSpec extends Specification {
 
     expect:
     Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual.values, context,
-      { -> }, callback).empty
+      { -> }, false, callback).empty
     !Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual2.values, context,
-      { -> }, callback).empty
+      { -> }, false, callback).empty
   }
 
   @Issue('#1367')
@@ -336,11 +336,11 @@ class MatchingContextSpec extends Specification {
 
     when:
     def result1 = Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual.values,
-      context, { -> }, callback)
+      context, { -> }, false, callback)
     def result2 = Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual2.values,
-      context, { -> }, callback)
+      context, { -> }, false, callback)
     def result3 = Matchers.INSTANCE.compareLists(['$'], matcher, expected.values, actual3.values,
-      context, { -> }, callback)
+      context, { -> }, false, callback)
 
     then:
     result1.empty

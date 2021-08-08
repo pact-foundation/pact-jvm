@@ -1,11 +1,9 @@
 package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
@@ -180,10 +178,7 @@ sealed class V4Interaction(
   class AsynchronousMessage @Suppress("LongParameterList") @JvmOverloads constructor(
     key: String,
     description: String,
-    override val contents: OptionalBody = OptionalBody.missing(),
-    override var metadata: Map<String, Any?> = emptyMap(),
-    override val matchingRules: MatchingRules = MatchingRulesImpl(),
-    val generators: Generators = Generators(),
+    val contents: MessageContents = MessageContents(),
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf(),
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
@@ -198,8 +193,7 @@ sealed class V4Interaction(
 
     @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
-      return AsynchronousMessage(generateKey(), description, contents, metadata, matchingRules, generators,
-        interactionId, providerStates, comments)
+      return AsynchronousMessage(generateKey(), description, contents, interactionId, providerStates, comments)
     }
 
     @ExperimentalUnsignedTypes
@@ -217,47 +211,106 @@ sealed class V4Interaction(
     }
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
-      val map = mutableMapOf(
+      val map = (mapOf(
         "type" to V4InteractionType.AsynchronousMessages.toString(),
         "key" to key,
         "description" to description,
-        "contents" to contents.toV4Format(),
         "pending" to pending
-      )
-      if (metadata.isNotEmpty()) {
-        map["metadata"] = metadata
-      }
+      ) + contents.toMap(pactSpecVersion)).toMutableMap()
+
       if (providerStates.isNotEmpty()) {
         map["providerStates"] = providerStates.map { it.toMap() }
-      }
-      if (matchingRules.isNotEmpty()) {
-        map["matchingRules"] = matchingRules.toMap(PactSpecVersion.V4)
-      }
-      if (generators.isNotEmpty()) {
-        map["generators"] = generators.toMap(PactSpecVersion.V4)
       }
       if (comments.isNotEmpty()) {
         map["comments"] = comments
       }
+
       return map
     }
 
     override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
       val errors = mutableListOf<String>()
-      errors.addAll(matchingRules.validateForVersion(pactVersion))
-      errors.addAll(generators.validateForVersion(pactVersion))
+      errors.addAll(contents.matchingRules.validateForVersion(pactVersion))
+      errors.addAll(contents.generators.validateForVersion(pactVersion))
       return errors
     }
 
     override fun asV4Interaction() = this
 
     fun asV3Interaction(): Message {
-      return Message(description, providerStates, contents, matchingRules.rename("content", "body"),
-        generators, metadata.toMutableMap(), interactionId)
+      return Message(description, providerStates, contents.contents, contents.matchingRules.rename("content", "body"),
+        contents.generators, contents.metadata.toMutableMap(), interactionId)
     }
 
     override fun isAsynchronousMessage() = true
-    override fun getContentType() = contents.contentType.or(Message.contentType(metadata))
+
+    fun getContentType() = contents.getContentType()
+  }
+
+  class SynchronousMessages @Suppress("LongParameterList") @JvmOverloads constructor(
+    key: String,
+    description: String,
+    interactionId: String? = null,
+    providerStates: List<ProviderState> = listOf(),
+    override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
+    pending: Boolean = false,
+    val request: MessageContents = MessageContents(),
+    val response: List<MessageContents> = listOf()
+    ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), MessageInteraction {
+    override fun withGeneratedKey(): V4Interaction {
+      return SynchronousMessages(generateKey(), description, interactionId, providerStates, comments, pending,
+        request, response)
+    }
+
+    @ExperimentalUnsignedTypes
+    override fun generateKey(): String {
+      val builder = HashCodeBuilder(33, 7)
+        .append(description)
+      for (state in providerStates) {
+        builder.append(state.uniqueKey())
+      }
+      return builder.build().toUInt().toString(16)
+    }
+
+    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+      require(pactSpecVersion >= PactSpecVersion.V4) {
+        "A Synchronous Messages interaction can not be written to a $pactSpecVersion pact file"
+      }
+      val map = mutableMapOf(
+        "type" to V4InteractionType.SynchronousMessages.toString(),
+        "key" to key,
+        "description" to description,
+        "pending" to pending,
+        "request" to request.toMap(pactSpecVersion),
+        "response" to response.map { it.toMap(pactSpecVersion) }
+      )
+
+      if (providerStates.isNotEmpty()) {
+        map["providerStates"] = providerStates.map { it.toMap() }
+      }
+      if (comments.isNotEmpty()) {
+        map["comments"] = comments
+      }
+
+      return map
+    }
+
+    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+      val errors = mutableListOf<String>()
+      errors.addAll(request.matchingRules.validateForVersion(pactVersion))
+      errors.addAll(request.generators.validateForVersion(pactVersion))
+      response.forEach {
+        errors.addAll(it.matchingRules.validateForVersion(pactVersion))
+        errors.addAll(it.generators.validateForVersion(pactVersion))
+      }
+      return errors
+    }
+
+    override fun asV4Interaction() = this
+
+    override fun updateProperties(values: Map<String, Any?>) {
+      TODO("Not yet implemented")
+    }
   }
 
   companion object : KLogging() {
@@ -293,31 +346,17 @@ sealed class V4Interaction(
                   HttpResponse.fromJson(json["response"]), id, comments, pending))
               }
               V4InteractionType.AsynchronousMessages -> {
-                val metadata = if (json.has("metadata")) {
-                  val jsonValue = json["metadata"]
-                  if (jsonValue is JsonValue.Object) {
-                    jsonValue.entries
-                  } else {
-                    logger.warn { "Ignoring invalid message metadata ${jsonValue.serialise()}" }
-                    mapOf()
-                  }
-                } else {
-                  mapOf()
-                }
-                val contents = bodyFromJson("contents", json, metadata)
-                val matchingRules = if (json.has("matchingRules") && json["matchingRules"] is JsonValue.Object)
-                  MatchingRulesImpl.fromJson(json["matchingRules"])
-                else MatchingRulesImpl()
-                val generators = if (json.has("generators") && json["generators"] is JsonValue.Object)
-                  Generators.fromJson(json["generators"])
-                else Generators()
-                Ok(AsynchronousMessage(key, description, contents, metadata, matchingRules, generators, id,
+                Ok(AsynchronousMessage(key, description, MessageContents.fromJson(json), id,
                   providerStates, comments, pending))
               }
               V4InteractionType.SynchronousMessages -> {
-                val message = "Interaction type '$type' is currently unimplemented. It will be ignored. Source: $source"
-                logger.warn(message)
-                Err(message)
+                val request = if (json.has("request"))
+                  MessageContents.fromJson(json["request"])
+                  else MessageContents()
+                val response = if (json.has("response"))
+                  json["response"].asArray().map { MessageContents.fromJson(it) }
+                  else listOf()
+                Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request, response))
               }
             }
           }
@@ -353,7 +392,9 @@ open class V4Pact @JvmOverloads constructor(
     return mapOf(
       "provider" to objectToMap(provider),
       "consumer" to objectToMap(consumer),
-      "interactions" to interactions.map { it.toMap(pactSpecVersion) },
+      "interactions" to interactions.map {
+        it.toMap(pactSpecVersion)
+      },
       "metadata" to metaData(jsonObject(metadata.entries.map { it.key to Json.toJson(it.value) }), pactSpecVersion)
     )
   }

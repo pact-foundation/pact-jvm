@@ -30,7 +30,7 @@
             }
           ]
         },
-        "$.animals[*].alligator['@phoneNumber']": {
+        "$.animals.alligator['@phoneNumber']": {
           "matchers": [
             {
               "match": "regex",

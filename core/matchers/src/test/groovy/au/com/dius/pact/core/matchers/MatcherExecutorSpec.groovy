@@ -45,7 +45,8 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'equals matcher matches using equals'() {
     expect:
-    MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+      mustBeEmpty
 
     where:
     expected                           | actual                               || mustBeEmpty
@@ -74,7 +75,8 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'regex matcher matches using the provided regex'() {
     expect:
-    MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory, false).empty ==
+      mustBeEmpty
 
     where:
     expected                  | actual                                | regex        || mustBeEmpty
@@ -90,7 +92,8 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'type matcher matches on types'() {
     expect:
-    MatcherExecutorKt.domatch(TypeMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(TypeMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+      mustBeEmpty
 
     where:
     expected                  | actual                     || mustBeEmpty
@@ -119,8 +122,8 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'number type matcher matches on types'() {
     expect:
-    MatcherExecutorKt.domatch(new NumberTypeMatcher(numberType), path, expected, actual, mismatchFactory).empty ==
-      mustBeEmpty
+    MatcherExecutorKt.domatch(new NumberTypeMatcher(numberType), path, expected, actual, mismatchFactory,
+      false).empty == mustBeEmpty
 
     where:
     numberType | expected | actual                             || mustBeEmpty
@@ -156,7 +159,7 @@ class MatcherExecutorSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'timestamp matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
 
     where:
     expected                                      | actual                                  | pattern                           || mustBeEmpty
@@ -184,7 +187,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'time matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
 
     where:
     expected         | actual       | pattern       || mustBeEmpty
@@ -199,7 +202,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'date matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
 
     where:
     expected     | actual       | pattern      || mustBeEmpty
@@ -214,7 +217,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'include matcher matches if the expected is included in the actual'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
 
     where:
     expected | actual           || mustBeEmpty
@@ -244,19 +247,22 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'list type matcher matches on array sizes - #matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, cascaded).empty == mustBeEmpty
 
     where:
-    matcher                     | expected | actual    || mustBeEmpty
-    TypeMatcher.INSTANCE        | [0]      | [1]       || true
-    new MinTypeMatcher(1)       | [0]      | [1]       || true
-    new MinTypeMatcher(2)       | [0, 1]   | [1]       || false
-    new MaxTypeMatcher(2)       | [0]      | [1]       || true
-    new MaxTypeMatcher(1)       | [0]      | [1, 1]    || false
-    new MinMaxTypeMatcher(1, 2) | [0]      | [1]       || true
-    new MinMaxTypeMatcher(2, 3) | [0, 1]   | [1]       || false
-    new MinMaxTypeMatcher(1, 2) | [0, 1]   | [1, 1]    || true
-    new MinMaxTypeMatcher(1, 2) | [0]      | [1, 1, 2] || false
+    matcher                     | expected | actual    | cascaded || mustBeEmpty
+    TypeMatcher.INSTANCE        | [0]      | [1]       | false    || true
+    new MinTypeMatcher(1)       | [0]      | [1]       | false    || true
+    new MinTypeMatcher(2)       | [0, 1]   | [1]       | false    || false
+    new MinTypeMatcher(2)       | [0, 1]   | [1]       | true     || true
+    new MaxTypeMatcher(2)       | [0]      | [1]       | false    || true
+    new MaxTypeMatcher(1)       | [0]      | [1, 1]    | false    || false
+    new MaxTypeMatcher(1)       | [0]      | [1, 1]    | true     || true
+    new MinMaxTypeMatcher(1, 2) | [0]      | [1]       | false    || true
+    new MinMaxTypeMatcher(2, 3) | [0, 1]   | [1]       | false    || false
+    new MinMaxTypeMatcher(1, 2) | [0, 1]   | [1, 1]    | false    || true
+    new MinMaxTypeMatcher(1, 2) | [0]      | [1, 1, 2] | false    || false
+    new MinMaxTypeMatcher(1, 2) | [0]      | [1, 1, 2] | true     || true
   }
 
   @Unroll
@@ -321,7 +327,8 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'boolean matcher test - #expected -> #actual'() {
     expect:
-    MatcherExecutorKt.domatch(BooleanMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(BooleanMatcher.INSTANCE, path, expected, actual, mismatchFactory,
+      false).empty == mustBeEmpty
 
     where:
     expected        | actual                                            || mustBeEmpty
@@ -349,7 +356,7 @@ class MatcherExecutorSpec extends Specification {
   def 'status code matcher test - #expected -> #actual'() {
     expect:
     MatcherExecutorKt.domatch(new StatusCodeMatcher(status, statusCodes), path, expected, actual,
-      mismatchFactory).empty == mustBeEmpty
+      mismatchFactory, false).empty == mustBeEmpty
 
     where:
     status                 | statusCodes | expected | actual || mustBeEmpty

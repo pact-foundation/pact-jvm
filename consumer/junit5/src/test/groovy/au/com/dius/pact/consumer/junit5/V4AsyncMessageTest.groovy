@@ -47,9 +47,9 @@ class V4AsyncMessageTest {
   @Test
   @PactTestFor(pactMethod = 'createPact')
   void test(List<V4Interaction.AsynchronousMessage> messages) {
-    assert messages[0].contents.valueAsString() == '{"testParam1":"value1","testParam2":"value2"}'
-    assert messages[0].metadata == [destination: 'X001', contentType: 'application/json']
-    assert messages[0].matchingRules.toMap(PactSpecVersion.V4) == [
+    assert messages[0].contents.contents.valueAsString() == '{"testParam1":"value1","testParam2":"value2"}'
+    assert messages[0].contents.metadata == [destination: 'X001', contentType: 'application/json']
+    assert messages[0].contents.matchingRules.toMap(PactSpecVersion.V4) == [
       metadata: [destination: [matchers: [[match: 'regex', regex: '\\w+\\d+']], combine: 'AND']],
       content: ['$.testParam1': [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
     ]
@@ -58,6 +58,6 @@ class V4AsyncMessageTest {
   @Test
   @PactTestFor(pactMethod = 'createPact2')
   void test2(V4Pact pact) {
-    assert pact.interactions[0].contents.valueAsString() == '{"testParam1":"value3","testParam2":"value4"}'
+    assert pact.interactions[0].contents.contents.valueAsString() == '{"testParam1":"value3","testParam2":"value4"}'
   }
 }

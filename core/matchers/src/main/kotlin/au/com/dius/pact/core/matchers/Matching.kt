@@ -40,8 +40,8 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
     pathComparator: Comparator<String> = Comparator.naturalOrder()
   ): MatchingRuleGroup {
     val matcherCategory = resolveMatchers(path, pathComparator)
-    return if (matchers.name == "body")
-      matcherCategory.filter2 { (p, rule) ->
+    return if (matchers.name == "body") {
+      val result = matcherCategory.filter2 { (p, rule) ->
         if (rule.rules.any { it is ValuesMatcher }) {
           parsePath(p).size == path.size
         } else {
@@ -60,7 +60,8 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
           else -> -1
         }
       }
-    else {
+      result?.second?.copy(cascaded = parsePath(result.first).size != path.size) ?: MatchingRuleGroup()
+    } else {
       matcherCategory.matchingRules.values.first()
     }
   }
@@ -196,7 +197,8 @@ object Matching : KLogging() {
         BodyMatchResult(null, emptyList())
       else
         BodyMatchResult(
-          BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()), emptyList())
+          BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()),
+          emptyList())
     }
   }
 
@@ -247,7 +249,8 @@ object Matching : KLogging() {
       }
     } + actual.query.entries.fold(emptyList()) { acc, entry ->
       when (expected.query[entry.key]) {
-        null -> acc + QueryMatchResult(entry.key, listOf(QueryMismatch(entry.key, "", entry.value.joinToString(","),
+        null -> acc +
+          QueryMatchResult(entry.key, listOf(QueryMismatch(entry.key, "", entry.value.joinToString(","),
           "Unexpected query parameter '${entry.key}' received",
           listOf("$", "query", entry.key).joinToString("."))))
         else -> acc

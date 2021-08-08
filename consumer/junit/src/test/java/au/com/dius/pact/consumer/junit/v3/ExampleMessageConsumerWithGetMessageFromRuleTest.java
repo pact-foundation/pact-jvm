@@ -37,7 +37,7 @@ public class ExampleMessageConsumerWithGetMessageFromRuleTest {
     }
 
     @Test
-    @PactVerification({"message_test_provider", "SomeProviderState"})
+    @PactVerification({"message_test_provider"})
     public void test() throws Exception {
         assertNotNull(new String(messageProvider.getMessage()));
     }

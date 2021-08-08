@@ -25,6 +25,7 @@ import java.math.BigInteger
 import java.util.Comparator
 import java.util.function.Predicate
 
+@Suppress("TooManyFunctions")
 object Matchers : KLogging() {
 
   private val intRegex = Regex("\\d+")
@@ -107,6 +108,7 @@ object Matchers : KLogging() {
     return result
   }
 
+  @Suppress("LongMethod")
   fun <T> compareLists(
     path: List<String>,
     matcher: MatchingRule,
@@ -114,10 +116,11 @@ object Matchers : KLogging() {
     actualList: List<T>,
     context: MatchingContext,
     generateDiff: () -> String,
+    cascaded: Boolean,
     callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
-    val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory)
+    val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory, cascaded)
     if (matchResult.isNotEmpty()) {
       result.add(BodyItemMatchResult(path.joinToString("."), matchResult))
     }

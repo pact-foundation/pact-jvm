@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.v4.MessageContents
 import spock.lang.Specification
 
 class V4InteractionSpec extends Specification {
@@ -10,8 +11,8 @@ class V4InteractionSpec extends Specification {
     given:
     MatchingRules matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('content').addRule('$', TypeMatcher.INSTANCE)
-    def message = new V4Interaction.AsynchronousMessage('key', 'description', OptionalBody.missing(),
-      [:], matchingRules)
+    def message = new V4Interaction.AsynchronousMessage('key', 'description',
+      new MessageContents(OptionalBody.missing(), [:], matchingRules))
 
     when:
     def v3Message = message.asV3Interaction()
