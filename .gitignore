@@ -1,4 +1,5 @@
 *.class
+*.hprof
 *.log
 */bin
 # sbt specific
