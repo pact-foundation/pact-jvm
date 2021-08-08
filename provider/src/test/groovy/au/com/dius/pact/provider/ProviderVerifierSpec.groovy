@@ -651,9 +651,9 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     result instanceof VerificationResult.Failed
-    result.description == 'Request to provider method failed with an exception'
+    result.description == 'Request to provider endpoint failed with an exception'
     result.failures.size() == 1
-    result.failures['1234'][0].description == 'Request to provider method failed with an exception'
+    result.failures['1234'][0].description == 'Request to provider endpoint failed with an exception'
     result.failures['1234'][0].e instanceof InvalidPathExpression
   }
 
@@ -671,9 +671,9 @@ class ProviderVerifierSpec extends Specification {
     then:
     client.makeRequest(_) >> { throw new IOException('Boom!') }
     result instanceof VerificationResult.Failed
-    result.description == 'Request to provider method failed with an exception'
+    result.description == 'Request to provider endpoint failed with an exception'
     result.failures.size() == 1
-    result.failures['12345678'][0].description == 'Request to provider method failed with an exception'
+    result.failures['12345678'][0].description == 'Request to provider endpoint failed with an exception'
     result.failures['12345678'][0].e instanceof IOException
   }
 
@@ -695,6 +695,118 @@ class ProviderVerifierSpec extends Specification {
     result.description == 'Request to provider method failed with an exception'
     result.failures.size() == 1
     result.failures['abc123'][0].description == 'Request to provider method failed with an exception'
+    result.failures['abc123'][0].e instanceof RuntimeException
+  }
+
+  def 'verifyInteraction sets the verification error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.SynchronousHttp('key', 'Test Interaction',
+      [], new HttpRequest(), new HttpResponse(), '1234', [:], true)
+    def client = Mock(ProviderClient)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
+
+    then:
+    client.makeRequest(_) >> new ProviderResponse(500, [:], ContentType.JSON, '')
+    result instanceof VerificationResult.Failed
+    result.pending == true
+  }
+
+  def 'verifyInteraction sets the message verification error result as pending if it is a V4 pending interaction'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    provider.verificationType = PactVerification.ANNOTATED_METHOD
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new V4Interaction.AsynchronousMessage('key', 'Test Interaction',
+      new MessageContents(OptionalBody.body('{}'.bytes, ContentType.JSON), [:], new MatchingRulesImpl(),
+        new Generators()), '1234', [], [:], true)
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
+
+    then:
+    result instanceof VerificationResult.Failed
+    result.pending == true
+  }
+
+  def 'verifyResponseByFactory is able to successfully verify an AsynchronousMessage with MessageAndMetadata'() {
+    given:
+    verifier.responseFactory = { new MessageAndMetadata('{}'.bytes, [:]) }
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    def failures = [:]
+    Interaction interaction = new Message('verifyResponseByFactory Test Message', [],
+            OptionalBody.body('{}'.bytes, ContentType.JSON), new MatchingRulesImpl(), new Generators(), [:], 'abc123')
+    IConsumerInfo consumer = Stub()
+    def interactionMessage = 'Test'
+
+    when:
+    def result = verifier.verifyResponseByFactory(
+            provider,
+            consumer,
+            interaction,
+            interactionMessage,
+            failures,
+            false
+    )
+
+    then:
+    result instanceof VerificationResult.Ok
+  }
+
+  def 'verifyResponseByFactory is able to successfully verify a SynchronousRequestResponse'() {
+    given:
+    verifier.responseFactory = { ['statusCode': 200, 'headers': [:], 'contentType': 'application/json', 'data': null] }
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    def failures = [:]
+    Interaction interaction = new RequestResponseInteraction('Test Interaction',
+            [new ProviderState('Test State')], new Request(), new Response(), '12345678')
+    IConsumerInfo consumer = Stub()
+    def interactionMessage = 'Test'
+
+    when:
+    def result = verifier.verifyResponseByFactory(
+            provider,
+            consumer,
+            interaction,
+            interactionMessage,
+            failures,
+            false
+    )
+
+    then:
+    result instanceof VerificationResult.Ok
+  }
+
+  def 'verifyResponseByFactory returns an error result if the factory method fails with an exception'() {
+    given:
+    verifier.responseFactory = { throw new RuntimeException("error") }
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    def failures = [:]
+    Interaction interaction = new Message('verifyResponseByFactory Test Message', [],
+            OptionalBody.empty(), new MatchingRulesImpl(), new Generators(), [:], 'abc123')
+    IConsumerInfo consumer = Stub()
+    def interactionMessage = 'Test'
+
+    when:
+    def result = verifier.verifyResponseByFactory(
+            provider,
+            consumer,
+            interaction,
+            interactionMessage,
+            failures,
+            false
+    )
+
+    then:
+    result instanceof VerificationResult.Failed
+    result.description == 'Verification factory method failed with an exception'
+    result.failures.size() == 1
+    result.failures['abc123'][0].description == 'Verification factory method failed with an exception'
     result.failures['abc123'][0].e instanceof RuntimeException
   }
 }

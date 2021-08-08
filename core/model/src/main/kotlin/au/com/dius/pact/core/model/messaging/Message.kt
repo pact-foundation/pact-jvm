@@ -16,6 +16,11 @@ import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 
+interface MessageInteraction {
+  val description: String
+  val interactionId: String?
+}
+
 /**
  * Message in a Message Pact
  */
@@ -27,7 +32,7 @@ class Message @JvmOverloads constructor(
   var generators: Generators = Generators(),
   var metaData: MutableMap<String, Any?> = mutableMapOf(),
   override val interactionId: String? = null
-) : Interaction {
+) : Interaction, MessageInteraction {
 
   fun contentsAsBytes() = contents.orEmpty()
 
