@@ -1,5 +1,38 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.0-beta.0 - Initial Beta Release
+
+* 519ce8048 - chore: setup release for beta versions (Ronald Holshausen, Mon Aug 9 11:33:17 2021 +1000)
+* 4d821f332 - Merge branch 'master' into v4.3.x (Ronald Holshausen, Mon Aug 9 09:03:22 2021 +1000)
+* 8de8efd48 - chore: downgrade kotlin-result to 1.1.11 (Ronald Holshausen, Sun Aug 8 16:52:09 2021 +1000)
+* f8e452031 - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Aug 8 16:47:23 2021 +1000)
+* ea12cdf30 - chore: update spec test case (Ronald Holshausen, Sun Aug 8 15:56:52 2021 +1000)
+* 2a12a3212 - fix: min/max type matchers must not apply the limits when cascading #396 (Ronald Holshausen, Sun Aug 8 13:29:49 2021 +1000)
+* 6c77eb5cf - chore: correct example message JUnit tests #384 (Ronald Holshausen, Sat Aug 7 16:34:31 2021 +1000)
+* ae0dd49b9 - chore: fix failing test on windows (Ronald Holshausen, Sat Aug 7 16:23:52 2021 +1000)
+* ad664ed5d - feat(V4): Implemented models for Synchronous Message interactions (Ronald Holshausen, Sat Aug 7 16:10:35 2021 +1000)
+* ada007d7e - chore: Upgrade kotlin-result and kotlin-logging (Ronald Holshausen, Sat Aug 7 14:44:12 2021 +1000)
+* 0c04aee63 - feat(plugins): support generating content via plugin (Ronald Holshausen, Fri Aug 6 16:39:35 2021 +1000)
+* af77e44ab - chore: Upgrade HTTP client to 5.1 (Ronald Holshausen, Fri Aug 6 11:47:51 2021 +1000)
+* fa47964c4 - feat(plugins): implemented support for content matchers via plugins (Ronald Holshausen, Thu Aug 5 12:03:22 2021 +1000)
+* 5f42e39e1 - chore: fix failing build (Ronald Holshausen, Mon Aug 2 13:48:00 2021 +1000)
+* 0a4f5c79a - chore: first phase of changes to support plugins (Ronald Holshausen, Mon Aug 2 13:34:59 2021 +1000)
+* f56a75625 - Merge branch 'master' into v4.3.x (Ronald Holshausen, Mon Aug 2 12:01:12 2021 +1000)
+* 5bac92c96 - feat: support specifying multiple example values in Java DSL #379 (Ronald Holshausen, Sun Aug 1 18:18:07 2021 +1000)
+* 4cde881a3 - chore: add a test to verify matching a number with a regular expression #330 (Ronald Holshausen, Sun Aug 1 14:28:23 2021 +1000)
+* e2970f3bc - chore: added test to verify empty body #298 (Ronald Holshausen, Sun Aug 1 14:17:13 2021 +1000)
+* 331cbe804 - chore: update readmes (Ronald Holshausen, Sun Aug 1 11:51:33 2021 +1000)
+* 1e240f5c2 - bump version to 4.2.10 (Ronald Holshausen, Sun Aug 1 11:45:06 2021 +1000)
+* 0d941d627 - chore: upgrade KTor to 1.6.1 (Ronald Holshausen, Thu Jul 29 16:42:52 2021 +1000)
+* c0b176de1 - feat: Introduce PactBuilder DSL class (will be able to apply plugins) (Ronald Holshausen, Wed Jul 28 12:49:14 2021 +1000)
+* 230063d8a - chore: Upgrade Kotlin to 1.5.21 (Ronald Holshausen, Wed Jul 28 10:54:32 2021 +1000)
+* f79cc81a4 - chore: remove deprecated methods (Ronald Holshausen, Tue Jul 27 16:55:08 2021 +1000)
+* 916342eac - chore: got the build working with JDK 16 (Ronald Holshausen, Tue Jul 27 15:58:54 2021 +1000)
+* b142f8455 - chore: Upgrade Gradle to 7.1.1 (Ronald Holshausen, Tue Jul 27 14:13:49 2021 +1000)
+* be87a7828 - chore: add 4.3 to build (Ronald Holshausen, Tue Jul 27 13:35:05 2021 +1000)
+* 279fd3f74 - chore: fix Gradle warnings (Ronald Holshausen, Tue Jul 27 13:48:48 2021 +1000)
+* 9ece88da1 - chore: setup 4.3 branch (Ronald Holshausen, Tue Jul 27 13:33:32 2021 +1000)
+
 # 4.2.9 - Bugfix Release
 
 * 436662ad7 - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Aug 1 11:16:06 2021 +1000)
