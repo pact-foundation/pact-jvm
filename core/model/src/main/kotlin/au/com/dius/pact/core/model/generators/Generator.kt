@@ -6,6 +6,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser.toDefaultExpressions
 import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.json.JsonValue
 import com.mifmif.common.regex.Generex
@@ -390,7 +391,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   val type: DataType = DataType.RAW
 ) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    return mapOf("type" to "ProviderState", "expression" to expression, "dataType" to type.name)
+    return mapOf("type" to "ProviderState", "expression" to toDefaultExpressions(expression), "dataType" to type.name)
   }
 
   override fun generate(context: Map<String, Any?>): Any? {

@@ -1,8 +1,10 @@
 package au.com.dius.pact.core.model.generators
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings('GStringExpressionWithinString')
 class ProviderStateGeneratorSpec extends Specification {
@@ -54,4 +56,20 @@ class ProviderStateGeneratorSpec extends Specification {
     result == '{\n  "entityName": "Entity-Name",\n  "xml": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"\n}'
   }
 
+  def 'toMap test'() {
+    expect:
+    new ProviderStateGenerator('/${a}/${b}').toMap(PactSpecVersion.V3) ==
+      [type: 'ProviderState', expression: '/${a}/${b}', dataType: 'RAW']
+  }
+
+  @RestoreSystemProperties
+  def 'toMap restores the expressions if the markers are overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', '<<')
+    System.setProperty('pact.expressions.end', '>>')
+
+    expect:
+    new ProviderStateGenerator('/<<a>>/<<b>>').toMap(PactSpecVersion.V3) ==
+      [type: 'ProviderState', expression: '/${a}/${b}', dataType: 'RAW']
+  }
 }

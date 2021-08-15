@@ -43,7 +43,9 @@ object ExpressionParser {
 
   const val VALUES_SEPARATOR = ","
   const val START_EXPRESSION = "\${"
-  const val END_EXPRESSION = '}'
+  const val END_EXPRESSION = "}"
+  const val START_EXP_SYS_PROP = "pact.expressions.start"
+  const val END_EXP_SYS_PROP = "pact.expressions.end"
 
   @JvmOverloads
   @JvmStatic
@@ -61,31 +63,52 @@ object ExpressionParser {
     }
   }
 
-  fun containsExpressions(value: String?) = value != null && value.contains(START_EXPRESSION)
+  fun containsExpressions(value: String?) = value != null && value.contains(startExpression())
+
+  private fun startExpression() = System.getProperty(START_EXP_SYS_PROP).orEmpty().ifEmpty { START_EXPRESSION }
+  private fun endExpression() = System.getProperty(END_EXP_SYS_PROP).orEmpty().ifEmpty { END_EXPRESSION }
 
   private fun replaceExpressions(value: String, valueResolver: ValueResolver): String {
     val joiner = StringJoiner("")
 
     var buffer = value
-    var position = buffer.indexOf(START_EXPRESSION)
+    val startExpression = startExpression()
+    val endExpression = endExpression()
+    var position = buffer.indexOf(startExpression)
     while (position >= 0) {
       if (position > 0) {
         joiner.add(buffer.substring(0, position))
       }
-      val endPosition = buffer.indexOf(END_EXPRESSION, position)
+      val endPosition = buffer.indexOf(endExpression, position)
       if (endPosition < 0) {
-        throw RuntimeException("Missing closing brace in expression string \"$value]\"")
+        throw RuntimeException("Missing closing value in expression string \"$value\"")
       }
       var expression = ""
       if (endPosition - position > 2) {
         expression = valueResolver.resolveValue(buffer.substring(position + 2, endPosition)) ?: ""
       }
       joiner.add(expression)
-      buffer = buffer.substring(endPosition + 1)
-      position = buffer.indexOf(START_EXPRESSION)
+      buffer = buffer.substring(endPosition + endExpression.length)
+      position = buffer.indexOf(startExpression)
     }
     joiner.add(buffer)
 
     return joiner.toString()
+  }
+
+  @JvmStatic
+  fun toDefaultExpressions(expression: String): String {
+    val startExpression = System.getProperty(START_EXP_SYS_PROP)
+    val endExpression = System.getProperty(END_EXP_SYS_PROP)
+    val updated = if (startExpression.isNullOrEmpty()) {
+      expression
+    } else {
+      expression.replace(startExpression, START_EXPRESSION)
+    }
+    return if (endExpression.isNullOrEmpty()) {
+      updated
+    } else {
+      updated.replace(endExpression, END_EXPRESSION)
+    }
   }
 }

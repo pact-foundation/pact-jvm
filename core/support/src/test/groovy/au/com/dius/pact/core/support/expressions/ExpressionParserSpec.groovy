@@ -3,6 +3,7 @@ package au.com.dius.pact.core.support.expressions
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 import static ExpressionParser.VALUES_SEPARATOR
 
@@ -137,5 +138,51 @@ class ExpressionParserSpec extends Specification {
 
     then:
     values == expectedValues
+  }
+
+  @RestoreSystemProperties
+  def 'supports overridden expression markers'() {
+    given:
+    System.setProperty('pact.expressions.start', '<<')
+    System.setProperty('pact.expressions.end', '>>')
+
+    when:
+    def value = ExpressionParser.parseExpression(' <<value>> ', DataType.RAW, valueResolver)
+
+    then:
+    value == ' [value] '
+  }
+
+  def 'toDefaultExpressions does nothing if the expression markers are not overridden'() {
+    expect:
+    ExpressionParser.toDefaultExpressions('${1} ${2} ${3}') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'toDefaultExpressions restores the start marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', '->')
+
+    expect:
+    ExpressionParser.toDefaultExpressions('->1} ${2} ->3}') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'toDefaultExpressions restores the end marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.end', '<-')
+
+    expect:
+    ExpressionParser.toDefaultExpressions('${1<- ${2} ${3<-') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'toDefaultExpressions restores the markers if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', '->')
+    System.setProperty('pact.expressions.end', '<-')
+
+    expect:
+    ExpressionParser.toDefaultExpressions('->1<- ${2} ->3<-') == '${1} ${2} ${3}'
   }
 }
