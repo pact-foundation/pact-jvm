@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
+import au.com.dius.pact.core.support.expressions.ExpressionParser.correctExpressionMarkers
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.ExpressionParser.toDefaultExpressions
 import au.com.dius.pact.core.support.expressions.MapValueResolver
@@ -411,8 +412,9 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
   companion object {
+    @JvmStatic
     fun fromJson(json: JsonValue.Object) = ProviderStateGenerator(
-      Json.toString(json["expression"]),
+      correctExpressionMarkers(Json.toString(json["expression"])),
       if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
     )
   }

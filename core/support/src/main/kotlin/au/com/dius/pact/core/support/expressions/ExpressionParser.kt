@@ -132,4 +132,20 @@ object ExpressionParser {
       updated.replace(endExpression, END_EXPRESSION)
     }
   }
+
+  @JvmStatic
+  fun correctExpressionMarkers(expression: String): String {
+    val startExpression = System.getProperty(START_EXP_SYS_PROP)
+    val endExpression = System.getProperty(END_EXP_SYS_PROP)
+    val updated = if (startExpression.isNullOrEmpty()) {
+      expression
+    } else {
+      expression.replace(START_EXPRESSION, startExpression)
+    }
+    return if (endExpression.isNullOrEmpty()) {
+      updated
+    } else {
+      updated.replace(END_EXPRESSION, endExpression)
+    }
+  }
 }

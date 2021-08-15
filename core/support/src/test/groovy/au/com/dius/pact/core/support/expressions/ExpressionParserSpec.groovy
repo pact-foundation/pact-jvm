@@ -185,4 +185,37 @@ class ExpressionParserSpec extends Specification {
     expect:
     ExpressionParser.toDefaultExpressions('->1<- ${2} ->3<-') == '${1} ${2} ${3}'
   }
+
+  def 'correctExpressionMarkers does nothing if the expression markers are not overridden'() {
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'correctExpressionMarkers updates the start marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', 'xx')
+
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1} xx2} xx3}'
+  }
+
+  @RestoreSystemProperties
+  def 'correctExpressionMarkers updates the end marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.end', 'xx')
+
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1xx ${2xx ${3xx'
+  }
+
+  @RestoreSystemProperties
+  def 'correctExpressionMarkers updates the markers if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', 'xx')
+    System.setProperty('pact.expressions.end', 'yy')
+
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1yy xx2yy xx3yy'
+  }
 }
