@@ -58,7 +58,7 @@ open class PactCreateVersionTagMojo : PactBaseMojo() {
 
   private fun createBrokerClient() {
     if (brokerClient == null)
-      brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions())
+      brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions(), brokerClientConfig())
   }
 
   private fun createVersionTag() =

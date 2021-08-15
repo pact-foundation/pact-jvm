@@ -157,6 +157,10 @@ open class PactProviderMojo : PactBaseMojo() {
       options["authentication"] = listOf("basic", serverDetails.username, result.server.password)
     }
 
+    if (pactBroker?.insecureTLS == true) {
+      options["insecureTLS"] = true
+    }
+
     when {
       pactBroker?.enablePending != null -> {
         if (pactBroker.enablePending!!.providerTags.isEmpty()) {
