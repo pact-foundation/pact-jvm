@@ -1,8 +1,11 @@
 package au.com.dius.pact.core.model.generators
 
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings('GStringExpressionWithinString')
 class ProviderStateGeneratorSpec extends Specification {
@@ -52,5 +55,45 @@ class ProviderStateGeneratorSpec extends Specification {
 
     then:
     result == '{\n  "entityName": "Entity-Name",\n  "xml": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"\n}'
+  }
+
+  def 'toMap test'() {
+    expect:
+    new ProviderStateGenerator('/${a}/${b}').toMap(PactSpecVersion.V3) ==
+      [type: 'ProviderState', expression: '/${a}/${b}', dataType: 'RAW']
+  }
+
+  @RestoreSystemProperties
+  def 'toMap restores the expressions if the markers are overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', '<<')
+    System.setProperty('pact.expressions.end', '>>')
+
+    expect:
+    new ProviderStateGenerator('/<<a>>/<<b>>').toMap(PactSpecVersion.V3) ==
+      [type: 'ProviderState', expression: '/${a}/${b}', dataType: 'RAW']
+  }
+
+  def 'fromJson test'() {
+    expect:
+    ProviderStateGenerator.fromJson(new JsonValue.Object([
+      type: new JsonValue.StringValue('ProviderState'),
+      expression: new JsonValue.StringValue('/${a}/${b}'),
+      dataType: new JsonValue.StringValue('RAW')
+    ])) == new ProviderStateGenerator('/${a}/${b}')
+  }
+
+  @RestoreSystemProperties
+  def 'fromJson updates the expressions if the markers are overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', '<<')
+    System.setProperty('pact.expressions.end', '>>')
+
+    expect:
+    ProviderStateGenerator.fromJson(new JsonValue.Object([
+      type: new JsonValue.StringValue('ProviderState'),
+      expression: new JsonValue.StringValue('/${a}/${b}'),
+      dataType: new JsonValue.StringValue('RAW')
+    ])) == new ProviderStateGenerator('/<<a>>/<<b>>')
   }
 }

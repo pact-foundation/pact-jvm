@@ -176,6 +176,12 @@ You can also just use the key instead of an expression:
     .valueFromProviderState('userId', 'userId', 100) // will look value using userId as the key
 ```
 
+## Overriding the expression markers `${` and `}` (4.1.25+)
+
+You can change the markers of the expressions using the following system properties:
+- `pact.expressions.start` (default is `${`)
+- `pact.expressions.end` (default is `}`)
+
 ## Using HTTPS
 
 You can enable a HTTPS mock server by setting `https=true` on the `@PactTestFor` annotation. Note that this mock
