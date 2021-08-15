@@ -49,31 +49,52 @@ object ExpressionParser {
 
   @JvmOverloads
   @JvmStatic
-  fun parseListExpression(value: String, valueResolver: ValueResolver = SystemPropertyResolver): List<String> {
-    return replaceExpressions(value, valueResolver).split(VALUES_SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
+  fun parseListExpression(
+    value: String,
+    valueResolver: ValueResolver = SystemPropertyResolver,
+    allowReplacement: Boolean = false
+  ): List<String> {
+    return replaceExpressions(value, valueResolver, allowReplacement)
+      .split(VALUES_SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
   }
 
   @JvmOverloads
   @JvmStatic
-  fun parseExpression(value: String?, type: DataType, valueResolver: ValueResolver = SystemPropertyResolver): Any? {
+  fun parseExpression(
+    value: String?,
+    type: DataType,
+    valueResolver: ValueResolver = SystemPropertyResolver,
+    allowReplacement: Boolean = false
+  ): Any? {
     return when {
-      containsExpressions(value) -> type.convert(replaceExpressions(value!!, valueResolver))
+      containsExpressions(value, allowReplacement) ->
+        type.convert(replaceExpressions(value!!, valueResolver, allowReplacement))
       value != null -> type.convert(value)
       else -> null
     }
   }
 
-  fun containsExpressions(value: String?) = value != null && value.contains(startExpression())
+  @JvmOverloads
+  @JvmStatic
+  fun containsExpressions(value: String?, allowReplacement: Boolean = false) =
+    value != null && value.contains(startExpression(allowReplacement))
 
-  private fun startExpression() = System.getProperty(START_EXP_SYS_PROP).orEmpty().ifEmpty { START_EXPRESSION }
-  private fun endExpression() = System.getProperty(END_EXP_SYS_PROP).orEmpty().ifEmpty { END_EXPRESSION }
+  private fun startExpression(allowReplacement: Boolean) = if (allowReplacement)
+    System.getProperty(START_EXP_SYS_PROP).orEmpty().ifEmpty { START_EXPRESSION }
+  else
+    START_EXPRESSION
 
-  private fun replaceExpressions(value: String, valueResolver: ValueResolver): String {
+  private fun endExpression(allowReplacement: Boolean) = if (allowReplacement)
+    System.getProperty(END_EXP_SYS_PROP).orEmpty().ifEmpty { END_EXPRESSION }
+  else
+    END_EXPRESSION
+
+  private fun replaceExpressions(value: String, valueResolver: ValueResolver, allowReplacement: Boolean): String {
     val joiner = StringJoiner("")
 
     var buffer = value
-    val startExpression = startExpression()
-    val endExpression = endExpression()
+    val startExpression = startExpression(allowReplacement)
+    val endExpression = endExpression(allowReplacement)
     var position = buffer.indexOf(startExpression)
     while (position >= 0) {
       if (position > 0) {

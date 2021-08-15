@@ -398,8 +398,8 @@ data class ProviderStateGenerator @JvmOverloads constructor (
     return when (val providerState = context["providerState"]) {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
-        if (containsExpressions(expression)) {
-          parseExpression(expression, type, MapValueResolver(map))
+        if (containsExpressions(expression, true)) {
+          parseExpression(expression, type, MapValueResolver(map), true)
         } else {
           map[expression]
         }

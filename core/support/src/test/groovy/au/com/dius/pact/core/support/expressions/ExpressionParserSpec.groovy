@@ -147,7 +147,7 @@ class ExpressionParserSpec extends Specification {
     System.setProperty('pact.expressions.end', '>>')
 
     when:
-    def value = ExpressionParser.parseExpression(' <<value>> ', DataType.RAW, valueResolver)
+    def value = ExpressionParser.parseExpression(' <<value>> ', DataType.RAW, valueResolver, true)
 
     then:
     value == ' [value] '
