@@ -1,7 +1,9 @@
 
 dependencies {
-  testImplementation project(":core:matchers"),
-    project(":provider")
+  testImplementation project(":core:model")
+  testImplementation project(":core:matchers")
+  testImplementation project(":core:pactbroker")
+  testImplementation project(":provider")
   testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
@@ -10,4 +12,5 @@ dependencies {
   testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
       exclude group: 'org.codehaus.groovy'
   }
+  testImplementation 'org.apache.tika:tika-core:1.27'
 }

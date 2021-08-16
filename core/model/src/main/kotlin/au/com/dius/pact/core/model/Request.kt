@@ -26,7 +26,6 @@ interface IRequest: IHttpPart {
   fun headersWithoutCookie(): Map<String, List<String>>
   fun asHttpPart() : HttpPart
   fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest
-  fun hasHeader(name: String): Boolean
 
   /**
    * If this request represents a multipart file upload

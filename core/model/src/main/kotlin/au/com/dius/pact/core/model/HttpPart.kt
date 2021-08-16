@@ -33,6 +33,8 @@ interface IHttpPart {
   }
 
   fun setupGenerators(category: Category, context: Map<String, Any>): Map<String, Generator>
+
+  fun hasHeader(name: String): Boolean
 }
 
 /**

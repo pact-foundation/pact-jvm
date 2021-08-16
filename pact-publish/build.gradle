@@ -9,6 +9,7 @@ if (System.env.PACT_PUBLISH == 'true') {
 }
 
 dependencies {
+  testImplementation project(":core:pactbroker")
   testImplementation("org.codehaus.groovy:groovy:${project.groovyVersion}")
   testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testImplementation(project(":consumer:groovy")) {

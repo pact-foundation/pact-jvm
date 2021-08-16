@@ -16,8 +16,8 @@ artifacts {
 }
 
 dependencies {
-  api project(path: ":core:support", configuration: 'default')
-  api project(path: ":core:pactbroker", configuration: 'default')
+  api project(":core:support")
+  implementation project(":core:pactbroker")
   implementation 'org.apache.commons:commons-collections4:4.4'
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'javax.mail:mail:1.5.0-b01'
@@ -26,6 +26,7 @@ dependencies {
   implementation 'org.apache.tika:tika-core:1.27'
   implementation 'io.ktor:ktor-http-jvm:1.3.1'
   implementation 'commons-beanutils:commons-beanutils:1.9.4'
+  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
 
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testImplementation "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
@@ -41,6 +42,7 @@ dependencies {
   testImplementation "junit:junit:${project.junitVersion}"
   testImplementation 'org.hamcrest:hamcrest:2.1'
   testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.32'
+  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 }
 
 compileGroovy {

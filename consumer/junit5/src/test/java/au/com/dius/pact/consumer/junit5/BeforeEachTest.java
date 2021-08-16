@@ -54,7 +54,7 @@ public class BeforeEachTest {
   @PactTestFor(pactMethod = "pactExecutedAfterBeforeEach")
   void testPactExecutedAfterBeforeEach(MockServer mockServer) throws IOException {
     ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/").execute().returnResponse();
-    assertThat(IOUtils.toString(httpResponse.getEntity().getContent(), Charset.defaultCharset()),
+    assertThat(IOUtils.toString(httpResponse.getEntity().getContent()),
       is(equalTo(EXPECTED_RESPONSE)));
   }
 }

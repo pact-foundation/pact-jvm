@@ -1,11 +1,13 @@
 dependencies {
-  api project(path: ":provider:junit5", configuration: 'default')
+  api project(':provider:junit5')
   api 'org.springframework:spring-context:5.3.9'
   api 'org.springframework:spring-test:5.3.9'
   api 'org.springframework:spring-web:5.3.9'
   api 'org.springframework:spring-webflux:5.3.9'
   api 'javax.servlet:javax.servlet-api:3.1.0'
   api 'org.hamcrest:hamcrest:2.1'
+  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+  implementation 'javax.mail:mail:1.5.0-b01'
 
   testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.3'
   testImplementation 'org.springframework.boot:spring-boot-starter-web:2.5.3'

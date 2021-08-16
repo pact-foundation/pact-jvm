@@ -48,6 +48,16 @@ interface MatchingRule {
    */
   fun hasGenerators(): Boolean = false
 
+  /**
+   * Returns the type name of the matching rule
+   */
+  val name: String
+
+  /**
+   * Returns the attributes of the matching rule
+   */
+  val attributes: Map<String, JsonValue>
+
   companion object : KLogging() {
     private const val MATCH = "match"
     private const val MIN = "min"
@@ -81,7 +91,7 @@ interface MatchingRule {
     }
 
     fun create(type: String, values: JsonValue): MatchingRule {
-      logger.debug { "MatchingRule.create($type, $values)" }
+      logger.trace { "MatchingRule.create($type, $values)" }
       return when (type) {
         REGEX -> RegexMatcher(values[REGEX].asString()!!)
         "equality" -> EqualsMatcher
@@ -193,6 +203,11 @@ data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-d
       listOf()
     }
   }
+
+  override val name: String
+    get() = "date"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("format" to JsonValue.StringValue(format))
 }
 
 /**
@@ -202,6 +217,11 @@ object EqualsMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "equality")
   override fun canMatch(contentType: ContentType) = true
   override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+
+  override val name: String
+    get() = "equality"
+  override val attributes: Map<String, JsonValue>
+    get() = emptyMap()
 }
 
 /**
@@ -217,6 +237,11 @@ data class IncludeMatcher(val value: String) : MatchingRule {
       listOf()
     }
   }
+
+  override val name: String
+    get() = "include"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("value" to JsonValue.StringValue(value))
 }
 
 /**
@@ -225,6 +250,11 @@ data class IncludeMatcher(val value: String) : MatchingRule {
 data class MaxTypeMatcher(val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type", "max" to max)
   override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+
+  override val name: String
+    get() = "max-type"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("max" to JsonValue.Integer(max))
 }
 
 /**
@@ -233,6 +263,11 @@ data class MaxTypeMatcher(val max: Int) : MatchingRule {
 data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type", "min" to min, "max" to max)
   override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+
+  override val name: String
+    get() = "min-max-type"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("min" to JsonValue.Integer(min), "max" to JsonValue.Integer(max))
 }
 
 /**
@@ -241,6 +276,11 @@ data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
 data class MinTypeMatcher(val min: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type", "min" to min)
   override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+
+  override val name: String
+    get() = "min-type"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("min" to JsonValue.Integer(min))
 }
 
 /**
@@ -254,7 +294,7 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
   }
 
   override fun toMap(spec: PactSpecVersion) = if (spec >= PactSpecVersion.V3) {
-    mapOf("match" to numberType.name.toLowerCase())
+    mapOf("match" to numberType.name.lowercase())
   } else {
     TypeMatcher.toMap(spec)
   }
@@ -266,6 +306,11 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
       listOf()
     }
   }
+
+  override val name: String
+    get() = "number"
+  override val attributes: Map<String, JsonValue>
+    get() = emptyMap()
 }
 
 /**
@@ -278,6 +323,11 @@ object BooleanMatcher : MatchingRule {
   }
 
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> = listOf()
+
+  override val name: String
+    get() = "boolean"
+  override val attributes: Map<String, JsonValue>
+    get() = emptyMap()
 }
 
 /**
@@ -286,6 +336,11 @@ object BooleanMatcher : MatchingRule {
 data class RegexMatcher @JvmOverloads constructor (val regex: String, val example: String? = null) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "regex", "regex" to regex)
   override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+
+  override val name: String
+    get() = "regex"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("regex" to JsonValue.StringValue(regex))
 }
 
 /**
@@ -300,6 +355,11 @@ data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"
       listOf()
     }
   }
+
+  override val name: String
+    get() = "time"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("format" to JsonValue.StringValue(format))
 }
 
 /**
@@ -314,6 +374,11 @@ data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy
       listOf()
     }
   }
+
+  override val name: String
+    get() = "datetime"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("format" to JsonValue.StringValue(format))
 }
 
 /**
@@ -322,6 +387,11 @@ data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy
 object TypeMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type")
   override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+
+  override val name: String
+    get() = "type"
+  override val attributes: Map<String, JsonValue>
+    get() = emptyMap()
 }
 
 /**
@@ -336,6 +406,11 @@ object NullMatcher : MatchingRule {
       listOf()
     }
   }
+
+  override val name: String
+    get() = "null"
+  override val attributes: Map<String, JsonValue>
+    get() = emptyMap()
 }
 
 /**
@@ -350,6 +425,11 @@ object ValuesMatcher : MatchingRule {
       listOf()
     }
   }
+
+  override val name: String
+    get() = "values"
+  override val attributes: Map<String, JsonValue>
+    get() = emptyMap()
 }
 
 /**
@@ -365,6 +445,11 @@ data class ContentTypeMatcher @JvmOverloads constructor (val contentType: String
       listOf()
     }
   }
+
+  override val name: String
+    get() = "content-type"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("content-type" to JsonValue.StringValue(contentType))
 }
 
 /**
@@ -382,6 +467,11 @@ object EqualsIgnoreOrderMatcher : MatchingRule {
       listOf()
     }
   }
+
+  override val name: String
+    get() = "ignore-order"
+  override val attributes: Map<String, JsonValue>
+    get() = emptyMap()
 }
 
 /**
@@ -399,6 +489,11 @@ data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
       listOf()
     }
   }
+
+  override val name: String
+    get() = "min-ignore-order"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("min" to JsonValue.Integer(min))
 }
 
 /**
@@ -416,6 +511,11 @@ data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
       listOf()
     }
   }
+
+  override val name: String
+    get() = "max-ignore-order"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("max" to JsonValue.Integer(max))
 }
 
 /**
@@ -433,6 +533,11 @@ data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : Matching
       listOf()
     }
   }
+
+  override val name: String
+    get() = "min-max-ignore-order"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("min" to JsonValue.Integer(min), "max" to JsonValue.Integer(max))
 }
 
 /**
@@ -465,6 +570,19 @@ data class ArrayContainsMatcher(
   override fun buildGenerators(context: Map<String, Any>): List<Generator> {
     return listOf(ArrayContainsGenerator(variants))
   }
+
+  override val name: String
+    get() = "array-contains"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("variants" to JsonValue.Array(variants.map { (variant, rules, gens) ->
+      JsonValue.Array(mutableListOf(
+        JsonValue.Integer(variant),
+        Json.toJson(rules.toMap(PactSpecVersion.V4)),
+        JsonValue.Object(gens.entries.associate {
+          it.key to Json.toJson(it.value.toMap(PactSpecVersion.V4))
+        }.toMutableMap())
+      ))
+    }.toMutableList()))
 }
 
 
@@ -483,8 +601,12 @@ data class StatusCodeMatcher(val statusType: HttpStatus, val values: List<Int> =
       listOf()
     }
   }
-}
 
+  override val name: String
+    get() = "status-code"
+  override val attributes: Map<String, JsonValue>
+    get() = mapOf("status" to Json.toJson(statusType.toJson(values)))
+}
 
 data class MatchingRuleGroup @JvmOverloads constructor(
   val rules: MutableList<MatchingRule> = mutableListOf(),

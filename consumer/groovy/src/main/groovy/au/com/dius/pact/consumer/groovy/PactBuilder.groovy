@@ -23,9 +23,9 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.json.JsonValue
 import groovy.transform.CompileStatic
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.HttpMultipartMode
-import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
+import org.apache.hc.core5.http.ContentType
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
 
@@ -308,23 +308,27 @@ class PactBuilder extends GroovyBuilder {
    * @param data This is the actual file contents
    */
   void withFileUpload(String partName, String fileName, String fileContentType, byte[] data) {
+    ContentType contentType = ContentType.DEFAULT_TEXT
+    if (!fileContentType.isEmpty()) {
+      contentType = ContentType.parseLenient(fileContentType)
+    }
+
     def multipart = MultipartEntityBuilder.create()
-      .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-      .addBinaryBody(partName, data, fileContentType ? ContentType.create(fileContentType) :
-        ContentType.DEFAULT_TEXT, fileName)
+      .setMode(HttpMultipartMode.EXTENDED)
+      .addBinaryBody(partName, data, contentType, fileName)
       .build()
     ByteArrayOutputStream os = new ByteArrayOutputStream()
     multipart.writeTo(os)
     if (requestState) {
       currentInteraction.request.body = OptionalBody.body(os.toByteArray())
-      currentInteraction.request.headers[CONTENT_TYPE] = [ multipart.contentType.value ]
+      currentInteraction.request.headers[CONTENT_TYPE] = [ multipart.contentType ]
       MatchingRuleCategory category  = currentInteraction.request.matchingRules.addCategory(HEADER)
-      category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
+      category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType))
     } else {
       currentInteraction.response.body = OptionalBody.body(os.toByteArray())
-      currentInteraction.response.headers[CONTENT_TYPE] = [ multipart.contentType.value ]
+      currentInteraction.response.headers[CONTENT_TYPE] = [ multipart.contentType ]
       MatchingRuleCategory category  = currentInteraction.response.matchingRules.addCategory(HEADER)
-      category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
+      category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType))
     }
   }
 

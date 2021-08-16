@@ -19,6 +19,7 @@ dependencies {
   }
   testImplementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
   testImplementation 'com.jayway.restassured:rest-assured:2.9.0'
+  testImplementation 'org.apache.commons:commons-collections4:4.4'
 
   // JAX-B dependencies for JDK 9+
   testImplementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"

@@ -1,5 +1,5 @@
 dependencies {
-  api project(path: ":core:support", configuration: 'default')
+  implementation project(':core:support')
   implementation "org.apache.commons:commons-lang3:$commonsLang3Version"
   implementation "com.google.guava:guava:${project.guavaVersion}"
   implementation("io.github.microutils:kotlin-logging:$kotlinLogging") {

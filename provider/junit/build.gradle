@@ -1,21 +1,24 @@
 dependencies {
-    api project(path: ":core:support", configuration: 'default'),
-      project(path: ":provider", configuration: 'default')
-    implementation "junit:junit:${project.junitVersion}",
-      "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
+    api project(':core:support')
+    api project(':provider')
+    api "junit:junit:${project.junitVersion}"
+    implementation  "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
       'org.jooq:jool:0.9.14'
     implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
     implementation "org.apache.httpcomponents.client5:httpclient5-fluent:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     implementation 'com.github.rholder:guava-retrying:2.0.0'
     implementation 'javax.mail:mail:1.5.0-b01'
+    implementation 'commons-io:commons-io:2.11.0'
 
     testImplementation 'com.github.rest-driver:rest-client-driver:1.1.45'
     testImplementation 'com.github.tomakehurst:wiremock-jre8:2.27.2'
     testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testImplementation 'org.apache.commons:commons-collections4:4.1'
+
     // Required for Java 9
     testImplementation 'javax.xml.bind:jaxb-api:2.3.0'
+
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
     testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {

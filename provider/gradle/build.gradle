@@ -6,6 +6,8 @@ dependencies {
   implementation project(":provider")
   implementation gradleApi()
   implementation 'com.github.ajalt:mordant:1.2.1'
+  implementation 'commons-io:commons-io:2.11.0'
+  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
 
   testImplementation "junit:junit:${project.junitVersion}"
   testImplementation 'org.mockito:mockito-core:2.28.2'

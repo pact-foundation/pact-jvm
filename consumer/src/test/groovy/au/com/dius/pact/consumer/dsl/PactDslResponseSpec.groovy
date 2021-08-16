@@ -7,7 +7,6 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import com.google.common.net.MediaType
 import org.apache.hc.core5.http.ContentType
 import spock.lang.Issue
 import spock.lang.Specification
@@ -45,7 +44,6 @@ class PactDslResponseSpec extends Specification {
       'application/json;charset=iso-8859-1'   | true
       'application/json'                      | true
       ContentType.APPLICATION_JSON.toString() | true
-      MediaType.JSON_UTF_8.toString()         | true
       'application/json;foo=bar'              | false
       'application/json;charset=*'            | false
       'application/xml'                       | false
@@ -145,5 +143,4 @@ class PactDslResponseSpec extends Specification {
     then:
     response.responseHeaders == ['content-type': ['text/plain']]
   }
-
 }

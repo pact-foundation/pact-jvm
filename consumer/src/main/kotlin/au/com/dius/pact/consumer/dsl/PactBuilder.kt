@@ -9,6 +9,7 @@ import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -126,82 +127,75 @@ open class PactBuilder(
     require(currentInteraction != null) {
       "'with' must be preceded by 'expectsToReceive'"
     }
-    currentInteraction!!.updateProperties(values)
+    when (val interaction = currentInteraction) {
+      is V4Interaction.SynchronousHttp -> {
+        logger.debug { "Configuring interaction from $values" }
+        if (values.containsKey("request.contents")) {
+          setupContents(values["request.contents"], interaction.request)
+        }
+        if (values.containsKey("response.contents")) {
+          setupContents(values["response.contents"], interaction.response)
+        }
+        interaction.updateProperties(values.filter { it.key != "request.contents" && it.key != "response.contents" })
+      }
+      is V4Interaction.AsynchronousMessage -> TODO()
+      is V4Interaction.SynchronousMessages -> TODO()
+    }
     return this
   }
 
-  /**
-   * Values to configure the response
-   */
-  fun willRespondWith(values: Map<String, Any?>): PactBuilder {
-    require(currentInteraction != null) {
-      "'with' must be preceded by 'expectsToReceive'"
-    }
-    when (val interaction = currentInteraction) {
-      is V4Interaction.AsynchronousMessage -> TODO()
-      is V4Interaction.SynchronousHttp -> {
-        logger.debug { "Configuring interaction response from $values" }
-        if (values.containsKey("contents")) {
-          logger.debug { "Interaction has explicit contents, will look for a content matcher" }
-          val contents = values["contents"]
-          interaction.response.updateProperties(values.filter { it.key != "contents" })
-          when (contents) {
-            is Map<*, *> -> if (contents.containsKey("content-type")) {
-              val contentType = contents["content-type"].toString()
-              val bodyConfig = contents.filter { it.key != "content-type" } as Map<String, Any?>
-              val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
-              logger.debug { "Found a matcher for '$contentType': $matcher" }
-              if (matcher == null || matcher.isCore) {
-                logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
-                val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
-                if (contentMatcher != null) {
-                  val (body, rules, generators) = contentMatcher.setupBodyFromConfig(bodyConfig)
-                  interaction.response.body = body
-                  if (rules != null) {
-                    interaction.response.matchingRules.addCategory(rules)
-                  }
-                  if (generators != null) {
-                    interaction.response.generators.addGenerators(generators)
-                  }
-                } else {
-                  interaction.response.body = OptionalBody.body(toJson(
-                    bodyConfig).serialise().toByteArray(), ContentType(contentType))
-                }
-              } else {
-                logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
-                setupResponseFromPlugin(matcher, contentType, bodyConfig, interaction)
-              }
-            } else {
-              interaction.response.body = OptionalBody.body(toJson(contents).serialise().toByteArray())
+  private fun setupContents(contents: Any?, part: IHttpPart) {
+    logger.debug { "Explicit contents, will look for a content matcher" }
+    when (contents) {
+      is Map<*, *> -> if (contents.containsKey("content-type")) {
+        val contentType = contents["content-type"].toString()
+        val bodyConfig = contents.filter { it.key != "content-type" } as Map<String, Any?>
+        val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
+        logger.debug { "Found a matcher for '$contentType': $matcher" }
+        if (matcher == null || matcher.isCore) {
+          logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
+          val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
+          if (contentMatcher != null) {
+            val (body, rules, generators) = contentMatcher.setupBodyFromConfig(bodyConfig)
+            part.body = body
+            if (rules != null) {
+              part.matchingRules.addCategory(rules)
             }
-            else -> interaction.response.body = OptionalBody.body(contents.toString().toByteArray())
+            if (generators != null) {
+              part.generators.addGenerators(generators)
+            }
+          } else {
+            part.body = OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType))
           }
         } else {
-          interaction.response.updateProperties(values)
+          logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
+          setupBodyFromPlugin(matcher, contentType, bodyConfig, part)
         }
+      } else {
+        part.body = OptionalBody.body(toJson(contents).serialise().toByteArray())
       }
+      else -> part.body = OptionalBody.body(contents.toString().toByteArray())
     }
-    return this
   }
 
-  private fun setupResponseFromPlugin(
+  private fun setupBodyFromPlugin(
     matcher: ContentMatcher,
     contentType: String,
     bodyConfig: Map<String, Any?>,
-    interaction: V4Interaction.SynchronousHttp
+    part: IHttpPart
   ) {
     val (body, rules, generators) = matcher.configureContent(contentType, bodyConfig)
-    interaction.response.body = body
-    if (!interaction.response.hasHeader("content-type")) {
-      interaction.response.headers["content-type"] = listOf(body.contentType.toString())
+    part.body = body
+    if (!part.hasHeader("content-type")) {
+      part.headers["content-type"] = listOf(body.contentType.toString())
     }
     if (rules != null) {
-      interaction.response.matchingRules.addCategory(rules)
+      part.matchingRules.addCategory(rules)
     }
     if (generators != null) {
-      interaction.response.generators.addGenerators(generators)
+      part.generators.addGenerators(generators)
     }
-    logger.debug { "Interaction from plugin: ${interaction.response}" }
+    logger.debug { "Http part from plugin: $part" }
   }
 
   fun toPact(): V4Pact {

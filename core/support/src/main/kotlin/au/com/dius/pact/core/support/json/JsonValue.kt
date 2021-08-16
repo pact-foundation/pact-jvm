@@ -5,6 +5,7 @@ import au.com.dius.pact.core.support.Json
 sealed class JsonValue {
   class Integer(val value: JsonToken.Integer) : JsonValue() {
     constructor(value: CharArray) : this(JsonToken.Integer(value))
+    constructor(value: Int) : this(JsonToken.Integer(value.toString().toCharArray()))
     fun toBigInteger() = String(this.value.chars).toBigInteger()
   }
 

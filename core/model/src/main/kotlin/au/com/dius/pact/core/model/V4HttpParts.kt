@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
+import mu.KLogging
 import org.apache.commons.beanutils.BeanUtils
 
 private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
@@ -32,7 +33,7 @@ data class HttpRequest @JvmOverloads constructor(
   override var body: OptionalBody = OptionalBody.missing(),
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
-): IRequest, IHttpPart {
+): IRequest, IHttpPart, KLogging() {
   fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
@@ -119,6 +120,12 @@ data class HttpRequest @JvmOverloads constructor(
     val generators = generators.categories[category] ?: emptyMap()
     val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.lowercase()).generators(context)
     return generators + matchingRuleGenerators
+  }
+
+  fun updateProperties(values: Map<String, Any?>) {
+    values.forEach { (key, value) ->
+      BeanUtils.setProperty(this, key, value)
+    }
   }
 }
 

@@ -25,7 +25,6 @@ interface IResponse: IHttpPart {
   fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse
 
   fun asHttpPart() : HttpPart
-  fun hasHeader(name: String): Boolean
 
   /**
    * Make a copy of this response

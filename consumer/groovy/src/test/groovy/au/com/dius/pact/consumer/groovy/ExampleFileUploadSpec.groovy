@@ -44,5 +44,4 @@ class ExampleFileUploadSpec extends Specification {
         then:
         result instanceof PactVerificationResult.Ok
     }
-
 }

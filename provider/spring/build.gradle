@@ -1,6 +1,6 @@
 dependencies {
-  api project(path: ":provider:junit", configuration: 'default')
-
+  api project(':provider:junit')
+  implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.3'
   implementation group: 'org.springframework', name: 'spring-webmvc', version: '5.3.9'
   implementation group: 'org.springframework', name: 'spring-webflux', version: '5.3.9'
@@ -8,6 +8,9 @@ dependencies {
   implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.10.2'
   runtimeOnly group: 'org.synchronoss.cloud', name: 'nio-multipart-parser', version: '1.1.0'
+  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+  implementation 'javax.mail:mail:1.5.0-b01'
+  implementation 'org.apache.commons:commons-collections4:4.4'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.5.3'
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"

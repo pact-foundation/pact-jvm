@@ -1,8 +1,10 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.ContentType
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
+import io.pact.plugins.jvm.core.CatalogueManager
 import kotlin.reflect.full.createInstance
 
 object MatchingConfig {
@@ -19,19 +21,33 @@ object MatchingConfig {
   @JvmStatic
   fun lookupContentMatcher(contentType: String?): ContentMatcher? {
     return if (contentType != null) {
-      val matcher = coreBodyMatchers.entries.find { contentType.matches(Regex(it.key)) }?.value
-      if (matcher != null) {
-        val clazz = Class.forName(matcher).kotlin
-        (clazz.objectInstance ?: clazz.createInstance()) as ContentMatcher?
-      } else {
-        when (System.getProperty("pact.content_type.override.$contentType")) {
-          "json" -> JsonContentMatcher
-          "text" -> PlainTextContentMatcher()
-          else -> null
+      val contentType1 = ContentType(contentType)
+      val contentMatcher = CatalogueManager.findContentMatcher(contentType1)
+      if (contentMatcher != null) {
+        if (!contentMatcher.isCore) {
+          PluginContentMatcher(contentMatcher, contentType1)
+        } else {
+          coreContentMatcher(contentType)
         }
+      } else {
+        coreContentMatcher(contentType)
       }
     } else {
       null
+    }
+  }
+
+  private fun coreContentMatcher(contentType: String): ContentMatcher? {
+    val matcher = coreBodyMatchers.entries.find { contentType.matches(Regex(it.key)) }?.value
+    return if (matcher != null) {
+      val clazz = Class.forName(matcher).kotlin
+      (clazz.objectInstance ?: clazz.createInstance()) as ContentMatcher?
+    } else {
+      when (System.getProperty("pact.content_type.override.$contentType")) {
+        "json" -> JsonContentMatcher
+        "text" -> PlainTextContentMatcher()
+        else -> null
+      }
     }
   }
 

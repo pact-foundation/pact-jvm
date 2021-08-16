@@ -3,11 +3,11 @@ plugins {
 }
 
 dependencies {
-    api project(path: ":core:model", configuration: 'default')
-    api project(path: ":core:pactbroker", configuration: 'default')
-    api project(path: ":core:matchers", configuration: 'default')
-    api project(path: ":core:support", configuration: 'default')
-    implementation 'commons-io:commons-io:2.5'
+    api project(':core:model')
+    api project(':core:pactbroker')
+    api project(':core:matchers')
+    api project(':core:support')
+    implementation 'commons-io:commons-io:2.11.0'
     implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     api 'io.github.classgraph:classgraph:4.8.105'
@@ -16,6 +16,8 @@ dependencies {
     implementation 'com.github.ajalt:mordant:1.2.1'
     implementation 'com.vladsch.flexmark:flexmark:0.62.2'
     implementation 'com.vladsch.flexmark:flexmark-ext-tables:0.62.2'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
 
     testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
     testRuntimeOnly "ch.qos.logback:logback-classic:${project.logbackVersion}"

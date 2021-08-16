@@ -61,7 +61,7 @@ public class Defect1070Test {
   void testApi(MockServer mockServer) throws IOException {
     ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/api/test/1234").execute().returnResponse();
     assertThat(httpResponse.getCode(), is(equalTo(200)));
-    assertThat(IOUtils.toString(httpResponse.getEntity().getContent(), Charset.defaultCharset()),
+    assertThat(IOUtils.toString(httpResponse.getEntity().getContent()),
       is(equalTo("[{\"id\":32432,\"name\":\"testId254\",\"size\":1445211}]")));
   }
 }

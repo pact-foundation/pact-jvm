@@ -78,7 +78,7 @@ public class ArticlesTest {
   void testArticles(MockServer mockServer) throws IOException {
     ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
     assertThat(httpResponse.getCode(), is(equalTo(200)));
-    assertThat(IOUtils.toString(httpResponse.getEntity().getContent(), Charset.defaultCharset()),
+    assertThat(IOUtils.toString(httpResponse.getEntity().getContent()),
       is(equalTo("{\"articles\":[{\"variants\":{\"0032\":{\"description\":\"sample description\"}}}]}")));
   }
 
@@ -87,6 +87,6 @@ public class ArticlesTest {
   void testArticlesDoNotExist(MockServer mockServer) throws IOException {
     ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
     assertThat(httpResponse.getCode(), is(equalTo(404)));
-    assertThat(IOUtils.toString(httpResponse.getEntity().getContent(), Charset.defaultCharset()), is(equalTo("")));
+    assertThat(IOUtils.toString(httpResponse.getEntity().getContent()), is(equalTo("")));
   }
 }

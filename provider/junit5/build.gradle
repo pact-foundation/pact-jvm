@@ -1,7 +1,7 @@
 dependencies {
-  api project(path: ":core:support", configuration: 'default'),
-    project(path: ":provider", configuration: 'default')
-  implementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+  api project(':core:support')
+  api project(':provider')
+  api "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
   testRuntimeOnly "ch.qos.logback:logback-classic:${project.logbackVersion}"
