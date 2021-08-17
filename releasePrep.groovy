@@ -65,7 +65,7 @@ def projectProps = './gradlew :core:model:properties'.execute().text.split('\n')
 
 def version = projectProps.version
 
-def prevTag = 'git tag --sort=-creatordate --merged'.execute().text.split('\n').find { it.startsWith('4_2_') }
+def prevTag = 'git tag --sort=-creatordate --merged'.execute().text.split('\n').find { it.startsWith('4_3_') }
 def changelog = []
 executeOnShell("git log --pretty='* %h - %s (%an, %ad)' ${prevTag}..HEAD".toString()) {
   println it
