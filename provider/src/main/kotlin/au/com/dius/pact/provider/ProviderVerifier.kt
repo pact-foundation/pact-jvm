@@ -248,7 +248,7 @@ interface IProviderVerifier {
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 open class ProviderVerifier @JvmOverloads constructor (
   override var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
@@ -290,7 +290,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator")
+  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator", "LongParameterList")
   override fun verifyResponseByInvokingProviderMethods(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -371,7 +371,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  @Suppress("TooGenericExceptionCaught")
+  @Suppress("TooGenericExceptionCaught", "LongParameterList")
   override fun verifyResponseByFactory(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -383,17 +383,17 @@ open class ProviderVerifier @JvmOverloads constructor (
     val interactionId = interaction.interactionId.orEmpty()
     try {
       val factory = responseFactory!!
-      return if (interaction.isAsynchronousMessage()) {
+      return if (interaction is Message) {
         verifyMessage(
           factory,
-          interaction as MessageInteraction,
+          interaction,
           interactionId,
           interactionMessage,
           failures,
           pending
         )
       } else {
-        val expectedResponse = (interaction as SynchronousRequestResponse).response
+        val expectedResponse = (interaction as RequestResponseInteraction).response
         val response = factory.apply(interaction.description) as Map<String, Any>
         val contentType = response["contentType"] as String?
         val actualResponse = ProviderResponse(
@@ -413,31 +413,13 @@ open class ProviderVerifier @JvmOverloads constructor (
       }
     } catch (e: Exception) {
       failures[interactionMessage] = e
-      emitEvent(Event.VerificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)))
+      reporters.forEach { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
       val errors = listOf(
         VerificationFailureType.ExceptionFailure("Verification factory method failed with an exception", e)
       )
       return VerificationResult.Failed(
         "Verification factory method failed with an exception", interactionMessage,
         mapOf(interactionId to errors), pending)
-    }
-  }
-
-  private fun setupClassGraph(providerInfo: IProviderInfo, consumer: IConsumerInfo): ClassGraph {
-    val classGraph = ClassGraph().enableAllInfo()
-    if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
-      classGraph.verbose()
-    }
-
-    val classLoader = projectClassLoader?.get()
-    if (classLoader == null) {
-      val urls = projectClasspath.get()
-      logger.debug { "projectClasspath = $urls" }
-      if (urls.isNotEmpty()) {
-        classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
-      }
-    } else {
-      classGraph.overrideClassLoaders(classLoader)
     }
   }
 
@@ -622,7 +604,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         }
         PactVerification.RESPONSE_FACTORY -> {
           logger.debug { "Verifying via response factory function" }
-          verifyResponseByFactory(provider, consumer, interaction, interactionMessage, failures, pending)
+          verifyResponseByFactory(provider, consumer, interaction, interactionMessage, failures, false)
         }
         else -> {
           logger.debug { "Verifying via provider methods" }

@@ -698,42 +698,6 @@ class ProviderVerifierSpec extends Specification {
     result.failures['abc123'][0].e instanceof RuntimeException
   }
 
-  def 'verifyInteraction sets the verification error result as pending if it is a V4 pending interaction'() {
-    given:
-    ProviderInfo provider = new ProviderInfo('Test Provider')
-    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
-    def failures = [:]
-    Interaction interaction = new V4Interaction.SynchronousHttp('key', 'Test Interaction',
-      [], new HttpRequest(), new HttpResponse(), '1234', [:], true)
-    def client = Mock(ProviderClient)
-
-    when:
-    def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
-
-    then:
-    client.makeRequest(_) >> new ProviderResponse(500, [:], ContentType.JSON, '')
-    result instanceof VerificationResult.Failed
-    result.pending == true
-  }
-
-  def 'verifyInteraction sets the message verification error result as pending if it is a V4 pending interaction'() {
-    given:
-    ProviderInfo provider = new ProviderInfo('Test Provider')
-    provider.verificationType = PactVerification.ANNOTATED_METHOD
-    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
-    def failures = [:]
-    Interaction interaction = new V4Interaction.AsynchronousMessage('key', 'Test Interaction',
-      new MessageContents(OptionalBody.body('{}'.bytes, ContentType.JSON), [:], new MatchingRulesImpl(),
-        new Generators()), '1234', [], [:], true)
-
-    when:
-    def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
-
-    then:
-    result instanceof VerificationResult.Failed
-    result.pending == true
-  }
-
   def 'verifyResponseByFactory is able to successfully verify an AsynchronousMessage with MessageAndMetadata'() {
     given:
     verifier.responseFactory = { new MessageAndMetadata('{}'.bytes, [:]) }
