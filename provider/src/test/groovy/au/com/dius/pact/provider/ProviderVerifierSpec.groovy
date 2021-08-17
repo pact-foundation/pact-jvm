@@ -808,9 +808,10 @@ class ProviderVerifierSpec extends Specification {
     result instanceof VerificationResult.Ok
   }
 
+  @SuppressWarnings('ThrowRuntimeException')
   def 'verifyResponseByFactory returns an error result if the factory method fails with an exception'() {
     given:
-    verifier.responseFactory = { throw new RuntimeException("error") }
+    verifier.responseFactory = { throw new RuntimeException('error') }
     ProviderInfo provider = new ProviderInfo('Test Provider')
     def failures = [:]
     Interaction interaction = new Message('verifyResponseByFactory Test Message', [],
