@@ -20,6 +20,7 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 
 interface MessageInteraction {
+  val description: String
   val interactionId: String?
 }
 
