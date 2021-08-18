@@ -7,7 +7,7 @@ dependencies {
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   implementation 'org.atteo:evo-inflector:1.3'
   implementation 'com.github.ajalt:mordant:1.2.1'
-  implementation "io.pact.plugins.jvm:core:0.0.0"
+  implementation "io.pact.plugin.driver:core:0.0.0"
   implementation 'org.apache.tika:tika-core:1.27'
   implementation 'javax.mail:mail:1.5.0-b01'
 

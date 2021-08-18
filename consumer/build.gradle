@@ -12,7 +12,7 @@ dependencies {
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   implementation 'io.ktor:ktor-server-netty:1.6.1'
   implementation "io.ktor:ktor-network-tls-certificates:1.6.1"
-  implementation "io.pact.plugins.jvm:core:0.0.0"
+  implementation "io.pact.plugin.driver:core:0.0.0"
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation 'com.github.mifmif:generex:1.0.2'
 
