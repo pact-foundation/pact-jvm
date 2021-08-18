@@ -122,8 +122,9 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
   }
 }
 
+@Suppress("TooManyFunctions")
 object Matching : KLogging() {
-  private val lowerCaseComparator = Comparator<String> { a, b -> a.toLowerCase().compareTo(b.toLowerCase()) }
+  private val lowerCaseComparator = Comparator<String> { a, b -> a.lowercase().compareTo(b.lowercase()) }
 
   val pathFilter = Regex("http[s]*://([^/]*)")
 

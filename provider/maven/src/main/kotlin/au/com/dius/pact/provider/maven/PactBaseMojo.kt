@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Parameter
@@ -32,6 +33,15 @@ abstract class PactBaseMojo : AbstractMojo() {
   @Component
   protected lateinit var decrypter: SettingsDecrypter
 
+  @Parameter(property = "retriesWhenUnknown", defaultValue = "0")
+  private var retriesWhenUnknown: Int? = 0
+
+  @Parameter(property = "retryInterval", defaultValue = "10")
+  private var retryInterval: Int? = 10
+
+  @Parameter(property = "pactBrokerInsecureTLS", defaultValue = "false")
+  private var pactBrokerInsecureTLS: Boolean? = false
+
   protected fun brokerClientOptions(): MutableMap<String, Any> {
     val options = mutableMapOf<String, Any>()
     if (!pactBrokerToken.isNullOrEmpty()) {
@@ -48,5 +58,13 @@ abstract class PactBaseMojo : AbstractMojo() {
         result.server.password)
     }
     return options
+  }
+
+  protected fun brokerClientConfig(): PactBrokerClientConfig {
+    return PactBrokerClientConfig(
+      retriesWhenUnknown ?: 0,
+      retryInterval ?: 10,
+      pactBrokerInsecureTLS ?: false
+    )
   }
 }

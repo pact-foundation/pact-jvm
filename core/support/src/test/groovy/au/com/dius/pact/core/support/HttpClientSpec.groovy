@@ -12,7 +12,7 @@ class HttpClientSpec extends Specification {
     def authentication = ['bearer', '1234abcd']
 
     when:
-    def result = HttpClient.INSTANCE.newHttpClient(authentication, uri, 1, 1)
+    def result = HttpClient.INSTANCE.newHttpClient(authentication, uri, 1, 1, false)
     def defaultHeaders = null
     def execChain = result.component1().execChain
     while (defaultHeaders == null && execChain != null) {

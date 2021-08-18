@@ -7,7 +7,6 @@ dependencies {
     'dk.brics.automaton:automaton:1.11-8'
   implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
   implementation "org.apache.httpcomponents.client5:httpclient5-fluent:${project.httpClientVersion}"
-//  implementation "org.apache.httpcomponents:httpmime:${project.httpClientVersion}"
   implementation "org.json:json:${project.jsonVersion}"
   implementation "io.netty:netty-handler:${project.nettyVersion}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
@@ -30,7 +29,8 @@ dependencies {
   testImplementation 'org.hamcrest:hamcrest:2.1'
   testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
-    }
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
+  }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntimeOnly 'org.objenesis:objenesis:3.1'
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
 }

@@ -84,8 +84,7 @@ publishing {
   }
 }
 
-if (System.env.TRAVIS != 'true') {
-  signing {
-    sign publishing.publications.serverDistribution
-  }
+signing {
+  required { project.hasProperty('isRelease') }
+  sign publishing.publications.serverDistribution
 }

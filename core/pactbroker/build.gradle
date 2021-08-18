@@ -6,7 +6,9 @@ dependencies {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  api "com.michael-bull.kotlin-result:kotlin-result:$kotlinResult"
+  api("com.michael-bull.kotlin-result:kotlin-result:$kotlinResult") {
+    exclude group: 'org.jetbrains.kotlin'
+  }
 
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"

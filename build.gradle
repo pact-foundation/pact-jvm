@@ -189,10 +189,9 @@ subprojects {
     }
   }
 
-  if (System.env.CI != 'true') {
-    signing {
-      sign publishing.publications.mavenPublication
-    }
+  signing {
+    required { project.hasProperty('isRelease') }
+    sign publishing.publications.mavenPublication
   }
 
 //  codenarcMain {

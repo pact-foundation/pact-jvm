@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.support.Utils
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -98,8 +99,10 @@ open class ProviderInfo @JvmOverloads constructor (
     }
   }
 
-  open fun pactBrokerClient(pactBrokerUrl: String, options: Map<String, Any>) =
-    PactBrokerClient(pactBrokerUrl, options.toMutableMap())
+  open fun pactBrokerClient(pactBrokerUrl: String, options: Map<String, Any>): PactBrokerClient {
+    val insecureTLS = Utils.lookupInMap(options, "insecureTLS", Boolean::class.java, false)
+    return PactBrokerClient(pactBrokerUrl, options.toMutableMap(), PactBrokerClientConfig(insecureTLS = insecureTLS))
+  }
 
   @Suppress("TooGenericExceptionThrown")
   open fun setupConsumerListFromPactFiles(consumersGroup: ConsumersGroup): MutableList<IConsumerInfo> {

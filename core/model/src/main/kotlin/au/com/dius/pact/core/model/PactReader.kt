@@ -2,10 +2,12 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.Auth
+import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Version
@@ -43,6 +45,7 @@ import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
 import kotlin.collections.set
+import kotlin.text.isNotEmpty
 
 private val logger = KotlinLogging.logger {}
 
@@ -55,7 +58,9 @@ fun loadPactFromUrl(
 ): Pair<JsonValue.Object, PactSource> {
   return when (source) {
     is BrokerUrlSource -> {
-      val brokerClient = PactBrokerClient(source.pactBrokerUrl, options.toMutableMap())
+      val insecureTLS = Utils.lookupInMap(options, "insecureTLS", Boolean::class.java, false)
+      val brokerClient = PactBrokerClient(source.pactBrokerUrl, options.toMutableMap(),
+        PactBrokerClientConfig(insecureTLS = insecureTLS))
       val pactResponse = brokerClient.fetchPact(source.url, source.encodePath)
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options, tag = source.tag)
     }
@@ -393,11 +398,21 @@ object DefaultPactReader : PactReader, KLogging() {
     } else if (source is InputStream || source is Reader || source is File) {
       return loadPactFromFile(source)
     } else if (source is BrokerUrlSource) {
-      return HttpClient.newHttpClient(options["authentication"], URI(source.pactBrokerUrl)).first.use {
+      val insecureTLS = Utils.lookupInMap(options, "insecureTLS", Boolean::class.java, false)
+      return HttpClient.newHttpClient(
+        options["authentication"],
+        URI(source.pactBrokerUrl),
+        insecureTLS = insecureTLS
+      ).first.use {
         loadPactFromUrl(source, options, it)
       }
     } else if (source is PactBrokerResult) {
-      return HttpClient.newHttpClient(options["authentication"], URI(source.pactBrokerUrl)).first.use {
+      val insecureTLS = Utils.lookupInMap(options, "insecureTLS", Boolean::class.java, false)
+      return HttpClient.newHttpClient(
+        options["authentication"],
+        URI(source.pactBrokerUrl),
+        insecureTLS = insecureTLS
+      ).first.use {
         loadPactFromUrl(BrokerUrlSource.fromResult(source, options, source.tag), options, it)
       }
     } else if (source is URL || source is UrlPactSource) {

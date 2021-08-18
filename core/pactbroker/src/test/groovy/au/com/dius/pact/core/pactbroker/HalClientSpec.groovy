@@ -32,7 +32,7 @@ class HalClientSpec extends Specification {
 
   def setup() {
     mockClient = Mock(CloseableHttpClient)
-    client = Spy(HalClient, constructorArgs: ['http://localhost:1234/'])
+    client = Spy(HalClient, constructorArgs: ['http://localhost:1234/', [:], new PactBrokerClientConfig()])
     client.pathInfo = null
   }
 
@@ -503,7 +503,8 @@ class HalClientSpec extends Specification {
   @Issue('1399')
   def 'navigating with a base URL containing a path'() {
     given:
-    HalClient client = Spy(HalClient, constructorArgs: ['http://localhost:1234/subpath/one/two'])
+    HalClient client = Spy(HalClient, constructorArgs: ['http://localhost:1234/subpath/one/two', [:],
+                                                        new PactBrokerClientConfig()])
     client.pathInfo = null
     client.httpClient = mockClient
     def mockResponse = Mock(ClassicHttpResponse) {

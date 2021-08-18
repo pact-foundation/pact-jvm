@@ -3,6 +3,7 @@ package au.com.dius.pact.core.support.expressions
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 import static ExpressionParser.VALUES_SEPARATOR
 
@@ -137,5 +138,84 @@ class ExpressionParserSpec extends Specification {
 
     then:
     values == expectedValues
+  }
+
+  @RestoreSystemProperties
+  def 'supports overridden expression markers'() {
+    given:
+    System.setProperty('pact.expressions.start', '<<')
+    System.setProperty('pact.expressions.end', '>>')
+
+    when:
+    def value = ExpressionParser.parseExpression(' <<value>> ', DataType.RAW, valueResolver, true)
+
+    then:
+    value == ' [value] '
+  }
+
+  def 'toDefaultExpressions does nothing if the expression markers are not overridden'() {
+    expect:
+    ExpressionParser.toDefaultExpressions('${1} ${2} ${3}') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'toDefaultExpressions restores the start marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', '->')
+
+    expect:
+    ExpressionParser.toDefaultExpressions('->1} ${2} ->3}') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'toDefaultExpressions restores the end marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.end', '<-')
+
+    expect:
+    ExpressionParser.toDefaultExpressions('${1<- ${2} ${3<-') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'toDefaultExpressions restores the markers if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', '->')
+    System.setProperty('pact.expressions.end', '<-')
+
+    expect:
+    ExpressionParser.toDefaultExpressions('->1<- ${2} ->3<-') == '${1} ${2} ${3}'
+  }
+
+  def 'correctExpressionMarkers does nothing if the expression markers are not overridden'() {
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1} ${2} ${3}'
+  }
+
+  @RestoreSystemProperties
+  def 'correctExpressionMarkers updates the start marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', 'xx')
+
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1} xx2} xx3}'
+  }
+
+  @RestoreSystemProperties
+  def 'correctExpressionMarkers updates the end marker if overridden'() {
+    given:
+    System.setProperty('pact.expressions.end', 'xx')
+
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1xx ${2xx ${3xx'
+  }
+
+  @RestoreSystemProperties
+  def 'correctExpressionMarkers updates the markers if overridden'() {
+    given:
+    System.setProperty('pact.expressions.start', 'xx')
+    System.setProperty('pact.expressions.end', 'yy')
+
+    expect:
+    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1yy xx2yy xx3yy'
   }
 }

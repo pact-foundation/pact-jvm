@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.support.Utils.permutations
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
@@ -292,31 +293,32 @@ open class PactBrokerLoader(
   }
 
   open fun newPactBrokerClient(url: URI, resolver: ValueResolver): IPactBrokerClient {
+    var options = mapOf<String, Any>()
+    val config = PactBrokerClientConfig()
+
     if (authentication == null) {
       logger.debug { "Authentication: None" }
-      return PactBrokerClient(url.toString(), mutableMapOf())
+    } else {
+      val username = parseExpression(authentication!!.username, DataType.RAW, resolver)?.toString()
+      val token = parseExpression(authentication!!.token, DataType.RAW, resolver)?.toString()
+
+      // Check if username is set. If yes, use basic auth.
+      if (username.isNotEmpty()) {
+        logger.debug { "Authentication: Basic" }
+        options = mapOf(
+          "authentication" to listOf(
+            "basic", username,
+            parseExpression(authentication!!.password, DataType.RAW, resolver)
+          )
+        )
+      // Check if token is set. If yes, use bearer auth.
+      } else if (token.isNotEmpty()) {
+        logger.debug { "Authentication: Bearer" }
+        options = mapOf("authentication" to listOf("bearer", token))
+      }
     }
 
-    val username = parseExpression(authentication!!.username, DataType.RAW, resolver)?.toString()
-    val token = parseExpression(authentication!!.token, DataType.RAW, resolver)?.toString()
-
-    // Check if username is set. If yes, use basic auth.
-    if (username.isNotEmpty()) {
-      logger.debug { "Authentication: Basic" }
-      val options = mapOf("authentication" to listOf("basic", username,
-        parseExpression(authentication!!.password, DataType.RAW, resolver)))
-      return PactBrokerClient(url.toString(), options.toMutableMap())
-    }
-
-    // Check if token is set. If yes, use bearer auth.
-    if (token.isNotEmpty()) {
-      logger.debug { "Authentication: Bearer" }
-      val options = mapOf("authentication" to listOf("bearer", token))
-      return PactBrokerClient(url.toString(), options.toMutableMap())
-    }
-
-    logger.debug { "Authentication: None" }
-    return PactBrokerClient(url.toString(), mutableMapOf())
+    return PactBrokerClient(url.toString(), options.toMutableMap(), config)
   }
 
   companion object : KLogging()

@@ -162,9 +162,10 @@ interface IPactBrokerClient {
   ): Result<Boolean, String>
 }
 
-data class PactBrokerClientConfig(
+data class PactBrokerClientConfig @JvmOverloads constructor(
   val retryCountWhileUnknown: Int = 0,
-  val retryWhileUnknownInterval: Int = 10
+  val retryWhileUnknownInterval: Int = 10,
+  val insecureTLS: Boolean = false
 )
 
 /**
@@ -174,10 +175,11 @@ open class PactBrokerClient(
   val pactBrokerUrl: String,
   @Deprecated("Move use of options to PactBrokerClientConfig")
   override val options: MutableMap<String, Any>,
-  val config: PactBrokerClientConfig = PactBrokerClientConfig()
+  val config: PactBrokerClientConfig
 ) : IPactBrokerClient {
 
-  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mutableMapOf())
+  @Deprecated("Use the version that takes PactBrokerClientConfig")
+  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mutableMapOf(), PactBrokerClientConfig())
 
   /**
    * Fetches all consumers for the given provider
@@ -354,7 +356,7 @@ open class PactBrokerClient(
     return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].asObject()))
   }
 
-  open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
+  open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options, config)
 
   override fun publishVerificationResults(
     docAttributes: Map<String, Any?>,

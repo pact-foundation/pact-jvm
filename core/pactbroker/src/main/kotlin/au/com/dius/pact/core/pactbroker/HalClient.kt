@@ -139,7 +139,8 @@ interface IHalClient {
  */
 open class HalClient @JvmOverloads constructor(
   val baseUrl: String,
-  var options: Map<String, Any> = mapOf()
+  var options: Map<String, Any> = mapOf(),
+  val config: PactBrokerClientConfig
 ) : IHalClient {
 
   var httpClient: CloseableHttpClient? = null
@@ -200,7 +201,7 @@ open class HalClient @JvmOverloads constructor(
       }
       val uri = URI(baseUrl)
       val result = HttpClient.newHttpClient(options["authentication"], uri, this.maxPublishRetries,
-        this.publishRetryInterval)
+        this.publishRetryInterval, config.insecureTLS)
       httpClient = result.first
 
       if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {

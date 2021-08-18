@@ -13,7 +13,14 @@ import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy
+import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.http.message.BasicHeader
+import org.apache.hc.core5.ssl.SSLContexts
 import org.apache.hc.core5.util.TimeValue
 import java.net.URI
 
@@ -42,7 +49,8 @@ object HttpClient : KLogging() {
     authentication: Any?,
     uri: URI,
     maxPublishRetries: Int = 5,
-    publishRetryInterval: Int = 3000
+    publishRetryInterval: Int = 3000,
+    insecureTLS: Boolean = false
   ): Pair<CloseableHttpClient, CredentialsProvider?> {
     val builder = HttpClients.custom().useSystemProperties()
       .setRetryStrategy(DefaultHttpRequestRetryStrategy(maxPublishRetries,
@@ -87,6 +95,11 @@ object HttpClient : KLogging() {
     }
 
     builder.setDefaultHeaders(defaultHeaders.map { BasicHeader(it.key, it.value) })
+
+    if (insecureTLS) {
+      setupInsecureTLS(builder)
+    }
+
     return builder.build() to credsProvider
   }
 
@@ -101,5 +114,28 @@ object HttpClient : KLogging() {
       UsernamePasswordCredentials(username, password.toCharArray()))
     builder.setDefaultCredentialsProvider(credsProvider)
     return credsProvider
+  }
+
+  private fun setupInsecureTLS(builder: HttpClientBuilder) {
+    logger.warn {
+      """
+      *****************************************************************
+                           Setting Insecure TLS
+      This will disable hostname validation and trust all certificates!               
+      *****************************************************************
+      """
+    }
+
+    val sslcontext = SSLContexts.custom().loadTrustMaterial(TrustSelfSignedStrategy()).build()
+    val sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+      .setSslContext(sslcontext).build()
+    builder.setConnectionManager(
+        BasicHttpClientConnectionManager(
+          RegistryBuilder.create<ConnectionSocketFactory>()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", sslSocketFactory)
+            .build()
+        )
+      )
   }
 }
