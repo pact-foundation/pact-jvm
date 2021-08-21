@@ -688,5 +688,4 @@ class ProviderClientSpec extends Specification {
     then:
     result.contentType.toString() == 'text/plain; charset=ISO-8859-1'
   }
-
 }

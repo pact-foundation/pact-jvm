@@ -121,7 +121,7 @@ interface IPactBrokerClient {
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
     enablePending: Boolean = false,
-    includeWipPactsSince: String
+    includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception>
 
   fun getUrlForProvider(providerName: String, tag: String): String?
@@ -236,7 +236,7 @@ open class PactBrokerClient(
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String>,
     enablePending: Boolean,
-    includeWipPactsSince: String
+    includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception> {
     val halClient = when (val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }) {
       is Err<Exception> -> return navigateResult
@@ -272,7 +272,7 @@ open class PactBrokerClient(
     selectors: List<ConsumerVersionSelector>,
     enablePending: Boolean,
     providerTags: List<String>,
-    includeWipPactsSince: String,
+    includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
     providerName: String
@@ -284,7 +284,7 @@ open class PactBrokerClient(
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
       body["includePendingStatus"] = true
-      if (!includeWipPactsSince.isBlank()) {
+      if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }
     }
