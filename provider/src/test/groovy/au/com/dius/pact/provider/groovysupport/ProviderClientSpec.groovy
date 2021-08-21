@@ -5,8 +5,6 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.model.ContentType as PactContentType
-@SuppressWarnings('UnusedImport')
-import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
@@ -288,7 +286,7 @@ class ProviderClientSpec extends Specification {
 
   def 'execute request filter executes any scala closure'() {
     given:
-    provider.requestFilter = GroovyScalaUtils$.MODULE$.testRequestFilter()
+    provider.requestFilter = au.com.dius.pact.provider.GroovyScalaUtils$.MODULE$.testRequestFilter()
 
     when:
     client.executeRequestFilter(httpRequest)
@@ -703,5 +701,4 @@ class ProviderClientSpec extends Specification {
     then:
     result.contentType.toString() == 'text/plain; charset=ISO-8859-1'
   }
-
 }
