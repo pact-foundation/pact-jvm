@@ -10,6 +10,7 @@ import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import org.apache.http.Header
+import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
@@ -687,5 +688,24 @@ class ProviderClientSpec extends Specification {
 
     then:
     result.contentType.toString() == 'text/plain; charset=ISO-8859-1'
+  }
+
+  @Issue('#1416')
+  def 'JSON keys with special characters'() {
+    given:
+    HttpEntity entity = null
+    httpRequest = Mock(HttpEntityEnclosingRequest) {
+      setEntity(_) >> { e -> entity = e[0] }
+    }
+    def body = '{"ä": "äbc"}'
+    request = new Request('GET', '/', [:],
+      ['content-type': ['application/json;charset=UTF-8']], OptionalBody.body(body.bytes))
+
+    when:
+    client.setupBody(request, httpRequest)
+
+    then:
+    entity.content.text == '{"ä": "äbc"}'
+    entity.contentType.value == 'application/json; charset=UTF-8'
   }
 }
