@@ -29,11 +29,12 @@ private fun matcherKey(path: List<String>, vararg key: String): String {
 }
 
 class PactXmlBuilder @JvmOverloads constructor (
-  val rootName: String,
-  val rootNameSpace: String? = null,
-  val namespaces: Map<String, String> = emptyMap(),
-  val version: String? = null,
-  val charset: String? = null
+  var rootName: String,
+  var rootNameSpace: String? = null,
+  var namespaces: Map<String, String> = emptyMap(),
+  var version: String? = null,
+  var charset: String? = null,
+  var standalone: Boolean = false
 ) {
   val generators: Generators = Generators()
   val matchingRules: Category = Category("body")
@@ -53,6 +54,7 @@ class PactXmlBuilder @JvmOverloads constructor (
     if (version != null) {
       doc.xmlVersion = version
     }
+    doc.xmlStandalone = standalone
     val root = if (doc.documentElement == null) {
       val element = doc.createElement(rootName)
       doc.appendChild(element)
@@ -87,6 +89,54 @@ class PactXmlBuilder @JvmOverloads constructor (
   }
 
   override fun toString() = String(asBytes())
+
+  /**
+   * Sets the name of the root name
+   */
+  fun withRootName(name: String): PactXmlBuilder {
+    this.rootName = name
+    return this
+  }
+
+  /**
+   * Sets the namespace of the root node
+   */
+  fun withRootNameSpace(nameSpace: String): PactXmlBuilder {
+    this.rootNameSpace = nameSpace
+    return this
+  }
+
+  /**
+   * Namespaces to define on the root name
+   */
+  fun withNamespaces(namespaces: Map<String, String>): PactXmlBuilder {
+    this.namespaces = namespaces
+    return this
+  }
+
+  /**
+   * Sets the version on the XML descriptor. Defaults to '1.0'.
+   */
+  fun withVersion(version: String): PactXmlBuilder {
+    this.version = version
+    return this
+  }
+
+  /**
+   * Sets the charset on the XML descriptor. Defaults to 'UTF-8'
+   */
+  fun withCharset(charset: String): PactXmlBuilder {
+    this.charset = charset
+    return this
+  }
+
+  /**
+   * Sets the standalone flag on the XML descriptor. Default is set ('yes')
+   */
+  fun withStandalone(standalone: Boolean): PactXmlBuilder {
+    this.standalone = standalone
+    return this
+  }
 }
 
 class XmlNode(private val builder: PactXmlBuilder, private val element: Element, private val path: List<String>) {
