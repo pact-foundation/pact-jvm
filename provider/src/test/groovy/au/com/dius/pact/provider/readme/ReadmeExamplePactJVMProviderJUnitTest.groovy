@@ -32,7 +32,7 @@ import static org.junit.Assert.assertThat
 @SuppressWarnings(['ExplicitHashMapInstantiation', 'FieldName', 'JUnitPublicField', 'UnnecessaryGetter',
   'UnnecessaryReturnKeyword'])
 // Test is failing on Windows
-@Ignore("Test is failing on Windows")
+@Ignore('Test is failing on Windows')
 class ReadmeExamplePactJVMProviderJUnitTest {
 
   @ClassRule
