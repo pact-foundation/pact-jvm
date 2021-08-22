@@ -1,5 +1,25 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.25 - Bugfix Release
+
+* fd6372fcd - chore: ignore test failing on Windows (Ronald Holshausen, Sun Aug 22 17:47:10 2021 +1000)
+* 59f01081a - chore: codenarc (Ronald Holshausen, Sun Aug 22 17:35:15 2021 +1000)
+* db52a0abf - chore: ignore test failing on Windows (Ronald Holshausen, Sun Aug 22 17:30:20 2021 +1000)
+* 603b61266 - feat: add the authentication options to PactBrokerOptions #1415 (Ronald Holshausen, Sun Aug 22 17:21:06 2021 +1000)
+* 60e0bcb28 - chore: add tests for JSON keys with special characters #1416 (Ronald Holshausen, Sat Aug 21 16:53:37 2021 +1000)
+* b44e8d4be - feat: add method to ProviderInfo with better type safety #1415 (Ronald Holshausen, Sat Aug 21 15:43:50 2021 +1000)
+* 4db1f837f - feat: add standalone setting to the XML builder #1414 (Ronald Holshausen, Sat Aug 21 14:51:13 2021 +1000)
+* 883be2dac - chore: fix build after backport from master (Ronald Holshausen, Wed Aug 18 09:13:24 2021 +1000)
+* 8cc8ae7ec - chore: fix codenarc violation (Ronald Holshausen, Tue Aug 17 13:08:40 2021 +1000)
+* af9f4948d - feat: add support for verification type RESPONSE_FACTORY. Fixes #1379 (Kyle Florence, Sat Aug 7 20:42:12 2021 -0500)
+* cf21bb87f - feat: allow insecure TLS when accessing the broker with Maven #1413 (Ronald Holshausen, Sun Aug 15 16:05:50 2021 +1000)
+* 60a624334 - feat: update the expression markers when loading a pact file if overridden #1410 (Ronald Holshausen, Sun Aug 15 12:33:44 2021 +1000)
+* 837a80176 - feat: restrict expression marker overrides to provider state expressions #1410 (Ronald Holshausen, Sun Aug 15 12:33:00 2021 +1000)
+* 4b84e68ad - chore: update readmes with expression marker overrides #1410 (Ronald Holshausen, Sun Aug 15 12:05:42 2021 +1000)
+* e84e19c5e - feat: allow the expression markers in expressions to be overridden #1410 (Ronald Holshausen, Sun Aug 15 11:58:21 2021 +1000)
+* 2a12a3212 - fix: min/max type matchers must not apply the limits when cascading #396 (Ronald Holshausen, Sun Aug 8 13:29:49 2021 +1000)
+* a816fb895 - bump version to 4.1.25 (Ronald Holshausen, Sun Aug 1 10:42:54 2021 +1000)
+
 # 4.2.9 - Bugfix Release
 
 * 436662ad7 - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Aug 1 11:16:06 2021 +1000)
