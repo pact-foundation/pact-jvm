@@ -193,7 +193,7 @@ open class PactBrokerClient(
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS).forAll(PACTS, Consumer { pact ->
         val href = pact["href"].toString()
         val name = pact["name"].toString()
-        if (options.containsKey("authentication")) {
+        if (options.containsKey("authentication") && options["authentication"] is List<*>) {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl))
@@ -218,7 +218,7 @@ open class PactBrokerClient(
         .forAll(PACTS, Consumer { pact ->
         val href = pact["href"].toString()
         val name = pact["name"].toString()
-        if (options.containsKey("authentication")) {
+        if (options.containsKey("authentication") && options["authentication"] is List<*>) {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag = tag))
         } else {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList(), tag = tag))

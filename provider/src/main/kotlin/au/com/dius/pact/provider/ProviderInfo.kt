@@ -91,11 +91,10 @@ open class ProviderInfo @JvmOverloads constructor (
       throw RuntimeException("No providerTags: To use the pending pacts feature, you need to provide the list of " +
         "provider names for the provider application version that will be published with the verification results")
     }
-    val client = pactBrokerClient(pactBrokerUrl, mapOf())
+    val client = pactBrokerClient(pactBrokerUrl, options)
     val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, options.providerTags,
       options.enablePending, options.includeWipPactsSince)
-      .map { results -> results.map { ConsumerInfo.from(it) }
-      }
+      .map { results -> results.map { ConsumerInfo.from(it) } }
     return when (consumersFromBroker) {
       is Ok<List<ConsumerInfo>> -> {
         val list = consumersFromBroker.value
@@ -109,9 +108,8 @@ open class ProviderInfo @JvmOverloads constructor (
     }
   }
 
-  open fun pactBrokerClient(pactBrokerUrl: String, options: Map<String, Any>): PactBrokerClient {
-    val insecureTLS = Utils.lookupInMap(options, "insecureTLS", Boolean::class.java, false)
-    return PactBrokerClient(pactBrokerUrl, options.toMutableMap(), PactBrokerClientConfig(insecureTLS = insecureTLS))
+  open fun pactBrokerClient(pactBrokerUrl: String, options: PactBrokerOptions): PactBrokerClient {
+    return PactBrokerClient(pactBrokerUrl, options.toMutableMap(), PactBrokerClientConfig(insecureTLS = options.insecureTLS))
   }
 
   @Suppress("TooGenericExceptionThrown")

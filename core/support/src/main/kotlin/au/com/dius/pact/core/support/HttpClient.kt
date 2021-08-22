@@ -24,8 +24,18 @@ import org.apache.http.ssl.SSLContextBuilder
 import java.net.URI
 import java.security.cert.X509Certificate
 
+/**
+ * Authentication options
+ */
 sealed class Auth {
+  /**
+   * Basic authentication (username/password)
+   */
   data class BasicAuthentication(val username: String, val password: String) : Auth()
+
+  /**
+   * Bearer token authentication
+   */
   data class BearerAuthentication(val token: String) : Auth()
 
   fun resolveProperties(resolver: ValueResolver): Auth {

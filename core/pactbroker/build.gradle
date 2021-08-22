@@ -1,5 +1,6 @@
 dependencies {
-  api project(path: ":core:support", configuration: 'default')
+  api project(":core:support")
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile('io.github.microutils:kotlin-logging:1.6.26') {
