@@ -2,6 +2,7 @@ package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.fromJson
@@ -140,6 +141,7 @@ interface IHalClient {
  */
 open class HalClient @JvmOverloads constructor(
   val baseUrl: String,
+  @Deprecated("Move use of options to PactBrokerClientConfig")
   var options: Map<String, Any> = mapOf(),
   val config: PactBrokerClientConfig
 ) : IHalClient {
@@ -197,8 +199,9 @@ open class HalClient @JvmOverloads constructor(
 
   open fun setupHttpClient(): CloseableHttpClient {
     if (httpClient == null) {
-      if (options.containsKey("authentication") && options["authentication"] !is List<*>) {
-        HttpClient.logger.warn { "Authentication options needs to be a list of values, ignoring." }
+      if (options.containsKey("authentication") && options["authentication"] !is Auth &&
+        options["authentication"] !is List<*>) {
+        logger.warn { "Authentication options needs to be either an instance of Auth or a list of values, ignoring." }
       }
       val uri = URI(baseUrl)
       val result = HttpClient.newHttpClient(options["authentication"], uri, this.maxPublishRetries,
@@ -486,7 +489,7 @@ open class HalClient @JvmOverloads constructor(
     const val LINKS = "_links"
     const val PREEMPTIVE_AUTHENTICATION = "pact.pactbroker.httpclient.usePreemptiveAuthentication"
 
-    val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
+    val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)}")
 
     @JvmStatic
     fun asMap(jsonObject: JsonValue.Object?) = jsonObject?.entries?.entries?.associate {
