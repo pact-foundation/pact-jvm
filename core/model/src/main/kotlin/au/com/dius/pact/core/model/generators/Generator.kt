@@ -7,7 +7,9 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
+import au.com.dius.pact.core.support.expressions.ExpressionParser.correctExpressionMarkers
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser.toDefaultExpressions
 import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.json.JsonValue
 import com.github.michaelbull.result.Err
@@ -462,15 +464,15 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   val type: DataType = DataType.RAW
 ) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    return mapOf("type" to "ProviderState", "expression" to expression, "dataType" to type.name)
+    return mapOf("type" to "ProviderState", "expression" to toDefaultExpressions(expression), "dataType" to type.name)
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
     return when (val providerState = context["providerState"]) {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
-        if (containsExpressions(expression)) {
-          parseExpression(expression, type, MapValueResolver(map))
+        if (containsExpressions(expression, true)) {
+          parseExpression(expression, type, MapValueResolver(map), true)
         } else {
           map[expression]
         }
@@ -482,8 +484,9 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
   companion object {
+    @JvmStatic
     fun fromJson(json: JsonValue.Object) = ProviderStateGenerator(
-      Json.toString(json["expression"]),
+      correctExpressionMarkers(Json.toString(json["expression"])),
       if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
     )
   }

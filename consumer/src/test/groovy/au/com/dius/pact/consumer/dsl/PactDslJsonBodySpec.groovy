@@ -4,6 +4,8 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
@@ -166,8 +168,8 @@ class PactDslJsonBodySpec extends Specification {
     new PactDslJsonBody()
       .array('available Options')
         .object()
-        .stringType('Material', 'Gold')
-      . closeObject()
+          .stringType('Material', 'Gold')
+        .closeObject()
       .closeArray().toString() == '{"available Options":[{"Material":"Gold"}]}'
   }
 
@@ -390,6 +392,24 @@ class PactDslJsonBodySpec extends Specification {
           new Triple(1, new MatchingRuleCategory('body'), [:])
         ])
       ])
+    ]
+  }
+
+  @Issue('379')
+  def 'using array like with multiple examples'() {
+    when:
+    PactDslJsonBody body = new PactDslJsonBody()
+      .minArrayLike('foo', 2)
+        .stringMatcher('bar', '[a-z0-9]+', 'abc', 'def')
+        .integerType('baz', 666, 90210)
+      .close()
+
+    then:
+    body.toString() == '{"foo":[{"bar":"abc","baz":666},{"bar":"def","baz":90210}]}'
+    body.matchers.matchingRules == [
+      '$.foo': new MatchingRuleGroup([new MinTypeMatcher(2)]),
+      '$.foo[*].bar': new MatchingRuleGroup([new RegexMatcher('[a-z0-9]+')]),
+      '$.foo[*].baz': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)])
     ]
   }
 }

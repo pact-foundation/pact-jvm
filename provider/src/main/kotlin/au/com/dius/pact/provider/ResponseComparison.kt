@@ -18,6 +18,7 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Utils.sizeOf
@@ -167,26 +168,39 @@ class ResponseComparison(
       actual: OptionalBody,
       metadata: Map<String, Any>? = null
     ): ComparisonResult {
-      val bodyContext = when (message) {
-        is V4Interaction.AsynchronousMessage ->
-          MatchingContext(message.matchingRules.rulesForCategory("content"), true)
-        else ->
-          MatchingContext(message.matchingRules.rulesForCategory("body") ?: MatchingRuleCategory("body"), true)
+      val (bodyMismatches, metadataMismatches) = when (message) {
+        is V4Interaction.AsynchronousMessage -> {
+          val bodyContext = MatchingContext(message.contents.matchingRules.rulesForCategory("content"), true)
+          val metadataContext = MatchingContext(message.contents.matchingRules.rulesForCategory("metadata"), true)
+          val bodyMismatches = compareMessageBody(message, actual, bodyContext)
+          val metadataMismatches = when (metadata) {
+            null -> emptyList()
+            else -> Matching.compareMessageMetadata(message.contents.metadata, metadata, metadataContext)
+          }
+          val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
+          val responseComparison = ResponseComparison(
+            mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents.contents,
+            messageContentType.isJson(), messageContentType, actual.valueAsString())
+          responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
+        }
+        is Message -> {
+          val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body") ?: MatchingRuleCategory("body"), true)
+          val metadataContext = MatchingContext(message.matchingRules.rulesForCategory("metadata"), true)
+          val bodyMismatches = compareMessageBody(message, actual, bodyContext)
+          val metadataMismatches = when (metadata) {
+            null -> emptyList()
+            else -> Matching.compareMessageMetadata(message.metadata, metadata, metadataContext)
+          }
+          val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
+          val responseComparison = ResponseComparison(
+            mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents,
+            messageContentType.isJson(), messageContentType, actual.valueAsString())
+          responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
+        }
+        else -> TODO("Matching a ${message.javaClass.simpleName} is not implemented")
       }
-      val metadataContext = MatchingContext(message.matchingRules.rulesForCategory("metadata"), true)
 
-      val bodyMismatches = compareMessageBody(message, actual, bodyContext)
-
-      val metadataMismatches = when (metadata) {
-        null -> emptyList()
-        else -> Matching.compareMessageMetadata(message.metadata, metadata, metadataContext)
-      }
-
-      val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
-      val responseComparison = ResponseComparison(
-        mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents,
-        messageContentType.isJson(), messageContentType, actual.valueAsString())
-      return ComparisonResult(bodyMismatches = responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver),
+      return ComparisonResult(bodyMismatches = bodyMismatches,
         metadataMismatches = metadataMismatches.groupBy { it.key })
     }
 
@@ -196,13 +210,18 @@ class ResponseComparison(
       actual: OptionalBody,
       context: MatchingContext
     ): MutableList<BodyMismatch> {
-      val result = MatchingConfig.lookupBodyMatcher(message.getContentType().getBaseType())
+      val (contents, contentType) = when (message) {
+        is V4Interaction.AsynchronousMessage -> message.contents.contents to message.contents.getContentType()
+        is Message -> message.contents to message.getContentType()
+        else -> TODO("Matching a ${message.javaClass.simpleName} is not implemented")
+      }
+      val result = MatchingConfig.lookupBodyMatcher(contentType.getBaseType())
       var bodyMismatches = mutableListOf<BodyMismatch>()
       if (result != null) {
-        bodyMismatches = result.matchBody(message.contents, actual, context)
+        bodyMismatches = result.matchBody(contents, actual, context)
           .bodyResults.flatMap { it.result }.toMutableList()
       } else {
-        val expectedBody = message.contents.valueAsString()
+        val expectedBody = contents.valueAsString()
         if (expectedBody.isNotEmpty() && actual.isNullOrEmpty()) {
           bodyMismatches.add(BodyMismatch(expectedBody, null, "Expected body '$expectedBody' but was missing"))
         } else if (expectedBody.isNotEmpty() && actual.valueAsString() != expectedBody) {

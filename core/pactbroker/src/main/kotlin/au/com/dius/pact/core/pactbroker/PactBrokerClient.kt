@@ -121,7 +121,7 @@ interface IPactBrokerClient {
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
     enablePending: Boolean = false,
-    includeWipPactsSince: String
+    includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception>
 
   fun getUrlForProvider(providerName: String, tag: String): String?
@@ -162,9 +162,10 @@ interface IPactBrokerClient {
   ): Result<Boolean, String>
 }
 
-data class PactBrokerClientConfig(
+data class PactBrokerClientConfig @JvmOverloads constructor(
   val retryCountWhileUnknown: Int = 0,
-  val retryWhileUnknownInterval: Int = 10
+  val retryWhileUnknownInterval: Int = 10,
+  val insecureTLS: Boolean = false
 )
 
 /**
@@ -174,10 +175,11 @@ open class PactBrokerClient(
   val pactBrokerUrl: String,
   @Deprecated("Move use of options to PactBrokerClientConfig")
   override val options: MutableMap<String, Any>,
-  val config: PactBrokerClientConfig = PactBrokerClientConfig()
+  val config: PactBrokerClientConfig
 ) : IPactBrokerClient {
 
-  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mutableMapOf())
+  @Deprecated("Use the version that takes PactBrokerClientConfig")
+  constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mutableMapOf(), PactBrokerClientConfig())
 
   /**
    * Fetches all consumers for the given provider
@@ -191,7 +193,7 @@ open class PactBrokerClient(
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS).forAll(PACTS, Consumer { pact ->
         val href = pact["href"].toString()
         val name = pact["name"].toString()
-        if (options.containsKey("authentication")) {
+        if (options.containsKey("authentication") && options["authentication"] is List<*>) {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl))
@@ -216,7 +218,7 @@ open class PactBrokerClient(
         .forAll(PACTS, Consumer { pact ->
         val href = pact["href"].toString()
         val name = pact["name"].toString()
-        if (options.containsKey("authentication")) {
+        if (options.containsKey("authentication") && options["authentication"] is List<*>) {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag = tag))
         } else {
           consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList(), tag = tag))
@@ -234,7 +236,7 @@ open class PactBrokerClient(
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String>,
     enablePending: Boolean,
-    includeWipPactsSince: String
+    includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception> {
     val halClient = when (val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }) {
       is Err<Exception> -> return navigateResult
@@ -270,7 +272,7 @@ open class PactBrokerClient(
     selectors: List<ConsumerVersionSelector>,
     enablePending: Boolean,
     providerTags: List<String>,
-    includeWipPactsSince: String,
+    includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
     providerName: String
@@ -282,7 +284,7 @@ open class PactBrokerClient(
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
       body["includePendingStatus"] = true
-      if (!includeWipPactsSince.isBlank()) {
+      if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }
     }
@@ -354,7 +356,7 @@ open class PactBrokerClient(
     return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].asObject()))
   }
 
-  open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
+  open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options, config)
 
   override fun publishVerificationResults(
     docAttributes: Map<String, Any?>,

@@ -7,11 +7,13 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation "com.google.code.findbugs:jsr305:3.0.2"
-  api('io.github.microutils:kotlin-logging:2.0.3') {
+  api('io.github.microutils:kotlin-logging:2.0.10') {
     exclude group: 'org.jetbrains.kotlin'
   }
   api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
-  api 'com.michael-bull.kotlin-result:kotlin-result:1.1.9'
+  api('com.michael-bull.kotlin-result:kotlin-result:1.1.10') {
+    exclude group: 'org.jetbrains.kotlin'
+  }
 
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"

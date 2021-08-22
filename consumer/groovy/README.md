@@ -678,3 +678,9 @@ service {
     }
 }
 ```
+
+## Overriding the expression markers `${` and `}` (4.1.25+)
+
+You can change the markers of the expressions using the following system properties:
+- `pact.expressions.start` (default is `${`)
+- `pact.expressions.end` (default is `}`)

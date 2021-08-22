@@ -25,6 +25,7 @@ import java.math.BigInteger
 import java.util.Comparator
 import java.util.function.Predicate
 
+@Suppress("TooManyFunctions")
 object Matchers : KLogging() {
 
   private val intRegex = Regex("\\d+")
@@ -67,15 +68,15 @@ object Matchers : KLogging() {
     category: String,
     items: List<String>,
     pathComparator: Comparator<String>
-  ) = if (category == "body")
-      matchers.rulesForCategory(category).filter(Predicate {
-        matchesPath(it, items) > 0
-      })
-    else if (category == "header" || category == "query" || category == "metadata")
-      matchers.rulesForCategory(category).filter(Predicate { key ->
-        items.all { pathComparator.compare(key, it) == 0 }
-      })
-    else matchers.rulesForCategory(category)
+  ) = when (category) {
+    "body" -> matchers.rulesForCategory(category).filter(Predicate {
+      matchesPath(it, items) > 0
+    })
+    "header", "query", "metadata" -> matchers.rulesForCategory(category).filter(Predicate { key ->
+      items.all { pathComparator.compare(key, it) == 0 }
+    })
+    else -> matchers.rulesForCategory(category)
+  }
 
   @Deprecated("Use function from MatchingContext or MatchingRuleCategory")
   @JvmStatic
@@ -156,8 +157,8 @@ object Matchers : KLogging() {
     pathComparator: Comparator<String> = Comparator.naturalOrder()
   ): MatchingRuleGroup {
     val matcherCategory = resolveMatchers(matchers, category, path, pathComparator)
-    return if (category == "body")
-      matcherCategory.maxBy(Comparator { a, b ->
+    return if (category == "body") {
+      val result = matcherCategory.maxBy(Comparator { a, b ->
         val weightA = calculatePathWeight(a, path)
         val weightB = calculatePathWeight(b, path)
         when {
@@ -170,7 +171,8 @@ object Matchers : KLogging() {
           else -> -1
         }
       })
-    else {
+      result?.second?.copy(cascaded = parsePath(result.first).size != path.size) ?: MatchingRuleGroup()
+    } else {
       matcherCategory.matchingRules.values.first()
     }
   }
@@ -213,6 +215,7 @@ object Matchers : KLogging() {
     return result
   }
 
+  @Suppress("LongMethod")
   fun <T> compareLists(
     path: List<String>,
     matcher: MatchingRule,
@@ -220,10 +223,11 @@ object Matchers : KLogging() {
     actualList: List<T>,
     context: MatchingContext,
     generateDiff: () -> String,
+    cascaded: Boolean,
     callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
-    val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory)
+    val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory, cascaded)
     if (matchResult.isNotEmpty()) {
       result.add(BodyItemMatchResult(path.joinToString("."), matchResult))
     }

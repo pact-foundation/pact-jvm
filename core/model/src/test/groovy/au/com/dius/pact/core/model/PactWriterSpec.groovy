@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
@@ -261,8 +262,8 @@ class PactWriterSpec extends Specification {
       [
         new V4Interaction.SynchronousHttp('A1', 'A1', [], new HttpRequest(), new HttpResponse(), null,
           comments),
-        new V4Interaction.AsynchronousMessage('A2', 'A2', OptionalBody.missing(), [:],
-          new MatchingRulesImpl(), new Generators(), null, [], comments)
+        new V4Interaction.AsynchronousMessage('A2', 'A2', new MessageContents(OptionalBody.missing(), [:],
+          new MatchingRulesImpl(), new Generators()), null, [], comments)
       ])
     def sw = new StringWriter()
 
@@ -292,8 +293,8 @@ class PactWriterSpec extends Specification {
       new Provider('PactWriterSpecProvider'),
       [
         new V4Interaction.SynchronousHttp('A1', 'A1', [], new HttpRequest(), new HttpResponse(), null, [:], false),
-        new V4Interaction.AsynchronousMessage('A2', 'A2', OptionalBody.missing(), [:],
-          new MatchingRulesImpl(), new Generators(), null, [], [:], true)
+        new V4Interaction.AsynchronousMessage('A2', 'A2', new MessageContents(OptionalBody.missing(), [:],
+          new MatchingRulesImpl(), new Generators()), null, [], [:], true)
       ])
     def sw = new StringWriter()
 
@@ -306,5 +307,90 @@ class PactWriterSpec extends Specification {
     then:
     interactionJson['pending'] == false
     interaction2Json['pending'] == true
+  }
+
+  def 'write synchronous message pact test'() {
+    given:
+    def pact = new V4Pact(
+      new Consumer('write_synchronous_message_pact_test_consumer'),
+      new Provider('write_synchronous_message_pact_test_provider'),
+      [
+        new V4Interaction.SynchronousMessages('A1', 'A1', null, [
+          new ProviderState('Good state to be in')
+        ], [:], false, new MessageContents(OptionalBody.body('"this is a message"'.bytes)),
+        [new MessageContents(OptionalBody.body('"this is a response"'.bytes))])
+      ])
+    def sw = new StringWriter()
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V4)
+    def pactStr = sw.toString()
+
+    then:
+    pactStr.trim() == '''{
+    |  "consumer": {
+    |    "name": "write_synchronous_message_pact_test_consumer"
+    |  },
+    |  "interactions": [
+    |    {
+    |      "description": "A1",
+    |      "key": "A1",
+    |      "pending": false,
+    |      "providerStates": [
+    |        {
+    |          "name": "Good state to be in"
+    |        }
+    |      ],
+    |      "request": {
+    |        "contents": {
+    |          "content": "this is a message",
+    |          "contentType": "application/json",
+    |          "encoded": false
+    |        }
+    |      },
+    |      "response": [
+    |        {
+    |          "contents": {
+    |            "content": "this is a response",
+    |            "contentType": "application/json",
+    |            "encoded": false
+    |          }
+    |        }
+    |      ],
+    |      "type": "Synchronous/Messages"
+    |    }
+    |  ],
+    |  "metadata": {
+    |    "pact-jvm": {
+    |      "version": ""
+    |    },
+    |    "pactSpecification": {
+    |      "version": "4.0"
+    |    }
+    |  },
+    |  "provider": {
+    |    "name": "write_synchronous_message_pact_test_provider"
+    |  }
+    |}
+    |'''.stripMargin().trim()
+  }
+
+  def 'write synchronous message pact as V3 throws an exception'() {
+    given:
+    def pact = new V4Pact(
+      new Consumer('write_synchronous_message_pact_test_consumer'),
+      new Provider('write_synchronous_message_pact_test_provider'),
+      [
+        new V4Interaction.AsynchronousMessage('A1', 'A1'),
+        new V4Interaction.SynchronousMessages('A2', 'A2')
+      ]
+    )
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(new StringWriter()), PactSpecVersion.V3)
+
+    then:
+    def ex = thrown(IllegalArgumentException)
+    ex.message == 'A Synchronous Messages interaction can not be written to a V3 pact file'
   }
 }

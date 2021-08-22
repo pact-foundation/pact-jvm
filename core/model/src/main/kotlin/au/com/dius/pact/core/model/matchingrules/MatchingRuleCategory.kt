@@ -96,7 +96,7 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   fun filter2(predicate: Predicate<Pair<String,MatchingRuleGroup>>) =
     copy(matchingRules = matchingRules.filter { predicate.test(it.key to it.value) }.toMutableMap())
 
-  fun maxBy(comparator: Comparator<String>): MatchingRuleGroup {
+  fun maxBy(comparator: Comparator<String>): Pair<String, MatchingRuleGroup>? {
     val max = matchingRules.entries.fold(matchingRules.entries.firstOrNull()) { acc, entry ->
       if (acc != null && comparator.compare(acc.key, entry.key) >= 0) {
         acc
@@ -104,7 +104,7 @@ data class MatchingRuleCategory @JvmOverloads constructor(
         entry
       }
     }
-    return max?.value ?: MatchingRuleGroup()
+    return max?.toPair()
   }
 
   /**

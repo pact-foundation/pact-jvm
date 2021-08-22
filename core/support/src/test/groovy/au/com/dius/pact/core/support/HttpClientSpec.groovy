@@ -10,7 +10,7 @@ class HttpClientSpec extends Specification {
     def authentication = ['bearer', '1234abcd']
 
     when:
-    def result = HttpClient.INSTANCE.newHttpClient(authentication, uri, 1, 1)
+    def result = HttpClient.INSTANCE.newHttpClient(authentication, uri, 1, 1, false)
     def defaultHeaders = result.component1().closeables[0].this$0.defaultHeaders
 
     then:

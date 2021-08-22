@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.consumer`
 * artifact-id = `junit`
-* version-id = `4.1.22`
+* version-id = `4.2.9`
 
 ## Usage
 
@@ -746,6 +746,26 @@ same way as the `PactProviderRule` class for Request-Response interactions, but 
 
 For an example, look at [ExampleMessageConsumerTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/v3/ExampleMessageConsumerTest.java)
 
+### Matching message metadata
+
+You can also use matching rules for the metadata associated with the message. There is a `MetadataBuilder` class to
+help with this. You can access it via the `withMetadata` method that takes a Java Consumer on the `MessagePactBuilder` class.
+
+For example:
+
+```java
+builder.given("SomeProviderState")
+    .expectsToReceive("a test message with metadata")
+    .withMetadata(md -> {
+        md.add("metadata1", "metadataValue1");
+        md.add("metadata2", "metadataValue2");
+        md.add("metadata3", 10L);
+        md.matchRegex("partitionKey", "[A-Z]{3}\\d{2}", "ABC01");
+    })
+    .withContent(body)
+    .toPact();
+```
+
 # Having values injected from provider state callbacks (3.6.11+)
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
@@ -773,6 +793,12 @@ You can also just use the key instead of an expression:
 ```java
     .valueFromProviderState('userId', 'userId', 100) // will look value using userId as the key
 ```
+
+## Overriding the expression markers `${` and `}` (4.1.25+)
+
+You can change the markers of the expressions using the following system properties:
+- `pact.expressions.start` (default is `${`)
+- `pact.expressions.end` (default is `}`)
 
 ## Dealing with persistent HTTP/1.1 connections (Keep Alive)
 

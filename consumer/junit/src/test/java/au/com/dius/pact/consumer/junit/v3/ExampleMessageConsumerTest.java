@@ -38,7 +38,7 @@ public class ExampleMessageConsumerTest {
     }
 
     @Test
-    @PactVerification({"test_provider", "SomeProviderState"})
+    @PactVerification({"test_provider"})
     public void test() throws Exception {
         Assert.assertNotNull(new String(currentMessage));
     }

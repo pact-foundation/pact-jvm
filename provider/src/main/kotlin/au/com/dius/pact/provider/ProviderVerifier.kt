@@ -26,7 +26,6 @@ import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
-import au.com.dius.pact.provider.PactVerification.REQUEST_RESPONSE
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
@@ -46,7 +45,7 @@ import java.util.function.Supplier
 import kotlin.reflect.KMutableProperty1
 
 enum class PactVerification {
-  REQUEST_RESPONSE, ANNOTATED_METHOD
+  REQUEST_RESPONSE, ANNOTATED_METHOD, RESPONSE_FACTORY
 }
 
 /**
@@ -155,6 +154,9 @@ interface IProviderVerifier {
    */
   var providerTags: Supplier<List<String>>?
 
+  /** Callback which is given an interaction description and returns a response */
+  var responseFactory: Function<String, Any>?
+
   /**
    * Run the verification for the given provider and return any failures
    */
@@ -203,6 +205,15 @@ interface IProviderVerifier {
    * Verifies the interaction by invoking a method on a provider test class
    */
   fun verifyResponseByInvokingProviderMethods(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean
+  ): VerificationResult
+
+  fun verifyResponseByFactory(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
     interaction: Interaction,
@@ -266,7 +277,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       .map { it.trim() }
       .filter { it.isNotEmpty() }
   },
-  override var projectClassLoader: Supplier<ClassLoader?>? = null
+  override var projectClassLoader: Supplier<ClassLoader?>? = null,
+  override var responseFactory: Function<String, Any>? = null
 ) : IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
@@ -286,7 +298,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator")
+  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator", "LongParameterList")
   override fun verifyResponseByInvokingProviderMethods(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -346,6 +358,58 @@ open class ProviderVerifier @JvmOverloads constructor (
       return VerificationResult.Failed(
         "Request to provider method failed with an exception", interactionMessage,
         mapOf(interactionId.orEmpty() to errors), pending)
+    }
+  }
+
+  @Suppress("TooGenericExceptionCaught")
+  override fun verifyResponseByFactory(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean
+  ): VerificationResult {
+    val interactionId = interaction.interactionId.orEmpty()
+    try {
+      val factory = responseFactory!!
+      return if (interaction.isAsynchronousMessage()) {
+        verifyMessage(
+          factory,
+          interaction as MessageInteraction,
+          interactionId,
+          interactionMessage,
+          failures,
+          pending
+        )
+      } else {
+        val expectedResponse = (interaction as SynchronousRequestResponse).response
+        val response = factory.apply(interaction.description) as Map<String, Any>
+        val contentType = response["contentType"] as String?
+        val actualResponse = ProviderResponse(
+          response["statusCode"] as Int,
+          response["headers"] as Map<String, List<String>>,
+          if (contentType == null) ContentType.UNKNOWN else ContentType(contentType),
+          response["data"] as String?
+        )
+        this.verifyRequestResponsePact(
+          expectedResponse,
+          actualResponse,
+          interactionMessage,
+          failures,
+          interactionId,
+          pending
+        )
+      }
+    } catch (e: Exception) {
+      failures[interactionMessage] = e
+      emitEvent(Event.VerificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)))
+      val errors = listOf(
+        VerificationFailureType.ExceptionFailure("Verification factory method failed with an exception", e)
+      )
+      return VerificationResult.Failed(
+        "Verification factory method failed with an exception", interactionMessage,
+        mapOf(interactionId to errors), pending)
     }
   }
 
@@ -416,41 +480,72 @@ open class ProviderVerifier @JvmOverloads constructor (
     val interactionId = message.interactionId
     var result: VerificationResult = VerificationResult.Ok(interactionId)
     methods.forEach { method ->
-      emitEvent(Event.GeneratesAMessageWhich)
-      val messageResult = invokeProviderMethod(method, providerMethodInstance.apply(method))
-      val actualMessage: ByteArray
-      var messageMetadata: Map<String, Any>? = null
-      var contentType = ContentType.JSON
-      when (messageResult) {
-        is MessageAndMetadata -> {
-          messageMetadata = messageResult.metadata
-          contentType = Message.contentType(messageResult.metadata)
-          actualMessage = messageResult.messageData
-        }
-        is Pair<*, *> -> {
-          messageMetadata = messageResult.second as Map<String, Any>
-          contentType = Message.contentType(messageMetadata)
-          actualMessage = messageResult.first.toString().toByteArray(contentType.asCharset())
-        }
-        is org.apache.commons.lang3.tuple.Pair<*, *> -> {
-          messageMetadata = messageResult.right as Map<String, Any>
-          contentType = Message.contentType(messageMetadata)
-          actualMessage = messageResult.left.toString().toByteArray(contentType.asCharset())
-        }
-        else -> {
-          actualMessage = messageResult.toString().toByteArray()
-        }
-      }
-      val comparison = ResponseComparison.compareMessage(message,
-        OptionalBody.body(actualMessage, contentType), messageMetadata)
-      val s = ": generates a message which"
-      result = result.merge(displayBodyResult(failures, comparison.bodyMismatches,
-        interactionMessage + s, interactionId.orEmpty(), pending))
-        .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures,
-          comparison.metadataMismatches, interactionMessage + s, interactionId.orEmpty(),
-          pending))
+      val messageFactory: Function<String, Any> =
+        Function { invokeProviderMethod(method, providerMethodInstance.apply(method))!! }
+      result = result.merge(verifyMessage(
+        messageFactory,
+        message,
+        interactionId.orEmpty(),
+        interactionMessage,
+        failures,
+        pending
+      ))
     }
     return result
+  }
+
+  private fun verifyMessage(
+    messageFactory: Function<String, Any>,
+    message: MessageInteraction,
+    interactionId: String,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean
+  ): VerificationResult {
+    emitEvent(Event.GeneratesAMessageWhich)
+    val messageResult = messageFactory.apply(message.description)
+    val actualMessage: ByteArray
+    var messageMetadata: Map<String, Any>? = null
+    var contentType = ContentType.JSON
+    when (messageResult) {
+      is MessageAndMetadata -> {
+        messageMetadata = messageResult.metadata
+        contentType = Message.contentType(messageResult.metadata)
+        actualMessage = messageResult.messageData
+      }
+      is Pair<*, *> -> {
+        messageMetadata = messageResult.second as Map<String, Any>
+        contentType = Message.contentType(messageMetadata)
+        actualMessage = messageResult.first.toString().toByteArray(contentType.asCharset())
+      }
+      is org.apache.commons.lang3.tuple.Pair<*, *> -> {
+        messageMetadata = messageResult.right as Map<String, Any>
+        contentType = Message.contentType(messageMetadata)
+        actualMessage = messageResult.left.toString().toByteArray(contentType.asCharset())
+      }
+      else -> {
+        actualMessage = messageResult.toString().toByteArray()
+      }
+    }
+    val comparison = ResponseComparison.compareMessage(message,
+      OptionalBody.body(actualMessage, contentType), messageMetadata)
+    val s = ": generates a message which"
+    return displayBodyResult(
+      failures,
+      comparison.bodyMismatches,
+      interactionMessage + s,
+      interactionId,
+      pending
+    ).merge(
+      displayMetadataResult(
+        messageMetadata ?: emptyMap(),
+        failures,
+        comparison.metadataMismatches,
+        interactionMessage + s,
+        interactionId,
+        pending
+      )
+    )
   }
 
   private fun displayMetadataResult(
@@ -525,13 +620,22 @@ open class ProviderVerifier @JvmOverloads constructor (
         "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator
       )
 
-      val result = if (ProviderUtils.verificationType(provider, consumer) == REQUEST_RESPONSE) {
-        logger.debug { "Verifying via request/response" }
-        verifyResponseFromProvider(provider, interaction.asSynchronousRequestResponse()!!, interactionMessage, failures,
-          providerClient, context, pending)
-      } else {
-        logger.debug { "Verifying via annotated test method" }
-        verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures, pending)
+      val result = when (ProviderUtils.verificationType(provider, consumer)) {
+        PactVerification.REQUEST_RESPONSE -> {
+          logger.debug { "Verifying via request/response" }
+          verifyResponseFromProvider(
+            provider, interaction.asSynchronousRequestResponse()!!, interactionMessage, failures, providerClient,
+            context, pending)
+        }
+        PactVerification.RESPONSE_FACTORY -> {
+          logger.debug { "Verifying via response factory function" }
+          verifyResponseByFactory(provider, consumer, interaction, interactionMessage, failures, pending)
+        }
+        else -> {
+          logger.debug { "Verifying via provider methods" }
+          verifyResponseByInvokingProviderMethods(
+            provider, consumer, interaction, interactionMessage, failures, pending)
+        }
       }
 
       if (provider.stateChangeTeardown) {
@@ -666,9 +770,9 @@ open class ProviderVerifier @JvmOverloads constructor (
       reporters.forEach {
         it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
       }
-      VerificationResult.Failed("Request to provider method failed with an exception", interactionMessage,
+      VerificationResult.Failed("Request to provider endpoint failed with an exception", interactionMessage,
         mapOf(interaction.interactionId.orEmpty() to
-          listOf(VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e))),
+          listOf(VerificationFailureType.ExceptionFailure("Request to provider endpoint failed with an exception", e))),
         pending)
     }
   }

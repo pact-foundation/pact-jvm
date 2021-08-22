@@ -8,7 +8,7 @@
     "headers": {"Content-Type": "application/xml"},
     "matchingRules": {
       "$.body.alligator['@name']": {"match": "regex", "regex": "\\w+"},
-      "$.body.alligator.favouriteColours.favouriteColour": {"match": "regex", "regex": "red|blue"}
+      "$.body.alligator.favouriteColours.favouriteColour.#text": {"match": "regex", "regex": "red|blue"}
     },
     "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><alligator name=\"Mary\" feet=\"4\"><favouriteColours><favouriteColour>red</favouriteColour><favouriteColour>blue</favouriteColour></favouriteColours></alligator>"
   },

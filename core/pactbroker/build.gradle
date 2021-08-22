@@ -1,12 +1,15 @@
 dependencies {
-  api project(path: ":core:support", configuration: 'default')
+  api project(":core:support")
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   compile "com.google.guava:guava:${project.guavaVersion}"
-  implementation('io.github.microutils:kotlin-logging:2.0.3') {
+  implementation('io.github.microutils:kotlin-logging:2.0.10') {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
+  api('com.michael-bull.kotlin-result:kotlin-result:1.1.10') {
+    exclude group: 'org.jetbrains.kotlin'
+  }
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"

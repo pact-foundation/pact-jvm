@@ -3,8 +3,6 @@ package au.com.dius.pact.consumer.dsl
 import au.com.dius.pact.consumer.InvalidMatcherException
 import au.com.dius.pact.consumer.dsl.Dsl.matcherKey
 import au.com.dius.pact.core.matchers.UrlMatcherSupport
-import au.com.dius.pact.core.model.Feature
-import au.com.dius.pact.core.model.FeatureToggles.isFeatureSet
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
@@ -31,6 +29,7 @@ import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.expressions.DataType.Companion.from
 import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.padTo
 import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.DateFormatUtils
@@ -83,6 +82,18 @@ open class PactDslJsonBody : DslPart {
     generators = body.generators.copyWithUpdatedMatcherRootPrefix(rootPath)
   }
 
+  /**
+   * Constructs a new body as a child of an array
+   * @param rootPath Path to prefix to this child
+   * @param rootName Name to associate this object as in the parent
+   * @param parent Parent to attach to
+   * @param examples Number of examples to generate
+   */
+  constructor(rootPath: String, rootName: String, parent: PactDslJsonArray, examples: Int)
+    : super(parent, rootPath, rootName) {
+    this.body = JsonValue.Array(1.rangeTo(examples).map { JsonValue.Object() }.toMutableList())
+  }
+
   override fun toString(): String {
     return body.toString()
   }
@@ -92,18 +103,36 @@ open class PactDslJsonBody : DslPart {
       matchers.setRules(matcherName, obj.matchers.matchingRules[matcherName]!!)
     }
     generators.addGenerators(obj.generators)
+
     val elementBase = StringUtils.difference(rootPath, obj.rootPath)
-    val body = body as JsonValue.Object
-    if (StringUtils.isNotEmpty(obj.rootName)) {
-      body.add(obj.rootName, obj.body)
-    } else {
-      val name = StringUtils.strip(elementBase, ".")
-      val p = Pattern.compile("\\['(.+)'\\]")
-      val matcher = p.matcher(name)
-      if (matcher.matches()) {
-        body.add(matcher.group(1), obj.body)
-      } else {
-        body.add(name, obj.body)
+    when (val body = body) {
+      is JsonValue.Object -> {
+        if (StringUtils.isNotEmpty(obj.rootName)) {
+          body.add(obj.rootName, obj.body)
+        } else {
+          val name = StringUtils.strip(elementBase, ".")
+          val p = Pattern.compile("\\['(.+)'\\]")
+          val matcher = p.matcher(name)
+          if (matcher.matches()) {
+            body.add(matcher.group(1), obj.body)
+          } else {
+            body.add(name, obj.body)
+          }
+        }
+      }
+      is JsonValue.Array -> body.values.forEach { v ->
+        if (StringUtils.isNotEmpty(obj.rootName)) {
+          v.asObject()!!.add(obj.rootName, obj.body)
+        } else {
+          val name = StringUtils.strip(elementBase, ".")
+          val p = Pattern.compile("\\['(.+)'\\]")
+          val matcher = p.matcher(name)
+          if (matcher.matches()) {
+            v.asObject()!!.add(matcher.group(1), obj.body)
+          } else {
+            v.asObject()!!.add(name, obj.body)
+          }
+        }
       }
     }
   }
@@ -113,11 +142,22 @@ open class PactDslJsonBody : DslPart {
       matchers.setRules(matcherName, obj.matchers.matchingRules[matcherName]!!)
     }
     generators.addGenerators(obj.generators)
-    val body = body as JsonValue.Object
-    if (StringUtils.isNotEmpty(obj.rootName)) {
-      body.add(obj.rootName, obj.body)
-    } else {
-      body.add(StringUtils.difference(rootPath, obj.rootPath), obj.body)
+
+    when (val body = body) {
+      is JsonValue.Object -> {
+        if (StringUtils.isNotEmpty(obj.rootName)) {
+          body.add(obj.rootName, obj.body)
+        } else {
+          body.add(StringUtils.difference(rootPath, obj.rootPath), obj.body)
+        }
+      }
+      is JsonValue.Array -> body.values.forEach { v ->
+        if (StringUtils.isNotEmpty(obj.rootName)) {
+          v.asObject()!!.add(obj.rootName, obj.body)
+        } else {
+          v.asObject()!!.add(StringUtils.difference(rootPath, obj.rootPath), obj.body)
+        }
+      }
     }
   }
 
@@ -126,13 +166,35 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param value string value
    */
-  fun stringValue(name: String, value: String?): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    if (value == null) {
-      body.add(name, JsonValue.Null)
-    } else {
-      body.add(name, JsonValue.StringValue(value.toCharArray()))
+  fun stringValue(name: String, vararg values: String?): PactDslJsonBody {
+    require(values.isNotEmpty()) {
+      "At least one example value is required"
     }
+    if (body is JsonValue.Object && values.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < values.size) {
+      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> {
+        if (values[0] == null) {
+          body.add(name, JsonValue.Null)
+        } else {
+          body.add(name, JsonValue.StringValue(values[0]!!.toCharArray()))
+        }
+      }
+      is JsonValue.Array -> {
+        values.padTo(body.size()).forEachIndexed { i, value ->
+          if (value == null) {
+            body[i].asObject()!!.add(name, JsonValue.Null)
+          } else {
+            body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
+          }
+        }
+      }
+    }
+
     return this
   }
 
@@ -141,9 +203,25 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param value number value
    */
-  fun numberValue(name: String, value: Number): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+  fun numberValue(name: String, vararg values: Number): PactDslJsonBody {
+    require(values.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && values.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < values.size) {
+      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Decimal(values[0].toString().toCharArray()))
+      is JsonValue.Array -> {
+        values.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
@@ -152,9 +230,25 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param value boolean value
    */
-  fun booleanValue(name: String, value: Boolean): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, if (value) JsonValue.True else JsonValue.False)
+  fun booleanValue(name: String, vararg values: Boolean): PactDslJsonBody {
+    require(values.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && values.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < values.size) {
+      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, if (values[0]) JsonValue.True else JsonValue.False)
+      is JsonValue.Array -> {
+        values.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, if (value) JsonValue.True else JsonValue.False)
+        }
+      }
+    }
+
     return this
   }
 
@@ -162,10 +256,29 @@ open class PactDslJsonBody : DslPart {
    * Attribute that must be the same type as the example
    * @param name attribute name
    */
-  open fun like(name: String, example: Any?): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, toJson(example))
+  open fun like(name: String, vararg examples: Any?): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException(
+        "You provided multiple example examples (${examples.size}) but only one was expected"
+      )
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, toJson(examples[0]))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, toJson(value))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+
     return this
   }
 
@@ -174,15 +287,22 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun stringType(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), RandomStringGenerator(20))
-    return stringType(name, "string")
+    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RandomStringGenerator(20))
+    return stringType(name, *examples("string"))
+  }
+
+  private fun examples(example: String): Array<String> {
+    return when (val body = body) {
+      is JsonValue.Array -> 1.rangeTo(body.size).map { example }.toTypedArray()
+      else -> arrayOf(example)
+    }
   }
 
   /**
    * Attributes that can be any string
    * @param names attribute names
    */
-  fun stringType(vararg names: String): PactDslJsonBody {
+  fun stringTypes(vararg names: String): PactDslJsonBody {
     for (name in names) {
       stringType(name)
     }
@@ -194,10 +314,29 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param example example value to use for generated bodies
    */
-  fun stringType(name: String, example: String): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(example.toCharArray()))
+  fun stringType(name: String, vararg examples: String): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException(
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      )
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(examples[0].toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+
     return this
   }
 
@@ -206,7 +345,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun numberType(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
+    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
     return numberType(name, 100)
   }
 
@@ -214,7 +353,7 @@ open class PactDslJsonBody : DslPart {
    * Attributes that can be any number
    * @param names attribute names
    */
-  fun numberType(vararg names: String): PactDslJsonBody {
+  fun numberTypes(vararg names: String): PactDslJsonBody {
     for (name in names) {
       numberType(name)
     }
@@ -226,10 +365,27 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example number to use for generated bodies
    */
-  fun numberType(name: String, number: Number): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Decimal(number.toString().toCharArray()))
+  fun numberType(name: String, vararg numbers: Number): PactDslJsonBody {
+    require(numbers.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && numbers.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < numbers.size) {
+      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0].toString().toCharArray()))
+      is JsonValue.Array -> {
+        numbers.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER))
+
     return this
   }
 
@@ -246,7 +402,7 @@ open class PactDslJsonBody : DslPart {
    * Attributes that must be an integer
    * @param names attribute names
    */
-  fun integerType(vararg names: String): PactDslJsonBody {
+  fun integerTypes(vararg names: String): PactDslJsonBody {
     for (name in names) {
       integerType(name)
     }
@@ -258,10 +414,27 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example integer value to use for generated bodies
    */
-  fun integerType(name: String, number: Long): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Integer(number.toString().toCharArray()))
+  fun integerType(name: String, vararg numbers: Long): PactDslJsonBody {
+    require(numbers.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && numbers.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < numbers.size) {
+      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Integer(numbers[0].toString().toCharArray()))
+      is JsonValue.Array -> {
+        numbers.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
+
     return this
   }
 
@@ -270,10 +443,27 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example integer value to use for generated bodies
    */
-  fun integerType(name: String, number: Int): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Integer(number.toString().toCharArray()))
+  fun integerType(name: String, vararg numbers: Int): PactDslJsonBody {
+    require(numbers.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && numbers.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < numbers.size) {
+      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Integer(numbers[0].toString().toCharArray()))
+      is JsonValue.Array -> {
+        numbers.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
+
     return this
   }
 
@@ -290,7 +480,7 @@ open class PactDslJsonBody : DslPart {
    * Attributes that must be a decimal values
    * @param names attribute names
    */
-  fun decimalType(vararg names: String): PactDslJsonBody {
+  fun decimalTypes(vararg names: String): PactDslJsonBody {
     for (name in names) {
       decimalType(name)
     }
@@ -302,10 +492,27 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example decimalType value
    */
-  fun decimalType(name: String, number: BigDecimal): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Decimal(number.toString().toCharArray()))
+  fun decimalType(name: String, vararg numbers: BigDecimal): PactDslJsonBody {
+    require(numbers.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && numbers.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < numbers.size) {
+      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0].toString().toCharArray()))
+      is JsonValue.Array -> {
+        numbers.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
+
     return this
   }
 
@@ -314,10 +521,27 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example decimalType value
    */
-  fun decimalType(name: String, number: Double): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Decimal(number.toString().toCharArray()))
+  fun decimalType(name: String, vararg numbers: Double): PactDslJsonBody {
+    require(numbers.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && numbers.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < numbers.size) {
+      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0].toString().toCharArray()))
+      is JsonValue.Array -> {
+        numbers.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
+
     return this
   }
 
@@ -325,7 +549,7 @@ open class PactDslJsonBody : DslPart {
    * Attributes that must be a boolean
    * @param names attribute names
    */
-  fun booleanType(vararg names: String): PactDslJsonBody {
+  fun booleanTypes(vararg names: String): PactDslJsonBody {
     for (name in names) {
       booleanType(name)
     }
@@ -338,10 +562,29 @@ open class PactDslJsonBody : DslPart {
    * @param example example boolean to use for generated bodies
    */
   @JvmOverloads
-  fun booleanType(name: String, example: Boolean = true): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, if (example) JsonValue.True else JsonValue.False)
+  fun booleanType(name: String, vararg examples: Boolean = booleanArrayOf(true)): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException(
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      )
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, if (examples[0]) JsonValue.True else JsonValue.False)
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, if (value) JsonValue.True else JsonValue.False)
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+
     return this
   }
 
@@ -351,13 +594,37 @@ open class PactDslJsonBody : DslPart {
    * @param regex regular expression
    * @param value example value to use for generated bodies
    */
-  fun stringMatcher(name: String, regex: String, value: String): PactDslJsonBody {
-    if (!value.matches(Regex(regex))) {
-      throw InvalidMatcherException("Example \"$value\" does not match regular expression \"$regex\"")
+  @Suppress("ThrowsCount")
+  fun stringMatcher(name: String, regex: String, vararg values: String): PactDslJsonBody {
+    require(values.isNotEmpty()) {
+      "At least one example value is required"
     }
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(value.toCharArray()))
+    if (body is JsonValue.Object && values.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < values.size) {
+      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    }
+
+    val re = Regex(regex)
+    when (val body = body) {
+      is JsonValue.Object -> {
+        if (!values[0].matches(re)) {
+          throw InvalidMatcherException("Example \"${values[0]}\" does not match regular expression \"$regex\"")
+        }
+        body.add(name, JsonValue.StringValue(values[0].toCharArray()))
+      }
+      is JsonValue.Array -> {
+        values.padTo(body.size()).forEachIndexed { i, value ->
+          if (!value.matches(re)) {
+            throw InvalidMatcherException("Example \"$value\" does not match regular expression \"$regex\"")
+          }
+          body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), regexp(regex))
+
     return this
   }
 
@@ -368,7 +635,7 @@ open class PactDslJsonBody : DslPart {
    */
   fun stringMatcher(name: String, regex: String): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RegexGenerator(regex))
-    stringMatcher(name, regex, Generex(regex).random())
+    stringMatcher(name, regex, *examples(Generex(regex).random()))
     return this
   }
 
@@ -409,7 +676,7 @@ open class PactDslJsonBody : DslPart {
    */
   @Deprecated("use datetime instead")
   fun timestamp(name: String, format: String, example: Date): PactDslJsonBody {
-    return datetime(name, format, example, TimeZone.getDefault())
+    return datetime(name, format, TimeZone.getDefault(), example)
   }
 
   /**
@@ -421,7 +688,7 @@ open class PactDslJsonBody : DslPart {
    */
   @Deprecated("use datetime instead")
   fun timestamp(name: String, format: String, example: Date, timeZone: TimeZone): PactDslJsonBody {
-    datetime(name, format, example, timeZone)
+    datetime(name, format, timeZone, example)
     return this
   }
 
@@ -433,7 +700,7 @@ open class PactDslJsonBody : DslPart {
    */
   @Deprecated("use datetime instead")
   fun timestamp(name: String, format: String, example: Instant): PactDslJsonBody {
-    return datetime(name, format, example, TimeZone.getDefault())
+    return datetime(name, format, example)
   }
 
   /**
@@ -445,7 +712,7 @@ open class PactDslJsonBody : DslPart {
    */
   @Deprecated("use datetime instead")
   fun timestamp(name: String, format: String, example: Instant, timeZone: TimeZone): PactDslJsonBody {
-    datetime(name, format, example, timeZone)
+    datetime(name, format, timeZone, example)
     return this
   }
 
@@ -456,10 +723,18 @@ open class PactDslJsonBody : DslPart {
   fun datetime(name: String): PactDslJsonBody {
     val pattern = DateFormatUtils.ISO_DATETIME_FORMAT.pattern
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateTimeGenerator(pattern, null))
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(
-      DateFormatUtils.ISO_DATETIME_FORMAT.format(Date(DATE_2000)).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchTimestamp(pattern))
+
+    val stringValue = JsonValue.StringValue(DateFormatUtils.ISO_DATETIME_FORMAT.format(Date(DATE_2000)).toCharArray())
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, stringValue)
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, stringValue)
+        }
+      }
+    }
+
     return this
   }
 
@@ -471,11 +746,21 @@ open class PactDslJsonBody : DslPart {
   fun datetime(name: String, format: String): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateTimeGenerator(format, null))
     val formatter = DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault())
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(formatter.format(Date(DATE_2000).toInstant()).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+
+    val stringValue = JsonValue.StringValue(formatter.format(Date(DATE_2000).toInstant()).toCharArray())
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, stringValue)
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, stringValue)
+        }
+      }
+    }
+
     return this
   }
+
 
   /**
    * Attribute that must match the given datetime format
@@ -490,13 +775,47 @@ open class PactDslJsonBody : DslPart {
     format: String,
     example: Date,
     timeZone: TimeZone = TimeZone.getDefault()
+  ) = datetime(name, format, timeZone, example)
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format datetime format
+   * @param example example date and time to use for generated bodies
+   * @param timeZone time zone used for formatting of example date and time
+   */
+  @JvmOverloads
+  fun datetime(
+    name: String,
+    format: String,
+    timeZone: TimeZone = TimeZone.getDefault(),
+    vararg examples: Date
   ): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
     val formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId())
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(formatter.format(example.toInstant()).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name,
+        JsonValue.StringValue(formatter.format(examples[0].toInstant()).toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.StringValue(formatter.format(value.toInstant()).toCharArray()))
+        }
+      }
+    }
+
     return this
   }
+
 
   /**
    * Attribute that must match the given datetime format
@@ -511,11 +830,44 @@ open class PactDslJsonBody : DslPart {
     format: String,
     example: Instant,
     timeZone: TimeZone = TimeZone.getDefault()
+  ) = datetime(name, format, timeZone, example)
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format timestamp format
+   * @param examples example dates and times to use for generated bodies
+   * @param timeZone time zone used for formatting of example date and time
+   */
+  @JvmOverloads
+  fun datetime(
+    name: String,
+    format: String,
+    timeZone: TimeZone = TimeZone.getDefault(),
+    vararg examples: Instant
   ): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
     val formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId())
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(formatter.format(example).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name,
+        JsonValue.StringValue(formatter.format(examples[0]).toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.StringValue(formatter.format(value).toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
@@ -527,10 +879,18 @@ open class PactDslJsonBody : DslPart {
   fun date(name: String = "date"): PactDslJsonBody {
     val pattern = DateFormatUtils.ISO_DATE_FORMAT.pattern
     generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), DateGenerator(pattern, null))
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(
-      DateFormatUtils.ISO_DATE_FORMAT.format(Date(DATE_2000)).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchDate(pattern))
+
+    val stringValue = JsonValue.StringValue(DateFormatUtils.ISO_DATE_FORMAT.format(Date(DATE_2000)).toCharArray())
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, stringValue)
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, stringValue)
+        }
+      }
+    }
+
     return this
   }
 
@@ -542,9 +902,18 @@ open class PactDslJsonBody : DslPart {
   fun date(name: String, format: String): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateGenerator(format, null))
     val instance = FastDateFormat.getInstance(format)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+
+    val stringValue = JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray())
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, stringValue)
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, stringValue)
+        }
+      }
+    }
+
     return this
   }
 
@@ -556,11 +925,45 @@ open class PactDslJsonBody : DslPart {
    * @param timeZone time zone used for formatting of example date
    */
   @JvmOverloads
-  fun date(name: String, format: String, example: Date, timeZone: TimeZone = TimeZone.getDefault()): PactDslJsonBody {
+  fun date(name: String, format: String, example: Date, timeZone: TimeZone = TimeZone.getDefault()) =
+    date(name, format, timeZone, example)
+
+
+  /**
+   * Attribute that must match the provided date format
+   * @param name attribute date
+   * @param format date format to match
+   * @param examples example dates to use for generated values
+   * @param timeZone time zone used for formatting of example date
+   */
+  @JvmOverloads
+  fun date(
+    name: String,
+    format: String,
+    timeZone: TimeZone = TimeZone.getDefault(),
+    vararg examples: Date
+  ): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
     val instance = FastDateFormat.getInstance(format, timeZone)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(instance.format(example).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(examples[0]).toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.StringValue(instance.format(value).toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
@@ -570,11 +973,28 @@ open class PactDslJsonBody : DslPart {
    * @param format date format to match
    * @param example example date to use for generated values
    */
-  fun localDate(name: String, format: String, example: LocalDate): PactDslJsonBody {
+  fun localDate(name: String, format: String, vararg examples: LocalDate): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
     val formatter = DateTimeFormatter.ofPattern(format)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(formatter.format(example).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(formatter.format(examples[0]).toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.StringValue(formatter.format(value).toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
@@ -589,10 +1009,18 @@ open class PactDslJsonBody : DslPart {
   fun time(name: String = "time"): PactDslJsonBody {
     val pattern = DateFormatUtils.ISO_TIME_FORMAT.pattern
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), TimeGenerator(pattern, null))
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(
-      DateFormatUtils.ISO_TIME_FORMAT.format(Date(DATE_2000)).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchTime(pattern))
+
+    val stringValue = JsonValue.StringValue(DateFormatUtils.ISO_TIME_FORMAT.format(Date(DATE_2000)).toCharArray())
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, stringValue)
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, stringValue)
+        }
+      }
+    }
+
     return this
   }
 
@@ -603,10 +1031,18 @@ open class PactDslJsonBody : DslPart {
    */
   fun time(name: String, format: String): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), TimeGenerator(format, null))
-    val instance = FastDateFormat.getInstance(format)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchTime(format))
+
+    val instance = FastDateFormat.getInstance(format)
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
@@ -618,11 +1054,48 @@ open class PactDslJsonBody : DslPart {
    * @param timeZone time zone used for formatting of example time
    */
   @JvmOverloads
-  fun time(name: String, format: String, example: Date, timeZone: TimeZone = TimeZone.getDefault()): PactDslJsonBody {
+  fun time(
+    name: String,
+    format: String,
+    example: Date,
+    timeZone: TimeZone = TimeZone.getDefault()
+  ) = time(name, format, timeZone, example)
+
+  /**
+   * Attribute that must match the given time format
+   * @param name attribute name
+   * @param format time format to match
+   * @param examples example times to use for generated bodies
+   * @param timeZone time zone used for formatting of example time
+   */
+  @JvmOverloads
+  fun time(
+    name: String,
+    format: String,
+    timeZone: TimeZone = TimeZone.getDefault(),
+    vararg examples: Date
+  ): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
     val instance = FastDateFormat.getInstance(format, timeZone)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(instance.format(example).toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), matchTime(format))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(examples[0]).toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.StringValue(instance.format(value).toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
@@ -631,9 +1104,17 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun ipAddress(name: String): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue("127.0.0.1".toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), regexp("(\\d{1,3}\\.)+\\d{1,3}"))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue("127.0.0.1".toCharArray()))
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, JsonValue.StringValue("127.0.0.1".toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
@@ -797,7 +1278,7 @@ open class PactDslJsonBody : DslPart {
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
     val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
     parent.numberExamples = numberExamples
-    return PactDslJsonBody(".", ".", parent)
+    return PactDslJsonBody(".", ".", parent, numberExamples)
   }
 
   override fun eachLike(numberExamples: Int): PactDslJsonBody {
@@ -862,7 +1343,7 @@ open class PactDslJsonBody : DslPart {
     matchers.addRule(matcherKey(name, rootPath), matchMin(size))
     val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
     parent.numberExamples = numberExamples
-    return PactDslJsonBody(".", "", parent)
+    return PactDslJsonBody(".", "", parent, numberExamples)
   }
 
   override fun minArrayLike(size: Int, numberExamples: Int): PactDslJsonBody {
@@ -933,7 +1414,7 @@ open class PactDslJsonBody : DslPart {
     matchers.addRule(matcherKey(name, rootPath), matchMax(size))
     val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
     parent.numberExamples = numberExamples
-    return PactDslJsonBody(".", "", parent)
+    return PactDslJsonBody(".", "", parent, numberExamples)
   }
 
   override fun maxArrayLike(size: Int, numberExamples: Int): PactDslJsonBody {
@@ -963,29 +1444,51 @@ open class PactDslJsonBody : DslPart {
 
   /**
    * Attribute that must be a numeric identifier
-   * @param name attribute name
-   */
-  /**
-   * Attribute named 'id' that must be a numeric identifier
+   * @param name attribute name, defaults to 'id', that must be a numeric identifier
    */
   @JvmOverloads
   fun id(name: String = "id"): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Integer("1234567890".toCharArray()))
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Integer("1234567890".toCharArray()))
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, JsonValue.Integer("1234567890".toCharArray()))
+        }
+      }
+    }
+
     return this
   }
 
   /**
    * Attribute that must be a numeric identifier
    * @param name attribute name
-   * @param id example id to use for generated bodies
+   * @param examples example ids to use for generated bodies
    */
-  fun id(name: String, id: Long): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.Integer(id.toString().toCharArray()))
+  fun id(name: String, vararg examples: Long): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.Integer(examples[0].toString().toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+
     return this
   }
 
@@ -1003,13 +1506,35 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param hexValue example value to use for generated bodies
    */
-  fun hexValue(name: String, hexValue: String): PactDslJsonBody {
-    if (!hexValue.matches(HEXADECIMAL)) {
-      throw InvalidMatcherException("Example \"$hexValue\" is not a hexadecimal value")
+  fun hexValue(name: String, vararg examples: String): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
     }
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(hexValue.toCharArray()))
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> {
+        if (!examples[0].matches(HEXADECIMAL)) {
+          throw InvalidMatcherException("Example \"${examples[0]}\" is not a valid hexadecimal value")
+        }
+        body.add(name, JsonValue.StringValue(examples[0].toCharArray()))
+      }
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          if (!examples[0].matches(HEXADECIMAL)) {
+            throw InvalidMatcherException("Example \"$value\" is not a valid hexadecimal value")
+          }
+          body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), regexp("[0-9a-fA-F]+"))
+
     return this
   }
 
@@ -1027,8 +1552,9 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param uuid example UUID to use for generated bodies
    */
-  fun uuid(name: String, uuid: UUID): PactDslJsonBody {
-    return uuid(name, uuid.toString())
+  fun uuid(name: String, vararg uuids: UUID): PactDslJsonBody {
+    val ids = uuids.map { it.toString() }.toTypedArray()
+    return uuid(name, *ids)
   }
 
   /**
@@ -1036,13 +1562,36 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param uuid example UUID to use for generated bodies
    */
-  fun uuid(name: String, uuid: String): PactDslJsonBody {
-    if (!uuid.matches(UUID_REGEX)) {
-      throw InvalidMatcherException("Example \"$uuid\" is not an UUID")
+  @Suppress("ThrowsCount")
+  fun uuid(name: String, vararg examples: String): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
     }
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(uuid.toCharArray()))
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> {
+        if (!examples[0].matches(UUID_REGEX)) {
+          throw InvalidMatcherException("Example \"${examples[0]}\" is not a valid UUID value")
+        }
+        body.add(name, JsonValue.StringValue(examples[0].toCharArray()))
+      }
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          if (!value.matches(UUID_REGEX)) {
+            throw InvalidMatcherException("Example \"$value\" is not a valid UUID value")
+          }
+          body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), regexp(UUID_REGEX.pattern))
+
     return this
   }
 
@@ -1051,8 +1600,15 @@ open class PactDslJsonBody : DslPart {
    * @param fieldName field name
    */
   fun nullValue(fieldName: String): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(fieldName, JsonValue.Null)
+    when (val body = body) {
+      is JsonValue.Object -> body.add(fieldName, JsonValue.Null)
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(fieldName, JsonValue.Null)
+        }
+      }
+    }
+
     return this
   }
 
@@ -1152,8 +1708,15 @@ open class PactDslJsonBody : DslPart {
    * @param value Value to use for matching and generated bodies
    */
   fun eachKeyLike(exampleKey: String, value: PactDslJsonRootValue): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(exampleKey, value.body)
+    when (val body = body) {
+      is JsonValue.Object -> body.add(exampleKey, value.body)
+      is JsonValue.Array -> {
+        body.values.forEach { v ->
+          v.asObject()!!.add(exampleKey, value.body)
+        }
+      }
+    }
+
     matchers.addRule(
       if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
     )
@@ -1169,9 +1732,17 @@ open class PactDslJsonBody : DslPart {
    * @param value Value that must be included
    */
   fun includesStr(name: String, value: String): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(value.toCharArray()))
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(value.toCharArray()))
+      is JsonValue.Array -> {
+        body.values.forEach { value ->
+          value.asObject()!!.add(name, JsonValue.StringValue(value.toString().toCharArray()))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), includesMatcher(value))
+
     return this
   }
 
@@ -1180,10 +1751,27 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param value Value that will be used for comparisons
    */
-  fun equalTo(name: String, value: Any?): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, toJson(value))
+  fun equalTo(name: String, vararg examples: Any?): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object && examples.size > 1) {
+      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
+    } else if (body is JsonValue.Array && body.size() < examples.size) {
+      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    }
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, toJson(examples[0]))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, toJson(value))
+        }
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), EqualsMatcher)
+
     return this
   }
 
@@ -1194,9 +1782,13 @@ open class PactDslJsonBody : DslPart {
    * @param rules Matching rules to apply
    */
   fun and(name: String, value: Any?, vararg rules: MatchingRule): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, toJson(value))
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, toJson(value))
+      is JsonValue.Array -> body.values.forEach { v -> v.asObject()!!.add(name, toJson(value)) }
+    }
+
     matchers.setRules(matcherKey(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.AND))
+
     return this
   }
 
@@ -1207,9 +1799,13 @@ open class PactDslJsonBody : DslPart {
    * @param rules Matching rules to apply
    */
   fun or(name: String, value: Any?, vararg rules: MatchingRule): PactDslJsonBody {
-    val body = body as JsonValue.Object
-    body.add(name, toJson(value))
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, toJson(value))
+      is JsonValue.Array -> body.values.forEach { v -> v.asObject()!!.add(name, toJson(value)) }
+    }
+
     matchers.setRules(matcherKey(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.OR))
+
     return this
   }
 
@@ -1222,8 +1818,14 @@ open class PactDslJsonBody : DslPart {
   override fun matchUrl(name: String, basePath: String?, vararg pathFragments: Any): PactDslJsonBody {
     val urlMatcher = UrlMatcherSupport(basePath, listOf(*pathFragments))
     val exampleValue = urlMatcher.getExampleValue()
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(exampleValue.toCharArray()))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(exampleValue.toCharArray()))
+      is JsonValue.Array -> body.values.forEach { v ->
+        v.asObject()!!.add(name, JsonValue.StringValue(exampleValue.toCharArray()))
+      }
+    }
+
     val regexExpression = urlMatcher.getRegexExpression()
     matchers.addRule(matcherKey(name, rootPath), regexp(regexExpression))
     if (StringUtils.isEmpty(basePath)) {
@@ -1286,7 +1888,7 @@ open class PactDslJsonBody : DslPart {
     matchers.addRule(matcherKey(name, rootPath), matchMinMax(minSize, maxSize))
     val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
     parent.numberExamples = numberExamples
-    return PactDslJsonBody(".", "", parent)
+    return PactDslJsonBody(".", "", parent, numberExamples)
   }
 
   private fun validateMinAndMaxAndExamples(minSize: Int, maxSize: Int, numberExamples: Int) {
@@ -1369,8 +1971,12 @@ open class PactDslJsonBody : DslPart {
   fun valueFromProviderState(name: String, expression: String, example: Any?): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath),
       ProviderStateGenerator(expression, from(example)))
-    val body = body as JsonValue.Object
-    body.add(name, toJson(example))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, toJson(example))
+      is JsonValue.Array -> body.values.forEach { v -> v.asObject()!!.add(name, toJson(example)) }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
     return this
   }
@@ -1389,9 +1995,16 @@ open class PactDslJsonBody : DslPart {
   ): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+      is JsonValue.Array -> body.values.forEach { v ->
+        v.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+
     return this
   }
 
@@ -1409,9 +2022,16 @@ open class PactDslJsonBody : DslPart {
   ): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), TimeGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+      is JsonValue.Array -> body.values.forEach { v ->
+        v.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), matchTime(format))
+
     return this
   }
 
@@ -1429,9 +2049,16 @@ open class PactDslJsonBody : DslPart {
   ): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateTimeGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
-    val body = body as JsonValue.Object
-    body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+      is JsonValue.Array -> body.values.forEach { v ->
+        v.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
+      }
+    }
+
     matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+
     return this
   }
 
@@ -1439,3 +2066,5 @@ open class PactDslJsonBody : DslPart {
     return PactDslJsonArrayContaining(rootPath, name, this)
   }
 }
+
+

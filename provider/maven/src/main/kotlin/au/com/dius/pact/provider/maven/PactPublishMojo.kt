@@ -53,7 +53,7 @@ open class PactPublishMojo : PactBaseMojo() {
       }
 
       if (brokerClient == null) {
-        brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions())
+        brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions(), brokerClientConfig())
       }
 
       val pactDirectory = File(pactDirectory)

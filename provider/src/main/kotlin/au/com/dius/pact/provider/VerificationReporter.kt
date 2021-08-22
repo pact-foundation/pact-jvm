@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
@@ -80,7 +81,8 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
   ): Result<Boolean, List<String>> {
     return when (val source = pact.source) {
       is BrokerUrlSource -> {
-        val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options.toMutableMap())
+        val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options.toMutableMap(),
+          PactBrokerClientConfig())
         publishResult(brokerClient, source, result, version, pact, tags)
       }
       else -> {

@@ -1,5 +1,68 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.25 - Bugfix Release
+
+* fd6372fcd - chore: ignore test failing on Windows (Ronald Holshausen, Sun Aug 22 17:47:10 2021 +1000)
+* 59f01081a - chore: codenarc (Ronald Holshausen, Sun Aug 22 17:35:15 2021 +1000)
+* db52a0abf - chore: ignore test failing on Windows (Ronald Holshausen, Sun Aug 22 17:30:20 2021 +1000)
+* 603b61266 - feat: add the authentication options to PactBrokerOptions #1415 (Ronald Holshausen, Sun Aug 22 17:21:06 2021 +1000)
+* 60e0bcb28 - chore: add tests for JSON keys with special characters #1416 (Ronald Holshausen, Sat Aug 21 16:53:37 2021 +1000)
+* b44e8d4be - feat: add method to ProviderInfo with better type safety #1415 (Ronald Holshausen, Sat Aug 21 15:43:50 2021 +1000)
+* 4db1f837f - feat: add standalone setting to the XML builder #1414 (Ronald Holshausen, Sat Aug 21 14:51:13 2021 +1000)
+* 883be2dac - chore: fix build after backport from master (Ronald Holshausen, Wed Aug 18 09:13:24 2021 +1000)
+* 8cc8ae7ec - chore: fix codenarc violation (Ronald Holshausen, Tue Aug 17 13:08:40 2021 +1000)
+* af9f4948d - feat: add support for verification type RESPONSE_FACTORY. Fixes #1379 (Kyle Florence, Sat Aug 7 20:42:12 2021 -0500)
+* cf21bb87f - feat: allow insecure TLS when accessing the broker with Maven #1413 (Ronald Holshausen, Sun Aug 15 16:05:50 2021 +1000)
+* 60a624334 - feat: update the expression markers when loading a pact file if overridden #1410 (Ronald Holshausen, Sun Aug 15 12:33:44 2021 +1000)
+* 837a80176 - feat: restrict expression marker overrides to provider state expressions #1410 (Ronald Holshausen, Sun Aug 15 12:33:00 2021 +1000)
+* 4b84e68ad - chore: update readmes with expression marker overrides #1410 (Ronald Holshausen, Sun Aug 15 12:05:42 2021 +1000)
+* e84e19c5e - feat: allow the expression markers in expressions to be overridden #1410 (Ronald Holshausen, Sun Aug 15 11:58:21 2021 +1000)
+* 2a12a3212 - fix: min/max type matchers must not apply the limits when cascading #396 (Ronald Holshausen, Sun Aug 8 13:29:49 2021 +1000)
+* a816fb895 - bump version to 4.1.25 (Ronald Holshausen, Sun Aug 1 10:42:54 2021 +1000)
+
+# 4.2.9 - Bugfix Release
+
+* 436662ad7 - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Aug 1 11:16:06 2021 +1000)
+* a816fb895 - bump version to 4.1.25 (Ronald Holshausen, Sun Aug 1 10:42:54 2021 +1000)
+* 357714d26 - update changelog for release 4.1.24 (Ronald Holshausen, Sat Jul 31 16:37:45 2021 +1000)
+* 43ec8749a - fix: previous provider states must not be copied over to new interactions #497 (Ronald Holshausen, Sat Jul 31 16:26:00 2021 +1000)
+* 08c639eff - feat: add a message metadata builder DSL #1409 (Ronald Holshausen, Sat Jul 31 16:07:04 2021 +1000)
+* 647ec0d20 - chore: fix codenarc (Ronald Holshausen, Sat Jul 31 14:11:23 2021 +1000)
+* c4bd5a14e - chore: add test for pactbroker with path in the URL #1399 (Ronald Holshausen, Sat Jul 31 14:07:04 2021 +1000)
+* 38c31266b - chore: add 4.3 to build (Ronald Holshausen, Tue Jul 27 13:35:05 2021 +1000)
+* 5c92c4f90 - fix: header values need to be parsed when loaded from older spec pact files #1398 (Ronald Holshausen, Sat Jul 24 16:09:46 2021 +1000)
+* a11b05cde - fix: header values need to be parsed when loaded from older spec pact files #1398 (Ronald Holshausen, Sat Jul 24 16:09:46 2021 +1000)
+* 8e3aa2dae - fix: failing test (Ronald Holshausen, Wed Jul 21 16:15:42 2021 +1000)
+* 46549eed7 - fix: retry condition for the pactbroker unknown response #1405 (Bryan Woodruff, Tue Jul 20 17:13:40 2021 -0700)
+* 2571af65b - fix: don't encode URLs when making requests from HAL links #1388 (Ronald Holshausen, Sat Jul 17 15:58:51 2021 +1000)
+* e750ba6c6 - chore: upgrade Tika to 1.27 #1392 (Ronald Holshausen, Sat Jul 17 14:22:08 2021 +1000)
+* 4b8be0225 - chore: fix codenarc voilation (Ronald Holshausen, Sat Jul 17 14:13:31 2021 +1000)
+* 1d69fa377 - chore: add debug logging to canIDeploy task (Ronald Holshausen, Sat Jul 17 12:16:18 2021 +1000)
+* a510b8fff - fix: retain previous summary state when updating markdown report #1128 (Daniel Grech, Thu Jul 15 07:55:07 2021 +0200)
+* 0492e871b - chore: fix test after cherry-picked commit (Ronald Holshausen, Sat Jul 24 12:25:51 2021 +1000)
+* 29b763879 - feat: Ignore missing part content type headers with multipart bodies #1385 (Ronald Holshausen, Sun Jun 27 15:55:04 2021 +1000)
+* 05cafce97 - feat: add option to mock server to disable persistant HTTP/1.1 connections #1383 #342 (Ronald Holshausen, Sun Jun 27 14:22:55 2021 +1000)
+* e93b1ccc3 - bump version to 4.2.9 (Ronald Holshausen, Wed Jul 21 17:16:35 2021 +1000)
+
+# 4.1.24 - Bugfixes + backports from 4.2.x
+
+* 43ec8749a - fix: previous provider states must not be copied over to new interactions #497 (Ronald Holshausen, Sat Jul 31 16:26:00 2021 +1000)
+* 08c639eff - feat: add a message metadata builder DSL #1409 (Ronald Holshausen, Sat Jul 31 16:07:04 2021 +1000)
+* 647ec0d20 - chore: fix codenarc (Ronald Holshausen, Sat Jul 31 14:11:23 2021 +1000)
+* c4bd5a14e - chore: add test for pactbroker with path in the URL #1399 (Ronald Holshausen, Sat Jul 31 14:07:04 2021 +1000)
+* a11b05cde - fix: header values need to be parsed when loaded from older spec pact files #1398 (Ronald Holshausen, Sat Jul 24 16:09:46 2021 +1000)
+* 8e3aa2dae - fix: failing test (Ronald Holshausen, Wed Jul 21 16:15:42 2021 +1000)
+* 46549eed7 - fix: retry condition for the pactbroker unknown response #1405 (Bryan Woodruff, Tue Jul 20 17:13:40 2021 -0700)
+* 2571af65b - fix: don't encode URLs when making requests from HAL links #1388 (Ronald Holshausen, Sat Jul 17 15:58:51 2021 +1000)
+* e750ba6c6 - chore: upgrade Tika to 1.27 #1392 (Ronald Holshausen, Sat Jul 17 14:22:08 2021 +1000)
+* 4b8be0225 - chore: fix codenarc voilation (Ronald Holshausen, Sat Jul 17 14:13:31 2021 +1000)
+* 1d69fa377 - chore: add debug logging to canIDeploy task (Ronald Holshausen, Sat Jul 17 12:16:18 2021 +1000)
+* a510b8fff - fix: retain previous summary state when updating markdown report #1128 (Daniel Grech, Thu Jul 15 07:55:07 2021 +0200)
+* 0492e871b - chore: fix test after cherry-picked commit (Ronald Holshausen, Sat Jul 24 12:25:51 2021 +1000)
+* 29b763879 - feat: Ignore missing part content type headers with multipart bodies #1385 (Ronald Holshausen, Sun Jun 27 15:55:04 2021 +1000)
+* 05cafce97 - feat: add option to mock server to disable persistant HTTP/1.1 connections #1383 #342 (Ronald Holshausen, Sun Jun 27 14:22:55 2021 +1000)
+* 76d2bbc63 - bump version to 4.1.24 (Ronald Holshausen, Thu Jun 24 11:50:03 2021 +1000)
+
 # 4.2.8 - Bugfix Release
 
 * 0ca295d3b - Merge pull request #1403 from llorentejavier/adding_external_keystore_for_mockserver (Ronald Holshausen, Wed Jul 21 16:18:32 2021 +1000)

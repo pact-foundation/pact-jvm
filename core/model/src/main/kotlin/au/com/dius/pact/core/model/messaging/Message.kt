@@ -10,6 +10,7 @@ import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
@@ -19,12 +20,8 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 
 interface MessageInteraction {
+  val description: String
   val interactionId: String?
-  val matchingRules: MatchingRules
-  val metadata: Map<String, Any?>
-  val contents: OptionalBody
-
-  fun getContentType(): ContentType
 }
 
 /**
@@ -33,10 +30,10 @@ interface MessageInteraction {
 class Message @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),
-  override var contents: OptionalBody = OptionalBody.missing(),
-  override val matchingRules: MatchingRules = MatchingRulesImpl(),
+  var contents: OptionalBody = OptionalBody.missing(),
+  val matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators(),
-  override var metadata: MutableMap<String, Any?> = mutableMapOf(),
+  var metadata: MutableMap<String, Any?> = mutableMapOf(),
   interactionId: String? = null
 ) : BaseInteraction(interactionId, description, providerStates), MessageInteraction {
 
@@ -44,7 +41,7 @@ class Message @JvmOverloads constructor(
 
   fun contentsAsString() = contents.valueAsString()
 
-  override fun getContentType() = contentType(metadata).or(contents.contentType)
+  fun getContentType() = contentType(metadata).or(contents.contentType)
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     val map: MutableMap<String, Any?> = mutableMapOf(
@@ -152,8 +149,8 @@ class Message @JvmOverloads constructor(
 
   @ExperimentalUnsignedTypes
   override fun asV4Interaction(): V4Interaction {
-    return V4Interaction.AsynchronousMessage("", description, contents, metadata,
-      matchingRules.rename("body", "content"), generators,
+    return V4Interaction.AsynchronousMessage("", description, MessageContents(contents, metadata,
+      matchingRules.rename("body", "content"), generators),
       interactionId, providerStates).withGeneratedKey()
   }
 

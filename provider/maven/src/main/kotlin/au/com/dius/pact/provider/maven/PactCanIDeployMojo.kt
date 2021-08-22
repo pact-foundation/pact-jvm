@@ -2,7 +2,6 @@ package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.ajalt.mordant.TermColors
 import org.apache.maven.plugin.MojoExecutionException
@@ -28,12 +27,6 @@ open class PactCanIDeployMojo : PactBaseMojo() {
 
   @Parameter(property = "toTag", defaultValue = "")
   private var to: String? = ""
-
-  @Parameter(property = "retriesWhenUnknown", defaultValue = "0")
-  private var retriesWhenUnknown: Int? = 0
-
-  @Parameter(property = "retryInterval", defaultValue = "10")
-  private var retryInterval: Int? = 10
 
   override fun execute() {
     val t = TermColors()
@@ -65,10 +58,6 @@ open class PactCanIDeployMojo : PactBaseMojo() {
     if (!result.ok) {
       throw MojoExecutionException("Can you deploy? Computer says no ¯\\_(ツ)_/¯ ${result.message}", null)
     }
-  }
-
-  private fun brokerClientConfig(): PactBrokerClientConfig {
-    return PactBrokerClientConfig(retriesWhenUnknown ?: 0, retryInterval ?: 10)
   }
 
   private fun setupLatestParam(): Latest {

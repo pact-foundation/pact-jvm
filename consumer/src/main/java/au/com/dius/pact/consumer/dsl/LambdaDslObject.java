@@ -67,7 +67,7 @@ public class LambdaDslObject {
      * @param names attribute names
      */
     public LambdaDslObject stringType(final String... names) {
-        object.stringType(names);
+        object.stringTypes(names);
         return this;
     }
 
@@ -122,7 +122,7 @@ public class LambdaDslObject {
      * @param names attribute names
      */
     public LambdaDslObject numberType(final String... names) {
-        object.numberType(names);
+        object.numberTypes(names);
         return this;
     }
 
@@ -141,7 +141,7 @@ public class LambdaDslObject {
      * @param names attribute names
      */
     public LambdaDslObject integerType(final String... names) {
-      object.integerType(names);
+      object.integerTypes(names);
       return this;
     }
 
@@ -173,7 +173,7 @@ public class LambdaDslObject {
      * @param names attribute names
      */
     public LambdaDslObject decimalType(final String... names) {
-        object.decimalType(names);
+        object.decimalTypes(names);
         return this;
     }
 
@@ -205,7 +205,7 @@ public class LambdaDslObject {
      * @param names attribute names
      */
     public LambdaDslObject booleanType(final String... names) {
-        object.booleanType(names);
+        object.booleanTypes(names);
         return this;
     }
 

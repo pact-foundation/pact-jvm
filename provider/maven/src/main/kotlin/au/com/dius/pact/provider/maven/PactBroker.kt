@@ -13,7 +13,8 @@ data class PactBroker @JvmOverloads constructor(
   val authentication: PactBrokerAuth? = null,
   val serverId: String? = null,
   var enablePending: EnablePending? = null,
-  val fallbackTag: String? = null
+  val fallbackTag: String? = null,
+  val insecureTLS: Boolean? = false
 )
 
 /**
