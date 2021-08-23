@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.0-beta.1 - Updated plugin driver + fixes from master
+
+* b9b7b1d08 - chore: upgrade version of the plugin driver lib (Ronald Holshausen, Mon Aug 23 12:16:49 2021 +1000)
+* 18e08a95d - chore: use the published driver lib (Ronald Holshausen, Wed Aug 18 10:10:04 2021 +1000)
+* f30138233 - Merge branch 'master' into v4.3.x (Ronald Holshausen, Wed Aug 18 10:01:38 2021 +1000)
+* c7e5f7de1 - Merge branch 'kflorence-message-handler-verification-1379' (Ronald Holshausen, Tue Aug 17 13:13:01 2021 +1000)
+* 892541921 - chore: fix codenarc violation (Ronald Holshausen, Tue Aug 17 13:08:40 2021 +1000)
+* 91d7823f7 - Merge branch 'message-handler-verification-1379' of https://github.com/kflorence/pact-jvm into kflorence-message-handler-verification-1379 (Ronald Holshausen, Tue Aug 17 12:48:43 2021 +1000)
+* e19d5e48d - chore: correct release script (Ronald Holshausen, Tue Aug 17 12:48:14 2021 +1000)
+* 59493c370 - feat: add support for verification type RESPONSE_FACTORY. Fixes #1379 (Kyle Florence, Sat Aug 7 20:42:12 2021 -0500)
+* 013df5fc7 - feat(plugins): Support matching request bodies via plugin (Ronald Holshausen, Mon Aug 16 17:32:58 2021 +1000)
+* 8d2b3c8c9 - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Aug 15 16:08:13 2021 +1000)
+* cf21bb87f - feat: allow insecure TLS when accessing the broker with Maven #1413 (Ronald Holshausen, Sun Aug 15 16:05:50 2021 +1000)
+* 48c52dbf1 - chore: update CONTRIBUTING.md #1291 (Ronald Holshausen, Sun Aug 15 14:09:54 2021 +1000)
+* 04a1e298f - chore: make artifact signing disabled for non-release builds #1291 (Ronald Holshausen, Sun Aug 15 13:58:51 2021 +1000)
+* 8a27dcb3a - chore: correct the build dependencies (Ronald Holshausen, Sun Aug 15 12:55:28 2021 +1000)
+* 8bd9fd65a - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Aug 15 12:39:49 2021 +1000)
+* 60a624334 - feat: update the expression markers when loading a pact file if overridden #1410 (Ronald Holshausen, Sun Aug 15 12:33:44 2021 +1000)
+* 837a80176 - feat: restrict expression marker overrides to provider state expressions #1410 (Ronald Holshausen, Sun Aug 15 12:33:00 2021 +1000)
+* 4b84e68ad - chore: update readmes with expression marker overrides #1410 (Ronald Holshausen, Sun Aug 15 12:05:42 2021 +1000)
+* e84e19c5e - feat: allow the expression markers in expressions to be overridden #1410 (Ronald Holshausen, Sun Aug 15 11:58:21 2021 +1000)
+* aa301cb07 - chore: fix release script (Ronald Holshausen, Mon Aug 9 11:59:25 2021 +1000)
+* 73d1e67a9 - bump version to 4.3.0-beta.1 (Ronald Holshausen, Mon Aug 9 11:58:17 2021 +1000)
+
 # 4.3.0-beta.0 - Initial Beta Release
 
 * 519ce8048 - chore: setup release for beta versions (Ronald Holshausen, Mon Aug 9 11:33:17 2021 +1000)
