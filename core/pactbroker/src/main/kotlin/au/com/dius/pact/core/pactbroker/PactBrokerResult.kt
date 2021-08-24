@@ -7,6 +7,7 @@ data class PactBrokerResult(
   val name: String,
   val source: String,
   val pactBrokerUrl: String,
+  @Deprecated("pactFileAuthentication is not used")
   val pactFileAuthentication: List<String> = listOf(),
   val notices: List<VerificationNotice> = listOf(),
   val pending: Boolean = false,
