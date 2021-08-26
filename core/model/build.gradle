@@ -1,3 +1,7 @@
+plugins {
+  id 'antlr'
+}
+
 task pactsJar(type: Jar, dependsOn: testClasses) {
   classifier = 'test-pacts'
   into('jar-pacts') {
@@ -43,9 +47,10 @@ dependencies {
   testImplementation 'org.hamcrest:hamcrest:2.1'
   testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.32'
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+
+  antlr "org.antlr:antlr4:4.9.2"
 }
 
-compileGroovy {
-  classpath = classpath.plus(files(compileKotlin.destinationDir))
-  dependsOn compileKotlin
+compileKotlin {
+  dependsOn 'generateGrammarSource'
 }
