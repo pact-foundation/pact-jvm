@@ -150,6 +150,8 @@ interface MatchingRule {
         } else {
           StatusCodeMatcher(HttpStatus.fromJson(values["status"]))
         }
+        "notEmpty" -> NotEmptyMatcher
+        "semver" -> SemverMatcher
         else -> {
           MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
           EqualsMatcher

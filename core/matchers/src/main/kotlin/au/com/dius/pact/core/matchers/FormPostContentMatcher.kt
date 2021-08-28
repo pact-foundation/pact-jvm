@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 import org.apache.hc.core5.http.NameValuePair
 import org.apache.hc.core5.net.WWWFormCodec
@@ -32,14 +33,12 @@ class FormPostContentMatcher : ContentMatcher {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
-    return Triple(
+  ): InteractionContents {
+    return InteractionContents(
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("application/x-www-form-urlencoded")
-      ),
-      null,
-      null
+      )
     )
   }
 

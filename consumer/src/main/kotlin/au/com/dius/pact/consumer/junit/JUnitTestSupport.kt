@@ -52,7 +52,8 @@ object JUnitTestSupport {
     val hasValidPactSignature = if (pactVersion == PactSpecVersion.V4) {
       V4Pact::class.java.isAssignableFrom(m.returnType) &&
         m.parameterTypes.size == 1 &&
-        m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder"))
+        (m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder")) ||
+          m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.PactBuilder")))
     } else {
       MessagePact::class.java.isAssignableFrom(m.returnType) &&
         m.parameterTypes.size == 1 &&
@@ -62,7 +63,7 @@ object JUnitTestSupport {
     if (!hasValidPactSignature && pact != null) {
       if (pactVersion == PactSpecVersion.V4) {
         throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +
-          "'public V4Pact xxx(MessagePactBuilder builder)'")
+          "'public V4Pact xxx(PactBuilder builder)'")
       } else {
         throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +
           "'public MessagePact xxx(MessagePactBuilder builder)'")

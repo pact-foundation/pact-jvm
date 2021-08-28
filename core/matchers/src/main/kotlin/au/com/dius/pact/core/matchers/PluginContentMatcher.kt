@@ -2,8 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import io.pact.plugins.jvm.core.InteractionContents
 
 class PluginContentMatcher(
   val contentMatcher: io.pact.plugins.jvm.core.ContentMatcher,
@@ -16,7 +15,9 @@ class PluginContentMatcher(
     return BodyMatchResult(null, bodyResults)
   }
 
-  override fun setupBodyFromConfig(bodyConfig: Map<String, Any?>): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
+  override fun setupBodyFromConfig(
+    bodyConfig: Map<String, Any?>
+  ): InteractionContents {
     return contentMatcher.configureContent(contentType.toString(), bodyConfig)
   }
 }

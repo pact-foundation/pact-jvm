@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
+import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
 object JsonContentMatcher : ContentMatcher, KLogging() {
@@ -40,14 +41,12 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
-    return Triple(
+  ): InteractionContents {
+    return InteractionContents(
       OptionalBody.body(
         toJson(bodyConfig["body"]).serialise().toByteArray(),
         ContentType("application/json")
-      ),
-      null,
-      null
+      )
     )
   }
 

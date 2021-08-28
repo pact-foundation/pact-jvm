@@ -17,12 +17,14 @@ import mu.KotlinLogging
 import org.apache.commons.beanutils.BeanUtils
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
+import java.util.Locale
 
 private val logger = KotlinLogging.logger {}
 
 fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): OptionalBody {
   var contentType = ContentType.UNKNOWN
-  val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+  var contentTypeOverride = ContentTypeOverride.DEFAULT
+  val contentTypeEntry = headers.entries.find { it.key.uppercase() == "CONTENT-TYPE" }
   if (contentTypeEntry != null) {
     val value = contentTypeEntry.value
     contentType = if (value is List<*>) {
@@ -39,6 +41,10 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
           contentType = ContentType(Json.toString(jsonBody["contentType"]))
         } else {
           logger.warn("Body has no content type set, will default to any headers or metadata")
+        }
+
+        if (jsonBody.has("contentTypeOverride")) {
+          contentTypeOverride = ContentTypeOverride.valueOf(Json.toString(jsonBody["contentTypeOverride"]))
         }
 
         val (encoded, encoding) = if (jsonBody.has("encoded")) {
@@ -63,7 +69,7 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
         } else {
           Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
         }
-        OptionalBody.body(bodyBytes, contentType)
+        OptionalBody.body(bodyBytes, contentType, contentTypeOverride)
       } else {
         OptionalBody.missing()
       }
@@ -178,7 +184,7 @@ sealed class V4Interaction(
   class AsynchronousMessage @Suppress("LongParameterList") @JvmOverloads constructor(
     key: String,
     description: String,
-    val contents: MessageContents = MessageContents(),
+    var contents: MessageContents = MessageContents(),
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf(),
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
@@ -207,7 +213,7 @@ sealed class V4Interaction(
     }
 
     override fun updateProperties(values: Map<String, Any?>) {
-      TODO("Not yet implemented")
+
     }
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
@@ -309,7 +315,7 @@ sealed class V4Interaction(
     override fun asV4Interaction() = this
 
     override fun updateProperties(values: Map<String, Any?>) {
-      TODO("Not yet implemented")
+
     }
   }
 

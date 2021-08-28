@@ -16,15 +16,19 @@ import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.model.matchingrules.SemverMatcher
 import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.zafarkhaja.semver.UnexpectedCharacterException
+import com.github.zafarkhaja.semver.Version
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
@@ -44,8 +48,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 private val logger = KotlinLogging.logger {}
-private val integerRegex = Regex("^\\d+$")
-private val decimalRegex = Regex("^0|\\d+\\.\\d*$")
+private val integerRegex = Regex("^-?\\d+$")
+private val decimalRegex = Regex("^0|-?\\d+\\.\\d*$")
 private val booleanRegex = Regex("^true|false$")
 
 fun valueOf(value: Any?): String {
@@ -131,7 +135,7 @@ fun <M : Mismatch> domatch(
 ): List<M> {
   return when (matcher) {
     is RegexMatcher -> matchRegex(matcher.regex, path, expected, actual, mismatchFn)
-    is TypeMatcher -> matchType(path, expected, actual, mismatchFn)
+    is TypeMatcher -> matchType(path, expected, actual, mismatchFn, true)
     is NumberTypeMatcher -> matchNumber(matcher.numberType, path, expected, actual, mismatchFn)
     is DateMatcher -> matchDate(matcher.format, path, expected, actual, mismatchFn)
     is TimeMatcher -> matchTime(matcher.format, path, expected, actual, mismatchFn)
@@ -142,6 +146,8 @@ fun <M : Mismatch> domatch(
             matchMaxType(matcher.max, path, expected, actual, mismatchFn, cascaded)
     is IncludeMatcher -> matchInclude(matcher.value, path, expected, actual, mismatchFn)
     is NullMatcher -> matchNull(path, actual, mismatchFn)
+    is NotEmptyMatcher -> matchType(path, expected, actual, mismatchFn, false)
+    is SemverMatcher -> matchSemver(path, expected, actual, mismatchFn)
     is EqualsIgnoreOrderMatcher -> matchEqualsIgnoreOrder(path, expected, actual, mismatchFn)
     is MinEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn)
     is MaxEqualsIgnoreOrderMatcher -> matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
@@ -207,22 +213,40 @@ fun <M : Mismatch> matchType(
   path: List<String>,
   expected: Any?,
   actual: Any?,
-  mismatchFactory: MismatchFactory<M>
+  mismatchFactory: MismatchFactory<M>,
+  allowEmpty: Boolean
 ): List<M> {
   logger.debug {
     "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to ${valueOf(expected)} (${typeOf(expected)}) at $path"
   }
-  return if (expected is String && actual is String ||
-    expected is Number && actual is Number ||
+  return if (expected is Number && actual is Number ||
     expected is Boolean && actual is Boolean ||
-    expected is List<*> && actual is List<*> ||
-    expected is JsonValue.Array && actual is JsonValue.Array ||
-    expected is Map<*, *> && actual is Map<*, *> ||
-    expected is JsonValue.Object && actual is JsonValue.Object ||
     expected is Element && actual is Element && QualifiedName(actual) == QualifiedName(expected) ||
     expected is Attr && actual is Attr && QualifiedName(actual) == QualifiedName(expected)
   ) {
     emptyList()
+  } else if (expected is String && actual is String ||
+    expected is List<*> && actual is List<*> ||
+    expected is JsonValue.Array && actual is JsonValue.Array ||
+    expected is Map<*, *> && actual is Map<*, *> ||
+    expected is JsonValue.Object && actual is JsonValue.Object) {
+    if (allowEmpty) {
+      emptyList()
+    } else {
+      val empty = when (actual) {
+        is String -> actual.isEmpty()
+        is List<*> -> actual.isEmpty()
+        is Map<*, *> -> actual.isEmpty()
+        is JsonValue.Array -> actual.size == 0
+        is JsonValue.Object -> actual.size == 0
+        else -> false
+      }
+      if (empty) {
+        listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to not be empty", path))
+      } else {
+        emptyList()
+      }
+    }
   } else if (expected is JsonValue && actual is JsonValue &&
     ((expected.isBoolean && actual.isBoolean) ||
       (expected.isNumber && actual.isNumber) ||
@@ -457,10 +481,10 @@ fun <M : Mismatch> matchMinType(
           emptyList()
         }
       }
-      else -> matchType(path, expected, actual, mismatchFactory)
+      else -> matchType(path, expected, actual, mismatchFactory, true)
     }
   } else {
-    matchType(path, expected, actual, mismatchFactory)
+    matchType(path, expected, actual, mismatchFactory, true)
   }
 }
 
@@ -496,10 +520,10 @@ fun <M : Mismatch> matchMaxType(
           emptyList()
         }
       }
-      else -> matchType(path, expected, actual, mismatchFactory)
+      else -> matchType(path, expected, actual, mismatchFactory, true)
     }
   } else {
-    matchType(path, expected, actual, mismatchFactory)
+    matchType(path, expected, actual, mismatchFactory, true)
   }
 }
 
@@ -665,6 +689,37 @@ fun matchStatusCode(
   }
 }
 
+fun <M : Mismatch> matchSemver(
+  path: List<String>,
+  expected: Any?,
+  actual: Any?,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  val asText = when (actual) {
+    is Element -> actual.nodeName
+    is Attr -> actual.name
+    is JsonValue.StringValue -> actual.value.toString()
+    else -> actual.toString()
+  }
+  val matches = try {
+    Version.valueOf(asText)
+    true
+  } catch (ex: ParseException) {
+    false
+  } catch (ex: UnexpectedCharacterException) {
+    false
+  }
+  logger.debug {
+    "comparing ${valueOf(actual)} (${typeOf(actual)}) as a semantic version at $path -> $matches"
+  }
+  return if (matches) {
+    emptyList()
+  } else {
+    listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a semantic version", path))
+  }
+}
+
 @Suppress("MaxLineLength")
 fun matcherCatalogueEntries(): List<CatalogueEntry> {
   return listOf(
@@ -687,6 +742,8 @@ fun matcherCatalogueEntries(): List<CatalogueEntry> {
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-minmax-equals-ignore-order"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-content-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-array-contains"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v1-equality")
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v1-equality"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-notempty"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-semver")
   )
 }

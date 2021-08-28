@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
 class PlainTextContentMatcher : ContentMatcher {
@@ -53,14 +54,12 @@ class PlainTextContentMatcher : ContentMatcher {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
-    return Triple(
+  ): InteractionContents {
+    return InteractionContents(
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("text/plain")
-      ),
-      null,
-      null
+      )
     )
   }
 

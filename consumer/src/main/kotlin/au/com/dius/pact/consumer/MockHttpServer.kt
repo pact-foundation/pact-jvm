@@ -344,6 +344,9 @@ fun calculateCharset(headers: Map<String, List<String?>>): Charset {
 }
 
 fun interactionCatalogueEntries(): List<CatalogueEntry> {
-  return listOf(CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "http", mapOf()),
-    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "https", mapOf()))
+  return listOf(
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "http", mapOf()),
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "https", mapOf()),
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "message", mapOf())
+  )
 }

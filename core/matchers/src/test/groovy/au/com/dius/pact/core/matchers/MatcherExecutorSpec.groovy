@@ -8,8 +8,10 @@ import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.SemverMatcher
 import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
@@ -98,13 +100,16 @@ class MatcherExecutorSpec extends Specification {
     where:
     expected                  | actual                     || mustBeEmpty
     'Harry'                   | 'Some other string'        || true
+    'Harry'                   | ''                         || true
     100                       | 200.3                      || true
     true                      | false                      || true
     null                      | null                       || true
     '200'                     | 200                        || false
     200                       | null                       || false
     [100, 200, 300]           | [200.3]                    || true
+    [100, 200, 300]           | []                         || true
     [a: 100]                  | [a: 200.3, b: 200, c: 300] || true
+    [a: 100]                  | [:]                        || true
     JsonValue.Null.INSTANCE   | null                       || true
     null                      | JsonValue.Null.INSTANCE    || true
     JsonValue.Null.INSTANCE   | JsonValue.Null.INSTANCE    || true
@@ -376,5 +381,52 @@ class MatcherExecutorSpec extends Specification {
     HttpStatus.Error       | []          | 500      | 250    || false
     HttpStatus.StatusCodes | [201, 204]  | 201      | 204    || true
     HttpStatus.StatusCodes | [201, 204]  | 201      | 200    || false
+  }
+
+  @Unroll
+  def 'notEmpty matcher test'() {
+    expect:
+    MatcherExecutorKt.domatch(NotEmptyMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+      mustBeEmpty
+
+    where:
+    expected                  | actual                     || mustBeEmpty
+    'Harry'                   | 'Some other string'        || true
+    'Harry'                   | ''                         || false
+    100                       | 200.3                      || true
+    true                      | false                      || true
+    null                      | null                       || true
+    '200'                     | 200                        || false
+    200                       | null                       || false
+    [100, 200, 300]           | [200.3]                    || true
+    [100, 200, 300]           | []                         || false
+    [a: 100]                  | [a: 200.3, b: 200, c: 300] || true
+    [a: 100]                  | [:]                        || false
+    JsonValue.Null.INSTANCE   | null                       || true
+    null                      | JsonValue.Null.INSTANCE    || true
+    JsonValue.Null.INSTANCE   | JsonValue.Null.INSTANCE    || true
+    xml('<a/>')               | xml('<a/>')                || true
+    xml('<a/>')               | xml('<b/>')                || false
+    xml('<e xmlns="a"/>')     | xml('<a:e xmlns:a="a"/>')  || true
+    xml('<a:e xmlns:a="a"/>') | xml('<b:e xmlns:b="a"/>')  || true
+    xml('<e xmlns="a"/>')     | xml('<e xmlns="b"/>')      || false
+    json('"hello"')           | json('"hello"')            || true
+    json('100')               | json('200')                || true
+    2.3d                      | 2.300d                     || true
+    2.3g                      | 2.300g                     || true
+  }
+
+  @Unroll
+  def 'semver matcher test'() {
+    expect:
+    MatcherExecutorKt.domatch(SemverMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+      mustBeEmpty
+
+    where:
+    expected                  | actual                     || mustBeEmpty
+    '1.0.0'                   | '1.0.0'                    || true
+    '1.0.0'                   | '1.0'                      || false
+    '1.0.0'                   | 'Not a version'            || false
+    '1.0.0'                   | '1.0.10-beta.3'            || true
   }
 }

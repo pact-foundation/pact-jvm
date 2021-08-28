@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation "com.google.code.findbugs:jsr305:3.0.2"

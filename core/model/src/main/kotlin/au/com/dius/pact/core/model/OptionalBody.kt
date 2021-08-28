@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.ContentType.Companion.HTMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.JSONREGEXP
+import au.com.dius.pact.core.model.ContentType.Companion.UNKNOWN
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
 import au.com.dius.pact.core.support.json.JsonParser
@@ -10,20 +11,29 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
-import java.lang.RuntimeException
 import java.util.Base64
+
+/**
+ * If the content type should be overridden
+ */
+enum class ContentTypeOverride {
+  BINARY,
+  TEXT,
+  DEFAULT
+}
 
 /**
  * Class to represent missing, empty, null and present bodies
  */
-data class OptionalBody(
+data class OptionalBody @JvmOverloads constructor(
   val state: State,
   val value: ByteArray? = null,
-  var contentType: ContentType = ContentType.UNKNOWN
+  var contentType: ContentType = UNKNOWN,
+  var contentTypeOverride: ContentTypeOverride = ContentTypeOverride.DEFAULT
 ) {
 
   init {
-    if (contentType == ContentType.UNKNOWN) {
+    if (contentType == UNKNOWN) {
       val detectedContentType = detectContentType()
       if (detectedContentType != null) {
         this.contentType = detectedContentType
@@ -96,7 +106,7 @@ data class OptionalBody(
 
   override fun toString(): String {
     return when (state) {
-      State.PRESENT -> if (contentType.isBinaryType()) {
+      State.PRESENT -> if (contentTypeOverride == ContentTypeOverride.BINARY || contentType.isBinaryType()) {
         "PRESENT(${value!!.size} bytes starting with ${Hex.encodeHexString(slice(16))}...)"
       } else {
         "PRESENT(${value!!.toString(contentType.asCharset())})"
@@ -133,14 +143,14 @@ data class OptionalBody(
 
   private fun detectStandardTextContentType(): ContentType? = when {
     isPresent() -> {
-      val newLine = '\n'.toByte()
-      val cReturn = '\r'.toByte()
+      val newLine = '\n'.code.toByte()
+      val cReturn = '\r'.code.toByte()
       val s = value!!.take(32).map {
-        if (it == newLine || it == cReturn) ' ' else it.toChar()
+        if (it == newLine || it == cReturn) ' ' else it.toInt().toChar()
       }.joinToString("")
       when {
         s.matches(XMLREGEXP) -> ContentType.XML
-        s.toUpperCase().matches(HTMLREGEXP) -> ContentType.HTML
+        s.uppercase().matches(HTMLREGEXP) -> ContentType.HTML
         s.matches(JSONREGEXP) -> ContentType.JSON
         s.matches(XMLREGEXP2) -> ContentType.XML
         else -> null
@@ -170,8 +180,13 @@ data class OptionalBody(
   fun toV4Format(): Map<String, Any?> {
     return when (state) {
       State.PRESENT -> if (value!!.isNotEmpty()) {
-        if (contentType.isBinaryType()) {
-          mapOf("content" to valueAsBase64(), "contentType" to contentType.toString(), "encoded" to "base64")
+        if (contentTypeOverride == ContentTypeOverride.BINARY || contentType.isBinaryType()) {
+          mapOf(
+            "content" to valueAsBase64(),
+            "contentType" to contentType.toString(),
+            "encoded" to "base64",
+            "contentTypeOverride" to contentTypeOverride.name
+          )
         } else if (contentType.isJson()) {
           mapOf(
             "content" to JsonParser.parseString(valueAsString()),
@@ -179,7 +194,12 @@ data class OptionalBody(
             "encoded" to false
           )
         } else {
-          mapOf("content" to valueAsString(), "contentType" to contentType.toString(), "encoded" to false)
+          mapOf(
+            "content" to valueAsString(),
+            "contentType" to contentType.toString(),
+            "encoded" to false,
+            "contentTypeOverride" to contentTypeOverride.name
+          )
         }
       } else {
         mapOf("content" to "")
@@ -203,12 +223,21 @@ data class OptionalBody(
     }
 
     @JvmStatic
-    @JvmOverloads
-    fun body(body: ByteArray?, contentType: ContentType = ContentType.UNKNOWN): OptionalBody {
+    fun body(body: ByteArray?) = body(body, UNKNOWN, ContentTypeOverride.DEFAULT)
+
+    @JvmStatic
+    fun body(body: ByteArray?, contentType: ContentType) = body(body, contentType, ContentTypeOverride.DEFAULT)
+
+    @JvmStatic
+    fun body(
+      body: ByteArray?,
+      contentType: ContentType,
+      contentTypeOverride: ContentTypeOverride
+    ): OptionalBody {
       return when {
         body == null -> nullBody()
         body.isEmpty() -> empty()
-        else -> OptionalBody(State.PRESENT, body, contentType)
+        else -> OptionalBody(State.PRESENT, body, contentType, contentTypeOverride)
       }
     }
 

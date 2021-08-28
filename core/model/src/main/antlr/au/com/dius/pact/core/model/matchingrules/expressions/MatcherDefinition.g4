@@ -16,7 +16,8 @@ grammar MatcherDefinition;
 **/
 matchingDefinition returns [ String value, MatchingRule rule, Generator generator ] :
     (
-      'matching' LEFT_BRACKET matchingRule { $value = $matchingRule.value; $rule = $matchingRule.rule; $generator = $matchingRule.generator; } RIGHT_BRACKET
+      'matching' LEFT_BRACKET matchingRule RIGHT_BRACKET { $value = $matchingRule.value; $rule = $matchingRule.rule; $generator = $matchingRule.generator; }
+      | 'notEmpty' LEFT_BRACKET string RIGHT_BRACKET { $value = $string.contents; $rule = NotEmptyMatcher.INSTANCE; }
     ) EOF
     ;
 
@@ -36,6 +37,7 @@ matchingRule returns [ String value, MatchingRule rule, Generator generator ] :
   | 'regex' ',' r=string ',' v=string { $rule = new RegexMatcher($r.contents); $value = $v.contents; }
   | 'include' ',' v=string { $rule = new IncludeMatcher($v.contents); $value = $v.contents; }
   | 'boolean' ',' BOOLEAN_LITERAL { $rule = BooleanMatcher.INSTANCE; $value = $BOOLEAN_LITERAL.getText(); }
+  | 'semver' ',' v=string { $rule = SemverMatcher.INSTANCE; $value = $value = $v.contents; }
   ;
 
 string returns [ String contents ] :

@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.zipAll
+import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap
@@ -41,14 +42,12 @@ object XmlContentMatcher : ContentMatcher, KLogging() {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
-    return Triple(
+  ): InteractionContents {
+    return InteractionContents(
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("application/xml")
-      ),
-      null,
-      null
+      )
     )
   }
 

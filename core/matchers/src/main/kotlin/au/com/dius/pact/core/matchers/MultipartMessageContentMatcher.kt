@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 import java.util.Enumeration
 import javax.mail.BodyPart
@@ -35,14 +36,12 @@ class MultipartMessageContentMatcher : ContentMatcher {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Triple<OptionalBody, MatchingRuleCategory?, Generators?> {
-    return Triple(
+  ): InteractionContents {
+    return InteractionContents(
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("multipart/form-data")
-      ),
-      null,
-      null
+      )
     )
   }
 

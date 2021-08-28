@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
+import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.interactionCatalogueEntries
 import au.com.dius.pact.core.matchers.MatchingConfig
 import au.com.dius.pact.core.matchers.MatchingConfig.contentHandlerCatalogueEntries
@@ -17,6 +18,9 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -30,6 +34,9 @@ import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
 import mu.KLogging
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.exists
 
 open class PactBuilder(
   var consumer: String = "consumer",
@@ -50,6 +57,13 @@ open class PactBuilder(
    */
   fun usingLegacyDsl(): PactDslWithProvider {
     return PactDslWithProvider(ConsumerPactBuilder(consumer), provider, pactVersion)
+  }
+
+  /**
+   * Use the old HTTP Pact DSL
+   */
+  fun usingLegacyMessageDsl(): MessagePactBuilder {
+    return MessagePactBuilder(pactVersion).consumer(consumer).hasPactWith(provider)
   }
 
   /**
@@ -114,7 +128,8 @@ open class PactBuilder(
     return when (entry.providerType) {
       CatalogueEntryProviderType.CORE -> when (entry.key) {
         "http", "https" -> V4Interaction.SynchronousHttp(key.orEmpty(), description)
-        else -> TODO()
+        "message" -> V4Interaction.AsynchronousMessage(key.orEmpty(), description)
+        else -> TODO("Interactions of type ${entry.key} are not currently supported")
       }
       CatalogueEntryProviderType.PLUGIN -> TODO()
     }
@@ -138,10 +153,53 @@ open class PactBuilder(
         }
         interaction.updateProperties(values.filter { it.key != "request.contents" && it.key != "response.contents" })
       }
-      is V4Interaction.AsynchronousMessage -> TODO()
+      is V4Interaction.AsynchronousMessage -> {
+        logger.debug { "Configuring interaction from $values" }
+        if (values.containsKey("message.contents")) {
+          interaction.contents = setupMessageContents(values["message.contents"])
+        }
+        interaction.updateProperties(values.filter { it.key != "message.contents" })
+      }
       is V4Interaction.SynchronousMessages -> TODO()
     }
     return this
+  }
+
+  private fun setupMessageContents(contents: Any?): MessageContents {
+    logger.debug { "Explicit contents, will look for a content matcher" }
+    return when (contents) {
+      is Map<*, *> -> if (contents.containsKey("content-type")) {
+        val contentType = contents["content-type"].toString()
+        val bodyConfig = contents.filter { it.key != "content-type" } as Map<String, Any?>
+        val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
+        logger.debug { "Found a matcher for '$contentType': $matcher" }
+        if (matcher == null || matcher.isCore) {
+          logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
+          val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
+          if (contentMatcher != null) {
+            val (body, rules, generators) = contentMatcher.setupBodyFromConfig(bodyConfig)
+            val matchingRules = MatchingRulesImpl()
+            if (rules != null) {
+              matchingRules.addCategory(rules)
+            }
+            MessageContents(body, mapOf(), matchingRules, generators ?: Generators())
+          } else {
+            MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType)))
+          }
+        } else {
+          logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
+          val (body, rules, generators, metadata) = matcher.configureContent(contentType, bodyConfig)
+          val matchingRules = MatchingRulesImpl()
+          if (rules != null) {
+            matchingRules.addCategory(rules)
+          }
+          MessageContents(body, metadata, matchingRules, generators ?: Generators())
+        }
+      } else {
+        MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray()))
+      }
+      else -> MessageContents(OptionalBody.body(contents.toString().toByteArray()))
+    }
   }
 
   private fun setupContents(contents: Any?, part: IHttpPart) {
@@ -216,5 +274,25 @@ open class PactBuilder(
     })
   }
 
-  companion object : KLogging()
+  companion object : KLogging() {
+    @JvmStatic
+    fun textFile(filePath: String): String {
+      var path = Paths.get(filePath)
+      if (!path.exists()) {
+        val cwd = Path.of("").toAbsolutePath()
+        path = cwd.resolve(filePath).toAbsolutePath()
+      }
+      return path.toFile().bufferedReader().readText()
+    }
+
+    @JvmStatic
+    fun filePath(filePath: String): String {
+      var path = Paths.get(filePath).toAbsolutePath()
+      if (!path.exists()) {
+        val cwd = Path.of("").toAbsolutePath()
+        path = cwd.resolve(filePath).toAbsolutePath()
+      }
+      return path.normalize().toString()
+    }
+  }
 }

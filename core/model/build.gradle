@@ -21,14 +21,14 @@ artifacts {
 
 dependencies {
   api project(":core:support")
-  implementation project(":core:pactbroker")
+  api project(":core:pactbroker")
   implementation 'org.apache.commons:commons-collections4:4.4'
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'javax.mail:mail:1.5.0-b01'
   implementation "org.jetbrains.kotlin:kotlin-reflect:${project.kotlinVersion}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   implementation 'org.apache.tika:tika-core:1.27'
-  implementation 'io.ktor:ktor-http-jvm:1.3.1'
+  implementation 'io.ktor:ktor-http-jvm:1.6.1'
   implementation 'commons-beanutils:commons-beanutils:1.9.4'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
 

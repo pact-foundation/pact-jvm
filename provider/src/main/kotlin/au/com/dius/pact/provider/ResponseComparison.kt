@@ -12,6 +12,7 @@ import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.ContentTypeOverride
 import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
@@ -154,9 +155,9 @@ class ResponseComparison(
       val actualResponseContentType = actualResponse.contentType
       val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
         actualResponseContentType, actualResponse.body)
+      val body = OptionalBody.body(actualResponse.body?.toByteArray(actualResponseContentType.asCharset()))
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode,
-        actualResponse.headers.toMutableMap(), OptionalBody.body(actualResponse.body?.toByteArray(
-        actualResponseContentType.asCharset()))))
+        actualResponse.headers.toMutableMap(), body))
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches, SystemPropertyResolver))
     }

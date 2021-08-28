@@ -267,7 +267,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           "'public [RequestResponsePact|V4Pact] xxx(PactBuilder builder)'")
       } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
         throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
-          "'public [MessagePact|V4Pact] xxx(MessagePactBuilder builder)'")
+          "'public [MessagePact|V4Pact] xxx(PactBuilder builder)'")
       }
 
       val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
@@ -297,9 +297,19 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           }
         }
         ProviderType.ASYNCH -> {
-          ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-            MessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V3)
-              .consumer(pactConsumer).hasPactWith(providerNameToUse)) as BasePact
+          if (method.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder"))) {
+            ReflectionSupport.invokeMethod(
+              method, context.requiredTestInstance,
+              MessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V3)
+                .consumer(pactConsumer).hasPactWith(providerNameToUse)
+            ) as BasePact
+          } else {
+            val pactBuilder = PactBuilder(pactConsumer, providerNameToUse)
+            if (providerInfo.pactVersion != null) {
+              pactBuilder.pactSpecVersion(providerInfo.pactVersion)
+            }
+            ReflectionSupport.invokeMethod(method, context.requiredTestInstance, pactBuilder) as BasePact
+          }
         }
       }
 
