@@ -158,7 +158,7 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
       }
 
       var contentType = UNKNOWN
-      val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+      val contentTypeEntry = headers.entries.find { it.key.uppercase() == "CONTENT-TYPE" }
       if (contentTypeEntry != null) {
         contentType = ContentType(contentTypeEntry.value.first())
       }

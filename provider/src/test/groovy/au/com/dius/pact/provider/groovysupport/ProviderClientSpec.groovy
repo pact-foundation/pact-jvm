@@ -16,6 +16,7 @@ import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.ClassicHttpResponse
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.Header
+import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.HttpRequest
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest
@@ -773,7 +774,7 @@ class ProviderClientSpec extends Specification {
   def 'JSON keys with special characters'() {
     given:
     HttpEntity entity = null
-    httpRequest = Mock(HttpEntityEnclosingRequest) {
+    httpRequest = Mock(BasicClassicHttpRequest) {
       setEntity(_) >> { e -> entity = e[0] }
     }
     def body = '{"ä": "äbc"}'
@@ -785,6 +786,6 @@ class ProviderClientSpec extends Specification {
 
     then:
     entity.content.text == '{"ä": "äbc"}'
-    entity.contentType.value == 'application/json; charset=UTF-8'
+    entity.contentType == 'application/json; charset=UTF-8'
   }
 }
