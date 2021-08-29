@@ -115,4 +115,26 @@ class PactXmlBuilderSpec extends Specification {
     ['$', 'one'] | ['two', "['@id']"] | "\$.one.two['@id']"
     ['$', 'one'] | ['two', '#text']   | "\$.one.two.#text"
   }
+
+  @Unroll
+  def 'standalone declaration - #standalone'() {
+    given:
+    def builder = new PactXmlBuilder('projects')
+      .withStandalone(standalone)
+      .build { node ->
+        node.setAttributes([id: '1234'])
+      }
+
+    when:
+    def result = builder.toString()
+
+    then:
+    result.startsWith(value)
+
+    where:
+
+    standalone | value
+    true       | '<?xml version="1.0" encoding="UTF-8"?>'
+    false      | '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
+  }
 }

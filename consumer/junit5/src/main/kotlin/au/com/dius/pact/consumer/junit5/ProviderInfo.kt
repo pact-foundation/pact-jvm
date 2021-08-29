@@ -88,18 +88,20 @@ data class ProviderInfo @JvmOverloads constructor(
   }
 
   companion object {
-    fun fromAnnotation(annotation: PactTestFor): ProviderInfo =
-            ProviderInfo(ExpressionParser.parseExpression(annotation.providerName, DataType.STRING)?.toString()
-                    ?: annotation.providerName,
-                    annotation.hostInterface, annotation.port,
-                    when (annotation.pactVersion) {
-                      PactSpecVersion.UNSPECIFIED -> null
-                      else -> annotation.pactVersion
-                    },
-                    when (annotation.providerType) {
-                      ProviderType.UNSPECIFIED -> null
-                      else -> annotation.providerType
-                    }, annotation.https, annotation.mockServerImplementation,
-                    annotation.keyStorePath, annotation.keyStoreAlias, annotation.keyStorePassword, annotation.privateKeyPassword)
+    fun fromAnnotation(annotation: PactTestFor): ProviderInfo {
+      val providerName = ExpressionParser().parseExpression(annotation.providerName, DataType.STRING)?.toString()
+        ?: annotation.providerName
+      val pactVersion = when (annotation.pactVersion) {
+        PactSpecVersion.UNSPECIFIED -> null
+        else -> annotation.pactVersion
+      }
+      val providerType = when (annotation.providerType) {
+        ProviderType.UNSPECIFIED -> null
+        else -> annotation.providerType
+      }
+      return ProviderInfo(providerName, annotation.hostInterface, annotation.port, pactVersion, providerType,
+        annotation.https, annotation.mockServerImplementation, annotation.keyStorePath, annotation.keyStoreAlias,
+        annotation.keyStorePassword, annotation.privateKeyPassword)
+    }
   }
 }

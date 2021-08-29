@@ -20,6 +20,7 @@ import org.apache.hc.core5.http.HttpRequest
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest
 import org.apache.hc.core5.http.message.BasicHeader
+import spock.lang.IgnoreIf
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -764,5 +765,26 @@ class ProviderClientSpec extends Specification {
     then:
     method.entity.contentType == contentType
     method.entity.content.getText('ISO-8859-1') == body
+  }
+
+  @Issue('#1416')
+  // Fails on Windows
+  @IgnoreIf({ System.getProperty('os.name').toLowerCase().contains('windows') })
+  def 'JSON keys with special characters'() {
+    given:
+    HttpEntity entity = null
+    httpRequest = Mock(HttpEntityEnclosingRequest) {
+      setEntity(_) >> { e -> entity = e[0] }
+    }
+    def body = '{"ä": "äbc"}'
+    request = new Request('GET', '/', [:],
+      ['content-type': ['application/json;charset=UTF-8']], OptionalBody.body(body.bytes))
+
+    when:
+    client.setupBody(request, httpRequest)
+
+    then:
+    entity.content.text == '{"ä": "äbc"}'
+    entity.contentType.value == 'application/json; charset=UTF-8'
   }
 }

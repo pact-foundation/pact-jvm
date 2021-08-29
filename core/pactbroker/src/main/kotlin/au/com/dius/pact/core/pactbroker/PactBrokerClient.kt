@@ -121,7 +121,7 @@ interface IPactBrokerClient {
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
     enablePending: Boolean = false,
-    includeWipPactsSince: String
+    includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception>
 
   fun getUrlForProvider(providerName: String, tag: String): String?
@@ -193,11 +193,7 @@ open class PactBrokerClient(
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS).forAll(PACTS, Consumer { pact ->
         val href = pact["href"].toString()
         val name = pact["name"].toString()
-        if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
-        } else {
-          consumers.add(PactBrokerResult(name, href, pactBrokerUrl))
-        }
+        consumers.add(PactBrokerResult(name, href, pactBrokerUrl))
       })
       consumers
     } catch (e: NotFoundHalResponse) {
@@ -218,11 +214,7 @@ open class PactBrokerClient(
         .forAll(PACTS, Consumer { pact ->
         val href = pact["href"].toString()
         val name = pact["name"].toString()
-        if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag = tag))
-        } else {
-          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList(), tag = tag))
-        }
+        consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList(), tag = tag))
       })
       consumers
     } catch (e: NotFoundHalResponse) {
@@ -236,7 +228,7 @@ open class PactBrokerClient(
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String>,
     enablePending: Boolean,
-    includeWipPactsSince: String
+    includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception> {
     val halClient = when (val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }) {
       is Err<Exception> -> return navigateResult
@@ -272,7 +264,7 @@ open class PactBrokerClient(
     selectors: List<ConsumerVersionSelector>,
     enablePending: Boolean,
     providerTags: List<String>,
-    includeWipPactsSince: String,
+    includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
     providerName: String
@@ -284,7 +276,7 @@ open class PactBrokerClient(
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
       body["includePendingStatus"] = true
-      if (!includeWipPactsSince.isBlank()) {
+      if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }
     }
@@ -305,13 +297,9 @@ open class PactBrokerClient(
           val wip = if (properties.has("wip") && properties["wip"].isBoolean)
             properties["wip"].asBoolean()!!
           else false
-          if (options.containsKey("authentication")) {
-            PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending,
-              wip = wip, usedNewEndpoint = true)
-          } else {
-            PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending, wip = wip,
+
+          PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending, wip = wip,
               usedNewEndpoint = true)
-          }
         }
       }
     }

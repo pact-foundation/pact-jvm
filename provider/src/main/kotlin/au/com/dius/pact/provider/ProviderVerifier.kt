@@ -298,7 +298,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator")
+  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator", "LongParameterList")
   override fun verifyResponseByInvokingProviderMethods(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,

@@ -39,55 +39,14 @@ enum class DataType {
   }
 }
 
-object ExpressionParser {
-
-  const val VALUES_SEPARATOR = ","
-  const val START_EXPRESSION = "\${"
-  const val END_EXPRESSION = "}"
-  const val START_EXP_SYS_PROP = "pact.expressions.start"
-  const val END_EXP_SYS_PROP = "pact.expressions.end"
+open class ExpressionParser(
+  val startExpression: String = START_EXPRESSION,
+  val endExpression: String = END_EXPRESSION
+) {
 
   @JvmOverloads
-  @JvmStatic
-  fun parseListExpression(
-    value: String,
-    valueResolver: ValueResolver = SystemPropertyResolver,
-    allowReplacement: Boolean = false
-  ): List<String> {
-    return replaceExpressions(value, valueResolver, allowReplacement)
-      .split(VALUES_SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
-  }
-
-  @JvmOverloads
-  @JvmStatic
-  fun parseExpression(
-    value: String?,
-    type: DataType,
-    valueResolver: ValueResolver = SystemPropertyResolver,
-    allowReplacement: Boolean = false
-  ): Any? {
-    return when {
-      containsExpressions(value, allowReplacement) ->
-        type.convert(replaceExpressions(value!!, valueResolver, allowReplacement))
-      value != null -> type.convert(value)
-      else -> null
-    }
-  }
-
-  @JvmOverloads
-  @JvmStatic
-  fun containsExpressions(value: String?, allowReplacement: Boolean = false) =
+  open fun containsExpressions(value: String?, allowReplacement: Boolean = false) =
     value != null && value.contains(startExpression(allowReplacement))
-
-  private fun startExpression(allowReplacement: Boolean) = if (allowReplacement)
-    System.getProperty(START_EXP_SYS_PROP).orEmpty().ifEmpty { START_EXPRESSION }
-  else
-    START_EXPRESSION
-
-  private fun endExpression(allowReplacement: Boolean) = if (allowReplacement)
-    System.getProperty(END_EXP_SYS_PROP).orEmpty().ifEmpty { END_EXPRESSION }
-  else
-    END_EXPRESSION
 
   private fun replaceExpressions(value: String, valueResolver: ValueResolver, allowReplacement: Boolean): String {
     val joiner = StringJoiner("")
@@ -117,35 +76,80 @@ object ExpressionParser {
     return joiner.toString()
   }
 
-  @JvmStatic
-  fun toDefaultExpressions(expression: String): String {
-    val startExpression = System.getProperty(START_EXP_SYS_PROP)
-    val endExpression = System.getProperty(END_EXP_SYS_PROP)
-    val updated = if (startExpression.isNullOrEmpty()) {
-      expression
-    } else {
-      expression.replace(startExpression, START_EXPRESSION)
-    }
-    return if (endExpression.isNullOrEmpty()) {
-      updated
-    } else {
-      updated.replace(endExpression, END_EXPRESSION)
+  private fun startExpression(allowReplacement: Boolean) = if (allowReplacement)
+    startExpressionOverride().orEmpty().ifEmpty { startExpression }
+  else
+    startExpression
+
+  private fun endExpression(allowReplacement: Boolean) = if (allowReplacement)
+    endExpressionOverride().orEmpty().ifEmpty { endExpression }
+  else
+    endExpression
+
+  @JvmOverloads
+  fun parseListExpression(
+    value: String,
+    valueResolver: ValueResolver = SystemPropertyResolver,
+    allowReplacement: Boolean = false
+  ): List<String> {
+    return replaceExpressions(value, valueResolver, allowReplacement)
+      .split(VALUES_SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
+  }
+
+  @JvmOverloads
+  fun parseExpression(
+    value: String?,
+    type: DataType,
+    valueResolver: ValueResolver = SystemPropertyResolver,
+    allowReplacement: Boolean = false
+  ): Any? {
+    return when {
+      containsExpressions(value, allowReplacement) ->
+        type.convert(replaceExpressions(value!!, valueResolver, allowReplacement))
+      value != null -> type.convert(value)
+      else -> null
     }
   }
 
-  @JvmStatic
-  fun correctExpressionMarkers(expression: String): String {
-    val startExpression = System.getProperty(START_EXP_SYS_PROP)
-    val endExpression = System.getProperty(END_EXP_SYS_PROP)
+  fun toDefaultExpressions(expression: String): String {
+    val startExpression = startExpressionOverride()
+    val endExpression = endExpressionOverride()
     val updated = if (startExpression.isNullOrEmpty()) {
       expression
     } else {
-      expression.replace(START_EXPRESSION, startExpression)
+      expression.replace(startExpression, this.startExpression)
     }
     return if (endExpression.isNullOrEmpty()) {
       updated
     } else {
-      updated.replace(END_EXPRESSION, endExpression)
+      updated.replace(endExpression, this.endExpression)
     }
+  }
+
+  fun correctExpressionMarkers(expression: String): String {
+    val startExpression = startExpressionOverride()
+    val endExpression = endExpressionOverride()
+    val updated = if (startExpression.isNullOrEmpty()) {
+      expression
+    } else {
+      expression.replace(this.startExpression, startExpression)
+    }
+    return if (endExpression.isNullOrEmpty()) {
+      updated
+    } else {
+      updated.replace(this.endExpression, endExpression)
+    }
+  }
+
+  open fun endExpressionOverride(): String? = System.getProperty(END_EXP_SYS_PROP)
+
+  open fun startExpressionOverride(): String? = System.getProperty(START_EXP_SYS_PROP)
+
+  companion object {
+    const val VALUES_SEPARATOR = ","
+    const val START_EXPRESSION = "\${"
+    const val END_EXPRESSION = "}"
+    const val START_EXP_SYS_PROP = "pact.expressions.start"
+    const val END_EXP_SYS_PROP = "pact.expressions.end"
   }
 }

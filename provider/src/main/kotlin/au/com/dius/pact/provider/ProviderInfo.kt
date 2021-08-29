@@ -64,28 +64,36 @@ open class ProviderInfo @JvmOverloads constructor (
     hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, emptyList())
 
   @JvmOverloads
-  @Suppress("TooGenericExceptionThrown")
   open fun hasPactsFromPactBrokerWithSelectors(
     options: Map<String, Any> = mapOf(),
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>
   ): List<ConsumerInfo> {
     val enablePending = Utils.lookupInMap(options, "enablePending", Boolean::class.java, false)
-    if (enablePending && (!options.containsKey("providerTags") || options["providerTags"] !is List<*>)) {
-      throw RuntimeException("No providerTags: To use the pending pacts feature, you need to provide the list of " +
-        "provider names for the provider application version that will be published with the verification results")
-    }
     val providerTags = if (enablePending) {
-      options["providerTags"] as List<String>
+      options["providerTags"] as List<String>?
     } else {
       emptyList()
     }
     val includePactsSince = Utils.lookupInMap(options, "includeWipPactsSince", String::class.java, "")
-    val client = pactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, providerTags, enablePending,
-      includePactsSince)
-      .map { results -> results.map { ConsumerInfo.from(it) }
+    return hasPactsFromPactBrokerWithSelectors(pactBrokerUrl, selectors,
+      PactBrokerOptions(enablePending, providerTags.orEmpty(), includePactsSince))
+  }
+
+  @Suppress("TooGenericExceptionThrown")
+  open fun hasPactsFromPactBrokerWithSelectors(
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelector>,
+    options: PactBrokerOptions
+  ): List<ConsumerInfo> {
+    if (options.enablePending && options.providerTags.isEmpty()) {
+      throw RuntimeException("No providerTags: To use the pending pacts feature, you need to provide the list of " +
+        "provider names for the provider application version that will be published with the verification results")
     }
+    val client = pactBrokerClient(pactBrokerUrl, options)
+    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, options.providerTags,
+      options.enablePending, options.includeWipPactsSince)
+      .map { results -> results.map { ConsumerInfo.from(it) } }
     return when (consumersFromBroker) {
       is Ok<List<ConsumerInfo>> -> {
         val list = consumersFromBroker.value
@@ -99,9 +107,8 @@ open class ProviderInfo @JvmOverloads constructor (
     }
   }
 
-  open fun pactBrokerClient(pactBrokerUrl: String, options: Map<String, Any>): PactBrokerClient {
-    val insecureTLS = Utils.lookupInMap(options, "insecureTLS", Boolean::class.java, false)
-    return PactBrokerClient(pactBrokerUrl, options.toMutableMap(), PactBrokerClientConfig(insecureTLS = insecureTLS))
+  open fun pactBrokerClient(pactBrokerUrl: String, options: PactBrokerOptions): PactBrokerClient {
+    return PactBrokerClient(pactBrokerUrl, options.toMutableMap(), PactBrokerClientConfig(insecureTLS = options.insecureTLS))
   }
 
   @Suppress("TooGenericExceptionThrown")

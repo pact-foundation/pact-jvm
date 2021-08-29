@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.pactbroker
 
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
@@ -37,7 +38,7 @@ class PactBrokerClientSpec extends Specification {
     pactFile.write pactContents
   }
 
-  def 'when fetching consumers, sets the auth if there is any'() {
+  def 'fetching consumers with the old auth format'() {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate() >> halClient
@@ -51,13 +52,34 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false, '').value
+    def consumers = client.fetchConsumers('provider')
 
     then:
     consumers != []
     consumers.first().name == 'bob'
     consumers.first().source == 'http://bob.com/'
-    consumers.first().pactFileAuthentication == ['Basic', '1', '2']
+  }
+
+  def 'fetching consumers with the new auth format'() {
+    given:
+    def halClient = Mock(IHalClient)
+    halClient.navigate() >> halClient
+    halClient.navigate(_, _) >> halClient
+    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
+
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
+      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', new Auth.BasicAuthentication('u', 'p'))),
+      new PactBrokerClientConfig()]) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumers('provider')
+
+    then:
+    consumers != []
+    consumers.first().name == 'bob'
+    consumers.first().source == 'http://bob.com/'
   }
 
   def 'when fetching consumers for an unknown provider, returns an empty pacts list'() {
@@ -147,27 +169,6 @@ class PactBrokerClientSpec extends Specification {
     consumers.last().name == 'bob'
     consumers.last().source == 'http://bob.com/'
     consumers.last().tag == 'anotherTag'
-  }
-
-  def 'when fetching consumers with specified tag, sets the auth if there is any'() {
-    given:
-    def halClient = Mock(IHalClient)
-    halClient.navigate() >> halClient
-    halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
-
-    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: [
-      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2'])),
-      new PactBrokerClientConfig()]) {
-      newHalClient() >> halClient
-    }
-
-    when:
-    def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true, null, null) ], [], false, '').value
-
-    then:
-    consumers.first().pactFileAuthentication == ['Basic', '1', '2']
   }
 
   def 'when fetching consumers with specified tag, does not decode the URLs to the pacts'() {
