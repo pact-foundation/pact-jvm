@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import org.apache.maven.plugin.MojoFailureException
@@ -287,6 +288,42 @@ class PactProviderMojoSpec extends Specification {
 
     then:
     noExceptionThrown()
+  }
+
+  def 'do fail the build if the Broker returns 404 and failIfNoPactsFound is true'() {
+    given:
+    def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1234'),
+            new PactBroker(null, null, null, null)))
+    def list = []
+    mojo.failIfNoPactsFound = true
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> {
+      throw new NotFoundHalResponse()
+    }
+    thrown(NotFoundHalResponse)
+    list.size() == 0
+  }
+
+  def 'do not fail the build if the Broker returns 404 and failIfNoPactsFound is false'() {
+    given:
+    def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1234'),
+            new PactBroker(null, null, null, null)))
+    def list = []
+    mojo.failIfNoPactsFound = false
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> {
+      throw new NotFoundHalResponse()
+    }
+    noExceptionThrown()
+    list.size() == 0
   }
 
   @RestoreSystemProperties
