@@ -139,8 +139,8 @@ For example:
       <serviceProviders>
         <serviceProvider>
           <name>provider</name>
-         <host>{{pact.host}}</host>
-         <port>{{pact.port}}</port>
+          <host>{{pact.host}}</host>
+          <port>{{pact.port}}</port>
           <pactFileDirectories>
             <pactFileDirectory>path/to/pacts</pactFileDirectory>
           </pactFileDirectories>
