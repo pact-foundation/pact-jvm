@@ -121,6 +121,37 @@ no pact files are loaded after processing all the directories in the list.
 </plugin>
 ```
 
+## Overriding the provider hostname and port when the task is executed (4.2.11+)
+
+Maven supports using expressions in the POM using `${...}`, but these are evaluated when the POM is loaded. 
+
+For the provider hostname and port, you can provide expressions of the form `{{...}}` which will be evaluated
+using JVM system properties when the verify task is run.
+
+For example:
+
+```xml
+<plugin>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.2.11</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider</name>
+         <host>{{pact.host}}</host>
+         <port>{{pact.port}}</port>
+          <pactFileDirectories>
+            <pactFileDirectory>path/to/pacts</pactFileDirectory>
+          </pactFileDirectories>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
+This will use `pact.host` and `pact.port` system properties.
+
 ## Enabling insecure SSL
 
 For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting

@@ -1,7 +1,10 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
@@ -54,6 +57,8 @@ open class PactProviderMojo : PactBaseMojo() {
   @Parameter(defaultValue = "console")
   lateinit var reports: List<String>
 
+  private val expressionParser = ExpressionParser("{{", "}}")
+
   override fun execute() {
     systemPropertyVariables.forEach { (property, value) ->
       if (value == null) {
@@ -94,8 +99,22 @@ open class PactProviderMojo : PactBaseMojo() {
 
     try {
       val failures = serviceProviders.flatMap { provider ->
+        provider.host = if (provider.host is String) {
+          expressionParser.parseExpression(provider.host as String, DataType.RAW)
+        } else provider.host
+        provider.port = if (provider.port is String) {
+          expressionParser.parseExpression(provider.port as String, DataType.RAW)
+        } else provider.port
+
         val consumers = mutableListOf<IConsumerInfo>()
-        consumers.addAll(provider.consumers)
+        consumers.addAll(provider.consumers.map {
+          if (it.pactSource is String) {
+            it.pactSource = FileSource(File(it.pactSource as String))
+            it
+          } else {
+            it
+          }
+        })
         if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory!!))
         }
