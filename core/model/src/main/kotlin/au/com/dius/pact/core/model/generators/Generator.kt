@@ -6,10 +6,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
-import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
-import au.com.dius.pact.core.support.expressions.ExpressionParser.correctExpressionMarkers
-import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
-import au.com.dius.pact.core.support.expressions.ExpressionParser.toDefaultExpressions
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.json.JsonValue
 import com.github.michaelbull.result.Err
@@ -463,16 +460,22 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   val expression: String,
   val type: DataType = DataType.RAW
 ) : Generator {
+  private val ep: ExpressionParser = ExpressionParser()
+
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    return mapOf("type" to "ProviderState", "expression" to toDefaultExpressions(expression), "dataType" to type.name)
+    return mapOf(
+      "type" to "ProviderState",
+      "expression" to ep.toDefaultExpressions(expression),
+      "dataType" to type.name
+    )
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
     return when (val providerState = context["providerState"]) {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
-        if (containsExpressions(expression, true)) {
-          parseExpression(expression, type, MapValueResolver(map), true)
+        if (ep.containsExpressions(expression, true)) {
+          ep.parseExpression(expression, type, MapValueResolver(map), true)
         } else {
           map[expression]
         }
@@ -486,7 +489,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   companion object {
     @JvmStatic
     fun fromJson(json: JsonValue.Object) = ProviderStateGenerator(
-      correctExpressionMarkers(Json.toString(json["expression"])),
+      ExpressionParser().correctExpressionMarkers(Json.toString(json["expression"])),
       if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
     )
   }

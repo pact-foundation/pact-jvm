@@ -23,7 +23,7 @@ import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
-import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import com.github.michaelbull.result.unwrap
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
@@ -62,6 +62,9 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Abst
 }
 
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver, AfterTestExecutionCallback, AfterAllCallback {
+
+  private val ep: ExpressionParser = ExpressionParser()
+
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val providers = lookupProviderInfo(extensionContext)
     val type = parameterContext.parameter.type
@@ -270,13 +273,13 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       }
 
       val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
-      val pactConsumer = parseExpression(pactAnnotation.consumer, DataType.STRING)?.toString() ?: pactAnnotation.consumer
+      val pactConsumer = ep.parseExpression(pactAnnotation.consumer, DataType.STRING)?.toString() ?: pactAnnotation.consumer
       logger.debug {
         "Invoking method '${method.name}' to get Pact for the test " +
           "'${context.testMethod.map { it.name }.orElse("unknown")}'"
       }
 
-      val provider = parseExpression(pactAnnotation.provider, DataType.STRING)?.toString()
+      val provider = ep.parseExpression(pactAnnotation.provider, DataType.STRING)?.toString()
       val providerNameToUse = if (provider.isNullOrEmpty()) providerName else provider
       val pact = when (providerType) {
         ProviderType.SYNCH, ProviderType.UNSPECIFIED -> {
@@ -326,7 +329,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         logger.debug { "Looking for first @Pact method for provider '$providerName'" }
         methods.firstOrNull {
           val pactAnnotationProviderName = AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider
-          val annotationProviderName = parseExpression(pactAnnotationProviderName, DataType.STRING)?.toString()
+          val annotationProviderName = ep.parseExpression(pactAnnotationProviderName, DataType.STRING)?.toString()
             ?: pactAnnotationProviderName
           annotationProviderName.isEmpty() || annotationProviderName == providerName
         }

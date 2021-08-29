@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.core.support.expressions.DataType
-import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.handleWith
@@ -37,6 +37,8 @@ val namespace: ExtensionContext.Namespace = ExtensionContext.Namespace.create("p
  */
 open class PactVerificationInvocationContextProvider : TestTemplateInvocationContextProvider {
 
+  private val ep: ExpressionParser = ExpressionParser()
+
   override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
     logger.trace { "provideTestTemplateInvocationContexts called" }
     val tests = resolvePactSources(context)
@@ -52,7 +54,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     var description = ""
     val providerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Provider::class.java)
     val serviceName = if (providerInfo.isPresent && providerInfo.get().value.isNotEmpty()) {
-      parseExpression(providerInfo.get().value, DataType.STRING)?.toString()
+      ep.parseExpression(providerInfo.get().value, DataType.STRING)?.toString()
     } else {
       System.getProperty("pact.provider.name")
     }
@@ -63,7 +65,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     description += "Provider: $serviceName"
 
     val consumerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Consumer::class.java)
-    val consumerName = parseExpression(consumerInfo.orElse(null)?.value, DataType.STRING)?.toString()
+    val consumerName = ep.parseExpression(consumerInfo.orElse(null)?.value, DataType.STRING)?.toString()
     if (consumerName.isNotEmpty()) {
       description += "\nConsumer: $consumerName"
     }
@@ -105,7 +107,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
           is IOException -> when {
             noPactsToVerify.ignoreIoErrors == "true" -> emptyList()
             valueResolver != null &&
-              parseExpression(noPactsToVerify.ignoreIoErrors, DataType.RAW, valueResolver) == "true" -> emptyList()
+              ep.parseExpression(noPactsToVerify.ignoreIoErrors, DataType.RAW, valueResolver) == "true" -> emptyList()
             else -> throw exception
           }
           is NotFoundHalResponse -> emptyList()
