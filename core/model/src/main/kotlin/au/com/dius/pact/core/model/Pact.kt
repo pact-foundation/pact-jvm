@@ -89,6 +89,13 @@ interface Interaction {
   }
 
   /**
+   * If this interaction is an asynchronous message, returns it. Otherwise returns null.
+   */
+  fun asAsynchronousMessage(): V4Interaction.AsynchronousMessage? {
+    return null
+  }
+
+  /**
    * Return this interaction as a V3 message (if it is one), otherwise null
    */
   fun asMessage(): Message? {
@@ -113,6 +120,20 @@ interface Interaction {
    * If this interaction is V4 spec
    */
   fun isV4() = false
+
+  /**
+   * If this interaction is a synchronous messages interaction
+   */
+  fun isSynchronousMessages(): Boolean {
+    return false
+  }
+
+  /**
+   * If this interaction is synchronous messages interaction, returns it. Otherwise returns null.
+   */
+  fun asSynchronousMessages(): V4Interaction.SynchronousMessages? {
+    return null
+  }
 }
 
 /**

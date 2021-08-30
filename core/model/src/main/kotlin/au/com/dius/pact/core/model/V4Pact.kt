@@ -125,12 +125,10 @@ sealed class V4Interaction(
         "request:\n$request\n\nresponse:\n$response\n\ncomments: $comments"
     }
 
-    @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
       return SynchronousHttp(generateKey(), description, providerStates, request, response, interactionId, comments)
     }
 
-    @ExperimentalUnsignedTypes
     override fun generateKey(): String {
       return HashCodeBuilder(57, 11)
         .append(description)
@@ -250,6 +248,8 @@ sealed class V4Interaction(
 
     override fun isAsynchronousMessage() = true
 
+    override fun asAsynchronousMessage() = this
+
     fun getContentType() = contents.getContentType()
   }
 
@@ -317,6 +317,10 @@ sealed class V4Interaction(
     override fun updateProperties(values: Map<String, Any?>) {
 
     }
+
+    override fun isSynchronousMessages() = true
+
+    override fun asSynchronousMessages() = this
   }
 
   companion object : KLogging() {

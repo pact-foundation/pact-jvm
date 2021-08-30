@@ -15,6 +15,7 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactDirectory
@@ -74,12 +75,15 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         type.isAssignableFrom(List::class.java) -> true
         type.isAssignableFrom(V4Pact::class.java) -> true
         type.isAssignableFrom(MessagePact::class.java) -> true
+        type.isAssignableFrom(V4Interaction.AsynchronousMessage::class.java) -> true
         else -> false
       }
       providers.any { it.first.providerType != ProviderType.ASYNCH } -> when {
         type.isAssignableFrom(MockServer::class.java) -> true
         type.isAssignableFrom(RequestResponsePact::class.java) -> true
         type.isAssignableFrom(V4Pact::class.java) -> true
+        type.isAssignableFrom(V4Interaction.SynchronousHttp::class.java) -> true
+        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> true
         else -> false
       }
       else -> false
@@ -120,12 +124,48 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         type.isAssignableFrom(List::class.java) -> pact.interactions
         type.isAssignableFrom(V4Pact::class.java) -> pact.asV4Pact().unwrap()
         type.isAssignableFrom(MessagePact::class.java) -> pact.asMessagePact().unwrap()
+        type.isAssignableFrom(V4Interaction.AsynchronousMessage::class.java) -> {
+          val messages = pact.asV4Pact().unwrap().interactions.filter { it.isAsynchronousMessage() }
+          if (messages.isEmpty()) {
+            throw UnsupportedOperationException("Could not inject parameter $type into test method: no interactions " +
+              "of type V4Interaction.AsynchronousMessage were found in the Pact")
+          } else {
+            if (messages.size > 1) {
+              logger.warn { "More than one message was found in the Pact, using the first one" }
+            }
+            messages.first()
+          }
+        }
         else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
       }
       else -> when {
-        type.isAssignableFrom(MockServer::class.java) -> setupMockServer(providerInfo.first, providerInfo.second, extensionContext)!!
+        type.isAssignableFrom(MockServer::class.java) -> setupMockServer(providerInfo.first, providerInfo.second, extensionContext)
         type.isAssignableFrom(RequestResponsePact::class.java) -> pact.asRequestResponsePact().unwrap()
         type.isAssignableFrom(V4Pact::class.java) -> pact.asV4Pact().unwrap()
+        type.isAssignableFrom(V4Interaction.SynchronousHttp::class.java) -> {
+          val interactions = pact.asV4Pact().unwrap().interactions.filter { it.isSynchronousRequestResponse() }
+          if (interactions.isEmpty()) {
+            throw UnsupportedOperationException("Could not inject parameter $type into test method: no interactions " +
+              "of type V4Interaction.SynchronousHttp were found in the Pact")
+          } else {
+            if (interactions.size > 1) {
+              logger.warn { "More than one interaction was found in the Pact, using the first one" }
+            }
+            interactions.first()
+          }
+        }
+        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> {
+          val messages = pact.asV4Pact().unwrap().interactions.filter { it.isSynchronousMessages() }
+          if (messages.isEmpty()) {
+            throw UnsupportedOperationException("Could not inject parameter $type into test method: no interactions " +
+              "of type V4Interaction.SynchronousMessages were found in the Pact")
+          } else {
+            if (messages.size > 1) {
+              logger.warn { "More than one message was found in the Pact, using the first one" }
+            }
+            messages.first()
+          }
+        }
         else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
       }
     }
