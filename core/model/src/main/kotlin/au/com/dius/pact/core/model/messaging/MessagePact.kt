@@ -2,14 +2,13 @@ package au.com.dius.pact.core.model.messaging
 
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
-import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.Json
@@ -27,7 +26,6 @@ import java.io.File
 /**
  * Pact for a sequences of messages
  */
-@ExperimentalUnsignedTypes
 class MessagePact @JvmOverloads constructor (
   override var provider: Provider,
   override var consumer: Consumer,

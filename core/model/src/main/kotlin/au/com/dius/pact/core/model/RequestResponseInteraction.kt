@@ -8,7 +8,6 @@ import java.net.URLEncoder
 /**
  * Interaction between a consumer and a provider
  */
-@ExperimentalUnsignedTypes
 open class RequestResponseInteraction @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),

@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.support
 
+import au.com.dius.pact.core.support.json.JsonValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.empty
@@ -90,5 +91,58 @@ class KotlinLanguageSupportTest {
   fun padToPadsTheArrayByCyclingTheElements() {
     assertThat(arrayOf(1, 2, 3, 4).padTo(8), `is`(listOf(1, 2, 3, 4, 1, 2, 3, 4)))
     assertThat(arrayOf(1, 2, 3, 4).padTo(5), `is`(listOf(1, 2, 3, 4, 1)))
+  }
+
+  @Test
+  fun deepMergeHandlesNull() {
+    val map: MutableMap<String, JsonValue>? = null
+    assertThat(map.deepMerge(mapOf()), `is`(emptyMap()))
+  }
+
+  @Test
+  fun deepMergeWithEmptyMaps() {
+    val map: MutableMap<String, JsonValue> = mutableMapOf()
+    assertThat(map.deepMerge(mapOf()), `is`(emptyMap()))
+    assertThat(map.deepMerge(mapOf("a" to JsonValue.Null)), `is`(mapOf("a" to JsonValue.Null)))
+    val map1: MutableMap<String, JsonValue> = mutableMapOf("a" to JsonValue.Null)
+    assertThat(map1.deepMerge(mapOf()), `is`(mapOf("a" to JsonValue.Null)))
+  }
+
+  @Test
+  fun deepMergeWithSimpleMaps() {
+    val map: MutableMap<String, JsonValue> = mutableMapOf("a" to JsonValue.Null)
+    assertThat(map.deepMerge(mapOf("b" to JsonValue.True)), `is`(mapOf("a" to JsonValue.Null, "b" to JsonValue.True)))
+    assertThat(map.deepMerge(mapOf("b" to JsonValue.True, "a" to JsonValue.False)),
+      `is`(mapOf("a" to JsonValue.False, "b" to JsonValue.True)))
+  }
+
+  @Test
+  fun deepMergeWithCollectionsWithDifferentTypes() {
+    val map: MutableMap<String, JsonValue> = mutableMapOf(
+      "a" to JsonValue.Object(mutableMapOf("b" to JsonValue.True)),
+      "b" to JsonValue.Array(mutableListOf(JsonValue.True))
+    )
+    assertThat(map.deepMerge(mapOf("a" to JsonValue.True)), `is`(mapOf(
+      "a" to JsonValue.True, "b" to JsonValue.Array(mutableListOf(JsonValue.True)))))
+    assertThat(map.deepMerge(mapOf("b" to JsonValue.True)), `is`(mapOf(
+      "a" to JsonValue.Object(mutableMapOf("b" to JsonValue.True)), "b" to JsonValue.True)))
+  }
+
+  @Test
+  fun deepMergeWithCollectionsRecursivelyMergesTheCollections() {
+    val map: MutableMap<String, JsonValue> = mutableMapOf(
+      "a" to JsonValue.Object(mutableMapOf("b" to JsonValue.True)),
+      "b" to JsonValue.Array(mutableListOf(JsonValue.True))
+    )
+    val map2: MutableMap<String, JsonValue> = mutableMapOf(
+      "a" to JsonValue.Object(mutableMapOf("b" to JsonValue.False)),
+      "b" to JsonValue.Array(mutableListOf(JsonValue.False))
+    )
+    assertThat(map.deepMerge(map2), `is`(mapOf(
+      "a" to JsonValue.Object(mutableMapOf("b" to JsonValue.False)),
+      "b" to JsonValue.Array(mutableListOf(JsonValue.True, JsonValue.False)))))
+    assertThat(map.deepMerge(map), `is`(mapOf(
+      "a" to JsonValue.Object(mutableMapOf("b" to JsonValue.True)),
+      "b" to JsonValue.Array(mutableListOf(JsonValue.True, JsonValue.True)))))
   }
 }

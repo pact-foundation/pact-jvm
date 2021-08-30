@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.support
 
+import au.com.dius.pact.core.support.json.JsonValue
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -73,3 +74,30 @@ public fun BooleanArray.padTo(size: Int) = this.asList().padTo(size)
 public fun LongArray.padTo(size: Int) = this.asList().padTo(size)
 public fun IntArray.padTo(size: Int) = this.asList().padTo(size)
 public fun DoubleArray.padTo(size: Int) = this.asList().padTo(size)
+
+public fun MutableMap<String, JsonValue>?.deepMerge(map: Map<String, JsonValue>): MutableMap<String, JsonValue> {
+  return if (this != null) {
+    (this.entries.toList() + map.entries).fold(mutableMapOf()) { map, entry ->
+      if (map.containsKey(entry.key)) {
+        when (val value = map[entry.key]) {
+          is JsonValue.Object -> if (entry.value is JsonValue.Object) {
+            map[entry.key] = JsonValue.Object(value.entries.deepMerge((entry.value as JsonValue.Object).entries))
+          } else {
+            map[entry.key] = entry.value
+          }
+          is JsonValue.Array -> if (entry.value is JsonValue.Array) {
+            map[entry.key] = JsonValue.Array((value.values + (entry.value as JsonValue.Array).values).toMutableList())
+          } else {
+            map[entry.key] = entry.value
+          }
+          else -> map[entry.key] = entry.value
+        }
+      } else {
+        map[entry.key] = entry.value
+      }
+      map
+    }
+  } else {
+    mutableMapOf()
+  }
+}

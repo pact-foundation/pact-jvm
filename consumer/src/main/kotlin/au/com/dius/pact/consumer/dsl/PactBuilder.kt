@@ -22,6 +22,8 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.deepMerge
+import au.com.dius.pact.core.support.json.JsonValue
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import io.pact.plugins.jvm.core.CatalogueEntry
@@ -46,6 +48,7 @@ open class PactBuilder(
   private val plugins: MutableList<PactPlugin> = mutableListOf()
   private val interactions: MutableList<Interaction> = mutableListOf()
   private var currentInteraction: V4Interaction? = null
+  private val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
 
   init {
     CatalogueManager.registerCoreEntries(contentMatcherCatalogueEntries() +
@@ -146,17 +149,17 @@ open class PactBuilder(
       is V4Interaction.SynchronousHttp -> {
         logger.debug { "Configuring interaction from $values" }
         if (values.containsKey("request.contents")) {
-          setupContents(values["request.contents"], interaction.request)
+          setupContents(values["request.contents"], interaction.request, interaction)
         }
         if (values.containsKey("response.contents")) {
-          setupContents(values["response.contents"], interaction.response)
+          setupContents(values["response.contents"], interaction.response, interaction)
         }
         interaction.updateProperties(values.filter { it.key != "request.contents" && it.key != "response.contents" })
       }
       is V4Interaction.AsynchronousMessage -> {
         logger.debug { "Configuring interaction from $values" }
         if (values.containsKey("message.contents")) {
-          interaction.contents = setupMessageContents(values["message.contents"])
+          interaction.contents = setupMessageContents(values["message.contents"], interaction)
         }
         interaction.updateProperties(values.filter { it.key != "message.contents" })
       }
@@ -165,7 +168,7 @@ open class PactBuilder(
     return this
   }
 
-  private fun setupMessageContents(contents: Any?): MessageContents {
+  private fun setupMessageContents(contents: Any?, interaction: V4Interaction.AsynchronousMessage): MessageContents {
     logger.debug { "Explicit contents, will look for a content matcher" }
     return when (contents) {
       is Map<*, *> -> if (contents.containsKey("content-type")) {
@@ -177,7 +180,7 @@ open class PactBuilder(
           logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
           val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
           if (contentMatcher != null) {
-            val (body, rules, generators) = contentMatcher.setupBodyFromConfig(bodyConfig)
+            val (body, rules, generators, _, _) = contentMatcher.setupBodyFromConfig(bodyConfig)
             val matchingRules = MatchingRulesImpl()
             if (rules != null) {
               matchingRules.addCategory(rules)
@@ -188,10 +191,16 @@ open class PactBuilder(
           }
         } else {
           logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
-          val (body, rules, generators, metadata) = matcher.configureContent(contentType, bodyConfig)
+          val (body, rules, generators, metadata, config) = matcher.configureContent(contentType, bodyConfig)
           val matchingRules = MatchingRulesImpl()
           if (rules != null) {
             matchingRules.addCategory(rules)
+          }
+          if (config.interactionConfiguration.isNotEmpty()) {
+            interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
+          }
+          if (config.pactConfiguration.isNotEmpty()) {
+            addPluginConfiguration(matcher, config.pactConfiguration)
           }
           MessageContents(body, metadata, matchingRules, generators ?: Generators())
         }
@@ -202,7 +211,15 @@ open class PactBuilder(
     }
   }
 
-  private fun setupContents(contents: Any?, part: IHttpPart) {
+  private fun addPluginConfiguration(contentMatcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>) {
+    if (pluginConfiguration.containsKey(contentMatcher.pluginName)) {
+      pluginConfiguration[contentMatcher.pluginName].deepMerge(pactConfiguration)
+    } else {
+      pluginConfiguration[contentMatcher.pluginName] = pactConfiguration.toMutableMap()
+    }
+  }
+
+  private fun setupContents(contents: Any?, part: IHttpPart, interaction: V4Interaction.SynchronousHttp) {
     logger.debug { "Explicit contents, will look for a content matcher" }
     when (contents) {
       is Map<*, *> -> if (contents.containsKey("content-type")) {
@@ -214,7 +231,7 @@ open class PactBuilder(
           logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
           val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
           if (contentMatcher != null) {
-            val (body, rules, generators) = contentMatcher.setupBodyFromConfig(bodyConfig)
+            val (body, rules, generators, _, _) = contentMatcher.setupBodyFromConfig(bodyConfig)
             part.body = body
             if (rules != null) {
               part.matchingRules.addCategory(rules)
@@ -227,7 +244,7 @@ open class PactBuilder(
           }
         } else {
           logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
-          setupBodyFromPlugin(matcher, contentType, bodyConfig, part)
+          setupBodyFromPlugin(matcher, contentType, bodyConfig, part, interaction)
         }
       } else {
         part.body = OptionalBody.body(toJson(contents).serialise().toByteArray())
@@ -240,9 +257,10 @@ open class PactBuilder(
     matcher: ContentMatcher,
     contentType: String,
     bodyConfig: Map<String, Any?>,
-    part: IHttpPart
+    part: IHttpPart,
+    interaction: V4Interaction
   ) {
-    val (body, rules, generators) = matcher.configureContent(contentType, bodyConfig)
+    val (body, rules, generators, _, config) = matcher.configureContent(contentType, bodyConfig)
     part.body = body
     if (!part.hasHeader("content-type")) {
       part.headers["content-type"] = listOf(body.contentType.toString())
@@ -254,6 +272,13 @@ open class PactBuilder(
       part.generators.addGenerators(generators)
     }
     logger.debug { "Http part from plugin: $part" }
+
+    if (config.interactionConfiguration.isNotEmpty()) {
+      interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
+    }
+    if (config.pactConfiguration.isNotEmpty()) {
+      addPluginConfiguration(matcher, config.pactConfiguration)
+    }
   }
 
   fun toPact(): V4Pact {
@@ -265,12 +290,16 @@ open class PactBuilder(
       UnknownPactSource)
   }
 
-  private fun pluginMetadata(): Map<String, Any> {
+  private fun pluginMetadata(): Map<String, Any?> {
     return mapOf("plugins" to plugins.map {
-      mapOf(
+      val map = mutableMapOf<String, Any?>(
         "name" to it.manifest.name,
         "version" to it.manifest.version
       )
+      if (pluginConfiguration.containsKey(it.manifest.name)) {
+        map["configuration"] = pluginConfiguration[it.manifest.name]
+      }
+      map
     })
   }
 
@@ -296,3 +325,4 @@ open class PactBuilder(
     }
   }
 }
+

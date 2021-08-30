@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.deepMerge
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonObject
@@ -17,7 +18,6 @@ import mu.KotlinLogging
 import org.apache.commons.beanutils.BeanUtils
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
-import java.util.Locale
 
 private val logger = KotlinLogging.logger {}
 
@@ -84,13 +84,15 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
   }
 }
 
+@Suppress("LongParameterList")
 sealed class V4Interaction(
   val key: String,
   description: String,
   interactionId: String? = null,
   providerStates: List<ProviderState> = listOf(),
   comments: MutableMap<String, JsonValue> = mutableMapOf(),
-  val pending: Boolean = false
+  val pending: Boolean = false,
+  val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
 ) : BaseInteraction(interactionId, description, providerStates, comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
@@ -108,6 +110,17 @@ sealed class V4Interaction(
 
   abstract fun updateProperties(values: Map<String, Any?>)
 
+  /**
+   * Add configuration values from the plugin to this interaction
+   */
+  fun addPluginConfiguration(plugin: String, config: Map<String, JsonValue>) {
+    if (pluginConfiguration.containsKey(plugin)) {
+      pluginConfiguration[plugin]!!.deepMerge(config)
+    } else {
+      pluginConfiguration[plugin] = config.toMutableMap()
+    }
+  }
+
   class SynchronousHttp @JvmOverloads constructor(
     key: String,
     description: String,
@@ -116,8 +129,10 @@ sealed class V4Interaction(
     override val response: HttpResponse = HttpResponse(),
     interactionId: String? = null,
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
-    pending: Boolean = false
-  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), SynchronousRequestResponse {
+    pending: Boolean = false,
+    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
+  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration),
+    SynchronousRequestResponse {
 
     override fun toString(): String {
       val pending = if (pending) " [PENDING]" else ""
@@ -126,7 +141,8 @@ sealed class V4Interaction(
     }
 
     override fun withGeneratedKey(): V4Interaction {
-      return SynchronousHttp(generateKey(), description, providerStates, request, response, interactionId, comments)
+      return SynchronousHttp(generateKey(), description, providerStates, request, response, interactionId,
+        comments, pending, pluginConfiguration)
     }
 
     override fun generateKey(): String {
@@ -151,12 +167,19 @@ sealed class V4Interaction(
         "response" to response.toMap(),
         "pending" to pending
       )
+
       if (providerStates.isNotEmpty()) {
         map["providerStates"] = providerStates.map { it.toMap() }
       }
+
       if (comments.isNotEmpty()) {
         map["comments"] = comments
       }
+
+      if (pluginConfiguration.isNotEmpty()) {
+        map["pluginConfiguration"] = pluginConfiguration
+      }
+
       return map
     }
 
@@ -186,8 +209,10 @@ sealed class V4Interaction(
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf(),
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
-    pending: Boolean = false
-  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), MessageInteraction {
+    pending: Boolean = false,
+    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
+  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration),
+    MessageInteraction {
 
     override fun toString(): String {
       val pending = if (pending) " [PENDING]" else ""
@@ -195,12 +220,11 @@ sealed class V4Interaction(
         "message:\n$contents\n\ncomments: $comments"
     }
 
-    @ExperimentalUnsignedTypes
     override fun withGeneratedKey(): V4Interaction {
-      return AsynchronousMessage(generateKey(), description, contents, interactionId, providerStates, comments)
+      return AsynchronousMessage(generateKey(), description, contents, interactionId, providerStates, comments,
+        pending, pluginConfiguration)
     }
 
-    @ExperimentalUnsignedTypes
     override fun generateKey(): String {
       val builder = HashCodeBuilder(33, 7)
         .append(description)
@@ -225,8 +249,13 @@ sealed class V4Interaction(
       if (providerStates.isNotEmpty()) {
         map["providerStates"] = providerStates.map { it.toMap() }
       }
+
       if (comments.isNotEmpty()) {
         map["comments"] = comments
+      }
+
+      if (pluginConfiguration.isNotEmpty()) {
+        map["pluginConfiguration"] = pluginConfiguration
       }
 
       return map
@@ -261,14 +290,15 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
     val request: MessageContents = MessageContents(),
-    val response: List<MessageContents> = listOf()
-    ) : V4Interaction(key, description, interactionId, providerStates, comments, pending), MessageInteraction {
+    val response: List<MessageContents> = listOf(),
+    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
+    ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration),
+    MessageInteraction {
     override fun withGeneratedKey(): V4Interaction {
       return SynchronousMessages(generateKey(), description, interactionId, providerStates, comments, pending,
-        request, response)
+        request, response, pluginConfiguration)
     }
 
-    @ExperimentalUnsignedTypes
     override fun generateKey(): String {
       val builder = HashCodeBuilder(33, 7)
         .append(description)
@@ -294,8 +324,13 @@ sealed class V4Interaction(
       if (providerStates.isNotEmpty()) {
         map["providerStates"] = providerStates.map { it.toMap() }
       }
+
       if (comments.isNotEmpty()) {
         map["comments"] = comments
+      }
+
+      if (pluginConfiguration.isNotEmpty()) {
+        map["pluginConfiguration"] = pluginConfiguration
       }
 
       return map
@@ -349,15 +384,24 @@ sealed class V4Interaction(
               mutableMapOf()
             }
             val pending = json["pending"].asBoolean() ?: false
+            val pluginConfiguration = if (json.has("pluginConfiguration")) {
+              json["pluginConfiguration"].asObject()!!.entries.map {
+                it.key to (it.value.asObject()?.entries ?: mutableMapOf())
+              }.associate { it }
+            } else {
+              mutableMapOf()
+            }
 
             when (result.value) {
               V4InteractionType.SynchronousHTTP -> {
-                Ok(SynchronousHttp(key, description, providerStates, HttpRequest.fromJson(json["request"]),
-                  HttpResponse.fromJson(json["response"]), id, comments, pending))
+                Ok(SynchronousHttp(
+                  key, description, providerStates, HttpRequest.fromJson(json["request"]),
+                  HttpResponse.fromJson(json["response"]), id, comments, pending, pluginConfiguration.toMutableMap()
+                ))
               }
               V4InteractionType.AsynchronousMessages -> {
                 Ok(AsynchronousMessage(key, description, MessageContents.fromJson(json), id,
-                  providerStates, comments, pending))
+                  providerStates, comments, pending, pluginConfiguration.toMutableMap()))
               }
               V4InteractionType.SynchronousMessages -> {
                 val request = if (json.has("request"))
@@ -366,7 +410,8 @@ sealed class V4Interaction(
                 val response = if (json.has("response"))
                   json["response"].asArray().map { MessageContents.fromJson(it) }
                   else listOf()
-                Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request, response))
+                Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request, response,
+                  pluginConfiguration.toMutableMap()))
               }
             }
           }
