@@ -704,7 +704,7 @@ fun <M : Mismatch> matchSemver(
   val matches = try {
     Version.valueOf(asText)
     true
-  } catch (ex: ParseException) {
+  } catch (ex: com.github.zafarkhaja.semver.ParseException) {
     false
   } catch (ex: UnexpectedCharacterException) {
     false

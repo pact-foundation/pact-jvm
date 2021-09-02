@@ -11,7 +11,11 @@ class PluginContentMatcher(
   override fun matchBody(expected: OptionalBody, actual: OptionalBody, context: MatchingContext): BodyMatchResult {
     val result = contentMatcher.invokeContentMatcher(expected, actual, context.allowUnexpectedKeys,
       context.matchers.matchingRules)
-    val bodyResults = emptyList<BodyItemMatchResult>()
+    val bodyResults = result.entries.map { mismatch ->
+      BodyItemMatchResult(mismatch.key, mismatch.value.map {
+        BodyMismatch(it.expected, it.actual, it.mismatch, it.path, it.diff)
+      })
+    }
     return BodyMatchResult(null, bodyResults)
   }
 
