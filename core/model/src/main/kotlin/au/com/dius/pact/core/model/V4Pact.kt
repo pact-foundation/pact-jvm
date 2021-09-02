@@ -459,8 +459,8 @@ open class V4Pact @JvmOverloads constructor(
   }
 
   private fun merge(interactions: List<Interaction>): List<Interaction> {
-    val mergedResult = this.interactions.associateBy { (it as V4Interaction).generateKey() } +
-      interactions.map { it.asV4Interaction() }.associateBy { it.generateKey() }
+    val mergedResult = this.interactions.map { it.asV4Interaction().withGeneratedKey() }.associateBy { it.key } +
+      interactions.map { it.asV4Interaction().withGeneratedKey() }.associateBy { it.key }
     return mergedResult.values.toList()
   }
 
