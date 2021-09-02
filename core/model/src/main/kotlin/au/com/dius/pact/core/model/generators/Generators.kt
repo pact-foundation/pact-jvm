@@ -251,12 +251,12 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
   /**
    * If there are no generators
    */
-  fun isEmpty() = categories.isEmpty()
+  fun isEmpty() = categories.isEmpty() || categories.all { it.value.isEmpty() }
 
   /**
    * If there are generators
    */
-  fun isNotEmpty() = categories.isNotEmpty()
+  fun isNotEmpty() = categories.isNotEmpty() && categories.any { it.value.isNotEmpty() }
 
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     if (pactSpecVersion < PactSpecVersion.V3) {
@@ -265,8 +265,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return categories.entries.associate { (key, value) ->
       when (key) {
         Category.METHOD, Category.PATH, Category.STATUS ->
-          key.name.toLowerCase() to value[""]!!.toMap(pactSpecVersion)
-        else -> key.name.toLowerCase() to value.entries.associate { (genKey, generator) ->
+          key.name.lowercase() to value[""]!!.toMap(pactSpecVersion)
+        else -> key.name.lowercase() to value.entries.associate { (genKey, generator) ->
           genKey to generator.toMap(pactSpecVersion)
         }
       }
