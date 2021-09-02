@@ -428,8 +428,8 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       Pair(pact.consumer, pact.provider),
       Pair(pact, version)
     ) { (currentPact, currentVersion), _ ->
-      currentPact.mergeInteractions(pact.interactions)
-      Pair(currentPact, maxOf(version, currentVersion))
+      val mergedPact = currentPact.mergeInteractions(pact.interactions) as BasePact
+      Pair(mergedPact, maxOf(version, currentVersion))
     }
   }
 
