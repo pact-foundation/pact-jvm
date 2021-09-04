@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.26 - Bugfix Release
+
+* 13f943d76 - chore: remove kotlinter from the project (Ronald Holshausen, Sat Sep 4 13:16:15 2021 +1000)
+* 8ef861125 - feat: force standalone="yes" when standalone is set to true on the XML builder #1414 (Ronald Holshausen, Sat Sep 4 13:02:14 2021 +1000)
+* 3c752cd1c - fix: allow Gradle providerTags to be an array #1423 (Ronald Holshausen, Sat Sep 4 12:52:36 2021 +1000)
+* d8bb675ce - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* 54d6ca8e6 - bump version to 4.1.26 (Ronald Holshausen, Sun Aug 22 18:21:26 2021 +1000)
+
 # 4.2.10 - Bugfix Release
 
 * 185061e9b - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Aug 22 18:23:38 2021 +1000)
