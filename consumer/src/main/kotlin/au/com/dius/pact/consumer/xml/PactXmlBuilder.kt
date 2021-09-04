@@ -77,6 +77,10 @@ class PactXmlBuilder @JvmOverloads constructor (
   fun asBytes(charset: Charset? = null): ByteArray {
     val transformer = TransformerFactory.newInstance().newTransformer()
     transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+    if (standalone) {
+      transformer.setOutputProperty(OutputKeys.STANDALONE, "yes")
+    }
+    
     val source = DOMSource(doc)
     val outputStream = ByteArrayOutputStream()
     val result = if (charset != null) {
