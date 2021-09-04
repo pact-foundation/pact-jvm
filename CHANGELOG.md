@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.11 - Bugfix Release
+
+* c9b8ffae8 - Merge branch 'v4.1.x' (Ronald Holshausen, Sat Sep 4 14:47:19 2021 +1000)
+* fd4130c12 - bump version to 4.1.27 (Ronald Holshausen, Sat Sep 4 14:31:39 2021 +1000)
+* 005d3a715 - update changelog for release 4.1.26 (Ronald Holshausen, Sat Sep 4 14:18:01 2021 +1000)
+* 13f943d76 - chore: remove kotlinter from the project (Ronald Holshausen, Sat Sep 4 13:16:15 2021 +1000)
+* 8ef861125 - feat: force standalone="yes" when standalone is set to true on the XML builder #1414 (Ronald Holshausen, Sat Sep 4 13:02:14 2021 +1000)
+* 3c752cd1c - fix: allow Gradle providerTags to be an array #1423 (Ronald Holshausen, Sat Sep 4 12:52:36 2021 +1000)
+* df86c8ad9 - chore: readme (Ronald Holshausen, Mon Aug 30 08:32:14 2021 +1000)
+* 99ee06630 - Merge pull request #1424 from darshna09/patch-1 (Ronald Holshausen, Sun Aug 29 22:52:15 2021 +1000)
+* d4751bea6 - feat(Maven): Add the ability to dynamically set the provider host/port from an expression #1412 (Ronald Holshausen, Sun Aug 29 12:02:49 2021 +1000)
+* d3f49648c - refactor: allow expression parser to be extended to allow start and end markers to be changed #1412 (Ronald Holshausen, Sun Aug 29 11:28:35 2021 +1000)
+* 89a0ec614 - Merge pull request #1420 from JapuDCret/patch-2 (Ronald Holshausen, Sun Aug 29 10:20:46 2021 +1000)
+* d8bb675ce - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
+* 89f2a56c5 - Merge pull request #1421 from JapuDCret/plugin-handle-404-correctly (Ronald Holshausen, Sun Aug 29 10:03:30 2021 +1000)
+* d1d33cd15 - Correcting definition for arrayMinLike. (darshna, Tue Aug 24 12:30:16 2021 +0530)
+* b462966e5 - Merge branch 'v4.1.x' (Ronald Holshausen, Tue Aug 24 11:39:55 2021 +1000)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* a6be37e5f - chore: upgrade kotlin-result (Ronald Holshausen, Tue Aug 24 10:37:29 2021 +1000)
+* 65b3b4dd4 - bump version to 4.2.10 in README (JapuDCret, Mon Aug 23 15:28:59 2021 +0200)
+* a7d66d873 - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
+* 8d66ef8f1 - bump version to 4.2.11 (Ronald Holshausen, Sun Aug 22 19:04:57 2021 +1000)
+
 # 4.1.26 - Bugfix Release
 
 * 13f943d76 - chore: remove kotlinter from the project (Ronald Holshausen, Sat Sep 4 13:16:15 2021 +1000)
