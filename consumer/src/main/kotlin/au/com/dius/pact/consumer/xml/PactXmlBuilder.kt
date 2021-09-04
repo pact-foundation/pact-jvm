@@ -80,7 +80,7 @@ class PactXmlBuilder @JvmOverloads constructor (
     if (standalone) {
       transformer.setOutputProperty(OutputKeys.STANDALONE, "yes")
     }
-    
+
     val source = DOMSource(doc)
     val outputStream = ByteArrayOutputStream()
     val result = if (charset != null) {
