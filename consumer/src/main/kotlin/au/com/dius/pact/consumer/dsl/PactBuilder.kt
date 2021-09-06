@@ -33,7 +33,7 @@ import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.ContentMatcher
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
-import io.pact.plugins.jvm.core.PactPluginEntryFoundException
+import io.pact.plugins.jvm.core.PactPluginEntryNotFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
 import mu.KLogging
 import java.nio.file.Path
@@ -115,7 +115,7 @@ open class PactBuilder(
     when {
       entry == null -> {
         logger.error { "No interaction type of '$interactionType' was found in the catalogue" }
-        throw PactPluginEntryFoundException(interactionType)
+        throw PactPluginEntryNotFoundException(interactionType)
       }
       entry.type == CatalogueEntryType.INTERACTION -> {
         currentInteraction = forEntry(entry, description, key)
