@@ -29,7 +29,18 @@ class PactVerificationTask extends PactVerificationBaseTask {
         project.sourceSets.test.runtimeClasspath*.toURL()
       }
       providerVersion = providerToVerify.providerVersion ?: { project.version }
-      providerTags = providerToVerify.providerTags
+      if (providerToVerify.providerTags) {
+        if (providerToVerify.providerTags instanceof Closure ) {
+          providerTags = providerToVerify.providerTags
+        } else if (providerToVerify.providerTags instanceof List) {
+          providerTags = { providerToVerify.providerTags }
+        } else if (providerToVerify.providerTags instanceof String) {
+          providerTags = { [ providerToVerify.providerTags ] }
+        } else {
+          throw new GradleScriptException(
+            "${providerToVerify.providerTags} is not a valid value for providerTags", null)
+        }
+      }
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')

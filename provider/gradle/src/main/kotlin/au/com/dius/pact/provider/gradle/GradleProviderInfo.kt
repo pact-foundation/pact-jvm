@@ -18,7 +18,7 @@ import java.net.URL
  */
 open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo(name) {
   var providerVersion: Any? = null
-  var providerTags: Closure<List<String>>? = null
+  var providerTags: Any? = null
   var brokerConfig: PactBrokerConsumerConfig? = null
 
   open fun hasPactWith(consumer: String, closure: Closure<*>): IConsumerInfo {
