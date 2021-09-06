@@ -1,6 +1,11 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser
+import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
@@ -12,6 +17,7 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.ProviderVersion
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.reporters.ReporterManager
+import com.github.michaelbull.result.getOrElse
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
@@ -50,6 +56,8 @@ open class PactProviderMojo : PactBaseMojo() {
 
   @Parameter(defaultValue = "console")
   lateinit var reports: List<String>
+
+  private val expressionParser = ExpressionParser("{{", "}}")
 
   override fun execute() {
     systemPropertyVariables.forEach { (property, value) ->
@@ -91,8 +99,22 @@ open class PactProviderMojo : PactBaseMojo() {
 
     try {
       val failures = serviceProviders.flatMap { provider ->
+        provider.host = if (provider.host is String) {
+          expressionParser.parseExpression(provider.host as String, DataType.RAW)
+        } else provider.host
+        provider.port = if (provider.port is String) {
+          expressionParser.parseExpression(provider.port as String, DataType.RAW)
+        } else provider.port
+
         val consumers = mutableListOf<IConsumerInfo>()
-        consumers.addAll(provider.consumers)
+        consumers.addAll(provider.consumers.map {
+          if (it.pactSource is String) {
+            it.pactSource = FileSource(File(it.pactSource as String))
+            it
+          } else {
+            it
+          }
+        })
         if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory!!))
         }
@@ -187,7 +209,21 @@ open class PactProviderMojo : PactBaseMojo() {
           ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) }
         consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors))
       }
-      else -> consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), emptyList()))
+      else -> consumers.addAll(
+              handleWith<List<ConsumerInfo>> {
+                provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), emptyList())
+              }.getOrElse { handleException(it) }
+      )
+    }
+  }
+
+  private fun handleException(exception: Exception): List<ConsumerInfo> {
+    return when (exception) {
+      is NotFoundHalResponse -> when {
+        failIfNoPactsFound -> throw exception
+        else -> emptyList()
+      }
+      else -> throw exception
     }
   }
 

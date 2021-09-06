@@ -8,6 +8,7 @@ import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.InvalidNavigationRequest
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.junitsupport.loader.VersionSelector
@@ -45,6 +46,7 @@ class PactBrokerLoaderSpec extends Specification {
   private Pact mockPact
   private PactReader mockReader
   private ValueResolver valueResolver
+  private ExpressionParser expressionParser
 
   void setup() {
     host = 'pactbroker'
@@ -65,11 +67,13 @@ class PactBrokerLoaderSpec extends Specification {
       loadPact(_) >> mockPact
     }
     valueResolver = null
+    expressionParser = new ExpressionParser()
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       IPactBrokerClient client = brokerClient
       def loader = new PactBrokerLoader(host, port, protocol, tags, consumerVersionSelectors, consumers,
-        failIfNoPactsFound, null, null, valueResolver, enablePendingPacts, providerTags, includeWipPactsSince, url) {
+        failIfNoPactsFound, null, null, valueResolver, enablePendingPacts, providerTags, includeWipPactsSince, url,
+        expressionParser) {
         @Override
         IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           client

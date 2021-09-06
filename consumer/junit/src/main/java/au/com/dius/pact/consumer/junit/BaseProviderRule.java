@@ -30,9 +30,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import au.com.dius.pact.core.support.expressions.ExpressionParser;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
-import static au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression;
 
 public class BaseProviderRule extends ExternalResource {
 
@@ -41,12 +41,14 @@ public class BaseProviderRule extends ExternalResource {
   protected MockProviderConfig config;
   private Map<String, BasePact> pacts;
   private MockServer mockServer;
+  private final ExpressionParser ep;
 
   public BaseProviderRule(Object target, String provider, String hostInterface, Integer port, PactSpecVersion pactVersion) {
     this.target = target;
     this.provider = provider;
     config = MockProviderConfig.httpConfig(StringUtils.isEmpty(hostInterface) ? MockProviderConfig.LOCALHOST : hostInterface,
       port == null ? 0 : port, pactVersion, MockServerImplementation.Default);
+    ep = new ExpressionParser();
   }
 
   public MockProviderConfig getConfig() {
@@ -119,7 +121,7 @@ public class BaseProviderRule extends ExternalResource {
       Method method = possiblePactMethod.get();
       Pact pactAnnotation = method.getAnnotation(Pact.class);
       PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
-              parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
+              ep.parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
         .pactSpecVersion(config.getPactVersion())
         .hasPactWith(provider);
       updateAnyDefaultValues(dslBuilder);
@@ -158,7 +160,7 @@ public class BaseProviderRule extends ExternalResource {
       String pactFragment = pactVerification.fragment();
       for (Method method : target.getClass().getMethods()) {
           Pact pact = method.getAnnotation(Pact.class);
-          if (pact != null && provider.equals(parseExpression(pact.provider(), DataType.RAW).toString())
+          if (pact != null && provider.equals(ep.parseExpression(pact.provider(), DataType.RAW).toString())
                   && (pactFragment.isEmpty() || pactFragment.equals(method.getName()))) {
 
               validatePactSignature(method);
@@ -211,10 +213,10 @@ public class BaseProviderRule extends ExternalResource {
       for (Method m: target.getClass().getMethods()) {
         if (JUnitTestSupport.conformsToSignature(m, config.getPactVersion()) && methodMatchesFragment(m, fragment)) {
           Pact pactAnnotation = m.getAnnotation(Pact.class);
-          String provider = parseExpression(pactAnnotation.provider(), DataType.RAW).toString();
+          String provider = ep.parseExpression(pactAnnotation.provider(), DataType.RAW).toString();
           if (StringUtils.isEmpty(provider) || this.provider.equals(provider)) {
             PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
-                parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
+                ep.parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
               .pactSpecVersion(config.getPactVersion())
               .hasPactWith(this.provider);
             updateAnyDefaultValues(dslBuilder);

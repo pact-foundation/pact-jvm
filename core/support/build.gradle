@@ -11,7 +11,7 @@ dependencies {
     exclude group: 'org.jetbrains.kotlin'
   }
   api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
-  api('com.michael-bull.kotlin-result:kotlin-result:1.1.10') {
+  api('com.michael-bull.kotlin-result:kotlin-result:1.1.12') {
     exclude group: 'org.jetbrains.kotlin'
   }
 

@@ -20,7 +20,7 @@ open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo
   var providerVersion: Any? = null
   @Deprecated("Use providerTags instead")
   var providerTag: String? = null
-  var providerTags: Closure<List<String>>? = null
+  var providerTags: Any? = null
   var brokerConfig: PactBrokerConsumerConfig? = null
 
   open fun hasPactWith(consumer: String, closure: Closure<*>): IConsumerInfo {

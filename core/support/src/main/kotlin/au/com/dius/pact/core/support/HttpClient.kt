@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.support
 
 import au.com.dius.pact.core.support.expressions.DataType
-import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import mu.KLogging
 import org.apache.http.auth.AuthScope
@@ -38,11 +38,13 @@ sealed class Auth {
    */
   data class BearerAuthentication(val token: String) : Auth()
 
-  fun resolveProperties(resolver: ValueResolver): Auth {
+  @JvmOverloads
+  fun resolveProperties(resolver: ValueResolver, ep: ExpressionParser = ExpressionParser()): Auth {
     return when (this) {
-      is BasicAuthentication -> BasicAuthentication(parseExpression(this.username, DataType.RAW, resolver).toString(),
-          parseExpression(this.password, DataType.RAW, resolver).toString())
-      is BearerAuthentication -> BearerAuthentication(parseExpression(this.token, DataType.RAW, resolver).toString())
+      is BasicAuthentication -> BasicAuthentication(
+        ep.parseExpression(this.username, DataType.RAW, resolver).toString(),
+        ep.parseExpression(this.password, DataType.RAW, resolver).toString())
+      is BearerAuthentication -> BearerAuthentication(ep.parseExpression(this.token, DataType.RAW, resolver).toString())
     }
   }
 }

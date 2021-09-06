@@ -241,8 +241,8 @@ If the root of the body is an array, you can create PactDslJsonArray classes wit
 | function | description |
 |----------|-------------|
 | `arrayEachLike` | Ensure that each item in the list matches the provided example |
-| `arrayMinLike` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max |
-| `arrayMaxLike` | Ensure that each item in the list matches the provided example and the list is no smaller than the provided min |
+| `arrayMaxLike` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max |
+| `arrayMinLike` | Ensure that each item in the list matches the provided example and the list is no smaller than the provided min |
 
 For example:
 

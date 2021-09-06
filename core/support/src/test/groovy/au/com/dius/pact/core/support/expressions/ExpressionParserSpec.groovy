@@ -11,24 +11,26 @@ import static ExpressionParser.VALUES_SEPARATOR
 class ExpressionParserSpec extends Specification {
 
   private ValueResolver valueResolver
+  private ExpressionParser expressionParser
 
   def setup() {
     valueResolver = [
       resolveValue: { expression -> "[$expression]".toString() }
     ] as ValueResolver
+    expressionParser = new ExpressionParser()
   }
 
   def 'Does Not Modify Strings With No Expressions'() {
     expect:
-    ExpressionParser.parseExpression(null, DataType.RAW) == null
-    ExpressionParser.parseExpression('', DataType.RAW) == ''
-    ExpressionParser.parseExpression('hello world', DataType.RAW) == 'hello world'
-    ExpressionParser.parseExpression('looks like a $', DataType.RAW) == 'looks like a $'
+    expressionParser.parseExpression(null, DataType.RAW) == null
+    expressionParser.parseExpression('', DataType.RAW) == ''
+    expressionParser.parseExpression('hello world', DataType.RAW) == 'hello world'
+    expressionParser.parseExpression('looks like a $', DataType.RAW) == 'looks like a $'
   }
 
   def 'Throws An Exception On Unterminated Expressions'() {
     when:
-    ExpressionParser.parseExpression('${value', DataType.RAW)
+    expressionParser.parseExpression('${value', DataType.RAW)
 
     then:
     thrown(RuntimeException)
@@ -38,7 +40,7 @@ class ExpressionParserSpec extends Specification {
   @SuppressWarnings('UnnecessaryBooleanExpression')
   def 'Replaces The Expression With System Properties'() {
     expect:
-    ExpressionParser.parseExpression(expression, DataType.RAW, valueResolver) == result
+    expressionParser.parseExpression(expression, DataType.RAW, valueResolver) == result
 
     where:
 
@@ -51,15 +53,23 @@ class ExpressionParserSpec extends Specification {
     '$${value}}'           || '$[value]}'
   }
 
+  def 'with overridden expression markers'() {
+    given:
+    expressionParser = new ExpressionParser('<<', '>>')
+
+    expect:
+    expressionParser.parseExpression('  <<value>>  ', DataType.RAW, valueResolver) == '  [value]  '
+  }
+
   def 'Handles Empty Expression'() {
     expect:
-    ExpressionParser.parseExpression('${}', DataType.RAW) == ''
-    ExpressionParser.parseExpression('${} ${} ${}', DataType.RAW) == '  '
+    expressionParser.parseExpression('${}', DataType.RAW) == ''
+    expressionParser.parseExpression('${} ${} ${}', DataType.RAW) == '  '
   }
 
   def 'Handles single value as list'() {
     when:
-    def values = ExpressionParser.parseListExpression('${value}', valueResolver)
+    def values = expressionParser.parseListExpression('${value}', valueResolver)
 
     then:
     values.size() == 1
@@ -72,7 +82,7 @@ class ExpressionParserSpec extends Specification {
     ValueResolver valueResolver = [ resolveValue: { expectedValues.join(VALUES_SEPARATOR) } ] as ValueResolver
 
     when:
-    def values = ExpressionParser.parseListExpression('${value}',  valueResolver)
+    def values = expressionParser.parseListExpression('${value}',  valueResolver)
 
     then:
     values == expectedValues
@@ -84,7 +94,7 @@ class ExpressionParserSpec extends Specification {
     List<String> expectedValues = ['one', 'two']
 
     when:
-    def values = ExpressionParser.parseListExpression("\${one}$VALUES_SEPARATOR\${two}",  valueResolver)
+    def values = expressionParser.parseListExpression("\${one}$VALUES_SEPARATOR\${two}",  valueResolver)
 
     then:
     values == expectedValues
@@ -96,7 +106,7 @@ class ExpressionParserSpec extends Specification {
     String expectedValue = 'one'
 
     when:
-    def values = ExpressionParser.parseListExpression("\${one}$VALUES_SEPARATOR",  valueResolver)
+    def values = expressionParser.parseListExpression("\${one}$VALUES_SEPARATOR",  valueResolver)
 
     then:
     values == [expectedValue]
@@ -106,7 +116,7 @@ class ExpressionParserSpec extends Specification {
   @SuppressWarnings('UnnecessaryBooleanExpression')
   def 'with a defined type, converts the expression into the correct type'() {
     expect:
-    ExpressionParser.parseExpression('${expression}', type, [
+    expressionParser.parseExpression('${expression}', type, [
       resolveValue: { value.toString() }
     ] as ValueResolver) == result
 
@@ -134,20 +144,20 @@ class ExpressionParserSpec extends Specification {
     List<String> expectedValues = ['one', 'two']
 
     when:
-    def values = ExpressionParser.parseListExpression("\${one}$VALUES_SEPARATOR \${two}",  valueResolver)
+    def values = expressionParser.parseListExpression("\${one}$VALUES_SEPARATOR \${two}",  valueResolver)
 
     then:
     values == expectedValues
   }
 
   @RestoreSystemProperties
-  def 'supports overridden expression markers'() {
+  def 'supports overridden expression markers with sys prop'() {
     given:
     System.setProperty('pact.expressions.start', '<<')
     System.setProperty('pact.expressions.end', '>>')
 
     when:
-    def value = ExpressionParser.parseExpression(' <<value>> ', DataType.RAW, valueResolver, true)
+    def value = expressionParser.parseExpression(' <<value>> ', DataType.RAW, valueResolver, true)
 
     then:
     value == ' [value] '
@@ -155,67 +165,67 @@ class ExpressionParserSpec extends Specification {
 
   def 'toDefaultExpressions does nothing if the expression markers are not overridden'() {
     expect:
-    ExpressionParser.toDefaultExpressions('${1} ${2} ${3}') == '${1} ${2} ${3}'
+    expressionParser.toDefaultExpressions('${1} ${2} ${3}') == '${1} ${2} ${3}'
   }
 
   @RestoreSystemProperties
-  def 'toDefaultExpressions restores the start marker if overridden'() {
+  def 'toDefaultExpressions restores the start marker if overridden with sys prop'() {
     given:
     System.setProperty('pact.expressions.start', '->')
 
     expect:
-    ExpressionParser.toDefaultExpressions('->1} ${2} ->3}') == '${1} ${2} ${3}'
+    expressionParser.toDefaultExpressions('->1} ${2} ->3}') == '${1} ${2} ${3}'
   }
 
   @RestoreSystemProperties
-  def 'toDefaultExpressions restores the end marker if overridden'() {
+  def 'toDefaultExpressions restores the end marker if overridden with sys prop'() {
     given:
     System.setProperty('pact.expressions.end', '<-')
 
     expect:
-    ExpressionParser.toDefaultExpressions('${1<- ${2} ${3<-') == '${1} ${2} ${3}'
+    expressionParser.toDefaultExpressions('${1<- ${2} ${3<-') == '${1} ${2} ${3}'
   }
 
   @RestoreSystemProperties
-  def 'toDefaultExpressions restores the markers if overridden'() {
+  def 'toDefaultExpressions restores the markers if overridden with sys prop'() {
     given:
     System.setProperty('pact.expressions.start', '->')
     System.setProperty('pact.expressions.end', '<-')
 
     expect:
-    ExpressionParser.toDefaultExpressions('->1<- ${2} ->3<-') == '${1} ${2} ${3}'
+    expressionParser.toDefaultExpressions('->1<- ${2} ->3<-') == '${1} ${2} ${3}'
   }
 
   def 'correctExpressionMarkers does nothing if the expression markers are not overridden'() {
     expect:
-    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1} ${2} ${3}'
+    expressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1} ${2} ${3}'
   }
 
   @RestoreSystemProperties
-  def 'correctExpressionMarkers updates the start marker if overridden'() {
+  def 'correctExpressionMarkers updates the start marker if overridden with sys prop'() {
     given:
     System.setProperty('pact.expressions.start', 'xx')
 
     expect:
-    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1} xx2} xx3}'
+    expressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1} xx2} xx3}'
   }
 
   @RestoreSystemProperties
-  def 'correctExpressionMarkers updates the end marker if overridden'() {
+  def 'correctExpressionMarkers updates the end marker if overridden with sys prop'() {
     given:
     System.setProperty('pact.expressions.end', 'xx')
 
     expect:
-    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1xx ${2xx ${3xx'
+    expressionParser.correctExpressionMarkers('${1} ${2} ${3}') == '${1xx ${2xx ${3xx'
   }
 
   @RestoreSystemProperties
-  def 'correctExpressionMarkers updates the markers if overridden'() {
+  def 'correctExpressionMarkers updates the markers if overridden with sys prop'() {
     given:
     System.setProperty('pact.expressions.start', 'xx')
     System.setProperty('pact.expressions.end', 'yy')
 
     expect:
-    ExpressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1yy xx2yy xx3yy'
+    expressionParser.correctExpressionMarkers('${1} ${2} ${3}') == 'xx1yy xx2yy xx3yy'
   }
 }

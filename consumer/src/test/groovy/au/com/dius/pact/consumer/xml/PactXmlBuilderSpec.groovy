@@ -134,7 +134,7 @@ class PactXmlBuilderSpec extends Specification {
     where:
 
     standalone | value
-    true       | '<?xml version="1.0" encoding="UTF-8"?>'
+    true       | '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     false      | '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
   }
 }

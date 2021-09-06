@@ -14,8 +14,7 @@ import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.support.Utils.permutations
 import au.com.dius.pact.core.support.expressions.DataType
-import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
-import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
@@ -56,7 +55,8 @@ open class PactBrokerLoader(
   val enablePendingPacts: String = "false",
   val providerTags: List<String> = emptyList(),
   val includeWipPactsSince: String = "",
-  val pactBrokerUrl: String? = null
+  val pactBrokerUrl: String? = null,
+  val ep: ExpressionParser = ExpressionParser()
 ) : OverrideablePactLoader {
 
   private var resolver: ValueResolver? = valueResolver
@@ -85,9 +85,9 @@ open class PactBrokerLoader(
   override fun description(): String {
     val resolver = setupValueResolver()
     val consumerVersionSelectors = buildConsumerVersionSelectors(resolver)
-    val consumers = pactBrokerConsumers.flatMap { parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
+    val consumers = pactBrokerConsumers.flatMap { ep.parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
     var source = getPactBrokerSource(resolver).description()
-    if (!consumerVersionSelectors.isNullOrEmpty()) {
+    if (consumerVersionSelectors.isNotEmpty()) {
       source += " consumerVersionSelectors=$consumerVersionSelectors"
     }
     if (consumers.isNotEmpty()) {
@@ -125,16 +125,16 @@ open class PactBrokerLoader(
   }
 
   fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
-    val tags = pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }
+    val tags = pactBrokerTags.orEmpty().flatMap { ep.parseListExpression(it, resolver) }
     return if (shouldFallBackToTags(tags, pactBrokerConsumerVersionSelectors, resolver)) {
-      permutations(tags, pactBrokerConsumers.flatMap { parseListExpression(it, resolver) })
+      permutations(tags, pactBrokerConsumers.flatMap { ep.parseListExpression(it, resolver) })
         .map { ConsumerVersionSelector(it.first, consumer = it.second) }
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
-        val tags = parseListExpression(it.tag, resolver)
-        val consumer = parseExpression(it.consumer, DataType.STRING, resolver) as String?
-        val fallbackTag = parseExpression(it.fallbackTag, DataType.STRING, resolver) as String?
-        val parsedLatest = parseListExpression(it.latest, resolver)
+        val tags = ep.parseListExpression(it.tag, resolver)
+        val consumer = ep.parseExpression(it.consumer, DataType.STRING, resolver) as String?
+        val fallbackTag = ep.parseExpression(it.fallbackTag, DataType.STRING, resolver) as String?
+        val parsedLatest = ep.parseListExpression(it.latest, resolver)
         val latest = when {
           parsedLatest.isEmpty() -> List(tags.size) { true.toString() }
           parsedLatest.size == 1 -> parsedLatest.padTo(tags.size, parsedLatest[0])
@@ -162,8 +162,8 @@ open class PactBrokerLoader(
   }
 
   fun shouldFallBackToTags(tags: List<String>, selectors: List<VersionSelector>, resolver: ValueResolver): Boolean {
-    return selectors.isEmpty() || (selectors.size == 1 && parseListExpression(selectors[0].tag, resolver).isEmpty() &&
-      tags.isNotEmpty())
+    return selectors.isEmpty() ||
+      (selectors.size == 1 && ep.parseListExpression(selectors[0].tag, resolver).isEmpty() && tags.isNotEmpty())
   }
 
   private fun setupValueResolver(): ValueResolver {
@@ -203,15 +203,17 @@ open class PactBrokerLoader(
   ): List<Pact> {
     logger.debug { "Loading pacts from pact broker for provider $providerName and consumer version selectors " +
       "$selectors" }
-    val pending = parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
-    val providerTags = providerTags.flatMap { parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
+    val pending = ep.parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
+    val providerTags = providerTags.flatMap { ep.parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
     if (pending && providerTags.none { it.isNotEmpty() }) {
       throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags have been " +
         "specified. To use the pending pacts feature, you need to provide the list of provider names for the " +
         "provider application version with the providerTags property that will be published with the verification " +
         "results.")
     }
-    val wipSinceDate = if (pending) parseExpression(includeWipPactsSince, DataType.STRING, resolver) as String else ""
+    val wipSinceDate = if (pending) {
+      ep.parseExpression(includeWipPactsSince, DataType.STRING, resolver) as String
+    } else ""
 
     val uriBuilder = brokerUrl(resolver)
     try {
@@ -230,7 +232,7 @@ open class PactBrokerLoader(
       }
 
       if (pactBrokerConsumers.isNotEmpty()) {
-        val consumerInclusions = pactBrokerConsumers.flatMap { parseListExpression(it, resolver) }
+        val consumerInclusions = pactBrokerConsumers.flatMap { ep.parseListExpression(it, resolver) }
         consumers = consumers.filter { it.usedNewEndpoint || consumerInclusions.isEmpty() ||
           consumerInclusions.contains(it.name) }
       }
@@ -256,10 +258,10 @@ open class PactBrokerLoader(
   }
 
   fun getPactBrokerSource(resolver: ValueResolver): PactBrokerSource<Interaction> {
-    val scheme = parseExpression(pactBrokerScheme, DataType.RAW, resolver)?.toString()
-    val host = parseExpression(pactBrokerHost, DataType.RAW, resolver)?.toString()
-    val port = parseExpression(pactBrokerPort, DataType.RAW, resolver)?.toString()
-    val url = parseExpression(pactBrokerUrl, DataType.RAW, resolver)?.toString()
+    val scheme = ep.parseExpression(pactBrokerScheme, DataType.RAW, resolver)?.toString()
+    val host = ep.parseExpression(pactBrokerHost, DataType.RAW, resolver)?.toString()
+    val port = ep.parseExpression(pactBrokerPort, DataType.RAW, resolver)?.toString()
+    val url = ep.parseExpression(pactBrokerUrl, DataType.RAW, resolver)?.toString()
 
     return if (url.isNullOrEmpty()) {
       if (host.isNullOrEmpty() || !host.matches(Regex("[0-9a-zA-Z\\-.]+"))) {
@@ -299,8 +301,8 @@ open class PactBrokerLoader(
     if (authentication == null) {
       logger.debug { "Authentication: None" }
     } else {
-      val username = parseExpression(authentication!!.username, DataType.RAW, resolver)?.toString()
-      val token = parseExpression(authentication!!.token, DataType.RAW, resolver)?.toString()
+      val username = ep.parseExpression(authentication!!.username, DataType.RAW, resolver)?.toString()
+      val token = ep.parseExpression(authentication!!.token, DataType.RAW, resolver)?.toString()
 
       // Check if username is set. If yes, use basic auth.
       if (username.isNotEmpty()) {
@@ -308,7 +310,7 @@ open class PactBrokerLoader(
         options = mapOf(
           "authentication" to listOf(
             "basic", username,
-            parseExpression(authentication!!.password, DataType.RAW, resolver)
+            ep.parseExpression(authentication!!.password, DataType.RAW, resolver)
           )
         )
       // Check if token is set. If yes, use bearer auth.
