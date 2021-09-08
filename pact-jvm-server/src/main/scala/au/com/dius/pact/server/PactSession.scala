@@ -4,8 +4,6 @@ import au.com.dius.pact.core.matchers.{FullRequestMatch, PartialRequestMatch, Re
 import au.com.dius.pact.core.model.{Interaction, OptionalBody, Request, RequestResponseInteraction, Response, Pact => PactModel}
 import org.apache.commons.lang3.StringEscapeUtils
 
-import scala.collection.JavaConverters._
-
 object PactSessionResults {
   val empty = PactSessionResults(Nil, Nil, Nil, Nil)
 }
@@ -25,15 +23,13 @@ case class PactSessionResults(
 }
 
 object PactSession {
-  val empty = PactSession(Seq(), PactSessionResults.empty)
+  val empty = PactSession(None, PactSessionResults.empty)
 
-  def forPact(pact: PactModel) = PactSession(pact.getInteractions.asScala, PactSessionResults.empty)
+  def forPact(pact: PactModel) = PactSession(Some(pact), PactSessionResults.empty)
 }
 
-case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {
+case class PactSession(expected: Option[PactModel], results: PactSessionResults) {
   import scala.collection.JavaConverters._
-
-  private def matcher = new RequestMatching(expected.asInstanceOf[Seq[RequestResponseInteraction]].asJava)
 
   val CrossSiteHeaders = Map[String, java.util.List[String]]("Access-Control-Allow-Origin" -> List("*").asJava)
 
@@ -47,6 +43,7 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
   def receiveRequest(req: Request): (Response, PactSession) = {
     val invalidResponse = invalidRequest(req)
 
+    val matcher = new RequestMatching(expected.get)
     matcher.matchInteraction(req) match {
       case frm: FullRequestMatch =>
         (frm.getInteraction.asInstanceOf[RequestResponseInteraction].getResponse, recordMatched(frm.getInteraction))
@@ -68,7 +65,7 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
   def recordMatched(interaction: Interaction): PactSession =
     copy(results = results addMatched interaction)
 
-  def withTheRestMissing: PactSession = PactSession(Seq(), remainingResults)
+  def withTheRestMissing: PactSession = PactSession(None, remainingResults)
 
-  def remainingResults: PactSessionResults = results.addMissing(expected diff results.matched)
+  def remainingResults: PactSessionResults = results.addMissing(expected.get.getInteractions.asScala diff results.matched)
 }

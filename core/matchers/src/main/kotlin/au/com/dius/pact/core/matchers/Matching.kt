@@ -11,9 +11,14 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
+import io.pact.plugins.jvm.core.PluginConfiguration
 import mu.KLogging
 
-data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpectedKeys: Boolean) {
+data class MatchingContext @JvmOverloads constructor(
+  val matchers: MatchingRuleCategory,
+  val allowUnexpectedKeys: Boolean,
+  val pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
+) {
   @JvmOverloads
   fun matcherDefined(path: List<String>, pathComparator: Comparator<String> = Comparator.naturalOrder()): Boolean {
     return resolveMatchers(path, pathComparator).filter2 { (p, rule) ->
@@ -26,12 +31,11 @@ data class MatchingContext(val matchers: MatchingRuleCategory, val allowUnexpect
   }
 
   private fun resolveMatchers(path: List<String>, pathComparator: Comparator<String>): MatchingRuleCategory {
-    return if (matchers.name == "body" || matchers.name == "content")
-      matchers.filter { Matchers.matchesPath(it, path) > 0 }
-    else if (matchers.name == "header" || matchers.name == "query" || matchers.name == "metadata")
-      matchers.filter { key -> path.all { pathComparator.compare(key, it) == 0 } }
-    else
-      matchers
+    return when (matchers.name) {
+      "body", "content" -> matchers.filter { Matchers.matchesPath(it, path) > 0 }
+      "header", "query", "metadata" -> matchers.filter { key -> path.all { pathComparator.compare(key, it) == 0 } }
+      else -> matchers
+    }
   }
 
   @JvmOverloads
@@ -172,6 +176,7 @@ object Matching : KLogging() {
     else MethodMismatch(expected, actual)
 
   fun matchBody(expected: HttpPart, actual: HttpPart, context: MatchingContext): BodyMatchResult {
+    logger.debug { "matchBody: context=$context" }
     val expectedContentType = expected.determineContentType()
     val actualContentType = actual.determineContentType()
     return if (expectedContentType.getBaseType() == actualContentType.getBaseType()) {

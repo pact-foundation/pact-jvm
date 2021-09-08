@@ -148,7 +148,7 @@ object Matchers : KLogging() {
           for ((index, variant) in variants.withIndex()) {
             if (index < expectedList.size) {
               val expectedValue = expectedList[index]
-              val newContext = MatchingContext(variant.second, context.allowUnexpectedKeys)
+              val newContext = MatchingContext(variant.second, context.allowUnexpectedKeys, context.pluginConfiguration)
               val noneMatched = actualList.withIndex().all { (actualIndex, value) ->
                 val variantResult = callback(listOf("$"), expectedValue, value, newContext)
                 val mismatches = variantResult.flatMap { it.result }

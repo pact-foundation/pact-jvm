@@ -23,6 +23,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.deepMerge
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -271,13 +272,18 @@ open class PactBuilder(
     if (generators != null) {
       part.generators.addGenerators(generators)
     }
+
     logger.debug { "Http part from plugin: $part" }
+    logger.debug { "Plugin config: $config" }
 
     if (config.interactionConfiguration.isNotEmpty()) {
       interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
     }
     if (config.pactConfiguration.isNotEmpty()) {
       addPluginConfiguration(matcher, config.pactConfiguration)
+    }
+    if (config.interactionMarkup.isNotEmpty()) {
+      interaction.interactionMarkup = config.interactionMarkup
     }
   }
 

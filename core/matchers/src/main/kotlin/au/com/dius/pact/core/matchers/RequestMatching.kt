@@ -2,10 +2,14 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.SynchronousRequestResponse
+import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonValue
+import io.pact.plugins.jvm.core.PluginConfiguration
 import mu.KLogging
 
 sealed class RequestMatch {
@@ -57,11 +61,27 @@ data class PartialRequestMatch(val problems: Map<Interaction, RequestMatchResult
 
 object RequestMismatch : RequestMatch()
 
-class RequestMatching(private val expectedInteractions: List<Interaction>) {
+class RequestMatching(private val expectedPact: Pact) {
   fun matchInteraction(actual: IRequest): RequestMatch {
-    val matches = expectedInteractions
+    val pluginConfiguration = when (expectedPact) {
+      is V4Pact -> expectedPact.pluginData()
+      else -> emptyList()
+    }
+    val matches = expectedPact.interactions
       .filter { it.isSynchronousRequestResponse() }
-      .map { compareRequest(it.asSynchronousRequestResponse()!!, actual) }
+      .map { interaction ->
+        val response = interaction.asSynchronousRequestResponse()!!
+        compareRequest(response, actual, pluginConfiguration.associate {
+          it.name to PluginConfiguration(
+            if (interaction.isV4()) {
+              interaction.asV4Interaction().pluginConfiguration[it.name] ?: emptyMap()
+            } else {
+              emptyMap()
+            }.toMutableMap(),
+            it.configuration.mapValues { (_, value) -> Json.toJson(value) }.toMutableMap()
+          )
+        })
+      }
     return if (matches.isEmpty())
       RequestMismatch
     else
@@ -83,20 +103,31 @@ class RequestMatching(private val expectedInteractions: List<Interaction>) {
         else -> RequestMismatch
       }
 
-    fun compareRequest(expected: SynchronousRequestResponse, actual: IRequest): RequestMatch {
-        val mismatches = requestMismatches(expected.request, actual)
+    @JvmOverloads
+    fun compareRequest(
+      expected: SynchronousRequestResponse,
+      actual: IRequest,
+      pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
+    ): RequestMatch {
+        val mismatches = requestMismatches(expected.request, actual, pluginConfiguration)
         logger.debug { "Request mismatch: $mismatches" }
         return decideRequestMatch(expected, mismatches)
     }
 
     @JvmStatic
-    fun requestMismatches(expected: IRequest, actual: IRequest): RequestMatchResult {
+    @JvmOverloads
+    fun requestMismatches(
+      expected: IRequest,
+      actual: IRequest,
+      pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
+    ): RequestMatchResult {
       logger.debug { "comparing to expected request: \n$expected" }
+      logger.debug { "pluginConfiguration=$pluginConfiguration" }
 
-      val pathContext = MatchingContext(expected.matchingRules.rulesForCategory("path"), false)
-      val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), false)
-      val queryContext = MatchingContext(expected.matchingRules.rulesForCategory("query"), false)
-      val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), false)
+      val pathContext = MatchingContext(expected.matchingRules.rulesForCategory("path"), false, pluginConfiguration)
+      val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), false, pluginConfiguration)
+      val queryContext = MatchingContext(expected.matchingRules.rulesForCategory("query"), false, pluginConfiguration)
+      val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), false, pluginConfiguration)
 
       return RequestMatchResult(Matching.matchMethod(expected.method, actual.method),
         Matching.matchPath(expected, actual, pathContext),

@@ -19,6 +19,7 @@ import java.io.StringReader
 import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
 
+@Suppress("LongMethod", "ComplexMethod", "TooManyFunctions")
 object XmlContentMatcher : ContentMatcher, KLogging() {
 
   override fun matchBody(

@@ -44,6 +44,7 @@ object ArrayContainsJsonGenerator : KLogging(), Generator {
     val variants = context["ArrayContainsVariants"] as List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>>
     return variants.firstOrNull { (index, rules, _) ->
       logger.debug { "Comparing variant $index with value '$example'" }
+      // TODO: need to get any plugin config here
       val matchingContext = MatchingContext(rules, true)
       val matches = JsonContentMatcher.compare(listOf("$"), example, example, matchingContext)
       logger.debug { "Comparing variant $index => $matches" }

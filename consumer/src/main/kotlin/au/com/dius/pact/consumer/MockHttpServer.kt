@@ -104,7 +104,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
 
   private val mismatchedRequests = ConcurrentHashMap<IRequest, MutableList<PactVerificationResult>>()
   private val matchedRequests = ConcurrentLinkedQueue<IRequest>()
-  private val requestMatcher = RequestMatching(pact.interactions)
+  private val requestMatcher = RequestMatching(pact)
 
   override fun waitForServer() {
     val sslcontext = SSLContexts.custom().loadTrustMaterial(TrustSelfSignedStrategy()).build()

@@ -92,7 +92,8 @@ sealed class V4Interaction(
   providerStates: List<ProviderState> = listOf(),
   comments: MutableMap<String, JsonValue> = mutableMapOf(),
   val pending: Boolean = false,
-  val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
+  val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
+  var interactionMarkup: String = ""
 ) : BaseInteraction(interactionId, description, providerStates, comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
@@ -130,8 +131,10 @@ sealed class V4Interaction(
     interactionId: String? = null,
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
-    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
-  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration),
+    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
+    interactionMarkup: String = ""
+  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
+      interactionMarkup),
     SynchronousRequestResponse {
 
     override fun toString(): String {
@@ -141,8 +144,18 @@ sealed class V4Interaction(
     }
 
     override fun withGeneratedKey(): V4Interaction {
-      return SynchronousHttp(generateKey(), description, providerStates, request, response, interactionId,
-        comments, pending, pluginConfiguration)
+      return SynchronousHttp(
+        generateKey(),
+        description,
+        providerStates,
+        request,
+        response,
+        interactionId,
+        comments,
+        pending,
+        pluginConfiguration,
+        interactionMarkup
+      )
     }
 
     override fun generateKey(): String {
@@ -180,6 +193,10 @@ sealed class V4Interaction(
         map["pluginConfiguration"] = pluginConfiguration
       }
 
+      if (interactionMarkup.isNotEmpty()) {
+        map["interactionMarkup"] = interactionMarkup
+      }
+
       return map
     }
 
@@ -210,8 +227,10 @@ sealed class V4Interaction(
     providerStates: List<ProviderState> = listOf(),
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
-    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
-  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration),
+    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
+    interactionMarkup: String = ""
+  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
+      interactionMarkup),
     MessageInteraction {
 
     override fun toString(): String {
@@ -221,8 +240,17 @@ sealed class V4Interaction(
     }
 
     override fun withGeneratedKey(): V4Interaction {
-      return AsynchronousMessage(generateKey(), description, contents, interactionId, providerStates, comments,
-        pending, pluginConfiguration)
+      return AsynchronousMessage(
+        generateKey(),
+        description,
+        contents,
+        interactionId,
+        providerStates,
+        comments,
+        pending,
+        pluginConfiguration,
+        interactionMarkup
+      )
     }
 
     override fun generateKey(): String {
@@ -258,6 +286,10 @@ sealed class V4Interaction(
         map["pluginConfiguration"] = pluginConfiguration
       }
 
+      if (interactionMarkup.isNotEmpty()) {
+        map["interactionMarkup"] = interactionMarkup
+      }
+
       return map
     }
 
@@ -291,12 +323,24 @@ sealed class V4Interaction(
     pending: Boolean = false,
     val request: MessageContents = MessageContents(),
     val response: List<MessageContents> = listOf(),
-    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
-    ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration),
+    pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
+    interactionMarkup: String = ""
+  ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
+      interactionMarkup),
     MessageInteraction {
     override fun withGeneratedKey(): V4Interaction {
-      return SynchronousMessages(generateKey(), description, interactionId, providerStates, comments, pending,
-        request, response, pluginConfiguration)
+      return SynchronousMessages(
+        generateKey(),
+        description,
+        interactionId,
+        providerStates,
+        comments,
+        pending,
+        request,
+        response,
+        pluginConfiguration,
+        interactionMarkup
+      )
     }
 
     override fun generateKey(): String {
@@ -333,6 +377,10 @@ sealed class V4Interaction(
         map["pluginConfiguration"] = pluginConfiguration
       }
 
+      if (interactionMarkup.isNotEmpty()) {
+        map["interactionMarkup"] = interactionMarkup
+      }
+
       return map
     }
 
@@ -367,11 +415,14 @@ sealed class V4Interaction(
             val id = json["_id"].asString()
             val key = Json.toString(json["key"])
             val description = Json.toString(json["description"])
+            val interactionMarkup = Json.toString(json["interactionMarkup"])
+
             val providerStates = if (json.has("providerStates")) {
               json["providerStates"].asArray().map { ProviderState.fromJson(it) }
             } else {
               emptyList()
             }
+
             val comments = if (json.has("comments")) {
               when (val comments = json["comments"]) {
                 is JsonValue.Object -> comments.entries
@@ -383,6 +434,7 @@ sealed class V4Interaction(
             } else {
               mutableMapOf()
             }
+
             val pending = json["pending"].asBoolean() ?: false
             val pluginConfiguration = if (json.has("pluginConfiguration")) {
               json["pluginConfiguration"].asObject()!!.entries.map {
@@ -396,12 +448,13 @@ sealed class V4Interaction(
               V4InteractionType.SynchronousHTTP -> {
                 Ok(SynchronousHttp(
                   key, description, providerStates, HttpRequest.fromJson(json["request"]),
-                  HttpResponse.fromJson(json["response"]), id, comments, pending, pluginConfiguration.toMutableMap()
+                  HttpResponse.fromJson(json["response"]), id, comments, pending, pluginConfiguration.toMutableMap(),
+                  interactionMarkup
                 ))
               }
               V4InteractionType.AsynchronousMessages -> {
                 Ok(AsynchronousMessage(key, description, MessageContents.fromJson(json), id,
-                  providerStates, comments, pending, pluginConfiguration.toMutableMap()))
+                  providerStates, comments, pending, pluginConfiguration.toMutableMap(), interactionMarkup))
               }
               V4InteractionType.SynchronousMessages -> {
                 val request = if (json.has("request"))
@@ -411,7 +464,7 @@ sealed class V4Interaction(
                   json["response"].asArray().map { MessageContents.fromJson(it) }
                   else listOf()
                 Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request, response,
-                  pluginConfiguration.toMutableMap()))
+                  pluginConfiguration.toMutableMap(), interactionMarkup))
               }
             }
           }
@@ -485,6 +538,21 @@ open class V4Pact @JvmOverloads constructor(
       Err("Provider names are different: '$provider' and '${other.provider}'")
     } else {
       Ok(true)
+    }
+  }
+
+  fun pluginData(): List<PluginData> {
+    return when (val plugins = metadata["plugins"]) {
+      is List<*> -> plugins.mapNotNull {
+        when (it) {
+          is Map<*, *> -> PluginData.fromMap(it as Map<String, Any?>)
+          else -> {
+            logger.warn { "$it is not valid plugin configuration, ignoring" }
+            null
+          }
+        }
+      }
+      else -> emptyList()
     }
   }
 }

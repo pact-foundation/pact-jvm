@@ -30,6 +30,7 @@ import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import io.pact.plugins.jvm.core.PluginConfiguration
 import mu.KLogging
 import java.lang.Integer.max
 
@@ -151,13 +152,18 @@ class ResponseComparison(
     }
 
     @JvmStatic
-    fun compareResponse(response: IResponse, actualResponse: ProviderResponse): ComparisonResult {
+    @JvmOverloads
+    fun compareResponse(
+      response: IResponse,
+      actualResponse: ProviderResponse,
+      pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
+    ): ComparisonResult {
       val actualResponseContentType = actualResponse.contentType
       val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
         actualResponseContentType, actualResponse.body)
       val body = OptionalBody.body(actualResponse.body?.toByteArray(actualResponseContentType.asCharset()))
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode,
-        actualResponse.headers.toMutableMap(), body))
+        actualResponse.headers.toMutableMap(), body), pluginConfiguration)
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches, SystemPropertyResolver))
     }
@@ -167,12 +173,15 @@ class ResponseComparison(
     fun compareMessage(
       message: MessageInteraction,
       actual: OptionalBody,
-      metadata: Map<String, Any>? = null
+      metadata: Map<String, Any>? = null,
+      pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
     ): ComparisonResult {
       val (bodyMismatches, metadataMismatches) = when (message) {
         is V4Interaction.AsynchronousMessage -> {
-          val bodyContext = MatchingContext(message.contents.matchingRules.rulesForCategory("content"), true)
-          val metadataContext = MatchingContext(message.contents.matchingRules.rulesForCategory("metadata"), true)
+          val bodyContext = MatchingContext(message.contents.matchingRules.rulesForCategory("content"),
+            true, pluginConfiguration)
+          val metadataContext = MatchingContext(message.contents.matchingRules.rulesForCategory("metadata"),
+            true, pluginConfiguration)
           val bodyMismatches = compareMessageBody(message, actual, bodyContext)
           val metadataMismatches = when (metadata) {
             null -> emptyList()
@@ -185,8 +194,10 @@ class ResponseComparison(
           responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
         }
         is Message -> {
-          val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body") ?: MatchingRuleCategory("body"), true)
-          val metadataContext = MatchingContext(message.matchingRules.rulesForCategory("metadata"), true)
+          val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body"),
+            true, pluginConfiguration)
+          val metadataContext = MatchingContext(message.matchingRules.rulesForCategory("metadata"),
+            true, pluginConfiguration)
           val bodyMismatches = compareMessageBody(message, actual, bodyContext)
           val metadataMismatches = when (metadata) {
             null -> emptyList()

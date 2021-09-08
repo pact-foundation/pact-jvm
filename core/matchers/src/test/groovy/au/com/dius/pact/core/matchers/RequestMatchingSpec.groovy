@@ -1,10 +1,13 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactReaderKt
+import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import spock.lang.Specification
@@ -12,6 +15,7 @@ import spock.lang.Specification
 class RequestMatchingSpec extends Specification {
 
   private request, response, interaction, testState
+  private RequestResponsePact pact
 
   def setup() {
     request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
@@ -22,11 +26,14 @@ class RequestMatchingSpec extends Specification {
       OptionalBody.body('{"responsetest": true}'.bytes))
 
     testState = [new ProviderState('test state')]
+
+    pact = new RequestResponsePact(new Provider(), new Consumer())
   }
 
   def test(Request actual) {
     interaction = new RequestResponseInteraction('test interaction', testState, request, response, null)
-    new RequestMatching([interaction]).findResponse(actual)
+    pact.interactions = [ interaction ]
+    new RequestMatching(pact).findResponse(actual)
   }
 
   def 'request matching should match the valid request'() {
@@ -259,5 +266,4 @@ class RequestMatchingSpec extends Specification {
     then:
     !actualResponse
   }
-
 }
