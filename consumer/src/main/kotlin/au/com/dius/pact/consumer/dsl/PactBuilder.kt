@@ -12,6 +12,7 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.InteractionMarkup
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
@@ -261,7 +262,8 @@ open class PactBuilder(
     part: IHttpPart,
     interaction: V4Interaction
   ) {
-    val (body, rules, generators, _, config) = matcher.configureContent(contentType, bodyConfig)
+    val (body, rules, generators, _, config, interactionMarkup, interactionMarkupType) =
+      matcher.configureContent(contentType, bodyConfig)
     part.body = body
     if (!part.hasHeader("content-type")) {
       part.headers["content-type"] = listOf(body.contentType.toString())
@@ -282,8 +284,8 @@ open class PactBuilder(
     if (config.pactConfiguration.isNotEmpty()) {
       addPluginConfiguration(matcher, config.pactConfiguration)
     }
-    if (config.interactionMarkup.isNotEmpty()) {
-      interaction.interactionMarkup = config.interactionMarkup
+    if (interactionMarkup.isNotEmpty()) {
+      interaction.interactionMarkup = InteractionMarkup(interactionMarkup, interactionMarkupType)
     }
   }
 

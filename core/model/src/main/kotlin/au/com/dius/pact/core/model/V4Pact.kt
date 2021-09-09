@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.deepMerge
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonObject
@@ -84,6 +85,31 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
   }
 }
 
+data class InteractionMarkup(
+  val markup: String = "",
+  val markupType: String = ""
+) {
+  fun isNotEmpty() = markup.isNotEmpty()
+
+  fun toMap() = mapOf(
+    "markup" to markup,
+    "markupType" to markupType
+  )
+
+  companion object : KLogging() {
+    fun fromJson(json: JsonValue): InteractionMarkup {
+      return when (json) {
+        is JsonValue.Object -> InteractionMarkup(Json.toString(json["markup"]), Json.toString(json["markupType"]))
+        else -> {
+          logger.warn { "$json is not valid for InteractionMarkup" }
+          InteractionMarkup()
+        }
+      }
+    }
+
+  }
+}
+
 @Suppress("LongParameterList")
 sealed class V4Interaction(
   val key: String,
@@ -93,7 +119,7 @@ sealed class V4Interaction(
   comments: MutableMap<String, JsonValue> = mutableMapOf(),
   val pending: Boolean = false,
   val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-  var interactionMarkup: String = ""
+  var interactionMarkup: InteractionMarkup = InteractionMarkup()
 ) : BaseInteraction(interactionId, description, providerStates, comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
@@ -132,7 +158,7 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: String = ""
+    interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup),
     SynchronousRequestResponse {
@@ -194,7 +220,7 @@ sealed class V4Interaction(
       }
 
       if (interactionMarkup.isNotEmpty()) {
-        map["interactionMarkup"] = interactionMarkup
+        map["interactionMarkup"] = interactionMarkup.toMap()
       }
 
       return map
@@ -228,7 +254,7 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: String = ""
+    interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup),
     MessageInteraction {
@@ -287,7 +313,7 @@ sealed class V4Interaction(
       }
 
       if (interactionMarkup.isNotEmpty()) {
-        map["interactionMarkup"] = interactionMarkup
+        map["interactionMarkup"] = interactionMarkup.toMap()
       }
 
       return map
@@ -324,7 +350,7 @@ sealed class V4Interaction(
     val request: MessageContents = MessageContents(),
     val response: List<MessageContents> = listOf(),
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: String = ""
+    interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup),
     MessageInteraction {
@@ -378,7 +404,7 @@ sealed class V4Interaction(
       }
 
       if (interactionMarkup.isNotEmpty()) {
-        map["interactionMarkup"] = interactionMarkup
+        map["interactionMarkup"] = interactionMarkup.toMap()
       }
 
       return map
@@ -415,7 +441,6 @@ sealed class V4Interaction(
             val id = json["_id"].asString()
             val key = Json.toString(json["key"])
             val description = Json.toString(json["description"])
-            val interactionMarkup = Json.toString(json["interactionMarkup"])
 
             val providerStates = if (json.has("providerStates")) {
               json["providerStates"].asArray().map { ProviderState.fromJson(it) }
@@ -442,6 +467,12 @@ sealed class V4Interaction(
               }.associate { it }
             } else {
               mutableMapOf()
+            }
+
+            val interactionMarkup = if (json.has("interactionMarkup")) {
+              InteractionMarkup.fromJson(json["interactionMarkup"])
+            } else {
+              InteractionMarkup()
             }
 
             when (result.value) {
