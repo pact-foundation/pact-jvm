@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.0-beta.3 - Support interaction markup from plugins
+
+* d398eedac - feat(plugins): make interaction markup type explicit (Ronald Holshausen, Thu Sep 9 11:22:32 2021 +1000)
+* bc66c13f2 - feat(Plugins): store plugin config and interaction markup in pact interaction (Ronald Holshausen, Wed Sep 8 16:38:26 2021 +1000)
+* 5a77c4e6f - bump version to 4.3.0-beta.3 (Ronald Holshausen, Mon Sep 6 11:36:30 2021 +1000)
+
 # 4.3.0-beta.2 - Support plugin data in pact files + fixes from master
 
 * 64b1d124c - chore: fix incorrect exception name (Ronald Holshausen, Mon Sep 6 11:14:06 2021 +1000)
