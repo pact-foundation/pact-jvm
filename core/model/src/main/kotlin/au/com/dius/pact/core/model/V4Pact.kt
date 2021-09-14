@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger {}
 
 fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): OptionalBody {
   var contentType = ContentType.UNKNOWN
-  var contentTypeOverride = ContentTypeOverride.DEFAULT
+  var contentTypeHint = ContentTypeHint.DEFAULT
   val contentTypeEntry = headers.entries.find { it.key.uppercase() == "CONTENT-TYPE" }
   if (contentTypeEntry != null) {
     val value = contentTypeEntry.value
@@ -41,11 +41,11 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
         if (jsonBody.has("contentType")) {
           contentType = ContentType(Json.toString(jsonBody["contentType"]))
         } else {
-          logger.warn("Body has no content type set, will default to any headers or metadata")
+          logger.warn { "Body has no content type set, will default to any headers or metadata" }
         }
 
-        if (jsonBody.has("contentTypeOverride")) {
-          contentTypeOverride = ContentTypeOverride.valueOf(Json.toString(jsonBody["contentTypeOverride"]))
+        if (jsonBody.has("contentTypeHint")) {
+          contentTypeHint = ContentTypeHint.valueOf(Json.toString(jsonBody["contentTypeHint"]))
         }
 
         val (encoded, encoding) = if (jsonBody.has("encoded")) {
@@ -63,20 +63,22 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
             "base64" -> Base64.getDecoder().decode(Json.toString(jsonBody["content"]))
             "json" -> Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
             else -> {
-              logger.warn("Unrecognised body encoding scheme '$encoding', will use the raw body")
+              logger.warn { "Unrecognised body encoding scheme '$encoding', will use the raw body" }
               Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
             }
           }
         } else {
           Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
         }
-        OptionalBody.body(bodyBytes, contentType, contentTypeOverride)
+        OptionalBody.body(bodyBytes, contentType, contentTypeHint)
       } else {
         OptionalBody.missing()
       }
       JsonValue.Null -> OptionalBody.nullBody()
       else -> {
-        logger.warn("Body in attribute '$field' from JSON file is not formatted correctly, will load it as plain text")
+        logger.warn {
+          "Body in attribute '$field' from JSON file is not formatted correctly, will load it as plain text"
+        }
         OptionalBody.body(Json.toString(jsonBody).toByteArray(contentType.asCharset()))
       }
     }
@@ -452,7 +454,9 @@ sealed class V4Interaction(
               when (val comments = json["comments"]) {
                 is JsonValue.Object -> comments.entries
                 else -> {
-                  logger.warn { "Interaction comments must be a JSON Object, found a ${json["comments"].name}. Ignoring" }
+                  logger.warn {
+                    "Interaction comments must be a JSON Object, found a ${json["comments"].name}. Ignoring"
+                  }
                   mutableMapOf()
                 }
               }

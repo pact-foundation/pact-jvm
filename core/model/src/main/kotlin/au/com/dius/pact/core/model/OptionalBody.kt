@@ -16,7 +16,7 @@ import java.util.Base64
 /**
  * If the content type should be overridden
  */
-enum class ContentTypeOverride {
+enum class ContentTypeHint {
   BINARY,
   TEXT,
   DEFAULT
@@ -29,7 +29,7 @@ data class OptionalBody @JvmOverloads constructor(
   val state: State,
   val value: ByteArray? = null,
   var contentType: ContentType = UNKNOWN,
-  var contentTypeOverride: ContentTypeOverride = ContentTypeOverride.DEFAULT
+  var contentTypeHint: ContentTypeHint = ContentTypeHint.DEFAULT
 ) {
 
   init {
@@ -106,7 +106,7 @@ data class OptionalBody @JvmOverloads constructor(
 
   override fun toString(): String {
     return when (state) {
-      State.PRESENT -> if (contentTypeOverride == ContentTypeOverride.BINARY || contentType.isBinaryType()) {
+      State.PRESENT -> if (contentTypeHint == ContentTypeHint.BINARY || contentType.isBinaryType()) {
         "PRESENT(${value!!.size} bytes starting with ${Hex.encodeHexString(slice(16))}...)"
       } else {
         "PRESENT(${value!!.toString(contentType.asCharset())})"
@@ -180,12 +180,12 @@ data class OptionalBody @JvmOverloads constructor(
   fun toV4Format(): Map<String, Any?> {
     return when (state) {
       State.PRESENT -> if (value!!.isNotEmpty()) {
-        if (contentTypeOverride == ContentTypeOverride.BINARY || contentType.isBinaryType()) {
+        if (contentTypeHint == ContentTypeHint.BINARY || contentType.isBinaryType()) {
           mapOf(
             "content" to valueAsBase64(),
             "contentType" to contentType.toString(),
             "encoded" to "base64",
-            "contentTypeOverride" to contentTypeOverride.name
+            "contentTypeHint" to contentTypeHint.name
           )
         } else if (contentType.isJson()) {
           mapOf(
@@ -198,7 +198,7 @@ data class OptionalBody @JvmOverloads constructor(
             "content" to valueAsString(),
             "contentType" to contentType.toString(),
             "encoded" to false,
-            "contentTypeOverride" to contentTypeOverride.name
+            "contentTypeHint" to contentTypeHint.name
           )
         }
       } else {
@@ -223,21 +223,21 @@ data class OptionalBody @JvmOverloads constructor(
     }
 
     @JvmStatic
-    fun body(body: ByteArray?) = body(body, UNKNOWN, ContentTypeOverride.DEFAULT)
+    fun body(body: ByteArray?) = body(body, UNKNOWN, ContentTypeHint.DEFAULT)
 
     @JvmStatic
-    fun body(body: ByteArray?, contentType: ContentType) = body(body, contentType, ContentTypeOverride.DEFAULT)
+    fun body(body: ByteArray?, contentType: ContentType) = body(body, contentType, ContentTypeHint.DEFAULT)
 
     @JvmStatic
     fun body(
       body: ByteArray?,
       contentType: ContentType,
-      contentTypeOverride: ContentTypeOverride
+      contentTypeHint: ContentTypeHint
     ): OptionalBody {
       return when {
         body == null -> nullBody()
         body.isEmpty() -> empty()
-        else -> OptionalBody(State.PRESENT, body, contentType, contentTypeOverride)
+        else -> OptionalBody(State.PRESENT, body, contentType, contentTypeHint)
       }
     }
 

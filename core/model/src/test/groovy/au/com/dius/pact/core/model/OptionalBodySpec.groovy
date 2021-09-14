@@ -165,8 +165,8 @@ class OptionalBodySpec extends Specification {
     OptionalBody.body(''.bytes, ContentType.UNKNOWN)                                                        | [:]
     OptionalBody.body('{}'.bytes, ContentType.UNKNOWN)                                                      | [content: new JsonValue.Object(), contentType: 'application/json', encoded: false]
     OptionalBody.body('{}'.bytes, ContentType.JSON)                                                         | [content: new JsonValue.Object(), contentType: 'application/json', encoded: false]
-    OptionalBody.body([0xff, 0xd8, 0xff, 0xe0] as byte[], new ContentType('image/jpeg'))                    | [content: '/9j/4A==', contentType: 'image/jpeg', encoded: 'base64', contentTypeOverride: 'DEFAULT']
-    OptionalBody.body('kjlkjlkjkl'.bytes, new ContentType('application/other'), ContentTypeOverride.BINARY) | [content: 'a2psa2psa2prbA==', contentType: 'application/other', encoded: 'base64', contentTypeOverride: 'BINARY']
+    OptionalBody.body([0xff, 0xd8, 0xff, 0xe0] as byte[], new ContentType('image/jpeg'))                    | [content: '/9j/4A==', contentType: 'image/jpeg', encoded: 'base64', contentTypeHint: 'DEFAULT']
+    OptionalBody.body('kjlkjlkjkl'.bytes, new ContentType('application/other'), ContentTypeHint.BINARY) | [content: 'a2psa2psa2prbA==', contentType: 'application/other', encoded: 'base64', contentTypeHint: 'BINARY']
   }
 
   private static OptionalBody bodyFromFile(String file) {

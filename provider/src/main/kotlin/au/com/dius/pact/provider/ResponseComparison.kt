@@ -12,13 +12,11 @@ import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.ContentType
-import au.com.dius.pact.core.model.ContentTypeOverride
 import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.isNullOrEmpty
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.support.Json
