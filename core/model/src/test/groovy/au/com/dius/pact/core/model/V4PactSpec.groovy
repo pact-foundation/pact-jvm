@@ -39,7 +39,7 @@ class V4PactSpec extends Specification {
     pact.interactions[0].uniqueKey() == 'm_001'
     pact.interactions[0] instanceof V4Interaction.AsynchronousMessage
     pact.interactions[0].description == 'Test Message'
-    pact.interactions[0].contents.matchingRules.toV3Map() == [
+    pact.interactions[0].contents.matchingRules.toV3Map(PactSpecVersion.V3) == [
       content: ['$.a': [matchers: [[match: 'regex', regex: '\\d+-\\d+']], combine: 'AND']]
     ]
     pact.interactions[0].contents.generators.toMap(PactSpecVersion.V4) == [content: [a: [type: 'Uuid']]]

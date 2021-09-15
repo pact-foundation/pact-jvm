@@ -118,8 +118,8 @@ interface MatchingRule {
           else DateMatcher()
         "values" -> ValuesMatcher
         "ignore-order" -> ruleForIgnoreOrder(values)
-        "contentType" -> ContentTypeMatcher(values["value"].toString())
-        "arrayContains" -> when (val variants = values["variants"]) {
+        "contentType", "content-type" -> ContentTypeMatcher(values["value"].toString())
+        "arrayContains", "array-contains" -> when (val variants = values["variants"]) {
           is JsonValue.Array -> ArrayContainsMatcher(variants.values.mapIndexed { index, variant ->
             when (variant) {
               is JsonValue.Object -> Triple(
@@ -136,7 +136,7 @@ interface MatchingRule {
           else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
         }
         "boolean" -> BooleanMatcher
-        "statusCode" -> if (values["status"].isArray) {
+        "statusCode", "status-code" -> if (values["status"].isArray) {
           val asArray = values["status"].asArray()!!
           StatusCodeMatcher(HttpStatus.StatusCodes, asArray.map {
             if (it.isNumber) {
@@ -150,7 +150,7 @@ interface MatchingRule {
         } else {
           StatusCodeMatcher(HttpStatus.fromJson(values["status"]))
         }
-        "notEmpty" -> NotEmptyMatcher
+        "notEmpty", "not-empty" -> NotEmptyMatcher
         "semver" -> SemverMatcher
         else -> {
           MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
@@ -451,7 +451,7 @@ data class ContentTypeMatcher @JvmOverloads constructor (val contentType: String
   override val name: String
     get() = "content-type"
   override val attributes: Map<String, JsonValue>
-    get() = mapOf("content-type" to JsonValue.StringValue(contentType))
+    get() = mapOf("value" to JsonValue.StringValue(contentType))
 }
 
 /**

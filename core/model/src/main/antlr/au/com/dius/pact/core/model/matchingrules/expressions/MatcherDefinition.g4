@@ -23,7 +23,7 @@ matchingDefinition returns [ String value, MatchingRule rule, Generator generato
 
 matchingRule returns [ String value, MatchingRule rule, Generator generator ] :
   (
-    ( 'equality' { $rule = EqualsMatcher.INSTANCE; }
+    ( 'equalTo' { $rule = EqualsMatcher.INSTANCE; }
     | 'type'  { $rule = TypeMatcher.INSTANCE; } )
     ',' string { $value = $string.contents; } )
   | 'number' { $rule = new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER); } ',' val=( DECIMAL_LITERAL | INTEGER_LITERAL ) { $value = $val.getText(); }
@@ -38,6 +38,7 @@ matchingRule returns [ String value, MatchingRule rule, Generator generator ] :
   | 'include' ',' v=string { $rule = new IncludeMatcher($v.contents); $value = $v.contents; }
   | 'boolean' ',' BOOLEAN_LITERAL { $rule = BooleanMatcher.INSTANCE; $value = $BOOLEAN_LITERAL.getText(); }
   | 'semver' ',' v=string { $rule = SemverMatcher.INSTANCE; $value = $value = $v.contents; }
+  | 'contentType' ',' ct=string ',' v=string { $rule = new ContentTypeMatcher($ct.contents); $value = $v.contents; }
   ;
 
 string returns [ String contents ] :

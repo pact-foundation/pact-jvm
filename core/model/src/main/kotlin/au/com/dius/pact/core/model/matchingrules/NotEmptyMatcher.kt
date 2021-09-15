@@ -15,7 +15,7 @@ object NotEmptyMatcher : MatchingRule {
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> = listOf()
 
   override val name: String
-    get() = "notEmpty"
+    get() = "not-empty"
   override val attributes: Map<String, JsonValue>
     get() = emptyMap()
 }

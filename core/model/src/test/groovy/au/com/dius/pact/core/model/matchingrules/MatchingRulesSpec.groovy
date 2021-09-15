@@ -155,7 +155,7 @@ class MatchingRulesSpec extends Specification {
     matchingRules.addCategory('path').addRule(new RegexMatcher('\\w+'))
 
     expect:
-    matchingRules.toV3Map() == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
+    matchingRules.toV3Map(PactSpecVersion.V3) == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
   }
 
   def 'do not include empty categories'() {
@@ -166,7 +166,7 @@ class MatchingRulesSpec extends Specification {
     matchingRules.addCategory('header')
 
     expect:
-    matchingRules.toV3Map() == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
+    matchingRules.toV3Map(PactSpecVersion.V3) == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
   }
 
   @Issue('#882')
@@ -256,7 +256,7 @@ class MatchingRulesSpec extends Specification {
     matchingRules.addCategory('header')
 
     expect:
-    matchingRules.rename('path', 'content').toV3Map() == [
+    matchingRules.rename('path', 'content').toV3Map(PactSpecVersion.V3) == [
       content: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']
     ]
   }

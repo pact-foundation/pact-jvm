@@ -62,11 +62,12 @@ class MatchingRulesImpl : MatchingRules {
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> = when {
         pactSpecVersion < PactSpecVersion.V3 -> toV2Map()
-        else -> toV3Map()
+        else -> toV3Map(pactSpecVersion)
     }
 
-    private fun toV3Map(): Map<String, Map<String, Any?>> = rules.filter { it.value.isNotEmpty() }.mapValues { entry ->
-        entry.value.toMap(PactSpecVersion.V3)
+    private fun toV3Map(pactSpecVersion: PactSpecVersion): Map<String, Map<String, Any?>> =
+      rules.filter { it.value.isNotEmpty() }.mapValues { entry ->
+        entry.value.toMap(pactSpecVersion)
     }
 
   fun fromV3Json(json: JsonValue.Object) {
