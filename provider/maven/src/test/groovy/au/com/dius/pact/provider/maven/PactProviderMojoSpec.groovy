@@ -302,7 +302,7 @@ class PactProviderMojoSpec extends Specification {
 
     then:
     1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> {
-      throw new NotFoundHalResponse()
+      throw new RuntimeException(new NotFoundHalResponse())
     }
     thrown(NotFoundHalResponse)
     list.size() == 0
@@ -320,7 +320,7 @@ class PactProviderMojoSpec extends Specification {
 
     then:
     1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> {
-      throw new NotFoundHalResponse()
+      throw new RuntimeException(new NotFoundHalResponse())
     }
     noExceptionThrown()
     list.size() == 0
