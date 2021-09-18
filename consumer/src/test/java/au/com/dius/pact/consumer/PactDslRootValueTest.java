@@ -15,8 +15,10 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 
-public class PactDslRootValueTest {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
+public class PactDslRootValueTest {
 
     @Test
     public void rootValueTest() {
@@ -43,6 +45,8 @@ public class PactDslRootValueTest {
             .toPact().asRequestResponsePact().component1();
 
         Assert.assertEquals(1, frag.getInteractions().size());
+        assertThat(frag.getInteractions().get(0).asSynchronousRequestResponse().getResponse().getBody().valueAsString(), is("Brent"));
+
         Map<String, MatchingRuleGroup> matchingGroups = frag.getInteractions()
                 .get(0)
                 .asSynchronousRequestResponse()

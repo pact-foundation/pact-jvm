@@ -209,8 +209,10 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
    */
   fun body(body: DslPart): PactDslRequestWithoutPath {
     val parent = body.close()
+
     requestMatchers.addCategory(parent!!.matchers)
     requestGenerators.addGenerators(parent.generators)
+
     if (isContentTypeHeaderNotSet) {
       requestHeaders[CONTENT_TYPE] = listOf(ContentType.APPLICATION_JSON.toString())
       requestBody = body(parent.toString().toByteArray())
@@ -218,7 +220,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
       val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
-      requestBody = body(parent.body.serialise().toByteArray(charset),
+      requestBody = body(parent.toString().toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
     return this

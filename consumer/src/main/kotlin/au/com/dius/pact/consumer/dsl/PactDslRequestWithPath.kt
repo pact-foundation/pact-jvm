@@ -293,7 +293,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
       val ct = ContentType.parse(contentType)
       charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
     }
-    requestBody = body(parent.body.serialise().toByteArray(charset),
+    requestBody = body(parent.toString().toByteArray(charset),
       au.com.dius.pact.core.model.ContentType(contentType))
     return this
   }

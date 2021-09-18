@@ -378,6 +378,10 @@ open class PactDslJsonRootValue : DslPart("", "") {
     throw UnsupportedOperationException("arrayContaining is not supported for PactDslJsonRootValue")
   }
 
+  override fun toString(): String {
+    return this.body.serialise()
+  }
+
   companion object {
     private const val USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS = "Use PactDslJsonArray for arrays"
     private const val USE_PACT_DSL_JSON_BODY_FOR_OBJECTS = "Use PactDslJsonBody for objects"
