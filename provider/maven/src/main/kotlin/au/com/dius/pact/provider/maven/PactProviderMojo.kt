@@ -183,6 +183,8 @@ open class PactProviderMojo : PactBaseMojo() {
       options["insecureTLS"] = true
     }
 
+    var selectors: List<ConsumerVersionSelector>? = null;
+
     when {
       pactBroker?.enablePending != null -> {
         if (pactBroker.enablePending!!.providerTags.isEmpty()) {
@@ -198,27 +200,25 @@ open class PactProviderMojo : PactBaseMojo() {
             |</enablePending>
           """.trimMargin())
         }
-        val selectors = pactBroker.tags?.map {
+        selectors = pactBroker.tags?.map {
           ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) } ?: emptyList()
-        consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options +
-          mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags),
-          pactBrokerUrl.toString(), selectors))
+        options.putAll(mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags))
       }
       pactBroker?.tags != null && pactBroker.tags.isNotEmpty() -> {
-        val selectors = pactBroker.tags.map {
+        selectors = pactBroker.tags.map {
           ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) }
-        consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors))
       }
-      else -> consumers.addAll(
-              handleWith<List<ConsumerInfo>> {
-                provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), emptyList())
-              }.getOrElse { handleException(it) }
-      )
     }
+
+    consumers.addAll(
+            handleWith<List<ConsumerInfo>> {
+              provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors ?: emptyList())
+            }.getOrElse { handleException(it) }
+    )
   }
 
   private fun handleException(exception: Exception): List<ConsumerInfo> {
-    return when (exception) {
+    return when (exception.cause) {
       is NotFoundHalResponse -> when {
         failIfNoPactsFound -> throw exception
         else -> emptyList()
