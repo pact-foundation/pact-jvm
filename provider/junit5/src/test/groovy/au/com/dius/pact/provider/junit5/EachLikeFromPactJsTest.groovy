@@ -37,12 +37,11 @@ class EachLikeFromPactJsTest {
     context.verifyInteraction()
   }
 
-  @State("is authenticated")
-  void setAuthenticated() {
+  @State('is authenticated')
+  @SuppressWarnings('EmptyMethod')
+  void setAuthenticated() { }
 
-  }
-
-  @State("Has an animal with ID")
+  @State('Has an animal with ID')
   void hasAnimal(Map params) {
     def animal = params.id as String
     Faker faker = new Faker()
@@ -88,10 +87,9 @@ class EachLikeFromPactJsTest {
     )
   }
 
-  @State("Has no animals")
-  void noAnimals() {
-
-  }
+  @State('Has no animals')
+  @SuppressWarnings('EmptyMethod')
+  void noAnimals() { }
 
   @BeforeEach
   void before(
