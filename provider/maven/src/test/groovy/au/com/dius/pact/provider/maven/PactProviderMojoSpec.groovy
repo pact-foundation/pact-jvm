@@ -290,6 +290,7 @@ class PactProviderMojoSpec extends Specification {
     noExceptionThrown()
   }
 
+  @SuppressWarnings('ThrowRuntimeException')
   def 'do fail the build if the Broker returns 404 and failIfNoPactsFound is true'() {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1234'),
@@ -304,10 +305,12 @@ class PactProviderMojoSpec extends Specification {
     1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> {
       throw new RuntimeException(new NotFoundHalResponse())
     }
-    thrown(NotFoundHalResponse)
+    def ex = thrown(RuntimeException)
+    ex.cause instanceof NotFoundHalResponse
     list.size() == 0
   }
 
+  @SuppressWarnings('ThrowRuntimeException')
   def 'do not fail the build if the Broker returns 404 and failIfNoPactsFound is false'() {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1234'),
