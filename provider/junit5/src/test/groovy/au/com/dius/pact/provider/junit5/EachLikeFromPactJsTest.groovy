@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.RandomUtils
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestTemplate
@@ -37,18 +38,22 @@ class EachLikeFromPactJsTest {
     System.setProperty('pact.matching.wildcard', 'true')
   }
 
+  @AfterAll
+  static void cleanup() {
+    System.clearProperty('pact.matching.wildcard')
+  }
+
   @TestTemplate
   @ExtendWith(PactVerificationInvocationContextProvider)
   void testTemplate(PactVerificationContext context) {
     context.verifyInteraction()
   }
 
-  @State("is authenticated")
-  void setAuthenticated() {
+  @State('is authenticated')
+  @SuppressWarnings('EmptyMethod')
+  void setAuthenticated() { }
 
-  }
-
-  @State("Has an animal with ID")
+  @State('Has an animal with ID')
   void hasAnimal(Map params) {
     def animal = params.id as String
     Faker faker = new Faker()
@@ -94,10 +99,9 @@ class EachLikeFromPactJsTest {
     )
   }
 
-  @State("Has no animals")
-  void noAnimals() {
-
-  }
+  @State('Has no animals')
+  @SuppressWarnings('EmptyMethod')
+  void noAnimals() { }
 
   @BeforeEach
   void before(
