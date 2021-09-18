@@ -175,35 +175,6 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   }
 
   /**
-   * Deserialise the category from the Map
-   */
-  @Deprecated("Use fromJson", replaceWith = ReplaceWith("fromJson"))
-  fun fromMap(map: Map<String, Any?>): MatchingRuleCategory {
-    if (categoryRequiresSubkeys()) {
-      map.forEach { (key, value) ->
-        if (value is Map<*, *>) {
-          val ruleGroup = MatchingRuleGroup.fromMap(value as Map<String, Any?>)
-          setRules(key, ruleGroup)
-        } else if (name == "path" && value is List<*>) {
-          value.forEach {
-            addRule(MatchingRuleGroup.ruleFromMap(it as Map<String, Any?>))
-          }
-        } else {
-          logger.warn { "$value is not a valid matcher definition" }
-        }
-      }
-    } else {
-      if (map.size == 1 && map.containsKey("")) {
-        // This is due to Defect #743
-        setRules("", MatchingRuleGroup.fromMap(map[""] as Map<String, Any?>))
-      } else {
-        setRules("", MatchingRuleGroup.fromMap(map))
-      }
-    }
-    return this
-  }
-
-  /**
    * Deserialise the category from JSON
    */
   fun fromJson(matcherDef: JsonValue): MatchingRuleCategory {

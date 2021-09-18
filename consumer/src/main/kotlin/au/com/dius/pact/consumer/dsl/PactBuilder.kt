@@ -173,9 +173,9 @@ open class PactBuilder(
   private fun setupMessageContents(contents: Any?, interaction: V4Interaction.AsynchronousMessage): MessageContents {
     logger.debug { "Explicit contents, will look for a content matcher" }
     return when (contents) {
-      is Map<*, *> -> if (contents.containsKey("content-type")) {
-        val contentType = contents["content-type"].toString()
-        val bodyConfig = contents.filter { it.key != "content-type" } as Map<String, Any?>
+      is Map<*, *> -> if (contents.containsKey("pact:content-type")) {
+        val contentType = contents["pact:content-type"].toString()
+        val bodyConfig = contents.filter { it.key != "pact:content-type" } as Map<String, Any?>
         val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
         logger.debug { "Found a matcher for '$contentType': $matcher" }
         if (matcher == null || matcher.isCore) {
@@ -224,9 +224,9 @@ open class PactBuilder(
   private fun setupContents(contents: Any?, part: IHttpPart, interaction: V4Interaction.SynchronousHttp) {
     logger.debug { "Explicit contents, will look for a content matcher" }
     when (contents) {
-      is Map<*, *> -> if (contents.containsKey("content-type")) {
-        val contentType = contents["content-type"].toString()
-        val bodyConfig = contents.filter { it.key != "content-type" } as Map<String, Any?>
+      is Map<*, *> -> if (contents.containsKey("pact:content-type")) {
+        val contentType = contents["pact:content-type"].toString()
+        val bodyConfig = contents.filter { it.key != "pact:content-type" } as Map<String, Any?>
         val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
         logger.debug { "Found a matcher for '$contentType': $matcher" }
         if (matcher == null || matcher.isCore) {

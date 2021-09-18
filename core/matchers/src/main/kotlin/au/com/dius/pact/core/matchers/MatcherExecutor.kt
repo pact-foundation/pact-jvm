@@ -723,27 +723,29 @@ fun <M : Mismatch> matchSemver(
 @Suppress("MaxLineLength")
 fun matcherCatalogueEntries(): List<CatalogueEntry> {
   return listOf(
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v1-equality"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-regex"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-min-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-max-type"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-minmax-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-number-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-integer-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-decimal-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-date"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-time"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-datetime"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-min-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-max-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-minmax-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-includes"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-null"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-content-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-equals-ignore-order"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-min-equals-ignore-order"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-max-equals-ignore-order"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-minmax-equals-ignore-order"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-content-type"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-array-contains"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v1-equality"),
     CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-notempty"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-semver")
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-semver"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-each-key"),
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-each-value")
   )
 }

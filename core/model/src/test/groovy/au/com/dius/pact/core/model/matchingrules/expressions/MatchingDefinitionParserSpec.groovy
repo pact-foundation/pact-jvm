@@ -2,20 +2,22 @@ package au.com.dius.pact.core.model.matchingrules.expressions
 
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
+import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import com.github.michaelbull.result.Err
-import kotlin.Triple
 import spock.lang.Specification
 
 class MatchingDefinitionParserSpec extends Specification {
-  def 'if the string does not start with matching'() {
+  def 'if the string does not start with a valid matching definition'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression) instanceof Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
 
     where:
 
@@ -28,8 +30,8 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse type matcher'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression).component1() ==
-      new Triple('Name', TypeMatcher.INSTANCE, null)
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition('Name', TypeMatcher.INSTANCE, null)
 
     where:
 
@@ -41,8 +43,8 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse number matcher'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression).component1() ==
-      new Triple(value, new NumberTypeMatcher(matcher), null)
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition(value, new NumberTypeMatcher(matcher), null)
 
     where:
 
@@ -55,7 +57,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'invalid number matcher'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression) instanceof Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
 
     where:
 
@@ -66,8 +68,8 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse datetime matcher'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression).component1() ==
-      new Triple(value, matcherClass.newInstance(format), null)
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition(value, matcherClass.newInstance(format), null)
 
     where:
 
@@ -79,8 +81,8 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse regex matcher'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression).component1() ==
-      new Triple(value, new RegexMatcher(regex), null)
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition(value, new RegexMatcher(regex), null)
 
     where:
 
@@ -90,8 +92,8 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse include matcher'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression).component1() ==
-      new Triple(value, new IncludeMatcher(value), null)
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition(value, new IncludeMatcher(value), null)
 
     where:
 
@@ -101,12 +103,36 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse boolean matcher'() {
     expect:
-    MatchingRuleDefinition.INSTANCE.parseMatchingRuleDefinition(expression).component1() ==
-      new Triple(value, BooleanMatcher.INSTANCE, null)
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition(value, BooleanMatcher.INSTANCE, null)
 
     where:
 
     expression                | value
     "matching(boolean, true)" | 'true'
+  }
+
+  def 'each key and value'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition(null, value, null)
+
+    where:
+
+    expression                | value
+    "eachKey(matching(regex, '\$(\\.\\w+)+', '\$.test.one'))" | [ new EachKeyMatcher(new MatchingRuleDefinition('$.test.one', [new RegexMatcher('$(\\.\\w+)+')], null)) ]
+    "eachKey(notEmpty('\$.test')), eachValue(matching(number, 100))" | [ new EachKeyMatcher(new MatchingRuleDefinition('$.test', [NotEmptyMatcher.INSTANCE], null)), new EachValueMatcher(new MatchingRuleDefinition('100', [ new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER) ], null)) ]
+  }
+
+  def 'invalid each key and value'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
+
+    where:
+
+    expression << [
+      "eachKey(regex, '\$(\\.\\w+)+', '\$.test.one')",
+      'eachValue(number, 10)'
+    ]
   }
 }

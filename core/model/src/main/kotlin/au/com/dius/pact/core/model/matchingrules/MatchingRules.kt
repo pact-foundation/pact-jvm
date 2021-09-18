@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.generators.ArrayContainsGenerator
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.NullGenerator
 import au.com.dius.pact.core.model.generators.lookupGenerator
+import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
@@ -152,6 +153,28 @@ interface MatchingRule {
         }
         "notEmpty", "not-empty" -> NotEmptyMatcher
         "semver" -> SemverMatcher
+        "eachKey", "each-key" -> {
+          val generator = if (values.has("generator")) {
+            lookupGenerator(values["generator"])
+          } else {
+            null
+          }
+
+          EachKeyMatcher(MatchingRuleDefinition(Json.toString(values["value"]), values["rules"].asArray()!!.map {
+            fromJson(it)
+          }, generator))
+        }
+        "eachValue", "each-value" -> {
+          val generator = if (values.has("generator")) {
+            lookupGenerator(values["generator"])
+          } else {
+            null
+          }
+
+          EachValueMatcher(MatchingRuleDefinition(Json.toString(values["value"]), values["rules"].asArray()!!.map {
+            fromJson(it)
+          }, generator))
+        }
         else -> {
           MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
           EqualsMatcher
@@ -437,7 +460,7 @@ object ValuesMatcher : MatchingRule {
 /**
  * Content type matcher. Matches the content type of binary data
  */
-data class ContentTypeMatcher @JvmOverloads constructor (val contentType: String) : MatchingRule {
+data class ContentTypeMatcher(val contentType: String) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "contentType", "value" to contentType)
   override fun canMatch(contentType: ContentType) = true
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
@@ -633,34 +656,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
   }
 
   companion object : KLogging() {
-    @Deprecated("use fromJson", replaceWith = ReplaceWith("fromJson"))
-    fun fromMap(map: Map<String, Any?>): MatchingRuleGroup {
-      var ruleLogic = RuleLogic.AND
-      if (map.containsKey("combine")) {
-        try {
-          ruleLogic = RuleLogic.valueOf(map["combine"] as String)
-        } catch (e: IllegalArgumentException) {
-          logger.warn { "${map["combine"]} is not a valid matcher rule logic value" }
-        }
-      }
-
-      val rules = mutableListOf<MatchingRule>()
-      if (map.containsKey("matchers")) {
-        val matchers = map["matchers"]
-        if (matchers is List<*>) {
-          matchers.forEach {
-            if (it is Map<*, *>) {
-              rules.add(ruleFromMap(it as Map<String, Any?>))
-            }
-          }
-        } else {
-          logger.warn { "Map $map does not contain a list of matchers" }
-        }
-      }
-
-      return MatchingRuleGroup(rules, ruleLogic)
-    }
-
+    @JvmStatic
     fun fromJson(json: JsonValue): MatchingRuleGroup {
       var ruleLogic = RuleLogic.AND
       val rules = mutableListOf<MatchingRule>()
@@ -706,93 +702,6 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     private fun mapEntryToInt(map: Map<String, Any?>, field: String) =
       if (map[field] is Int) map[field] as Int
       else Integer.parseInt(map[field]!!.toString())
-
-    @JvmStatic
-    @Deprecated("Use MatchingRule.fromJson", replaceWith = ReplaceWith("MatchingRule.fromJson"))
-    fun ruleFromMap(map: Map<String, Any?>): MatchingRule {
-      return when {
-        map.containsKey(MATCH) -> when (map[MATCH]) {
-          REGEX -> RegexMatcher(map[REGEX] as String)
-          "equality" -> EqualsMatcher
-          "null" -> NullMatcher
-          "include" -> IncludeMatcher(map["value"].toString())
-          "type" -> ruleForType(map)
-          "number" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
-          "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
-          "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
-          "real" -> {
-            logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
-            NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
-          }
-          MIN -> MinTypeMatcher(mapEntryToInt(map, MIN))
-          MAX -> MaxTypeMatcher(mapEntryToInt(map, MAX))
-          TIMESTAMP ->
-            if (map.containsKey(TIMESTAMP)) TimestampMatcher(map[TIMESTAMP].toString())
-            else TimestampMatcher()
-          TIME ->
-            if (map.containsKey(TIME)) TimeMatcher(map[TIME].toString())
-            else TimeMatcher()
-          DATE ->
-            if (map.containsKey(DATE)) DateMatcher(map[DATE].toString())
-            else DateMatcher()
-          "values" -> ValuesMatcher
-          "ignore-order" -> ruleForIgnoreOrder(map)
-          "contentType" -> ContentTypeMatcher(map["value"].toString())
-          "arrayContains" -> when(val variants = map["variants"]) {
-            is List<*> -> ArrayContainsMatcher(variants.mapIndexed { index, variant ->
-              when (variant) {
-                is Map<*, *> -> Triple(
-                  mapEntryToInt(variant as Map<String, Any?>, "index"),
-                  MatchingRuleCategory("body").fromMap(variant["rules"] as Map<String, Any?>),
-                  emptyMap()
-                )
-                else ->
-                  throw InvalidMatcherJsonException("Array contains matchers: variant $index is incorrectly formed")
-              }
-            })
-            else -> throw InvalidMatcherJsonException("Array contains matchers should have a list of variants")
-          }
-          else -> {
-            logger.warn { "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
-            EqualsMatcher
-          }
-        }
-        map.containsKey(REGEX) -> RegexMatcher(map[REGEX] as String)
-        map.containsKey(MIN) -> MinTypeMatcher(mapEntryToInt(map, MIN))
-        map.containsKey(MAX) -> MaxTypeMatcher(mapEntryToInt(map, MAX))
-        map.containsKey(TIMESTAMP) -> TimestampMatcher(map[TIMESTAMP] as String)
-        map.containsKey(TIME) -> TimeMatcher(map[TIME] as String)
-        map.containsKey(DATE) -> DateMatcher(map[DATE] as String)
-        else -> {
-          logger.warn { "Unrecognised matcher definition $map, defaulting to equality matching" }
-          EqualsMatcher
-        }
-      }
-    }
-
-    private fun ruleForType(map: Map<String, Any?>): MatchingRule {
-      return if (map.containsKey(MIN) && map.containsKey(MAX)) {
-        MinMaxTypeMatcher(mapEntryToInt(map, MIN), mapEntryToInt(map, MAX))
-      } else if (map.containsKey(MIN)) {
-        MinTypeMatcher(mapEntryToInt(map, MIN))
-      } else if (map.containsKey(MAX)) {
-        MaxTypeMatcher(mapEntryToInt(map, MAX))
-      } else {
-        TypeMatcher
-      }
-    }
-
-    private fun ruleForIgnoreOrder(map: Map<String, Any?>): MatchingRule {
-      return if (map.containsKey(MIN) && map.containsKey(MAX)) {
-        MinMaxEqualsIgnoreOrderMatcher(mapEntryToInt(map, MIN), mapEntryToInt(map, MAX))
-      } else if (map.containsKey(MIN)) {
-        MinEqualsIgnoreOrderMatcher(mapEntryToInt(map, MIN))
-      } else if (map.containsKey(MAX)) {
-        MaxEqualsIgnoreOrderMatcher(mapEntryToInt(map, MAX))
-      } else {
-        EqualsIgnoreOrderMatcher
-      }
-    }
   }
 }
 

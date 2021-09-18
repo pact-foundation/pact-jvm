@@ -124,9 +124,9 @@ class MatchingRulesImpl : MatchingRules {
     private fun addV2Rule(categoryName: String, item: String?, matcher: Map<String, Any?>) {
         val category = addCategory(categoryName)
         if (item != null) {
-            category.addRule(item, MatchingRuleGroup.ruleFromMap(matcher))
+            category.addRule(item, MatchingRule.fromJson(Json.toJson(matcher)))
         } else {
-            category.addRule(MatchingRuleGroup.ruleFromMap(matcher))
+            category.addRule(MatchingRule.fromJson(Json.toJson(matcher)))
         }
     }
 }

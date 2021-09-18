@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.Json
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -106,7 +107,7 @@ class MatchingRuleCategorySpec extends Specification {
     def category = new MatchingRuleCategory('path')
 
     when:
-    category.fromMap(matcherDefinition)
+    category.fromJson(Json.toJson(matcherDefinition))
 
     then:
     category.matchingRules[''].rules == [ new RegexMatcher('/api/test/\\d{1,8}', null) ]
