@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 @Provider("AmqpProvider")
 @PactFolder("src/test/resources/amqp_pacts")
-public class AmqpContractTest {
+class AmqpContractTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(AmqpContractTest.class);
 
   @TestTemplate
