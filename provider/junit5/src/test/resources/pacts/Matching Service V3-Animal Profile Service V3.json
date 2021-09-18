@@ -141,14 +141,6 @@
                 }
               ]
             },
-            "$.identifiers.*": {
-              "combine": "AND",
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ]
-            },
             "$.identifiers.*.description": {
               "combine": "AND",
               "matchers": [

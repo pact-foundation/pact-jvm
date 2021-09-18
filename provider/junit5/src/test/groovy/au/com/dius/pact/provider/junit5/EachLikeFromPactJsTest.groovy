@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.RandomUtils
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.ExtendWith
@@ -31,11 +30,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 @Slf4j
 class EachLikeFromPactJsTest {
   private WireMockServer server
-
-  @BeforeAll
-  static void setup() {
-    System.setProperty('pact.matching.wildcard', 'true')
-  }
 
   @TestTemplate
   @ExtendWith(PactVerificationInvocationContextProvider)
