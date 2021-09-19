@@ -12,6 +12,7 @@ import au.com.dius.pact.core.support.expressions.DataType
 import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.http.entity.ContentType
+import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.json.JSONObject
 import org.w3c.dom.Document
 import java.io.IOException
@@ -264,6 +265,16 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
       requestBody = body(xmlBuilder.asBytes(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
+    return this
+  }
+
+  /**
+   * The body of the request
+   *
+   * @param body Built using MultipartEntityBuilder
+   */
+  open fun body(body: MultipartEntityBuilder): PactDslRequestWithoutPath {
+    setupMultipart(body)
     return this
   }
 
