@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.27 - Maintenance release + support of multiple parts in multipart request
+
+* 793ed5c1d - Merge branch 'kmochocki-feature/non-file_parts_in_multipart' into v4.1.x (Ronald Holshausen, Sun Sep 19 10:46:38 2021 +1000)
+* 10a968214 - chore: fix missing import (Ronald Holshausen, Sun Sep 19 10:46:00 2021 +1000)
+* 8fe5f8cbd - Merge branch 'feature/non-file_parts_in_multipart' of https://github.com/kmochocki/pact-jvm into kmochocki-feature/non-file_parts_in_multipart (Ronald Holshausen, Sun Sep 19 10:43:00 2021 +1000)
+* 1b31c75fd - Update provider/junit5spring/src/main/kotlin/au/com/dius/pact/provider/spring/junit5/MockMvcTestTarget.kt (Ronald Holshausen, Sun Sep 19 10:28:39 2021 +1000)
+* e708f45a8 - chore: Upgarde Spring libraries to 5.3.9 (Ronald Holshausen, Sun Sep 19 10:28:13 2021 +1000)
+* 3fcbf92d4 - Merge pull request #1442 from kmochocki/feature/multiple_parts_for_multipart (Ronald Holshausen, Sun Sep 19 10:18:29 2021 +1000)
+* 757903466 - feat: add support for non-file parts in the multipart requests (krzysztofmochocki, Sat Sep 18 11:17:47 2021 +0200)
+* 3777d5528 - feat: add support of multiple parts in multipart request (krzysztofmochocki, Sat Sep 18 10:43:28 2021 +0200)
+* 122ced049 - chore: fix codenarc (Ronald Holshausen, Sat Sep 18 14:06:59 2021 +1000)
+* ea989c028 - chore: add provider verification test with pact file from Pact-JS V3 #1434 (Ronald Holshausen, Sat Sep 18 13:56:13 2021 +1000)
+* c2fd9f4d9 - feat: set accessible flag when calling test methods in case the class/method is not public #1431 (Ronald Holshausen, Sat Sep 18 11:56:21 2021 +1000)
+* fd4130c12 - bump version to 4.1.27 (Ronald Holshausen, Sat Sep 4 14:31:39 2021 +1000)
+
 # 4.1.26 - Bugfix Release
 
 * 13f943d76 - chore: remove kotlinter from the project (Ronald Holshausen, Sat Sep 4 13:16:15 2021 +1000)
