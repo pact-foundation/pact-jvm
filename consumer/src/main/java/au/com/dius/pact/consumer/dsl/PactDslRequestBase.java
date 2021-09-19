@@ -58,10 +58,16 @@ public abstract class PactDslRequestBase {
     if (!fileContentType.isEmpty()) {
       contentType = ContentType.create(fileContentType);
     }
-    HttpEntity multipart = MultipartEntityBuilder.create()
+    MultipartEntityBuilder multipart = MultipartEntityBuilder.create()
       .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-      .addBinaryBody(partName, data, contentType, fileName)
-      .build();
+      .addBinaryBody(partName, data, contentType, fileName);
+
+    setupMultipart(multipart);
+  }
+
+  protected void setupMultipart(MultipartEntityBuilder multipartBuilder) throws IOException {
+
+    HttpEntity multipart = multipartBuilder.build();
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     multipart.writeTo(os);
 

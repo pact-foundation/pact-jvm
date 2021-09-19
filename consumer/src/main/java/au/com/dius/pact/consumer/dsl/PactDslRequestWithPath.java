@@ -16,6 +16,7 @@ import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
@@ -360,6 +361,16 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
 
     return this;
   }
+
+    /**
+     * The body of the request
+     *
+     * @param body Built using MultipartEntityBuilder
+     */
+    public PactDslRequestWithPath body(MultipartEntityBuilder body) throws IOException {
+        setupMultipart(body);
+        return this;
+    }
 
     /**
      * The path of the request
