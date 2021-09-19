@@ -18,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockMultipartFile
+import org.springframework.mock.web.MockPart
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.ResultActions
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
+import org.springframework.util.FileCopyUtils
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import javax.mail.internet.ContentDisposition
@@ -96,7 +98,11 @@ class MockMvcTestTarget @JvmOverloads constructor(
           val contentDisposition = ContentDisposition(bodyPart.getHeader("Content-Disposition").first())
           val name = StringUtils.defaultString(contentDisposition.getParameter("name"), "file")
           val filename = contentDisposition.getParameter("filename").orEmpty()
-          multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
+          if (filename.isEmpty()) {
+            multipartRequest.part(MockPart(name, FileCopyUtils.copyToByteArray(bodyPart.inputStream)))
+          } else {
+            multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
+          }
           i++
         }
         multipartRequest.headers(mapHeaders(request, true))
