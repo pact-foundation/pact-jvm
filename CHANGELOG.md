@@ -1,5 +1,34 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.12 - Maintenance release + support of multiple parts in multipart request
+
+* bca15036b - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Sep 19 11:53:00 2021 +1000)
+* 4b461d809 - bump version to 4.1.28 (Ronald Holshausen, Sun Sep 19 11:35:46 2021 +1000)
+* 37e73ce67 - update changelog for release 4.1.27 (Ronald Holshausen, Sun Sep 19 11:22:18 2021 +1000)
+* 793ed5c1d - Merge branch 'kmochocki-feature/non-file_parts_in_multipart' into v4.1.x (Ronald Holshausen, Sun Sep 19 10:46:38 2021 +1000)
+* 10a968214 - chore: fix missing import (Ronald Holshausen, Sun Sep 19 10:46:00 2021 +1000)
+* 8fe5f8cbd - Merge branch 'feature/non-file_parts_in_multipart' of https://github.com/kmochocki/pact-jvm into kmochocki-feature/non-file_parts_in_multipart (Ronald Holshausen, Sun Sep 19 10:43:00 2021 +1000)
+* 1b31c75fd - Update provider/junit5spring/src/main/kotlin/au/com/dius/pact/provider/spring/junit5/MockMvcTestTarget.kt (Ronald Holshausen, Sun Sep 19 10:28:39 2021 +1000)
+* e708f45a8 - chore: Upgarde Spring libraries to 5.3.9 (Ronald Holshausen, Sun Sep 19 10:28:13 2021 +1000)
+* 3fcbf92d4 - Merge pull request #1442 from kmochocki/feature/multiple_parts_for_multipart (Ronald Holshausen, Sun Sep 19 10:18:29 2021 +1000)
+* 757903466 - feat: add support for non-file parts in the multipart requests (krzysztofmochocki, Sat Sep 18 11:17:47 2021 +0200)
+* 3777d5528 - feat: add support of multiple parts in multipart request (krzysztofmochocki, Sat Sep 18 10:43:28 2021 +0200)
+* 066c5adb1 - fix: PactDslRootValue should return the value as a String, not JSON (Ronald Holshausen, Sat Sep 18 15:06:26 2021 +1000)
+* a78ae7bb1 - Merge pull request #1438 from JapuDCret/bugfix/issue-1436-windows-compilation-maven-plugin (Ronald Holshausen, Sat Sep 18 14:35:47 2021 +1000)
+* 59ed393df - Merge branch 'JapuDCret-bugfix/issue-1419-fix-error-when-notfoundhalresponse' (Ronald Holshausen, Sat Sep 18 14:34:16 2021 +1000)
+* 70d3f7eb3 - chore: fix failing test and codenarc violations (Ronald Holshausen, Sat Sep 18 14:34:00 2021 +1000)
+* 1a19fffb1 - Merge branch 'bugfix/issue-1419-fix-error-when-notfoundhalresponse' of https://github.com/JapuDCret/pact-jvm into JapuDCret-bugfix/issue-1419-fix-error-when-notfoundhalresponse (Ronald Holshausen, Sat Sep 18 14:25:47 2021 +1000)
+* 24f46afbd - Merge branch 'v4.1.x' (Ronald Holshausen, Sat Sep 18 14:07:56 2021 +1000)
+* 122ced049 - chore: fix codenarc (Ronald Holshausen, Sat Sep 18 14:06:59 2021 +1000)
+* a8d989a88 - chore: add provider verification test with pact file from Pact-JS V3 #1434 (Ronald Holshausen, Sat Sep 18 14:01:25 2021 +1000)
+* 26d5ae965 - Merge branch 'v4.1.x' (Ronald Holshausen, Sat Sep 18 13:58:08 2021 +1000)
+* ea989c028 - chore: add provider verification test with pact file from Pact-JS V3 #1434 (Ronald Holshausen, Sat Sep 18 13:56:13 2021 +1000)
+* c2fd9f4d9 - feat: set accessible flag when calling test methods in case the class/method is not public #1431 (Ronald Holshausen, Sat Sep 18 11:56:21 2021 +1000)
+* b75661fb0 - fix: resolve Windows build problem when using Maven>=3.3.3 (Marvin Kienitz, Tue Sep 14 17:07:02 2021 +0200)
+* c04aab5a4 - feat: add and refactor handling for 404 responses in Maven plugin (Marvin Kienitz, Tue Sep 14 16:24:24 2021 +0200)
+* 589eb3f95 - Update README.md (Ronald Holshausen, Mon Sep 6 11:16:23 2021 +1000)
+* aae244a9a - bump version to 4.2.12 (Ronald Holshausen, Sat Sep 4 15:40:57 2021 +1000)
+
 # 4.1.27 - Maintenance release + support of multiple parts in multipart request
 
 * 793ed5c1d - Merge branch 'kmochocki-feature/non-file_parts_in_multipart' into v4.1.x (Ronald Holshausen, Sun Sep 19 10:46:38 2021 +1000)
