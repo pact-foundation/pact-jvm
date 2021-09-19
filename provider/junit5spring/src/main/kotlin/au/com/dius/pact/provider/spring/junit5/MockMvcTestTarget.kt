@@ -98,7 +98,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
           val name = StringUtils.defaultString(contentDisposition.getParameter("name"), "file")
           val filename = contentDisposition.getParameter("filename").orEmpty()
           if (filename.isEmpty()) {
-            multipartRequest.param(name, FileCopyUtils.copyToString(bodyPart.inputStream.bufferedReader()))
+            multipartRequest.part(MockPart(name, FileCopyUtils.copyToByteArray(bodyPart.inputStream)))
           } else {
             multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
           }
