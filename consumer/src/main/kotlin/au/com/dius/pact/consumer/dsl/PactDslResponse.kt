@@ -218,8 +218,10 @@ open class PactDslResponse @JvmOverloads constructor(
    */
   fun body(body: DslPart): PactDslResponse {
     val parent = body.close()!!
+
     responseMatchers.addCategory(parent.matchers)
     responseGenerators.addGenerators(parent.generators)
+
     var charset = Charset.defaultCharset()
     var contentType = ContentType.APPLICATION_JSON.toString()
     if (isContentTypeHeaderNotSet) {
@@ -229,8 +231,10 @@ open class PactDslResponse @JvmOverloads constructor(
       val ct = ContentType.parse(contentType)
       charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
     }
-    responseBody = body(parent.body.serialise().toByteArray(charset),
+
+    responseBody = body(parent.toString().toByteArray(charset),
       au.com.dius.pact.core.model.ContentType(contentType))
+
     return this
   }
 

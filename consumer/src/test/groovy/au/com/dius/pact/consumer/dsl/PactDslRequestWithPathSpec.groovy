@@ -78,6 +78,7 @@ class PactDslRequestWithPathSpec extends Specification {
   }
 
   @Issue('#883')
+  @Issue('#1435')
   def 'Pact with PactDslRootValue as body'() {
     given:
     def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
@@ -99,10 +100,41 @@ class PactDslRequestWithPathSpec extends Specification {
     def response = pact.interactions[0].response
 
     then:
-    request.body.value == '"example"'.bytes
+    request.body.valueAsString() == 'example'
     request.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
       'TypeMatcher']
-    response.body.value == '"example"'.bytes
+    response.body.valueAsString() == 'example'
+    response.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
+      'TypeMatcher']
+  }
+
+  @Issue('#883')
+  @Issue('#1435')
+  def 'Pact with PactDslJsonRootValue as body'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
+    def body = PactDslJsonRootValue.stringType('example')
+
+    when:
+    def pact = builder
+      .given('Given a body that is a string')
+      .uponReceiving('a request for a string')
+      .path('/string')
+      .method('POST')
+      .body(body)
+      .willRespondWith()
+      .status(200)
+      .body(body)
+      .toPact()
+
+    def request = pact.interactions[0].request
+    def response = pact.interactions[0].response
+
+    then:
+    request.body.valueAsString() == '"example"'
+    request.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
+      'TypeMatcher']
+    response.body.valueAsString() == '"example"'
     response.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
       'TypeMatcher']
 

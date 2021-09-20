@@ -969,6 +969,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")
     fun invokeProviderMethod(m: Method, instance: Any?): Any? {
       try {
+        m.isAccessible = true
         return m.invoke(instance)
       } catch (e: Throwable) {
         throw RuntimeException("Failed to invoke provider method '${m.name}'", e)
