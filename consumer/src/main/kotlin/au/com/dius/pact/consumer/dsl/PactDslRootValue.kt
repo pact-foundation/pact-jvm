@@ -197,6 +197,13 @@ open class PactDslRootValue : DslPart("", "") {
     return this
   }
 
+  fun getValue(): String {
+    return when (val body = this.body) {
+      is JsonValue.StringValue -> body.toString()
+      else -> body.serialise()
+    }
+  }
+
   fun setValue(value: Any?) {
     body = toJson(value)
   }
@@ -204,6 +211,8 @@ open class PactDslRootValue : DslPart("", "") {
   fun setMatcher(matcher: MatchingRule) {
     matchers.addRule(matcher)
   }
+
+
 
   @Deprecated("Use PactDslJsonArray for arrays")
   override fun eachArrayLike(name: String): PactDslJsonArray {
@@ -348,6 +357,10 @@ open class PactDslRootValue : DslPart("", "") {
 
   override fun arrayContaining(name: String): DslPart {
     throw UnsupportedOperationException("arrayContaining is not currently supported for PactDslRootValue")
+  }
+
+  override fun toString(): String {
+    return getValue()
   }
 
   companion object {

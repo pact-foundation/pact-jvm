@@ -12,6 +12,7 @@ import au.com.dius.pact.core.support.expressions.DataType
 import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.hc.core5.http.ContentType
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.json.JSONObject
 import org.w3c.dom.Document
 import java.io.IOException
@@ -209,8 +210,10 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
    */
   fun body(body: DslPart): PactDslRequestWithoutPath {
     val parent = body.close()
+
     requestMatchers.addCategory(parent!!.matchers)
     requestGenerators.addGenerators(parent.generators)
+
     if (isContentTypeHeaderNotSet) {
       requestHeaders[CONTENT_TYPE] = listOf(ContentType.APPLICATION_JSON.toString())
       requestBody = body(parent.toString().toByteArray())
@@ -218,7 +221,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
       val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
-      requestBody = body(parent.body.serialise().toByteArray(charset),
+      requestBody = body(parent.toString().toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
     return this
@@ -262,6 +265,16 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
       requestBody = body(xmlBuilder.asBytes(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
+    return this
+  }
+
+  /**
+   * The body of the request
+   *
+   * @param body Built using MultipartEntityBuilder
+   */
+  open fun body(body: MultipartEntityBuilder): PactDslRequestWithoutPath {
+    setupMultipart(body)
     return this
   }
 

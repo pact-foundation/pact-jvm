@@ -47,7 +47,15 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:publishToMavenLo
 if (System.env.CI != 'true') {
   task pluginDescriptor(type: Exec, dependsOn: generatePom) {
     if (isWindows()) {
-      commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+      try {
+        // check if mvn.bat exists
+        def proc = new ProcessBuilder('mvn.bat', '-v')
+        proc.start().waitFor()
+
+        commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+      } catch(Exception e) {
+        commandLine 'mvn.cmd', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+      }
     } else {
       commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
     }

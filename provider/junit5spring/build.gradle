@@ -5,7 +5,7 @@ dependencies {
   api 'org.springframework:spring-web:5.3.9'
   api 'org.springframework:spring-webflux:5.3.9'
   api 'javax.servlet:javax.servlet-api:3.1.0'
-  api 'org.hamcrest:hamcrest:2.1'
+  implementation 'org.hamcrest:hamcrest:2.2'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation 'javax.mail:mail:1.5.0-b01'
 

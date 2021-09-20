@@ -49,8 +49,8 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 | Branch | Specification | JDK | Kotlin Version | Latest Version | Notes |
 | ------ | ------------- | --- | -------------- | -------------- | ----- |
 | [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md) | V4 | 11+ | 1.5.21 | | [Upgrade notes](./upgrade-to-4.3.x.md) |
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4 (1) | 11-15 (2) | 1.4.32 | 4.2.10 | |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.24 | |
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) master | V4 (1) | 11-15 (2) | 1.4.32 | 4.2.11 | |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.26 | |
 
 **Notes:**
 * **1:** V4 specification support is a work in progress. See [Pact V4 RFC](https://github.com/pact-foundation/pact-specification/issues/71).

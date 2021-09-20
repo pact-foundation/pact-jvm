@@ -32,7 +32,7 @@ dependencies {
     testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
         exclude group: 'org.codehaus.groovy'
     }
-    testImplementation 'org.hamcrest:hamcrest:2.1'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
 compileTestGroovy {

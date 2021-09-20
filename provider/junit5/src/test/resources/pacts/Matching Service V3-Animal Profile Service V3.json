@@ -1,0 +1,254 @@
+{
+  "consumer": {
+    "name": "Matching Service V3"
+  },
+  "interactions": [
+    {
+      "description": "a request for an animal with an ID",
+      "providerStates": [
+        {
+          "name": "is authenticated"
+        },
+        {
+          "name": "Has an animal with ID",
+          "params": {
+            "id": 100
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer token"
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "/animals/[0-9]+"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/animals/100"
+      },
+      "response": {
+        "body": {
+          "age": 21,
+          "animal": "goat",
+          "available_from": "2021-09-18T12:59:54.497+10:00",
+          "eligibility": {
+            "available": true,
+            "previously_married": false
+          },
+          "first_name": "Billy",
+          "gender": "M",
+          "id": 100,
+          "identifiers": {
+            "004": {
+              "description": "thing",
+              "id": "004"
+            }
+          },
+          "interests": [
+            "walks in the garden/meadow"
+          ],
+          "last_name": "Goat",
+          "location": {
+            "country": "Australia",
+            "description": "Melbourne Zoo",
+            "post_code": 3000
+          }
+        },
+        "generators": {
+          "body": {
+            "$.available_from": {
+              "format": "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+              "type": "DateTime"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.age": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.animal": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.available_from": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "timestamp",
+                  "timestamp": "yyyy-MM-dd'T'HH:mm:ss.SSSX"
+                }
+              ]
+            },
+            "$.eligibility.available": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.eligibility.previously_married": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.first_name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.gender": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "F|M"
+                }
+              ]
+            },
+            "$.identifiers": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "values"
+                }
+              ]
+            },
+            "$.identifiers.*.description": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.identifiers.*.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9]+"
+                }
+              ]
+            },
+            "$.interests": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.last_name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.location.country": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.location.description": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.location.post_code": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for an animal by ID",
+      "providerStates": [
+        {
+          "name": "is authenticated"
+        },
+        {
+          "name": "Has no animals"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer token"
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "/animals/[0-9]+"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/animals/100"
+      },
+      "response": {
+        "status": 404
+      }
+    }
+  ],
+  "metadata": {
+    "pactJs": {
+      "opts:cors": "true",
+      "version": "10.0.0-beta.42"
+    },
+    "pactRust": {
+      "version": "0.9.4"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "Animal Profile Service V3"
+  }
+}

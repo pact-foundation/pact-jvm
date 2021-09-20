@@ -70,14 +70,18 @@ open class PactDslRequestBase(
     val multipart = MultipartEntityBuilder.create()
       .setMode(HttpMultipartMode.EXTENDED)
       .addBinaryBody(partName, data, contentType, fileName)
-      .build()
+    setupMultipart(multipart)
+  }
+
+  fun setupMultipart(multipart: MultipartEntityBuilder) {
+    val entity = multipart.build()
     val os = ByteArrayOutputStream()
-    multipart.writeTo(os)
+    entity.writeTo(os)
     requestBody = body(os.toByteArray(),
-      au.com.dius.pact.core.model.ContentType(multipart.contentType))
+      au.com.dius.pact.core.model.ContentType(entity.contentType))
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, RegexMatcher(MULTIPART_HEADER_REGEX,
-      multipart.contentType))
-    requestHeaders[CONTENT_TYPE] = listOf(multipart.contentType)
+      entity.contentType))
+    requestHeaders[CONTENT_TYPE] = listOf(entity.contentType)
   }
 
   protected fun queryMatchingDateBase(field: String, pattern: String?, example: String?): PactDslRequestBase {
