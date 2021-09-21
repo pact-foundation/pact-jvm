@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.support.Either
 import com.github.michaelbull.result.Err
 import spock.lang.Specification
 
@@ -115,13 +116,14 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'each key and value'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
-      new MatchingRuleDefinition(null, value, null)
+      new MatchingRuleDefinition(null, ValueType.Unknown, value, null)
 
     where:
 
-    expression                | value
-    "eachKey(matching(regex, '\$(\\.\\w+)+', '\$.test.one'))" | [ new EachKeyMatcher(new MatchingRuleDefinition('$.test.one', [new RegexMatcher('$(\\.\\w+)+')], null)) ]
-    "eachKey(notEmpty('\$.test')), eachValue(matching(number, 100))" | [ new EachKeyMatcher(new MatchingRuleDefinition('$.test', [NotEmptyMatcher.INSTANCE], null)), new EachValueMatcher(new MatchingRuleDefinition('100', [ new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER) ], null)) ]
+    expression                                                       | value
+    "eachKey(matching(regex, '\$(\\.\\w+)+', '\$.test.one'))"        | [Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test.one', new RegexMatcher('$(\\.\\w+)+'), null)))]
+    "eachKey(notEmpty('\$.test')), eachValue(matching(number, 100))" | [Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test', NotEmptyMatcher.INSTANCE, null))), Either.a(new EachValueMatcher(new MatchingRuleDefinition('100', new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), null)))]
+    "eachValue(matching(\$'items'))"                                 | [Either.a(new EachValueMatcher(new MatchingRuleDefinition(null, ValueType.Unknown, [Either.b(new MatchingReference('items'))], null)))]
   }
 
   def 'invalid each key and value'() {

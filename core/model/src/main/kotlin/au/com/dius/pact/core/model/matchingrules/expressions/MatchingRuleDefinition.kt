@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model.matchingrules.expressions
 import au.com.dius.pact.core.model.generators.ErrorListener
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -11,9 +12,55 @@ import mu.KLogging
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
+data class MatchingReference(
+  val name: String
+)
+
+enum class ValueType {
+  Unknown,
+  String,
+  Number,
+  Integer,
+  Decimal,
+  Boolean;
+
+  fun merge(valueType: ValueType): ValueType {
+    return when (this) {
+      String -> String
+      Number -> when (valueType) {
+        Number, Boolean, Unknown -> Number
+        Integer -> Integer
+        Decimal -> Decimal
+        String -> String
+      }
+      Integer -> when (valueType) {
+        Number, Integer, Boolean -> Integer
+        Decimal -> Decimal
+        String -> String
+        Unknown -> Integer
+      }
+      Decimal -> when (valueType) {
+        Number, Integer, Boolean -> Decimal
+        Decimal -> Decimal
+        String -> String
+        Unknown -> Decimal
+      }
+      Boolean -> when (valueType) {
+        Number -> Number
+        Integer -> Integer
+        Decimal -> Decimal
+        String -> String
+        Unknown, Boolean -> Boolean
+      }
+      Unknown -> valueType
+    }
+  }
+}
+
 data class MatchingRuleDefinition(
   val value: String?,
-  val rules: List<MatchingRule>,
+  val valueType: ValueType,
+  val rules: List<Either<MatchingRule, MatchingReference>>,
   val generator: Generator?
 ) {
   constructor(
@@ -22,7 +69,19 @@ data class MatchingRuleDefinition(
     generator: Generator?
   ): this(
     value,
-    if (rule != null) listOf(rule) else emptyList(),
+    ValueType.Unknown,
+    if (rule != null) listOf(Either.A(rule)) else emptyList(),
+    generator
+  )
+
+  constructor(
+    value: String?,
+    rule: MatchingReference,
+    generator: Generator?
+  ): this(
+    value,
+    ValueType.Unknown,
+    listOf(Either.B(rule)),
     generator
   )
 
@@ -42,7 +101,10 @@ data class MatchingRuleDefinition(
         }
       }
 
-      return MatchingRuleDefinition(if (value.isNotEmpty()) value else other.value, rules + other.rules,
+      return MatchingRuleDefinition(
+        if (value.isNotEmpty()) value else other.value,
+        valueType.merge(other.valueType),
+        rules + other.rules,
         generator ?: other.generator)
     } else {
       return this

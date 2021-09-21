@@ -101,3 +101,34 @@ public fun MutableMap<String, JsonValue>?.deepMerge(map: Map<String, JsonValue>)
     mutableMapOf()
   }
 }
+
+sealed class Either<out A, out B> {
+  data class A<A>(val value: A) : Either<A, Nothing>()
+  data class B<B>(val value: B) : Either<Nothing, B>()
+
+  fun unwrapA(error: String): A {
+    return when (this) {
+      is Either.A -> this.value
+      is Either.B -> throw InvalidEitherOptionException(error)
+    }
+  }
+
+  fun unwrapB(error: String): B {
+    return when (this) {
+      is Either.A -> throw InvalidEitherOptionException(error)
+      is Either.B -> this.value
+    }
+  }
+
+  companion object {
+    @JvmStatic
+    fun <A, B> a(value: A): Either<A, B> {
+      return A(value)
+    }
+
+    @JvmStatic
+    fun <B> b(value: B): Either<Nothing, B> {
+      return B(value)
+    }
+  }
+}

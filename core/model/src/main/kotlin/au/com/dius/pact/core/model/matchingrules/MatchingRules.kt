@@ -7,6 +7,8 @@ import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.NullGenerator
 import au.com.dius.pact.core.model.generators.lookupGenerator
 import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
+import au.com.dius.pact.core.model.matchingrules.expressions.ValueType
+import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
@@ -163,9 +165,13 @@ interface MatchingRule {
             null
           }
 
-          EachKeyMatcher(MatchingRuleDefinition(Json.toString(values["value"]), values["rules"].asArray()!!.map {
-            fromJson(it)
-          }, generator))
+          val definition = MatchingRuleDefinition(
+            Json.toString(values["value"]),
+            ValueType.Unknown,
+            values["rules"].asArray()!!.map {
+              Either.A(fromJson(it))
+            }, generator)
+          EachKeyMatcher(definition)
         }
         "eachValue", "each-value" -> {
           val generator = if (values.has("generator")) {
@@ -174,9 +180,15 @@ interface MatchingRule {
             null
           }
 
-          EachValueMatcher(MatchingRuleDefinition(Json.toString(values["value"]), values["rules"].asArray()!!.map {
-            fromJson(it)
-          }, generator))
+          val definition = MatchingRuleDefinition(
+            Json.toString(values["value"]),
+            ValueType.Unknown,
+            values["rules"].asArray()!!.map {
+              Either.A(fromJson(it))
+            },
+            generator
+          )
+          EachValueMatcher(definition)
         }
         else -> {
           MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }

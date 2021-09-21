@@ -7,7 +7,12 @@ import au.com.dius.pact.core.support.json.JsonValue
 
 data class EachKeyMatcher(val definition: MatchingRuleDefinition) : MatchingRule {
   override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
-    val map = mutableMapOf("match" to "eachKey", "rules" to definition.rules.map { it.toMap(spec) })
+    val map = mutableMapOf<String, Any?>("match" to "eachKey")
+
+    map["rules"] = definition.rules.map {
+      val matchingRule: MatchingRule = it.unwrapA("Expected a matching rule, found an unresolved reference")
+      matchingRule.toMap(spec)
+    }
 
     if (definition.value != null) {
       map["value"] = definition.value
@@ -33,7 +38,7 @@ data class EachKeyMatcher(val definition: MatchingRuleDefinition) : MatchingRule
   override val attributes: Map<String, JsonValue>
     get() {
       val map = mutableMapOf<String, JsonValue>("rules" to JsonValue.Array(definition.rules.map {
-        Json.toJson(it.toMap(PactSpecVersion.V4))
+        Json.toJson(it.unwrapA("Expected a matching rule, found an unresolved reference").toMap(PactSpecVersion.V4))
       }.toMutableList()))
 
       if (definition.value != null) {
