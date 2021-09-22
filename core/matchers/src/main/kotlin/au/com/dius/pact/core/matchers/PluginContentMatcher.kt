@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
@@ -23,7 +24,7 @@ class PluginContentMatcher(
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): InteractionContents {
+  ): Result<InteractionContents, String> {
     return contentMatcher.configureContent(contentType.toString(), bodyConfig)
   }
 

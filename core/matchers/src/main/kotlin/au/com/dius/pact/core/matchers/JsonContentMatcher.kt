@@ -7,6 +7,8 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
@@ -39,13 +41,13 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): InteractionContents {
-    return InteractionContents(
+  ): Result<InteractionContents, String> {
+    return Ok(InteractionContents(
       OptionalBody.body(
         toJson(bodyConfig["body"]).serialise().toByteArray(),
         ContentType("application/json")
       )
-    )
+    ))
   }
 
   private fun valueOf(value: Any?) = when (value) {

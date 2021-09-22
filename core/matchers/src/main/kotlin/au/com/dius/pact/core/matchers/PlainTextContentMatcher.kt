@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
@@ -54,13 +56,13 @@ class PlainTextContentMatcher : ContentMatcher {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): InteractionContents {
-    return InteractionContents(
+  ): Result<InteractionContents, String> {
+    return Ok(InteractionContents(
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("text/plain")
       )
-    )
+    ))
   }
 
   companion object : KLogging()

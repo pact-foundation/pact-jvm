@@ -182,29 +182,39 @@ open class PactBuilder(
           logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
           val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
           if (contentMatcher != null) {
-            val (body, rules, generators, _, _) = contentMatcher.setupBodyFromConfig(bodyConfig)
-            val matchingRules = MatchingRulesImpl()
-            if (rules != null) {
-              matchingRules.addCategory(rules)
+            when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
+              is Ok -> {
+                val (body, rules, generators, _, _) = result.value
+                val matchingRules = MatchingRulesImpl()
+                if (rules != null) {
+                  matchingRules.addCategory(rules)
+                }
+                MessageContents(body, mapOf(), matchingRules, generators ?: Generators())
+              }
+              is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
             }
-            MessageContents(body, mapOf(), matchingRules, generators ?: Generators())
           } else {
             MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType)))
           }
         } else {
           logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
-          val (body, rules, generators, metadata, config) = matcher.configureContent(contentType, bodyConfig)
-          val matchingRules = MatchingRulesImpl()
-          if (rules != null) {
-            matchingRules.addCategory(rules)
+          when (val result = matcher.configureContent(contentType, bodyConfig)) {
+            is Ok -> {
+              val (body, rules, generators, metadata, config) = result.value
+              val matchingRules = MatchingRulesImpl()
+              if (rules != null) {
+                matchingRules.addCategory(rules)
+              }
+              if (config.interactionConfiguration.isNotEmpty()) {
+                interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
+              }
+              if (config.pactConfiguration.isNotEmpty()) {
+                addPluginConfiguration(matcher, config.pactConfiguration)
+              }
+              MessageContents(body, metadata, matchingRules, generators ?: Generators())
+            }
+            is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
           }
-          if (config.interactionConfiguration.isNotEmpty()) {
-            interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
-          }
-          if (config.pactConfiguration.isNotEmpty()) {
-            addPluginConfiguration(matcher, config.pactConfiguration)
-          }
-          MessageContents(body, metadata, matchingRules, generators ?: Generators())
         }
       } else {
         MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray()))
@@ -233,13 +243,18 @@ open class PactBuilder(
           logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
           val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
           if (contentMatcher != null) {
-            val (body, rules, generators, _, _) = contentMatcher.setupBodyFromConfig(bodyConfig)
-            part.body = body
-            if (rules != null) {
-              part.matchingRules.addCategory(rules)
-            }
-            if (generators != null) {
-              part.generators.addGenerators(generators)
+            when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
+              is Ok -> {
+                val (body, rules, generators, _, _) = result.value
+                part.body = body
+                if (rules != null) {
+                  part.matchingRules.addCategory(rules)
+                }
+                if (generators != null) {
+                  part.generators.addGenerators(generators)
+                }
+              }
+              is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
             }
           } else {
             part.body = OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType))
@@ -262,30 +277,34 @@ open class PactBuilder(
     part: IHttpPart,
     interaction: V4Interaction
   ) {
-    val (body, rules, generators, _, config, interactionMarkup, interactionMarkupType) =
-      matcher.configureContent(contentType, bodyConfig)
-    part.body = body
-    if (!part.hasHeader("content-type")) {
-      part.headers["content-type"] = listOf(body.contentType.toString())
-    }
-    if (rules != null) {
-      part.matchingRules.addCategory(rules)
-    }
-    if (generators != null) {
-      part.generators.addGenerators(generators)
-    }
+    when (val result = matcher.configureContent(contentType, bodyConfig)) {
+      is Ok -> {
+        val (body, rules, generators, _, config, interactionMarkup, interactionMarkupType) = result.value
+        part.body = body
+        if (!part.hasHeader("content-type")) {
+          part.headers["content-type"] = listOf(body.contentType.toString())
+        }
+        if (rules != null) {
+          part.matchingRules.addCategory(rules)
+        }
+        if (generators != null) {
+          part.generators.addGenerators(generators)
+        }
 
-    logger.debug { "Http part from plugin: $part" }
-    logger.debug { "Plugin config: $config" }
+        logger.debug { "Http part from plugin: $part" }
+        logger.debug { "Plugin config: $config" }
 
-    if (config.interactionConfiguration.isNotEmpty()) {
-      interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
-    }
-    if (config.pactConfiguration.isNotEmpty()) {
-      addPluginConfiguration(matcher, config.pactConfiguration)
-    }
-    if (interactionMarkup.isNotEmpty()) {
-      interaction.interactionMarkup = InteractionMarkup(interactionMarkup, interactionMarkupType)
+        if (config.interactionConfiguration.isNotEmpty()) {
+          interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
+        }
+        if (config.pactConfiguration.isNotEmpty()) {
+          addPluginConfiguration(matcher, config.pactConfiguration)
+        }
+        if (interactionMarkup.isNotEmpty()) {
+          interaction.interactionMarkup = InteractionMarkup(interactionMarkup, interactionMarkupType)
+        }
+      }
+      is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
     }
   }
 
@@ -334,3 +353,4 @@ open class PactBuilder(
   }
 }
 
+class InteractionConfigurationError(error: String) : RuntimeException(error)
