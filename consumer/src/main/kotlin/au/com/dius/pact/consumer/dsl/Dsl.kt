@@ -14,6 +14,8 @@ object Dsl {
    * Returns a safe matcher key for the attribute name
    */
   @JvmStatic
+  @Deprecated("Use the constructValidPath method in the model lib",
+    replaceWith = ReplaceWith("constructValidPath(name, rootPath)"))
   fun matcherKey(name: String, rootPath: String): String {
     return if (name.any { !validPathCharacter(it) }) {
       "${StringUtils.stripEnd(rootPath, ".")}['$name']"

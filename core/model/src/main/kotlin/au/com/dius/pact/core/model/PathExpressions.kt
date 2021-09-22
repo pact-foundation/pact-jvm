@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import org.apache.commons.collections4.iterators.PushbackIterator
+import org.apache.commons.lang3.StringUtils
 
 const val PATH_SPECIAL_CHARS = "'[].@ \t\n"
 const val EXP_ALLOWED_SPECIAL_CHARS = "-_:#@"
@@ -162,4 +163,22 @@ fun parsePath(path: String): List<PathToken> {
   }
 
   return tokens
+}
+
+/**
+ * This will combine the root path and the path segment to make a valid resulting path
+ */
+fun constructValidPath(segment: String, rootPath: String): String {
+  return when {
+    rootPath.isEmpty() -> segment
+    segment.isEmpty() -> rootPath
+    else -> {
+      val root = StringUtils.stripEnd(rootPath, ".")
+      if (segment.any { !validPathCharacter(it) }) {
+        "$root['$segment']"
+      } else {
+        "$root.$segment"
+      }
+    }
+  }
 }

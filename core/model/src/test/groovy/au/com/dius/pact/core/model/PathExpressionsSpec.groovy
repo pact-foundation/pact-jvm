@@ -166,4 +166,22 @@ class PathExpressionsSpec extends Specification {
     '$[-1]'    | 'Indexes can only consist of numbers or a "*", found "-" instead in path expression "$[-1]" at index 2'
   }
 
+  @Unroll
+  def 'Constructing valid path expressions'() {
+    expect:
+    PathExpressionsKt.constructValidPath(segment, root) == result
+
+    where:
+
+    segment | root  || result
+    ''      | ''    || ''
+    'a'     | ''    || 'a'
+    ''      | 'a'   || 'a'
+    'a'     | 'a'   || 'a.a'
+    'a'     | 'a.'  || 'a.a'
+    'a'     | 'a.b' || 'a.b.a'
+    'a$'    | 'a.b' || "a.b['a\$']"
+    'a b'   | 'a.b' || "a.b['a b']"
+    '$a.b'  | 'a.b' || "a.b['\$a.b']"
+  }
 }
