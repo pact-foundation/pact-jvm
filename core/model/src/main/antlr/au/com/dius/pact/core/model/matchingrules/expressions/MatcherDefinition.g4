@@ -63,7 +63,7 @@ matchingRule returns [ String value, ValueType type, MatchingRule rule, Generato
 primitiveValue returns [ String value, ValueType type ] :
   string { $value = $string.contents; $type = ValueType.String; }
   | v=DECIMAL_LITERAL { $value = $v.getText(); $type = ValueType.Decimal; }
-  | v=INTEGER_LITERAL { $value = $v.getText(); $type = ValueType.Number; }
+  | v=INTEGER_LITERAL { $value = $v.getText(); $type = ValueType.Integer; }
   | v=BOOLEAN_LITERAL { $value = $v.getText(); $type = ValueType.Boolean; }
   ;
 

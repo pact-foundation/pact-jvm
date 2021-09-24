@@ -85,6 +85,10 @@ data class MatchingRuleDefinition(
     generator
   )
 
+  /**
+   * Merges two matching rules definitions. This is used when multiple matching rules are
+   * provided for a single element.
+   */
   fun merge(other: MatchingRuleDefinition?): MatchingRuleDefinition {
     if (other != null) {
       if (value.isNotEmpty() && other.value.isNotEmpty()) {
