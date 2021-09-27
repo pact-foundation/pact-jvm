@@ -648,4 +648,26 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.putJson('pb:version-tag', [version: 'null', tag: '2'], _) >> new Ok(true)
     result == new Err(["Publishing tag '1' failed: failed"])
   }
+
+  @Unroll
+  @SuppressWarnings('UnnecessaryBooleanExpression')
+  def 'can-i-deploy - matrix query'() {
+    expect:
+    PactBrokerClient.internalBuildMatrixQuery(pacticipant, pacticipantVersion, (Latest) latest, to, ignore) == result
+
+    where:
+
+    pacticipant  | pacticipantVersion | latest                             | to        | ignore                                                              || result
+    'Test'       | ''                 | new Latest.UseLatest(true)         | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true'
+    'Test'       | '100'              | new Latest.UseLatest(false)        | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][version]=100&latest=true'
+    'Test'       | ''                 | new Latest.UseLatestTag('tst')     | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][tag]=tst&latest=true'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | 'tst'     | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&tag=tst'
+    'Test 1 2 3' | ''                 | new Latest.UseLatest(true)         | null      | []                                                                  || 'q[][pacticipant]=Test%201%202%203&latestby=cvp&q[][latest]=true&latest=true'
+    'Test'       | '1 0 0'            | new Latest.UseLatest(false)        | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][version]=1%200%200&latest=true'
+    'Test'       | ''                 | new Latest.UseLatestTag('tst 3/4') | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][tag]=tst%203%2F4&latest=true'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | 'tst 3/4' | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&tag=tst%203%2F4'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', null)]                                   || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', '100')]                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob&ignore[][version]=100'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', null), new IgnoreSelector('fred', null)] || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob&ignore[][pacticipant]=fred'
+  }
 }

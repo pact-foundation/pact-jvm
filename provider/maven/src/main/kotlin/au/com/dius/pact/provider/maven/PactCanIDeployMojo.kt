@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.pactbroker.IgnoreSelector
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.isNotEmpty
@@ -9,7 +10,7 @@ import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 
 /**
- * Task to push pact files to a pact broker
+ * Pact broker can-i-deploy check ()
  */
 @Mojo(name = "can-i-deploy")
 open class PactCanIDeployMojo : PactBaseMojo() {
@@ -27,6 +28,9 @@ open class PactCanIDeployMojo : PactBaseMojo() {
 
   @Parameter(property = "toTag", defaultValue = "")
   private var to: String? = ""
+
+  @Parameter(property = "ignore")
+  private var ignore: Array<IgnoreSelector> = emptyArray()
 
   override fun execute() {
     val t = TermColors()
@@ -48,7 +52,7 @@ open class PactCanIDeployMojo : PactBaseMojo() {
       throw MojoExecutionException("The can-i-deploy task requires -DpacticipantVersion=... or -Dlatest=true", null)
     }
 
-    val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion.orEmpty(), latest, to)
+    val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion.orEmpty(), latest, to, ignore.asList())
     if (result.ok) {
       println("Computer says yes \\o/ ${result.message}\n\n${t.green(result.reason)}")
     } else {
