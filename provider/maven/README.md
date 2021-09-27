@@ -852,3 +852,35 @@ be added to the configuration in the POM to enable this: `retriesWhenUnknown` an
 |-----|-----------|-------|
 |retriesWhenUnknown|The amount of times to retry while there are unknown results|0|
 |retryInterval|The number of seconds to wait between retries|10|
+
+## Ignoring pacticipant by name and version (4.1.28+, 4.2.13+)
+
+You can specify pacticipants by name or by name and version to ignore from the can-i-deploy check.
+
+To configure it in the POM file, add an ignore section to the `configuration` element:
+
+```xml
+<plugin>
+ <groupId>au.com.dius.pact.provider</groupId>
+ <artifactId>maven</artifactId>
+ <version>4.1.28</version>
+ <configuration>
+  <pactBrokerUrl>https://test.pact.dius.com.au/</pactBrokerUrl>
+  <ignore>
+   <param>
+    <name>Bob</name> <!-- Will ignore pacticipant named Bob -->
+   </param>
+   <param>
+    <name>Fred</name> <!-- Will ignore pacticipant name Fred with version 1.2.3 -->
+    <version>1.2.3</version>
+   </param>
+  </ignore>
+  <serviceProviders>
+   ...
+  </serviceProviders>
+ </configuration>
+</plugin>
+```
+
+Or add it to the command line using the format `-Dignore=<pacticipant>:<version>?,<pacticipant>:<version>?,...`. 
+For example, `-Dignore=bob,fred:1.2.3` to ignore pacticipant named Bob and pacticipant name Fred with version 1.2.3.
