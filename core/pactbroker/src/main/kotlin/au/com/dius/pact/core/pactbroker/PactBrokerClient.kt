@@ -114,7 +114,17 @@ data class ConsumerVersionSelector(
 /**
  * Selectors to ignore with the can-i-deploy check
  */
-data class IgnoreSelector @JvmOverloads constructor(val name: String, val version: String? = null)
+data class IgnoreSelector @JvmOverloads constructor(var name: String = "", var version: String? = null) {
+  fun set(value: String) {
+    val vals = value.split(":", limit = 2)
+    if (vals.size == 2) {
+      name = vals[0]
+      version = vals[1]
+    } else {
+      name = vals[0]
+    }
+  }
+}
 
 interface IPactBrokerClient {
   /**
@@ -655,9 +665,11 @@ open class PactBrokerClient(
 
       if (ignore.isNotEmpty()) {
         for ((key, value) in ignore) {
-          params.add("ignore[][pacticipant]" to key)
-          if (value.isNotEmpty()) {
-            params.add("ignore[][version]" to value)
+          if (key.isNotEmpty()) {
+            params.add("ignore[][pacticipant]" to key)
+            if (value.isNotEmpty()) {
+              params.add("ignore[][version]" to value)
+            }
           }
         }
       }
