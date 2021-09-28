@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class PactBrokerSourceSpec extends Specification {
 
   @Unroll
