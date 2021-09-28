@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.CanIDeployResult
+import au.com.dius.pact.core.pactbroker.IgnoreSelector
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import org.apache.maven.plugin.MojoExecutionException
@@ -58,7 +59,7 @@ class PactCanIDeployMojoSpec extends Specification {
     mojo.pacticipantVersion = null
     mojo.latest = 'true'
     mojo.brokerClient = Mock(PactBrokerClient) {
-      canIDeploy(_, _, _, _) >> new CanIDeployResult(true, '', '', null)
+      canIDeploy(_, _, _, _, _) >> new CanIDeployResult(true, '', '', null)
     }
 
     when:
@@ -77,7 +78,7 @@ class PactCanIDeployMojoSpec extends Specification {
 
     then:
     notThrown(MojoExecutionException)
-    1 * mojo.brokerClient.canIDeploy('test', '1234', _, _) >>
+    1 * mojo.brokerClient.canIDeploy('test', '1234', _, _, _) >>
       new CanIDeployResult(true, '', '', null)
   }
 
@@ -93,7 +94,23 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234',
-      new Latest.UseLatest(true), 'prod') >> new CanIDeployResult(true, '', '', null)
+      new Latest.UseLatest(true), 'prod', _) >> new CanIDeployResult(true, '', '', null)
+  }
+
+  def 'passes ignore parameters to the pact broker client'() {
+    given:
+    IgnoreSelector[] selectors = [new IgnoreSelector('bob')] as IgnoreSelector[]
+    mojo.latest = 'true'
+    mojo.ignore = selectors
+    mojo.brokerClient = Mock(PactBrokerClient)
+
+    when:
+    mojo.execute()
+
+    then:
+    notThrown(MojoExecutionException)
+    1 * mojo.brokerClient.canIDeploy('test', '1234',
+      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null)
   }
 
   def 'throws an exception if the pact broker client says no'() {
@@ -104,7 +121,7 @@ class PactCanIDeployMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * mojo.brokerClient.canIDeploy('test', '1234', _, _) >>
+    1 * mojo.brokerClient.canIDeploy('test', '1234', _, _, _) >>
       new CanIDeployResult(false, 'Bad version', 'Bad version', null)
     def ex = thrown(MojoExecutionException)
     ex.message == 'Can you deploy? Computer says no ¯\\_(ツ)_/¯ Bad version'

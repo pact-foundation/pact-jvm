@@ -132,7 +132,7 @@ open class PactBrokerLoader(
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
         val tags = ep.parseListExpression(it.tag, resolver)
-        val consumer = ep.parseExpression(it.consumer, DataType.STRING, resolver) as String?
+        val consumers = ep.parseListExpression(it.consumer, resolver)
         val fallbackTag = ep.parseExpression(it.fallbackTag, DataType.STRING, resolver) as String?
         val parsedLatest = ep.parseListExpression(it.latest, resolver)
         val latest = when {
@@ -147,13 +147,22 @@ open class PactBrokerLoader(
         }
 
         when {
-          tags.isNotEmpty() -> {
-            tags.mapIndexed { index, tag ->
-              ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag, consumer = consumer)
+          tags.isNotEmpty() && consumers.isNotEmpty() -> {
+            permutations(tags.mapIndexed { index, tag -> tag to index  }, consumers).map { (tag, consumer) ->
+              ConsumerVersionSelector(tag!!.first, latest[tag.second].toBoolean(), fallbackTag = fallbackTag,
+                consumer = consumer)
             }
           }
-          consumer.isNotEmpty() -> {
-            listOf(ConsumerVersionSelector(null, true, fallbackTag = fallbackTag, consumer = consumer))
+          tags.isNotEmpty() -> {
+            tags.mapIndexed { index, tag ->
+              ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag,
+                consumer = consumers.firstOrNull())
+            }
+          }
+          consumers.isNotEmpty() -> {
+            consumers.map { name ->
+              ConsumerVersionSelector(null, true, fallbackTag = fallbackTag, consumer = name)
+            }
           }
           else -> listOf()
         }

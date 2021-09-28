@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import au.com.dius.pact.core.support.isNotEmpty
 import java.io.File
 import java.util.function.Supplier
 
@@ -37,12 +38,13 @@ data class PactBrokerSource<I> @JvmOverloads constructor(
   val url: String? = null
 ) : PactSource()
   where I : Interaction {
-  override fun description() =
-    if (port == null) {
-      "Pact Broker $scheme://$host"
-    } else {
-      "Pact Broker $scheme://$host:$port"
+  override fun description(): String {
+    return when {
+      url.isNotEmpty() -> "Pact Broker $url"
+      port == null -> "Pact Broker $scheme://$host"
+      else -> "Pact Broker $scheme://$host:$port"
     }
+  }
 }
 
 data class FileSource @JvmOverloads constructor(val file: File, val pact: Pact? = null) : PactSource() {

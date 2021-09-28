@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.13 - Bugfix + add ignore parameter to Maven can-i-deploy task
+
+* 70ebaa38f - fix: org.apache.httpcomponents:httpmime needs to be defined as api for consumer lib #1446 (Ronald Holshausen, Mon Sep 27 16:04:51 2021 +1000)
+* e1afb3415 - fix: build after merge from v4.1.x (Ronald Holshausen, Mon Sep 27 16:03:55 2021 +1000)
+* 6ef8fc119 - Merge branch 'v4.1.x' (Ronald Holshausen, Mon Sep 27 15:52:21 2021 +1000)
+* 6bd425fe9 - feat: update readme with ignore options #1444 (Ronald Holshausen, Mon Sep 27 15:51:16 2021 +1000)
+* b9dfa76dd - feat: support setting can-i-deploy ignore values using -D command line #1444 (Ronald Holshausen, Mon Sep 27 15:33:41 2021 +1000)
+* e21f0f05f - feat: add ignore parameter to Maven can-i-deploy mojo #1444 (Ronald Holshausen, Mon Sep 27 14:23:49 2021 +1000)
+* 7b956c1d3 - chore: add example Java test with null value matchers (Ronald Holshausen, Mon Sep 27 11:10:46 2021 +1000)
+* 7c556ea51 - fix: support specifying both tags and consumers as system property list expressions #1447 (Ronald Holshausen, Fri Sep 24 12:53:27 2021 +1000)
+* ed6e82c93 - bump version to 4.2.13 (Ronald Holshausen, Sun Sep 19 12:17:26 2021 +1000)
+
 # 4.2.12 - Maintenance release + support of multiple parts in multipart request
 
 * bca15036b - Merge branch 'v4.1.x' (Ronald Holshausen, Sun Sep 19 11:53:00 2021 +1000)
@@ -28,6 +40,13 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * c04aab5a4 - feat: add and refactor handling for 404 responses in Maven plugin (Marvin Kienitz, Tue Sep 14 16:24:24 2021 +0200)
 * 589eb3f95 - Update README.md (Ronald Holshausen, Mon Sep 6 11:16:23 2021 +1000)
 * aae244a9a - bump version to 4.2.12 (Ronald Holshausen, Sat Sep 4 15:40:57 2021 +1000)
+
+# 4.1.28 - add ignore parameter to Maven can-i-deploy
+
+* 6bd425fe9 - feat: update readme with ignore options #1444 (Ronald Holshausen, Mon Sep 27 15:51:16 2021 +1000)
+* b9dfa76dd - feat: support setting can-i-deploy ignore values using -D command line #1444 (Ronald Holshausen, Mon Sep 27 15:33:41 2021 +1000)
+* e21f0f05f - feat: add ignore parameter to Maven can-i-deploy mojo #1444 (Ronald Holshausen, Mon Sep 27 14:23:49 2021 +1000)
+* 4b461d809 - bump version to 4.1.28 (Ronald Holshausen, Sun Sep 19 11:35:46 2021 +1000)
 
 # 4.1.27 - Maintenance release + support of multiple parts in multipart request
 
