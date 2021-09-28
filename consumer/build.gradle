@@ -2,12 +2,13 @@
 dependencies {
   api project(path: ":core:model", configuration: 'default')
   api project(path: ":core:matchers", configuration: 'default')
+  api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+  api "org.apache.httpcomponents:httpmime:${project.httpClientVersion}"
+
   implementation 'com.googlecode.java-diff-utils:diffutils:1.3.0',
-    'dk.brics.automaton:automaton:1.11-8',
-    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+    'dk.brics.automaton:automaton:1.11-8'
   implementation "org.json:json:${project.jsonVersion}"
   implementation "io.netty:netty-handler:${project.nettyVersion}"
-  implementation "org.apache.httpcomponents:httpmime:${project.httpClientVersion}"
   implementation "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   implementation 'io.ktor:ktor-server-netty:1.4.1'

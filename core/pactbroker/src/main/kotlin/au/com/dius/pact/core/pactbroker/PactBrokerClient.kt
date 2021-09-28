@@ -111,6 +111,21 @@ data class ConsumerVersionSelector(
   }
 }
 
+/**
+ * Selectors to ignore with the can-i-deploy check
+ */
+data class IgnoreSelector @JvmOverloads constructor(var name: String = "", var version: String? = null) {
+  fun set(value: String) {
+    val vals = value.split(":", limit = 2)
+    if (vals.size == 2) {
+      name = vals[0]
+      version = vals[1]
+    } else {
+      name = vals[0]
+    }
+  }
+}
+
 interface IPactBrokerClient {
   /**
    * Fetches all consumers for the given provider and selectors
@@ -519,9 +534,16 @@ open class PactBrokerClient(
     }
   }
 
-  open fun canIDeploy(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): CanIDeployResult {
+  @JvmOverloads
+  open fun canIDeploy(
+    pacticipant: String,
+    pacticipantVersion: String,
+    latest: Latest,
+    to: String?,
+    ignore: List<IgnoreSelector> = emptyList()
+  ): CanIDeployResult {
     val halClient = newHalClient()
-    val path = "/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to)
+    val path = "/matrix?" + internalBuildMatrixQuery(pacticipant, pacticipantVersion, latest, to, ignore)
     logger.debug { "Matrix Query: $path" }
     return retryWith(
       "canIDeploy: Retrying request as there are unknown results",
@@ -541,25 +563,6 @@ open class PactBrokerClient(
         }
       }
     }
-  }
-
-  private fun buildMatrixQuery(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): String {
-    val escaper = urlPathSegmentEscaper()
-    var base = "?q[][pacticipant]=${escaper.escape(pacticipant)}&latestby=cvp"
-    base += when (latest) {
-      is Latest.UseLatest -> if (latest.latest) {
-        "&q[][latest]=true"
-      } else {
-        "&q[][version]=${escaper.escape(pacticipantVersion)}"
-      }
-      is Latest.UseLatestTag -> "q[][tag]=${escaper.escape(latest.latestTag)}"
-    }
-    base += if (to.isNotEmpty()) {
-      "&latest=true&tag=${escaper.escape(to)}"
-    } else {
-      "&latest=true"
-    }
-    return base
   }
 
   open fun createVersionTag(
@@ -629,6 +632,50 @@ open class PactBrokerClient(
         result = function()
       }
       return result
+    }
+
+    /**
+     * Internal: Public for testing
+     */
+    @JvmStatic
+    fun internalBuildMatrixQuery(
+      pacticipant: String,
+      pacticipantVersion: String,
+      latest: Latest,
+      to: String?,
+      ignore: List<IgnoreSelector>
+    ): String {
+      val escaper = urlPathSegmentEscaper()
+      var params = mutableListOf("q[][pacticipant]" to escaper.escape(pacticipant), "latestby" to "cvp")
+
+      when (latest) {
+        is Latest.UseLatest -> if (latest.latest) {
+          params.add("q[][latest]" to "true")
+        } else {
+          params.add("q[][version]" to escaper.escape(pacticipantVersion))
+        }
+        is Latest.UseLatestTag -> params.add("q[][tag]" to escaper.escape(latest.latestTag))
+      }
+
+      if (to.isNotEmpty()) {
+        params.add("latest" to "true")
+        params.add("tag" to escaper.escape(to))
+      } else {
+        params.add("latest" to "true")
+      }
+
+      if (ignore.isNotEmpty()) {
+        for ((key, value) in ignore) {
+          if (key.isNotEmpty()) {
+            params.add("ignore[][pacticipant]" to key)
+            if (value.isNotEmpty()) {
+              params.add("ignore[][version]" to value)
+            }
+          }
+        }
+      }
+
+      return params.joinToString("&") { "${it.first}=${it.second}" }
     }
   }
 }
