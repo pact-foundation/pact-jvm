@@ -11,8 +11,9 @@ class PactBrokerSourceSpec extends Specification {
     source.description() == description
 
     where:
-    source                                                  | description
-    new PactBrokerSource('localhost', '80', 'http')         | 'Pact Broker http://localhost:80'
-    new PactBrokerSource('www.example.com', '443', 'https') | 'Pact Broker https://www.example.com:443'
+    source                                                                     | description
+    new PactBrokerSource('localhost', '80', 'http')                            | 'Pact Broker http://localhost:80'
+    new PactBrokerSource('www.example.com', '443', 'https')                    | 'Pact Broker https://www.example.com:443'
+    new PactBrokerSource(null, null, null, [:], 'https://www.example.com:443') | 'Pact Broker https://www.example.com:443'
   }
 }

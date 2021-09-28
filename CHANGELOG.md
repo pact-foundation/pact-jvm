@@ -41,6 +41,13 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 589eb3f95 - Update README.md (Ronald Holshausen, Mon Sep 6 11:16:23 2021 +1000)
 * aae244a9a - bump version to 4.2.12 (Ronald Holshausen, Sat Sep 4 15:40:57 2021 +1000)
 
+# 4.1.28 - add ignore parameter to Maven can-i-deploy
+
+* 6bd425fe9 - feat: update readme with ignore options #1444 (Ronald Holshausen, Mon Sep 27 15:51:16 2021 +1000)
+* b9dfa76dd - feat: support setting can-i-deploy ignore values using -D command line #1444 (Ronald Holshausen, Mon Sep 27 15:33:41 2021 +1000)
+* e21f0f05f - feat: add ignore parameter to Maven can-i-deploy mojo #1444 (Ronald Holshausen, Mon Sep 27 14:23:49 2021 +1000)
+* 4b461d809 - bump version to 4.1.28 (Ronald Holshausen, Sun Sep 19 11:35:46 2021 +1000)
+
 # 4.1.27 - Maintenance release + support of multiple parts in multipart request
 
 * 793ed5c1d - Merge branch 'kmochocki-feature/non-file_parts_in_multipart' into v4.1.x (Ronald Holshausen, Sun Sep 19 10:46:38 2021 +1000)
