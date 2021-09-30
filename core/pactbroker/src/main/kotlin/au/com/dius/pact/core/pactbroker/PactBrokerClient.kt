@@ -135,6 +135,7 @@ interface IPactBrokerClient {
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
+    enablePending: Boolean = false,
     includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception>
 
