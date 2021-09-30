@@ -135,7 +135,6 @@ interface IPactBrokerClient {
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
-    enablePending: Boolean = false,
     includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception>
 
@@ -288,9 +287,10 @@ open class PactBrokerClient(
     val body = JsonValue.Object(
       "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
     )
+    
+    body["includePendingStatus"] = enablePending
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
-      body["includePendingStatus"] = true
       if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }
