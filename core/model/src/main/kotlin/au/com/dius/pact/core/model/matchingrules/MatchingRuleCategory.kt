@@ -230,4 +230,11 @@ data class MatchingRuleCategory @JvmOverloads constructor(
     }
     return map
   }
+
+  /**
+   * If any of the matcher types are defined in this category
+   */
+  fun any(matchers: List<Class<out MatchingRule>>): Boolean {
+    return matchingRules.values.any { it.any(matchers)  }
+  }
 }

@@ -2,8 +2,11 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
+import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
@@ -89,18 +92,36 @@ data class MatchingContext @JvmOverloads constructor(
 
     val result = mutableListOf<BodyItemMatchResult>()
 
-    if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
-      result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
-        "Actual map is missing the following keys: ${missingKeys.joinToString(", ")}",
-        path.joinToString("."), generateDiff()))))
-    } else if (!allowUnexpectedKeys && expectedKeys != actualKeysSorted) {
-      result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
-        "Expected a Map with keys $expectedKeys " +
-          "but received one with keys $actualKeysSorted",
-        path.joinToString("."), generateDiff()))))
+    if (!directMatcherDefined(path, listOf(EachValueMatcher::class.java, ValuesMatcher::class.java))) {
+      if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
+        result.add(
+          BodyItemMatchResult(
+            constructPath(path), listOf(
+              BodyMismatch(
+                expectedEntries, actualEntries,
+                "Actual map is missing the following keys: ${missingKeys.joinToString(", ")}",
+                constructPath(path), generateDiff()
+              )
+            )
+          )
+        )
+      } else if (!allowUnexpectedKeys && expectedKeys != actualKeysSorted) {
+        result.add(
+          BodyItemMatchResult(
+            constructPath(path), listOf(
+              BodyMismatch(
+                expectedEntries, actualEntries,
+                "Expected a Map with keys $expectedKeys " +
+                  "but received one with keys $actualKeysSorted",
+                constructPath(path), generateDiff()
+              )
+            )
+          )
+        )
+      }
     }
 
-    if (matcherDefined(path)) {
+    if (directMatcherDefined(path)) {
       for (matcher in selectBestMatcher(path).rules) {
         if (matcher is EachKeyMatcher) {
           for (subMatcher in matcher.definition.rules) {
@@ -108,7 +129,7 @@ data class MatchingContext @JvmOverloads constructor(
               val keyPath = path + key
               val matchingRule = subMatcher.unwrapA("Expected a matching rule, found an unresolved reference")
               val mismatches = domatch(matchingRule, keyPath, "", key, BodyMismatchFactory, false)
-              result.add(BodyItemMatchResult(keyPath.joinToString("."), mismatches))
+              result.add(BodyItemMatchResult(constructPath(keyPath), mismatches))
             }
           }
         }
@@ -123,12 +144,17 @@ data class MatchingContext @JvmOverloads constructor(
    */
   fun directMatcherDefined(
     path: List<String>,
+    matchers: List<Class<out MatchingRule>> = emptyList(),
     pathComparator: Comparator<String> = Comparator.naturalOrder()
   ): Boolean {
-    val resolveMatchers = resolveMatchers(path, pathComparator).filter {
+    val resolvedMatchers = resolveMatchers(path, pathComparator).filter {
       parsePath(it).size == path.size
     }
-    return resolveMatchers.isNotEmpty()
+    return if (matchers.isEmpty()) {
+      resolvedMatchers.isNotEmpty()
+    } else {
+      resolvedMatchers.any(matchers)
+    }
   }
 
   /**

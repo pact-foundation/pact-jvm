@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.HttpStatus
 import com.github.ajalt.mordant.TermColors
 
@@ -143,7 +144,7 @@ data class BodyMismatch @JvmOverloads constructor(
 
 object BodyMismatchFactory : MismatchFactory<BodyMismatch> {
   override fun create(expected: Any?, actual: Any?, message: String, path: List<String>) =
-    BodyMismatch(expected, actual, message, path.joinToString("."))
+    BodyMismatch(expected, actual, message, constructPath(path))
 }
 
 data class MetadataMismatch(val key: String, val expected: Any?, val actual: Any?, val mismatch: String) : Mismatch() {

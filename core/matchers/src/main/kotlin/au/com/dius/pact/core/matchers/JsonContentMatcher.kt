@@ -4,6 +4,7 @@ import au.com.dius.pact.core.matchers.Matchers.compareListContent
 import au.com.dius.pact.core.matchers.Matchers.compareLists
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
@@ -82,9 +83,9 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
         compareLists(expected, actual, path, context)
       expected is JsonValue.Object && actual !is JsonValue.Object ||
         expected is JsonValue.Array && actual !is JsonValue.Array ->
-        listOf(BodyItemMatchResult(path.joinToString("."),
+        listOf(BodyItemMatchResult(constructPath(path),
           listOf(BodyMismatch(expected, actual, "Type mismatch: Expected ${typeOf(expected)} " +
-          "${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}", path.joinToString("."),
+          "${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}", constructPath(path),
           generateJsonDiff(expected, actual)))))
       else -> compareValues(path, expected, actual, context)
     }
@@ -110,18 +111,18 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
       }
     } else {
       if (expectedList.isEmpty() && actualList.isNotEmpty()) {
-        result.add(BodyItemMatchResult(path.joinToString("."),
+        result.add(BodyItemMatchResult(constructPath(path),
           listOf(BodyMismatch(expectedValues, actualValues,
             "Expected an empty List but received ${valueOf(actualValues)}",
-          path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
+            constructPath(path), generateJsonDiff(expectedValues, actualValues)))))
       } else {
         result.addAll(compareListContent(expectedList, actualList, path, context, generateDiff) {
           p, expected, actual, context -> compare(p, expected, actual, context)
         })
         if (expectedList.size != actualList.size) {
-          result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedList, actualList,
+          result.add(BodyItemMatchResult(constructPath(path), listOf(BodyMismatch(expectedList, actualList,
             "Expected a List with ${expectedList.size} elements but received ${actualList.size} elements",
-            path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
+            constructPath(path), generateJsonDiff(expectedValues, actualValues)))))
         }
       }
     }
@@ -135,9 +136,9 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
     context: MatchingContext
   ): List<BodyItemMatchResult> {
     return if (expectedValues.isEmpty() && actualValues.isNotEmpty() && !context.allowUnexpectedKeys) {
-      listOf(BodyItemMatchResult(path.joinToString("."),
+      listOf(BodyItemMatchResult(constructPath(path),
         listOf(BodyMismatch(expectedValues, actualValues, "Expected an empty Map but received ${valueOf(actualValues)}",
-        path.joinToString("."), generateJsonDiff(expectedValues, actualValues)))))
+          constructPath(path), generateJsonDiff(expectedValues, actualValues)))))
     } else {
       val result = mutableListOf<BodyItemMatchResult>()
       val generateDiff = { generateJsonDiff(expectedValues, actualValues) }
@@ -170,16 +171,16 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
   ): List<BodyItemMatchResult> {
     return if (context.matcherDefined(path)) {
       logger.debug { "compareValues: Matcher defined for path $path" }
-      listOf(BodyItemMatchResult(path.joinToString("."),
+      listOf(BodyItemMatchResult(constructPath(path),
         Matchers.domatch(context, path, expected, actual, BodyMismatchFactory)))
     } else {
       logger.debug { "compareValues: No matcher defined for path $path, using equality" }
       if (expected == actual) {
-        listOf(BodyItemMatchResult(path.joinToString("."), emptyList()))
+        listOf(BodyItemMatchResult(constructPath(path), emptyList()))
       } else {
-        listOf(BodyItemMatchResult(path.joinToString("."),
+        listOf(BodyItemMatchResult(constructPath(path),
           listOf(BodyMismatch(expected, actual, "Expected ${valueOf(expected)} (${typeOf(expected)}) " +
-            "but received ${valueOf(actual)} (${typeOf(actual)})", path.joinToString(".")))))
+            "but received ${valueOf(actual)} (${typeOf(actual)})", constructPath(path)))))
       }
     }
   }

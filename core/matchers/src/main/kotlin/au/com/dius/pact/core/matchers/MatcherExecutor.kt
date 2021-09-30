@@ -6,6 +6,8 @@ import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
+import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.HttpStatus
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
@@ -27,6 +29,7 @@ import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.support.json.JsonValue
 import com.github.zafarkhaja.semver.UnexpectedCharacterException
 import com.github.zafarkhaja.semver.Version
@@ -157,7 +160,7 @@ fun <M : Mismatch> domatch(
             matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
     is ContentTypeMatcher ->
       matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
-    is ArrayContainsMatcher -> listOf()
+    is ArrayContainsMatcher, is EachKeyMatcher, is EachValueMatcher, is ValuesMatcher -> listOf()
     is BooleanMatcher -> matchBoolean(path, expected, actual, mismatchFn)
     is StatusCodeMatcher ->
       matchStatusCode(matcher.statusType, matcher.values, expected as Int, actual as Int) as List<M>

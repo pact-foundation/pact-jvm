@@ -182,3 +182,15 @@ fun constructValidPath(segment: String, rootPath: String): String {
     }
   }
 }
+
+/**
+ * This will combine the list of segments to make a valid path
+ */
+fun constructPath(path: List<String>) =
+  path.fold("") { path, segment ->
+    if (path.isEmpty()) {
+      segment
+    } else {
+      constructValidPath(segment, path)
+    }
+  }

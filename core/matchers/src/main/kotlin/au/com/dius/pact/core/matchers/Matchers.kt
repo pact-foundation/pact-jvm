@@ -7,7 +7,9 @@ import au.com.dius.pact.core.matchers.util.memoizeFixed
 import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
@@ -100,9 +102,11 @@ object Matchers : KLogging() {
       }
     } else {
       result.addAll(context.matchKeys(path, expectedEntries, actualEntries, generateDiff))
-      expectedEntries.entries.forEach { (key, value) ->
-        if (actualEntries.containsKey(key)) {
-          result.addAll(callback(path + key, value, actualEntries[key]))
+      if (matcher !is EachKeyMatcher) {
+        expectedEntries.entries.forEach { (key, value) ->
+          if (actualEntries.containsKey(key)) {
+            result.addAll(callback(path + key, value, actualEntries[key]))
+          }
         }
       }
     }
@@ -123,7 +127,7 @@ object Matchers : KLogging() {
     val result = mutableListOf<BodyItemMatchResult>()
     val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory, cascaded)
     if (matchResult.isNotEmpty()) {
-      result.add(BodyItemMatchResult(path.joinToString("."), matchResult))
+      result.add(BodyItemMatchResult(constructPath(path), matchResult))
     }
     if (expectedList.isNotEmpty()) {
       when (matcher) {
@@ -160,18 +164,18 @@ object Matchers : KLogging() {
                 mismatches.isNotEmpty()
               }
               if (noneMatched) {
-                result.add(BodyItemMatchResult(path.joinToString("."),
+                result.add(BodyItemMatchResult(constructPath(path),
                   listOf(BodyMismatch(expectedValue, actualList,
                     "Variant at index $index ($expectedValue) was not found in the actual list",
-                    path.joinToString("."), generateDiff()
+                    constructPath(path), generateDiff()
                   ))
                 ))
               }
             } else {
-              result.add(BodyItemMatchResult(path.joinToString("."),
+              result.add(BodyItemMatchResult(constructPath(path),
                 listOf(BodyMismatch(expectedList, actualList,
                   "ArrayContains: variant $index is missing from the expected list, which has " +
-                    "${expectedList.size} items", path.joinToString("."), generateDiff()
+                    "${expectedList.size} items", constructPath(path), generateDiff()
                 ))
               ))
             }
@@ -287,10 +291,10 @@ object Matchers : KLogging() {
         .groupBy { it.path }
         .map { (path, mismatches) -> BodyItemMatchResult(path, mismatches) }
 
-      listOf(BodyItemMatchResult(path.joinToString("."),
+      listOf(BodyItemMatchResult(constructPath(path),
         listOf(BodyMismatch(expectedList, actualList,
           "Expected $expectedList to match $actualList ignoring order of elements",
-          path.joinToString("."), generateDiff()
+          constructPath(path), generateDiff()
         ))
       )) + remainingErrors
     }
@@ -309,10 +313,10 @@ object Matchers : KLogging() {
       if (index < actualList.size) {
         result.addAll(callback(path + index.toString(), value, actualList[index], context))
       } else if (!context.matcherDefined(path)) {
-        result.add(BodyItemMatchResult(path.joinToString("."),
+        result.add(BodyItemMatchResult(constructPath(path),
           listOf(BodyMismatch(expectedList, actualList,
             "Expected $value but was missing",
-            path.joinToString("."), generateDiff()))))
+            constructPath(path), generateDiff()))))
       }
     }
     return result

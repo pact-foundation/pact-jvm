@@ -670,6 +670,13 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     return rules.flatMap { it.validateForVersion(pactVersion) }
   }
 
+  /**
+   * If any of the matcher types are defined in this group
+   */
+  fun any(matchers: List<Class<out MatchingRule>>): Boolean {
+    return rules.any { matchers.contains(it.javaClass) }
+  }
+
   companion object : KLogging() {
     @JvmStatic
     fun fromJson(json: JsonValue): MatchingRuleGroup {
