@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
@@ -85,18 +86,36 @@ data class MatchingContext @JvmOverloads constructor(
     val actualKeys = actualEntries.keys
     val actualKeysSorted = actualKeys.sorted()
     val missingKeys = expectedKeys.filter { key -> !actualKeys.contains(key) }
-    return if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
-      listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
+
+    val result = mutableListOf<BodyItemMatchResult>()
+
+    if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
+      result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
         "Actual map is missing the following keys: ${missingKeys.joinToString(", ")}",
         path.joinToString("."), generateDiff()))))
     } else if (!allowUnexpectedKeys && expectedKeys != actualKeysSorted) {
-      listOf(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
+      result.add(BodyItemMatchResult(path.joinToString("."), listOf(BodyMismatch(expectedEntries, actualEntries,
         "Expected a Map with keys $expectedKeys " +
           "but received one with keys $actualKeysSorted",
         path.joinToString("."), generateDiff()))))
-    } else {
-      emptyList()
     }
+
+    if (matcherDefined(path)) {
+      for (matcher in selectBestMatcher(path).rules) {
+        if (matcher is EachKeyMatcher) {
+          for (subMatcher in matcher.definition.rules) {
+            for (key in actualKeys) {
+              val keyPath = path + key
+              val matchingRule = subMatcher.unwrapA("Expected a matching rule, found an unresolved reference")
+              val mismatches = domatch(matchingRule, keyPath, "", key, BodyMismatchFactory, false)
+              result.add(BodyItemMatchResult(keyPath.joinToString("."), mismatches))
+            }
+          }
+        }
+      }
+    }
+
+    return result
   }
 
   /**

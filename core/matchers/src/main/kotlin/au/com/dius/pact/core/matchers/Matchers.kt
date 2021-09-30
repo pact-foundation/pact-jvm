@@ -8,6 +8,7 @@ import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
+import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
@@ -89,7 +90,7 @@ object Matchers : KLogging() {
     callback: (List<String>, T?, T?) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
-    if (matcher is ValuesMatcher) {
+    if (matcher is ValuesMatcher || matcher is EachValueMatcher) {
       actualEntries.entries.forEach { (key, value) ->
         if (expectedEntries.containsKey(key)) {
           result.addAll(callback(path + key, expectedEntries[key]!!, value))

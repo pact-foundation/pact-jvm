@@ -35,6 +35,23 @@ class ContentTypeMatcherSpec extends Specification {
     then:
     !result.empty
     result*.mismatch == [
-      'Expected binary contents to have content type \'application/pdf\' but detected contents was \'text/plain\'']
+      'Expected binary contents to have content type \'application/pdf\' but detected contents was \'application/json\''
+    ]
+  }
+
+  def 'matching binary data with a text format like JSON'() {
+    given:
+    def path = []
+    def contentType = ContentType.fromString('application/json')
+    def actual = '["I\'m a PDF!"]'.bytes
+    def mismatchFactory = [create: { p1, p2, message, p3 ->
+      new BodyMismatch(p1, p2, message, 'path')
+    }] as MismatchFactory
+
+    when:
+    def result = MatcherExecutorKt.matchHeaderWithParameters(path, contentType, actual, mismatchFactory)
+
+    then:
+    result.empty
   }
 }

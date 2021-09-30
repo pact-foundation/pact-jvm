@@ -141,7 +141,7 @@ data class OptionalBody @JvmOverloads constructor(
     else -> null
   }
 
-  private fun detectStandardTextContentType(): ContentType? = when {
+  fun detectStandardTextContentType(): ContentType? = when {
     isPresent() -> {
       val newLine = '\n'.code.toByte()
       val cReturn = '\r'.code.toByte()

@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
@@ -37,6 +38,7 @@ import org.apache.commons.lang3.time.DateUtils
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
+import org.apache.tika.mime.MediaType
 import org.w3c.dom.Attr
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -648,9 +650,19 @@ fun <M : Mismatch> matchHeaderWithParameters(
   }
   val metadata = Metadata()
   val stream = TikaInputStream.get(binaryData)
-  val detectedContentType = stream.use { stream ->
+  var detectedContentType = stream.use { stream ->
     tika.detector.detect(stream, metadata)
   }
+
+  if (detectedContentType == MediaType.TEXT_PLAIN) {
+    // Check for common text types, like JSON
+    val data = OptionalBody.body(binaryData)
+    val ct = data.detectStandardTextContentType()
+    if (ct != null) {
+      detectedContentType = ct.contentType
+    }
+  }
+
   val matches = contentType.equals(detectedContentType)
   logger.debug { "Matching binary contents by content type: " +
     "expected '$contentType', detected '$detectedContentType' -> $matches" }
