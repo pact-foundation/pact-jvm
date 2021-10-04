@@ -48,6 +48,7 @@ import org.junit.runners.model.TestClass
 import java.lang.RuntimeException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Supplier
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.kotlinProperty
 import org.apache.commons.lang3.tuple.Pair as TuplePair
 
@@ -271,8 +272,10 @@ open class InteractionRunner(
   protected fun lookupTarget(testInstance: Any, interaction: Interaction): Target {
     val target = testClass.getAnnotatedFields(TestTarget::class.java).map {
       if (it.field.kotlinProperty != null) {
+        it.field.kotlinProperty!!.getter.isAccessible = true
         it.field.kotlinProperty!!.getter.call(testInstance)
       } else {
+        it.field.isAccessible = true
         it.get(testInstance)
       }
     }.first { (it as Target).validForInteraction(interaction) }
