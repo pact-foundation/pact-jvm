@@ -1,3 +1,7 @@
+plugins {
+    id 'scala'
+}
+
 dependencies {
     api project(path: ":core:support", configuration: 'default'),
       project(path: ":provider", configuration: 'default')
@@ -9,6 +13,7 @@ dependencies {
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     compile 'com.github.rholder:guava-retrying:2.0.0'
     compile 'javax.mail:mail:1.5.0-b01'
+    compile project(path: ":provider:scalasupport_2.13", configuration: 'default')
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.45'
     testCompile 'com.github.tomakehurst:wiremock-jre8:2.27.2'
