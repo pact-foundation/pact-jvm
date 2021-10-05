@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.14 - enablePending + scala support
+
+* d86e79d16 - fix: broken spec after merging #1455 (Ronald Holshausen, Tue Oct 5 10:08:10 2021 +1100)
+* 673689a6c - chore: correctly sort the interactions before writing (Ronald Holshausen, Tue Oct 5 08:57:31 2021 +1100)
+* 6da800794 - Merge pull request #1460 from psliwa/feature-support-for-TestTarget-annotation-for-junit-and-scala (Ronald Holshausen, Tue Oct 5 09:04:40 2021 +1100)
+* 25be84f20 - feat: add support for @TestTarget annotation for junit tests written in scala (piotr.sliwa, Mon Oct 4 22:34:04 2021 +0200)
+* d014fb03b - Merge pull request #1455 from pact-foundation/TimothyJones-patch-1 (Ronald Holshausen, Thu Sep 30 11:50:40 2021 +1000)
+* ac6741897 - chore: Revert accidental change to interface (Timothy Jones, Thu Sep 30 11:34:34 2021 +1000)
+* 861001505 - test(PactBrokerClient): Update test for when include pending pacts is set to false (Timothy Jones, Thu Sep 30 11:30:40 2021 +1000)
+* 349231d8f - fix(PactBrokerClient): Send `includePendingStatus=false` when enablePending is set to false (Timothy Jones, Thu Sep 30 10:47:32 2021 +1000)
+* a36a51fda - Merge branch 'v4.1.x' (Ronald Holshausen, Wed Sep 29 09:13:56 2021 +1000)
+* 96521e3a2 - fix: codenarc violation #1449 (Ronald Holshausen, Wed Sep 29 09:13:23 2021 +1000)
+* 20a5d590b - Merge branch 'v4.1.x' (Ronald Holshausen, Wed Sep 29 09:03:23 2021 +1000)
+* bcc1d12c0 - fix: correct the pact source description when using the URL option #1449 (Ronald Holshausen, Wed Sep 29 09:01:21 2021 +1000)
+* daac53382 - bump version to 4.2.14 (Ronald Holshausen, Mon Sep 27 17:07:12 2021 +1000)
+* 5706c6034 - bump version to 4.1.29 (Ronald Holshausen, Mon Sep 27 16:36:14 2021 +1000)
+* 085c12735 - update changelog for release 4.1.28 (Ronald Holshausen, Mon Sep 27 16:21:44 2021 +1000)
+
 # 4.2.13 - Bugfix + add ignore parameter to Maven can-i-deploy task
 
 * 70ebaa38f - fix: org.apache.httpcomponents:httpmime needs to be defined as api for consumer lib #1446 (Ronald Holshausen, Mon Sep 27 16:04:51 2021 +1000)

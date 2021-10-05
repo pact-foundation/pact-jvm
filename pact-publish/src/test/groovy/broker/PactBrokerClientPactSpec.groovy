@@ -590,6 +590,7 @@ class PactBrokerClientPactSpec extends Specification {
               latest true
             }
         ])
+        includePendingStatus false
       }
       willRespondWith(status: 200)
       withBody(contentType: 'application/hal+json') {

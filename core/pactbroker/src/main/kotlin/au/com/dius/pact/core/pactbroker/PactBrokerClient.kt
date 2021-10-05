@@ -288,9 +288,10 @@ open class PactBrokerClient(
     val body = JsonValue.Object(
       "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
     )
+    
+    body["includePendingStatus"] = enablePending
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
-      body["includePendingStatus"] = true
       if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }
