@@ -115,6 +115,10 @@ data class MatchingRuleDefinition(
     }
   }
 
+  fun withType(valueType: ValueType): MatchingRuleDefinition {
+    return copy(valueType = valueType)
+  }
+
   companion object: KLogging() {
     /**
      * Parse the matching rule expression into a matching rule definition

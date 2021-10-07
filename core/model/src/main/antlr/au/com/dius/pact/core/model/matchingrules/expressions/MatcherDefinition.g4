@@ -29,7 +29,7 @@ matchingDefinitionExp returns [ MatchingRuleDefinition value ] :
           $value = new MatchingRuleDefinition($matchingRule.value, $matchingRule.rule, $matchingRule.generator);
         }
       }
-      | 'notEmpty' LEFT_BRACKET primitiveValue RIGHT_BRACKET { $value = new MatchingRuleDefinition($primitiveValue.value, NotEmptyMatcher.INSTANCE, null); }
+      | 'notEmpty' LEFT_BRACKET primitiveValue RIGHT_BRACKET { $value = new MatchingRuleDefinition($primitiveValue.value, NotEmptyMatcher.INSTANCE, null).withType($primitiveValue.type); }
       | 'eachKey' LEFT_BRACKET e=matchingDefinitionExp RIGHT_BRACKET { if ($e.value != null) { $value = new MatchingRuleDefinition(null, new EachKeyMatcher($e.value), null); } }
       | 'eachValue' LEFT_BRACKET e=matchingDefinitionExp RIGHT_BRACKET {
         if ($e.value != null) {

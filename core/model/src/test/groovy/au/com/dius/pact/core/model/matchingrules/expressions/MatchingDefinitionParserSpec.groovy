@@ -122,7 +122,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
     expression                                                       | value
     "eachKey(matching(regex, '\$(\\.\\w+)+', '\$.test.one'))"        | [Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test.one', new RegexMatcher('$(\\.\\w+)+'), null)))]
-    "eachKey(notEmpty('\$.test')), eachValue(matching(number, 100))" | [Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test', NotEmptyMatcher.INSTANCE, null))), Either.a(new EachValueMatcher(new MatchingRuleDefinition('100', new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), null)))]
+    "eachKey(notEmpty('\$.test')), eachValue(matching(number, 100))" | [Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test', ValueType.String, [ Either.a(NotEmptyMatcher.INSTANCE) ], null))), Either.a(new EachValueMatcher(new MatchingRuleDefinition('100', new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), null)))]
     "eachValue(matching(\$'items'))"                                 | [Either.a(new EachValueMatcher(new MatchingRuleDefinition(null, ValueType.Unknown, [Either.b(new MatchingReference('items'))], null)))]
   }
 
@@ -136,5 +136,17 @@ class MatchingDefinitionParserSpec extends Specification {
       "eachKey(regex, '\$(\\.\\w+)+', '\$.test.one')",
       'eachValue(number, 10)'
     ]
+  }
+
+  def 'parse notEmpty matcher'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+      new MatchingRuleDefinition(value, type, [ Either.a(NotEmptyMatcher.INSTANCE) ], null)
+
+    where:
+
+    expression         | value  | type
+    "notEmpty('true')" | 'true' | ValueType.String
+    "notEmpty(true)"   | 'true' | ValueType.Boolean
   }
 }
