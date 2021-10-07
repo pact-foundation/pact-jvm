@@ -326,6 +326,248 @@ The following matchers are supported:
 | StatusCode | V4 | `{ "match": "statusCode", "status": "success" }` | Matches the response status code. |
 | NotEmpty | V4 | `{ "match": "notEmpty" }` | Value must be present and not empty (not null or the empty string) |
 | Semver | V4 | `{ "match": "semver" }` | Value must be valid based on the semver specification |
-| Semver | V4 | `{ "match": "semver" }` | Value must be valid based on the semver specification |
 | EachKey | V4 | `{ "match": "eachKey", "rules": [{"match": "regex", "regex": "\\$(\\.\\w+)+"}], "value": "$.test.one" }` | Allows defining matching rules to apply to the keys in a map |
 | EachValue | V4 | `{ "match": "eachValue", "rules": [{"match": "regex", "regex": "\\$(\\.\\w+)+"}], "value": "$.test.one" }` | Allows defining matching rules to apply to the values in a collection. For maps, delgates to the Values matcher. |
+
+### Matching Rule Definition
+
+Each matching rule definition is a comma-separated list of functions with a number of arguments within brackets.
+Most of the time only a single definition is required for a value, but in they case were more than one is required,
+they just need to be separated by a comma.
+
+#### Matching functions
+
+The main function is the `matching` function. This creates a matching rule based on a type and a number of values. The
+values required are dependent on the type of the matching rule.
+
+For example, matching with a regular expression: `matching(regex, '\\$(\\.\\w+)+', '$.test.one')`
+
+##### equalTo
+
+Specifies that the attribute/field must be equal to the example value.
+
+Parameters:
+* example (Primitive value)
+
+Example:
+```
+matching(equalTo, 'TEXT')
+```
+
+##### type
+
+Specifies that the attribute/field must have the same type as the example value.
+
+Parameters:
+* example (Primitive value)
+
+Example:
+```
+matching(type, 100)
+```
+
+##### number types (number, integer, decimal)
+
+Specifies that the attribute/field must be a number type. `number` will match any numeric value, `integer` will match
+numeric values with no decimals (no significant figures after the decimal point) and `decimal` will match numeric values
+that have decimals (at least one significant figure after the decimal point).
+
+Parameters:
+* example (integer or decimal value)
+
+Example:
+```
+matching(integer, 100)
+matching(decimal, 100.1234)
+```
+
+##### date and time matchers (datetime, date, time)
+
+Specifies that the string representation of the attribute/field must match the format specifier. These are based on the
+Java DateTimeFormatter.
+
+Parameters:
+* format (string)
+* example (string)
+
+Example:
+```
+matching(datetime, 'yyyy-MM-dd HH:mm:ss', '2021-10-07 13:00:13')
+matching(date, 'yyyy-MM-dd', '2021-10-07')
+matching(time, 'HH:mm:ss', '13:00:13')
+```
+
+##### Regex
+
+Specifies that the string representation of the attribute/field must match the provided regular expression.
+
+Parameters:
+* regex (string)
+* example (string)
+
+Example:
+```
+matching(regex, '\w+ \w+', 'Hello World')
+```
+
+##### Include
+
+Specifies that the string representation of the attribute/field must include the given string.
+
+Parameters:
+* example (string)
+
+Example:
+```
+matching(include, 'Hello World')
+```
+
+##### Boolean
+
+Specifies that the attribute/field must be a boolean value or its string representation must be the strings `true` or
+`false`.
+
+Parameters:
+* example (boolean)
+
+Example:
+```
+matching(boolean, false)
+```
+
+##### Semver
+
+Specifies that the string representation of the attribute/field must be a valid semantic version as per the semver
+specification.
+
+Parameters:
+* example (string)
+
+Example:
+```
+matching(semver, '1.0.0')
+```
+
+##### Content Type
+
+Specifies that the byte string representation of the attribute/field must match the given content type using a magic
+file number check. This compares the first few bytes with a database of rules to determine the type of the contents.
+
+Parameters:
+* content type in MIME format (string)
+* example (string)
+
+Example:
+```
+matching(contentType, 'application/json', '{}')
+```
+
+##### Matching an example type by reference
+
+Type matching can also be specified by a reference to an example. References are defined by a dollar (`$`) followed by
+a string value. The string value must be the attribute/field name that contains the example type.
+
+Parameters:
+* reference name
+
+Example:
+```
+matching($'items') // where items is the name of the example to match the types against
+```
+
+#### NotEmpty
+
+Specifies that the attribute field must be present and contain a value (not null or an empty string).
+
+Parameters:
+* example (primitive value)
+
+Example:
+```
+notEmpty('DateTime')
+```
+
+#### EachKey
+
+Allows a matching rule definition to be applied to the keys in a map.
+
+Parameters:
+* definition* (comma-separated list of matching rule definitions)
+
+Example:
+```
+eachKey(matching(regex, '\\$(\\.\\w+)+', '$.test.one'))
+```
+
+#### EachValue
+
+Allows a matching rule definition to be applied to the values in a collection (list/array or map form).
+
+Parameters:
+* definition* (comma-separated list of matching rule definitions)
+
+Example:
+```
+eachValue(matching($'items'))
+```
+
+### Grammar
+
+The grammar for the Matching Rule Definition Language (ANTLR 4 format)
+
+```antlrv4
+grammar MatcherDefinition;
+
+matchingDefinition :
+    matchingDefinitionExp  ( COMMA matchingDefinitionExp  )* EOF
+    ;
+
+matchingDefinitionExp :
+    (
+      'matching' LEFT_BRACKET matchingRule RIGHT_BRACKET 
+      | 'notEmpty' LEFT_BRACKET primitiveValue RIGHT_BRACKET 
+      | 'eachKey' LEFT_BRACKET matchingDefinitionExp RIGHT_BRACKET 
+      | 'eachValue' LEFT_BRACKET matchingDefinitionExp RIGHT_BRACKET 
+    )
+    ;
+
+matchingRule :
+  (
+    ( 'equalTo' | 'type' ) COMMA primitiveValue )
+  | 'number' COMMA ( DECIMAL_LITERAL | INTEGER_LITERAL ) 
+  | 'integer' COMMA INTEGER_LITERAL 
+  | 'decimal' COMMA DECIMAL_LITERAL 
+  | ( 'datetime' | 'date' | 'time' ) COMMA string COMMA string 
+  | 'regex' COMMA string COMMA string 
+  | 'include' COMMA string 
+  | 'boolean' COMMA BOOLEAN_LITERAL 
+  | 'semver' COMMA string 
+  | 'contentType' COMMA string COMMA string 
+  | DOLLAR string 
+  ;
+
+primitiveValue :
+  string 
+  | DECIMAL_LITERAL
+  | INTEGER_LITERAL
+  | BOOLEAN_LITERAL
+  ;
+
+string :
+  STRING_LITERAL 
+  | 'null'
+  ;
+
+INTEGER_LITERAL : '-'? DIGIT+ ;
+DECIMAL_LITERAL : '-'? DIGIT+ '.' DIGIT+ ;
+fragment DIGIT  : [0-9] ;
+
+LEFT_BRACKET    : '(' ;
+RIGHT_BRACKET   : ')' ;
+STRING_LITERAL  : '\'' (~['])* '\'' ;
+BOOLEAN_LITERAL : 'true' | 'false' ;
+COMMA           : ',' ;
+DOLLAR          : '$';
+
+WS : [ \t\n\r] + -> skip ;
+```
