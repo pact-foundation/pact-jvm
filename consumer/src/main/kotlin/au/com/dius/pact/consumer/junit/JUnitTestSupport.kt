@@ -17,7 +17,7 @@ object JUnitTestSupport {
   @JvmStatic
   fun conformsToSignature(m: Method, pactVersion: PactSpecVersion): Boolean {
     val pact = m.getAnnotation(Pact::class.java)
-    val conforms = if (pactVersion == PactSpecVersion.V4) {
+    val conforms = if (pactVersion >= PactSpecVersion.V4) {
       (pact != null &&
         V4Pact::class.java.isAssignableFrom(m.returnType) &&
         m.parameterTypes.size == 1 &&
@@ -49,7 +49,7 @@ object JUnitTestSupport {
   @JvmStatic
   fun conformsToMessagePactSignature(m: Method, pactVersion: PactSpecVersion): Boolean {
     val pact = m.getAnnotation(Pact::class.java)
-    val hasValidPactSignature = if (pactVersion == PactSpecVersion.V4) {
+    val hasValidPactSignature = if (pactVersion >= PactSpecVersion.V4) {
       V4Pact::class.java.isAssignableFrom(m.returnType) &&
         m.parameterTypes.size == 1 &&
         (m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder")) ||
@@ -68,6 +68,29 @@ object JUnitTestSupport {
         throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +
           "'public MessagePact xxx(MessagePactBuilder builder)'")
       }
+    }
+
+    return hasValidPactSignature
+  }
+
+
+  /**
+   * validates method signature for a synchronous message Pact test
+   */
+  @JvmStatic
+  fun conformsToSynchMessagePactSignature(m: Method, pactVersion: PactSpecVersion): Boolean {
+    val pact = m.getAnnotation(Pact::class.java)
+    val hasValidPactSignature = if (pactVersion >= PactSpecVersion.V4) {
+      V4Pact::class.java.isAssignableFrom(m.returnType) &&
+        m.parameterTypes.size == 1 &&
+        m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.PactBuilder"))
+    } else {
+      false
+    }
+
+    if (!hasValidPactSignature && pact != null) {
+      throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +
+        "'public V4Pact xxx(PactBuilder builder)'")
     }
 
     return hasValidPactSignature

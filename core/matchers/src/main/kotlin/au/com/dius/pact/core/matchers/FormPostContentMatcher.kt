@@ -35,13 +35,11 @@ class FormPostContentMatcher : ContentMatcher {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Result<InteractionContents, String> {
-    return Ok(InteractionContents(
-      OptionalBody.body(
+  ): Result<List<InteractionContents>, String> {
+    return Ok(listOf(InteractionContents("", OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("application/x-www-form-urlencoded")
-      )
-    ))
+      ))))
   }
 
   private fun compareParameters(

@@ -29,6 +29,7 @@ class PactConsumerTestExtSpec extends Specification {
   def testMethodMessagePact(MessagePact pact) { }
   def testMethodV4Pact(V4Pact pact) { }
   def testMethodV4MessagePact(V4Pact pact) { }
+  def testMethodV4SynchMessagePact(V4Pact pact) { }
 
   def setup() {
     testExt = new PactConsumerTestExt()
@@ -59,11 +60,12 @@ class PactConsumerTestExtSpec extends Specification {
 
     where:
 
-    model               | providerType        | testMethod
-    RequestResponsePact | ProviderType.SYNCH  | 'testMethodRequestResponsePact'
-    MessagePact         | ProviderType.ASYNCH | 'testMethodMessagePact'
-    V4Pact              | ProviderType.SYNCH  | 'testMethodV4Pact'
-    V4Pact              | ProviderType.ASYNCH | 'testMethodV4MessagePact'
+    model               | providerType               | testMethod
+    RequestResponsePact | ProviderType.SYNCH         | 'testMethodRequestResponsePact'
+    MessagePact         | ProviderType.ASYNCH        | 'testMethodMessagePact'
+    V4Pact              | ProviderType.SYNCH         | 'testMethodV4Pact'
+    V4Pact              | ProviderType.ASYNCH        | 'testMethodV4MessagePact'
+    V4Pact              | ProviderType.SYNCH_MESSAGE | 'testMethodV4SynchMessagePact'
   }
 
   @RestoreSystemProperties

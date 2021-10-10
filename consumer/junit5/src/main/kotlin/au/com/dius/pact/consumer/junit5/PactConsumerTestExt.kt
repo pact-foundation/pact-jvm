@@ -70,24 +70,34 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val providers = lookupProviderInfo(extensionContext)
     val type = parameterContext.parameter.type
-    return when {
-      providers.any { it.first.providerType == ProviderType.ASYNCH } -> when {
-        type.isAssignableFrom(List::class.java) -> true
-        type.isAssignableFrom(V4Pact::class.java) -> true
-        type.isAssignableFrom(MessagePact::class.java) -> true
-        type.isAssignableFrom(V4Interaction.AsynchronousMessage::class.java) -> true
-        else -> false
+    if (providers.any { it.first.providerType == ProviderType.ASYNCH }) {
+      when {
+        type.isAssignableFrom(List::class.java) -> return true
+        type.isAssignableFrom(V4Pact::class.java) -> return true
+        type.isAssignableFrom(MessagePact::class.java) -> return true
+        type.isAssignableFrom(V4Interaction.AsynchronousMessage::class.java) -> return true
       }
-      providers.any { it.first.providerType != ProviderType.ASYNCH } -> when {
-        type.isAssignableFrom(MockServer::class.java) -> true
-        type.isAssignableFrom(RequestResponsePact::class.java) -> true
-        type.isAssignableFrom(V4Pact::class.java) -> true
-        type.isAssignableFrom(V4Interaction.SynchronousHttp::class.java) -> true
-        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> true
-        else -> false
-      }
-      else -> false
     }
+    if (providers.any { it.first.providerType == ProviderType.SYNCH_MESSAGE }) {
+      when {
+        type.isAssignableFrom(List::class.java) -> return true
+        type.isAssignableFrom(V4Pact::class.java) -> return true
+        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> return true
+      }
+    }
+    if (providers.any { it.first.providerType == null ||
+        it.first.providerType == ProviderType.SYNCH ||
+        it.first.providerType == ProviderType.UNSPECIFIED }) {
+      when {
+        type.isAssignableFrom(MockServer::class.java) -> return true
+        type.isAssignableFrom(RequestResponsePact::class.java) -> return true
+        type.isAssignableFrom(V4Pact::class.java) -> return true
+        type.isAssignableFrom(V4Interaction.SynchronousHttp::class.java) -> return true
+        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> return true
+      }
+    }
+
+    return false
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
@@ -129,6 +139,23 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           if (messages.isEmpty()) {
             throw UnsupportedOperationException("Could not inject parameter $type into test method: no interactions " +
               "of type V4Interaction.AsynchronousMessage were found in the Pact")
+          } else {
+            if (messages.size > 1) {
+              logger.warn { "More than one message was found in the Pact, using the first one" }
+            }
+            messages.first()
+          }
+        }
+        else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+      }
+      ProviderType.SYNCH_MESSAGE -> when {
+        type.isAssignableFrom(List::class.java) -> pact.interactions
+        type.isAssignableFrom(V4Pact::class.java) -> pact.asV4Pact().unwrap()
+        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> {
+          val messages = pact.asV4Pact().unwrap().interactions.filter { it.isSynchronousMessages() }
+          if (messages.isEmpty()) {
+            throw UnsupportedOperationException("Could not inject parameter $type into test method: no interactions " +
+              "of type V4Interaction.SynchronousMessages were found in the Pact")
           } else {
             if (messages.size > 1) {
               logger.warn { "More than one message was found in the Pact, using the first one" }
@@ -181,7 +208,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     for ((providerInfo, pactMethod) in lookupProviderInfo(context)) {
       logger.debug { "providerInfo = $providerInfo" }
 
-      if (providerInfo.providerType != ProviderType.ASYNCH) {
+      if (providerInfo.providerType != ProviderType.ASYNCH && providerInfo.providerType != ProviderType.SYNCH_MESSAGE) {
         val mockServer = setupMockServer(providerInfo, pactMethod, context)
         mockServer.start()
         mockServer.waitForServer()
@@ -311,6 +338,9 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
         throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
           "'public [MessagePact|V4Pact] xxx(PactBuilder builder)'")
+      } else if (providerType == ProviderType.SYNCH_MESSAGE && !JUnitTestSupport.conformsToSynchMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
+        throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
+          "'public V4Pact xxx(PactBuilder builder)'")
       }
 
       val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
@@ -354,9 +384,16 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
             ReflectionSupport.invokeMethod(method, context.requiredTestInstance, pactBuilder) as BasePact
           }
         }
+        ProviderType.SYNCH_MESSAGE -> {
+          val pactBuilder = PactBuilder(pactConsumer, providerNameToUse)
+          if (providerInfo.pactVersion != null) {
+            pactBuilder.pactSpecVersion(providerInfo.pactVersion)
+          }
+          ReflectionSupport.invokeMethod(method, context.requiredTestInstance, pactBuilder) as BasePact
+        }
       }
 
-      if (providerInfo.pactVersion == PactSpecVersion.V4) {
+      if (providerInfo.pactVersion != null && providerInfo.pactVersion >= PactSpecVersion.V4) {
         pact.asV4Pact().unwrap().interactions.forEach { i ->
          i.comments["testname"] = Json.toJson(context.testClass.map { it.name + "." }.orElse("") +
            context.displayName)
@@ -401,7 +438,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       val store = context.getStore(NAMESPACE)
       val providers = store["providers"] as List<Pair<ProviderInfo, String>>
       for ((provider, _) in providers) {
-        if (provider.providerType == ProviderType.ASYNCH) {
+        if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
           storePactForWrite(store, provider)
         } else {
           val mockServer = store["mockServer:${provider.providerName}"] as JUnit5MockServerSupport

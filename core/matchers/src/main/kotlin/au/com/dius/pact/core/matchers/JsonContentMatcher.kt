@@ -42,13 +42,13 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Result<InteractionContents, String> {
-    return Ok(InteractionContents(
+  ): Result<List<InteractionContents>, String> {
+    return Ok(listOf(InteractionContents("",
       OptionalBody.body(
         toJson(bodyConfig["body"]).serialise().toByteArray(),
         ContentType("application/json")
       )
-    ))
+    )))
   }
 
   private fun valueOf(value: Any?) = when (value) {

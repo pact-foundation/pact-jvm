@@ -349,8 +349,8 @@ sealed class V4Interaction(
     providerStates: List<ProviderState> = listOf(),
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
-    val request: MessageContents = MessageContents(),
-    val response: List<MessageContents> = listOf(),
+    var request: MessageContents = MessageContents(),
+    val response: MutableList<MessageContents> = mutableListOf(),
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
     interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
@@ -498,8 +498,8 @@ sealed class V4Interaction(
                 val response = if (json.has("response"))
                   json["response"].asArray().map { MessageContents.fromJson(it) }
                   else listOf()
-                Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request, response,
-                  pluginConfiguration.toMutableMap(), interactionMarkup))
+                Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request,
+                  response.toMutableList(), pluginConfiguration.toMutableMap(), interactionMarkup))
               }
             }
           }

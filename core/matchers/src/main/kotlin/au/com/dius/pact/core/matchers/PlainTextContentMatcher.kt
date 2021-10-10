@@ -56,13 +56,13 @@ class PlainTextContentMatcher : ContentMatcher {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Result<InteractionContents, String> {
-    return Ok(InteractionContents(
+  ): Result<List<InteractionContents>, String> {
+    return Ok(listOf(InteractionContents("",
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("text/plain")
       )
-    ))
+    )))
   }
 
   companion object : KLogging()

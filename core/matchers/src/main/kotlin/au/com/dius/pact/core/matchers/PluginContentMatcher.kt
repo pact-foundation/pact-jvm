@@ -6,6 +6,9 @@ import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
+/**
+ * Content matcher that delegates to a plugin
+ */
 class PluginContentMatcher(
   val contentMatcher: io.pact.plugins.jvm.core.ContentMatcher,
   val contentType: ContentType
@@ -24,7 +27,7 @@ class PluginContentMatcher(
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Result<InteractionContents, String> {
+  ): Result<List<InteractionContents>, String> {
     return contentMatcher.configureContent(contentType.toString(), bodyConfig)
   }
 

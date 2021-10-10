@@ -134,6 +134,7 @@ open class PactBuilder(
       CatalogueEntryProviderType.CORE -> when (entry.key) {
         "http", "https" -> V4Interaction.SynchronousHttp(key.orEmpty(), description)
         "message" -> V4Interaction.AsynchronousMessage(key.orEmpty(), description)
+        "synchronous-message" -> V4Interaction.SynchronousMessages(key.orEmpty(), description)
         else -> TODO("Interactions of type ${entry.key} are not currently supported")
       }
       CatalogueEntryProviderType.PLUGIN -> TODO()
@@ -147,6 +148,7 @@ open class PactBuilder(
     require(currentInteraction != null) {
       "'with' must be preceded by 'expectsToReceive'"
     }
+
     when (val interaction = currentInteraction) {
       is V4Interaction.SynchronousHttp -> {
         logger.debug { "Configuring interaction from $values" }
@@ -158,19 +160,35 @@ open class PactBuilder(
         }
         interaction.updateProperties(values.filter { it.key != "request.contents" && it.key != "response.contents" })
       }
+
       is V4Interaction.AsynchronousMessage -> {
-        logger.debug { "Configuring interaction from $values" }
+        logger.debug { "Configuring AsynchronousMessage interaction from $values" }
         if (values.containsKey("message.contents")) {
-          interaction.contents = setupMessageContents(values["message.contents"], interaction)
+          val messageContents = setupMessageContents(values["message.contents"], interaction)
+          if (messageContents.size > 1) {
+            logger.warn { "Received multiple values for the interaction contents, will only use the first" }
+          }
+          interaction.contents = messageContents.first()
         }
         interaction.updateProperties(values.filter { it.key != "message.contents" })
       }
-      is V4Interaction.SynchronousMessages -> TODO()
+
+      is V4Interaction.SynchronousMessages -> {
+        logger.debug { "Configuring SynchronousMessages interaction from $values" }
+        val result = setupMessageContents(values, interaction)
+        val requestContents = result.find { it.partName == "request" }
+        if (requestContents != null) {
+          interaction.request = requestContents
+        }
+        interaction.response.addAll(result.filter { it.partName == "response" })
+        interaction.updateProperties(values.filter { it.key != "request" && it.key != "response" })
+      }
     }
+
     return this
   }
 
-  private fun setupMessageContents(contents: Any?, interaction: V4Interaction.AsynchronousMessage): MessageContents {
+  private fun setupMessageContents(contents: Any?, interaction: V4Interaction): List<MessageContents> {
     logger.debug { "Explicit contents, will look for a content matcher" }
     return when (contents) {
       is Map<*, *> -> if (contents.containsKey("pact:content-type")) {
@@ -184,42 +202,46 @@ open class PactBuilder(
           if (contentMatcher != null) {
             when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
               is Ok -> {
-                val (body, rules, generators, _, _) = result.value
-                val matchingRules = MatchingRulesImpl()
-                if (rules != null) {
-                  matchingRules.addCategory(rules)
+                result.value.map {
+                  val (partName, body, rules, generators, _, _, _, _) = it
+                  val matchingRules = MatchingRulesImpl()
+                  if (rules != null) {
+                    matchingRules.addCategory(rules)
+                  }
+                  MessageContents(body, mapOf(), matchingRules, generators ?: Generators(), partName)
                 }
-                MessageContents(body, mapOf(), matchingRules, generators ?: Generators())
               }
               is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
             }
           } else {
-            MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType)))
+            listOf(MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType))))
           }
         } else {
           logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
           when (val result = matcher.configureContent(contentType, bodyConfig)) {
             is Ok -> {
-              val (body, rules, generators, metadata, config) = result.value
-              val matchingRules = MatchingRulesImpl()
-              if (rules != null) {
-                matchingRules.addCategory(rules)
+              result.value.map {
+                val (partName, body, rules, generators, metadata, config, _, _) = it
+                val matchingRules = MatchingRulesImpl()
+                if (rules != null) {
+                  matchingRules.addCategory(rules)
+                }
+                if (config.interactionConfiguration.isNotEmpty()) {
+                  interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
+                }
+                if (config.pactConfiguration.isNotEmpty()) {
+                  addPluginConfiguration(matcher, config.pactConfiguration)
+                }
+                MessageContents(body, metadata, matchingRules, generators ?: Generators(), partName)
               }
-              if (config.interactionConfiguration.isNotEmpty()) {
-                interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
-              }
-              if (config.pactConfiguration.isNotEmpty()) {
-                addPluginConfiguration(matcher, config.pactConfiguration)
-              }
-              MessageContents(body, metadata, matchingRules, generators ?: Generators())
             }
             is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
           }
         }
       } else {
-        MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray()))
+        listOf(MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray())))
       }
-      else -> MessageContents(OptionalBody.body(contents.toString().toByteArray()))
+      else -> listOf(MessageContents(OptionalBody.body(contents.toString().toByteArray())))
     }
   }
 
@@ -245,7 +267,10 @@ open class PactBuilder(
           if (contentMatcher != null) {
             when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
               is Ok -> {
-                val (body, rules, generators, _, _) = result.value
+                if (result.value.size > 1) {
+                  logger.warn { "Plugin returned multiple contents, will only use the first" }
+                }
+                val (_, body, rules, generators, _, _, _, _) = result.value.first()
                 part.body = body
                 if (rules != null) {
                   part.matchingRules.addCategory(rules)
@@ -279,7 +304,10 @@ open class PactBuilder(
   ) {
     when (val result = matcher.configureContent(contentType, bodyConfig)) {
       is Ok -> {
-        val (body, rules, generators, _, config, interactionMarkup, interactionMarkupType) = result.value
+        if (result.value.size > 1) {
+          logger.warn { "Plugin returned multiple contents, will only use the first" }
+        }
+        val (_, body, rules, generators, _, config, interactionMarkup, interactionMarkupType) = result.value.first()
         part.body = body
         if (!part.hasHeader("content-type")) {
           part.headers["content-type"] = listOf(body.contentType.toString())

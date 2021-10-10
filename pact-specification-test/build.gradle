@@ -13,5 +13,5 @@ dependencies {
       exclude group: 'org.codehaus.groovy'
   }
   testImplementation 'org.apache.tika:tika-core:1.27'
-  testImplementation 'io.pact.plugin.driver:core:0.0.4'
+  testImplementation 'io.pact.plugin.driver:core:0.0.5'
 }

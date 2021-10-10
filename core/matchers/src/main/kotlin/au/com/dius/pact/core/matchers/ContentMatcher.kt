@@ -11,5 +11,5 @@ interface ContentMatcher {
     context: MatchingContext
   ): BodyMatchResult
 
-  fun setupBodyFromConfig(bodyConfig: Map<String, Any?>): Result<InteractionContents, String>
+  fun setupBodyFromConfig(bodyConfig: Map<String, Any?>): Result<List<InteractionContents>, String>
 }

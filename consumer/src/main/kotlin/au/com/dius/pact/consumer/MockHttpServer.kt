@@ -28,7 +28,7 @@ import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
 import mu.KLogging
-import org.apache.commons.lang3.StringEscapeUtils
+import org.apache.commons.text.StringEscapeUtils
 import org.apache.hc.client5.http.classic.methods.HttpOptions
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
@@ -127,6 +127,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
     httpclient.execute(httpOptions).close()
   }
 
+  @Suppress("TooGenericExceptionCaught")
   override fun <R> runAndWritePact(pact: BasePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>):
     PactVerificationResult {
     start()
@@ -211,9 +212,15 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
 
   private fun invalidResponse(request: IRequest): IResponse {
     val body = "{ \"error\": \"Unexpected request : ${StringEscapeUtils.escapeJson(request.toString())}\" }"
-    return Response(500, mutableMapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
-      "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray(),
-      au.com.dius.pact.core.model.ContentType.JSON))
+    return Response(500,
+      mutableMapOf(
+        "Access-Control-Allow-Origin" to listOf("*"),
+        "Content-Type" to listOf("application/json"),
+        "X-Pact-Unexpected-Request" to listOf("1")
+      ),
+      OptionalBody.body(body.toByteArray(),
+      au.com.dius.pact.core.model.ContentType.JSON)
+    )
   }
 
   companion object : KLogging()
@@ -226,6 +233,7 @@ abstract class BaseJdkMockServer(
   private var stopped: Boolean = false
 ) : HttpHandler, BaseMockServer(pact, config) {
 
+  @Suppress("TooGenericExceptionCaught")
   override fun handle(exchange: HttpExchange) {
     if (exchange.requestMethod == "OPTIONS" && exchange.requestHeaders.containsKey("X-PACT-BOOTCHECK")) {
       exchange.responseHeaders.add("X-PACT-BOOTCHECK", "true")
@@ -240,8 +248,13 @@ abstract class BaseJdkMockServer(
         pactResponseToHttpExchange(response, exchange)
       } catch (e: Exception) {
         logger.error(e) { "Failed to generate response" }
-        pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to listOf("application/json")),
-          OptionalBody.body("{\"error\": ${e.message}}".toByteArray(), au.com.dius.pact.core.model.ContentType.JSON)), exchange)
+        pactResponseToHttpExchange(Response(500,
+          mutableMapOf(
+            "Content-Type" to listOf("application/json")
+          ),
+          OptionalBody.body("{\"error\": ${e.message}}".toByteArray(),
+            au.com.dius.pact.core.model.ContentType.JSON)
+        ), exchange)
       }
     }
   }
@@ -330,6 +343,7 @@ open class MockHttpServer(pact: BasePact, config: MockProviderConfig) :
 open class MockHttpsServer(pact: BasePact, config: MockProviderConfig) :
   BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
+@Suppress("TooGenericExceptionCaught")
 fun calculateCharset(headers: Map<String, List<String?>>): Charset {
   val contentType = headers.entries.find { it.key.lowercase() == "content-type" }
   val default = Charset.forName("UTF-8")
@@ -345,8 +359,13 @@ fun calculateCharset(headers: Map<String, List<String?>>): Charset {
 
 fun interactionCatalogueEntries(): List<CatalogueEntry> {
   return listOf(
-    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "http", mapOf()),
-    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "https", mapOf()),
-    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core", "message", mapOf())
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
+      "http", mapOf()),
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
+      "https", mapOf()),
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
+      "message", mapOf()),
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
+      "synchronous-message", mapOf())
   )
 }

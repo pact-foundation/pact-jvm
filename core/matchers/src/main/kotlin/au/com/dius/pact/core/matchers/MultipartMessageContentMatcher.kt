@@ -38,13 +38,13 @@ class MultipartMessageContentMatcher : ContentMatcher {
 
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
-  ): Result<InteractionContents, String> {
-    return Ok(InteractionContents(
+  ): Result<List<InteractionContents>, String> {
+    return Ok(listOf(InteractionContents("",
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("multipart/form-data")
       )
-    ))
+    )))
   }
 
   private fun compareContents(

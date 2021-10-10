@@ -23,6 +23,10 @@ enum class ProviderType {
    */
   ASYNCH,
   /**
+   * Synchronous message provider
+   */
+  SYNCH_MESSAGE,
+  /**
    * Unspecified, will default to synchronous
    */
   UNSPECIFIED
