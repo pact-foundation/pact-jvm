@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.0-beta.5 - Support using synchrounous messages with JUnit 5 (Protobuf plugin)
+
+* 23df6e53b - feat(plugins): Support V4 synchrounous messages in JUnit 5 tests (Ronald Holshausen, Mon Oct 11 09:11:37 2021 +1100)
+* cc9a183b1 - fix: notEmpty matching rule defintion should be applied to any primitive value (Ronald Holshausen, Thu Oct 7 14:01:59 2021 +1100)
+* 591eb35ce - fix: notEmpty matching rule defintion should be applied to any primitive value (Ronald Holshausen, Thu Oct 7 13:50:08 2021 +1100)
+* 9ba102834 - chore: add docs about the matching rule definition language (Ronald Holshausen, Thu Oct 7 13:35:26 2021 +1100)
+* 63d35c3f7 - chore: update the matching readme (Ronald Holshausen, Thu Oct 7 10:51:54 2021 +1100)
+* f6966d126 - bump version to 4.3.0-beta.5 (Ronald Holshausen, Tue Oct 5 12:04:40 2021 +1100)
+
 # 4.3.0-beta.4 - Fixes from master + updated matching rule expressions and plugin support
 
 * d84ae9aa2 - Merge branch 'master' into v4.3.x (Ronald Holshausen, Tue Oct 5 11:39:54 2021 +1100)
