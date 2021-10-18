@@ -1,5 +1,10 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.0-beta.6 - Update plugin driver to latest
+
+* 867021e1b - chore: set the plugin driver version to be the same across modules (Ronald Holshausen, Mon Oct 18 11:56:08 2021 +1100)
+* 6ce48abb3 - bump version to 4.3.0-beta.6 (Ronald Holshausen, Mon Oct 11 10:39:50 2021 +1100)
+
 # 4.3.0-beta.5 - Support using synchrounous messages with JUnit 5 (Protobuf plugin)
 
 * 23df6e53b - feat(plugins): Support V4 synchrounous messages in JUnit 5 tests (Ronald Holshausen, Mon Oct 11 09:11:37 2021 +1100)
