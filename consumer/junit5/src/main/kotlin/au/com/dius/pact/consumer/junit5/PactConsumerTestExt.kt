@@ -8,6 +8,7 @@ import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.PactTestRun
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.dsl.PactBuilder
+import au.com.dius.pact.consumer.dsl.SynchronousMessagePactBuilder
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
 import au.com.dius.pact.core.model.BasePact
@@ -21,6 +22,7 @@ import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.Json
@@ -93,7 +95,6 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         type.isAssignableFrom(RequestResponsePact::class.java) -> return true
         type.isAssignableFrom(V4Pact::class.java) -> return true
         type.isAssignableFrom(V4Interaction.SynchronousHttp::class.java) -> return true
-        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> return true
       }
     }
 
@@ -385,11 +386,19 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           }
         }
         ProviderType.SYNCH_MESSAGE -> {
-          val pactBuilder = PactBuilder(pactConsumer, providerNameToUse)
-          if (providerInfo.pactVersion != null) {
-            pactBuilder.pactSpecVersion(providerInfo.pactVersion)
+          if (method.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.SynchronousMessagePactBuilder"))) {
+            ReflectionSupport.invokeMethod(
+              method, context.requiredTestInstance,
+              SynchronousMessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V4)
+                .consumer(pactConsumer).hasPactWith(providerNameToUse)
+            ) as BasePact
+          } else {
+            val pactBuilder = PactBuilder(pactConsumer, providerNameToUse)
+            if (providerInfo.pactVersion != null) {
+              pactBuilder.pactSpecVersion(providerInfo.pactVersion)
+            }
+            ReflectionSupport.invokeMethod(method, context.requiredTestInstance, pactBuilder) as BasePact
           }
-          ReflectionSupport.invokeMethod(method, context.requiredTestInstance, pactBuilder) as BasePact
         }
       }
 

@@ -72,6 +72,13 @@ open class PactBuilder(
   }
 
   /**
+   * Use the Synchronous Message DSL
+   */
+  fun usingSynchronousMessageDsl(): SynchronousMessagePactBuilder {
+    return SynchronousMessagePactBuilder(pactVersion).consumer(consumer).hasPactWith(provider)
+  }
+
+  /**
    * Sets the Pact specification version
    */
   fun pactSpecVersion(version: PactSpecVersion) {

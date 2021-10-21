@@ -84,7 +84,7 @@ class V4AsyncMessageTest {
       metadata: [destination: [matchers: [[match: 'regex', regex: '\\w+\\d+']], combine: 'AND']],
       body: ['$.testParam1': [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
     ]
-    
+
     // We need to process the message here with our actual message handler (it should be the one used to actually
     // process your messages). This example just uses a test class as an example
     def processed = new MessageHandler().process(message.contents.contents.value)

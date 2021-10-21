@@ -150,7 +150,7 @@ sealed class V4Interaction(
     }
   }
 
-  class SynchronousHttp @JvmOverloads constructor(
+  open class SynchronousHttp @JvmOverloads constructor(
     key: String,
     description: String,
     providerStates: List<ProviderState> = listOf(),
@@ -247,7 +247,7 @@ sealed class V4Interaction(
     override fun asSynchronousRequestResponse() = this
   }
 
-  class AsynchronousMessage @Suppress("LongParameterList") @JvmOverloads constructor(
+  open class AsynchronousMessage @Suppress("LongParameterList") @JvmOverloads constructor(
     key: String,
     description: String,
     var contents: MessageContents = MessageContents(),
@@ -342,7 +342,7 @@ sealed class V4Interaction(
     fun getContentType() = contents.getContentType()
   }
 
-  class SynchronousMessages @Suppress("LongParameterList") @JvmOverloads constructor(
+  open class SynchronousMessages @Suppress("LongParameterList") @JvmOverloads constructor(
     key: String,
     description: String,
     interactionId: String? = null,
@@ -354,8 +354,7 @@ sealed class V4Interaction(
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
     interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
-      interactionMarkup),
-    MessageInteraction {
+      interactionMarkup), MessageInteraction {
     override fun withGeneratedKey(): V4Interaction {
       return SynchronousMessages(
         generateKey(),
