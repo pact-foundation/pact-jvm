@@ -222,10 +222,23 @@ One option (if the HTTP client supports it, Apache HTTP Client does) is to set t
 the test JVM. The other option is to set `pact.mockserver.addCloseHeader` to `true` to force the mock server to
 send a `Connection: close` header with every response (supported with Pact-JVM 4.2.7+).
 
-# Message Pacts
+# Testing messages
 
-## Consumer test for a message consumer
-For testing a consumer of messages from a message queue using JUnit 5 and Pact V4, see [AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/ac6a0eae0b18183f6f453eafddb89b90741ace42/consumer/junit5/src/test/java/au/com/dius/pact/consumer/junit5/AsyncMessageTest.java).
+You can use Pact to test interactions with messaging systems. There are two main types of message support: asynchronous 
+messages and synchronous request/response messages.
+
+## Asynchronous messages
+
+Asynchronous messages are you normal type of single shot or fire and forget type messages. They are typically sent to a
+message queue or topic as a notification or event. With Pact tests, we will be testing that our consumer of the messages
+works with the messages setup as the expectations in test. This should be the message handler code that processes the
+actual messages that come off the message queue in production.
+
+You can use either the V3 Message Pact or the V4 Asynchronous Message interaction to test these types of interactions.
+
+For a V3 message pact example, see [AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/ac6a0eae0b18183f6f453eafddb89b90741ace42/consumer/junit5/src/test/java/au/com/dius/pact/consumer/junit5/AsyncMessageTest.java).
+
+For a V4 asynchronous message example, see [V4AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/master/consumer/junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/V4AsyncMessageTest.groovy).
 
 ### Matching message metadata
 
@@ -245,4 +258,75 @@ builder.given("SomeProviderState")
     })
     .withContent(body)
     .toPact();
+```
+
+### V4 Synchronous request/response messages
+
+Synchronous request/response messages are a form of message interchange were a request message is sent to another service and
+one or more response messages are returned. Examples of this would be things like Websockets and gRPC.
+
+For a V4 synchronous request/response message example, see [V4AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/master/consumer/junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/V4SyncMessageTest.groovy).
+
+# Using Pact plugins (version 4.3.0+)
+
+The `PactBuilder` consumer test builder supports using Pact plugins. Plugins are defined in the [Pact plugins project](https://github.com/pact-foundation/pact-plugins).
+To use plugins requires the use of Pact specification V4 Pacts.
+
+To use a plugin, first you need to let the builder know to load the plugin (using the `usingPlugin` method) and then 
+configure the interaction based on the requirements for the plugin. Each plugin may have different requirements, so you 
+will have to consult the plugin docs on what is required. The plugins will be loaded from the plugin directory. By 
+default, this is `~/.pact/plugins` or the value of the `PACT_PLUGIN_DIR` environment variable.
+
+Then you need to use the `with` method that takes a Map-based data structure and passed it on to the plugin to
+setup the interaction.
+
+For example, if we use the CSV plugin from the plugins project, our test would look like:
+
+```java
+@ExtendWith(PactConsumerTestExt.class)
+class CsvClientTest {
+  /**
+   * Setup an interaction that makes a request for a CSV report 
+   */
+  @Pact(consumer = "CsvClient")
+  V4Pact pact(PactBuilder builder) {
+    return builder
+      // Tell the builder to load the CSV plugin
+      .usingPlugin("csv")
+      // Interaction we are expecting to receive
+      .expectsToReceive("request for a report", "core/interaction/http")
+      // Data for the interaction. This will be sent to the plugin
+      .with(Map.of(
+        "request.path", "/reports/report001.csv",
+        "response.status", "200",
+        "response.contents", Map.of(
+          "pact:content-type", "text/csv",
+          "csvHeaders", false,
+          "column:1", "matching(type,'Name')",
+          "column:2", "matching(number,100)",
+          "column:3", "matching(datetime, 'yyyy-MM-dd','2000-01-01')"
+        )
+      ))
+      .toPact();
+  }
+
+  /**
+   * Test to get the CSV report
+   */
+  @Test
+  @PactTestFor(providerName = "CsvServer", pactMethod = "pact")
+  void getCsvReport(MockServer mockServer) throws IOException {
+    // Setup our CSV client class to point to the Pact mock server
+    CsvClient client = new CsvClient(mockServer.getUrl());
+    
+    // Fetch the CSV report
+    List<CSVRecord> csvData = client.fetch("report001.csv", false);
+    
+    // Verify it is as expected
+    assertThat(csvData.size(), is(1));
+    assertThat(csvData.get(0).get(0), is(equalTo("Name")));
+    assertThat(csvData.get(0).get(1), is(equalTo("100")));
+    assertThat(csvData.get(0).get(2), matchesRegex("\\d{4}-\\d{2}-\\d{2}"));
+  }
+}
 ```
