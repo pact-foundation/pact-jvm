@@ -176,7 +176,7 @@ class ResponseComparison(
     ): ComparisonResult {
       val (bodyMismatches, metadataMismatches) = when (message) {
         is V4Interaction.AsynchronousMessage -> {
-          val bodyContext = MatchingContext(message.contents.matchingRules.rulesForCategory("content"),
+          val bodyContext = MatchingContext(message.contents.matchingRules.rulesForCategory("body"),
             true, pluginConfiguration)
           val metadataContext = MatchingContext(message.contents.matchingRules.rulesForCategory("metadata"),
             true, pluginConfiguration)

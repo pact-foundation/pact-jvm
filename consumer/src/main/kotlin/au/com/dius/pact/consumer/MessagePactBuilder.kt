@@ -12,13 +12,15 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.v4.MessageContents
 
 /**
- * PACT DSL builder for v3 specification
+ * PACT DSL builder for v3 specification messages or v4 asynchronous messages
  */
 class MessagePactBuilder @JvmOverloads constructor(
   /**
@@ -39,7 +41,7 @@ class MessagePactBuilder @JvmOverloads constructor(
   /**
    * Messages for the pact
    */
-  private var messages: MutableList<Message> = mutableListOf(),
+  private var messages: MutableList<V4Interaction.AsynchronousMessage> = mutableListOf(),
 
   /**
    * Specification Version
@@ -110,7 +112,7 @@ class MessagePactBuilder @JvmOverloads constructor(
    * @param description message description.
    */
   fun expectsToReceive(description: String): MessagePactBuilder {
-    messages.add(Message(description, providerStates))
+    messages.add(V4Interaction.AsynchronousMessage("", description, providerStates = providerStates))
     return this
   }
 
@@ -123,18 +125,17 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     val message = messages.last()
-    message.metadata = metadata.mapValues { (key, value) ->
+    message.contents = message.contents.copy(metadata = metadata.mapValues { (key, value) ->
       if (value is Matcher) {
-        message.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
+        message.contents.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
         if (value.generator != null) {
-          message.generators.addGenerator(category = au.com.dius.pact.core.model.generators.Category.METADATA,
-            generator = value.generator!!)
+          message.contents.generators.addGenerator(category = Category.METADATA, generator = value.generator!!)
         }
         value.value
       } else {
         value
       }
-    }.toMutableMap()
+    }.toMutableMap())
     return this
   }
 
@@ -149,9 +150,9 @@ class MessagePactBuilder @JvmOverloads constructor(
     val message = messages.last()
     val metadataBuilder = MetadataBuilder()
     consumer.accept(metadataBuilder)
-    message.metadata = metadataBuilder.values
-    message.matchingRules.addCategory(metadataBuilder.matchers)
-    message.generators.addGenerators(Category.METADATA, metadataBuilder.generators)
+    message.contents = message.contents.copy(metadata = metadataBuilder.values)
+    message.contents.matchingRules.addCategory(metadataBuilder.matchers)
+    message.contents.generators.addGenerators(Category.METADATA, metadataBuilder.generators)
     return this
   }
 
@@ -164,7 +165,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     val message = messages.last()
-    val metadata = message.metadata.toMutableMap()
+    val metadata = message.contents.metadata.toMutableMap()
     val contentTypeEntry = metadata.entries.find {
       it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
     }
@@ -179,10 +180,12 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     val parent = body.close()!!
-    message.contents = OptionalBody.body(parent.toString().toByteArray(contentType.asCharset()), contentType)
-    message.metadata = metadata
-    message.matchingRules.addCategory(parent.matchers)
-    message.generators.addGenerators(parent.generators)
+    message.contents = message.contents.copy(
+      contents = OptionalBody.body(parent.toString().toByteArray(contentType.asCharset()), contentType),
+      metadata = metadata
+    )
+    message.contents.matchingRules.addCategory(parent.matchers)
+    message.contents.generators.addGenerators(parent.generators)
 
     return this
   }
@@ -196,7 +199,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     }
 
     val message = messages.last()
-    val metadata = message.metadata.toMutableMap()
+    val metadata = message.contents.metadata.toMutableMap()
     val contentTypeEntry = metadata.entries.find {
       it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
     }
@@ -210,10 +213,12 @@ class MessagePactBuilder @JvmOverloads constructor(
       metadata["contentType"] = contentTypeEntry.value
     }
 
-    message.contents = OptionalBody.body(xmlBuilder.asBytes(contentType.asCharset()), contentType)
-    message.metadata = metadata
-    message.matchingRules.addCategory(xmlBuilder.matchingRules)
-    message.generators.addGenerators(xmlBuilder.generators)
+    message.contents = message.contents.copy(
+      contents = OptionalBody.body(xmlBuilder.asBytes(contentType.asCharset()), contentType),
+      metadata = metadata
+    )
+    message.contents.matchingRules.addCategory(xmlBuilder.matchingRules)
+    message.contents.generators.addGenerators(xmlBuilder.generators)
 
     return this
   }
@@ -224,10 +229,10 @@ class MessagePactBuilder @JvmOverloads constructor(
   fun <P : Pact?> toPact(pactClass: Class<P>): P {
     return when {
       pactClass.isAssignableFrom(V4Pact::class.java) -> {
-        V4Pact(consumer, provider, messages.map { it.asV4Interaction() }.toMutableList()) as P
+        V4Pact(consumer, provider, messages.toMutableList()) as P
       }
       pactClass.isAssignableFrom(MessagePact::class.java) -> {
-        return MessagePact(provider, consumer, messages) as P
+        return MessagePact(provider, consumer, messages.map { it.asV3Interaction() }.toMutableList()) as P
       }
       else -> {
         throw IllegalArgumentException(pactClass.simpleName + " is not a valid Pact class")
@@ -240,9 +245,9 @@ class MessagePactBuilder @JvmOverloads constructor(
    */
   fun <P : Pact> toPact(): P {
     return if (specVersion == PactSpecVersion.V4) {
-      V4Pact(consumer, provider, messages.map { it.asV4Interaction() }.toMutableList()) as P
+      V4Pact(consumer, provider, messages.toMutableList()) as P
     } else {
-      MessagePact(provider, consumer, messages) as P
+      MessagePact(provider, consumer, messages.map { it.asV3Interaction() }.toMutableList()) as P
     }
   }
 }
