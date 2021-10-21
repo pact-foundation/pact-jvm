@@ -102,6 +102,14 @@ For example, configure it by adding the following to your POM:
 </plugin>
 ```
 
+### IMPORTANT NOTE!!!: JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.
+
+Gradle and Maven do not pass in the system properties in to the test JVM from the command line. The system properties
+specified on the command line only control the build JVM (the one that runs Gradle or Maven), but the tests will run in
+a new JVM. See [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
+and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
+
+
 ### For Message Tests and Spring and Maven
 
 If you are using Spring (or Springboot), and want to have values injected into your test, you need to ensure 

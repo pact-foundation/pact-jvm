@@ -585,6 +585,13 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  
 To enable publishing of results, set the Java system property or environment variable `pact.verifier.publishResults` to `true`.
 
+### IMPORTANT NOTE!!!: this property needs to be set on the test JVM if your build is running with Gradle or Maven.
+
+Gradle and Maven do not pass in the system properties in to the test JVM from the command line. The system properties
+specified on the command line only control the build JVM (the one that runs Gradle or Maven), but the tests will run in
+a new JVM. See [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
+and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
+
 ## Tagging the provider before verification results are published [4.0.1+]
 
 You can have a tag pushed against the provider version before the verification results are published. To do this 

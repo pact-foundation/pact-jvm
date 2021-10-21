@@ -218,5 +218,3 @@ public class PactVerificationTest {
 
 }
 ```
-
-

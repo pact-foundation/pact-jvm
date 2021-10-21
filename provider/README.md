@@ -1,8 +1,6 @@
 Pact provider
 =============
 
-sub project of https://github.com/DiUS/pact-jvm
-
 The pact provider is responsible for verifying that an API provider adheres to a number of pacts authored by its clients
 
 This library provides the basic tools required to automate the process, and should be usable on its own in many instances.
