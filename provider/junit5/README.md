@@ -214,3 +214,16 @@ Then any pending pacts will not cause a build failure.
 # Work In Progress (WIP) Pact Support (version 4.1.5 and later)
 
 WIP pacts work in the same way as with JUnit 4 tests, refer to the [Pact junit runner](../junit/README.md) docs.
+
+
+# Verifying V4 Pact files that require plugins (version 4.3.0+)
+
+Pact files that require plugins can be verified with version 4.3.0+. For details on how plugins work, see the
+[Pact plugin project](https://github.com/pact-foundation/pact-plugins).
+
+Each required plugin is defined in the `plugins` section in the Pact metadata in the Pact file. The plugins will be
+loaded from the plugin directory. By default, this is `~/.pact/plugins` or the value of the `PACT_PLUGIN_DIR` environment
+variable. Each plugin required by the Pact file must be installed there. You will need to follow the installation
+instructions for each plugin, but the default is to unpack the plugin into a sub-directory `<plugin-name>-<plugin-version>`
+(i.e., for the Protobuf plugin 0.0.0 it will be `protobuf-0.0.0`). The plugin manifest file must be present for the
+plugin to be able to be loaded.
