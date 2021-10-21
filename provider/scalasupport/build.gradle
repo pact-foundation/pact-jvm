@@ -10,7 +10,7 @@ dependencies {
   compile("com.typesafe.scala-logging:scala-logging_2.13:3.9.2") {
     exclude group: 'org.scala-lang'
   }
-  compile 'org.scala-lang.modules:scala-java8-compat_2.13:0.9.1'
+  compile 'org.scala-lang.modules:scala-java8-compat_2.13:1.0.0'
   compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
   compile("ws.unfiltered:unfiltered-netty-server_2.13:0.10.0-M8") {
     exclude group: 'org.scala-lang'

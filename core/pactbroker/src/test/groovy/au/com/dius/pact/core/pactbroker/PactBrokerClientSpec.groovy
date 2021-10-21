@@ -370,7 +370,7 @@ class PactBrokerClientSpec extends Specification {
       newHalClient() >> halClient
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true, null, null) ]
-    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}],"includePendingStatus":false}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
       {
         "_embedded": {
@@ -467,7 +467,7 @@ class PactBrokerClientSpec extends Specification {
       newHalClient() >> halClient
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true, null, null) ]
-    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}]}'
+    def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}],"includePendingStatus":false}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {
