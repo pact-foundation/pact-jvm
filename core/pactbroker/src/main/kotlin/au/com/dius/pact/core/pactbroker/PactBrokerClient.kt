@@ -255,7 +255,12 @@ open class PactBrokerClient(
       else -> null
     }
     return if (pactsForVerification != null) {
-      fetchPactsUsingNewEndpoint(selectors, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+      val selectorsRawJson = System.getProperty("pactbroker.consumerversionselectors.rawjson")
+      if(!selectorsRawJson.isNullOrBlank()){
+        fetchPactsUsingNewEndpointRaw(selectorsRawJson, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+      } else {
+        fetchPactsUsingNewEndpointTyped(selectors, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+      }
     } else {
       handleWith {
         val tags = selectors.filter { it.tag.isNotEmpty() }.map { it.tag to it.fallbackTag }
@@ -275,8 +280,33 @@ open class PactBrokerClient(
     }
   }
 
+  private fun fetchPactsUsingNewEndpointTyped(
+    selectorsTyped: List<ConsumerVersionSelector>,
+    enablePending: Boolean,
+    providerTags: List<String>,
+    includeWipPactsSince: String?,
+    halClient: IHalClient,
+    pactsForVerification: String,
+    providerName: String
+  ): Result<List<PactBrokerResult>, Exception> {
+    val selectorsJson = jsonArray(selectorsTyped.map { it.toJson() })
+    return fetchPactsUsingNewEndpoint(selectorsJson, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+  }
+
+  private fun fetchPactsUsingNewEndpointRaw(
+    selectorsRaw: String,
+    enablePending: Boolean,
+    providerTags: List<String>,
+    includeWipPactsSince: String?,
+    halClient: IHalClient,
+    pactsForVerification: String,
+    providerName: String
+  ): Result<List<PactBrokerResult>, Exception> {
+    return fetchPactsUsingNewEndpoint(JsonParser.parseString(selectorsRaw), enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+  }
+
   private fun fetchPactsUsingNewEndpoint(
-    selectors: List<ConsumerVersionSelector>,
+    selectorsJson: JsonValue,
     enablePending: Boolean,
     providerTags: List<String>,
     includeWipPactsSince: String?,
@@ -286,9 +316,9 @@ open class PactBrokerClient(
   ): Result<List<PactBrokerResult>, Exception> {
     logger.debug { "Fetching pacts using the pactsForVerification endpoint" }
     val body = JsonValue.Object(
-      "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
+      "consumerVersionSelectors" to selectorsJson
     )
-    
+
     body["includePendingStatus"] = enablePending
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
