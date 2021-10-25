@@ -649,6 +649,26 @@ class PactBrokerClientSpec extends Specification {
     result == new Err(["Publishing tag '1' failed: failed"])
   }
 
+  def 'fetches provider pacts for verification based on selectors raw json configuration passed from cli'() {
+    given:
+    System.setProperty('pactbroker.consumerversionselectors.rawjson', '[{"mainBranch":true}]')
+    def halClient = Mock(IHalClient)
+    halClient.navigate() >> halClient
+    halClient.linkUrl("pb:provider-pacts-for-verification") >> "pb:provider-pacts-for-verification"
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+
+    def expectedJson = "{\"consumerVersionSelectors\":[{\"mainBranch\":true}],\"includePendingStatus\":false}"
+
+    when:
+    def consumers = client.fetchConsumersWithSelectors('provider',
+            [], [], false, '')
+
+    then:
+    1 * halClient.postJson("pb:provider-pacts-for-verification", _, expectedJson)
+  }
+
   @Unroll
   @SuppressWarnings('UnnecessaryBooleanExpression')
   def 'can-i-deploy - matrix query'() {
