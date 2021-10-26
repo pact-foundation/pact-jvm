@@ -12,7 +12,6 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.InteractionMarkup
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
@@ -21,6 +20,7 @@ import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.v4.InteractionMarkup
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.deepMerge
@@ -187,7 +187,17 @@ open class PactBuilder(
         if (requestContents != null) {
           interaction.request = requestContents
         }
-        interaction.response.addAll(result.filter { it.partName == "response" })
+        if (interaction.request.interactionMarkup != null) {
+          interaction.interactionMarkup = interaction.request.interactionMarkup!!
+        }
+
+        for (response in result.filter { it.partName == "response" }) {
+          interaction.response.add(response)
+          if (response.interactionMarkup != null) {
+            interaction.interactionMarkup = interaction.interactionMarkup.merge(response.interactionMarkup!!)
+          }
+        }
+
         interaction.updateProperties(values.filter { it.key != "request" && it.key != "response" })
       }
     }
@@ -210,12 +220,14 @@ open class PactBuilder(
             when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
               is Ok -> {
                 result.value.map {
-                  val (partName, body, rules, generators, _, _, _, _) = it
+                  val (partName, body, rules, generators, _, _, interactionMarkup, interactionMarkupType) = it
                   val matchingRules = MatchingRulesImpl()
                   if (rules != null) {
                     matchingRules.addCategory(rules)
                   }
-                  MessageContents(body, mapOf(), matchingRules, generators ?: Generators(), partName)
+                  MessageContents(body, mapOf(), matchingRules, generators ?: Generators(), partName,
+                    InteractionMarkup(interactionMarkup, interactionMarkupType)
+                  )
                 }
               }
               is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
@@ -228,7 +240,7 @@ open class PactBuilder(
           when (val result = matcher.configureContent(contentType, bodyConfig)) {
             is Ok -> {
               result.value.map {
-                val (partName, body, rules, generators, metadata, config, _, _) = it
+                val (partName, body, rules, generators, metadata, config, interactionMarkup, interactionMarkupType) = it
                 val matchingRules = MatchingRulesImpl()
                 if (rules != null) {
                   matchingRules.addCategory(rules)
@@ -239,7 +251,8 @@ open class PactBuilder(
                 if (config.pactConfiguration.isNotEmpty()) {
                   addPluginConfiguration(matcher, config.pactConfiguration)
                 }
-                MessageContents(body, metadata, matchingRules, generators ?: Generators(), partName)
+                MessageContents(body, metadata, matchingRules, generators ?: Generators(), partName,
+                  InteractionMarkup(interactionMarkup, interactionMarkupType))
               }
             }
             is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
