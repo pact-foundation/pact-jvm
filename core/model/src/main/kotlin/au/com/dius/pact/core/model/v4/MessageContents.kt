@@ -18,8 +18,7 @@ data class MessageContents @JvmOverloads constructor(
   val metadata: Map<String, Any?> = mapOf(),
   val matchingRules: MatchingRules = MatchingRulesImpl(),
   val generators: Generators = Generators(),
-  val partName: String = "",
-  val interactionMarkup: InteractionMarkup? = null
+  val partName: String = ""
 ) {
   fun getContentType() = contents.contentType.or(Message.contentType(metadata))
 

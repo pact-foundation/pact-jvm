@@ -15,7 +15,9 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.v4.MessageContents
 
 /**
  * PACT DSL builder for v3 specification messages or v4 asynchronous messages

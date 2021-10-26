@@ -3,7 +3,6 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.messaging.MessagePact
-import au.com.dius.pact.core.model.v4.InteractionMarkup
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
@@ -88,6 +87,31 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
   }
 }
 
+data class InteractionMarkup(
+  val markup: String = "",
+  val markupType: String = ""
+) {
+  fun isNotEmpty() = markup.isNotEmpty()
+
+  fun toMap() = mapOf(
+    "markup" to markup,
+    "markupType" to markupType
+  )
+
+  companion object : KLogging() {
+    fun fromJson(json: JsonValue): InteractionMarkup {
+      return when (json) {
+        is JsonValue.Object -> InteractionMarkup(Json.toString(json["markup"]), Json.toString(json["markupType"]))
+        else -> {
+          logger.warn { "$json is not valid for InteractionMarkup" }
+          InteractionMarkup()
+        }
+      }
+    }
+
+  }
+}
+
 @Suppress("LongParameterList")
 sealed class V4Interaction(
   val key: String,
@@ -97,7 +121,7 @@ sealed class V4Interaction(
   comments: MutableMap<String, JsonValue> = mutableMapOf(),
   val pending: Boolean = false,
   val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-  var interactionMarkup: InteractionMarkup = InteractionMarkup("", "")
+  var interactionMarkup: InteractionMarkup = InteractionMarkup()
 ) : BaseInteraction(interactionId, description, providerStates, comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
@@ -136,7 +160,7 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: InteractionMarkup = InteractionMarkup("", "")
+    interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup),
     SynchronousRequestResponse {
@@ -232,9 +256,10 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: InteractionMarkup = InteractionMarkup("", "")
+    interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
-      interactionMarkup), MessageInteraction {
+      interactionMarkup),
+    MessageInteraction {
 
     override fun toString(): String {
       val pending = if (pending) " [PENDING]" else ""
@@ -327,7 +352,7 @@ sealed class V4Interaction(
     var request: MessageContents = MessageContents(),
     val response: MutableList<MessageContents> = mutableListOf(),
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: InteractionMarkup = InteractionMarkup("", "")
+    interactionMarkup: InteractionMarkup = InteractionMarkup()
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup), MessageInteraction {
     override fun withGeneratedKey(): V4Interaction {
@@ -450,7 +475,7 @@ sealed class V4Interaction(
             val interactionMarkup = if (json.has("interactionMarkup")) {
               InteractionMarkup.fromJson(json["interactionMarkup"])
             } else {
-              InteractionMarkup("", "")
+              InteractionMarkup()
             }
 
             when (result.value) {
