@@ -49,7 +49,8 @@ class MessagePactBuilder @JvmOverloads constructor(
   private var specVersion: PactSpecVersion = PactSpecVersion.V3
 ) {
 
-  constructor(specVersion: PactSpecVersion) : this(Consumer(), Provider(), mutableListOf(), mutableListOf(), specVersion)
+  constructor(specVersion: PactSpecVersion) :
+    this(Consumer(), Provider(), mutableListOf(), mutableListOf(), specVersion)
 
   /**
    * Name the consumer of the pact

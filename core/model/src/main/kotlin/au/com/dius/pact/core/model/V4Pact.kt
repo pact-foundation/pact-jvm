@@ -98,6 +98,22 @@ data class InteractionMarkup(
     "markupType" to markupType
   )
 
+  /**
+   * Merges this markup with the other
+   */
+  fun merge(other: InteractionMarkup): InteractionMarkup {
+    return if (!this.isNotEmpty()) {
+      other
+    } else if (!other.isNotEmpty()) {
+      this
+    } else {
+      if (this.markupType != other.markupType) {
+        logger.warn { "Merging different markup types: ${this.markupType} and ${other.markupType}" }
+      }
+      InteractionMarkup(this.markup + "\n" + other.markup, this.markupType)
+    }
+  }
+
   companion object : KLogging() {
     fun fromJson(json: JsonValue): InteractionMarkup {
       return when (json) {

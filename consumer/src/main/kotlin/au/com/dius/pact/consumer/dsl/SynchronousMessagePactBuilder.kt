@@ -40,7 +40,8 @@ class SynchronousMessagePactBuilder @JvmOverloads constructor(
    */
   private var specVersion: PactSpecVersion = PactSpecVersion.V4
 ) {
-  constructor(specVersion: PactSpecVersion) : this(Consumer(), Provider(), mutableListOf(), mutableListOf(), specVersion)
+  constructor(specVersion: PactSpecVersion) :
+    this(Consumer(), Provider(), mutableListOf(), mutableListOf(), specVersion)
 
   init {
     if (specVersion < PactSpecVersion.V4) {

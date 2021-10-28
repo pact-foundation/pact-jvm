@@ -175,7 +175,11 @@ open class PactBuilder(
           if (messageContents.size > 1) {
             logger.warn { "Received multiple values for the interaction contents, will only use the first" }
           }
-          interaction.contents = messageContents.first()
+          val contents = messageContents.first()
+          interaction.contents = contents.first
+          if (contents.second.isNotEmpty()) {
+            interaction.interactionMarkup = contents.second
+          }
         }
         interaction.updateProperties(values.filter { it.key != "message.contents" })
       }
@@ -183,11 +187,21 @@ open class PactBuilder(
       is V4Interaction.SynchronousMessages -> {
         logger.debug { "Configuring SynchronousMessages interaction from $values" }
         val result = setupMessageContents(values, interaction)
-        val requestContents = result.find { it.partName == "request" }
+        val requestContents = result.find { it.first.partName == "request" }
         if (requestContents != null) {
-          interaction.request = requestContents
+          interaction.request = requestContents.first
+          if (requestContents.second.isNotEmpty()) {
+            interaction.interactionMarkup = requestContents.second
+          }
         }
-        interaction.response.addAll(result.filter { it.partName == "response" })
+
+        for (response in result.filter { it.first.partName == "response" }) {
+          interaction.response.add(response.first)
+          if (response.second.isNotEmpty()) {
+            interaction.interactionMarkup = interaction.interactionMarkup.merge(response.second)
+          }
+        }
+
         interaction.updateProperties(values.filter { it.key != "request" && it.key != "response" })
       }
     }
@@ -195,7 +209,7 @@ open class PactBuilder(
     return this
   }
 
-  private fun setupMessageContents(contents: Any?, interaction: V4Interaction): List<MessageContents> {
+  private fun setupMessageContents(contents: Any?, interaction: V4Interaction): List<Pair<MessageContents, InteractionMarkup>> {
     logger.debug { "Explicit contents, will look for a content matcher" }
     return when (contents) {
       is Map<*, *> -> if (contents.containsKey("pact:content-type")) {
@@ -210,25 +224,29 @@ open class PactBuilder(
             when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
               is Ok -> {
                 result.value.map {
-                  val (partName, body, rules, generators, _, _, _, _) = it
+                  val (partName, body, rules, generators, _, _, interactionMarkup, interactionMarkupType) = it
                   val matchingRules = MatchingRulesImpl()
                   if (rules != null) {
                     matchingRules.addCategory(rules)
                   }
-                  MessageContents(body, mapOf(), matchingRules, generators ?: Generators(), partName)
+                  MessageContents(body, mapOf(), matchingRules, generators ?: Generators(), partName) to
+                    InteractionMarkup(interactionMarkup, interactionMarkupType)
                 }
               }
               is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
             }
           } else {
-            listOf(MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType))))
+            listOf(
+              MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType)))
+                to InteractionMarkup()
+            )
           }
         } else {
           logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
           when (val result = matcher.configureContent(contentType, bodyConfig)) {
             is Ok -> {
               result.value.map {
-                val (partName, body, rules, generators, metadata, config, _, _) = it
+                val (partName, body, rules, generators, metadata, config, interactionMarkup, interactionMarkupType) = it
                 val matchingRules = MatchingRulesImpl()
                 if (rules != null) {
                   matchingRules.addCategory(rules)
@@ -239,16 +257,17 @@ open class PactBuilder(
                 if (config.pactConfiguration.isNotEmpty()) {
                   addPluginConfiguration(matcher, config.pactConfiguration)
                 }
-                MessageContents(body, metadata, matchingRules, generators ?: Generators(), partName)
+                MessageContents(body, metadata, matchingRules, generators ?: Generators(), partName) to
+                  InteractionMarkup(interactionMarkup, interactionMarkupType)
               }
             }
             is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
           }
         }
       } else {
-        listOf(MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray())))
+        listOf(MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray())) to InteractionMarkup())
       }
-      else -> listOf(MessageContents(OptionalBody.body(contents.toString().toByteArray())))
+      else -> listOf(MessageContents(OptionalBody.body(contents.toString().toByteArray())) to InteractionMarkup())
     }
   }
 
