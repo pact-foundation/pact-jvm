@@ -771,6 +771,13 @@ you need set the `pact.provider.tag` JVM system property to the tag value.
 From 4.1.8+, you can specify multiple tags with a comma separated string for the `pact.provider.tag`
 system property.
 
+## Setting the provider branch before verification results are published [4.3.0-beta.7+]
+
+Requires Pact Broker version 2.86.0 or later
+
+You can have a branch pushed against the provider version before the verification results are published. To do this
+you need set the `pact.provider.branch` JVM system property to the branch value.
+
 # Enabling other verification reports
 
 By default the verification report is written to the console. You can also enable a JSON or Markdown report by setting

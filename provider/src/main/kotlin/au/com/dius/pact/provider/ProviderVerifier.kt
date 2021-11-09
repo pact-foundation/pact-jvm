@@ -147,6 +147,11 @@ interface IProviderVerifier {
   var providerTag: Supplier<String?>?
 
   /**
+   * Callback to get the provider branch
+   */
+  var providerBranch: Supplier<String?>?
+
+  /**
    * Callback to get the provider tags
    */
   var providerTags: Supplier<List<String>>?
@@ -268,6 +273,9 @@ open class ProviderVerifier @JvmOverloads constructor (
       .split(',')
       .map { it.trim() }
       .filter { it.isNotEmpty() }
+  },
+  override var providerBranch: Supplier<String?>? = Supplier {
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_BRANCH, "")
   },
   override var projectClassLoader: Supplier<ClassLoader?>? = null,
   override var responseFactory: Function<String, Any>? = null
@@ -802,11 +810,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           VerificationResult.Ok()
         }
         else -> {
-          val reportResults = verificationReporter.reportResults(pact,
-            result.toTestResult(),
-            providerVersion.get(),
-            client,
-            providerTags?.get().orEmpty())
+          val reportResults = reportResults(pact, result, client)
           when (reportResults) {
             is Ok -> VerificationResult.Ok()
             is Err -> VerificationResult.Failed("Failed to publish results to the Pact broker", "",
@@ -817,7 +821,35 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?) {
+  private fun reportResults(
+      pact: FilteredPact,
+      result: VerificationResult,
+      client: IPactBrokerClient?
+  ): Result<Boolean, List<String>> {
+    if (providerBranch?.get()?.isNotBlank() == true){
+      return verificationReporter.reportResultsWithBranch(
+        pact,
+        result.toTestResult(),
+        providerVersion.get(),
+        client,
+        providerBranch?.get()
+      )
+    } else {
+      return verificationReporter.reportResults(
+        pact,
+        result.toTestResult(),
+        providerVersion.get(),
+        client,
+        providerTags?.get().orEmpty()
+      )
+    }
+  }
+
+  override fun reportVerificationForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    pactSource: PactSource?
+  ) {
     when (pactSource) {
       is BrokerUrlSource -> reporters.forEach { reporter ->
         reporter.reportVerificationForConsumer(consumer, provider, pactSource.tag)
@@ -934,6 +966,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
     const val PACT_PROVIDER_VERSION = "pact.provider.version"
     const val PACT_PROVIDER_TAG = "pact.provider.tag"
+    const val PACT_PROVIDER_BRANCH = "pact.provider.branch"
     const val PACT_PROVIDER_VERSION_TRIM_SNAPSHOT = "pact.provider.version.trimSnapshot"
 
     @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")
