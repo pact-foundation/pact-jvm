@@ -85,9 +85,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         Ok(false)
       } else {
         val initial = TestResult.Ok(interaction.interactionId)
-        verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
-          acc.merge(result)
-        }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver))
+        reportResults(pact, interactionResults, initial, propertyResolver)
       }
       testResults.remove(pactHash)
       result
@@ -97,6 +95,23 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         logger.warn { "    ${it.description}" }
       }
       Ok(true)
+    }
+  }
+
+  private fun reportResults(
+    pact: Pact,
+    interactionResults: MutableMap<Int, TestResult>,
+    initial: TestResult.Ok,
+    propertyResolver: ValueResolver
+  ): Result<Boolean, List<String>> {
+    if (lookupProviderBranch(propertyResolver)?.isNotBlank() == true){
+      return verificationReporter.reportResultsWithBranch(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
+        acc.merge(result)
+      }, lookupProviderVersion(propertyResolver), null, lookupProviderBranch(propertyResolver))
+    } else {
+      return verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
+        acc.merge(result)
+      }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver))
     }
   }
 
@@ -130,6 +145,9 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     .split(',')
     .map { it.trim() }
     .filter { it.isNotEmpty() }
+
+  private fun lookupProviderBranch(propertyResolver: ValueResolver) = propertyResolver
+    .resolveValue("pact.provider.branch", "")
 
   fun unverifiedInteractions(pact: Pact, results: MutableMap<Int, TestResult>): List<Interaction> {
     logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }
