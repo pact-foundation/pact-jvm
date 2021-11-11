@@ -100,7 +100,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(mutablePact, interaction3, new TestResult.Ok(), null, mockValueResolver)
 
     then:
-    1 * mockVerificationReporter.reportResults(_, new TestResult.Ok(), _, null, [])
+    1 * mockVerificationReporter.reportResults(_, new TestResult.Ok(), _, null, [], _)
 
     cleanup:
     testResultAccumulator.verificationReporter = DefaultVerificationReporter.INSTANCE
@@ -144,7 +144,7 @@ class TestResultAccumulatorSpec extends Specification {
       mockValueResolver)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _, _) >> new Ok(true)
     updateTestResult == new Ok(true)
 
     cleanup:
@@ -172,7 +172,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result, null, mockValueResolver)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -204,7 +204,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null, mockValueResolver)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -226,7 +226,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction2, new TestResult.Ok(), null, mockValueResolver)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _, _)
     testResultAccumulator.testResults.isEmpty()
 
     cleanup:
@@ -252,7 +252,7 @@ class TestResultAccumulatorSpec extends Specification {
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _,
-      ['updateTestResultTag'])
+      ['updateTestResultTag'], _)
     testResultAccumulator.testResults.isEmpty()
 
     cleanup:
@@ -278,7 +278,7 @@ class TestResultAccumulatorSpec extends Specification {
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _,
-      ['tag1', 'tag2', 'tag3'])
+      ['tag1', 'tag2', 'tag3'], _)
     testResultAccumulator.testResults.isEmpty()
 
     cleanup:
@@ -406,7 +406,7 @@ class TestResultAccumulatorSpec extends Specification {
     verificationReporter.publishingResultsDisabled(_) >> false
     1 * verificationReporter.reportResults(pact2,
       new TestResult.Ok(['interaction2_3', 'interaction2_1', 'interaction2_4', 'interaction2_2'] as HashSet), _, _,
-      [])
+      [], _)
     1 * verificationReporter.reportResults(pact3,
       new TestResult.Failed(
         [
@@ -415,14 +415,14 @@ class TestResultAccumulatorSpec extends Specification {
           [interactionId: 'interaction2_2'],
           [interactionId: 'interaction2_3']
         ], 'failed'), _, _,
-      [])
+      [], _)
     1 * verificationReporter.reportResults(pact4,
       new TestResult.Ok(['interaction3_1', 'interaction3_2', 'interaction3_3', 'interaction3_4'] as HashSet), _, _,
-      [])
+      [], _)
     1 * verificationReporter.reportResults(pact1,
       new TestResult.Ok(
         ['interaction1_1', 'interaction1_2', 'interaction1_3', 'interaction1_4', 'interaction1_5'] as HashSet
-      ), _, _, [])
+      ), _, _, [], _)
     0 * verificationReporter._
     testResultAccumulator.testResults.isEmpty()
 
@@ -447,7 +447,7 @@ class TestResultAccumulatorSpec extends Specification {
       mockValueResolver)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _) >>
+    1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _, _) >>
       new Err('failed')
     testResultAccumulator.testResults.isEmpty()
     result1 instanceof Ok

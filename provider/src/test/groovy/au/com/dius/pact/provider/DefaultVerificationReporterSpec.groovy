@@ -25,7 +25,7 @@ class DefaultVerificationReporterSpec extends Specification {
     def brokerClient = Mock(PactBrokerClient)
 
     when:
-    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [])
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
 
     then:
     1 * brokerClient.publishVerificationResults(links, testResult, '0') >> new Ok(true)
@@ -42,7 +42,7 @@ class DefaultVerificationReporterSpec extends Specification {
     def brokerClient = Mock(PactBrokerClient)
 
     when:
-    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [])
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [], null)
 
     then:
     0 * brokerClient.publishVerificationResults(_, new TestResult.Ok(), '0')
@@ -59,7 +59,7 @@ class DefaultVerificationReporterSpec extends Specification {
     def brokerClient = Mock(PactBrokerClient)
 
     when:
-    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [])
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [], null)
 
     then:
     1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Err('failed')
@@ -77,11 +77,53 @@ class DefaultVerificationReporterSpec extends Specification {
     def tags = ['tag1', 'tag2', 'tag3']
 
     when:
-    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, tags)
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, tags, null)
 
     then:
+    0 * brokerClient.publishProviderBranch(_, 'provider', _, '')
     1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Err(['failed'])
     1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Ok(true)
     result == new Err(['failed'])
+  }
+
+  def 'return an error if publishing the provider branch fails'() {
+    given:
+    def interaction = new RequestResponseInteraction('interaction1')
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
+            interaction
+    ], [:], new BrokerUrlSource('', ''))
+    def testResult = new TestResult.Ok()
+    def brokerClient = Mock(PactBrokerClient)
+    def branch = "main"
+
+    when:
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [], branch)
+
+    then:
+    0 * brokerClient.publishProviderTags(_, 'provider', _, '')
+    1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Err('failed')
+    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Ok(true)
+    result == new Err(['failed'])
+  }
+
+  def 'return list of errors if publishing the provider tags and branch fails'() {
+    given:
+    def interaction = new RequestResponseInteraction('interaction1')
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
+            interaction
+    ], [:], new BrokerUrlSource('', ''))
+    def testResult = new TestResult.Ok()
+    def brokerClient = Mock(PactBrokerClient)
+    def tags = ['tag1', 'tag2', 'tag3']
+    def branch = "main"
+
+    when:
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, tags, branch)
+
+    then:
+    1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Err(['tags failed'])
+    1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Err('branch failed')
+    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Ok(true)
+    result == new Err(['tags failed', 'branch failed'])
   }
 }
