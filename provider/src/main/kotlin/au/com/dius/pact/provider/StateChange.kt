@@ -95,7 +95,7 @@ object DefaultStateChange : StateChange, KLogging() {
     return StateChangeResult(stateChangeResult, message)
   }
 
-  @Suppress("TooGenericExceptionCaught")
+  @Suppress("TooGenericExceptionCaught", "ReturnCount")
   override fun stateChange(
     verifier: IProviderVerifier,
     state: ProviderState,
@@ -167,7 +167,12 @@ object DefaultStateChange : StateChange, KLogging() {
       response?.use {
         if (response.statusLine.statusCode >= 400) {
           verifier.reporters.forEach {
-            it.stateChangeRequestFailed(state.name.toString(), provider, isSetup, response.statusLine.toString())
+            it.stateChangeRequestFailed(
+              state.name.toString(),
+              provider,
+              isSetup,
+              response.statusLine.toString()
+            )
           }
           Err(Exception("State Change Request Failed - ${response.statusLine}"))
         } else {

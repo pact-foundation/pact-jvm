@@ -810,7 +810,12 @@ open class ProviderVerifier @JvmOverloads constructor (
           VerificationResult.Ok()
         }
         else -> {
-          val reportResults = reportResults(pact, result, client)
+          val reportResults = verificationReporter.reportResults(pact,
+            result.toTestResult(),
+            providerVersion.get(),
+            client,
+            providerTags?.get().orEmpty(),
+            providerBranch?.get().orEmpty())
           when (reportResults) {
             is Ok -> VerificationResult.Ok()
             is Err -> VerificationResult.Failed("Failed to publish results to the Pact broker", "",
@@ -818,30 +823,6 @@ open class ProviderVerifier @JvmOverloads constructor (
           }
         }
       })
-    }
-  }
-
-  private fun reportResults(
-      pact: FilteredPact,
-      result: VerificationResult,
-      client: IPactBrokerClient?
-  ): Result<Boolean, List<String>> {
-    if (providerBranch?.get()?.isNotBlank() == true){
-      return verificationReporter.reportResultsWithBranch(
-        pact,
-        result.toTestResult(),
-        providerVersion.get(),
-        client,
-        providerBranch?.get()
-      )
-    } else {
-      return verificationReporter.reportResults(
-        pact,
-        result.toTestResult(),
-        providerVersion.get(),
-        client,
-        providerTags?.get().orEmpty()
-      )
     }
   }
 

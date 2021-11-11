@@ -32,25 +32,17 @@ interface VerificationReporter {
   )
 
   /**
-   * Publish the results to the pact broker. If the tags are given, then the provider will be tagged with those first.
+   * Publish the results to the pact broker.
+   * If the branch is given, then branch for this provider will be created first.
+   * If the tags are given, then the provider will be tagged with those after the branch si created.
    */
   fun reportResults(
     pact: Pact<out Interaction>,
     result: TestResult,
     version: String,
     client: IPactBrokerClient? = null,
-    tags: List<String> = emptyList()
-  ): Result<Boolean, List<String>>
-
-  /**
-   * Publish the results to the pact broker. If the branch is given, then branch for this provider will be created first.
-   */
-  fun reportResultsWithBranch(
-    pact: Pact<out Interaction>,
-    result: TestResult,
-    version: String,
-    client: IPactBrokerClient? = null,
-    branch: String?
+    tags: List<String> = emptyList(),
+    branch: String? = null
   ): Result<Boolean, List<String>>
 
   /**
@@ -89,33 +81,14 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     result: TestResult,
     version: String,
     client: IPactBrokerClient?,
-    tags: List<String>
-  ): Result<Boolean, List<String>> {
-    return when (val source = pact.source) {
-      is BrokerUrlSource -> {
-        val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options.toMutableMap(),
-          PactBrokerClientConfig())
-        publishResultWithTags(brokerClient, source, result, version, pact, tags)
-      }
-      else -> {
-        logger.info { "Skipping publishing verification results for source $source" }
-        Ok(false)
-      }
-    }
-  }
-
-  override fun reportResultsWithBranch(
-    pact: Pact<out Interaction>,
-    result: TestResult,
-    version: String,
-    client: IPactBrokerClient?,
+    tags: List<String>,
     branch: String?
   ): Result<Boolean, List<String>> {
     return when (val source = pact.source) {
       is BrokerUrlSource -> {
         val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options.toMutableMap(),
           PactBrokerClientConfig())
-        publishResultWithBranch(brokerClient, source, result, version, pact, branch)
+        publishResult(brokerClient, source, result, version, pact, tags, branch)
       }
       else -> {
         logger.info { "Skipping publishing verification results for source $source" }
@@ -124,12 +97,13 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     }
   }
 
-  private fun publishResultWithBranch(
+  private fun publishResult(
     brokerClient: IPactBrokerClient,
     source: BrokerUrlSource,
     result: TestResult,
     version: String,
     pact: Pact<out Interaction>,
+    tags: List<String>,
     branch: String?
   ): Result<Boolean, List<String>> {
     val branchResult = if (branch?.isNotBlank() == true) {
@@ -137,45 +111,27 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     } else {
       Ok(true)
     }
-    return publishResults(brokerClient, source, result, version, pact, branchResult)
-  }
-
-  private fun publishResultWithTags(
-    brokerClient: IPactBrokerClient,
-    source: BrokerUrlSource,
-    result: TestResult,
-    version: String,
-    pact: Pact<out Interaction>,
-    tags: List<String>
-  ): Result<Boolean, List<String>> {
     val tagsResult = if (tags.isNotEmpty()) {
       brokerClient.publishProviderTags(source.attributes, pact.provider.name, tags, version)
     } else {
       Ok(true)
     }
-    return publishResults(brokerClient, source, result, version, pact, tagsResult)
-  }
-
-  private fun publishResults(
-      brokerClient: IPactBrokerClient,
-      source: BrokerUrlSource,
-      result: TestResult,
-      version: String,
-      pact: Pact<out Interaction>,
-      branchResult: Result<Boolean, List<String>>
-  ): Result<Boolean, List<String>> {
     val publishResult = brokerClient.publishVerificationResults(source.attributes, result, version)
     if (publishResult is Err) {
       logger.error { "Failed to publish verification results - ${publishResult.error}" }
-      } else {
+    } else {
       logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
-      }
+    }
 
     return when {
-      branchResult is Err && publishResult is Ok -> branchResult
-      branchResult is Err && publishResult is Err -> Err(branchResult.error + publishResult.error)
+      tagsResult is Err && branchResult is Ok && publishResult is Ok -> tagsResult
+      branchResult is Err && tagsResult is Ok && publishResult is Ok -> branchResult.mapError { listOf(it) }
+      tagsResult is Err && branchResult is Err && publishResult is Ok -> Err(
+        tagsResult.error + branchResult.error)
+      tagsResult is Err && branchResult is Err && publishResult is Err -> Err(
+        tagsResult.error + branchResult.error + publishResult.error)
       else -> publishResult.mapError { listOf(it) }
-      }
+    }
   }
 
   override fun publishingResultsDisabled() = publishingResultsDisabled(SystemPropertyResolver)

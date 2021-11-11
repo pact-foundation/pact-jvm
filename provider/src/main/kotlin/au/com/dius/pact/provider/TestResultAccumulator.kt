@@ -85,7 +85,10 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         Ok(false)
       } else {
         val initial = TestResult.Ok(interaction.interactionId)
-        reportResults(pact, interactionResults, initial, propertyResolver)
+        verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
+          acc.merge(result)
+        }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver),
+          lookupProviderBranch(propertyResolver))
       }
       testResults.remove(pactHash)
       result
@@ -95,23 +98,6 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         logger.warn { "    ${it.description}" }
       }
       Ok(true)
-    }
-  }
-
-  private fun reportResults(
-    pact: Pact<out Interaction>,
-    interactionResults: MutableMap<Int, TestResult>,
-    initial: TestResult.Ok,
-    propertyResolver: ValueResolver
-  ): Result<Boolean, List<String>> {
-    if (lookupProviderBranch(propertyResolver)?.isNotBlank() == true){
-      return verificationReporter.reportResultsWithBranch(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
-        acc.merge(result)
-      }, lookupProviderVersion(propertyResolver), null, lookupProviderBranch(propertyResolver))
-    } else {
-      return verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
-        acc.merge(result)
-      }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver))
     }
   }
 

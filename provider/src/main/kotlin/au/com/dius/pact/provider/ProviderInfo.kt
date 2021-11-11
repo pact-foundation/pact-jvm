@@ -109,7 +109,11 @@ open class ProviderInfo @JvmOverloads constructor (
   }
 
   open fun pactBrokerClient(pactBrokerUrl: String, options: PactBrokerOptions): PactBrokerClient {
-    return PactBrokerClient(pactBrokerUrl, options.toMutableMap(), PactBrokerClientConfig(insecureTLS = options.insecureTLS))
+    return PactBrokerClient(
+      pactBrokerUrl,
+      options.toMutableMap(),
+      PactBrokerClientConfig(insecureTLS = options.insecureTLS)
+    )
   }
 
   @Suppress("TooGenericExceptionThrown")
