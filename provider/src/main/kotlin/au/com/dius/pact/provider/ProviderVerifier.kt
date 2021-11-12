@@ -248,6 +248,10 @@ interface IProviderVerifier {
   fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String
 
   fun reportStateChangeFailed(providerState: ProviderState, error: Exception, isSetup: Boolean)
+
+  fun initialiseReporters(provider: IProviderInfo)
+
+  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?)
 }
 
 /**
@@ -770,7 +774,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  fun initialiseReporters(provider: IProviderInfo) {
+  override fun initialiseReporters(provider: IProviderInfo) {
     reporters.forEach {
       if (it.hasProperty("displayFullDiff")) {
         (it.property("displayFullDiff") as KMutableProperty1<VerifierReporter, Boolean>)

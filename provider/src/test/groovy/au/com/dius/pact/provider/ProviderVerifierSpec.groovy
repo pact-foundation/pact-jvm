@@ -454,7 +454,7 @@ class ProviderVerifierSpec extends Specification {
   }
 
   @Unroll
-  @SuppressWarnings('UnnecessaryGetter')
+  @SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
   @RestoreSystemProperties
   def 'after verifying a pact, the results are reported back using branch and reportVerificationResults'() {
     given:
@@ -481,7 +481,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.pactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
 
-    def branch = "master"
+    def branch = 'master'
     System.setProperty(ProviderVerifier.PACT_PROVIDER_BRANCH, branch)
 
     when:
