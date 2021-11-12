@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.29 - Fixes backported from master
+
+* dfcd67f4d - chore: fix test after cherry pick commits (Ronald Holshausen, Fri Nov 12 12:25:05 2021 +1100)
+* 78c5af5a5 - feat: Allow creating both the provider branch and tags when publishing results (Radek Koubsky, Thu Nov 11 13:16:45 2021 +0100)
+* d8d55cffb - feat: Publish verification results with provider branch (Radek Koubsky, Tue Nov 9 16:39:45 2021 +0100)
+* e93d69430 - chore: fix test after cherry pick commits (Ronald Holshausen, Thu Nov 11 17:47:56 2021 +1100)
+* 53ebdcc50 - feat: Add support for configuring consumer version selectors from cli as raw json (Radek Koubsky, Mon Oct 25 16:48:18 2021 +0200)
+* f1fa43b07 - Update scala-java9-compat to 1.0.0 (Bendix Sältz, Fri Oct 15 15:09:52 2021 +0200)
+* 1f213498e - Upgrade commons-io linked to https://www.cvedetails.com/cve/CVE-2021-29425/ (mikrethor, Tue Oct 12 14:14:13 2021 -0400)
+* a0a5716a8 - chore: fix test after cherry pick commits (Ronald Holshausen, Thu Nov 11 17:18:03 2021 +1100)
+* 3d1c7df12 - chore: Revert accidental change to interface (Timothy Jones, Thu Sep 30 11:34:34 2021 +1000)
+* 1a1c5af95 - test(PactBrokerClient): Update test for when include pending pacts is set to false (Timothy Jones, Thu Sep 30 11:30:40 2021 +1000)
+* bb0b18bd0 - fix(PactBrokerClient): Send `includePendingStatus=false` when enablePending is set to false (Timothy Jones, Thu Sep 30 10:47:32 2021 +1000)
+* 96521e3a2 - fix: codenarc violation #1449 (Ronald Holshausen, Wed Sep 29 09:13:23 2021 +1000)
+* bcc1d12c0 - fix: correct the pact source description when using the URL option #1449 (Ronald Holshausen, Wed Sep 29 09:01:21 2021 +1000)
+* 5706c6034 - bump version to 4.1.29 (Ronald Holshausen, Mon Sep 27 16:36:14 2021 +1000)
+
 # 4.1.28 - add ignore parameter to Maven can-i-deploy
 
 * 6bd425fe9 - feat: update readme with ignore options #1444 (Ronald Holshausen, Mon Sep 27 15:51:16 2021 +1000)
