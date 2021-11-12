@@ -150,6 +150,11 @@ interface IProviderVerifier {
   var providerTag: Supplier<String?>?
 
   /**
+   * Callback to get the provider branch
+   */
+  var providerBranch: Supplier<String?>?
+
+  /**
    * Callback to get the provider tags
    */
   var providerTags: Supplier<List<String>>?
@@ -276,6 +281,9 @@ open class ProviderVerifier @JvmOverloads constructor (
       .split(',')
       .map { it.trim() }
       .filter { it.isNotEmpty() }
+  },
+  override var providerBranch: Supplier<String?>? = Supplier {
+    SystemPropertyResolver.resolveValue(PACT_PROVIDER_BRANCH, "")
   },
   override var projectClassLoader: Supplier<ClassLoader?>? = null,
   override var responseFactory: Function<String, Any>? = null
@@ -833,7 +841,8 @@ open class ProviderVerifier @JvmOverloads constructor (
             result.toTestResult(),
             providerVersion.get(),
             client,
-            providerTags?.get().orEmpty())
+            providerTags?.get().orEmpty(),
+            providerBranch?.get().orEmpty())
           when (reportResults) {
             is Ok -> VerificationResult.Ok()
             is Err -> VerificationResult.Failed("Failed to publish results to the Pact broker", "",
@@ -964,6 +973,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
     const val PACT_PROVIDER_VERSION = "pact.provider.version"
     const val PACT_PROVIDER_TAG = "pact.provider.tag"
+    const val PACT_PROVIDER_BRANCH = "pact.provider.branch"
     const val PACT_PROVIDER_VERSION_TRIM_SNAPSHOT = "pact.provider.version.trimSnapshot"
 
     @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")

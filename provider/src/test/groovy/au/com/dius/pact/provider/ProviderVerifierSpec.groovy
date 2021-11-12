@@ -413,7 +413,7 @@ class ProviderVerifierSpec extends Specification {
   @Unroll
   @SuppressWarnings('UnnecessaryGetter')
   @RestoreSystemProperties
-  def 'after verifying a pact, the results are reported back using reportVerificationResults'() {
+  def 'after verifying a pact, the results are reported back using tags and reportVerificationResults'() {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
@@ -445,7 +445,55 @@ class ProviderVerifierSpec extends Specification {
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags) >> new Ok(true)
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags, _) >> new Ok(true)
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
+
+    where:
+
+    result1                         | result2                         | finalResult
+    new VerificationResult.Ok()     | new VerificationResult.Ok()     | new TestResult.Ok()
+    new VerificationResult.Ok()     | new VerificationResult.Failed() | new TestResult.Failed()
+    new VerificationResult.Failed() | new VerificationResult.Ok()     | new TestResult.Failed()
+    new VerificationResult.Failed() | new VerificationResult.Failed() | new TestResult.Failed()
+  }
+
+  @Unroll
+  @SuppressWarnings('UnnecessaryGetter')
+  @RestoreSystemProperties
+  def 'after verifying a pact, the results are reported back using branch and reportVerificationResults'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    PactBrokerClient pactBrokerClient = Mock(PactBrokerClient, constructorArgs: [''])
+    verifier.verificationReporter = Mock(VerificationReporter)
+    verifier.pactReader = Stub(PactReader)
+    def statechange = Stub(StateChange) {
+      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+    }
+    def interaction1 = Stub(RequestResponseInteraction)
+    def interaction2 = Stub(RequestResponseInteraction)
+    def mockPact = Stub(Pact) {
+      getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
+    }
+
+    verifier.projectHasProperty = { it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS }
+    verifier.projectGetProperty = {
+      (it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS).toString()
+    }
+    verifier.stateChangeHandler = statechange
+
+    verifier.pactReader.loadPact(_) >> mockPact
+    mockPact.interactions >> [interaction1, interaction2]
+
+    def branch = "master"
+    System.setProperty(ProviderVerifier.PACT_PROVIDER_BRANCH, branch)
+
+    when:
+    verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
+
+    then:
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, [], branch) >> new Ok(true)
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
@@ -487,7 +535,7 @@ class ProviderVerifierSpec extends Specification {
     def result = verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, _, '0.0.0', pactBrokerClient, []) >> new Err(['failed'])
+    1 * verifier.verificationReporter.reportResults(_, _, '0.0.0', pactBrokerClient, [], _) >> new Err(['failed'])
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> new VerificationResult.Ok()
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> new VerificationResult.Ok()
     result instanceof VerificationResult.Failed

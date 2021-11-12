@@ -87,7 +87,8 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         val initial = TestResult.Ok(interaction.interactionId)
         verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
           acc.merge(result)
-        }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver))
+        }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver),
+          lookupProviderBranch(propertyResolver))
       }
       testResults.remove(pactHash)
       result
@@ -130,6 +131,9 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     .split(',')
     .map { it.trim() }
     .filter { it.isNotEmpty() }
+
+  private fun lookupProviderBranch(propertyResolver: ValueResolver) = propertyResolver
+    .resolveValue("pact.provider.branch", "")
 
   fun unverifiedInteractions(pact: Pact, results: MutableMap<Int, TestResult>): List<Interaction> {
     logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }

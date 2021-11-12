@@ -146,7 +146,7 @@ interface IPactBrokerClient {
   /**
    * Publish all the tags for the provider to the Pact broker
    * @param docAttributes Attributes associated with the fetched Pact file
-   * @param tag Provider name
+   * @param name Provider name
    * @param tags Provider tags to tag the provider with
    * @param version Provider version
    */
@@ -156,6 +156,20 @@ interface IPactBrokerClient {
     tags: List<String>,
     version: String
   ): Result<Boolean, List<String>>
+
+  /**
+   * Publish provider branch to the Pact broker
+   * @param docAttributes Attributes associated with the fetched Pact file
+   * @param name Provider name
+   * @param branch Provider branch
+   * @param version Provider version
+   */
+  fun publishProviderBranch(
+    docAttributes: Map<String, Any?>,
+    name: String,
+    branch: String,
+    version: String
+  ): Result<Boolean, String>
 
   /**
    * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
@@ -565,6 +579,34 @@ open class PactBrokerClient(
     }
   }
 
+  override fun publishProviderBranch(
+    docAttributes: Map<String, Any?>,
+    name: String,
+    branch: String,
+    version: String
+  ): Result<Boolean, String> {
+    try {
+      val halClient = newHalClient()
+        .withDocContext(docAttributes)
+        .navigate(PROVIDER)
+      val result = halClient.putJson(PROVIDER_BRANCH_VERSION, mapOf("version" to version, "branch" to branch), "{}")
+      return when (result) {
+        is Ok<*> -> {
+          logger.debug { "Pushed branch $branch for provider $name and version $version" }
+          Ok(true)
+        }
+        is Err<Exception> -> {
+          logger.error(result.error) { "Failed to push branch $branch for provider $name and version $version" }
+          Err("Publishing branch '$branch' failed: ${result.error.message ?: result.error.toString()}")
+        }
+      }
+    } catch (e: NotFoundHalResponse) {
+      val message = "Could not create branch for provider $name, link was missing. It looks like your Pact Broker does not support branches, please update to Pact Broker version 2.86.0 or later for branch support"
+      logger.error(e) { message }
+      return Err(message)
+    }
+  }
+
   @JvmOverloads
   open fun canIDeploy(
     pacticipant: String,
@@ -616,6 +658,7 @@ open class PactBrokerClient(
     const val BETA_PROVIDER_PACTS_FOR_VERIFICATION = "beta:provider-pacts-for-verification"
     const val PROVIDER = "pb:provider"
     const val PROVIDER_TAG_VERSION = "pb:version-tag"
+    const val PROVIDER_BRANCH_VERSION = "pb:branch-version"
     const val PACTS = "pb:pacts"
     const val UTF8 = "UTF-8"
 

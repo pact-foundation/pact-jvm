@@ -31,14 +31,17 @@ interface VerificationReporter {
   )
 
   /**
-   * Publish the results to the pact broker. If the tags are given, then the provider will be tagged with those first.
+   * Publish the results to the pact broker.
+   * If the branch is given, then branch for this provider will be created first.
+   * If the tags are given, then the provider will be tagged with those after the branch si created.
    */
   fun reportResults(
     pact: Pact,
     result: TestResult,
     version: String,
     client: IPactBrokerClient? = null,
-    tags: List<String> = emptyList()
+    tags: List<String> = emptyList(),
+    branch: String? = null
   ): Result<Boolean, List<String>>
 
   /**
@@ -77,13 +80,14 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     result: TestResult,
     version: String,
     client: IPactBrokerClient?,
-    tags: List<String>
+    tags: List<String>,
+    branch: String?
   ): Result<Boolean, List<String>> {
     return when (val source = pact.source) {
       is BrokerUrlSource -> {
         val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options.toMutableMap(),
           PactBrokerClientConfig())
-        publishResult(brokerClient, source, result, version, pact, tags)
+        publishResult(brokerClient, source, result, version, pact, tags, branch)
       }
       else -> {
         logger.info { "Skipping publishing verification results for source $source" }
@@ -98,8 +102,14 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     result: TestResult,
     version: String,
     pact: Pact,
-    tags: List<String>
+    tags: List<String>,
+    branch: String?
   ): Result<Boolean, List<String>> {
+    val branchResult = if (branch?.isNotBlank() == true) {
+      brokerClient.publishProviderBranch(source.attributes, pact.provider.name, branch, version)
+    } else {
+      Ok(true)
+    }
     val tagsResult = if (tags.isNotEmpty()) {
       brokerClient.publishProviderTags(source.attributes, pact.provider.name, tags, version)
     } else {
@@ -113,8 +123,12 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     }
 
     return when {
-      tagsResult is Err && publishResult is Ok -> tagsResult
-      tagsResult is Err && publishResult is Err -> Err(tagsResult.error + publishResult.error)
+      tagsResult is Err && branchResult is Ok && publishResult is Ok -> tagsResult
+      branchResult is Err && tagsResult is Ok && publishResult is Ok -> branchResult.mapError { listOf(it) }
+      tagsResult is Err && branchResult is Err && publishResult is Ok -> Err(
+        tagsResult.error + branchResult.error)
+      tagsResult is Err && branchResult is Err && publishResult is Err -> Err(
+        tagsResult.error + branchResult.error + publishResult.error)
       else -> publishResult.mapError { listOf(it) }
     }
   }
