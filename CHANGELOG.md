@@ -1,5 +1,41 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.0 - Bugfix Release
+
+* 6f7522ce6 - chore: from beta suffix from version (Ronald Holshausen, Fri Nov 12 14:26:02 2021 +1100)
+* ac4dcff27 - chore: use the composite action for unit test results in CI (Ronald Holshausen, Fri Nov 12 11:46:40 2021 +1100)
+* 70b664548 - chore: fix GH action config (Ronald Holshausen, Fri Nov 12 11:25:32 2021 +1100)
+* 926153547 - Merge branch 'RadekKoubsky-feat/1454-verification-results-with-branch' (Ronald Holshausen, Fri Nov 12 11:17:53 2021 +1100)
+* 73a6db784 - chore: fix GH action config (Ronald Holshausen, Fri Nov 12 11:16:05 2021 +1100)
+* 57b1cc970 - chore: fix GH action config (Ronald Holshausen, Fri Nov 12 11:13:17 2021 +1100)
+* c83e6f9cc - chore: fix GH action config (Ronald Holshausen, Fri Nov 12 11:12:56 2021 +1100)
+* 48201d3f3 - chore: try fix Gradle dependency issue (Ronald Holshausen, Fri Nov 12 11:11:20 2021 +1100)
+* a01f9c379 - feat: Allow creating both the provider branch and tags when publishing results (Radek Koubsky, Thu Nov 11 13:16:45 2021 +0100)
+* e9f9b0d8c - feat: Publish verification results with provider branch (Radek Koubsky, Tue Nov 9 16:39:45 2021 +0100)
+* 8a98a417c - Merge pull request #1473 from waikontse/Add-support-for-TestClient-as-test-target (Ronald Holshausen, Sat Oct 30 19:39:27 2021 +1100)
+* 4012acd13 - feat: Add WebTestClient as a test target. (Wai kon Tse, Fri Oct 29 15:04:10 2021 +0200)
+* 76f33b1ea - Merge pull request #1471 from RadekKoubsky/feat/1465-consumer-selectors-with-branches (Ronald Holshausen, Sat Oct 30 13:06:15 2021 +1100)
+* 3fb3b987d - Merge branch 'master' into v4.3.x (Ronald Holshausen, Sat Oct 30 12:58:38 2021 +1100)
+* 599cadca0 - chore: add regex matcher test (Ronald Holshausen, Sat Oct 30 12:57:31 2021 +1100)
+* 93dd5e78e - fix: capture the interaction markdown from the plugins (after reverting prev commit) (Ronald Holshausen, Thu Oct 28 14:47:40 2021 +1100)
+* b4f6c0959 - Revert "fix: capture the interaction markdown from the plugins" (Ronald Holshausen, Wed Oct 27 10:07:38 2021 +1100)
+* 2d0ab3e10 - feat: Add support for configuring consumer version selectors from cli as raw json (Radek Koubsky, Mon Oct 25 16:48:18 2021 +0200)
+* 39fa134df - fix: capture the interaction markdown from the plugins (Ronald Holshausen, Tue Oct 26 16:38:18 2021 +1100)
+* 362695583 - Update README.md (Ronald Holshausen, Thu Oct 21 17:27:21 2021 +1100)
+* 54df7cf6a - feat(plugins): Update the provider readmes with verifying pacts with plugins (Ronald Holshausen, Thu Oct 21 16:53:03 2021 +1100)
+* 66e286418 - feat(plugins): Update JUnit 5 readme with using plugin details (Ronald Holshausen, Thu Oct 21 16:45:30 2021 +1100)
+* 22db44032 - feat(V4): Add support V4 sync message tests with JUnit 5 (Ronald Holshausen, Thu Oct 21 16:23:36 2021 +1100)
+* ce69e1208 - feat(V4): Update V4 async message test (Ronald Holshausen, Thu Oct 21 14:37:12 2021 +1100)
+* f636440cb - Merge branch 'master' into v4.3.x (Ronald Holshausen, Thu Oct 21 12:59:48 2021 +1100)
+* f2681843c - chore: add note to readmes about setting test JVM system properties (Ronald Holshausen, Thu Oct 21 12:56:39 2021 +1100)
+* cde68cd2d - Merge pull request #1467 from saeltz/patch-1 (Ronald Holshausen, Mon Oct 18 12:55:33 2021 +1100)
+* 80c4e974b - Merge pull request #1464 from mikrethor/commons-io-cve (Ronald Holshausen, Mon Oct 18 12:32:35 2021 +1100)
+* 505f11e5b - bump version to 4.3.0-beta.7 (Ronald Holshausen, Mon Oct 18 12:30:46 2021 +1100)
+* 3aef7f9fb - Update scala-java9-compat to 1.0.0 (Bendix Sältz, Fri Oct 15 15:09:52 2021 +0200)
+* 5fcadf9ce - Upgrade commons-io linked to https://www.cvedetails.com/cve/CVE-2021-29425/ (mikrethor, Tue Oct 12 14:14:13 2021 -0400)
+* 18bef0a46 - chore: update JUnit 5 spring docs (Ronald Holshausen, Thu Oct 7 12:17:57 2021 +1100)
+* 8dbff8c0c - chore: add the type of the request class to the JUnit docs (Ronald Holshausen, Thu Oct 7 11:51:18 2021 +1100)
+
 # 4.3.0-beta.6 - Update plugin driver to latest
 
 * 867021e1b - chore: set the plugin driver version to be the same across modules (Ronald Holshausen, Mon Oct 18 11:56:08 2021 +1100)
