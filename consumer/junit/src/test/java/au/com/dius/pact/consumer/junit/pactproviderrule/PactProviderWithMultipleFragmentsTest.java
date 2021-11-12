@@ -15,17 +15,19 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.fluent.Request;
-import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -170,8 +172,7 @@ public class PactProviderWithMultipleFragmentsTest {
         HttpResponse httpResponse = Request.Get(mockTestProvider2.getUrl())
                                            .addHeader("testreqheader", "testreqheadervalue")
                                            .execute().returnResponse();
-        Assertions.assertThat(List.of(httpResponse.getHeaders("testresheader")))
-                  .flatExtracting(Header::getValue)
-                  .containsExactly("testresheadervalue");
+        assertThat(Arrays.stream(httpResponse.getHeaders("testresheader"))
+            .map(Header::getValue).collect(Collectors.toList()), is(equalTo(List.of("testresheadervalue"))));
     }
 }
