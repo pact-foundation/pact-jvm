@@ -94,7 +94,7 @@ class DefaultVerificationReporterSpec extends Specification {
     ], [:], new BrokerUrlSource('', ''))
     def testResult = new TestResult.Ok()
     def brokerClient = Mock(PactBrokerClient)
-    def branch = "main"
+    def branch = 'main'
 
     when:
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [], branch)
@@ -115,7 +115,7 @@ class DefaultVerificationReporterSpec extends Specification {
     def testResult = new TestResult.Ok()
     def brokerClient = Mock(PactBrokerClient)
     def tags = ['tag1', 'tag2', 'tag3']
-    def branch = "main"
+    def branch = 'main'
 
     when:
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, tags, branch)
