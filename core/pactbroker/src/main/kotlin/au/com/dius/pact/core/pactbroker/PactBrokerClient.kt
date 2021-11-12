@@ -590,17 +590,16 @@ open class PactBrokerClient(
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       val result = halClient.putJson(PROVIDER_BRANCH_VERSION, mapOf("version" to version, "branch" to branch), "{}")
-      when (result) {
+      return when (result) {
         is Ok<*> -> {
           logger.debug { "Pushed branch $branch for provider $name and version $version" }
-          return Ok(true)
+          Ok(true)
         }
         is Err<Exception> -> {
           logger.error(result.error) { "Failed to push branch $branch for provider $name and version $version" }
-          return Err("Publishing branch '$branch' failed: ${result.error.message ?: result.error.toString()}")
+          Err("Publishing branch '$branch' failed: ${result.error.message ?: result.error.toString()}")
         }
       }
-
     } catch (e: NotFoundHalResponse) {
       val message = "Could not create branch for provider $name, link was missing. It looks like your Pact Broker does not support branches, please update to Pact Broker version 2.86.0 or later for branch support"
       logger.error(e) { message }

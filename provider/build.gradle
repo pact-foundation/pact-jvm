@@ -1,20 +1,21 @@
-plugins {
-  id 'scala'
-}
-
 dependencies {
     api project(':core:model')
-    api project(':core:pactbroker')
     api project(':core:matchers')
     api project(':core:support')
-    implementation 'commons-io:commons-io:2.11.0'
-    implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
-    implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-    api 'io.github.classgraph:classgraph:4.8.105'
-    implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+
+    // For some wierd reason, this is not resolving correctly
+    // api project(':core:pactbroker')
+    api 'au.com.dius.pact.core:pactbroker:4.3.0-beta.7'
+
+    api 'io.github.classgraph:classgraph:4.8.129'
     api('com.michael-bull.kotlin-result:kotlin-result:1.1.12') {
         exclude group: 'org.jetbrains.kotlin'
     }
+
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
+    implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+    implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
     implementation 'com.github.ajalt:mordant:1.2.1'
     implementation 'com.vladsch.flexmark:flexmark:0.62.2'
     implementation 'com.vladsch.flexmark:flexmark-ext-tables:0.62.2'
@@ -33,9 +34,4 @@ dependencies {
         exclude group: 'org.codehaus.groovy'
     }
     testImplementation 'org.hamcrest:hamcrest:2.2'
-}
-
-compileTestGroovy {
-  dependsOn compileTestScala
-  classpath = classpath.plus(files(compileTestScala.destinationDir))
 }

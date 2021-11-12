@@ -6,7 +6,9 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UnknownPactSource
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -93,7 +95,7 @@ class DefaultVerificationReporterSpec extends Specification {
             interaction
     ], [:], new BrokerUrlSource('', ''))
     def testResult = new TestResult.Ok()
-    def brokerClient = Mock(PactBrokerClient)
+    def brokerClient = Mock(IPactBrokerClient)
     def branch = "main"
 
     when:
@@ -113,7 +115,7 @@ class DefaultVerificationReporterSpec extends Specification {
             interaction
     ], [:], new BrokerUrlSource('', ''))
     def testResult = new TestResult.Ok()
-    def brokerClient = Mock(PactBrokerClient)
+    def brokerClient = Mock(IPactBrokerClient)
     def tags = ['tag1', 'tag2', 'tag3']
     def branch = "main"
 
