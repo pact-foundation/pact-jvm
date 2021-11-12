@@ -1,5 +1,32 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.15 - Back-ported fixes from master
+
+* 577fd1e38 - chore: fix test after cherry pick commits (Ronald Holshausen, Thu Nov 11 17:47:56 2021 +1100)
+* 2257dfd69 - chore: fix test after cherry pick commits (Ronald Holshausen, Fri Nov 12 12:25:05 2021 +1100)
+* 3cc941961 - feat: Allow creating both the provider branch and tags when publishing results (Radek Koubsky, Thu Nov 11 13:16:45 2021 +0100)
+* 6c93f5bcc - feat: Publish verification results with provider branch (Radek Koubsky, Tue Nov 9 16:39:45 2021 +0100)
+* 5a7d1bab9 - feat: Add WebTestClient as a test target. (Wai kon Tse, Fri Oct 29 15:04:10 2021 +0200)
+* ce6980b9d - feat: Add support for configuring consumer version selectors from cli as raw json (Radek Koubsky, Mon Oct 25 16:48:18 2021 +0200)
+* 9556d8015 - chore: fix test failing due to missing dep (Ronald Holshausen, Fri Nov 12 13:27:33 2021 +1100)
+* 98c8cfa0d - Merge branch 'master' into v4.2.x (Ronald Holshausen, Thu Oct 21 17:17:54 2021 +1100)
+* cde68cd2d - Merge pull request #1467 from saeltz/patch-1 (Ronald Holshausen, Mon Oct 18 12:55:33 2021 +1100)
+* 80c4e974b - Merge pull request #1464 from mikrethor/commons-io-cve (Ronald Holshausen, Mon Oct 18 12:32:35 2021 +1100)
+* 3aef7f9fb - Update scala-java9-compat to 1.0.0 (Bendix Sältz, Fri Oct 15 15:09:52 2021 +0200)
+* 5fcadf9ce - Upgrade commons-io linked to https://www.cvedetails.com/cve/CVE-2021-29425/ (mikrethor, Tue Oct 12 14:14:13 2021 -0400)
+* 18bef0a46 - chore: update JUnit 5 spring docs (Ronald Holshausen, Thu Oct 7 12:17:57 2021 +1100)
+* 8dbff8c0c - chore: add the type of the request class to the JUnit docs (Ronald Holshausen, Thu Oct 7 11:51:18 2021 +1100)
+* 5234d625d - chore: update release docs (Ronald Holshausen, Tue Oct 5 10:55:24 2021 +1100)
+* a5ab732e6 - bump version to 4.2.15 (Ronald Holshausen, Tue Oct 5 10:43:24 2021 +1100)
+* a548c4ce5 - Merge branch 'master' into v4.2.x (Ronald Holshausen, Wed Sep 29 09:14:17 2021 +1000)
+* d0ef06108 - Merge branch 'master' into v4.2.x (Ronald Holshausen, Mon Sep 20 10:31:19 2021 +1000)
+* e8726c5d5 - fix: PactCanIDeployTask needs to have internal fields maked @Internal for Gradle 7 #1430 (Ronald Holshausen, Sat Sep 18 12:20:55 2021 +1000)
+* f68765bd4 - Merge branch 'master' into v4.2.x (Ronald Holshausen, Mon Sep 6 10:50:19 2021 +1000)
+* 4e37ad8e6 - Merge branch 'master' into v4.2.x (Ronald Holshausen, Sun Aug 22 18:42:41 2021 +1000)
+* 4c6d028ff - Merge branch 'master' into v4.2.x (Ronald Holshausen, Tue Jul 27 13:01:28 2021 +1000)
+* eab8a92b4 - Merge pull request #1357 from asolcanu/v4.2.x (Ronald Holshausen, Sun May 9 11:24:01 2021 +1000)
+* eb3e1e69d - Adding support for @DefaultResponseValues/@DefaultRequestValues to work in combination with @PactVerifications, previously only single @PactVerification was supported (Alexei, Wed May 5 21:58:33 2021 -0400)
+
 # 4.2.14 - enablePending + scala support
 
 * d86e79d16 - fix: broken spec after merging #1455 (Ronald Holshausen, Tue Oct 5 10:08:10 2021 +1100)
