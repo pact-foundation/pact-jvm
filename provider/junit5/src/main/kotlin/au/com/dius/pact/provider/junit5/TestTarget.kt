@@ -6,7 +6,7 @@ import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
-import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.IHttpClientFactory
@@ -178,7 +178,7 @@ open class MessageTestTarget @JvmOverloads constructor(
   }
 
   override fun prepareRequest(interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>? {
-    if (interaction is Message) {
+    if (interaction is MessageInteraction) {
       return null
     }
     throw UnsupportedOperationException("Only message interactions can be used with an AMPQ test target")
