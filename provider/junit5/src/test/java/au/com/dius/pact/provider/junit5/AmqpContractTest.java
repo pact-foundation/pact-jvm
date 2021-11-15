@@ -34,9 +34,13 @@ class AmqpContractTest {
     LOGGER.info("SomeProviderState callback");
   }
 
-  @PactVerifyProvider("a test message")
+  @PactVerifyProvider("a V3 test message")
   public String verifyMessageForOrder() {
     return "{\"testParam1\": \"value1\",\"testParam2\": \"value2\"}";
   }
 
+  @PactVerifyProvider("a V4 test message")
+  public String verifyV4MessageForOrder() {
+    return "{\"testParam1\": \"value1\",\"testParam2\": \"value2\"}";
+  }
 }

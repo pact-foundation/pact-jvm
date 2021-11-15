@@ -5,9 +5,9 @@
     "provider": {
         "name": "AmqpProvider"
     },
-    "messages": [
+    "interactions": [
         {
-            "description": "a V3 test message",
+            "description": "a V4 test message",
             "metaData": {
                 "contentType": "application/json"
             },
@@ -15,15 +15,17 @@
                 "testParam1": "value1",
                 "testParam2": "value2"
             },
-            "providerState": "SomeProviderState"
+            "providerState": "SomeProviderState",
+            "pending": false,
+            "type": "Asynchronous/Messages"
         }
     ],
     "metadata": {
         "pact-specification": {
-            "version": "3.0.0"
+            "version": "4.0"
         },
         "pact-jvm": {
-            "version": "3.3.3"
+            "version": "4.3.0"
         }
     }
 }
