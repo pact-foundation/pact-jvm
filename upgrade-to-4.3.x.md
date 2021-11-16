@@ -20,5 +20,5 @@ public class ArticlesTest {
 
 ## Apache HTTP client has been upgraded to 5.1
 
-Target request filters will now be called with `org.apache.hc.core5.http.ClassicHttpRequest`. JUnit 5 tests will
-need to have this class injected.
+Target request filters will now be called with either `org.apache.hc.core5.http.HttpRequest` or `org.apache.hc.core5.http.ClassicHttpRequest`. JUnit 5 tests will
+need to have this interface injected.
