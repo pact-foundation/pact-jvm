@@ -7,7 +7,7 @@ import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.StateChangeAction;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -40,7 +40,7 @@ public class ContractTest {
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
-    void testTemplate(Pact pact, Interaction interaction, ClassicHttpRequest request, PactVerificationContext context) {
+    void testTemplate(Pact pact, Interaction interaction, HttpRequest request, PactVerificationContext context) {
       LOGGER.info("testTemplate called: " + pact.getProvider().getName() + ", " + interaction.getDescription());
       request.addHeader("X-ContractTest", "true");
 
@@ -56,7 +56,8 @@ public class ContractTest {
     }
 
     @BeforeEach
-    void before(PactVerificationContext context, @WiremockResolver.Wiremock WireMockServer server,
+    void before(PactVerificationContext context,
+                @WiremockResolver.Wiremock WireMockServer server,
                 @WiremockUriResolver.WiremockUri String uri) throws MalformedURLException {
         // Rest data
         // Mock dependent service responses
