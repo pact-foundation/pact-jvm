@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.1 - Fix regressions in JUnit support
+
+* ac8b78f5d - chore: update upgrade notes (Ronald Holshausen, Wed Nov 17 09:11:52 2021 +1100)
+* 0950730a5 - fix: support HttpRequest in JUnit 5 tests #1481 (Ronald Holshausen, Wed Nov 17 09:09:13 2021 +1100)
+* d543ca426 - Merge pull request #1478 from Urokhtor/fix-async-test-target (Ronald Holshausen, Tue Nov 16 09:54:08 2021 +1100)
+* 6be794691 - Use MessageInteraction instead of Message in MessageTestTarget (Jere Teittinen, Mon Nov 15 13:17:13 2021 +0200)
+* 542cfdb70 - bump version to 4.3.1 (Ronald Holshausen, Fri Nov 12 14:59:01 2021 +1100)
+
 # 4.3.0 - Bugfix Release
 
 * 6f7522ce6 - chore: from beta suffix from version (Ronald Holshausen, Fri Nov 12 14:26:02 2021 +1100)
