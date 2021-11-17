@@ -508,7 +508,7 @@ For example, configure it by adding the following to your POM:
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
 be authentication tokens, which have a small life span. The HttpTarget supports request filters by annotating methods
 on the test class with `@TargetRequestFilter`. These methods must be public void methods that take a single HttpRequest
-parameter of type `org.apache.http.HttpRequest`.
+parameter of type `org.apache.http.HttpRequest` (4.2.x and before) or `org.apache.hc.core5.http.HttpRequest` (4.3.0+).
 
 For example:
 

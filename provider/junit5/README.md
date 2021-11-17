@@ -137,7 +137,8 @@ or `setStateHandlers` methods. See [StateAnnotationsOnAdditionalClassTest](https
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would be
 authentication tokens, which have a small life span. The Http and Https test targets support injecting the request that
-will executed into the test template method (of type `org.apache.http.HttpRequest`).
+will executed into the test template method (of type `org.apache.http.HttpRequest` for versions 4.2.x and before,
+`org.apache.hc.core5.http.HttpRequest` for versions 4.3.0+).
 You can then add things to the request before calling the `verifyInteraction()` method.
 
 For example to add a header:
