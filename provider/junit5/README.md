@@ -102,6 +102,14 @@ For example, configure it by adding the following to your POM:
 </plugin>
 ```
 
+### IMPORTANT NOTE!!!: JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.
+
+Gradle and Maven do not pass in the system properties in to the test JVM from the command line. The system properties
+specified on the command line only control the build JVM (the one that runs Gradle or Maven), but the tests will run in
+a new JVM. See [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
+and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
+
+
 ### For Message Tests and Spring and Maven
 
 If you are using Spring (or Springboot), and want to have values injected into your test, you need to ensure 
@@ -171,6 +179,53 @@ By default, bodies will be handled based on their content types. For binary cont
 encoded when written to the Pact file and then decoded again when the file is loaded. You can change this with
 an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary`. For instance, setting 
 `pact.content_type.override.application.pdf=text` will treat PDF bodies as a text type and not encode/decode them.
+
+### Controlling the generation of diffs
+
+**NOTE: version 4.2.7+**
+
+When there are mismatches with large bodies the calculation of the diff can take a long time . You can turn off the
+generation of the diffs with the JVM system property: `pact.verifier.generateDiff=true|false|<dataSize>`, where
+`dataSize`, if specified, must be a valid data size (for instance `100kb` or `1mb`). This will turn off the diff
+calculation for payloads that exceed this size.
+
+For instance, setting `pact.verifier.generateDiff=false` will turn off the generation of diffs for all bodies, while
+`pact.verifier.generateDiff=512kb` will only turn off the diffs if the actual or expected body is larger than 512kb.
+
+# Publishing verification results to a Pact Broker
+
+For pacts that are loaded from a Pact Broker, the results of running the verification can be published back to the
+broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen. You need to
+set the version of the provider that is verified using the `pact.provider.version` system property.
+
+To enable publishing of results, set the Java system property or environment variable `pact.verifier.publishResults` to `true`.
+
+### IMPORTANT NOTE!!!: this property needs to be set on the test JVM if your build is running with Gradle or Maven.
+
+Gradle and Maven do not pass in the system properties in to the test JVM from the command line. The system properties
+specified on the command line only control the build JVM (the one that runs Gradle or Maven), but the tests will run in
+a new JVM. See [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
+and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
+
+## Tagging the provider before verification results are published [4.0.1+]
+
+You can have a tag pushed against the provider version before the verification results are published. To do this
+you need set the `pact.provider.tag` JVM system property to the tag value.
+
+From 4.1.8+, you can specify multiple tags with a comma separated string for the `pact.provider.tag`
+system property.
+
+## Setting the provider branch before verification results are published [4.3.0-beta.7+]
+
+Pact Broker version 2.86.0 or later
+
+You can have a branch pushed against the provider version before the verification results are published. To do this
+you need set the `pact.provider.branch` JVM system property to the branch value.
+
+## Setting the build URL for verification results [4.3.2+]
+
+You can specify a URL to link to your CI build output. To do this you need to set the `pact.verifier.buildUrl` JVM
+system property to the URL value.
 
 # Pending Pact Support (version 4.1.0 and later)
 

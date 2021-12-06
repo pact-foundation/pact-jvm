@@ -943,6 +943,7 @@ open class ProviderVerifier @JvmOverloads constructor (
 
   companion object : KLogging() {
     const val PACT_VERIFIER_PUBLISH_RESULTS = "pact.verifier.publishResults"
+    const val PACT_VERIFIER_BUILD_URL = "pact.verifier.buildUrl"
     const val PACT_FILTER_CONSUMERS = "pact.filter.consumers"
     const val PACT_FILTER_DESCRIPTION = "pact.filter.description"
     const val PACT_FILTER_PROVIDERSTATE = "pact.filter.providerState"

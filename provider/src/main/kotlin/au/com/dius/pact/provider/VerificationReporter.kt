@@ -116,7 +116,12 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     } else {
       Ok(true)
     }
-    val publishResult = brokerClient.publishVerificationResults(source.attributes, result, version)
+    val buildUrl = System.getProperty(ProviderVerifier.PACT_VERIFIER_BUILD_URL)
+    val publishResult = if (buildUrl.isNullOrEmpty()) {
+      brokerClient.publishVerificationResults(source.attributes, result, version)
+    } else {
+      brokerClient.publishVerificationResults(source.attributes, result, version, buildUrl)
+    }
     if (publishResult is Err) {
       logger.error { "Failed to publish verification results - ${publishResult.error}" }
     } else {
