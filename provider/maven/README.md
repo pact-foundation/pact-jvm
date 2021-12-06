@@ -299,6 +299,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |`pact.content_type.override.<TYPE>.<SUBTYPE>=text\|json\|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
 |`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
 |`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
+|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]|
 
 Example in the configuration section:
 
@@ -808,6 +809,11 @@ Requires Pact Broker version 2.86.0 or later
 
 You can have a branch pushed against the provider version before the verification results are published. To do this
 you need set the `pact.provider.branch` JVM system property to the branch value.
+
+## Setting the build URL for verification results [4.3.2+]
+
+You can specify a URL to link to your CI build output. To do this you need to set the `pact.verifier.buildUrl` JVM
+system property to the URL value.
 
 # Enabling other verification reports
 
