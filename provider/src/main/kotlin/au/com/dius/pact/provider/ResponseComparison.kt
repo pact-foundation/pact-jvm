@@ -81,7 +81,12 @@ class ResponseComparison(
 
   companion object : KLogging() {
 
-    private fun generateFullDiff(actual: String, contentType: ContentType, response: String, jsonBody: Boolean): List<String> {
+    private fun generateFullDiff(
+      actual: String,
+      contentType: ContentType,
+      response: String,
+      jsonBody: Boolean
+    ): List<String> {
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
         actualBodyString = if (contentType.isJson()) {
