@@ -84,11 +84,9 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         }
         Ok(false)
       } else {
-        val initial = TestResult.Ok(interaction.interactionId)
-        verificationReporter.reportResults(pact, interactionResults.values.fold(initial) { acc: TestResult, result ->
-          acc.merge(result)
-        }, lookupProviderVersion(propertyResolver), null, lookupProviderTags(propertyResolver),
-          lookupProviderBranch(propertyResolver))
+        val calculatedTestResult = interactionResults.values.reduce { acc: TestResult, result -> acc.merge(result) }
+        verificationReporter.reportResults(pact, calculatedTestResult, lookupProviderVersion(propertyResolver),
+                null, lookupProviderTags(propertyResolver), lookupProviderBranch(propertyResolver))
       }
       testResults.remove(pactHash)
       result

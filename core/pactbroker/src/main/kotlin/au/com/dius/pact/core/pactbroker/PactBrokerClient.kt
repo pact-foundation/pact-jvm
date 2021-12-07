@@ -47,7 +47,7 @@ sealed class TestResult {
       is Ok -> if (result.interactionIds.isEmpty()) {
         this
         } else {
-          val allResults = results + result.interactionIds.associateBy { "interactionId" }
+          val allResults = results + result.interactionIds.map { mapOf("interactionId" to it) }
           val grouped = allResults.groupBy { it["interactionId"] }
           val filtered = grouped.mapValues { entry ->
             val interactionId = entry.key as String?
