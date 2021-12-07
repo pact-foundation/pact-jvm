@@ -11,6 +11,7 @@ dependencies {
     exclude group: 'org.jetbrains.kotlin'
   }
   api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+  implementation "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}"
   api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"

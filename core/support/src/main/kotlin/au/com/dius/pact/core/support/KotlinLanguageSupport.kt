@@ -53,3 +53,13 @@ public fun <A, B> Result<A, B>.unwrap(): A {
     is Ok<*> -> return value as A
   }
 }
+
+// This is not available in Kotlin 1.4
+public fun String?.ifNullOrEmpty(function: () -> String?) = if (this.isNullOrEmpty()) {
+  function()
+} else {
+  this
+}
+
+// This function is not available in Kotlin 1.4
+public fun String?.lowercase() = this?.toLowerCase()
