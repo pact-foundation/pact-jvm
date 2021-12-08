@@ -41,3 +41,5 @@ consumer/scalasupport/target/
 provider/target/
 provider/scalasupport/target/
 .kotlintest/
+bin/
+
