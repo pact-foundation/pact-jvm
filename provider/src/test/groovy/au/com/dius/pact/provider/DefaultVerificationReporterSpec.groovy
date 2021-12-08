@@ -43,13 +43,15 @@ class DefaultVerificationReporterSpec extends Specification {
     ], [:], new BrokerUrlSource('', '', links))
     def testResult = new TestResult.Ok()
     def brokerClient = Mock(PactBrokerClient)
-    System.setProperty('pact.verifier.buildUrl', 'https://buildsystem.com/job/1234')
+
+    def buildUrl = 'https://buildsystem.com/job/1234'
+    System.setProperty('pact.verifier.buildUrl', buildUrl)
 
     when:
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
 
     then:
-    1 * brokerClient.publishVerificationResults(links, testResult, '0', 'https://buildsystem.com/job/1234') >> new Ok(true)
+    1 * brokerClient.publishVerificationResults(links, testResult, '0', buildUrl) >> new Ok(true)
     result == new Ok(true)
   }
 
