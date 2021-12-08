@@ -192,3 +192,9 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 ## I want to contribute
 
 [Documentation for contributors is here](https://github.com/DiUS/pact-jvm/blob/master/CONTRIBUTING.md).
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

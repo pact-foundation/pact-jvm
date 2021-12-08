@@ -217,3 +217,9 @@ newJsonArray {
     }
  }
 ```
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

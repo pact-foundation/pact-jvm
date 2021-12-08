@@ -898,3 +898,9 @@ To configure it in the POM file, add an ignore section to the `configuration` el
 
 Or add it to the command line using the format `-Dignore=<pacticipant>:<version>?,<pacticipant>:<version>?,...`. 
 For example, `-Dignore=bob,fred:1.2.3` to ignore pacticipant named Bob and pacticipant name Fred with version 1.2.3.
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

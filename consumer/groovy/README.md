@@ -667,3 +667,9 @@ service {
 You can change the markers of the expressions using the following system properties:
 - `pact.expressions.start` (default is `${`)
 - `pact.expressions.end` (default is `}`)
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

@@ -249,3 +249,9 @@ Then any pending pacts will not cause a build failure.
 # Work In Progress (WIP) Pact Support (version 4.1.5 and later)
 
 WIP pacts work in the same way as with JUnit 4 tests, refer to the [Pact junit runner](../junit/README.md) docs.
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.
