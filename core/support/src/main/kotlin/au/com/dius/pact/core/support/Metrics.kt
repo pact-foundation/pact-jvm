@@ -98,22 +98,23 @@ object Metrics : KLogging() {
           val osName = lookupProperty("os.name").lowercase().orEmpty()
           val osArch = "$osName-${lookupProperty("os.arch")?.lowercase()}"
           val entity = mapOf<String, Any?>(
-            "v" to 1,                                         // Version of the API
-            "tid" to UA_ACCOUNT,                              // Property ID
-            "uid" to hostnameHash(osName),                    // Anonymous Client ID.
-            "an" to "pact-jvm",                               // App name.
-            "aid" to "pact-jvm",                              // App Id
-            "av" to lookupVersion(Metrics::class.java),       // App version.
-            "aip" to true,                                    // Anonymise IP address
-            "ds" to "pact-jvm",                               // Data source
-            "cd1" to "pact-jvm",                              // Custom Dimension 1: library
-            "cd2" to lookupContext(),                         // Custom Dimension 2: context
-            "cd3" to osArch,                                  // Custom Dimension 3: osarch
-            "cd6" to event.testFramework(),                   // Custom Dimension 6: test_framework
-            "el" to event.name(),                             // Event
-            "ec" to event.category(),                         // Category
-            "ea" to event.action(),                           // Action
-            "ev" to event.value()                             // Value
+            "v" to 1,                                               // Version of the API
+            "tid" to UA_ACCOUNT,                                    // Property ID
+            "uid" to hostnameHash(osName),                          // Anonymous Client ID.
+            "an" to "pact-jvm",                                     // App name.
+            "aid" to "pact-jvm",                                    // App Id
+            "av" to lookupVersion(Metrics::class.java),             // App version.
+            "aip" to true,                                          // Anonymise IP address
+            "ds" to "pact-jvm",                                     // Data source
+            "cd1" to "pact-jvm",                                    // Custom Dimension 1: library
+            "cd2" to lookupContext(),                               // Custom Dimension 2: context
+            "cd3" to osArch,                                        // Custom Dimension 3: osarch
+            "cd6" to event.testFramework(),                         // Custom Dimension 6: test_framework
+            "cd7" to lookupProperty("java.runtime.version"),  // Custom Dimension 7: platform_version
+            "el" to event.name(),                                   // Event
+            "ec" to event.category(),                               // Category
+            "ea" to event.action(),                                 // Action
+            "ev" to event.value()                                   // Value
           ).filterValues { it != null }
           val stringEntity = StringEntity(Json.toJson(entity).serialise(), ContentType.APPLICATION_JSON)
           val response = org.apache.http.client.fluent.Request.Post(GA_URL)
