@@ -17,6 +17,7 @@ class PactVerificationTask extends PactVerificationBaseTask {
   @TaskAction
   void verifyPact() {
     verifier.with {
+      verificationSource = 'gradle'
       projectHasProperty = { project.hasProperty(it) }
       projectGetProperty = { project.property(it) }
       pactLoadFailureMessage = { 'You must specify the pactfile to execute (use pactFile = ...)' }

@@ -127,6 +127,7 @@ open class PactVerificationExtension(
     }
 
     val verifier = ProviderVerifier()
+    verifier.verificationSource = "junit5"
     testContext.target.prepareVerifier(verifier, extContext.requiredTestInstance)
 
     setupReporters(verifier, serviceName, interaction.description, extContext, testContext.valueResolver)

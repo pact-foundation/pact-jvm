@@ -37,6 +37,7 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
     import verificationConfig.serverConfig._
 
     val verifier = new ProviderVerifier
+    verifier.setVerificationSource("scalatest")
     ProviderUtils.loadPactFiles(new ProviderInfo(provider), new File(uri)).asScala
       .filter(consumer.filter)
       .flatMap(c => verifier.loadPactFileForConsumer(c)
