@@ -105,8 +105,7 @@ object Metrics : KLogging() {
             "aid" to "pact-jvm",                                    // App Id
             "av" to lookupVersion(Metrics::class.java),             // App version.
             "aip" to true,                                          // Anonymise IP address
-            "ds" to "pact-jvm",                                     // Data source
-            "cd1" to "pact-jvm",                                    // Custom Dimension 1: library
+            "ds" to "client",                                       // Data source
             "cd2" to lookupContext(),                               // Custom Dimension 2: context
             "cd3" to osArch,                                        // Custom Dimension 3: osarch
             "cd6" to event.testFramework(),                         // Custom Dimension 6: test_framework

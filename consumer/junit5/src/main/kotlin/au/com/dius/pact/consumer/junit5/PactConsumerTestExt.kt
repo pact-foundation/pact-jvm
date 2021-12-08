@@ -23,6 +23,8 @@ import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
+import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import mu.KLogging
@@ -357,8 +359,12 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   override fun afterTestExecution(context: ExtensionContext) {
+    val store = context.getStore(NAMESPACE)
+
+    val pact = store["pact"] as BasePact<out Interaction>?
+    Metrics.sendMetrics(MetricEvent.ConsumerTestRun(pact?.interactions?.size ?: 0, "junit5"))
+
     if (!context.executionException.isPresent) {
-      val store = context.getStore(NAMESPACE)
       val providerInfo = store["providerInfo"] as ProviderInfo
       if (providerInfo.providerType == ProviderType.ASYNCH) {
         storePactForWrite(store)

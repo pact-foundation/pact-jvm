@@ -13,6 +13,8 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.support.MetricEvent;
+import au.com.dius.pact.core.support.Metrics;
 import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
@@ -84,7 +86,9 @@ public class BaseProviderRule extends ExternalResource {
 
             PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
             PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
-            PactVerificationResult result = runPactTest(base, pact.get(), pactFolder, pactDirectory);
+            RequestResponsePact requestResponsePact = pact.get();
+            Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(requestResponsePact.getInteractions().size(), "junit"));
+            PactVerificationResult result = runPactTest(base, requestResponsePact, pactFolder, pactDirectory);
             validateResult(result, pactDef);
           }
       };

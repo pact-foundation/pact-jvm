@@ -133,6 +133,9 @@ subprojects {
         events "passed", "skipped", "failed"
       }
     }
+
+    // Mark sure Pact-JVM builds don't skew the metrics
+    systemProperty 'pact_do_not_track', 'true'
   }
 
   publishing {
