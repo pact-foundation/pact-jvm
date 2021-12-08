@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.30 - Bugfix Release
+
+* 83385c51d - chore: add note about metric events to all the readmes (Ronald Holshausen, Wed Dec 8 15:53:27 2021 +1100)
+* ea4fa4eaf - chore: add metric events for provider tests (Ronald Holshausen, Wed Dec 8 15:46:22 2021 +1100)
+* 7fc3c0dd6 - chore: add metric events for consumer tests (Ronald Holshausen, Wed Dec 8 14:33:00 2021 +1100)
+* af7d904c2 - chore: add platform_version to metrics (Ronald Holshausen, Wed Dec 8 13:31:38 2021 +1100)
+* 75b11f68e - chore: fix codenarc violation (Ronald Holshausen, Wed Dec 8 12:32:47 2021 +1100)
+* 920a4d31f - feat: Specify buildUrl with system property pact.verifier.buildUrl (Michael Bannister, Mon Dec 6 08:50:37 2021 +0000)
+* 54781c479 - chore: fix static code violations (Ronald Holshausen, Wed Dec 8 11:16:39 2021 +1100)
+* 624d6c7cc - chore: add support for sending analytics events (Ronald Holshausen, Wed Dec 8 10:47:50 2021 +1100)
+* cb409d2bf - chore: upgrade detekt ask the current version requires a lib from jcenter which has gone away (Ronald Holshausen, Tue Dec 7 15:12:37 2021 +1100)
+* 7a9cae31b - fix(junit): correctly merge success results with error results with JUnit verification tests  #1274 (Ronald Holshausen, Tue Dec 7 14:29:21 2021 +1100)
+* 44563e1b9 - bump version to 4.1.30 (Ronald Holshausen, Fri Nov 12 13:07:15 2021 +1100)
+
 # 4.1.29 - Fixes backported from master
 
 * dfcd67f4d - chore: fix test after cherry pick commits (Ronald Holshausen, Fri Nov 12 12:25:05 2021 +1100)
