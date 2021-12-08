@@ -607,6 +607,11 @@ Pact Broker version 2.86.0 or later
 You can have a branch pushed against the provider version before the verification results are published. To do this
 you need set the `pact.provider.branch` JVM system property to the branch value.
 
+## Setting the build URL for verification results [4.3.2+]
+
+You can specify a URL to link to your CI build output. To do this you need to set the `pact.verifier.buildUrl` JVM
+system property to the URL value.
+
 # Pending Pact Support (version 4.1.3 and later)
 
 If your Pact broker supports pending pacts, you can enable support for that by enabling that on your Pact broker annotation or with JVM system properties. You also need to provide the tags that will be published with your provider's verification results. The broker will then label any pacts found that don't have a successful verification result as pending. That way, if they fail verification, the verifier will ignore those failures and not fail the build.

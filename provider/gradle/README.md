@@ -107,6 +107,7 @@ The following project properties must be specified as system properties:
 |`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
 |`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
 |`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
+|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]|
 
 ## Specifying the provider hostname at runtime
 
@@ -889,6 +890,8 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.
 
 To turn on the verification publishing, set the project property `pact.verifier.publishResults` to `true`.
+
+To provide the build URL, set the JVM system property `pact.verifier.buildUrl`.
 
 By default, the Gradle project version will be used as the provider version. You can override this by setting the
 `providerVersion` property.

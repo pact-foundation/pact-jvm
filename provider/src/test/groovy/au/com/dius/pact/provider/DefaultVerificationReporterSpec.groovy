@@ -13,6 +13,7 @@ import au.com.dius.pact.core.pactbroker.TestResult
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 class DefaultVerificationReporterSpec extends Specification {
 
@@ -31,6 +32,26 @@ class DefaultVerificationReporterSpec extends Specification {
 
     then:
     1 * brokerClient.publishVerificationResults(links, testResult, '0') >> new Ok(true)
+    result == new Ok(true)
+  }
+
+  @RestoreSystemProperties
+  def 'include buildUrl in publishing test results if system property is set'() {
+    given:
+    def links = ['publish': 'true']
+    def interaction = new RequestResponseInteraction('interaction1')
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
+            interaction
+    ], [:], new BrokerUrlSource('', '', links))
+    def testResult = new TestResult.Ok()
+    def brokerClient = Mock(PactBrokerClient)
+    System.setProperty('pact.verifier.buildUrl', 'https://buildsystem.com/job/1234')
+
+    when:
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
+
+    then:
+    1 * brokerClient.publishVerificationResults(links, testResult, '0', 'https://buildsystem.com/job/1234') >> new Ok(true)
     result == new Ok(true)
   }
 
