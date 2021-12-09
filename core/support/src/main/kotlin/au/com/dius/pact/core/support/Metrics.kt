@@ -3,9 +3,9 @@ package au.com.dius.pact.core.support
 import au.com.dius.pact.core.support.Utils.lookupVersion
 import mu.KLogging
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import java.util.*
+import org.apache.http.client.fluent.Request
+import org.apache.http.message.BasicNameValuePair
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 /**
@@ -95,7 +95,7 @@ object Metrics : KLogging() {
         }
 
         try {
-          val osName = lookupProperty("os.name").lowercase().orEmpty()
+          val osName = lookupProperty("os.name")?.lowercase().orEmpty()
           val osArch = "$osName-${lookupProperty("os.arch")?.lowercase()}"
           val entity = mapOf<String, Any?>(
             "v" to 1,                                               // Version of the API
@@ -114,10 +114,13 @@ object Metrics : KLogging() {
             "ec" to event.category(),                               // Category
             "ea" to event.action(),                                 // Action
             "ev" to event.value()                                   // Value
-          ).filterValues { it != null }
-          val stringEntity = StringEntity(Json.toJson(entity).serialise(), ContentType.APPLICATION_JSON)
-          val response = org.apache.http.client.fluent.Request.Post(GA_URL)
-            .body(stringEntity)
+          )
+            .filterValues { it != null }
+            .map {
+              BasicNameValuePair(it.key, it.value.toString())
+            }
+          val response = Request.Post(GA_URL)
+            .bodyForm(entity)
             .execute()
             .returnResponse()
           if (response.statusLine.statusCode > 299) {
