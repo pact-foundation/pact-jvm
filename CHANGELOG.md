@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.17 - Bugfix Release
+
+* 27c150caa - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 16:19:02 2021 +1100)
+* 98c237852 - chore: fix changelog (Ronald Holshausen, Thu Dec 9 13:19:24 2021 +1100)
+* 769ae4c41 - bump version to 4.2.17 (Ronald Holshausen, Thu Dec 9 13:06:19 2021 +1100)
+
 # 4.2.16 - Bugfix Release
 
 * 9127fd630 - Merge branch 'v4.1.x' into v4.2.x (Ronald Holshausen, Thu Dec 9 12:16:24 2021 +1100)
