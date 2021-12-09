@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.4.32'
-  id 'io.gitlab.arturbosch.detekt' version '1.17.1'
+  id 'io.gitlab.arturbosch.detekt' version '1.18.0'
   id 'org.jetbrains.dokka' version '1.4.32' apply false
   id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
 }
@@ -137,6 +137,9 @@ subprojects {
         events "passed", "skipped", "failed"
       }
     }
+
+    // Mark sure Pact-JVM builds don't skew the metrics
+    systemProperty 'pact_do_not_track', 'true'
   }
 
   publishing {

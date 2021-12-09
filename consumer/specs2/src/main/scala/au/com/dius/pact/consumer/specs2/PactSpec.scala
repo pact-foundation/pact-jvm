@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.specs2.PactFragmentBuilder.PactWithAtLeastOneRequest
 import au.com.dius.pact.consumer._
 import au.com.dius.pact.core.model.{Consumer, PactSpecVersion, RequestResponsePact}
+import au.com.dius.pact.core.support.{MetricEvent, Metrics}
 import org.specs2.execute.{AsResult, Failure, Result}
 import org.specs2.specification.core.Fragment
 import org.specs2.specification.create.FragmentsFactory
@@ -51,6 +52,7 @@ trait PactSpec extends FragmentsFactory {
 
       fragmentFactory.example(description, {
         val f: PactTestRun[Result] = (m: MockServer, c: PactTestExecutionContext) => test(m, c)
+        Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(pactFragment.getInteractions.size(), "specs"))
         ConsumerPactRunnerKt.runConsumerTest(pactFragment, config, f)
       })
     }

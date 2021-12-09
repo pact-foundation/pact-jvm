@@ -143,6 +143,7 @@ object Matching : KLogging() {
     }
   }
 
+  @Suppress("UnusedPrivateMember")
   fun matchCookies(expected: List<String>, actual: List<String>, headerContext: MatchingContext) =
     if (expected.all { actual.contains(it) }) null
     else CookieMismatch(expected, actual)

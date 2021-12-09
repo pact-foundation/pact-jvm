@@ -98,15 +98,16 @@ The following project properties can be specified with `-Pproperty=value` on the
 
 The following project properties must be specified as system properties:
 
-|Property|Description|
-|--------|-----------|
-|`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
-|`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
-|`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|
-|`pact.provider.branch`|Sets the provider branch to push before publishing verification results|
-|`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
-|`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
-|`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
+|Property| Description                                                                                                                                                                               |
+|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`pact.verifier.disableUrlPathDecoding`| Disables decoding of request paths                                                                                                                                                        |
+|`pact.pactbroker.httpclient.usePreemptiveAuthentication`| Enables preemptive authentication with the pact broker when set to `true`                                                                                                                 |
+|`pact.provider.tag`| Sets the provider tag to push before publishing verification results (can use a comma separated list)                                                                                     |
+|`pact.provider.branch`| Sets the provider branch to push before publishing verification results                                                                                                                   |
+|`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`| Overrides the handling of a particular content type [4.1.3+]                                                                                                                              |
+|`pact.verifier.enableRedirectHandling`| Enables automatically handling redirects [4.1.8+]                                                                                                                                         |
+|`pact.verifier.generateDiff`| Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+] |
+|`pact.verifier.buildUrl`| Specifies buildUrl to report to the broker when publishing verification results [4.2.16/4.3.2+]                                                                                           |
 
 ## Specifying the provider hostname at runtime
 
@@ -890,6 +891,8 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
 
 To turn on the verification publishing, set the project property `pact.verifier.publishResults` to `true`.
 
+To provide the build URL, set the JVM system property `pact.verifier.buildUrl`.
+
 By default, the Gradle project version will be used as the provider version. You can override this by setting the
 `providerVersion` property.
 
@@ -1006,3 +1009,9 @@ pact {
   }
 }
 ```
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

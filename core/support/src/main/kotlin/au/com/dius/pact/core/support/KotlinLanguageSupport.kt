@@ -73,3 +73,13 @@ public fun BooleanArray.padTo(size: Int) = this.asList().padTo(size)
 public fun LongArray.padTo(size: Int) = this.asList().padTo(size)
 public fun IntArray.padTo(size: Int) = this.asList().padTo(size)
 public fun DoubleArray.padTo(size: Int) = this.asList().padTo(size)
+
+// This is not available in Kotlin 1.4
+public fun String?.ifNullOrEmpty(function: () -> String?) = if (this.isNullOrEmpty()) {
+  function()
+} else {
+  this
+}
+
+// This function is not available in Kotlin 1.4
+public fun String?.lowercase() = this?.toLowerCase()

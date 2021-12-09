@@ -1,5 +1,36 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.30 - Bugfix Release
+
+* 83385c51d - chore: add note about metric events to all the readmes (Ronald Holshausen, Wed Dec 8 15:53:27 2021 +1100)
+* ea4fa4eaf - chore: add metric events for provider tests (Ronald Holshausen, Wed Dec 8 15:46:22 2021 +1100)
+* 7fc3c0dd6 - chore: add metric events for consumer tests (Ronald Holshausen, Wed Dec 8 14:33:00 2021 +1100)
+* af7d904c2 - chore: add platform_version to metrics (Ronald Holshausen, Wed Dec 8 13:31:38 2021 +1100)
+* 75b11f68e - chore: fix codenarc violation (Ronald Holshausen, Wed Dec 8 12:32:47 2021 +1100)
+* 920a4d31f - feat: Specify buildUrl with system property pact.verifier.buildUrl (Michael Bannister, Mon Dec 6 08:50:37 2021 +0000)
+* 54781c479 - chore: fix static code violations (Ronald Holshausen, Wed Dec 8 11:16:39 2021 +1100)
+* 624d6c7cc - chore: add support for sending analytics events (Ronald Holshausen, Wed Dec 8 10:47:50 2021 +1100)
+* cb409d2bf - chore: upgrade detekt ask the current version requires a lib from jcenter which has gone away (Ronald Holshausen, Tue Dec 7 15:12:37 2021 +1100)
+* 7a9cae31b - fix(junit): correctly merge success results with error results with JUnit verification tests  #1274 (Ronald Holshausen, Tue Dec 7 14:29:21 2021 +1100)
+* 44563e1b9 - bump version to 4.1.30 (Ronald Holshausen, Fri Nov 12 13:07:15 2021 +1100)
+
+# 4.1.29 - Fixes backported from master
+
+* dfcd67f4d - chore: fix test after cherry pick commits (Ronald Holshausen, Fri Nov 12 12:25:05 2021 +1100)
+* 78c5af5a5 - feat: Allow creating both the provider branch and tags when publishing results (Radek Koubsky, Thu Nov 11 13:16:45 2021 +0100)
+* d8d55cffb - feat: Publish verification results with provider branch (Radek Koubsky, Tue Nov 9 16:39:45 2021 +0100)
+* e93d69430 - chore: fix test after cherry pick commits (Ronald Holshausen, Thu Nov 11 17:47:56 2021 +1100)
+* 53ebdcc50 - feat: Add support for configuring consumer version selectors from cli as raw json (Radek Koubsky, Mon Oct 25 16:48:18 2021 +0200)
+* f1fa43b07 - Update scala-java9-compat to 1.0.0 (Bendix Sältz, Fri Oct 15 15:09:52 2021 +0200)
+* 1f213498e - Upgrade commons-io linked to https://www.cvedetails.com/cve/CVE-2021-29425/ (mikrethor, Tue Oct 12 14:14:13 2021 -0400)
+* a0a5716a8 - chore: fix test after cherry pick commits (Ronald Holshausen, Thu Nov 11 17:18:03 2021 +1100)
+* 3d1c7df12 - chore: Revert accidental change to interface (Timothy Jones, Thu Sep 30 11:34:34 2021 +1000)
+* 1a1c5af95 - test(PactBrokerClient): Update test for when include pending pacts is set to false (Timothy Jones, Thu Sep 30 11:30:40 2021 +1000)
+* bb0b18bd0 - fix(PactBrokerClient): Send `includePendingStatus=false` when enablePending is set to false (Timothy Jones, Thu Sep 30 10:47:32 2021 +1000)
+* 96521e3a2 - fix: codenarc violation #1449 (Ronald Holshausen, Wed Sep 29 09:13:23 2021 +1000)
+* bcc1d12c0 - fix: correct the pact source description when using the URL option #1449 (Ronald Holshausen, Wed Sep 29 09:01:21 2021 +1000)
+* 5706c6034 - bump version to 4.1.29 (Ronald Holshausen, Mon Sep 27 16:36:14 2021 +1000)
+
 # 4.2.15 - Back-ported fixes from master
 
 * 577fd1e38 - chore: fix test after cherry pick commits (Ronald Holshausen, Thu Nov 11 17:47:56 2021 +1100)

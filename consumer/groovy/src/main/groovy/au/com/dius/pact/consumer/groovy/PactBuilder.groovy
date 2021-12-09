@@ -22,6 +22,8 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
 import groovy.transform.CompileStatic
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
@@ -275,6 +277,7 @@ class PactBuilder extends GroovyBuilder {
       }
     }
 
+    Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(interactions.size(), 'groovy'))
     runConsumerTest(pact, config, runTest)
   }
 

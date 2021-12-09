@@ -9,6 +9,8 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.support.MetricEvent;
+import au.com.dius.pact.core.support.Metrics;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,6 +34,8 @@ public abstract class ConsumerPactTest {
           runTest(mockServer, context);
           return null;
         });
+
+        Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(pact.getInteractions().size(), "junit"));
 
         if (!(result instanceof PactVerificationResult.Ok)) {
             if (result instanceof PactVerificationResult.Error) {

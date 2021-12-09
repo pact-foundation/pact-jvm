@@ -71,6 +71,7 @@ open class PactProviderMojo : PactBaseMojo() {
     }
 
     val verifier = providerVerifier().let { verifier ->
+      verifier.verificationSource = "maven"
       verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
       verifier.projectGetProperty = Function { p: String -> this.property(p) }
       verifier.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->

@@ -59,3 +59,9 @@ This spec will be run along with the rest of your specs2 unit tests and will out
 
 By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
 overwritten, set the Java system property `pact.writer.overwrite` to `true`.
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.
