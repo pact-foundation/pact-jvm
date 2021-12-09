@@ -3,7 +3,7 @@ package au.com.dius.pact.core.model
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@SuppressWarnings('LineLength')
+@SuppressWarnings(['LineLength', 'UnnecessaryBooleanExpression'])
 class PathExpressionsSpec extends Specification {
 
   def 'Parse Path Exp Handles Empty String'() {

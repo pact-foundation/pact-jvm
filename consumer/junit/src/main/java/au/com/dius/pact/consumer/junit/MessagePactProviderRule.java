@@ -9,6 +9,8 @@ import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
 import au.com.dius.pact.core.support.BuiltToolConfig;
+import au.com.dius.pact.core.support.MetricEvent;
+import au.com.dius.pact.core.support.Metrics;
 import au.com.dius.pact.core.support.expressions.DataType;
 import au.com.dius.pact.core.support.expressions.ExpressionParser;
 import org.apache.commons.lang3.StringUtils;
@@ -109,6 +111,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				}
 
 				setMessage(providedMessage, description);
+				Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(messagePact.getMessages().size(), "junit"));
 				try {
 					base.evaluate();
 					PactFolder pactFolder = testClassInstance.getClass().getAnnotation(PactFolder.class);

@@ -17,7 +17,9 @@ class HttpClientSpec extends Specification {
     def execChain = result.component1().execChain
     while (defaultHeaders == null && execChain != null) {
       if (execChain.handler instanceof ProtocolExec) {
-        def interceptor = execChain.handler.httpProcessor.requestInterceptors.find { it instanceof RequestDefaultHeaders }
+        def interceptor = execChain.handler.httpProcessor.requestInterceptors.find {
+          it instanceof RequestDefaultHeaders
+        }
         defaultHeaders = interceptor.defaultHeaders
       } else {
         execChain = execChain.next

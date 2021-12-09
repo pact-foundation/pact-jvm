@@ -654,19 +654,18 @@ class PactBrokerClientSpec extends Specification {
     System.setProperty('pactbroker.consumerversionselectors.rawjson', '[{"mainBranch":true}]')
     def halClient = Mock(IHalClient)
     halClient.navigate() >> halClient
-    halClient.linkUrl("pb:provider-pacts-for-verification") >> "pb:provider-pacts-for-verification"
+    halClient.linkUrl('pb:provider-pacts-for-verification') >> 'pb:provider-pacts-for-verification'
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
 
-    def expectedJson = "{\"consumerVersionSelectors\":[{\"mainBranch\":true}],\"includePendingStatus\":false}"
+    def expectedJson = '{"consumerVersionSelectors":[{"mainBranch":true}],"includePendingStatus":false}'
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider',
-            [], [], false, '')
+    client.fetchConsumersWithSelectors('provider', [], [], false, '')
 
     then:
-    1 * halClient.postJson("pb:provider-pacts-for-verification", _, expectedJson)
+    1 * halClient.postJson('pb:provider-pacts-for-verification', _, expectedJson)
   }
 
   @Unroll

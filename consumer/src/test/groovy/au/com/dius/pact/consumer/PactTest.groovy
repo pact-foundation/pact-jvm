@@ -91,8 +91,8 @@ class PactTest {
         def httpclient = HttpClientBuilder.create()
           .setConnectionManager(new BasicHttpClientConnectionManager(
             RegistryBuilder.create()
-              .register("http", PlainConnectionSocketFactory.getSocketFactory())
-              .register("https", sslSocketFactory)
+              .register('http', PlainConnectionSocketFactory.socketFactory)
+              .register('https', sslSocketFactory)
               .build()
           ))
           .build()

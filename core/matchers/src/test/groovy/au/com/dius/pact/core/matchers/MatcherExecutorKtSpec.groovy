@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class MatcherExecutorKtSpec extends Specification {
 
   def 'match regex'() {

@@ -34,7 +34,8 @@ class MockHttpsProviderConfig @JvmOverloads constructor(
       } else {
         port
       }
-      val keystore = io.ktor.network.tls.certificates.generateCertificate(jksFile, "SHA1withRSA", "PactTest", "changeit", "changeit", 1024)
+      val keystore = io.ktor.network.tls.certificates.generateCertificate(jksFile, "SHA1withRSA",
+              "PactTest", "changeit", "changeit", 1024)
       return MockHttpsProviderConfig(hostname, p, pactVersion, keystore, "PactTest", "changeit", "changeit",
         implementation.merge(MockServerImplementation.KTorServer))
     }

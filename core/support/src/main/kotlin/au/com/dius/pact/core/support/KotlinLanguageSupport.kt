@@ -132,3 +132,9 @@ sealed class Either<out A, out B> {
     }
   }
 }
+
+public fun String?.ifNullOrEmpty(function: () -> String?) = if (this.isNullOrEmpty()) {
+  function()
+} else {
+  this
+}

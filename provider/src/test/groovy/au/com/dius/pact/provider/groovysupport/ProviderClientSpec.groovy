@@ -752,7 +752,6 @@ class ProviderClientSpec extends Specification {
     'ISO-8859-1' | 'text/plain; charset=ISO-8859-1'
   }
 
-
   def 'setupBody() Content-Type defaults to plain text with encoding'() {
     given:
     def contentType = 'text/plain; charset=ISO-8859-1'

@@ -4,6 +4,7 @@ import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import com.github.ajalt.mordant.TermColors
 import org.gradle.api.GradleScriptException
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -17,6 +18,7 @@ class PactCanIDeployTask extends PactCanIDeployBaseTask {
   private static final String TO = 'toTag'
   private static final String LATEST = 'latest'
 
+  @Internal
   PactBrokerClient brokerClient
 
   @TaskAction

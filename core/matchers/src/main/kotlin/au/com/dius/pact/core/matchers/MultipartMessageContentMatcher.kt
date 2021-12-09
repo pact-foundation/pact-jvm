@@ -47,6 +47,7 @@ class MultipartMessageContentMatcher : ContentMatcher {
     )))
   }
 
+  @Suppress("UnusedPrivateMember")
   private fun compareContents(
     expectedMultipart: BodyPart,
     actualMultipart: BodyPart,

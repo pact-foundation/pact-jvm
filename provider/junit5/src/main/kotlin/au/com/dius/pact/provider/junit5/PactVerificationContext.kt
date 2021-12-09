@@ -6,6 +6,8 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
+import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.IConsumerInfo
@@ -47,6 +49,7 @@ data class PactVerificationContext @JvmOverloads constructor(
     val request = store.get("request")
     val testContext = store.get("interactionContext") as PactVerificationContext
     try {
+      Metrics.sendMetrics(MetricEvent.ProviderVerificationRan(1, "junit5"))
       val result = validateTestExecution(client, request, testContext.executionContext ?: mutableMapOf())
         .filterIsInstance<VerificationResult.Failed>()
       this.testExecutionResult.addAll(result)

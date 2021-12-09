@@ -69,6 +69,7 @@ class PactConsumerTestExtSpec extends Specification {
   }
 
   @RestoreSystemProperties
+  @SuppressWarnings(['UnnecessaryParenthesesForMethodCallWithClosure', 'UnnecessaryGetter'])
   def 'never overwrites Pacts defined within same class'() {
     given:
     System.setProperty('pact.writer.overwrite', 'true')

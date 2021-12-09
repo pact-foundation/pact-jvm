@@ -26,6 +26,8 @@ import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import com.github.michaelbull.result.unwrap
@@ -443,9 +445,15 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   override fun afterTestExecution(context: ExtensionContext) {
+    val store = context.getStore(NAMESPACE)
+
+    val providers = store["providers"] as List<Pair<ProviderInfo, String>>
+    for ((provider, _) in providers) {
+      val pact = store["pact:${provider.providerName}"] as BasePact?
+      Metrics.sendMetrics(MetricEvent.ConsumerTestRun(pact?.interactions?.size ?: 0, "junit5"))
+    }
+
     if (!context.executionException.isPresent) {
-      val store = context.getStore(NAMESPACE)
-      val providers = store["providers"] as List<Pair<ProviderInfo, String>>
       for ((provider, _) in providers) {
         if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
           storePactForWrite(store, provider)

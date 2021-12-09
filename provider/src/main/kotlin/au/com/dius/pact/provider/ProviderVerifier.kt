@@ -23,8 +23,11 @@ import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
+import au.com.dius.pact.core.support.Metrics
+import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
+import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.Event
@@ -256,6 +259,11 @@ interface IProviderVerifier {
   fun initialiseReporters(provider: IProviderInfo)
 
   fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?)
+
+  /**
+   * Source of the verification (Gradle/Maven/Junit)
+   */
+  var verificationSource: String?
 }
 
 /**
@@ -294,6 +302,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
   var stateChangeHandler: StateChange = DefaultStateChange
   var pactReader: PactReader = DefaultPactReader
+  override var verificationSource: String? = null
 
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
@@ -603,6 +612,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     interaction: Interaction,
     providerClient: ProviderClient = ProviderClient(provider, HttpClientFactory())
   ): VerificationResult {
+    Metrics.sendMetrics(MetricEvent.ProviderVerificationRan(1, verificationSource.ifNullOrEmpty { "unknown" }!!))
+
     var interactionMessage = "Verifying a pact between ${consumer.name}"
     if (!consumer.name.contains(provider.name)) {
       interactionMessage += " and ${provider.name}"

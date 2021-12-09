@@ -107,7 +107,7 @@ The following project properties must be specified as system properties:
 |`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
 |`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
 |`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
-|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]|
+|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.2.16/4.3.2+]|
 
 ## Specifying the provider hostname at runtime
 
@@ -1021,3 +1021,9 @@ variable. Each plugin required by the Pact file must be installed there. You wil
 instructions for each plugin, but the default is to unpack the plugin into a sub-directory `<plugin-name>-<plugin-version>`
 (i.e., for the Protobuf plugin 0.0.0 it will be `protobuf-0.0.0`). The plugin manifest file must be present for the
 plugin to be able to be loaded.
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

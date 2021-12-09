@@ -288,3 +288,9 @@ instructions for each plugin, but the default is to unpack the plugin into a sub
 (i.e., for the Protobuf plugin 0.0.0 it will be `protobuf-0.0.0`). The plugin manifest file must be present for the
 plugin to be able to be loaded.
 
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

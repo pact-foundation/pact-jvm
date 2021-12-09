@@ -15,6 +15,8 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactDirectory;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.support.Json;
+import au.com.dius.pact.core.support.MetricEvent;
+import au.com.dius.pact.core.support.Metrics;
 import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
@@ -98,7 +100,9 @@ public class BaseProviderRule extends ExternalResource {
 
         PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
         PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
-        PactVerificationResult result = runPactTest(base, pact.get(), pactFolder, pactDirectory);
+        BasePact basePact = pact.get();
+        Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(basePact.getInteractions().size(), "junit"));
+        PactVerificationResult result = runPactTest(base, basePact, pactFolder, pactDirectory);
         validateResult(result, pactDef);
       }
     };
@@ -124,6 +128,7 @@ public class BaseProviderRule extends ExternalResource {
               ep.parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
         .pactSpecVersion(config.getPactVersion())
         .hasPactWith(provider);
+      updateAnyDefaultValues(dslBuilder);
       try {
         BasePact pactFromMethod = (BasePact) method.invoke(target, dslBuilder);
         if (pact[0] == null) {

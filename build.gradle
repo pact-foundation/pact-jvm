@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.5.31'
-  id 'io.gitlab.arturbosch.detekt' version '1.17.1'
+  id 'io.gitlab.arturbosch.detekt' version '1.18.0'
   id 'org.jetbrains.dokka' version '1.5.0' apply false
   id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
 }
@@ -51,7 +51,7 @@ subprojects {
 
   apply plugin: 'java'
   apply plugin: 'groovy'
-//  apply plugin: 'codenarc'
+  apply plugin: 'codenarc'
   apply plugin: 'jacoco'
   apply plugin: 'org.jetbrains.kotlin.jvm'
   apply plugin: 'io.gitlab.arturbosch.detekt'
@@ -137,6 +137,9 @@ subprojects {
         events "passed", "skipped", "failed"
       }
     }
+
+    // Mark sure Pact-JVM builds don't skew the metrics
+    systemProperty 'pact_do_not_track', 'true'
   }
 
   publishing {
@@ -194,13 +197,13 @@ subprojects {
     sign publishing.publications.mavenPublication
   }
 
-//  codenarcMain {
-//      configFile = rootProject.file('config/codenarc/ruleset.groovy')
-//  }
-//
-//  codenarcTest {
-//      configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
-//  }
+  codenarcMain {
+      configFile = rootProject.file('config/codenarc/ruleset.groovy')
+  }
+
+  codenarcTest {
+      configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
+  }
 
   check.dependsOn << 'jacocoTestReport'
 

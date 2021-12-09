@@ -8,6 +8,7 @@ import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class MatchingRulesSpec extends Specification {
 
   def 'fromMap handles a null map'() {

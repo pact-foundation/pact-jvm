@@ -52,7 +52,7 @@ class V4FeaturesPactTest {
       .body(new PactDslJsonBody().unorderedArray('items').string('harry'))
       .willRespondWith()
       .status(200)
-      .body("", "text/plain")
+      .body('', 'text/plain')
       .toPact()
 
     MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V4)

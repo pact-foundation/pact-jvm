@@ -15,6 +15,7 @@ import au.com.dius.pact.core.support.Either
 import com.github.michaelbull.result.Err
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class MatchingDefinitionParserSpec extends Specification {
   def 'if the string does not start with a valid matching definition'() {
     expect:
@@ -110,7 +111,7 @@ class MatchingDefinitionParserSpec extends Specification {
     where:
 
     expression                | value
-    "matching(boolean, true)" | 'true'
+    'matching(boolean, true)' | 'true'
   }
 
   def 'each key and value'() {
@@ -147,6 +148,6 @@ class MatchingDefinitionParserSpec extends Specification {
 
     expression         | value  | type
     "notEmpty('true')" | 'true' | ValueType.String
-    "notEmpty(true)"   | 'true' | ValueType.Boolean
+    'notEmpty(true)'   | 'true' | ValueType.Boolean
   }
 }

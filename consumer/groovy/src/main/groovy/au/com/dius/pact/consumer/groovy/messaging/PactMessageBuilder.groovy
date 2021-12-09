@@ -13,6 +13,8 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
+import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
 
 /**
  * Pact builder for consumer tests for messaging
@@ -123,6 +125,8 @@ class PactMessageBuilder extends GroovyBuilder {
         ex
       }
     }
+
+    Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(messages.size(), 'groovy'))
 
     if (results.any { it instanceof Throwable }) {
       throw new MessagePactFailedException(results.findAll { it instanceof Throwable })

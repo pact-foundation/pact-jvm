@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model.matchingrules.expressions
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings(['AbcMetric', 'CyclomaticComplexity'])
 class ValueTypeSpec extends Specification {
   @Unroll
   def 'merging types'() {

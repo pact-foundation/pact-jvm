@@ -7,7 +7,6 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.annotations.Pact
-import groovy.json.JsonParser
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.junit.jupiter.api.Test
@@ -104,7 +103,8 @@ class V4AsyncMessageTest {
 
     // We need to process the message here with our actual message handler (it should be the one used to actually
     // process your messages). This example just uses a test class as an example
-    def processed = new MessageHandler().process(pact.interactions.first().asAsynchronousMessage().contents.contents.value)
+    def processed = new MessageHandler().process(
+            pact.interactions.first().asAsynchronousMessage().contents.contents.value)
     assert processed.testParam1 == 'value3'
     assert processed.testParam2 == 'value4'
   }

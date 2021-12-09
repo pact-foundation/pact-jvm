@@ -7,8 +7,11 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
@@ -246,6 +249,7 @@ open class InteractionRunner(
 
     val target = lookupTarget(testInstance, interaction)
     target.configureVerifier(source, pact.consumer.name, interaction)
+    target.verifier.verificationSource = "junit"
     target.verifier.reportInteractionDescription(interaction)
 
     var statement: Statement = object : Statement() {
@@ -254,6 +258,7 @@ open class InteractionRunner(
         target.addResultCallback { result, verifier ->
           results[interaction.uniqueKey()] = Pair(result, verifier)
         }
+        Metrics.sendMetrics(MetricEvent.ProviderVerificationRan(1, "junit"))
         target.testInteraction(pact.consumer.name, interaction, source,
           mutableMapOf("providerState" to context, "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator),
           pending

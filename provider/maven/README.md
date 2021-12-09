@@ -810,7 +810,7 @@ Requires Pact Broker version 2.86.0 or later
 You can have a branch pushed against the provider version before the verification results are published. To do this
 you need set the `pact.provider.branch` JVM system property to the branch value.
 
-## Setting the build URL for verification results [4.3.2+]
+## Setting the build URL for verification results [4.1.30/4.3.2+]
 
 You can specify a URL to link to your CI build output. To do this you need to set the `pact.verifier.buildUrl` JVM
 system property to the URL value.
@@ -940,3 +940,9 @@ variable. Each plugin required by the Pact file must be installed there. You wil
 instructions for each plugin, but the default is to unpack the plugin into a sub-directory `<plugin-name>-<plugin-version>`
 (i.e., for the Protobuf plugin 0.0.0 it will be `protobuf-0.0.0`). The plugin manifest file must be present for the
 plugin to be able to be loaded.
+
+# Test Analytics
+
+We are tracking anonymous analytics to gather important usage statistics like JVM version
+and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
+variable to 'true'.

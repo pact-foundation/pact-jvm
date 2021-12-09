@@ -8,13 +8,13 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
+@SuppressWarnings('ConfusingMethodName')
 class DefaultVerificationReporterSpec extends Specification {
 
   def 'for Pact broker sources, publish the test results and return the result'() {
@@ -51,7 +51,30 @@ class DefaultVerificationReporterSpec extends Specification {
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
 
     then:
-    1 * brokerClient.publishVerificationResults(links, testResult, '0', 'https://buildsystem.com/job/1234') >> new Ok(true)
+    1 * brokerClient.publishVerificationResults(links, testResult, '0', 'https://buildsystem.com/job/1234') >>
+            new Ok(true)
+    result == new Ok(true)
+  }
+
+  @RestoreSystemProperties
+  def 'include buildUrl in publishing test results if system property is set'() {
+    given:
+    def links = ['publish': 'true']
+    def interaction = new RequestResponseInteraction('interaction1')
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
+            interaction
+    ], [:], new BrokerUrlSource('', '', links))
+    def testResult = new TestResult.Ok()
+    def brokerClient = Mock(PactBrokerClient)
+
+    def buildUrl = 'https://buildsystem.com/job/1234'
+    System.setProperty('pact.verifier.buildUrl', buildUrl)
+
+    when:
+    def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
+
+    then:
+    1 * brokerClient.publishVerificationResults(links, testResult, '0', buildUrl) >> new Ok(true)
     result == new Ok(true)
   }
 
@@ -117,7 +140,7 @@ class DefaultVerificationReporterSpec extends Specification {
     ], [:], new BrokerUrlSource('', ''))
     def testResult = new TestResult.Ok()
     def brokerClient = Mock(IPactBrokerClient)
-    def branch = "main"
+    def branch = 'main'
 
     when:
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [], branch)
@@ -138,7 +161,7 @@ class DefaultVerificationReporterSpec extends Specification {
     def testResult = new TestResult.Ok()
     def brokerClient = Mock(IPactBrokerClient)
     def tags = ['tag1', 'tag2', 'tag3']
-    def branch = "main"
+    def branch = 'main'
 
     when:
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, tags, branch)
