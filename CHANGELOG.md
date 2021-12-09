@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.31 - Bugfix Release
+
+* 5f9d4c9c2 - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 16:19:02 2021 +1100)
+* 30e224f27 - chore: update docs (Ronald Holshausen, Thu Dec 9 15:05:12 2021 +1100)
+* deaea1e53 - chore: update version in readme (Ronald Holshausen, Thu Dec 9 10:09:37 2021 +1100)
+* fb75a0885 - bump version to 4.1.31 (Ronald Holshausen, Wed Dec 8 17:12:30 2021 +1100)
+
 # 4.1.30 - Bugfix Release
 
 * 83385c51d - chore: add note about metric events to all the readmes (Ronald Holshausen, Wed Dec 8 15:53:27 2021 +1100)
