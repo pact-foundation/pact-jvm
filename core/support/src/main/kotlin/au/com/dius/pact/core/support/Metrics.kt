@@ -6,7 +6,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import java.util.concurrent.TimeUnit
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
-import org.apache.hc.client5.http.entity.EntityBuilder
+import org.apache.hc.core5.http.message.BasicNameValuePair
 import java.util.UUID
 
 /**
@@ -115,13 +115,13 @@ object Metrics : KLogging() {
             "ec" to event.category(),                               // Category
             "ea" to event.action(),                                 // Action
             "ev" to event.value()                                   // Value
-          ).filterValues { it != null }
-          val stringEntity = EntityBuilder.create()
-            .setText(Json.toJson(entity).serialise())
-            .setContentType(ContentType.APPLICATION_JSON)
-            .build()
+          )
+            .filterValues { it != null }
+            .map {
+              BasicNameValuePair(it.key, it.value.toString())
+            }
           val response = Request.post(GA_URL)
-            .body(stringEntity)
+            .bodyForm(entity)
             .execute()
             .returnResponse()
           if (response.code > 299) {
