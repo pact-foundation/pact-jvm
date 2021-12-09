@@ -47,14 +47,14 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 ## Supported JDK and specification versions:
 
 | Branch | Specification | JDK | Kotlin Version | Scala Versions | Latest Version |
-| ------ | ------------- | --- | -------------- | -------------- | -------------- |
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) | V4* | 11+ | 1.4.10 | N/A | 4.2.0-beta.3 |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | N/A | 4.1.30 |
-| [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md) | V3 | 8-12 | 1.3.71 | N/A | 4.0.10 |
-| [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md) | V3 | 8 | 1.3.71 | 2.12 | 3.6.15 |
-| [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md) | V3 | 8 | 1.1.4-2 | 2.12, 2.11 | 3.5.25 |
-| [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3 | 7 | 1.1.4-2 | 2.11 | 3.5.7-jre7.0 |
-| [2.4.x](https://github.com/DiUS/pact-jvm/blob/v2.x/README.md) | V2 | 6 | N/A | 2.10, 2.11 | 2.4.20 |
+| ------ | ------------- | --- | -------------- | -------------- |----------------|
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) | V4* | 11+ | 1.4.10 | N/A | 4.2.0-beta.3   |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | N/A | 4.1.30         |
+| [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md) | V3 | 8-12 | 1.3.71 | N/A | 4.0.10         |
+| [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md) | V3 | 8 | 1.3.71 | 2.12 | 3.6.15         |
+| [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md) | V3 | 8 | 1.1.4-2 | 2.12, 2.11 | 3.5.25         |
+| [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3 | 7 | 1.1.4-2 | 2.11 | 3.5.7-jre7.0   |
+| [2.4.x](https://github.com/DiUS/pact-jvm/blob/v2.x/README.md) | V2 | 6 | N/A | 2.10, 2.11 | 2.4.20         |
 
 **NOTE:** V4 specification support is a work in progress. See [Pact V4 RFC](https://github.com/pact-foundation/pact-specification/issues/71).
 

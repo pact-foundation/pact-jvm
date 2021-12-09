@@ -42,7 +42,7 @@ gradle.publish.secret         # this is the Gradle plugin portal API key secret
 signing.keyId                 # this is your GPG key ID
 signing.password              # GPG key password
 signing.secretKeyRingFile     # Path to the GPG secret key file
-pactBrokerToken               # This is the API token to pact-foundation.pact.dius.com.au broker
+pactBrokerToken               # This is the API token to pact-foundation.pactflow.io broker
 ```
 
 ## 3. Running the release script
