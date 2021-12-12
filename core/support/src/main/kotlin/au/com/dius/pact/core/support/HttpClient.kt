@@ -8,7 +8,6 @@ import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.auth.CredentialsProvider
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
@@ -121,7 +120,7 @@ object HttpClient : KLogging() {
     password: String,
     builder: HttpClientBuilder
   ): CredentialsProvider {
-    val credsProvider = BasicCredentialsProvider()
+    val credsProvider = SystemDefaultCredentialsProvider()
     credsProvider.setCredentials(AuthScope(uri.host, uri.port),
       UsernamePasswordCredentials(username, password.toCharArray()))
     builder.setDefaultCredentialsProvider(credsProvider)
