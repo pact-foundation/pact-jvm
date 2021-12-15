@@ -4,8 +4,8 @@ import au.com.dius.pact.core.support.json.JsonParser
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import org.apache.hc.client5.http.classic.methods.HttpPost
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.impl.auth.BasicScheme
+import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.RedirectExec
 import org.apache.hc.client5.http.protocol.RedirectStrategy
@@ -61,7 +61,7 @@ class HalClientSpec extends Specification {
     client.setupHttpClient()
 
     then:
-    client.httpClient.credentialsProvider instanceof BasicCredentialsProvider
+    client.httpClient.credentialsProvider instanceof SystemDefaultCredentialsProvider
     client.httpContext == null
   }
 
@@ -76,7 +76,7 @@ class HalClientSpec extends Specification {
     client.setupHttpClient()
 
     then:
-    client.httpClient.credentialsProvider instanceof BasicCredentialsProvider
+    client.httpClient.credentialsProvider instanceof SystemDefaultCredentialsProvider
     client.httpContext != null
     client.httpContext.authCache.get(host) instanceof BasicScheme
   }
