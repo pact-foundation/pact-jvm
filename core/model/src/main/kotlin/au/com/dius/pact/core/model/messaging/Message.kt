@@ -15,6 +15,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.json.KafkaSchemaRegistryJsonParser
 import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
@@ -63,6 +64,15 @@ class Message @JvmOverloads constructor(
             contents.valueAsString()
           }
         }
+        isKafkaSchemaRegistryCompliantJsonContents() -> {
+          try {
+            val json = KafkaSchemaRegistryJsonParser.parseString(contents.valueAsString())
+            Json.fromJson(json)
+          } catch (ex: JsonException) {
+            logger.trace(ex) { "Failed to parse Kafka Schema Registry Compliant JSON body" }
+            contents.valueAsString()
+          }
+        }
         else -> formatContents()
       }
     }
@@ -86,10 +96,19 @@ class Message @JvmOverloads constructor(
     }
   }
 
+  private fun isKafkaSchemaRegistryCompliantJsonContents(): Boolean {
+    return if (contents.isPresent()) {
+      contentType(metadata).or(contents.contentType).isKafkaSchemaRegistryJson()
+    } else {
+      false
+    }
+  }
+
   fun formatContents(): String {
     return if (contents.isPresent()) {
       val contentType = contentType(metadata).or(contents.contentType)
       when {
+        contentType.isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryJsonParser.parseString(contents.valueAsString()).prettyPrint()
         contentType.isJson() -> JsonParser.parseString(contents.valueAsString()).prettyPrint()
         contentType.isOctetStream() -> Base64.encodeBase64String(contentsAsBytes())
         else -> contents.valueAsString()

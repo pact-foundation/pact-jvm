@@ -118,12 +118,15 @@ class MessageSpec extends Specification {
 
     where:
 
-    body                               | contentType                | contents
-    '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
-    '{"A": "Value A", "B": "Value B"}' | ''                         | [A: 'Value A', B: 'Value B']
-    '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
-    '1 2 3 4'                          | ''                         | '1 2 3 4'
-    new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
+    body                                     | contentType                              | contents
+    '{"A": "Value A", "B": "Value B"}'       | 'application/json'                       | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}'       | ''                                       | [A: 'Value A', B: 'Value B']
+    '1 2 3 4'                                | 'text/plain'                             | '1 2 3 4'
+    '1 2 3 4'                                | ''                                       | '1 2 3 4'
+    new String([1, 2, 3, 4] as byte[])       | 'application/octet-stream'               | 'AQIDBA=='
+    kStr('{"A": "Value A", "B": "Value B"}') | 'application/vnd.schemaregistry.v1+json' | [A: 'Value A', B: 'Value B']
+    kStr('{"A": "Value A", "B": "Value B"}') | ''                                       | [A: 'Value A', B: 'Value B']
+    kStr('invalid json')                     | 'application/vnd.schemaregistry.v1+json' | kStr('invalid json')
 
     message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
       new MatchingRulesImpl(), new Generators(), [contentType: contentType])
@@ -204,6 +207,36 @@ class MessageSpec extends Specification {
     message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes,
       ContentType.fromString(contentType)),
       new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
+  }
+
+  def 'kafka schema registry content type should be handled - #contentType'() {
+    expect:
+    message.formatContents() == result
+
+    where:
+
+    contentType                                | result
+    'application/vnd.schemaregistry.v1+json'   | '{\n  "a": 100.0,\n  "b": "test"\n}'
+
+    message = new Message('test',
+            [],
+            OptionalBody.body(createKafkaSchemaRegistryCompliantBytes('{"a": 100.0, "b": "test"}'),
+                    ContentType.fromString(contentType)),
+            new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
+  }
+
+  private byte[] createKafkaSchemaRegistryCompliantBytes(String json) {
+    ((kafkaSchemaRegistryMagicBytes() as List) << (json.bytes as List)).flatten()
+  }
+
+  private String kStr(String json) {
+    new String(kafkaSchemaRegistryMagicBytes()) + json
+  }
+
+  private byte[] kafkaSchemaRegistryMagicBytes() {
+    def zero = (byte) 0x00
+    def one = (byte) 0x01
+    new byte[] {zero, zero, zero, zero, one}
   }
 
   def 'when upgrading message to V4, rename the matching rules from body to content'() {
