@@ -101,7 +101,7 @@ object Metrics : KLogging() {
             "v" to 1,                                               // Version of the API
             "t" to "event",                                         // Hit type, Specifies the metric is for an event
             "tid" to UA_ACCOUNT,                                    // Property ID
-            "uid" to hostnameHash(osName),                          // Anonymous Client ID.
+            "cid" to hostnameHash(osName),                          // Anonymous Client ID.
             "an" to "pact-jvm",                                     // App name.
             "aid" to "pact-jvm",                                    // App Id
             "av" to lookupVersion(Metrics::class.java),             // App version.
