@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.32 - Fix Analytics
+
+* 0fb473089 - fix(metrics): swap uid for cid (Ronald Holshausen, Thu Jan 6 10:22:39 2022 +1100)
+* 00aa12a74 - fix: add required event value to analytics call (Ronald Holshausen, Fri Dec 10 10:56:22 2021 +1100)
+* ad6bd6874 - bump version to 4.1.32 (Ronald Holshausen, Thu Dec 9 17:22:12 2021 +1100)
+
 # 4.1.31 - Bugfix Release
 
 * 5f9d4c9c2 - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 16:19:02 2021 +1100)
