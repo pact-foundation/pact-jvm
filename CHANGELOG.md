@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.3 - Bugfix Release
+
+* f1b629ca1 - fix(metrics): swap uid for cid (Ronald Holshausen, Thu Jan 6 10:22:39 2022 +1100)
+* 2a8686812 - Merge pull request #1499 from davidvc/master (Ronald Holshausen, Wed Jan 5 13:31:30 2022 +1100)
+* aadeab41f - Clarify that this plugin is not just for verification; some refinements on pact publishing. (David Van Couvering, Tue Jan 4 17:02:31 2022 -0800)
+* 7cd4ff4d3 - chore: update to the latest plugin driver (metrics fixes) (Ronald Holshausen, Mon Dec 20 11:52:53 2021 +1100)
+* 3def834a5 - Merge pull request #1491 from jaecktec/fix-no-proxy-system-properties (Ronald Holshausen, Wed Dec 15 17:05:42 2021 +1100)
+* cabd4d28f - fix: use system default parameters on basic-auth (Constantin, Sun Dec 12 17:56:36 2021 +0100)
+* 07014df04 - fix: upgrade to latest plugin driver lib with corrected metrics call (Ronald Holshausen, Fri Dec 10 13:11:30 2021 +1100)
+* c685cfa6d - fix: add required event value to analytics call (Ronald Holshausen, Fri Dec 10 10:56:22 2021 +1100)
+* 3dcc0ef4a - bump version to 4.3.3 (Ronald Holshausen, Thu Dec 9 15:46:59 2021 +1100)
+
 # 4.3.2 - Bugfix Release
 
 * c84c65d6c - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 15:03:41 2021 +1100)
