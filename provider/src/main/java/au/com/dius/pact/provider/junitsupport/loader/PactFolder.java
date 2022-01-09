@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider.junitsupport.loader;
 
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver;
+import au.com.dius.pact.core.support.expressions.ValueResolver;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -19,5 +21,10 @@ public @interface PactFolder {
     /**
      * @return path to subfolder of project resource folder with pact
      */
-    String value();
+    String value() default "${pactfolder.path:}";
+
+    /**
+     * Override the default value resolver for resolving the values in the expressions
+     */
+    Class<? extends ValueResolver> valueResolver() default SystemPropertyResolver.class;
 }
