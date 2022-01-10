@@ -162,5 +162,7 @@ class ContentType(val contentType: MediaType?) {
     val JSON = ContentType("application/json")
     @JvmStatic
     val XML = ContentType("application/xml")
+    @JvmStatic
+    val KAFKA_SCHEMA_REGISTRY_JSON = ContentType("application/vnd.schemaregistry.v1+json")
   }
 }
