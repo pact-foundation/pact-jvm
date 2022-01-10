@@ -12,7 +12,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
-import au.com.dius.pact.core.support.json.KafkaSchemaRegistryJsonParser
+import au.com.dius.pact.core.support.json.KafkaSchemaRegistryWireFormatter
 import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
@@ -35,9 +35,15 @@ class Message @JvmOverloads constructor(
   override val interactionId: String? = null
 ) : Interaction, MessageInteraction {
 
-  fun contentsAsBytes() = contents.orEmpty()
+  fun contentsAsBytes() = when {
+    isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryWireFormatter.addMagicBytes(contents.orEmpty())
+    else -> contents.orEmpty()
+  }
 
-  fun contentsAsString() = contents.valueAsString()
+  fun contentsAsString() = when {
+    isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryWireFormatter.addMagicBytesToString(contents.valueAsString())
+    else -> contents.valueAsString()
+  }
 
   fun getContentType() = contentType(metaData).or(contents.contentType)
 
@@ -48,7 +54,7 @@ class Message @JvmOverloads constructor(
     )
     if (!contents.isMissing()) {
       map["contents"] = when {
-        isJsonContents() -> {
+        isJsonCompatibleContent() -> {
           try {
             val json = JsonParser.parseString(contents.valueAsString())
             if (json is JsonValue.StringValue) {
@@ -58,15 +64,6 @@ class Message @JvmOverloads constructor(
             }
           } catch (ex: JsonException) {
             logger.trace(ex) { "Failed to parse JSON body" }
-            contents.valueAsString()
-          }
-        }
-        isKafkaSchemaRegistryCompliantJsonContents() -> {
-          try {
-            val json = KafkaSchemaRegistryJsonParser.parseString(contents.valueAsString())
-            Json.fromJson(json)
-          } catch (ex: JsonException) {
-            logger.trace(ex) { "Failed to parse Kafka Schema Registry Compliant JSON body" }
             contents.valueAsString()
           }
         }
@@ -85,34 +82,44 @@ class Message @JvmOverloads constructor(
     return map
   }
 
-  private fun isJsonContents(): Boolean {
-    return if (contents.isPresent()) {
-      contentType(metaData).or(contents.contentType).isJson()
-    } else {
-      false
-    }
+  private fun isJsonCompatibleContent(): Boolean = isJsonContents() || isKafkaSchemaRegistryJson()
+
+  private fun isJsonContents() = when {
+    contents.isPresent() ->  getContentType().isJson()
+    else -> false
   }
 
-  private fun isKafkaSchemaRegistryCompliantJsonContents(): Boolean {
-    return if (contents.isPresent()) {
-      contentType(metaData).or(contents.contentType).isKafkaSchemaRegistryJson()
-    } else {
-      false
-    }
+  private fun isKafkaSchemaRegistryJson(): Boolean = when {
+    contents.isPresent() -> getContentType().isKafkaSchemaRegistryJson()
+    else -> false
   }
 
   fun formatContents(): String {
     return if (contents.isPresent()) {
-      val contentType = contentType(metaData).or(contents.contentType)
+      val contentType = getContentType()
+
       when {
-        contentType.isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryJsonParser.parseString(contents.valueAsString()).prettyPrint()
-        contentType.isJson() -> JsonParser.parseString(contents.valueAsString()).prettyPrint()
+        contentType.isKafkaSchemaRegistryJson() -> tryParseKafkaSchemaRegistryMagicBytes()
+        isJsonCompatibleContent() -> JsonParser.parseString(contents.valueAsString()).prettyPrint()
         contentType.isOctetStream() -> Base64.encodeBase64String(contentsAsBytes())
         else -> contents.valueAsString()
       }
     } else {
       ""
     }
+  }
+
+  private fun tryParseKafkaSchemaRegistryMagicBytes(): String {
+    return try {
+        parseKafkaSchemaRegistryMagicBytes()
+    } catch (e: JsonException) {
+      throw KafkaSchemaRegistryMagicBytesMissingException()
+    }
+  }
+
+  private fun parseKafkaSchemaRegistryMagicBytes(): String {
+    val jsonWithoutMagicBytes = KafkaSchemaRegistryWireFormatter.removeMagicBytes(contents.value) ?: return ""
+    return JsonParser.parseString(String(jsonWithoutMagicBytes)).prettyPrint()
   }
 
   override fun uniqueKey(): String {
@@ -203,3 +210,5 @@ class Message @JvmOverloads constructor(
     }
   }
 }
+
+class KafkaSchemaRegistryMagicBytesMissingException : RuntimeException()

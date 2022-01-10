@@ -12,6 +12,7 @@ class ContentTypeSpec extends Specification {
 
   def setupSpec() {
     System.setProperty('pact.content_type.override.application/x-thrift', 'json')
+    System.setProperty('pact.content_type.override.application/graphql', 'json')
     System.setProperty('pact.content_type.override.application/x-other', 'text')
     System.setProperty('pact.content_type.override.application/x-bin', 'binary')
     System.setProperty('pact.content_type.override.application/x-ml', 'xml')

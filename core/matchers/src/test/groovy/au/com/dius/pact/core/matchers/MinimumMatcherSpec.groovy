@@ -39,8 +39,9 @@ class MinimumMatcherSpec extends Specification {
   @Unroll
   def 'with a non array default to a type matcher'() {
     expect:
-    MatcherExecutorKt.domatch(new MinTypeMatcher(2), path, expected, actual, mismatchFactory, false).empty
-      == beEmpty
+    MatcherExecutorKt.domatch(
+      new MinTypeMatcher(2), path, expected, actual, mismatchFactory, false
+    ).empty == beEmpty
 
     where:
     expected | actual   || beEmpty

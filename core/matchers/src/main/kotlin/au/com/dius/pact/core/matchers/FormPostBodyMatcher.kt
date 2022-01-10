@@ -22,8 +22,10 @@ class FormPostBodyMatcher : BodyMatcher {
               null, "Expected a form post body but was missing")))))
       expectedBody.isEmpty() && actualBody.isEmpty() -> BodyMatchResult(null, emptyList())
       else -> {
-        val expectedParameters = URLEncodedUtils.parse(expectedBody.valueAsString(), expected.contentType.asCharset(), '&')
-        val actualParameters = URLEncodedUtils.parse(actualBody.valueAsString(), actual.contentType.asCharset(), '&')
+        val expectedParameters = URLEncodedUtils.parse(expectedBody.valueAsString(), expected.contentType.asCharset(),
+          '&')
+        val actualParameters = URLEncodedUtils.parse(actualBody.valueAsString(), actual.contentType.asCharset(),
+          '&')
         BodyMatchResult(null, compareParameters(expectedParameters, actualParameters, matchingRules,
           allowUnexpectedKeys))
       }
