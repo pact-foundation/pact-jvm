@@ -9,6 +9,7 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
+import au.com.dius.pact.core.support.toJson
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -20,6 +21,7 @@ import mu.KLogging
 import java.io.File
 import java.io.IOException
 import java.net.URLDecoder
+import java.util.Base64
 import java.util.function.Consumer
 
 /**
@@ -27,7 +29,13 @@ import java.util.function.Consumer
  */
 data class PactResponse(val pactFile: JsonValue.Object, val links: Map<String, Any?>)
 
+/**
+ * Test result that is sent to the Pact broker
+ */
 sealed class TestResult {
+  /**
+   * Success result
+   */
   data class Ok(val interactionIds: Set<String> = emptySet()) : TestResult() {
     constructor(interactionId: String?) : this(if (interactionId.isNullOrEmpty())
       emptySet() else setOf(interactionId))
@@ -40,6 +48,9 @@ sealed class TestResult {
     }
   }
 
+  /**
+   * Failed result
+   */
   data class Failed(var results: List<Map<String, Any?>> = emptyList(), val description: String = "") : TestResult() {
     override fun toBoolean() = false
 
@@ -80,11 +91,17 @@ sealed class TestResult {
   abstract fun merge(result: TestResult): TestResult
 }
 
+/**
+ * Represents a request for the latest pact, or the latest pact for a particular tag
+ */
 sealed class Latest {
   data class UseLatest(val latest: Boolean) : Latest()
   data class UseLatestTag(val latestTag: String) : Latest()
 }
 
+/**
+ * Model for a CanIDeploy result
+ */
 data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String, val unknown: Int? = null)
 
 /**
@@ -126,6 +143,9 @@ data class IgnoreSelector @JvmOverloads constructor(var name: String = "", var v
   }
 }
 
+/**
+ * Interface to a Pact Broker client
+ */
 interface IPactBrokerClient {
   /**
    * Fetches all consumers for the given provider and selectors
@@ -189,8 +209,21 @@ interface IPactBrokerClient {
     result: TestResult,
     version: String
   ): Result<Boolean, String>
+
+  /**
+   * Uploads the given pact file to the broker and applies any tags
+   */
+  fun uploadPactFile(pactFile: File, version: String): Result<String?, Exception>
+
+  /**
+   * Uploads the given pact file to the broker and applies any tags
+   */
+  fun uploadPactFile(pactFile: File, version: String, tags: List<String>): Result<String?, Exception>
 }
 
+/**
+ * Client configuration.
+ */
 data class PactBrokerClientConfig @JvmOverloads constructor(
   val retryCountWhileUnknown: Int = 0,
   val retryWhileUnknownInterval: Int = 10,
@@ -367,25 +400,113 @@ open class PactBrokerClient(
   /**
    * Uploads the given pact file to the broker, and optionally applies any tags
    */
-  @JvmOverloads
-  open fun uploadPactFile(
-    pactFile: File,
-    version: String,
-    tags: List<String> = emptyList()
-  ): Result<String?, Exception> {
+  override fun uploadPactFile(pactFile: File, version: String) = uploadPactFile(pactFile, version, emptyList())
+
+  /**
+   * Uploads the given pact file to the broker, and optionally applies any tags
+   */
+  override fun uploadPactFile(pactFile: File, version: String, tags: List<String>): Result<String?, Exception> {
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
-    val halClient = newHalClient()
+    val halClient = newHalClient().navigate()
     val providerName = pact["provider"]["name"].asString()
     val consumerName = pact["consumer"]["name"].asString()
-    if (tags.isNotEmpty()) {
-      uploadTags(halClient, consumerName, version, tags)
+
+    val publishContractsLink = halClient.linkUrl(PUBLISH_CONTRACTS_LINK)
+    return if (publishContractsLink != null) {
+      when (val result = publishContract(halClient, publishContractsLink, providerName, consumerName, version, tags, pactText)) {
+        is Ok -> Ok("OK")
+        is Err -> result
+      }
+    } else {
+      if (tags.isNotEmpty()) {
+        uploadTags(halClient, consumerName, version, tags)
+      }
+      halClient.putJson(
+        "pb:publish-pact", mapOf(
+          "provider" to providerName,
+          "consumer" to consumerName,
+          "consumerApplicationVersion" to version
+        ), pactText
+      )
     }
-    return halClient.navigate().putJson("pb:publish-pact", mapOf(
-      "provider" to providerName,
-      "consumer" to consumerName,
-      "consumerApplicationVersion" to version
-    ), pactText)
+  }
+
+  /**
+   * Publish the contract using the "Publish Contracts" endpoint
+   */
+  private fun publishContract(
+    halClient: IHalClient,
+    publishContractsLink: String,
+    providerName: String,
+    consumerName: String,
+    version: String,
+    tags: List<String>,
+    pactText: String
+  ): Result<JsonValue.Object, Exception> {
+    val body = JsonValue.Object(
+      "pacticipantName" to consumerName.toJson(),
+      "pacticipantVersionNumber" to version.toJson(),
+      //"branch": "main", TODO: require the consumer branch here
+      "tags" to JsonValue.Array(tags.map { it.toJson() }.toMutableList()),
+      //"buildUrl": "https://ci/builds/1234", TODO: require build URL
+      "contracts" to JsonValue.Array(
+        mutableListOf(
+          JsonValue.Object(
+            "consumerName" to consumerName.toJson(),
+            "providerName" to providerName.toJson(),
+            "specification" to "pact".toJson(),
+            "contentType" to "application/json".toJson(),
+            "content" to Base64.getEncoder().encodeToString(pactText.toByteArray()).toJson()
+          )
+        )
+      )
+    )
+    return when (val result = halClient.postJson(publishContractsLink, mapOf(), body.serialise())) {
+      is Ok -> {
+        displayNotices(result.value)
+        result
+      }
+      is Err -> {
+        val error = result.error
+        if (error is RequestFailedException && error.body != null) {
+          when (val json = handleWith<JsonValue> { JsonParser.parseString(error.body) }) {
+            is Ok -> if (json.value is JsonValue.Object) {
+              displayNotices(json.value.asObject())
+            } else {
+              logger.error { "Response from Pact Broker was not in correct JSON format: got ${json.value}" }
+            }
+            is Err -> {
+              logger.error { "Response from Pact Broker was not in JSON format: ${json.error}" }
+            }
+          }
+        }
+        result
+      }
+    }
+  }
+
+  private fun displayNotices(result: JsonValue.Object) {
+    val notices = result["notices"]
+    if (notices is JsonValue.Array) {
+      for (noticeJson in notices.values) {
+        if (noticeJson.isObject) {
+          val notice = noticeJson.asObject()
+          val level = notice["level"].asString()
+          val text = notice["text"].asString()
+          when (level) {
+            "info", "prompt" -> logger.info { text }
+            "warning", "danger" -> logger.warn { text }
+            "error" -> logger.error { text }
+            else -> logger.debug { text }
+          }
+        } else {
+          logger.error("Got an invalid notice value from the Pact Broker: Expected an object, got ${notices.name}")
+        }
+      }
+    } else {
+      logger.error("Got an invalid notices value from the Pact Broker: Expected an array, got ${notices.name}")
+    }
   }
 
   override fun getUrlForProvider(providerName: String, tag: String): String? {
@@ -588,20 +709,22 @@ open class PactBrokerClient(
       val halClient = newHalClient()
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
-      val result = halClient.putJson(PROVIDER_BRANCH_VERSION, mapOf("version" to version, "branch" to branch), "{}")
-      when (result) {
-        is Ok<*> -> {
-          logger.debug { "Pushed branch $branch for provider $name and version $version" }
-          return Ok(true)
-        }
-        is Err<Exception> -> {
-          logger.error(result.error) { "Failed to push branch $branch for provider $name and version $version" }
-          return Err("Publishing branch '$branch' failed: ${result.error.message ?: result.error.toString()}")
-        }
+      val result = halClient.putJson(PROVIDER_BRANCH_VERSION,
+        mapOf("version" to version, "branch" to branch), "{}")
+      return when (result) {
+          is Ok<*> -> {
+            logger.debug { "Pushed branch $branch for provider $name and version $version" }
+            Ok(true)
+          }
+          is Err<Exception> -> {
+            logger.error(result.error) { "Failed to push branch $branch for provider $name and version $version" }
+            Err("Publishing branch '$branch' failed: ${result.error.message ?: result.error.toString()}")
+          }
       }
 
     } catch (e: NotFoundHalResponse) {
-      val message = "Could not create branch for provider $name, link was missing. It looks like your Pact Broker does not support branches, please update to Pact Broker version 2.86.0 or later for branch support"
+      val message = "Could not create branch for provider $name, link was missing. It looks like your Pact Broker " +
+        "does not support branches, please update to Pact Broker version 2.86.0 or later for branch support"
       logger.error(e) { message }
       return Err(message)
     }
@@ -661,6 +784,7 @@ open class PactBrokerClient(
     const val PROVIDER_BRANCH_VERSION = "pb:branch-version"
     const val PACTS = "pb:pacts"
     const val UTF8 = "UTF-8"
+    const val PUBLISH_CONTRACTS_LINK = "pb:publish-contracts"
 
     fun uploadTags(
       halClient: IHalClient,
@@ -676,7 +800,12 @@ open class PactBrokerClient(
       return result
     }
 
-    private fun uploadTag(halClient: IHalClient, consumerName: String, version: String, it: String): Result<String?, Exception> {
+    private fun uploadTag(
+      halClient: IHalClient,
+      consumerName: String,
+      version: String,
+      it: String
+    ): Result<String?, Exception> {
       val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
           "pacticipant" to consumerName,
           "version" to version,

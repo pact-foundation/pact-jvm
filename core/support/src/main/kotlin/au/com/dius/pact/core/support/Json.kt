@@ -135,3 +135,7 @@ fun jsonObject(vararg pairs: Pair<String, Any?>) = JsonValue.Object(
 
 fun jsonObject(pairs: List<Pair<String, Any?>>) = JsonValue.Object(
   pairs.associate { it.first to toJson(it.second) }.toMutableMap())
+
+public fun String.toJson() = JsonValue.StringValue(this)
+
+public fun String?.toJson() = if (this == null) JsonValue.Null else JsonValue.StringValue(this)

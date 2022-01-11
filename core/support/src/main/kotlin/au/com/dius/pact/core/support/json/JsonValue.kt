@@ -240,6 +240,18 @@ sealed class JsonValue {
       is Null -> true
       else -> false
     }
+
+  val isObject: Boolean
+    get() = when (this) {
+      is Object -> true
+      else -> false
+    }
+
+  val isArray: Boolean
+    get() = when (this) {
+      is Array -> true
+      else -> false
+    }
 }
 
 fun <R> JsonValue?.map(transform: (JsonValue) -> R): List<R> = when {
