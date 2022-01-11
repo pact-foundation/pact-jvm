@@ -9,6 +9,7 @@ import kotlin.reflect.full.createInstance
 
 object MatchingConfig {
   private val coreBodyMatchers = mapOf(
+    "application/vnd.schemaregistry.v1\\+json" to "au.com.dius.pact.core.matchers.KafkaJsonSchemaContentMatcher",
     "application/.*xml" to "au.com.dius.pact.core.matchers.XmlContentMatcher",
     "text/xml" to "au.com.dius.pact.core.matchers.XmlContentMatcher",
     ".*json.*" to "au.com.dius.pact.core.matchers.JsonContentMatcher",

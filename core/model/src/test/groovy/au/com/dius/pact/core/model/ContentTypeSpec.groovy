@@ -24,16 +24,40 @@ class ContentTypeSpec extends Specification {
 
     where:
 
-    value                  || result
-    ''                     || false
-    'text/plain'           || false
-    'application/pdf'      || false
-    'application/json'     || true
-    'application/hal+json' || true
-    'application/HAL+JSON' || true
-    'application/x-thrift' || true
-    'application/x-other'  || false
-    'application/graphql'  || true
+    value                                    || result
+    ''                                       || false
+    'text/plain'                             || false
+    'application/pdf'                        || false
+    'application/json'                       || true
+    'application/hal+json'                   || true
+    'application/HAL+JSON'                   || true
+    'application/vnd.schemaregistry.v1+json' || false
+    'application/x-thrift'                   || true
+    'application/x-other'                    || false
+    'application/graphql'                    || true
+
+    contentType = new ContentType(value)
+  }
+
+  @Unroll
+  def '"#value" is kafka schema registry -> #result'() {
+    expect:
+    result == contentType.kafkaSchemaRegistryJson
+
+    where:
+
+    value                                    || result
+    ''                                       || false
+    'text/plain'                             || false
+    'application/pdf'                        || false
+    'application/json'                       || false
+    'application/hal+json'                   || false
+    'application/HAL+JSON'                   || false
+    'application/vnd.schemaregistry.v1+json' || true
+    'application/x-thrift'                   || false
+    'application/x-other'                    || false
+    'application/graphql'                    || false
+    'application/xml'                        || false
 
     contentType = new ContentType(value)
   }

@@ -14,29 +14,63 @@ import spock.lang.Unroll
 
 class MessageSpec extends Specification {
 
+  @Unroll
   def 'contentsAsBytes handles contents in string form'() {
-      when:
-      Message message = new Message('test', [], OptionalBody.body('1 2 3 4'.bytes))
+    expect:
+    message.contentsAsBytes() == expectedContents
 
-      then:
-      message.contentsAsBytes() == '1 2 3 4'.bytes
+    where:
+
+    body               | contentType                              | expectedContents
+    '1 2 3 4'          | 'text/plain'                             | '1 2 3 4'.bytes
+    '1 2 3 4'          | ''                                       | '1 2 3 4'.bytes
+    '{"A": "Value A"}' | 'application/json'                       | '{"A": "Value A"}'.bytes
+    '{"A": "Value A"}' | 'application/vnd.schemaregistry.v1+json' | kStr('{"A": "Value A"}').bytes
+    ''                 | 'application/vnd.schemaregistry.v1+json' | ''.bytes
+
+    message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)))
   }
 
   def 'contentsAsBytes handles no contents'() {
-      when:
-      Message message = new Message('test', [], OptionalBody.missing())
+    when:
+    Message message = new Message('test', [], OptionalBody.missing())
 
-      then:
-      message.contentsAsBytes() == []
+    then:
+    message.contentsAsBytes() == []
+  }
+
+  @Unroll
+  def 'contentsAsString handles contents in string form'() {
+    expect:
+    message.contentsAsString() == expectedContents
+
+    where:
+
+    body                               | contentType                              | expectedContents
+    '1 2 3 4'                          | 'text/plain'                             | '1 2 3 4'
+    '1 2 3 4'                          | ''                                       | '1 2 3 4'
+    '{"A": "Value A", "B": "Value B"}' | 'application/json'                       | '{"A": "Value A", "B": "Value B"}'
+    '{"A": "Value A"}'                 | 'application/vnd.schemaregistry.v1+json' | kStr('{"A": "Value A"}')
+    ''                                 | 'application/vnd.schemaregistry.v1+json' | ''
+
+    message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)))
+  }
+
+  def 'contentsAsString handles no contents'() {
+    when:
+    Message message = new Message('test', [], OptionalBody.missing())
+
+    then:
+    message.contentsAsString() == ''
   }
 
   def 'defaults to V3 provider state format when converting from a map'() {
     given:
     def map = [
-      providerState: 'test state',
-      providerStates: [
-        [name: 'V3 state']
-      ]
+            providerState : 'test state',
+            providerStates: [
+                    [name: 'V3 state']
+            ]
     ]
 
     when:
@@ -60,28 +94,28 @@ class MessageSpec extends Specification {
   def 'Uses V3 provider state format when converting to a map'() {
     given:
     Message message = new Message('test', [new ProviderState('Test', [a: 'A', b: 100])],
-      OptionalBody.body('"1 2 3 4"'.bytes))
+            OptionalBody.body('"1 2 3 4"'.bytes))
 
     when:
     def map = message.toMap(PactSpecVersion.V3)
 
     then:
     map == [
-      description: 'test',
-      metaData: [:],
-      contents: '"1 2 3 4"',
-      providerStates: [
-        [name: 'Test', params: [a: 'A', b: 100]]
-      ]
+            description   : 'test',
+            metaData      : [:],
+            contents      : '"1 2 3 4"',
+            providerStates: [
+                    [name: 'Test', params: [a: 'A', b: 100]]
+            ]
     ]
   }
 
   def 'delegates to the matching rules to parse matchers'() {
     given:
     def json = [
-      matchingRules: [
-        'stuff': ['': [matchers: [ [match: 'type'] ] ] ]
-      ]
+            matchingRules: [
+                    'stuff': ['': [matchers: [[match: 'type']]]]
+            ]
     ]
 
     when:
@@ -118,15 +152,17 @@ class MessageSpec extends Specification {
 
     where:
 
-    body                               | contentType                | contents
-    '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
-    '{"A": "Value A", "B": "Value B"}' | ''                         | [A: 'Value A', B: 'Value B']
-    '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
-    '1 2 3 4'                          | ''                         | '1 2 3 4'
-    new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
+    body                               | contentType                              | contents
+    '{"A": "Value A", "B": "Value B"}' | 'application/json'                       | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}' | ''                                       | [A: 'Value A', B: 'Value B']
+    '1 2 3 4'                          | 'text/plain'                             | '1 2 3 4'
+    '1 2 3 4'                          | ''                                       | '1 2 3 4'
+    new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream'               | 'AQIDBA=='
+    '{"A": "Value A", "B": "Value B"}' | 'application/vnd.schemaregistry.v1+json' | [A: 'Value A', B: 'Value B']
+    'invalid json'                     | 'application/vnd.schemaregistry.v1+json' | 'invalid json'
 
     message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
-      new MatchingRulesImpl(), new Generators(), [contentType: contentType])
+            new MatchingRulesImpl(), new Generators(), [contentType: contentType])
   }
 
   @Unroll
@@ -145,7 +181,7 @@ class MessageSpec extends Specification {
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
     message = new Message('test', [], OptionalBody.body(body.bytes),
-      new MatchingRulesImpl(), new Generators(), [contentType: contentType])
+            new MatchingRulesImpl(), new Generators(), [contentType: contentType])
   }
 
   @Unroll
@@ -164,7 +200,7 @@ class MessageSpec extends Specification {
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
     message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
-      new MatchingRulesImpl(), new Generators(), [:])
+            new MatchingRulesImpl(), new Generators(), [:])
   }
 
   @Unroll
@@ -202,8 +238,53 @@ class MessageSpec extends Specification {
     null                                       | '{\n  "a": 100.0,\n  "b": "test"\n}'
 
     message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes,
-      ContentType.fromString(contentType)),
-      new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
+            ContentType.fromString(contentType)),
+            new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
+  }
+
+  def 'kafka schema registry content type should be handled - #contentType'() {
+    expect:
+    message.formatContents() == result
+
+    where:
+
+    contentType                              | result
+    'application/vnd.schemaregistry.v1+json' | '{\n  "a": 100.0,\n  "b": "test"\n}'
+
+    message = new Message('test',
+            [],
+            OptionalBody.body(createKafkaSchemaRegistryCompliantBytes('{"a": 100.0, "b": "test"}'),
+                    ContentType.fromString(contentType)),
+            new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
+  }
+
+  private byte[] createKafkaSchemaRegistryCompliantBytes(String json) {
+    ((kafkaSchemaRegistryMagicBytes() as List) << (json.bytes as List)).flatten()
+  }
+
+  private String kStr(String json) {
+    new String(kafkaSchemaRegistryMagicBytes()) + json
+  }
+
+  private byte[] kafkaSchemaRegistryMagicBytes() {
+    def zero = (byte) 0x00
+    def one = (byte) 0x01
+    new byte[] {zero, zero, zero, zero, one}
+  }
+
+  def 'should throw when kafka schema registry content does not start with magic bytes'() {
+    given:
+    Message message = new Message('test',
+            [],
+            OptionalBody.body('{"a": 100.0, "b": "test"}'.getBytes(),
+                    ContentType.fromString('application/vnd.schemaregistry.v1+json')),
+            new MatchingRulesImpl(), new Generators(), ['contentType': 'application/vnd.schemaregistry.v1+json'])
+
+    when:
+    message.formatContents()
+
+    then:
+    thrown(KafkaSchemaRegistryMagicBytesMissingException)
   }
 
   def 'when upgrading message to V4, rename the matching rules from body to content'() {

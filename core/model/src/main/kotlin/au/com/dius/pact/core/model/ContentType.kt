@@ -19,7 +19,9 @@ class ContentType(val contentType: MediaType?) {
       when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
         "json" -> true
         else -> {
-          if (jsonRegex.matches(contentType.subtype.toLowerCase())) {
+          if ("vnd.schemaregistry.v1+json" == contentType.subtype)
+            false
+          else if (jsonRegex.matches(contentType.subtype.toLowerCase())) {
             true
           } else {
             val superType = registry.getSupertype(contentType)
@@ -34,6 +36,13 @@ class ContentType(val contentType: MediaType?) {
     when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
       "xml" -> true
       else -> xmlRegex.matches(contentType.subtype.toLowerCase())
+    }
+  } else false
+
+  fun isKafkaSchemaRegistryJson(): Boolean = if (contentType != null) {
+    when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
+      "kafkaSchemaRegistryJson" -> true
+      else -> contentType.subtype == "vnd.schemaregistry.v1+json"
     }
   } else false
 
@@ -153,5 +162,7 @@ class ContentType(val contentType: MediaType?) {
     val JSON = ContentType("application/json")
     @JvmStatic
     val XML = ContentType("application/xml")
+    @JvmStatic
+    val KAFKA_SCHEMA_REGISTRY_JSON = ContentType("application/vnd.schemaregistry.v1+json")
   }
 }
