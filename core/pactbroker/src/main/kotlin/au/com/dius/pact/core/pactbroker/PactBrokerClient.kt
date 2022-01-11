@@ -414,7 +414,7 @@ open class PactBrokerClient(
 
     val publishContractsLink = halClient.linkUrl(PUBLISH_CONTRACTS_LINK)
     return if (publishContractsLink != null) {
-      when (val result = publishContract(halClient, publishContractsLink, providerName, consumerName, version, tags, pactText)) {
+      when (val result = publishContract(halClient, providerName, consumerName, version, tags, pactText)) {
         is Ok -> Ok("OK")
         is Err -> result
       }
@@ -437,7 +437,6 @@ open class PactBrokerClient(
    */
   private fun publishContract(
     halClient: IHalClient,
-    publishContractsLink: String,
     providerName: String,
     consumerName: String,
     version: String,
@@ -462,7 +461,7 @@ open class PactBrokerClient(
         )
       )
     )
-    return when (val result = halClient.postJson(publishContractsLink, mapOf(), body.serialise())) {
+    return when (val result = halClient.postJson(PUBLISH_CONTRACTS_LINK, mapOf(), body.serialise())) {
       is Ok -> {
         displayNotices(result.value)
         result
@@ -472,7 +471,11 @@ open class PactBrokerClient(
         if (error is RequestFailedException && error.body != null) {
           when (val json = handleWith<JsonValue> { JsonParser.parseString(error.body) }) {
             is Ok -> if (json.value is JsonValue.Object) {
-              displayNotices(json.value.asObject())
+              val body = json.value.asObject()
+              displayNotices(body)
+              if (error.status.statusCode == 400) {
+                displayErrors(body)
+              }
             } else {
               logger.error { "Response from Pact Broker was not in correct JSON format: got ${json.value}" }
             }
@@ -495,10 +498,10 @@ open class PactBrokerClient(
           val level = notice["level"].asString()
           val text = notice["text"].asString()
           when (level) {
-            "info", "prompt" -> logger.info { text }
-            "warning", "danger" -> logger.warn { text }
-            "error" -> logger.error { text }
-            else -> logger.debug { text }
+            "info", "prompt" -> logger.info { "notice: $text" }
+            "warning", "danger" -> logger.warn { "notice: $text" }
+            "error" -> logger.error { "notice: $text" }
+            else -> logger.debug { "notice: $text" }
           }
         } else {
           logger.error("Got an invalid notice value from the Pact Broker: Expected an object, got ${notices.name}")
@@ -506,6 +509,21 @@ open class PactBrokerClient(
       }
     } else {
       logger.error("Got an invalid notices value from the Pact Broker: Expected an array, got ${notices.name}")
+    }
+  }
+
+  private fun displayErrors(result: JsonValue.Object) {
+    val errors = result["errors"]
+    if (errors is JsonValue.Object) {
+      for ((key, errorJson) in errors.entries) {
+        if (errorJson.isArray) {
+          for (error in errorJson.asArray().values) {
+            logger.error("$key: $error")
+          }
+        } else {
+          logger.error("$key: $errorJson")
+        }
+      }
     }
   }
 
