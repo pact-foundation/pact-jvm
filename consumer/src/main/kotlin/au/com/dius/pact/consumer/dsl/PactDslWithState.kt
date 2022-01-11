@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.dsl
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.support.json.JsonValue
 
 open class PactDslWithState @JvmOverloads constructor(
   private val consumerPactBuilder: ConsumerPactBuilder,
@@ -10,7 +11,8 @@ open class PactDslWithState @JvmOverloads constructor(
   var providerName: String,
   private val defaultRequestValues: PactDslRequestWithoutPath?,
   private val defaultResponseValues: PactDslResponse?,
-  val version: PactSpecVersion = PactSpecVersion.V3
+  val version: PactSpecVersion = PactSpecVersion.V3,
+  private var additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
 ) {
   @JvmField
   var state: MutableList<ProviderState> = mutableListOf()
@@ -24,9 +26,11 @@ open class PactDslWithState @JvmOverloads constructor(
     state: ProviderState,
     defaultRequestValues: PactDslRequestWithoutPath?,
     defaultResponseValues: PactDslResponse?,
-    version: PactSpecVersion
+    version: PactSpecVersion,
+    additionalMetadata: MutableMap<String, JsonValue>
   ) : this(consumerPactBuilder, consumerName, providerName, defaultRequestValues, defaultResponseValues, version) {
     this.state.add(state)
+    this.additionalMetadata = additionalMetadata
   }
 
   /**
@@ -36,7 +40,7 @@ open class PactDslWithState @JvmOverloads constructor(
    */
   fun uponReceiving(description: String): PactDslRequestWithoutPath {
     return PactDslRequestWithoutPath(consumerPactBuilder, this, description, defaultRequestValues,
-      defaultResponseValues, version)
+      defaultResponseValues, version, additionalMetadata)
   }
 
   /**
@@ -63,6 +67,22 @@ open class PactDslWithState @JvmOverloads constructor(
    */
   fun comment(comment: String): PactDslWithState {
     comments.add(comment)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: String): PactDslWithState {
+    additionalMetadata[key] = JsonValue.StringValue(value)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: JsonValue): PactDslWithState {
+    additionalMetadata[key] = value
     return this
   }
 }

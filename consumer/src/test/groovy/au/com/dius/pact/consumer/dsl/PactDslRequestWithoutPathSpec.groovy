@@ -12,7 +12,7 @@ class PactDslRequestWithoutPathSpec extends Specification {
     ConsumerPactBuilder consumerPactBuilder = ConsumerPactBuilder.consumer('spec')
     PactDslWithState pactDslWithState = new PactDslWithState(consumerPactBuilder, 'spec', 'spec', null, null)
     PactDslRequestWithoutPath defaultRequestValues = new PactDslRequestWithoutPath(consumerPactBuilder,
-      pactDslWithState, 'test', null, null)
+      pactDslWithState, 'test', null, null, [:])
       .method('PATCH')
       .headers('test', 'test')
       .query('test=true')
@@ -20,7 +20,7 @@ class PactDslRequestWithoutPathSpec extends Specification {
 
     when:
     PactDslRequestWithoutPath subject = new PactDslRequestWithoutPath(consumerPactBuilder, pactDslWithState, 'test',
-      defaultRequestValues, null)
+      defaultRequestValues, null, [:])
 
     then:
     subject.requestMethod == 'PATCH'
@@ -37,7 +37,7 @@ class PactDslRequestWithoutPathSpec extends Specification {
 
     when:
     PactDslRequestWithoutPath request = new PactDslRequestWithoutPath(consumerPactBuilder,
-      pactDslWithState, 'test', null, null)
+      pactDslWithState, 'test', null, null, [:])
       .headers('content-type', 'text/plain')
       .body(new PactDslJsonBody())
 
@@ -45,4 +45,17 @@ class PactDslRequestWithoutPathSpec extends Specification {
     request.requestHeaders == ['content-type': ['text/plain']]
   }
 
+  def 'allows setting any additional metadata'() {
+    given:
+    ConsumerPactBuilder consumerPactBuilder = ConsumerPactBuilder.consumer('spec')
+    PactDslWithState pactDslWithState = new PactDslWithState(consumerPactBuilder, 'spec', 'spec', null, null)
+    PactDslRequestWithoutPath subject = new PactDslRequestWithoutPath(consumerPactBuilder, pactDslWithState, 'test',
+      null, null, [:])
+
+    when:
+    subject.addMetadataValue('test', 'value')
+
+    then:
+    subject.additionalMetadata == [test: 'value']
+  }
 }

@@ -51,6 +51,7 @@ open class PactBuilder(
   private val interactions: MutableList<Interaction> = mutableListOf()
   private var currentInteraction: V4Interaction? = null
   private val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
+  private val additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
 
   init {
     CatalogueManager.registerCoreEntries(contentMatcherCatalogueEntries() +
@@ -362,12 +363,28 @@ open class PactBuilder(
     }
   }
 
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: String): PactBuilder {
+    additionalMetadata[key] = JsonValue.StringValue(value)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: JsonValue): PactBuilder {
+    additionalMetadata[key] = value
+    return this
+  }
+
   fun toPact(): V4Pact {
     if (currentInteraction != null) {
       interactions.add(currentInteraction!!)
     }
     return V4Pact(Consumer(consumer), Provider(provider), interactions,
-      BasePact.metaData(null, PactSpecVersion.V4) + pluginMetadata(),
+      BasePact.metaData(null, PactSpecVersion.V4) + additionalMetadata + pluginMetadata(),
       UnknownPactSource)
   }
 

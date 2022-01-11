@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.dsl
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.BasePact
+import au.com.dius.pact.core.model.BasePact.Companion.DEFAULT_METADATA
 import au.com.dius.pact.core.model.BasePact.Companion.metaData
 import au.com.dius.pact.core.model.ContentType.Companion.fromString
 import au.com.dius.pact.core.model.HttpRequest
@@ -29,6 +30,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
 import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonArray
 import com.mifmif.common.regex.Generex
 import org.apache.hc.core5.http.ContentType
@@ -41,12 +43,13 @@ import javax.xml.transform.TransformerException
 
 @Suppress("TooManyFunctions")
 open class PactDslResponse @JvmOverloads constructor(
-  private val consumerPactBuilder: ConsumerPactBuilder,
-  private val request: PactDslRequestWithPath?,
-  private val defaultRequestValues: PactDslRequestWithoutPath? = null,
-  private val defaultResponseValues: PactDslResponse? = null,
-  private val comments: MutableList<String> = mutableListOf(),
-  val version: PactSpecVersion = PactSpecVersion.V3
+    private val consumerPactBuilder: ConsumerPactBuilder,
+    private val request: PactDslRequestWithPath?,
+    private val defaultRequestValues: PactDslRequestWithoutPath? = null,
+    private val defaultResponseValues: PactDslResponse? = null,
+    private val comments: MutableList<String> = mutableListOf(),
+    val version: PactSpecVersion = PactSpecVersion.V3,
+    private val additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
 ) {
   private var responseStatus = 200
   private val responseHeaders: MutableMap<String, List<String>> = HashMap()
@@ -315,12 +318,14 @@ open class PactDslResponse @JvmOverloads constructor(
       pactClass.isAssignableFrom(V4Pact::class.java) -> {
         V4Pact(request!!.consumer, request.provider,
           consumerPactBuilder.interactions.map { obj -> obj.asV4Interaction() }.toMutableList(),
-          metaData(null, PactSpecVersion.V4),
+          additionalMetadata + metaData(null, PactSpecVersion.V4),
           UnknownPactSource) as P
       }
       pactClass.isAssignableFrom(RequestResponsePact::class.java) -> {
         RequestResponsePact(request!!.provider, request.consumer,
-          consumerPactBuilder.interactions.map { it.asSynchronousRequestResponse()!! }.toMutableList()) as P
+          consumerPactBuilder.interactions.map { it.asSynchronousRequestResponse()!! }.toMutableList(),
+          DEFAULT_METADATA + additionalMetadata
+        ) as P
       }
       else -> throw IllegalArgumentException(pactClass.simpleName + " is not a valid Pact class")
     }
@@ -341,7 +346,7 @@ open class PactDslResponse @JvmOverloads constructor(
   fun uponReceiving(description: String): PactDslRequestWithPath {
     addInteraction()
     return PactDslRequestWithPath(consumerPactBuilder, request!!, description, defaultRequestValues,
-      defaultResponseValues, comments, version)
+      defaultResponseValues, comments, version, additionalMetadata)
   }
 
   /**
@@ -351,7 +356,7 @@ open class PactDslResponse @JvmOverloads constructor(
   fun given(state: String): PactDslWithState {
     addInteraction()
     return PactDslWithState(consumerPactBuilder, request!!.consumer.name, request.provider.name,
-      ProviderState(state), defaultRequestValues, defaultResponseValues, version)
+      ProviderState(state), defaultRequestValues, defaultResponseValues, version, additionalMetadata)
   }
 
   /**
@@ -362,7 +367,7 @@ open class PactDslResponse @JvmOverloads constructor(
   fun given(state: String, params: Map<String, Any>): PactDslWithState {
     addInteraction()
     return PactDslWithState(consumerPactBuilder, request!!.consumer.name, request.provider.name,
-      ProviderState(state, params), defaultRequestValues, defaultResponseValues, version)
+      ProviderState(state, params), defaultRequestValues, defaultResponseValues, version, additionalMetadata)
   }
 
   /**
@@ -504,6 +509,22 @@ open class PactDslResponse @JvmOverloads constructor(
     val matcher = StatusCodeMatcher(HttpStatus.StatusCodes, statusCodes)
     responseMatchers.addCategory("status").addRule(matcher)
     responseStatus = statusCodes.first()
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: String): PactDslResponse {
+    additionalMetadata[key] = JsonValue.StringValue(value)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: JsonValue): PactDslResponse {
+    additionalMetadata[key] = value
     return this
   }
 

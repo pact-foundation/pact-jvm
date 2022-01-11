@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.support.json.JsonValue
 import org.apache.hc.core5.http.ContentType
 import spock.lang.Issue
 import spock.lang.Specification
@@ -142,5 +143,23 @@ class PactDslResponseSpec extends Specification {
 
     then:
     response.responseHeaders == ['content-type': ['text/plain']]
+  }
+
+  def 'allows setting any additional metadata'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('complex-instruction-service')
+      .hasPactWith('workflow-service')
+      .uponReceiving('a request to start a workflow')
+      .path('/startWorkflowProcessInstance')
+      .willRespondWith()
+      .body(PactDslJsonRootValue.numberType())
+
+    when:
+    def pact = builder.addMetadataValue('test', 'value').toPact()
+
+    then:
+    pact.metadata.findAll {
+      !['pactSpecification', 'pact-jvm', 'plugins'].contains(it.key)
+    } == [test: new JsonValue.StringValue('value')]
   }
 }

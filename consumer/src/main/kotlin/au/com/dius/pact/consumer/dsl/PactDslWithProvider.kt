@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.dsl
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.support.json.JsonValue
 
 open class PactDslWithProvider @JvmOverloads constructor(
   val consumerPactBuilder: ConsumerPactBuilder,
@@ -11,6 +12,7 @@ open class PactDslWithProvider @JvmOverloads constructor(
 ) {
   private var defaultRequestValues: PactDslRequestWithoutPath? = null
   private var defaultResponseValues: PactDslResponse? = null
+  private val additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
 
   /**
    * Describe the state the provider needs to be in for the pact test to be verified.
@@ -19,7 +21,7 @@ open class PactDslWithProvider @JvmOverloads constructor(
    */
   fun given(state: String): PactDslWithState {
     return PactDslWithState(consumerPactBuilder, consumerPactBuilder.consumerName, providerName,
-      ProviderState(state), defaultRequestValues, defaultResponseValues, version)
+      ProviderState(state), defaultRequestValues, defaultResponseValues, version, additionalMetadata)
   }
 
   /**
@@ -30,7 +32,7 @@ open class PactDslWithProvider @JvmOverloads constructor(
    */
   fun given(state: String, params: Map<String, Any?>): PactDslWithState {
     return PactDslWithState(consumerPactBuilder, consumerPactBuilder.consumerName, providerName,
-      ProviderState(state, params), defaultRequestValues, defaultResponseValues, version)
+      ProviderState(state, params), defaultRequestValues, defaultResponseValues, version, additionalMetadata)
   }
 
   /**
@@ -51,7 +53,7 @@ open class PactDslWithProvider @JvmOverloads constructor(
       i += 2
     }
     return PactDslWithState(consumerPactBuilder, consumerPactBuilder.consumerName, providerName,
-      ProviderState(state, params), defaultRequestValues, defaultResponseValues, version)
+      ProviderState(state, params), defaultRequestValues, defaultResponseValues, version, additionalMetadata)
   }
 
   /**
@@ -61,7 +63,7 @@ open class PactDslWithProvider @JvmOverloads constructor(
    */
   fun uponReceiving(description: String): PactDslRequestWithoutPath {
     return PactDslWithState(consumerPactBuilder, consumerPactBuilder.consumerName, providerName,
-      defaultRequestValues, defaultResponseValues, version)
+      defaultRequestValues, defaultResponseValues, version, additionalMetadata)
       .uponReceiving(description)
   }
 
@@ -71,5 +73,21 @@ open class PactDslWithProvider @JvmOverloads constructor(
 
   fun setDefaultResponseValues(defaultResponseValues: PactDslResponse) {
     this.defaultResponseValues = defaultResponseValues
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: String): PactDslWithProvider {
+    additionalMetadata[key] = JsonValue.StringValue(value)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: JsonValue): PactDslWithProvider {
+    additionalMetadata[key] = value
+    return this
   }
 }

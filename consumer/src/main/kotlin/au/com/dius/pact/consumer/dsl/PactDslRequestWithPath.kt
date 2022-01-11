@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.json.JsonValue
 import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
@@ -40,6 +41,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   var description: String
   var path = "/"
   private val defaultResponseValues: PactDslResponse?
+  private var additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
 
   @Suppress("LongParameterList")
   @JvmOverloads
@@ -58,7 +60,8 @@ open class PactDslRequestWithPath : PactDslRequestBase {
                        defaultRequestValues: PactDslRequestWithoutPath?,
                        defaultResponseValues: PactDslResponse?,
                        comments: MutableList<String> = mutableListOf(),
-                       version: PactSpecVersion = PactSpecVersion.V3
+                       version: PactSpecVersion = PactSpecVersion.V3,
+                       additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
   ) : super(defaultRequestValues, comments, version) {
     this.consumerPactBuilder = consumerPactBuilder
     this.requestMatchers = requestMatchers
@@ -75,6 +78,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     this.requestGenerators = requestGenerators
     this.defaultResponseValues = defaultResponseValues
     this.comments = comments
+    this.additionalMetadata = additionalMetadata
     setupDefaultValues()
   }
 
@@ -87,7 +91,8 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     defaultRequestValues: PactDslRequestWithoutPath?,
     defaultResponseValues: PactDslResponse?,
     comments: MutableList<String> = mutableListOf(),
-    version: PactSpecVersion = PactSpecVersion.V3
+    version: PactSpecVersion = PactSpecVersion.V3,
+    additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
   ) : super(defaultRequestValues, comments, version) {
     requestMethod = "GET"
     this.consumerPactBuilder = consumerPactBuilder
@@ -97,6 +102,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     this.description = description
     this.defaultResponseValues = defaultResponseValues
     path = existing.path
+    this.additionalMetadata = additionalMetadata
     setupDefaultValues()
   }
 
@@ -400,7 +406,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    */
   fun willRespondWith(): PactDslResponse {
     return PactDslResponse(consumerPactBuilder, this, defaultRequestValues, defaultResponseValues, comments,
-      version)
+      version, additionalMetadata)
   }
 
   /**
@@ -605,6 +611,22 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    */
   fun comment(comment: String): PactDslRequestWithPath {
     this.comments.add(comment)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: String): PactDslRequestWithPath {
+    additionalMetadata[key] = JsonValue.StringValue(value)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: JsonValue): PactDslRequestWithPath {
+    additionalMetadata[key] = value
     return this
   }
 }

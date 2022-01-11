@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.json.JsonValue
 import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.hc.core5.http.ContentType
@@ -22,12 +23,13 @@ import javax.xml.transform.TransformerException
 
 @Suppress("TooManyFunctions")
 open class PactDslRequestWithoutPath @JvmOverloads constructor(
-  private val consumerPactBuilder: ConsumerPactBuilder,
-  private val pactDslWithState: PactDslWithState,
-  private val description: String,
-  defaultRequestValues: PactDslRequestWithoutPath?,
-  private val defaultResponseValues: PactDslResponse?,
-  version: PactSpecVersion = PactSpecVersion.V3
+    private val consumerPactBuilder: ConsumerPactBuilder,
+    private val pactDslWithState: PactDslWithState,
+    private val description: String,
+    defaultRequestValues: PactDslRequestWithoutPath?,
+    private val defaultResponseValues: PactDslResponse?,
+    version: PactSpecVersion = PactSpecVersion.V3,
+    private val additionalMetadata: MutableMap<String, JsonValue>
 ) : PactDslRequestBase(defaultRequestValues, pactDslWithState.comments, version) {
   private val consumerName: String = pactDslWithState.consumerName
   private val providerName: String = pactDslWithState.providerName
@@ -286,7 +288,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
   fun path(path: String): PactDslRequestWithPath {
     return PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
       description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
-      defaultRequestValues, defaultResponseValues, comments, version)
+      defaultRequestValues, defaultResponseValues, comments, version, additionalMetadata)
   }
 
   /**
@@ -306,7 +308,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
     requestMatchers.addCategory("path").addRule(RegexMatcher(pathRegex))
     return PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
       description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
-      defaultRequestValues, defaultResponseValues, comments, version)
+      defaultRequestValues, defaultResponseValues, comments, version, additionalMetadata)
   }
 
   /**
@@ -360,7 +362,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
     requestGenerators.addGenerator(Category.PATH, "", ProviderStateGenerator(expression, DataType.STRING))
     return PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
       description, example, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
-      defaultRequestValues, defaultResponseValues, comments, version)
+      defaultRequestValues, defaultResponseValues, comments, version, additionalMetadata)
   }
 
   /**
@@ -459,5 +461,21 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
   fun queryMatchingISODatetime(field: String, example: String? = null): PactDslRequestWithoutPath {
     return queryMatchingDatetimeBase(field, DateFormatUtils.ISO_DATETIME_FORMAT.pattern,
       example) as PactDslRequestWithoutPath
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: String): PactDslRequestWithoutPath {
+    additionalMetadata[key] = JsonValue.StringValue(value)
+    return this
+  }
+
+  /**
+   * Adds additional values to the metadata section of the Pact file
+   */
+  fun addMetadataValue(key: String, value: JsonValue): PactDslRequestWithoutPath {
+    additionalMetadata[key] = value
+    return this
   }
 }
