@@ -648,10 +648,10 @@ For example:
 ```
 You can now execute `mvn pact:publish` to publish the pact files.
 
-_NOTE:_ The pact broker requires a version for all published pacts. The `publish` task will use the version of the
+**NOTE:** The pact broker requires a version for all published pacts. The `publish` task will use the version of the
 project by default, but can be overwritten with the `projectVersion` property. Make sure you have set one otherwise the broker will reject the pact files.
 
-_NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to 
+**NOTE:** By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to 
 automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
 
 You can set any tags that the pacts should be published with by setting the `tags` list property. A common use of this
@@ -748,6 +748,50 @@ For example:
     </configuration>
 </plugin>
 ```
+
+## Including the consumer branch when publishing [min versions 4.1.33/4.2.19/4.3.4]
+
+The consumer branch and build URL can be included when the pacts are published. This requires Pact Broker version
+**2.86.0 or later**.
+
+The branch name and build URL can either be configured in the POM or as system properties or environment variables.
+
+### Configured in the POM
+
+There are attributes that can be added to the plugin configuration to set these values.
+
+```xml
+<plugin>
+    <groupId>au.com.dius.pact.provider</groupId>
+    <artifactId>maven</artifactId>
+    <version>4.1.33</version>
+    <configuration>
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+     <branchName>feat/test</branchName>
+     <buildUrl>https://github.com/pact-foundation/pact-jvm/actions/runs/1685674772</buildUrl> <!-- Build URL is not required -->
+    </configuration>
+</plugin>
+```
+
+## Configured as JVM system properties
+
+You can configure these values as system properties using the following keys:
+* `pact.publish.consumer.buildUrl`
+* `pact.publish.consumer.branchName`
+* `pact.publish.consumer.version`
+
+## Configured as environment variables
+
+You can configure these values as environment variables using the following keys:
+* `pact.publish.consumer.buildUrl`
+* `pact.publish.consumer.branchName`
+* `pact.publish.consumer.version`
+
+OR
+
+* `PACT_PUBLISH_CONSUMER_BUILDURL`
+* `PACT_PUBLISH_CONSUMER_BRANCHNAME`
+* `PACT_PUBLISH_CONSUMER_VERSION`
 
 ### Overriding the handling of a body data type
 

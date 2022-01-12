@@ -230,7 +230,6 @@ would skip it.  This can be useful when you want to define two providers, one wi
 and as second without, so you can manually start your provider (to debug it from your IDE, for example) but still want a `pactVerify` 
  to run normally from your CI build.
 
-
 ## Enabling insecure SSL
 
 For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting
@@ -795,6 +794,49 @@ pact {
 
 }
 ```
+
+## Including the consumer branch when publishing [min versions 4.1.33/4.2.19/4.3.4]
+
+The consumer branch and build URL can be included when the pacts are published. This requires Pact Broker version 
+**2.86.0 or later**.
+
+The branch name and build URL can either be configured in the project or as system properties or environment variables.
+
+### Configured in the build
+
+There are attributes on the `publish` block to set these values.
+
+```groovy
+pact {
+
+    publish {
+      consumerBranch = 'feat/test'
+      // build URL is optional 
+      consumerBuildUrl = 'https://github.com/pact-foundation/pact-jvm/actions/runs/1685674772'
+    }
+
+}
+```
+
+## Configured as JVM system properties
+
+You can configure these values as system properties using the following keys:
+* `pact.publish.consumer.buildUrl`
+* `pact.publish.consumer.branchName`
+* `pact.publish.consumer.version`
+
+## Configured as environment variables
+
+You can configure these values as environment variables using the following keys:
+* `pact.publish.consumer.buildUrl`
+* `pact.publish.consumer.branchName`
+* `pact.publish.consumer.version`
+
+OR
+
+* `PACT_PUBLISH_CONSUMER_BUILDURL`
+* `PACT_PUBLISH_CONSUMER_BRANCHNAME`
+* `PACT_PUBLISH_CONSUMER_VERSION`
 
 # Verifying a message provider
 
