@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PublishConfiguration
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import org.apache.maven.plugin.MojoExecutionException
@@ -9,6 +10,7 @@ import spock.util.environment.RestoreSystemProperties
 
 import java.nio.file.Files
 
+@SuppressWarnings('LineLength')
 class PactPublishMojoSpec extends Specification {
 
   private PactPublishMojo mojo
@@ -33,7 +35,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(null)
+    3 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -53,7 +55,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(null) >>
+    3 * brokerClient.uploadPactFile(_, _) >> new Ok(null) >>
             new Err(new RuntimeException('FAILED! Bang')) >> new Ok(null)
     thrown(MojoExecutionException)
 
@@ -163,7 +165,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, tags) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', tags)) >> new Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -184,7 +186,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, ['1', '2', '3']) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', ['1', '2', '3'])) >> new Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -209,13 +211,33 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(file1, _, []) >> new Ok(null)
-    0 * brokerClient.uploadPactFile(file2, _, [])
-    0 * brokerClient.uploadPactFile(file3, _, [])
-    0 * brokerClient.uploadPactFile(file4, _, [])
+    1 * brokerClient.uploadPactFile(file1, _) >> new Ok(null)
+    0 * brokerClient.uploadPactFile(file2, _)
+    0 * brokerClient.uploadPactFile(file3, _)
+    0 * brokerClient.uploadPactFile(file4, _)
 
     cleanup:
     dir.deleteDir()
   }
 
+  def 'Allows the branch name to be set'() {
+    given:
+    def dir = Files.createTempDirectory('pacts')
+    def pact = PactPublishMojoSpec.classLoader.getResourceAsStream('pacts/contract.json').text
+    def file = Files.createTempFile(dir, 'pactfile', '.json')
+    file.write(pact)
+    mojo.pactDirectory = dir.toString()
+
+    mojo.branchName = 'feat/test'
+    mojo.buildUrl = 'http:/1234'
+
+    when:
+    mojo.execute()
+
+    then:
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', [], 'feat/test', 'http:/1234')) >> new Ok(null)
+
+    cleanup:
+    dir.deleteDir()
+  }
 }
