@@ -11,7 +11,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
-@SuppressWarnings(['UnnecessaryGetter', 'LineLength', 'NestedBlockDepth', 'AbcMetric', 'MethodSize'])
+@SuppressWarnings(['UnnecessaryGetter', 'LineLength', 'NestedBlockDepth', 'AbcMetric', 'MethodSize', 'ClassSize'])
 class PactBrokerClientPactSpec extends Specification {
 
   private PactBrokerClient pactBrokerClient
@@ -256,6 +256,276 @@ class PactBrokerClientPactSpec extends Specification {
       def result = pactBrokerClient.uploadPactFile(pactFile, '10.0.0')
       assert result instanceof Err
       assert result.error.body == body
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+   def 'new end point - returns success when uploading a pact is ok'() {
+      given:
+      pactBroker {
+        uponReceiving('a HAL navigate request')
+        withAttributes(method: 'GET', path: '/')
+        willRespondWith(status: 200)
+        withBody(mimetype: 'application/json') {
+          _links {
+            'pb:publish-pact' {
+              href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+              title 'Publish a pact'
+              templated true
+            }
+            'pb:publish-contracts' {
+              href url('http://localhost:9876', 'contracts/publish')
+              title 'Publish Contracts'
+              templated false
+            }
+          }
+        }
+        uponReceiving('a pact publish request')
+        withAttributes(method: 'POST', path: '/contracts/publish')
+        withBody {
+          pacticipantName 'Foo Consumer'
+          pacticipantVersionNumber '10.0.0/A'
+          tags = []
+          contracts eachLike {
+            consumerName 'Foo Consumer'
+            providerName 'Provider'
+            specification 'pact'
+            contentType 'application/json'
+            content Base64.encoder.encodeToString(pactContents.bytes)
+          }
+        }
+        willRespondWith(status: 200)
+        withBody {
+          notices = [
+            {
+              level string('debug')
+              text string('Created Foo version dc5eb529230038a4673b8c971395bd2922d8b240 with branch main and tags main')
+            }
+          ]
+        }
+      }
+
+      when:
+      def result = pactBroker.runTest { server, context ->
+        assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A') instanceof Ok
+      }
+
+      then:
+      result instanceof PactVerificationResult.Ok
+   }
+
+  def 'new end point - publish pact with tags'() {
+    given:
+    pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+          'pb:pacticipant-version-tag' {
+            href url('http://localhost:9876', '/pacticipants/{pacticipant}/versions/{version}/tags/{tag}')
+            title 'Create a tag'
+            templated true
+          }
+          'pb:publish-contracts' {
+            href url('http://localhost:9876', 'contracts/publish')
+            title 'Publish Contracts'
+            templated false
+          }
+        }
+      }
+      uponReceiving('a pact publish request')
+      withAttributes(method: 'POST', path: '/contracts/publish')
+      withBody {
+        pacticipantName 'Foo Consumer'
+        pacticipantVersionNumber '10.0.0/A'
+        tags = [ 'A', 'B' ]
+        contracts eachLike {
+          consumerName 'Foo Consumer'
+          providerName 'Provider'
+          specification 'pact'
+          contentType 'application/json'
+          content Base64.encoder.encodeToString(pactContents.bytes)
+        }
+      }
+      willRespondWith(status: 200)
+      withBody {
+        notices = [
+          {
+            level string('debug')
+            text string('Created Foo version dc5eb529230038a4673b8c971395bd2922d8b240 with branch main and tags A, B')
+          }
+        ]
+      }
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A', ['A', 'B']) instanceof Ok
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+  def 'new end point - returns an error when forbidden to publish the pact'() {
+    given:
+    pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+          'pb:publish-contracts' {
+            href url('http://localhost:9876', 'contracts/publish')
+            title 'Publish Contracts'
+            templated false
+          }
+        }
+      }
+      uponReceiving('a pact publish request which will be forbidden')
+      withAttributes(method: 'POST', path: '/contracts/publish')
+      withBody {
+        pacticipantName 'Foo Consumer'
+        pacticipantVersionNumber '10.0.0'
+        tags = [ ]
+        contracts eachLike {
+          consumerName 'Foo Consumer'
+          providerName 'Provider'
+          specification 'pact'
+          contentType 'application/json'
+          content Base64.encoder.encodeToString(pactContents.bytes)
+        }
+      }
+      willRespondWith(status: 401, headers: [ 'Content-Type': 'application/json' ])
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Err
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+  def 'new end point - returns an error if the pact broker rejects the pact'() {
+    given:
+    def body = '{"errors":{"consumer_version_number":["Consumer version number \'XXX\' cannot be parsed to a version ' +
+      'number. The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1"]}}'
+    pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+          'pb:publish-contracts' {
+            href url('http://localhost:9876', 'contracts/publish')
+            title 'Publish Contracts'
+            templated false
+          }
+        }
+      }
+      given('No pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish request with invalid version')
+      withAttributes(method: 'POST', path: '/contracts/publish')
+      withBody {
+        pacticipantName 'Foo Consumer'
+        pacticipantVersionNumber 'XXXX'
+        tags = [ ]
+        contracts eachLike {
+          consumerName 'Foo Consumer'
+          providerName 'Provider'
+          specification 'pact'
+          contentType 'application/json'
+          content Base64.encoder.encodeToString(pactContents.bytes)
+        }
+      }
+      willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'], body: body)
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      def result = pactBrokerClient.uploadPactFile(pactFile, 'XXXX')
+      assert result instanceof Err
+      assert result.error.body == body
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+  def 'new end point - returns an error if the pact broker rejects the pact with a conflict'() {
+    given:
+    def message = 'Cannot change the content of the pact for Foo version 183a77b0 and provider Bar, as race conditions will cause unreliable results for can-i-deploy. Each pact must be published with a unique consumer version number. For more information see https://docs.pact.io/go/versioning'
+    pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:9876', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+          'pb:publish-contracts' {
+            href url('http://localhost:9876', 'contracts/publish')
+            title 'Publish Contracts'
+            templated false
+          }
+        }
+      }
+      given('No pact has been published between the Provider and Foo Consumer and there is a similar consumer')
+      uponReceiving('a pact publish request')
+      withAttributes(method: 'POST', path: '/contracts/publish')
+      withBody {
+        pacticipantName 'Foo Consumer'
+        pacticipantVersionNumber '10.0.0'
+        tags = [ ]
+        contracts eachLike {
+          consumerName 'Foo Consumer'
+          providerName 'Provider'
+          specification 'pact'
+          contentType 'application/json'
+          content Base64.encoder.encodeToString(pactContents.bytes)
+        }
+      }
+      willRespondWith(status: 409, headers: ['Content-Type': 'text/plain'])
+      withBody {
+        notices = [
+          {
+            text message
+            type 'error'
+          }
+        ]
+        errors {
+          content = [ message ]
+        }
+      }
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      def result = pactBrokerClient.uploadPactFile(pactFile, '10.0.0')
+      assert result instanceof Err
     }
 
     then:

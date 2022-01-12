@@ -1,5 +1,27 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.33 - Support branches when publishing Pacts
+
+* 0b41e1791 - feat: Update readmes on setting branches when publishing #1453 (Ronald Holshausen, Wed Jan 12 14:09:50 2022 +1100)
+* c95d2159c - feat: Update Maven publish task to support branches #1453 (Ronald Holshausen, Wed Jan 12 13:40:58 2022 +1100)
+* d9cffbf52 - feat: Update Gradle publish task to support branches #1453 (Ronald Holshausen, Wed Jan 12 12:53:03 2022 +1100)
+* a84070d02 - feat: Add pact tests for "all in one" endpoint to publish pacts #1452 (Ronald Holshausen, Tue Jan 11 16:46:58 2022 +1100)
+* 8a6adde2a - feat: Use "all in one" endpoint to publish pacts #1452 (Ronald Holshausen, Tue Jan 11 15:28:24 2022 +1100)
+* 8e100b843 - bump version to 4.1.33 (Ronald Holshausen, Thu Jan 6 11:37:22 2022 +1100)
+
+# 4.1.32 - Fix Analytics
+
+* 0fb473089 - fix(metrics): swap uid for cid (Ronald Holshausen, Thu Jan 6 10:22:39 2022 +1100)
+* 00aa12a74 - fix: add required event value to analytics call (Ronald Holshausen, Fri Dec 10 10:56:22 2021 +1100)
+* ad6bd6874 - bump version to 4.1.32 (Ronald Holshausen, Thu Dec 9 17:22:12 2021 +1100)
+
+# 4.1.31 - Bugfix Release
+
+* 5f9d4c9c2 - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 16:19:02 2021 +1100)
+* 30e224f27 - chore: update docs (Ronald Holshausen, Thu Dec 9 15:05:12 2021 +1100)
+* deaea1e53 - chore: update version in readme (Ronald Holshausen, Thu Dec 9 10:09:37 2021 +1100)
+* fb75a0885 - bump version to 4.1.31 (Ronald Holshausen, Wed Dec 8 17:12:30 2021 +1100)
+
 # 4.2.18 - Fix Analytics
 
 * a425672b3 - fix(metrics): swap uid for cid (Ronald Holshausen, Thu Jan 6 10:22:39 2022 +1100)

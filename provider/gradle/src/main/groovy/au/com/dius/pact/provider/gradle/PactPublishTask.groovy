@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
+import au.com.dius.pact.core.pactbroker.PublishConfiguration
 import au.com.dius.pact.core.pactbroker.RequestFailedException
 import com.github.michaelbull.result.Ok
 import groovy.io.FileType
@@ -35,6 +36,10 @@ class PactPublishTask extends DefaultTask {
           version = version.call()
         }
 
+        if (version == null || version.toString().empty) {
+          throw new GradleScriptException('The consumer version is required to publish Pact files', null)
+        }
+
         def brokerConfig = project.pact.broker ?: project.pact.publish
         def options = [:]
         if (StringUtils.isNotEmpty(brokerConfig.pactBrokerToken)) {
@@ -45,7 +50,11 @@ class PactPublishTask extends DefaultTask {
           options.authentication = [brokerConfig.pactBrokerAuthenticationScheme ?: 'basic',
                                     brokerConfig.pactBrokerUsername, brokerConfig.pactBrokerPassword]
         }
+
+        def publishConfig = new PublishConfiguration(version.toString(), pactPublish.tags, pactPublish.consumerBranch,
+          pactPublish.consumerBuildUrl)
         def brokerClient = new PactBrokerClient(brokerConfig.pactBrokerUrl, options, new PactBrokerClientConfig())
+
         File pactDirectory = pactPublish.pactDirectory as File
         boolean anyFailed = false
         pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->
@@ -54,11 +63,11 @@ class PactPublishTask extends DefaultTask {
           } else {
             def result
             if (pactPublish.tags) {
-              print "Publishing '${pactFile.name}' with tags ${pactPublish.tags.join(', ')} ... "
+              println "Publishing '${pactFile.name}' with tags ${pactPublish.tags.join(', ')} ... "
             } else {
-              print "Publishing '${pactFile.name}' ... "
+              println "Publishing '${pactFile.name}' ... "
             }
-            result = brokerClient.uploadPactFile(pactFile, version.toString(), pactPublish.tags)
+            result = brokerClient.uploadPactFile(pactFile, publishConfig)
             if (result instanceof Ok) {
               println('OK')
             } else {

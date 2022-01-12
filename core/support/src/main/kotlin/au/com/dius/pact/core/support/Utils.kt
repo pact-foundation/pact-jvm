@@ -12,7 +12,13 @@ import kotlin.math.pow
 import kotlin.reflect.full.cast
 import kotlin.reflect.full.declaredMemberProperties
 
+/**
+ * Common utility functions
+ */
 object Utils : KLogging() {
+  /**
+   * Recursively extracts a sequence of keys from a recursive Map structure
+   */
   fun extractFromMap(json: Map<String, Any>, vararg s: String): Any? {
     return if (s.size == 1) {
       json[s.first()]
@@ -28,6 +34,10 @@ object Utils : KLogging() {
     }
   }
 
+  /**
+   * Looks up a key in a map of a particular type. If the key does not exist, or the value is not the correct type,
+   * returns the default value
+   */
   fun <T : Any> lookupInMap(map: Map<String, Any?>, key: String, clazz: Class<T>, default: T): T {
     return if (map.containsKey(key)) {
       val value = map[key]
@@ -42,6 +52,9 @@ object Utils : KLogging() {
     }
   }
 
+  /**
+   * Finds a random open port between the min and max port values
+   */
   fun randomPort(lower: Int = 10000, upper: Int = 60000): Int {
     var port: Int? = null
     var count = 0
@@ -56,6 +69,9 @@ object Utils : KLogging() {
     return port ?: 0
   }
 
+  /**
+   * Determines if the given port number is available. Does this by trying to open a socket and then immediately closing it.
+   */
   fun portAvailable(p: Int): Boolean {
     var socket: ServerSocket? = null
     return try {
@@ -70,11 +86,14 @@ object Utils : KLogging() {
     }
   }
 
+  /**
+   * Returns a list of pairs of all the permutations of combining two lists
+   */
   fun <T1, T2> permutations(list1: List<T1>, list2: List<T2>): List<Pair<T1?, T2?>> {
     val result = mutableListOf<Pair<T1?, T2?>>()
     if (list1.isNotEmpty() || list2.isNotEmpty()) {
-      val firstList = if (list1.isEmpty()) listOf<T1?>(null) else list1
-      val secondList = if (list2.isEmpty()) listOf<T2?>(null) else list2
+      val firstList = list1.ifEmpty { listOf<T1?>(null) }
+      val secondList = list2.ifEmpty { listOf<T2?>(null) }
       for (item1 in firstList) {
         for (item2 in secondList) {
           result.add(item1 to item2)
@@ -84,6 +103,9 @@ object Utils : KLogging() {
     return result
   }
 
+  /**
+   * Recursively converts an object properties into a map structure
+   */
   fun objectToJsonMap(obj: Any?): Map<String, Any?>? {
     return if (obj != null) {
       obj::class.declaredMemberProperties.associate { prop ->
@@ -96,6 +118,9 @@ object Utils : KLogging() {
     }
   }
 
+  /**
+   * Ensures a value is safe to be converted into JSON
+   */
   fun jsonSafeValue(value: Any?): Any? {
     return if (value != null) {
       when (value) {
@@ -111,6 +136,10 @@ object Utils : KLogging() {
     }
   }
 
+  /**
+   * Tries to lookup the version of the library that invoked this method by accessing the Implementation-Version
+   * from the Jar manifest
+   */
   fun lookupVersion(clazz: Class<*>): String {
     val url = clazz.protectionDomain?.codeSource?.location
     return if (url != null) {
@@ -145,4 +174,30 @@ object Utils : KLogging() {
       Err("'$value' is not a valid data size")
     }
   }
+
+  /**
+   * Looks up a value from the environment, first by looking for the JVM system property with the key, then
+   * looking for an environment variable with the key, then looking for the snake-cased version of the key as an
+   * environment variable.
+   */
+  @JvmOverloads
+  fun lookupEnvironmentValue(
+    key: String,
+    sysLookup: (key: String) -> String? = System::getProperty,
+    envLookup: (key: String) -> String? = System::getenv
+  ): String? {
+    var value: String? = sysLookup(key)
+    if (value.isNullOrEmpty()) {
+      value = envLookup(key)
+    }
+    if (value.isNullOrEmpty()) {
+      value = envLookup(snakeCase(key))
+    }
+    return value
+  }
+
+  /**
+   * Convert a value to snake-case form (a.b.c -> A_B_C)
+   */
+  private fun snakeCase(key: String) = key.split('.').joinToString("_") { it.toUpperCase() }
 }
