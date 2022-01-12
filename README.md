@@ -46,25 +46,25 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 ## Supported JDK and specification versions:
 
-| Branch | Specification | JDK | Kotlin Version | Latest Version | Notes |
-| ------ | ------------- | --- | -------------- |----------------| ----- |
-| [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md) master | V4 | 11+ | 1.5.21 | 4.3.2          | [Upgrade notes](./upgrade-to-4.3.x.md) |
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md) | V4 (1) | 11-15 (2) | 1.4.32 | 4.2.16         | |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md) | V3 | 8-12 | 1.3.72 | 4.1.30         | |
+| Branch                                                                 | Specification | JDK       | Kotlin Version | Latest Version | Notes                                  |
+|------------------------------------------------------------------------|---------------|-----------|----------------|----------------|----------------------------------------|
+| [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md) master | V4            | 11+       | 1.5.21         | 4.3.4          | [Upgrade notes](./upgrade-to-4.3.x.md) |
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md)        | V4 (1)        | 11-15 (2) | 1.4.32         | 4.2.19         |                                        |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12      | 1.3.72         | 4.1.33         |                                        |
 
 **Notes:**
-* **1:** V4 specification support is a work in progress. See [Pact V4 RFC](https://github.com/pact-foundation/pact-specification/issues/71).
+* **1:** V4 specification support is only partially implemented with 4.2.x
 * **2:** v4.2.x may run on JDK 16, but the build for it does not.
 
 ### Previous versions (not actively supported)
 
-| Branch | Specification | JDK | Kotlin Version | Scala Versions | Latest Version |
-| ------ | ------------- | --- | -------------- | -------------- |----------------|
-| [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md) | V3 | 8-12 | 1.3.71 | N/A | 4.0.10         |
-| [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md) | V3 | 8 | 1.3.71 | 2.12 | 3.6.15         |
-| [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md) | V3 | 8 | 1.1.4-2 | 2.12, 2.11 | 3.5.25         |
-| [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3 | 7 | 1.1.4-2 | 2.11 | 3.5.7-jre7.0   |
-| [2.4.x](https://github.com/DiUS/pact-jvm/blob/v2.x/README.md) | V2 | 6 | N/A | 2.10, 2.11 | 2.4.20         |
+| Branch                                                                    | Specification | JDK  | Kotlin Version | Scala Versions | Latest Version |
+|---------------------------------------------------------------------------|---------------|------|----------------|----------------|----------------|
+| [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md)             | V3            | 8-12 | 1.3.71         | N/A            | 4.0.10         |
+| [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md)           | V3            | 8    | 1.3.71         | 2.12           | 3.6.15         |
+| [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md)           | V3            | 8    | 1.1.4-2        | 2.12, 2.11     | 3.5.25         |
+| [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3            | 7    | 1.1.4-2        | 2.11           | 3.5.7-jre7.0   |
+| [2.4.x](https://github.com/DiUS/pact-jvm/blob/v2.x/README.md)             | V2            | 6    | N/A            | 2.10, 2.11     | 2.4.20         |
 
 **NOTE:** The JARs produced by this project have changed with 4.1.x to better align with Java 9 JPMS. The artefacts are now:
 
