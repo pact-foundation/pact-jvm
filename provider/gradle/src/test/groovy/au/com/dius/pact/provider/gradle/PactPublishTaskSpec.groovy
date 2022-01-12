@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PublishConfiguration
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.zafarkhaja.semver.Version
@@ -56,7 +57,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
   }
 
   def 'failure to publish'() {
@@ -72,7 +73,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Err(new RuntimeException('Boom'))
+    1 * brokerClient.uploadPactFile(_, _) >> new Err(new RuntimeException('Boom'))
     thrown(GradleScriptException)
   }
 
@@ -91,7 +92,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]], _) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
   }
 
   def 'passes in bearer token to the broker client'() {
@@ -109,13 +110,14 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']], _) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
   }
 
   def 'passes in any tags to the broker client'() {
     given:
     project.pact {
       publish {
+        consumerVersion = '1'
         tags = ['tag1']
         pactBrokerUrl = 'pactBrokerUrl'
       }
@@ -126,7 +128,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, ['tag1']) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1', ['tag1'])) >> new Ok(null)
   }
 
   def 'allows pact files to be excluded from publishing'() {
@@ -151,10 +153,10 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(pactFile, _, []) >> new Ok(null)
-    0 * brokerClient.uploadPactFile(excluded[0], _, [])
-    0 * brokerClient.uploadPactFile(excluded[1], _, [])
-    0 * brokerClient.uploadPactFile(excluded[2], _, [])
+    1 * brokerClient.uploadPactFile(pactFile, _) >> new Ok(null)
+    0 * brokerClient.uploadPactFile(excluded[0], _)
+    0 * brokerClient.uploadPactFile(excluded[1], _)
+    0 * brokerClient.uploadPactFile(excluded[2], _)
   }
 
   def 'supports versions that are not string values'() {
@@ -171,6 +173,6 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, '1.2.3', _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1.2.3')) >> new Ok(null)
   }
 }

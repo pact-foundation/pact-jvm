@@ -11,6 +11,7 @@ import kotlin.collections.MapsKt
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 import javax.net.ssl.SSLHandshakeException
 
@@ -649,6 +650,7 @@ class PactBrokerClientSpec extends Specification {
     result == new Err(["Publishing tag '1' failed: failed"])
   }
 
+  @RestoreSystemProperties
   def 'fetches provider pacts for verification based on selectors raw json configuration passed from cli'() {
     given:
     System.setProperty('pactbroker.consumerversionselectors.rawjson', '[{"mainBranch":true}]')
@@ -688,5 +690,43 @@ class PactBrokerClientSpec extends Specification {
     'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', null)]                                   || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob'
     'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', '100')]                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob&ignore[][version]=100'
     'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', null), new IgnoreSelector('fred', null)] || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob&ignore[][pacticipant]=fred'
+  }
+
+  def 'publishing pact with new publish endpoint'() {
+    given:
+    def mockHalClient = Mock(IHalClient)
+    def providerName = 'provider'
+    def consumerName = 'consumer'
+    def config = new PublishConfiguration('1.0.0', [], 'test', 'http://123')
+    def pactText = '{}'
+    def jsonBody = '{"branch":"test","buildUrl":"http://123","contracts":[{"consumerName":"consumer",' +
+      '"content":"e30=","contentType":"application/json","providerName":"provider","specification":"pact"}],' +
+      '"pacticipantName":"consumer","pacticipantVersionNumber":"1.0.0","tags":[]}'
+
+    when:
+    pactBrokerClient.publishContract(mockHalClient, providerName, consumerName, config, pactText)
+
+    then:
+    1 * mockHalClient.postJson(PactBrokerClient.PUBLISH_CONTRACTS_LINK, [:], jsonBody) >> new Ok(new JsonValue.Object([:]))
+  }
+
+  @RestoreSystemProperties
+  def 'publishing pact with new publish endpoint - with the branch as a system property'() {
+    given:
+    def mockHalClient = Mock(IHalClient)
+    def providerName = 'provider'
+    def consumerName = 'consumer'
+    def config = new PublishConfiguration('1.0.0')
+    def pactText = '{}'
+    def jsonBody = '{"branch":"feat/mine","contracts":[{"consumerName":"consumer",' +
+      '"content":"e30=","contentType":"application/json","providerName":"provider","specification":"pact"}],' +
+      '"pacticipantName":"consumer","pacticipantVersionNumber":"1.0.0","tags":[]}'
+    System.setProperty('pact.publish.consumer.branchName', 'feat/mine')
+
+    when:
+    pactBrokerClient.publishContract(mockHalClient, providerName, consumerName, config, pactText)
+
+    then:
+    1 * mockHalClient.postJson(PactBrokerClient.PUBLISH_CONTRACTS_LINK, [:], jsonBody) >> new Ok(new JsonValue.Object([:]))
   }
 }

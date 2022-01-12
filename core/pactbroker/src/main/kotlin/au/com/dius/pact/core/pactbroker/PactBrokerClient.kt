@@ -2,7 +2,9 @@ package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Utils
+import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
 import au.com.dius.pact.core.support.handleWith
+import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
@@ -213,12 +215,19 @@ interface IPactBrokerClient {
   /**
    * Uploads the given pact file to the broker and applies any tags
    */
+  @Deprecated("Replaced with version that takes a configuration object")
   fun uploadPactFile(pactFile: File, version: String): Result<String?, Exception>
 
   /**
    * Uploads the given pact file to the broker and applies any tags
    */
+  @Deprecated("Replaced with version that takes a configuration object")
   fun uploadPactFile(pactFile: File, version: String, tags: List<String>): Result<String?, Exception>
+
+  /**
+   * Uploads the given pact file to the broker and applies any tags/branches
+   */
+  fun uploadPactFile(pactFile: File, config: PublishConfiguration): Result<String?, Exception>
 }
 
 /**
@@ -405,7 +414,10 @@ open class PactBrokerClient(
   /**
    * Uploads the given pact file to the broker, and optionally applies any tags
    */
-  override fun uploadPactFile(pactFile: File, version: String, tags: List<String>): Result<String?, Exception> {
+  override fun uploadPactFile(pactFile: File, version: String, tags: List<String>) =
+    uploadPactFile(pactFile, PublishConfiguration(version, tags))
+
+  override fun uploadPactFile(pactFile: File, config: PublishConfiguration): Result<String?, Exception> {
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient().navigate()
@@ -414,19 +426,19 @@ open class PactBrokerClient(
 
     val publishContractsLink = halClient.linkUrl(PUBLISH_CONTRACTS_LINK)
     return if (publishContractsLink != null) {
-      when (val result = publishContract(halClient, providerName, consumerName, version, tags, pactText)) {
+      when (val result = publishContract(halClient, providerName, consumerName, config, pactText)) {
         is Ok -> Ok("OK")
         is Err -> result
       }
     } else {
-      if (tags.isNotEmpty()) {
-        uploadTags(halClient, consumerName, version, tags)
+      if (config.tags.isNotEmpty()) {
+        uploadTags(halClient, consumerName, config.consumerVersion, config.tags)
       }
       halClient.putJson(
         "pb:publish-pact", mapOf(
           "provider" to providerName,
           "consumer" to consumerName,
-          "consumerApplicationVersion" to version
+          "consumerApplicationVersion" to config.consumerVersion
         ), pactText
       )
     }
@@ -435,20 +447,19 @@ open class PactBrokerClient(
   /**
    * Publish the contract using the "Publish Contracts" endpoint
    */
-  private fun publishContract(
+  fun publishContract(
     halClient: IHalClient,
     providerName: String,
     consumerName: String,
-    version: String,
-    tags: List<String>,
+    config: PublishConfiguration,
     pactText: String
   ): Result<JsonValue.Object, Exception> {
-    val body = JsonValue.Object(
+    val branchName = branchName(config)
+    val consumerBuildUrl = consumerBuildUrl(config)
+    val bodyValues = mutableMapOf(
       "pacticipantName" to consumerName.toJson(),
-      "pacticipantVersionNumber" to version.toJson(),
-      //"branch": "main", TODO: require the consumer branch here
-      "tags" to JsonValue.Array(tags.map { it.toJson() }.toMutableList()),
-      //"buildUrl": "https://ci/builds/1234", TODO: require build URL
+      "pacticipantVersionNumber" to consumerVersion(config),
+      "tags" to JsonValue.Array(config.tags.map { it.toJson() }.toMutableList()),
       "contracts" to JsonValue.Array(
         mutableListOf(
           JsonValue.Object(
@@ -461,6 +472,14 @@ open class PactBrokerClient(
         )
       )
     )
+    if (branchName != JsonValue.Null) {
+      bodyValues["branch"] = branchName
+    }
+    if (consumerBuildUrl != JsonValue.Null) {
+      bodyValues["buildUrl"] = consumerBuildUrl
+    }
+
+    val body = JsonValue.Object(bodyValues)
     return when (val result = halClient.postJson(PUBLISH_CONTRACTS_LINK, mapOf(), body.serialise())) {
       is Ok -> {
         displayNotices(result.value)
@@ -487,6 +506,24 @@ open class PactBrokerClient(
         result
       }
     }
+  }
+
+  private fun consumerBuildUrl(config: PublishConfiguration): JsonValue {
+    return config.consumerBuildUrl.ifNullOrEmpty {
+      lookupEnvironmentValue("pact.publish.consumer.buildUrl")
+    }.toJson()
+  }
+
+  private fun branchName(config: PublishConfiguration): JsonValue {
+    return config.branchName.ifNullOrEmpty {
+      lookupEnvironmentValue("pact.publish.consumer.branchName")
+    }.toJson()
+  }
+
+  private fun consumerVersion(config: PublishConfiguration): JsonValue {
+    return config.consumerVersion.ifNullOrEmpty {
+      lookupEnvironmentValue("pact.publish.consumer.version")
+    }.toJson()
   }
 
   private fun displayNotices(result: JsonValue.Object) {

@@ -82,4 +82,27 @@ class UtilsSpec extends Specification {
     then:
     result == []
   }
+
+  @Unroll
+  @SuppressWarnings(['LineLength', 'ClosureAsLastMethodParameter'])
+  def 'lookup value from environment - #description'() {
+    given:
+
+    def env = [
+      'pact.publish.branch': 'value 2',
+      'PACT_PUBLISH_BRANCH2': 'value 3'
+    ]
+
+    expect:
+    Utils.INSTANCE.lookupEnvironmentValue(key, { it == key ? sysProp : null }, { env[it] }) == result
+
+    where:
+
+    description                                          | key                    | sysProp | result
+    'key is a system property'                           | 'pact.publish.branch'  | 'value' | 'value'
+    'key is an environment variable'                     | 'pact.publish.branch'  | null    | 'value 2'
+    'key is an environment variable 2'                   | 'pact.publish.branch'  | ''      | 'value 2'
+    'snake-case value of key is an environment variable' | 'pact.publish.branch2' | ''      | 'value 3'
+    'key is not found'                                   | 'pact.publish.branch3' | null    | null
+  }
 }
