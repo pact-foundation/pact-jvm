@@ -1,5 +1,41 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.4 - Support branches when publishing Pacts
+
+* 854f8b808 - Merge branch 'v4.2.x' (Ronald Holshausen, Wed Jan 12 16:10:46 2022 +1100)
+* 2ff6299f3 - bump version to 4.2.20 (Ronald Holshausen, Wed Jan 12 15:49:33 2022 +1100)
+* 048fc2a73 - update changelog for release 4.2.19 (Ronald Holshausen, Wed Jan 12 15:33:45 2022 +1100)
+* cd28a44ef - Merge branch 'v4.1.x' into v4.2.x (Ronald Holshausen, Wed Jan 12 15:22:03 2022 +1100)
+* 72454f968 - bump version to 4.1.34 (Ronald Holshausen, Wed Jan 12 14:46:31 2022 +1100)
+* 101b34ecb - update changelog for release 4.1.33 (Ronald Holshausen, Wed Jan 12 14:32:22 2022 +1100)
+* 0b41e1791 - feat: Update readmes on setting branches when publishing #1453 (Ronald Holshausen, Wed Jan 12 14:09:50 2022 +1100)
+* c95d2159c - feat: Update Maven publish task to support branches #1453 (Ronald Holshausen, Wed Jan 12 13:40:58 2022 +1100)
+* d9cffbf52 - feat: Update Gradle publish task to support branches #1453 (Ronald Holshausen, Wed Jan 12 12:53:03 2022 +1100)
+* d3580fccd - Merge pull request #1503 from muirandy/kafka-schema-registry-messaging-support (Ronald Holshausen, Wed Jan 12 09:22:39 2022 +1100)
+* a84070d02 - feat: Add pact tests for "all in one" endpoint to publish pacts #1452 (Ronald Holshausen, Tue Jan 11 16:46:58 2022 +1100)
+* 8a6adde2a - feat: Use "all in one" endpoint to publish pacts #1452 (Ronald Holshausen, Tue Jan 11 15:28:24 2022 +1100)
+* 0ef2bafdc - feat: Adding custom information to generated pact json file #400 (Ronald Holshausen, Tue Jan 11 12:27:42 2022 +1100)
+* f3c0ba185 - Adding support for Kafka Schema Registry JSON messages. Do not store magic bytes in broker:   - use the content-type to add them to messages for Consumer Tests   - remove first 5 bytes from provider tests before parsing as JSON (Andy Muir, Mon Jan 10 12:23:05 2022 +0000)
+* b17ae2d79 - Merge pull request #1502 from fragonib/pactfolder (Ronald Holshausen, Mon Jan 10 14:07:12 2022 +1100)
+* 21fe703ed - feat: Add support for PactLoader path value expressions (Francisco González Ibáñez, Sun Jan 9 11:50:44 2022 +0100)
+* 3c3ec810d - bump version to 4.3.4 (Ronald Holshausen, Thu Jan 6 12:37:58 2022 +1100)
+* 969bcc0d3 - bump version to 4.2.19 (Ronald Holshausen, Thu Jan 6 12:10:14 2022 +1100)
+* db13adf64 - update changelog for release 4.2.18 (Ronald Holshausen, Thu Jan 6 11:54:12 2022 +1100)
+* 8e100b843 - bump version to 4.1.33 (Ronald Holshausen, Thu Jan 6 11:37:22 2022 +1100)
+* da695682b - update changelog for release 4.1.32 (Ronald Holshausen, Thu Jan 6 11:22:42 2022 +1100)
+* 0fb473089 - fix(metrics): swap uid for cid (Ronald Holshausen, Thu Jan 6 10:22:39 2022 +1100)
+* a425672b3 - fix(metrics): swap uid for cid (Ronald Holshausen, Thu Jan 6 10:22:39 2022 +1100)
+* f7860e371 - Adding support for Kafka Schema Registry JSON messages. Utilise the Content-Type to indicate KSR messages. Deal with the 5 "magic" bytes at the start of the JSON. (Andy Muir, Tue Jan 4 16:47:03 2022 +0000)
+* 00aa12a74 - fix: add required event value to analytics call (Ronald Holshausen, Fri Dec 10 10:56:22 2021 +1100)
+* f907e0c6e - fix: add required event value to analytics call (Ronald Holshausen, Fri Dec 10 10:56:22 2021 +1100)
+* ad6bd6874 - bump version to 4.1.32 (Ronald Holshausen, Thu Dec 9 17:22:12 2021 +1100)
+* 3929424e9 - update changelog for release 4.1.31 (Ronald Holshausen, Thu Dec 9 17:05:30 2021 +1100)
+* 5f9d4c9c2 - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 16:19:02 2021 +1100)
+* 6920a4d9a - bump version to 4.2.18 (Ronald Holshausen, Thu Dec 9 16:49:23 2021 +1100)
+* a768a49d0 - update changelog for release 4.2.17 (Ronald Holshausen, Thu Dec 9 16:35:32 2021 +1100)
+* 27c150caa - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 16:19:02 2021 +1100)
+* 30e224f27 - chore: update docs (Ronald Holshausen, Thu Dec 9 15:05:12 2021 +1100)
+
 # 4.2.19 - Support branches when publishing Pacts
 
 * cd28a44ef - Merge branch 'v4.1.x' into v4.2.x (Ronald Holshausen, Wed Jan 12 15:22:03 2022 +1100)
