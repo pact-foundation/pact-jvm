@@ -58,7 +58,7 @@ subprojects {
   if (System.env.CI != 'true') {
     apply plugin: 'org.jetbrains.dokka'
   }
-//  apply plugin: "org.javamodularity.moduleplugin"
+  apply plugin: "org.javamodularity.moduleplugin"
 
   dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"

@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PublishConfiguration
 import au.com.dius.pact.core.pactbroker.RequestFailedException
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.michaelbull.result.Err
@@ -36,6 +37,11 @@ open class PactPublishMojo : PactBaseMojo() {
     @Parameter
     private var excludes: MutableList<String> = mutableListOf()
 
+  @Parameter
+  var branchName: String? = null
+  @Parameter
+  var buildUrl: String? = null
+
     override fun execute() {
       if (skipPactPublish) {
         println("'skipPactPublish' is set to true, skipping uploading of pacts")
@@ -57,6 +63,8 @@ open class PactPublishMojo : PactBaseMojo() {
       }
 
       val pactDirectory = File(pactDirectory)
+      val tagsToPublish = calculateTags()
+      val publishConfiguration = PublishConfiguration(projectVersion, tagsToPublish, branchName, buildUrl)
 
       if (!pactDirectory.exists()) {
         println("Pact directory $pactDirectory does not exist, skipping uploading of pacts")
@@ -67,13 +75,12 @@ open class PactPublishMojo : PactBaseMojo() {
           if (pactFileIsExcluded(excludedList, pactFile)) {
             println("Not publishing '${pactFile.name}' as it matches an item in the excluded list")
           } else {
-            val tagsToPublish = calculateTags()
             if (tagsToPublish.isNotEmpty()) {
-              print("Publishing '${pactFile.name}' with tags '${tagsToPublish.joinToString(", ")}' ... ")
+              println("Publishing '${pactFile.name}' with tags '${tagsToPublish.joinToString(", ")}' ... ")
             } else {
-              print("Publishing '${pactFile.name}' ... ")
+              println("Publishing '${pactFile.name}' ... ")
             }
-            when (val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tagsToPublish)) {
+            when (val result = brokerClient!!.uploadPactFile(pactFile, publishConfiguration)) {
                 is Ok -> println("OK")
                 is Err -> {
                   val error = result.error

@@ -87,7 +87,11 @@ interface IHalClient {
    * @return Returns a Success result object with the boolean value returned from the handler closure. Any
    * exception will be wrapped in a Failure
    */
-  fun postJson(url: String, body: String, handler: ((status: Int, response: ClassicHttpResponse) -> Boolean)?): Result<Boolean, Exception>
+  fun postJson(
+    url: String,
+    body: String,
+    handler: ((status: Int, response: ClassicHttpResponse) -> Boolean)?
+  ): Result<Boolean, Exception>
 
   /**
    * Fetches the HAL document from the provided path

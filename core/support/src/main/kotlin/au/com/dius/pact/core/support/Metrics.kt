@@ -111,7 +111,7 @@ object Metrics : KLogging() {
             "cd2" to lookupContext(),                               // Custom Dimension 2: context
             "cd3" to osArch,                                        // Custom Dimension 3: osarch
             "cd6" to event.testFramework(),                         // Custom Dimension 6: test_framework
-            "cd7" to lookupProperty("java.runtime.version"),  // Custom Dimension 7: platform_version
+            "cd7" to lookupProperty("java.runtime.version"),        // Custom Dimension 7: platform_version
             "el" to event.name(),                                   // Event
             "ec" to event.category(),                               // Category
             "ea" to event.action(),                                 // Action

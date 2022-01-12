@@ -221,7 +221,8 @@ object JsonParser {
         token = nextTokenOrThrow(lexer)
         if (token !is JsonToken.Comma && token != JsonToken.ObjectEnd && token != null) {
           throw JsonException(
-            "Invalid Json document (${lexer.documentPointer()}) - Expecting ',' or '}' while parsing object, found '${String(token.chars)}'")
+            "Invalid Json document (${lexer.documentPointer()}) - Expecting ',' or '}' while parsing object, " +
+              "found '${String(token.chars)}'")
         }
       }
     } while (token != null && token != JsonToken.ObjectEnd)
