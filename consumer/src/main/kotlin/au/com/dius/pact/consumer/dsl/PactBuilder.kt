@@ -205,6 +205,7 @@ open class PactBuilder(
 
         interaction.updateProperties(values.filter { it.key != "request" && it.key != "response" })
       }
+      else -> {}
     }
 
     return this

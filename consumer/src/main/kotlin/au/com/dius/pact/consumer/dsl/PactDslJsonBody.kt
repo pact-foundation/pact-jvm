@@ -134,6 +134,7 @@ open class PactDslJsonBody : DslPart {
           }
         }
       }
+      else -> {}
     }
   }
 
@@ -158,6 +159,7 @@ open class PactDslJsonBody : DslPart {
           v.asObject()!!.add(StringUtils.difference(rootPath, obj.rootPath), obj.body)
         }
       }
+      else -> {}
     }
   }
 
@@ -193,6 +195,7 @@ open class PactDslJsonBody : DslPart {
           }
         }
       }
+      else -> {}
     }
 
     return this
@@ -220,6 +223,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -247,6 +251,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, if (value) JsonValue.True else JsonValue.False)
         }
       }
+      else -> {}
     }
 
     return this
@@ -275,6 +280,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, toJson(value))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
@@ -333,6 +339,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
@@ -382,6 +389,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER))
@@ -431,6 +439,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
@@ -460,6 +469,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
@@ -509,6 +519,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
@@ -538,6 +549,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
@@ -581,6 +593,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, if (value) JsonValue.True else JsonValue.False)
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
@@ -621,6 +634,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), regexp(regex))
@@ -656,6 +670,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, stringValue)
         }
       }
+      else -> {}
     }
 
     return this
@@ -679,6 +694,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, stringValue)
         }
       }
+      else -> {}
     }
 
     return this
@@ -734,6 +750,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(formatter.format(value.toInstant()).toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -789,6 +806,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(formatter.format(value).toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -812,6 +830,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, stringValue)
         }
       }
+      else -> {}
     }
 
     return this
@@ -835,6 +854,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, stringValue)
         }
       }
+      else -> {}
     }
 
     return this
@@ -885,6 +905,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(instance.format(value).toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -916,6 +937,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(formatter.format(value).toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -942,6 +964,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, stringValue)
         }
       }
+      else -> {}
     }
 
     return this
@@ -964,6 +987,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -1017,6 +1041,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(instance.format(value).toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -1036,6 +1061,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, JsonValue.StringValue("127.0.0.1".toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -1381,6 +1407,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, JsonValue.Integer("1234567890".toCharArray()))
         }
       }
+      else -> {}
     }
 
     return this
@@ -1408,6 +1435,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
@@ -1454,6 +1482,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), regexp("[0-9a-fA-F]+"))
@@ -1511,6 +1540,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), regexp(UUID_REGEX.pattern))
@@ -1530,6 +1560,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(fieldName, JsonValue.Null)
         }
       }
+      else -> {}
     }
 
     return this
@@ -1638,6 +1669,7 @@ open class PactDslJsonBody : DslPart {
           v.asObject()!!.add(exampleKey, value.body)
         }
       }
+      else -> {}
     }
 
     matchers.addRule(
@@ -1662,6 +1694,7 @@ open class PactDslJsonBody : DslPart {
           value.asObject()!!.add(name, JsonValue.StringValue(value.toString().toCharArray()))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), includesMatcher(value))
@@ -1691,6 +1724,7 @@ open class PactDslJsonBody : DslPart {
           body[i].asObject()!!.add(name, toJson(value))
         }
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), EqualsMatcher)
@@ -1708,6 +1742,7 @@ open class PactDslJsonBody : DslPart {
     when (val body = body) {
       is JsonValue.Object -> body.add(name, toJson(value))
       is JsonValue.Array -> body.values.forEach { v -> v.asObject()!!.add(name, toJson(value)) }
+      else -> {}
     }
 
     matchers.setRules(matcherKey(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.AND))
@@ -1725,6 +1760,7 @@ open class PactDslJsonBody : DslPart {
     when (val body = body) {
       is JsonValue.Object -> body.add(name, toJson(value))
       is JsonValue.Array -> body.values.forEach { v -> v.asObject()!!.add(name, toJson(value)) }
+      else -> {}
     }
 
     matchers.setRules(matcherKey(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.OR))
@@ -1747,6 +1783,7 @@ open class PactDslJsonBody : DslPart {
       is JsonValue.Array -> body.values.forEach { v ->
         v.asObject()!!.add(name, JsonValue.StringValue(exampleValue.toCharArray()))
       }
+      else -> {}
     }
 
     val regexExpression = urlMatcher.getRegexExpression()
@@ -1898,6 +1935,7 @@ open class PactDslJsonBody : DslPart {
     when (val body = body) {
       is JsonValue.Object -> body.add(name, toJson(example))
       is JsonValue.Array -> body.values.forEach { v -> v.asObject()!!.add(name, toJson(example)) }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
@@ -1924,6 +1962,7 @@ open class PactDslJsonBody : DslPart {
       is JsonValue.Array -> body.values.forEach { v ->
         v.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), matchDate(format))
@@ -1951,6 +1990,7 @@ open class PactDslJsonBody : DslPart {
       is JsonValue.Array -> body.values.forEach { v ->
         v.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), matchTime(format))
@@ -1978,6 +2018,7 @@ open class PactDslJsonBody : DslPart {
       is JsonValue.Array -> body.values.forEach { v ->
         v.asObject()!!.add(name, JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray()))
       }
+      else -> {}
     }
 
     matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))

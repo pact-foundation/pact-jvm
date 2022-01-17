@@ -173,7 +173,6 @@ class Message @JvmOverloads constructor(
     return errors
   }
 
-  @ExperimentalUnsignedTypes
   override fun asV4Interaction(): V4Interaction {
     return V4Interaction.AsynchronousMessage("", description, MessageContents(contents, metadata,
       matchingRules.rename("body", "content"), generators),

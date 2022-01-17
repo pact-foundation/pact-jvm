@@ -89,6 +89,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
         } else {
           return
         }
+        else -> {}
       }
     }
 
