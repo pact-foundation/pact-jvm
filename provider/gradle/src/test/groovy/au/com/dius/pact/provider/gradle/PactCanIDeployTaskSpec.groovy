@@ -61,7 +61,7 @@ class PactCanIDeployTaskSpec extends Specification {
 
     then:
     def ex = thrown(GradleScriptException)
-    ex.message == 'The CanIDeploy task requires -PpacticipantVersion=... or -Dlatest=true'
+    ex.message == 'The CanIDeploy task requires -PpacticipantVersion=... or -Platest=true'
   }
 
   def 'pacticipantVersion can be missing if latest is provided'() {
