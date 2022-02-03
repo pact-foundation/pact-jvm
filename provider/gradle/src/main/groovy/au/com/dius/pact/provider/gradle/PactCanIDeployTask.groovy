@@ -40,7 +40,7 @@ class PactCanIDeployTask extends PactCanIDeployBaseTask {
     Latest latest = setupLatestParam()
     if ((latest instanceof Latest.UseLatestTag || latest.latest == false) &&
       !project.hasProperty(PACTICIPANT_VERSION)) {
-      throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=... or -Dlatest=true', null)
+      throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=... or -Platest=true', null)
     }
     String pacticipantVersion = project.hasProperty(PACTICIPANT_VERSION) ? project.property(PACTICIPANT_VERSION) : ''
     String to = null
