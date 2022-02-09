@@ -56,7 +56,7 @@ class TestDescriptionSpec extends Specification {
       [ new ProviderState('Test State') ], new Request(), new Response())
     def pactSource =  new BrokerUrlSource('url', 'url', [:], [:], 'master',
       new PactBrokerResult('test', 'test', 'test', [], [],
-        pending == 'enabled', null, false, true))
+        pending == 'enabled', null, false, true, null))
     def pact = new RequestResponsePact(new au.com.dius.pact.core.model.Provider(),
       new au.com.dius.pact.core.model.Consumer('the-consumer-name'), [interaction ],
       [:], pactSource)

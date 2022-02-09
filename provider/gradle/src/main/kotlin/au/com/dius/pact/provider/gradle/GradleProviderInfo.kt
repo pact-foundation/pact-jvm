@@ -79,7 +79,7 @@ open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo
   }
 
   override fun hasPactsFromPactBrokerWithSelectors(
-    options: Map<String, Any>,
+    options: Map<String, Any?>,
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>
   ): List<ConsumerInfo> {
