@@ -18,6 +18,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.unwrap
+import com.google.common.net.UrlEscapers.urlFormParameterEscaper
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import mu.KLogging
 import java.io.File
@@ -903,8 +904,8 @@ open class PactBrokerClient(
       to: String?,
       ignore: List<IgnoreSelector>
     ): String {
-      val escaper = urlPathSegmentEscaper()
-      var params = mutableListOf("q[][pacticipant]" to escaper.escape(pacticipant), "latestby" to "cvp")
+      val escaper = urlFormParameterEscaper()
+      val params = mutableListOf("q[][pacticipant]" to escaper.escape(pacticipant), "latestby" to "cvp")
 
       when (latest) {
         is Latest.UseLatest -> if (latest.latest) {
@@ -927,7 +928,7 @@ open class PactBrokerClient(
           if (key.isNotEmpty()) {
             params.add("ignore[][pacticipant]" to key)
             if (value.isNotEmpty()) {
-              params.add("ignore[][version]" to value)
+              params.add("ignore[][version]" to escaper.escape(value))
             }
           }
         }
