@@ -10,6 +10,7 @@ import au.com.dius.pact.core.support.Utils
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.map
+import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
 import java.io.File
@@ -18,6 +19,7 @@ import java.net.URL
 /**
  * Provider Info Config
  */
+@Suppress("LongParameterList")
 open class ProviderInfo @JvmOverloads constructor (
   override var name: String = "provider",
   override var protocol: String = "http",
@@ -66,7 +68,7 @@ open class ProviderInfo @JvmOverloads constructor (
 
   @JvmOverloads
   open fun hasPactsFromPactBrokerWithSelectors(
-    options: Map<String, Any> = mapOf(),
+    options: Map<String, Any?> = mapOf(),
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>
   ): List<ConsumerInfo> {
@@ -77,8 +79,10 @@ open class ProviderInfo @JvmOverloads constructor (
       emptyList()
     }
     val includePactsSince = Utils.lookupInMap(options, "includeWipPactsSince", String::class.java, "")
-    return hasPactsFromPactBrokerWithSelectors(pactBrokerUrl, selectors,
-      PactBrokerOptions(enablePending, providerTags.orEmpty(), includePactsSince))
+    val pactBrokerOptions = PactBrokerOptions(enablePending, providerTags.orEmpty(), includePactsSince, false,
+      PactBrokerOptions.parseAuthSettings(options))
+
+    return hasPactsFromPactBrokerWithSelectors(pactBrokerUrl, selectors, pactBrokerOptions)
   }
 
   @Suppress("TooGenericExceptionThrown")
@@ -153,4 +157,6 @@ open class ProviderInfo @JvmOverloads constructor (
 
     return true
   }
+
+  companion object : KLogging()
 }

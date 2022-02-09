@@ -3,9 +3,12 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import au.com.dius.pact.core.support.Auth
 import com.github.michaelbull.result.Ok
+import spock.lang.Issue
 import spock.lang.Specification
 
+@SuppressWarnings(['LineLength', 'ClosureAsLastMethodParameter'])
 class ProviderInfoSpec extends Specification {
 
   private ProviderInfo providerInfo
@@ -26,7 +29,7 @@ class ProviderInfoSpec extends Specification {
     providerInfo.pactBrokerClient(_, _) >> pactBrokerClient
   }
 
-  def 'returns an empty list if the directory is null'() {
+  def 'hasPactsWith - returns an empty list if the directory is null'() {
     when:
     def consumers = providerInfo.hasPactsWith('testGroup') { group ->
       group.pactFileLocation = null
@@ -36,7 +39,7 @@ class ProviderInfoSpec extends Specification {
     consumers == []
   }
 
-  def 'raises an exception if the directory does not exist'() {
+  def 'hasPactsWith - raises an exception if the directory does not exist'() {
     when:
     providerInfo.hasPactsWith('testGroup') { group ->
       group.pactFileLocation = Mock(File) {
@@ -48,7 +51,7 @@ class ProviderInfoSpec extends Specification {
     thrown(RuntimeException)
   }
 
-  def 'raises an exception if the directory is not readable'() {
+  def 'hasPactsWith - raises an exception if the directory is not readable'() {
     when:
     providerInfo.hasPactsWith('testGroup') { group ->
       group.pactFileLocation = Mock(File) {
@@ -61,7 +64,7 @@ class ProviderInfoSpec extends Specification {
     thrown(RuntimeException)
   }
 
-  def 'does not include pending pacts if the option is not present'() {
+  def 'hasPactsFromPactBrokerWithSelectors - does not include pending pacts if the option is not present'() {
     given:
     def options = [:]
     def url = 'http://localhost:8080'
@@ -81,7 +84,7 @@ class ProviderInfoSpec extends Specification {
     !result[0].pending
   }
 
-  def 'does include pending pacts if the option is present'() {
+  def 'hasPactsFromPactBrokerWithSelectors - does include pending pacts if the option is present'() {
     given:
     def options = [
       enablePending: true,
@@ -104,7 +107,7 @@ class ProviderInfoSpec extends Specification {
     result[0].pending
   }
 
-  def 'throws an exception if the pending pacts option is present but there is no provider tags'() {
+  def 'hasPactsFromPactBrokerWithSelectors - throws an exception if the pending pacts option is present but there is no provider tags'() {
     given:
     def options = [
       enablePending: true
@@ -123,7 +126,7 @@ class ProviderInfoSpec extends Specification {
       'provider names for the provider application version that will be published with the verification results'
   }
 
-  def 'does not include wip pacts if the option is not present'() {
+  def 'hasPactsFromPactBrokerWithSelectors - does not include wip pacts if the option is not present'() {
     given:
     def options = [
       enablePending: true,
@@ -146,7 +149,7 @@ class ProviderInfoSpec extends Specification {
     !result[0].pending
   }
 
-  def 'does include wip pacts if the option is present'() {
+  def 'hasPactsFromPactBrokerWithSelectors - does include wip pacts if the option is present'() {
     given:
     def options = [
       enablePending: true,
@@ -163,6 +166,28 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '2020-05-23') >> new Ok([
+      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false)
+    ])
+    result.size == 1
+    result[0].name == 'consumer'
+    result[0].pending
+  }
+
+  @Issue('#1483')
+  def 'hasPactsFromPactBrokerWithSelectors - configures the authentication correctly'() {
+    given:
+    def options = [
+      authentication: ['bearer', '123ABC']
+    ]
+    def url = 'http://localhost:8080'
+    def selectors = []
+
+    when:
+    def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
+
+    then:
+    providerInfo.pactBrokerClient(_, { it.auth == new Auth.BearerAuthentication('123ABC') }) >> pactBrokerClient
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false)
     ])
     result.size == 1
