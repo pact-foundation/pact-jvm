@@ -45,6 +45,13 @@ sealed class Auth {
       is BearerAuthentication -> BearerAuthentication(parseExpression(this.token, DataType.RAW, resolver).toString())
     }
   }
+
+  fun legacyForm(): List<String> {
+    return when (this) {
+      is BasicAuthentication -> listOf("basic", this.username, this.password)
+      is BearerAuthentication -> listOf("bearer", this.token)
+    }
+  }
 }
 
 /**

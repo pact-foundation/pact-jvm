@@ -400,8 +400,8 @@ open class PactBrokerClient(
           val wip = if (properties.has("wip") && properties["wip"].isBoolean) properties["wip"].asBoolean()
           else false
 
-          PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending, wip = wip,
-              usedNewEndpoint = true)
+          PactBrokerResult(name, href, pactBrokerUrl, halClient.getAuth()?.legacyForm() ?: emptyList(),
+            notices, pending, wip = wip, usedNewEndpoint = true, auth = halClient.getAuth())
         }
       }
     }

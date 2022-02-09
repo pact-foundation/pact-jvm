@@ -77,7 +77,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false, '') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false)
+      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -100,7 +100,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, false, false)
+      new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -142,7 +142,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false)
+      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -166,7 +166,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '2020-05-23') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false)
+      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -188,7 +188,7 @@ class ProviderInfoSpec extends Specification {
     then:
     providerInfo.pactBrokerClient(_, { it.auth == new Auth.BearerAuthentication('123ABC') }) >> pactBrokerClient
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false, '') >> new Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false)
+      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
     result.size == 1
     result[0].name == 'consumer'

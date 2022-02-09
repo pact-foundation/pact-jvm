@@ -137,6 +137,11 @@ interface IHalClient {
    * @param encodePath If the path should be encoded
    */
   fun getJson(path: String, encodePath: Boolean): Result<JsonValue, Exception>
+
+  /**
+   * Return the authentication used to access the Pact broker
+   */
+  fun getAuth(): Auth?
 }
 
 /**
@@ -294,6 +299,13 @@ open class HalClient @JvmOverloads constructor(
 
       val response = httpClient!!.execute(httpGet, httpContext)
       handleHalResponse(response, path)
+    }
+  }
+
+  override fun getAuth(): Auth? {
+    return when (val authentication = options["authentication"]) {
+      is Auth -> authentication
+      else -> null
     }
   }
 
