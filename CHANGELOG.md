@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.34 - Bugfix Release
+
+* e3651f62d - fix(Gradle): Authentication needs to be propagated when using fromPactBroker #1483 (Ronald Holshausen, Wed Feb 9 17:07:19 2022 +1100)
+* 1ac516838 - fix(Gradle): Cannot connect to authenticated broker with token when verifying #1483 (Ronald Holshausen, Wed Feb 9 15:28:00 2022 +1100)
+* 4e257276d - fix(canIDeploy): Plus signs in version numbers not correctly escaped #1511 (Ronald Holshausen, Wed Feb 9 11:26:48 2022 +1100)
+* 72454f968 - bump version to 4.1.34 (Ronald Holshausen, Wed Jan 12 14:46:31 2022 +1100)
+
 # 4.1.33 - Support branches when publishing Pacts
 
 * 0b41e1791 - feat: Update readmes on setting branches when publishing #1453 (Ronald Holshausen, Wed Jan 12 14:09:50 2022 +1100)
