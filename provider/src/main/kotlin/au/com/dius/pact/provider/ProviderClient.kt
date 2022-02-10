@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.VerificationNotice
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.Json
 import groovy.lang.Binding
 import groovy.lang.Closure
@@ -75,10 +76,12 @@ interface IConsumerInfo {
   var packagesToScan: List<String>
   var verificationType: PactVerification?
   var pactSource: Any?
+  @Deprecated("Replaced with auth")
   var pactFileAuthentication: List<Any?>
   val notices: List<VerificationNotice>
   val pending: Boolean
   val wip: Boolean
+  val auth: Auth?
 
   fun toPactConsumer(): au.com.dius.pact.core.model.Consumer
   fun resolvePactSource(): PactSource?
@@ -92,10 +95,12 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
+  @Deprecated("replaced with auth")
   override var pactFileAuthentication: List<Any?> = emptyList(),
   override val notices: List<VerificationNotice> = emptyList(),
   override val pending: Boolean = false,
-  override val wip: Boolean = false
+  override val wip: Boolean = false,
+  override val auth: Auth? = null
 ) : IConsumerInfo {
 
   override fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
@@ -124,7 +129,7 @@ open class ConsumerInfo @JvmOverloads constructor (
   override fun toString(): String {
     return "ConsumerInfo(name='$name', stateChange=$stateChange, stateChangeUsesBody=$stateChangeUsesBody, " +
       "packagesToScan=$packagesToScan, verificationType=$verificationType, pactSource=$pactSource, " +
-      "pactFileAuthentication=$pactFileAuthentication, notices=$notices, pending=$pending, wip=$wip)"
+      "notices=$notices, pending=$pending, wip=$wip)"
   }
 
   override fun equals(other: Any?): Boolean {
@@ -166,7 +171,7 @@ open class ConsumerInfo @JvmOverloads constructor (
       ConsumerInfo(name = result.name,
         pactSource = BrokerUrlSource(url = result.source, pactBrokerUrl = result.pactBrokerUrl, result = result),
         pactFileAuthentication = result.pactFileAuthentication, notices = result.notices, pending = result.pending,
-        wip = result.wip
+        wip = result.wip, auth = result.auth
       )
   }
 }
