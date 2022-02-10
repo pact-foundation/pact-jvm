@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.5 - Bugfix Release
+
+* 8cd69bef8 - Merge branch 'v4.2.x' (Ronald Holshausen, Thu Feb 10 11:50:15 2022 +1100)
+* c4926c432 - bump version to 4.2.21 (Ronald Holshausen, Thu Feb 10 11:31:08 2022 +1100)
+* 8bc5d6818 - update changelog for release 4.2.20 (Ronald Holshausen, Thu Feb 10 11:14:10 2022 +1100)
+* 69587d6a4 - Merge branch 'v4.1.x' into v4.2.x (Ronald Holshausen, Thu Feb 10 10:15:39 2022 +1100)
+* 8a97a23ad - bump version to 4.1.35 (Ronald Holshausen, Wed Feb 9 17:39:25 2022 +1100)
+* 4bc07519d - update changelog for release 4.1.34 (Ronald Holshausen, Wed Feb 9 17:26:03 2022 +1100)
+* e3651f62d - fix(Gradle): Authentication needs to be propagated when using fromPactBroker #1483 (Ronald Holshausen, Wed Feb 9 17:07:19 2022 +1100)
+* 1ac516838 - fix(Gradle): Cannot connect to authenticated broker with token when verifying #1483 (Ronald Holshausen, Wed Feb 9 15:28:00 2022 +1100)
+* 4e257276d - fix(canIDeploy): Plus signs in version numbers not correctly escaped #1511 (Ronald Holshausen, Wed Feb 9 11:26:48 2022 +1100)
+* 4b9e7548a - chore: fix failing test after merging PR (Ronald Holshausen, Fri Feb 4 09:08:25 2022 +1100)
+* 5a8c042e6 - Merge pull request #1510 from lio-wd/patch-1 (Ronald Holshausen, Fri Feb 4 07:58:17 2022 +1100)
+* e8cc494da - Update PactCanIDeployTask.groovy (lio-wd, Thu Feb 3 10:45:35 2022 -0800)
+* 53daa6f22 - chore: update readme (Ronald Holshausen, Wed Jan 12 16:43:07 2022 +1100)
+* 423da9fb9 - bump version to 4.3.5 (Ronald Holshausen, Wed Jan 12 16:38:08 2022 +1100)
+
 # 4.3.4 - Support branches when publishing Pacts
 
 * 854f8b808 - Merge branch 'v4.2.x' (Ronald Holshausen, Wed Jan 12 16:10:46 2022 +1100)
