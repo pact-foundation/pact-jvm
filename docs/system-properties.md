@@ -1,4 +1,4 @@
-# Pact-JVM System Properties
+# System Properties
 
 Theses are all the system properties used by Pact-JVM
 
