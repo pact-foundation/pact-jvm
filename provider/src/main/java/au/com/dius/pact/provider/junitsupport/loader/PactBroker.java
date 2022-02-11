@@ -87,7 +87,7 @@ public @interface PactBroker {
 
   /**
    * If the pending pacts feature should be enabled. This can be set with the pactbroker.enablePending JVM system property.
-   * When this is set to try, the provider tags property also needs to be set
+   * When this is set to true, the provider tags property also needs to be set
    */
   String enablePendingPacts() default "${pactbroker.enablePending:false}";
 
