@@ -571,7 +571,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 89f2a56c5 - Merge pull request #1421 from JapuDCret/plugin-handle-404-correctly (Ronald Holshausen, Sun Aug 29 10:03:30 2021 +1000)
 * d1d33cd15 - Correcting definition for arrayMinLike. (darshna, Tue Aug 24 12:30:16 2021 +0530)
 * b462966e5 - Merge branch 'v4.1.x' (Ronald Holshausen, Tue Aug 24 11:39:55 2021 +1000)
-* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List&lt;String&gt; #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
 * a6be37e5f - chore: upgrade kotlin-result (Ronald Holshausen, Tue Aug 24 10:37:29 2021 +1000)
 * 65b3b4dd4 - bump version to 4.2.10 in README (JapuDCret, Mon Aug 23 15:28:59 2021 +0200)
 * a7d66d873 - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
@@ -583,7 +583,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 8ef861125 - feat: force standalone="yes" when standalone is set to true on the XML builder #1414 (Ronald Holshausen, Sat Sep 4 13:02:14 2021 +1000)
 * 3c752cd1c - fix: allow Gradle providerTags to be an array #1423 (Ronald Holshausen, Sat Sep 4 12:52:36 2021 +1000)
 * d8bb675ce - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
-* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List&lt;String&gt; #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
 * 54d6ca8e6 - bump version to 4.1.26 (Ronald Holshausen, Sun Aug 22 18:21:26 2021 +1000)
 
 # 4.3.0-beta.1 - Updated plugin driver + fixes from master
