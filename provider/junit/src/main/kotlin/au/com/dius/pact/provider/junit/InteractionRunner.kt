@@ -163,7 +163,7 @@ open class InteractionRunner<I>(
       } else {
         if (!included) {
           logger.warn { "Ignoring interaction '${interaction.description}' as it does not match the filter " +
-            "pact.filter.interaction='${System.getProperty("pact.filter.interaction")}'" }
+            "pact.filter.description='${System.getProperty("pact.filter.description")}'" }
         }
         notifier.fireTestIgnored(description)
       }
