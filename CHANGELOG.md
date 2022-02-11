@@ -529,7 +529,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 5df1731ff - feat(plugins): added matcher definition parser (Ronald Holshausen, Thu Aug 26 13:57:48 2021 +1000)
 * d1d33cd15 - Correcting definition for arrayMinLike. (darshna, Tue Aug 24 12:30:16 2021 +0530)
 * b462966e5 - Merge branch 'v4.1.x' (Ronald Holshausen, Tue Aug 24 11:39:55 2021 +1000)
-* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List&lt;String&gt; #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
 * a6be37e5f - chore: upgrade kotlin-result (Ronald Holshausen, Tue Aug 24 10:37:29 2021 +1000)
 * 65b3b4dd4 - bump version to 4.2.10 in README (JapuDCret, Mon Aug 23 15:28:59 2021 +0200)
 * a7d66d873 - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
