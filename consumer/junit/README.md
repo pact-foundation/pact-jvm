@@ -559,7 +559,7 @@ DslPart body = new PactDslJsonBody()
 
 ```
 
-For an example, have a look at [WildcardKeysTest](https://github.com/DiUS/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/WildcardKeysTest.java).
+For an example, have a look at [ArticlesTest](https://github.com/pact-foundation/pact-jvm/blob/master/consumer/junit/src/test/java/au/com/dius/pact/consumer/junit/examples/ArticlesTest.java).
 
 #### Combining matching rules with AND/OR
 
