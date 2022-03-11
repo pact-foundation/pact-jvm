@@ -48,7 +48,7 @@ open class PactBuilder(
   var pactVersion: PactSpecVersion = PactSpecVersion.V4
 ) {
   private val plugins: MutableList<PactPlugin> = mutableListOf()
-  private val interactions: MutableList<Interaction> = mutableListOf()
+  private val interactions: MutableList<V4Interaction> = mutableListOf()
   private var currentInteraction: V4Interaction? = null
   private val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
   private val additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
@@ -384,7 +384,10 @@ open class PactBuilder(
     if (currentInteraction != null) {
       interactions.add(currentInteraction!!)
     }
-    return V4Pact(Consumer(consumer), Provider(provider), interactions,
+    val interactions = interactions.map { i ->
+      if (i.key.isNotEmpty()) i else i.withGeneratedKey()
+    } as List<Interaction>
+    return V4Pact(Consumer(consumer), Provider(provider), interactions.toMutableList(),
       BasePact.metaData(null, PactSpecVersion.V4) + additionalMetadata + pluginMetadata(),
       UnknownPactSource)
   }

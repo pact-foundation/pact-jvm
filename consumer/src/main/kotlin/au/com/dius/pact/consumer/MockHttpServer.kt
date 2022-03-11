@@ -59,6 +59,7 @@ fun mockServer(pact: BasePact, config: MockProviderConfig): BaseMockServer {
     }
     else -> when (config.mockServerImplementation) {
       MockServerImplementation.KTorServer -> KTorMockServer(pact, config)
+      MockServerImplementation.Plugin -> PluginMockServer(pact, config)
       else -> MockHttpServer(pact, config)
     }
   }

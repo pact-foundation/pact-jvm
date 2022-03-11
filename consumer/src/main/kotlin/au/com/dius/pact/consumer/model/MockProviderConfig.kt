@@ -1,7 +1,9 @@
 package au.com.dius.pact.consumer.model
 
+import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.core.model.PactSpecVersion
 import java.net.InetSocketAddress
+import java.util.Optional
 
 /**
  * Mock Server Implementation
@@ -20,7 +22,12 @@ enum class MockServerImplementation {
   /**
    * Use the Java server for HTTP and the KTor server for HTTPS
    */
-  Default;
+  Default,
+
+  /**
+   * Mock server provided by a plugin
+   */
+  Plugin;
 
   fun merge(implementation: MockServerImplementation) = if (this == Default) {
     implementation
@@ -41,12 +48,22 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val pactVersion: PactSpecVersion = PactSpecVersion.V3,
   open val scheme: String = HTTP,
   open val mockServerImplementation: MockServerImplementation = MockServerImplementation.JavaHttpServer,
-  open val addCloseHeader: Boolean = false
+  open val addCloseHeader: Boolean = false,
+  open val mockServerRegistryEntry: String = ""
 ) {
 
   fun url() = "$scheme://$hostname:$port"
 
   fun address() = InetSocketAddress(hostname, port)
+
+  /**
+   * Create the mock server configuration required to pass to a plugin
+   */
+  fun toPluginMockServerConfig(): io.pact.plugins.jvm.core.MockServerConfig {
+    return io.pact.plugins.jvm.core.MockServerConfig(
+      hostname, port, scheme == "https"
+    )
+  }
 
   companion object {
     const val LOCALHOST = "127.0.0.1"
@@ -73,5 +90,22 @@ open class MockProviderConfig @JvmOverloads constructor (
     fun createDefault(host: String, pactVersion: PactSpecVersion) =
       MockProviderConfig(hostname = host, pactVersion = pactVersion,
         addCloseHeader = System.getProperty("pact.mockserver.addCloseHeader") == "true")
+
+    fun fromMockServerAnnotation(config: Optional<MockServerConfig>): MockProviderConfig? {
+      return if (config.isPresent) {
+        val annotation = config.get()
+        MockProviderConfig(
+          annotation.hostInterface.ifEmpty { LOCALHOST },
+          if (annotation.port.isEmpty()) 0 else annotation.port.toInt(),
+          PactSpecVersion.V4,
+          if (annotation.tls) "tls" else HTTP,
+          annotation.implementation,
+          System.getProperty("pact.mockserver.addCloseHeader") == "true",
+          annotation.registryEntry
+        )
+      } else {
+        null
+      }
+    }
   }
 }

@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.time.StopWatch
 import org.json.JSONObject
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
@@ -17,6 +18,7 @@ class PerfTest {
 
   @ParameterizedTest(name = 'Implementation - {0}')
   @EnumSource(value = MockServerImplementation)
+  @Disabled
   void test(MockServerImplementation impl) {
     log.info("Starting test for $impl")
     StopWatch stopWatch = new StopWatch()

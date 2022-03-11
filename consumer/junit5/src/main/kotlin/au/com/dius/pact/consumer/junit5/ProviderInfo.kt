@@ -39,6 +39,7 @@ data class ProviderInfo @JvmOverloads constructor(
         val pactVersion: PactSpecVersion? = null,
         val providerType: ProviderType? = null,
         val https: Boolean = false,
+        @Deprecated("This has been replaced with the @MockServer annotation")
         val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default,
         val keyStorePath: String = "",
         val keyStoreAlias: String = "",

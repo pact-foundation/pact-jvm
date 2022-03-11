@@ -6,6 +6,7 @@ dependencies {
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation "io.pact.plugin.driver:core:${project.pluginDriverVersion}"
 
   testImplementation "junit:junit:${project.junitVersion}"
   testImplementation "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}",

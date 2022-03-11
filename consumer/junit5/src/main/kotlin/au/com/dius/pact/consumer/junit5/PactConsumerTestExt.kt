@@ -1,16 +1,16 @@
 package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.AbstractBaseMockServer
-import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
-import au.com.dius.pact.consumer.PactTestRun
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.dsl.PactBuilder
 import au.com.dius.pact.consumer.dsl.SynchronousMessagePactBuilder
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
+import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.consumer.mockServer
+import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -22,7 +22,6 @@ import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactDirectory
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
-import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.Json
@@ -51,22 +50,6 @@ import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.full.findAnnotation
 
-class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : AbstractBaseMockServer(),
-  ExtensionContext.Store.CloseableResource {
-  override fun close() {
-    baseMockServer.stop()
-  }
-
-  override fun start() = baseMockServer.start()
-  override fun stop() = baseMockServer.stop()
-  override fun waitForServer() = baseMockServer.waitForServer()
-  override fun getUrl() = baseMockServer.getUrl()
-  override fun getPort() = baseMockServer.getPort()
-  override fun <R> runAndWritePact(pact: BasePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>) =
-    baseMockServer.runAndWritePact(pact, pactVersion, testFn)
-  override fun validateMockServerState(testResult: Any?) = baseMockServer.validateMockServerState(testResult)
-}
-
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver, AfterTestExecutionCallback, AfterAllCallback {
 
   private val ep: ExpressionParser = ExpressionParser()
@@ -74,29 +57,45 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val providers = lookupProviderInfo(extensionContext)
     val type = parameterContext.parameter.type
-    if (providers.any { it.first.providerType == ProviderType.ASYNCH }) {
-      when {
-        type.isAssignableFrom(List::class.java) -> return true
-        type.isAssignableFrom(V4Pact::class.java) -> return true
-        type.isAssignableFrom(MessagePact::class.java) -> return true
-        type.isAssignableFrom(V4Interaction.AsynchronousMessage::class.java) -> return true
+
+    if (type.isAssignableFrom(MockServer::class.java)) {
+      return if (mockServerConfigured(extensionContext)) {
+        true
+      } else {
+        providers.any {
+          it.first.providerType == null ||
+            it.first.providerType == ProviderType.SYNCH ||
+            it.first.providerType == ProviderType.UNSPECIFIED
+        }
       }
-    }
-    if (providers.any { it.first.providerType == ProviderType.SYNCH_MESSAGE }) {
-      when {
-        type.isAssignableFrom(List::class.java) -> return true
-        type.isAssignableFrom(V4Pact::class.java) -> return true
-        type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> return true
+    } else {
+      if (providers.any { it.first.providerType == ProviderType.ASYNCH }) {
+        when {
+          type.isAssignableFrom(List::class.java) -> return true
+          type.isAssignableFrom(V4Pact::class.java) -> return true
+          type.isAssignableFrom(MessagePact::class.java) -> return true
+          type.isAssignableFrom(V4Interaction.AsynchronousMessage::class.java) -> return true
+        }
       }
-    }
-    if (providers.any { it.first.providerType == null ||
-        it.first.providerType == ProviderType.SYNCH ||
-        it.first.providerType == ProviderType.UNSPECIFIED }) {
-      when {
-        type.isAssignableFrom(MockServer::class.java) -> return true
-        type.isAssignableFrom(RequestResponsePact::class.java) -> return true
-        type.isAssignableFrom(V4Pact::class.java) -> return true
-        type.isAssignableFrom(V4Interaction.SynchronousHttp::class.java) -> return true
+
+      if (providers.any { it.first.providerType == ProviderType.SYNCH_MESSAGE }) {
+        when {
+          type.isAssignableFrom(List::class.java) -> return true
+          type.isAssignableFrom(V4Pact::class.java) -> return true
+          type.isAssignableFrom(V4Interaction.SynchronousMessages::class.java) -> return true
+        }
+      }
+
+      if (providers.any {
+          it.first.providerType == null ||
+            it.first.providerType == ProviderType.SYNCH ||
+            it.first.providerType == ProviderType.UNSPECIFIED
+        }) {
+        when {
+          type.isAssignableFrom(RequestResponsePact::class.java) -> return true
+          type.isAssignableFrom(V4Pact::class.java) -> return true
+          type.isAssignableFrom(V4Interaction.SynchronousHttp::class.java) -> return true
+        }
       }
     }
 
@@ -132,7 +131,9 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     type: Class<*>
   ): Any {
     val pact = lookupPact(providerInfo.first, providerInfo.second, extensionContext)
-    return when (providerInfo.first.providerType) {
+    return if (type.isAssignableFrom(MockServer::class.java) && mockServerConfigured(extensionContext)) {
+      setupMockServer(providerInfo.first, providerInfo.second, extensionContext)
+    } else when (providerInfo.first.providerType) {
       ProviderType.ASYNCH -> when {
         type.isAssignableFrom(List::class.java) -> pact.interactions
         type.isAssignableFrom(V4Pact::class.java) -> pact.asV4Pact().unwrap()
@@ -211,7 +212,10 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     for ((providerInfo, pactMethod) in lookupProviderInfo(context)) {
       logger.debug { "providerInfo = $providerInfo" }
 
-      if (providerInfo.providerType != ProviderType.ASYNCH && providerInfo.providerType != ProviderType.SYNCH_MESSAGE) {
+      if (mockServerConfigured(context) ||
+        providerInfo.providerType == null ||
+        providerInfo.providerType == ProviderType.SYNCH ||
+        providerInfo.providerType == ProviderType.UNSPECIFIED) {
         val mockServer = setupMockServer(providerInfo, pactMethod, context)
         mockServer.start()
         mockServer.waitForServer()
@@ -225,11 +229,36 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     return when {
       store[key] != null -> store[key] as AbstractBaseMockServer
       else -> {
-        val config = providerInfo.mockServerConfig()
+        val config = mockServerConfigFromAnnotation(context) ?: providerInfo.mockServerConfig()
         store.put("mockServerConfig:${providerInfo.providerName}", config)
         val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context), config)
         store.put(key, JUnit5MockServerSupport(mockServer))
         mockServer
+      }
+    }
+  }
+
+  private fun mockServerConfigured(extensionContext: ExtensionContext): Boolean {
+    val mockServerConfig = AnnotationSupport.findAnnotation(extensionContext.requiredTestClass,
+      MockServerConfig::class.java)
+    val mockServerConfigMethod = AnnotationSupport.findAnnotation(extensionContext.requiredTestMethod,
+      MockServerConfig::class.java)
+    return mockServerConfig != null && mockServerConfig.isPresent ||
+      mockServerConfigMethod != null && mockServerConfigMethod.isPresent
+  }
+
+  private fun mockServerConfigFromAnnotation(context: ExtensionContext): MockProviderConfig? {
+    val mockServerConfigMethod = AnnotationSupport.findAnnotation(context.requiredTestMethod,
+      MockServerConfig::class.java)
+    return if (mockServerConfigMethod != null) {
+      MockProviderConfig.fromMockServerAnnotation(mockServerConfigMethod)
+    } else {
+      val mockServerConfig = AnnotationSupport.findAnnotation(context.requiredTestClass,
+        MockServerConfig::class.java)
+      if (mockServerConfig != null) {
+        MockProviderConfig.fromMockServerAnnotation(mockServerConfig)
+      } else {
+        null
       }
     }
   }
@@ -453,20 +482,22 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       Metrics.sendMetrics(MetricEvent.ConsumerTestRun(pact?.interactions?.size ?: 0, "junit5"))
     }
 
-    if (!context.executionException.isPresent) {
-      for ((provider, _) in providers) {
-        if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
-          storePactForWrite(store, provider)
-        } else {
-          val mockServer = store["mockServer:${provider.providerName}"] as JUnit5MockServerSupport
-          Thread.sleep(100) // give the mock server some time to have consistent state
-          mockServer.close()
-          val result = mockServer.validateMockServerState(null)
-          if (result is PactVerificationResult.Ok) {
+    for ((provider, _) in providers) {
+      if (store["mockServer:${provider.providerName}"] != null) {
+        val mockServer = store["mockServer:${provider.providerName}"] as JUnit5MockServerSupport
+        Thread.sleep(100) // give the mock server some time to have consistent state
+        mockServer.close()
+        val result = mockServer.validateMockServerState(null)
+        if (result is PactVerificationResult.Ok) {
+          if (!context.executionException.isPresent) {
             storePactForWrite(store, provider)
-          } else {
-            JUnitTestSupport.validateMockServerResult(result)
           }
+        } else {
+          JUnitTestSupport.validateMockServerResult(result)
+        }
+      } else if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
+        if (!context.executionException.isPresent) {
+          storePactForWrite(store, provider)
         }
       }
     }

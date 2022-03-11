@@ -20,11 +20,13 @@ annotation class PactTestFor(
          * Host interface to use for the mock server. Only used for synchronous provider tests and defaults to the
          * loopback adapter (127.0.0.1).
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val hostInterface: String = "",
 
         /**
          * Port number to bind to. Only used for synchronous provider tests and defaults to 0, which causes a random free port to be chosen.
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val port: String = "",
 
         /**
@@ -45,6 +47,7 @@ annotation class PactTestFor(
         /**
          * If HTTPS should be used. If enabled, a mock server with a self-signed cert will be started.
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val https: Boolean = false,
 
         /**
@@ -57,27 +60,31 @@ annotation class PactTestFor(
          * If an external keystore should be provided to the mockServer. This allos to provide a path to
          * keystore file
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val keyStorePath: String = "",
 
         /**
          * This property allows to provide the alias name of the certificate should be used.
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val keyStoreAlias: String = "",
 
         /**
          * This property allows to provide the password for the keystore
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val keyStorePassword: String = "",
 
         /**
          * This property allows to provide the password for the private key entry in the keystore
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val privateKeyPassword: String = "",
 
         /**
          * * The type of mock server implementation to use. The default is to use the Java server for HTTP and the KTor
          * server for HTTPS
          */
+        @Deprecated("This has been replaced with the @MockServerConfig annotation")
         val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default
-
 )
