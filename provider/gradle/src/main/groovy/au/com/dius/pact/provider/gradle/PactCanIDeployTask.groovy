@@ -58,6 +58,10 @@ class PactCanIDeployTask extends PactCanIDeployBaseTask {
       println("Computer says no ¯\\_(ツ)_/¯ ${result.message}\n\n${t.red.invoke(result.reason)}")
     }
 
+    if (result.verificationResultUrl != null) {
+      println("VERIFICATION RESULTS\n--------------------\n1. ${result.verificationResultUrl}\n")
+    }
+
     if (!result.ok) {
       throw new GradleScriptException("Can you deploy? Computer says no ¯\\_(ツ)_/¯ ${result.message}", null)
     }

@@ -736,4 +736,39 @@ class PactBrokerClientSpec extends Specification {
     then:
     1 * mockHalClient.postJson(PactBrokerClient.PUBLISH_CONTRACTS_LINK, [:], jsonBody) >> new Ok(new JsonValue.Object([:]))
   }
+
+  @Issue('#')
+  def 'can-i-deploy - should return verificationResultUrl when there is one'() {
+    given:
+    def halClient = Mock(IHalClient)
+    def config = new PactBrokerClientConfig(10, 0)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl', [:], config]) {
+      newHalClient() >> halClient
+    }
+    def json = JsonParser.parseString('''
+    |{
+    |  "summary": {
+    |      "deployable": true,
+    |      "reason": "some text",
+    |      "unknown": 0
+    |  },
+    |  "matrix": [{
+    |      "verificationResult": {
+    |          "_links": {
+    |              "self": {
+    |                  "href": "verificationResultUrl"
+    |              }
+    |          }
+    |      }
+    |  }]
+    |}'''.stripMargin())
+
+    when:
+    def result = client.canIDeploy('test', '1.2.3', new Latest.UseLatest(true), '')
+
+    then:
+    1 * halClient.getJson(_, _) >> new Ok(json)
+    result.ok
+    result.verificationResultUrl == 'verificationResultUrl'
+  }
 }
