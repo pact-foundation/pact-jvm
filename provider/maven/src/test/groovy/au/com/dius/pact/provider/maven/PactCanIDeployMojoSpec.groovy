@@ -113,6 +113,22 @@ class PactCanIDeployMojoSpec extends Specification {
       new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null, null)
   }
 
+  def 'prints verification results url when pact broker client returns one'() {
+    given:
+    IgnoreSelector[] selectors = [new IgnoreSelector('bob')] as IgnoreSelector[]
+    mojo.latest = 'true'
+    mojo.ignore = selectors
+    mojo.brokerClient = Mock(PactBrokerClient)
+
+    when:
+    mojo.execute()
+
+    then:
+    notThrown(MojoExecutionException)
+    1 * mojo.brokerClient.canIDeploy('test', '1234',
+      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null, "verificationResultUrl")
+  }
+
   def 'throws an exception if the pact broker client says no'() {
     given:
     mojo.brokerClient = Mock(PactBrokerClient)
