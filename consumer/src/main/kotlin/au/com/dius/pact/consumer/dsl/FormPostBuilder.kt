@@ -29,11 +29,15 @@ import java.util.UUID
  * Builder for constructing application/x-www-form-urlencoded bodies
  */
 class FormPostBuilder(
-  val body: MutableMap<String, List<String>> = mutableMapOf(),
-  private val contentType: ContentType = ContentType(APPLICATION_FORM_URLENCODED),
-  private val matchers: MatchingRuleCategory = MatchingRuleCategory("body"),
-  private val generators: Generators = Generators()
+        val body: MutableMap<String, List<String>> = mutableMapOf(),
+        private var contentType: ContentType = ContentType(APPLICATION_FORM_URLENCODED),
+        private val matchers: MatchingRuleCategory = MatchingRuleCategory("body"),
+        private val generators: Generators = Generators()
 ) : BodyBuilder {
+
+  constructor(contentType: ContentType): this() {
+    this.contentType = contentType;
+  }
 
   /**
    * Attribute that must be have the specified value
