@@ -737,7 +737,7 @@ class PactBrokerClientSpec extends Specification {
     1 * mockHalClient.postJson(PactBrokerClient.PUBLISH_CONTRACTS_LINK, [:], jsonBody) >> new Ok(new JsonValue.Object([:]))
   }
 
-  @Issue('#')
+  @Issue('#1525')
   def 'can-i-deploy - should return verificationResultUrl when there is one'() {
     given:
     def halClient = Mock(IHalClient)
