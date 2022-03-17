@@ -14,10 +14,11 @@ import mu.KLogging
 /**
  * Mock server provided by a plugin
  */
+@Suppress("TooGenericExceptionThrown")
 class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockServer(pact, config) {
 
   private var mockServerState: List<MockServerResults>? = null
-  private lateinit var mockServerDetails: MockServerDetails
+  private var mockServerDetails: MockServerDetails? = null
   private lateinit var mockServerEntry: CatalogueEntry
 
   override fun start() {
@@ -30,16 +31,20 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
   override fun waitForServer() { }
 
   override fun stop() {
-    val response = DefaultPluginManager.shutdownMockServer(mockServerDetails)
-    if (response.isNotEmpty()) {
-      logger.warn { "Mock server returned an error response - $response" }
-      this.mockServerState = response
+    if (mockServerDetails != null) {
+      val response = DefaultPluginManager.shutdownMockServer(mockServerDetails!!)
+      if (response.isNotEmpty()) {
+        logger.warn { "Mock server returned an error response - $response" }
+        this.mockServerState = response
+      }
+    } else {
+      throw RuntimeException("Mock server is not running")
     }
   }
 
-  override fun getUrl() = mockServerDetails.baseUrl
+  override fun getUrl() = mockServerDetails?.baseUrl ?: throw RuntimeException("Mock server is not running")
 
-  override fun getPort() = mockServerDetails.port
+  override fun getPort() = mockServerDetails?.port ?: throw RuntimeException("Mock server is not running")
 
   override fun validateMockServerState(testResult: Any?): PactVerificationResult {
     return if (mockServerState.isNullOrEmpty()) {
