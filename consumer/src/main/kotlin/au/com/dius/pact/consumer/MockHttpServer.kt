@@ -13,12 +13,16 @@ import au.com.dius.pact.core.model.DefaultPactWriter
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.unwrap
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
@@ -85,6 +89,11 @@ interface MockServer {
    * Returns the results of validating the mock server state
    */
   fun validateMockServerState(testResult: Any?): PactVerificationResult
+
+  /**
+   * Lets the mock server annotate the Pact when ready to be written
+   */
+  fun updatePact(pact: Pact): Pact
 }
 
 abstract class AbstractBaseMockServer : MockServer {
@@ -160,11 +169,13 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
       val pactDirectory = context.pactFolder
       val pactFile = pact.fileForPact(pactDirectory)
       logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $pactFile" }
+
       val pactToWrite = if (pactVersion == PactSpecVersion.V4) {
-        pact.asV4Pact().unwrap()
+        updatePact(pact.asV4Pact().unwrap())
       } else {
-        pact
+        updatePact(pact)
       }
+
       DefaultPactWriter.writePact(pactFile, pactToWrite, pactVersion)
     }
 
@@ -339,10 +350,42 @@ abstract class BaseJdkMockServer(
 }
 
 open class MockHttpServer(pact: BasePact, config: MockProviderConfig) :
-  BaseJdkMockServer(pact, config, HttpServer.create(config.address(), 0))
+  BaseJdkMockServer(pact, config, HttpServer.create(config.address(), 0)) {
+  override fun updatePact(pact: Pact): Pact {
+    return if (pact.isV4Pact()) {
+      when (val p = pact.asV4Pact()) {
+        is Ok -> {
+          for (interaction in p.value.interactions) {
+            interaction.asV4Interaction().transport = "https"
+          }
+          p.value
+        }
+        is Err -> pact
+      }
+    } else {
+      pact
+    }
+  }
+}
 
 open class MockHttpsServer(pact: BasePact, config: MockProviderConfig) :
-  BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
+  BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0)) {
+  override fun updatePact(pact: Pact): Pact {
+    return if (pact.isV4Pact()) {
+      when (val p = pact.asV4Pact()) {
+        is Ok -> {
+          for (interaction in p.value.interactions) {
+            interaction.asV4Interaction().transport = "https"
+          }
+          p.value
+        }
+        is Err -> pact
+      }
+    } else {
+      pact
+    }
+  }
+}
 
 @Suppress("TooGenericExceptionCaught")
 fun calculateCharset(headers: Map<String, List<String?>>): Charset {

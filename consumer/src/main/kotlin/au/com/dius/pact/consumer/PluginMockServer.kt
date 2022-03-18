@@ -3,7 +3,11 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.model.BasePact
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.core.support.isNotEmpty
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
@@ -45,6 +49,18 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
   override fun getUrl() = mockServerDetails?.baseUrl ?: throw RuntimeException("Mock server is not running")
 
   override fun getPort() = mockServerDetails?.port ?: throw RuntimeException("Mock server is not running")
+
+  override fun updatePact(pact: Pact): Pact {
+    return when (val p = pact.asV4Pact()) {
+      is Ok -> {
+        for (interaction in p.value.interactions) {
+          interaction.asV4Interaction().transport = mockServerEntry.catalogueKey.ifNullOrEmpty { mockServerEntry.key }
+        }
+        p.value
+      }
+      is Err -> pact
+    }
+  }
 
   override fun validateMockServerState(testResult: Any?): PactVerificationResult {
     return if (mockServerState.isNullOrEmpty()) {

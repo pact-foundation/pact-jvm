@@ -10,6 +10,8 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.install
@@ -121,6 +123,22 @@ class KTorMockServer(
   }
 
   override fun getPort() = server.environment.connectors.first().port
+
+  override fun updatePact(pact: Pact): Pact {
+    return if (pact.isV4Pact()) {
+      when (val p = pact.asV4Pact()) {
+        is Ok -> {
+          for (interaction in p.value.interactions) {
+            interaction.asV4Interaction().transport = if (config is MockHttpsProviderConfig) "https" else "http"
+          }
+          p.value
+        }
+        is Err -> pact
+      }
+    } else {
+      pact
+    }
+  }
 
   override fun start() {
     logger.debug { "Starting mock server" }

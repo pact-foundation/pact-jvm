@@ -217,4 +217,9 @@ interface Pact {
 
   /** Write this Pact out to the provided file for the Pact specification version */
   fun write(pactDir: String, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable>
+
+  /**
+   * If this Pact is a V4 Pact
+   */
+  fun isV4Pact(): Boolean
 }

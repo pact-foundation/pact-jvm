@@ -78,6 +78,10 @@ class PactConsumerTestExtSpec extends Specification {
     Mockito.when(mockServer.validateMockServerState(Mockito.any())).then {
       new PactVerificationResult.Ok()
     }
+    Mockito.when(mockServer.updatePact(Mockito.any())).then {
+      it.arguments[0]
+    }
+
     def mockStoreData = [
       'mockServer:provider': new JUnit5MockServerSupport(mockServer),
       'mockServerConfig:provider': new MockProviderConfig(),

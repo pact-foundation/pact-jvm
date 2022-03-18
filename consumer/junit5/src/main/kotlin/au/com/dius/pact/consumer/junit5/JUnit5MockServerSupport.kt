@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.AbstractBaseMockServer
 import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.PactTestRun
 import au.com.dius.pact.core.model.BasePact
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import org.junit.jupiter.api.extension.ExtensionContext
 
@@ -21,4 +22,5 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Abst
   override fun <R> runAndWritePact(pact: BasePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>) =
     baseMockServer.runAndWritePact(pact, pactVersion, testFn)
   override fun validateMockServerState(testResult: Any?) = baseMockServer.validateMockServerState(testResult)
+  override fun updatePact(pact: Pact) = baseMockServer.updatePact(pact)
 }

@@ -490,28 +490,36 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         val result = mockServer.validateMockServerState(null)
         if (result is PactVerificationResult.Ok) {
           if (!context.executionException.isPresent) {
-            storePactForWrite(store, provider)
+            storePactForWrite(store, provider, mockServer)
           }
         } else {
           JUnitTestSupport.validateMockServerResult(result)
         }
       } else if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
         if (!context.executionException.isPresent) {
-          storePactForWrite(store, provider)
+          storePactForWrite(store, provider, null)
         }
       }
     }
   }
 
-  private fun storePactForWrite(store: ExtensionContext.Store, providerInfo: ProviderInfo) {
+  private fun storePactForWrite(
+    store: ExtensionContext.Store,
+    providerInfo: ProviderInfo,
+    mockServer: MockServer?
+  ) {
     @Suppress("UNCHECKED_CAST")
     val pactsToWrite = store["pactsToWrite"] as MutableMap<Pair<Consumer, Provider>, Pair<BasePact, PactSpecVersion>>
-    val pact = store["pact:${providerInfo.providerName}"] as BasePact
+    var pact = store["pact:${providerInfo.providerName}"] as BasePact
     val version = providerInfo.pactVersion ?: PactSpecVersion.V4
+
+    if (mockServer != null) {
+      pact = mockServer.updatePact(pact) as BasePact
+    }
 
     pactsToWrite.merge(
       Pair(pact.consumer, pact.provider),
-      Pair(pact, version)
+      Pair(pact as BasePact, version)
     ) { (currentPact, currentVersion), _ ->
       val mergedPact = currentPact.mergeInteractions(pact.interactions) as BasePact
       Pair(mergedPact, maxOf(version, currentVersion))

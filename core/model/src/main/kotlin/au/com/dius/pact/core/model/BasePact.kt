@@ -64,6 +64,8 @@ abstract class BasePact @JvmOverloads constructor(
     return errors
   }
 
+  override fun isV4Pact() = false
+
   companion object : KLogging() {
     @JvmStatic
     val DEFAULT_METADATA: Map<String, Map<String, Any?>> by lazy {

@@ -137,7 +137,8 @@ sealed class V4Interaction(
   comments: MutableMap<String, JsonValue> = mutableMapOf(),
   val pending: Boolean = false,
   val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-  var interactionMarkup: InteractionMarkup = InteractionMarkup()
+  var interactionMarkup: InteractionMarkup = InteractionMarkup(),
+  var transport: String? = null
 ) : BaseInteraction(interactionId, description, providerStates, comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
@@ -176,9 +177,10 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: InteractionMarkup = InteractionMarkup()
+    interactionMarkup: InteractionMarkup = InteractionMarkup(),
+    transport: String? = null
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
-      interactionMarkup),
+      interactionMarkup, transport),
     SynchronousRequestResponse {
 
     override fun toString(): String {
@@ -198,7 +200,8 @@ sealed class V4Interaction(
         comments,
         pending,
         pluginConfiguration,
-        interactionMarkup
+        interactionMarkup,
+        transport
       )
     }
 
@@ -241,6 +244,10 @@ sealed class V4Interaction(
         map["interactionMarkup"] = interactionMarkup.toMap()
       }
 
+      if (transport.isNotEmpty()) {
+        map["transport"] = transport!!
+      }
+
       return map
     }
 
@@ -272,9 +279,10 @@ sealed class V4Interaction(
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: InteractionMarkup = InteractionMarkup()
+    interactionMarkup: InteractionMarkup = InteractionMarkup(),
+    transport: String? = null
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
-      interactionMarkup),
+      interactionMarkup, transport),
     MessageInteraction {
 
     override fun toString(): String {
@@ -293,7 +301,8 @@ sealed class V4Interaction(
         comments,
         pending,
         pluginConfiguration,
-        interactionMarkup
+        interactionMarkup,
+        transport
       )
     }
 
@@ -334,6 +343,10 @@ sealed class V4Interaction(
         map["interactionMarkup"] = interactionMarkup.toMap()
       }
 
+      if (transport.isNotEmpty()) {
+        map["transport"] = transport
+      }
+
       return map
     }
 
@@ -368,9 +381,10 @@ sealed class V4Interaction(
     var request: MessageContents = MessageContents(),
     val response: MutableList<MessageContents> = mutableListOf(),
     pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
-    interactionMarkup: InteractionMarkup = InteractionMarkup()
+    interactionMarkup: InteractionMarkup = InteractionMarkup(),
+    transport: String? = null
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
-      interactionMarkup), MessageInteraction {
+      interactionMarkup, transport), MessageInteraction {
     override fun withGeneratedKey(): V4Interaction {
       return SynchronousMessages(
         generateKey(),
@@ -382,7 +396,8 @@ sealed class V4Interaction(
         request,
         response,
         pluginConfiguration,
-        interactionMarkup
+        interactionMarkup,
+        transport
       )
     }
 
@@ -422,6 +437,10 @@ sealed class V4Interaction(
 
       if (interactionMarkup.isNotEmpty()) {
         map["interactionMarkup"] = interactionMarkup.toMap()
+      }
+
+      if (transport.isNotEmpty()) {
+        map["transport"] = transport!!
       }
 
       return map
@@ -494,17 +513,19 @@ sealed class V4Interaction(
               InteractionMarkup()
             }
 
+            val transport = json["transport"].asString()
+
             when (result.value) {
               V4InteractionType.SynchronousHTTP -> {
                 Ok(SynchronousHttp(
                   key, description, providerStates, HttpRequest.fromJson(json["request"]),
                   HttpResponse.fromJson(json["response"]), id, comments, pending, pluginConfiguration.toMutableMap(),
-                  interactionMarkup
+                  interactionMarkup, transport
                 ))
               }
               V4InteractionType.AsynchronousMessages -> {
                 Ok(AsynchronousMessage(key, description, MessageContents.fromJson(json), id,
-                  providerStates, comments, pending, pluginConfiguration.toMutableMap(), interactionMarkup))
+                  providerStates, comments, pending, pluginConfiguration.toMutableMap(), interactionMarkup, transport))
               }
               V4InteractionType.SynchronousMessages -> {
                 val request = if (json.has("request"))
@@ -514,7 +535,7 @@ sealed class V4Interaction(
                   json["response"].asArray().map { MessageContents.fromJson(it) }
                   else listOf()
                 Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request,
-                  response.toMutableList(), pluginConfiguration.toMutableMap(), interactionMarkup))
+                  response.toMutableList(), pluginConfiguration.toMutableMap(), interactionMarkup, transport))
               }
             }
           }
@@ -578,6 +599,8 @@ open class V4Pact @JvmOverloads constructor(
       interactions.filterIsInstance<V4Interaction.AsynchronousMessage>()
         .map { it.asV3Interaction() }.toMutableList()))
   }
+
+  override fun isV4Pact() = true
 
   override fun asV4Pact() = Ok(this)
 
