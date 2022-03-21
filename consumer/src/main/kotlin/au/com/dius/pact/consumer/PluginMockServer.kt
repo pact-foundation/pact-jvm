@@ -4,7 +4,6 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -23,12 +22,12 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
 
   private var mockServerState: List<MockServerResults>? = null
   private var mockServerDetails: MockServerDetails? = null
-  private lateinit var mockServerEntry: CatalogueEntry
+  private lateinit var transportEntry: CatalogueEntry
 
   override fun start() {
-    mockServerEntry = CatalogueManager.lookupEntry(config.mockServerRegistryEntry)
-      ?: throw InvalidMockServerRegistryEntry(config.mockServerRegistryEntry)
-    mockServerDetails = DefaultPluginManager.startMockServer(mockServerEntry, config.toPluginMockServerConfig(), pact)
+    transportEntry = CatalogueManager.lookupEntry(config.transportRegistryEntry)
+      ?: throw InvalidMockServerRegistryEntry(config.transportRegistryEntry)
+    mockServerDetails = DefaultPluginManager.startMockServer(transportEntry, config.toPluginMockServerConfig(), pact)
   }
 
   @Suppress("EmptyFunctionBlock")
@@ -54,7 +53,7 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
     return when (val p = pact.asV4Pact()) {
       is Ok -> {
         for (interaction in p.value.interactions) {
-          interaction.asV4Interaction().transport = mockServerEntry.catalogueKey.ifNullOrEmpty { mockServerEntry.key }
+          interaction.asV4Interaction().transport = transportEntry.key
         }
         p.value
       }

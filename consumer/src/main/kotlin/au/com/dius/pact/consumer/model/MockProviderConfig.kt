@@ -49,7 +49,7 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val scheme: String = HTTP,
   open val mockServerImplementation: MockServerImplementation = MockServerImplementation.JavaHttpServer,
   open val addCloseHeader: Boolean = false,
-  open val mockServerRegistryEntry: String = ""
+  open val transportRegistryEntry: String = ""
 ) {
 
   fun url() = "$scheme://$hostname:$port"
