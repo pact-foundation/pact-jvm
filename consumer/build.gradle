@@ -36,4 +36,5 @@ dependencies {
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
   testRuntimeOnly 'org.objenesis:objenesis:3.2'
   testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+  testImplementation 'io.grpc:grpc-protobuf:1.43.2'
 }
