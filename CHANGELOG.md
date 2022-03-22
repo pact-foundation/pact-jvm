@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0-beta.0 - Support for mock servers from plugins
+
+* a10524d34 - chore: update release script for beta verion (Ronald Holshausen, Tue Mar 22 16:10:02 2022 +1100)
+* 203f37e15 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Tue Mar 22 16:07:27 2022 +1100)
+* 5835a5856 - chore: update version table in readme (Ronald Holshausen, Tue Mar 22 16:06:07 2022 +1100)
+* a3e2426a8 - bump version to 4.3.7 (Ronald Holshausen, Tue Mar 22 16:01:17 2022 +1100)
+* 4bd1201b6 - feat: Allow lookup of mock server if only the transport is given (Ronald Holshausen, Tue Mar 22 15:25:25 2022 +1100)
+* 6cc4fae6a - refactor: rename mock-server -> transport (Ronald Holshausen, Mon Mar 21 15:19:07 2022 +1100)
+* 97de8d546 - feat: Plugin mock servers needs to presist the transport in the Pact files (Ronald Holshausen, Fri Mar 18 14:07:42 2022 +1100)
+* ba5e6dcdb - fix: avoid NPE when the plugin does not start correctly (Ronald Holshausen, Thu Mar 17 16:36:18 2022 +1100)
+* b270f6977 - feat: support mock servers from plugins (Ronald Holshausen, Fri Mar 11 16:38:39 2022 +1100)
+* 0cd62bf7a - chore: add 4.4 build to CI (Ronald Holshausen, Mon Jan 17 15:11:27 2022 +1100)
+* 4c994b18e - chore: create v4.4 version branch; Upgrade Kotlin to 1.6.10 (Ronald Holshausen, Mon Jan 17 15:02:23 2022 +1100)
+
 # 4.3.6 - Bugfix Release
 
 * 99316a311 - chore: fix codenarc violation after merging PR (Ronald Holshausen, Tue Mar 22 15:44:54 2022 +1100)
