@@ -1,5 +1,25 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.6 - Bugfix Release
+
+* 99316a311 - chore: fix codenarc violation after merging PR (Ronald Holshausen, Tue Mar 22 15:44:54 2022 +1100)
+* 4f4c0b296 - Merge pull request #1527 from kellychen103/verificationresults (Ronald Holshausen, Thu Mar 17 08:42:01 2022 +1100)
+* feb84a894 - Merge pull request #1526 from colossatr0n/overload-form-post-builder (Ronald Holshausen, Thu Mar 17 08:39:52 2022 +1100)
+* 0d62de13c - Added secondary constructor to FormPostBuilder to facilitate passing a ContentType. (Thackery Archuletta, Wed Mar 16 12:43:05 2022 -0600)
+* 8745a241d - put issue number (kelly chen, Wed Mar 16 12:35:37 2022 -0600)
+* 22804543b - add printing verification results url to maven as well (kelly chen, Tue Mar 15 15:20:24 2022 -0600)
+* 22aa7bcce - added verification result url from client and printing in gradle can i deploy (kelly chen, Tue Mar 15 15:17:38 2022 -0600)
+* ef0feb82d - chore: correct offset expressions in date-time expressions (Ronald Holshausen, Fri Mar 11 14:49:58 2022 +1100)
+* 8868ac5ae - fix: WildcardKeysTest link on README is broken #1518 (Ronald Holshausen, Mon Feb 28 10:49:00 2022 +1100)
+* 0e3c0ff8a - Fix: WildcardKeysTest link on README is broken #1518 (Ronald Holshausen, Mon Feb 28 10:46:36 2022 +1100)
+* d0ed7496b - chore: update sys prop doc title (Ronald Holshausen, Fri Feb 11 14:50:11 2022 +1100)
+* d1c5e7f03 - chore: update doc on system properties used (Ronald Holshausen, Fri Feb 11 14:09:20 2022 +1100)
+* bfd6385b7 - chore: commit message in the changelog was breaking the doc sync process (Ronald Holshausen, Fri Feb 11 11:58:17 2022 +1100)
+* cc4498c33 - chore: correct message on warning log entry (Ronald Holshausen, Fri Feb 11 11:47:26 2022 +1100)
+* f3e82dd02 - chore: update doc on system properties used (Ronald Holshausen, Fri Feb 11 11:46:57 2022 +1100)
+* 3912c3896 - chore: add doc on system properties used (Ronald Holshausen, Thu Feb 10 17:02:21 2022 +1100)
+* 293563238 - bump version to 4.3.6 (Ronald Holshausen, Thu Feb 10 12:52:05 2022 +1100)
+
 # 4.3.5 - Bugfix Release
 
 * 8cd69bef8 - Merge branch 'v4.2.x' (Ronald Holshausen, Thu Feb 10 11:50:15 2022 +1100)
