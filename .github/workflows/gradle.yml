@@ -12,13 +12,13 @@ jobs:
     strategy:
       matrix:
         operating-system: [ ubuntu-latest, windows-latest, macos-latest ]
-        module: [ core, 'consumer -x :consumer:junit:clojureTest', provider, pact-specification-test ]
+        module: [ core, consumer, provider, pact-specification-test ]
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 15
+    - name: Set up JDK 17
       uses: actions/setup-java@v1
       with:
-        java-version: 15
+        java-version: 17
     - name: Cache Gradle packages
       uses: actions/cache@v2
       with:
@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         module: [ core, consumer, provider, pact-specification-test ]
-        jdk: [ 11, 12, 13, 14 ]
+        jdk: [ 11, 15, 16 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
