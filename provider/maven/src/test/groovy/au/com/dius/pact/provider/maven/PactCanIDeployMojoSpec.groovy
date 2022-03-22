@@ -126,7 +126,7 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234',
-      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null, "verificationResultUrl")
+      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null, 'verificationResultUrl')
   }
 
   def 'throws an exception if the pact broker client says no'() {
