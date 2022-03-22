@@ -40,7 +40,7 @@ class PactCanIDeployTask extends PactCanIDeployBaseTask {
     Latest latest = setupLatestParam()
     if ((latest instanceof Latest.UseLatestTag || latest.latest == false) &&
       !project.hasProperty(PACTICIPANT_VERSION)) {
-      throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=... or -Dlatest=true', null)
+      throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=... or -Platest=true', null)
     }
     String pacticipantVersion = project.hasProperty(PACTICIPANT_VERSION) ? project.property(PACTICIPANT_VERSION) : ''
     String to = null
@@ -56,6 +56,10 @@ class PactCanIDeployTask extends PactCanIDeployBaseTask {
       println("Computer says yes \\o/ ${result.message}\n\n${t.green.invoke(result.reason)}")
     } else {
       println("Computer says no ¯\\_(ツ)_/¯ ${result.message}\n\n${t.red.invoke(result.reason)}")
+    }
+
+    if (result.verificationResultUrl != null) {
+      println("VERIFICATION RESULTS\n--------------------\n1. ${result.verificationResultUrl}\n")
     }
 
     if (!result.ok) {

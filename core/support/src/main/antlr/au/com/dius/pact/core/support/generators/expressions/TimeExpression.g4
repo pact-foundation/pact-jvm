@@ -8,13 +8,13 @@ expression returns [ TimeBase timeBase = TimeBase.Now.INSTANCE, List<Adjustment<
     | op duration { if ($duration.d != null) $adj.add($duration.d.withOperation($op.o)); } ( op duration { if ($duration.d != null) $adj.add($duration.d.withOperation($op.o)); } )*
     | base { $timeBase = $base.t; } ( op duration { if ($duration.d != null) $adj.add($duration.d.withOperation($op.o)); } )*
     | 'next' offset { $adj.add(new Adjustment($offset.type, $offset.val, Operation.PLUS)); }
-    | 'next' offset { $adj.add(new Adjustment($offset.type, $offset.val, Operation.PLUS)); }  op duration {
+    | 'next' offset { $adj.add(new Adjustment($offset.type, $offset.val, Operation.PLUS)); }  ( op duration {
         if ($duration.d != null) $adj.add($duration.d.withOperation($op.o));
-    }
+    } )*
     | 'last' offset { $adj.add(new Adjustment($offset.type, $offset.val, Operation.MINUS)); }
-    | 'last' offset { $adj.add(new Adjustment($offset.type, $offset.val, Operation.MINUS)); } (op duration {
+    | 'last' offset { $adj.add(new Adjustment($offset.type, $offset.val, Operation.MINUS)); } ( op duration {
         if ($duration.d != null) $adj.add($duration.d.withOperation($op.o));
-    })*
+    } )*
     ) EOF
     ;
 

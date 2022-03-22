@@ -1,5 +1,42 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.6 - Bugfix Release
+
+* 99316a311 - chore: fix codenarc violation after merging PR (Ronald Holshausen, Tue Mar 22 15:44:54 2022 +1100)
+* 4f4c0b296 - Merge pull request #1527 from kellychen103/verificationresults (Ronald Holshausen, Thu Mar 17 08:42:01 2022 +1100)
+* feb84a894 - Merge pull request #1526 from colossatr0n/overload-form-post-builder (Ronald Holshausen, Thu Mar 17 08:39:52 2022 +1100)
+* 0d62de13c - Added secondary constructor to FormPostBuilder to facilitate passing a ContentType. (Thackery Archuletta, Wed Mar 16 12:43:05 2022 -0600)
+* 8745a241d - put issue number (kelly chen, Wed Mar 16 12:35:37 2022 -0600)
+* 22804543b - add printing verification results url to maven as well (kelly chen, Tue Mar 15 15:20:24 2022 -0600)
+* 22aa7bcce - added verification result url from client and printing in gradle can i deploy (kelly chen, Tue Mar 15 15:17:38 2022 -0600)
+* ef0feb82d - chore: correct offset expressions in date-time expressions (Ronald Holshausen, Fri Mar 11 14:49:58 2022 +1100)
+* 8868ac5ae - fix: WildcardKeysTest link on README is broken #1518 (Ronald Holshausen, Mon Feb 28 10:49:00 2022 +1100)
+* 0e3c0ff8a - Fix: WildcardKeysTest link on README is broken #1518 (Ronald Holshausen, Mon Feb 28 10:46:36 2022 +1100)
+* d0ed7496b - chore: update sys prop doc title (Ronald Holshausen, Fri Feb 11 14:50:11 2022 +1100)
+* d1c5e7f03 - chore: update doc on system properties used (Ronald Holshausen, Fri Feb 11 14:09:20 2022 +1100)
+* bfd6385b7 - chore: commit message in the changelog was breaking the doc sync process (Ronald Holshausen, Fri Feb 11 11:58:17 2022 +1100)
+* cc4498c33 - chore: correct message on warning log entry (Ronald Holshausen, Fri Feb 11 11:47:26 2022 +1100)
+* f3e82dd02 - chore: update doc on system properties used (Ronald Holshausen, Fri Feb 11 11:46:57 2022 +1100)
+* 3912c3896 - chore: add doc on system properties used (Ronald Holshausen, Thu Feb 10 17:02:21 2022 +1100)
+* 293563238 - bump version to 4.3.6 (Ronald Holshausen, Thu Feb 10 12:52:05 2022 +1100)
+
+# 4.3.5 - Bugfix Release
+
+* 8cd69bef8 - Merge branch 'v4.2.x' (Ronald Holshausen, Thu Feb 10 11:50:15 2022 +1100)
+* c4926c432 - bump version to 4.2.21 (Ronald Holshausen, Thu Feb 10 11:31:08 2022 +1100)
+* 8bc5d6818 - update changelog for release 4.2.20 (Ronald Holshausen, Thu Feb 10 11:14:10 2022 +1100)
+* 69587d6a4 - Merge branch 'v4.1.x' into v4.2.x (Ronald Holshausen, Thu Feb 10 10:15:39 2022 +1100)
+* 8a97a23ad - bump version to 4.1.35 (Ronald Holshausen, Wed Feb 9 17:39:25 2022 +1100)
+* 4bc07519d - update changelog for release 4.1.34 (Ronald Holshausen, Wed Feb 9 17:26:03 2022 +1100)
+* e3651f62d - fix(Gradle): Authentication needs to be propagated when using fromPactBroker #1483 (Ronald Holshausen, Wed Feb 9 17:07:19 2022 +1100)
+* 1ac516838 - fix(Gradle): Cannot connect to authenticated broker with token when verifying #1483 (Ronald Holshausen, Wed Feb 9 15:28:00 2022 +1100)
+* 4e257276d - fix(canIDeploy): Plus signs in version numbers not correctly escaped #1511 (Ronald Holshausen, Wed Feb 9 11:26:48 2022 +1100)
+* 4b9e7548a - chore: fix failing test after merging PR (Ronald Holshausen, Fri Feb 4 09:08:25 2022 +1100)
+* 5a8c042e6 - Merge pull request #1510 from lio-wd/patch-1 (Ronald Holshausen, Fri Feb 4 07:58:17 2022 +1100)
+* e8cc494da - Update PactCanIDeployTask.groovy (lio-wd, Thu Feb 3 10:45:35 2022 -0800)
+* 53daa6f22 - chore: update readme (Ronald Holshausen, Wed Jan 12 16:43:07 2022 +1100)
+* 423da9fb9 - bump version to 4.3.5 (Ronald Holshausen, Wed Jan 12 16:38:08 2022 +1100)
+
 # 4.3.4 - Support branches when publishing Pacts
 
 * 854f8b808 - Merge branch 'v4.2.x' (Ronald Holshausen, Wed Jan 12 16:10:46 2022 +1100)
@@ -35,6 +72,23 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * a768a49d0 - update changelog for release 4.2.17 (Ronald Holshausen, Thu Dec 9 16:35:32 2021 +1100)
 * 27c150caa - fix: Metrics payload needs to be a classic FORM post (Ronald Holshausen, Thu Dec 9 16:19:02 2021 +1100)
 * 30e224f27 - chore: update docs (Ronald Holshausen, Thu Dec 9 15:05:12 2021 +1100)
+
+# 4.2.20 - Bugfix Release
+
+* 69587d6a4 - Merge branch 'v4.1.x' into v4.2.x (Ronald Holshausen, Thu Feb 10 10:15:39 2022 +1100)
+* 8a97a23ad - bump version to 4.1.35 (Ronald Holshausen, Wed Feb 9 17:39:25 2022 +1100)
+* 4bc07519d - update changelog for release 4.1.34 (Ronald Holshausen, Wed Feb 9 17:26:03 2022 +1100)
+* e3651f62d - fix(Gradle): Authentication needs to be propagated when using fromPactBroker #1483 (Ronald Holshausen, Wed Feb 9 17:07:19 2022 +1100)
+* 1ac516838 - fix(Gradle): Cannot connect to authenticated broker with token when verifying #1483 (Ronald Holshausen, Wed Feb 9 15:28:00 2022 +1100)
+* 4e257276d - fix(canIDeploy): Plus signs in version numbers not correctly escaped #1511 (Ronald Holshausen, Wed Feb 9 11:26:48 2022 +1100)
+* 2ff6299f3 - bump version to 4.2.20 (Ronald Holshausen, Wed Jan 12 15:49:33 2022 +1100)
+
+# 4.1.34 - Bugfix Release
+
+* e3651f62d - fix(Gradle): Authentication needs to be propagated when using fromPactBroker #1483 (Ronald Holshausen, Wed Feb 9 17:07:19 2022 +1100)
+* 1ac516838 - fix(Gradle): Cannot connect to authenticated broker with token when verifying #1483 (Ronald Holshausen, Wed Feb 9 15:28:00 2022 +1100)
+* 4e257276d - fix(canIDeploy): Plus signs in version numbers not correctly escaped #1511 (Ronald Holshausen, Wed Feb 9 11:26:48 2022 +1100)
+* 72454f968 - bump version to 4.1.34 (Ronald Holshausen, Wed Jan 12 14:46:31 2022 +1100)
 
 # 4.2.19 - Support branches when publishing Pacts
 
@@ -495,7 +549,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 5df1731ff - feat(plugins): added matcher definition parser (Ronald Holshausen, Thu Aug 26 13:57:48 2021 +1000)
 * d1d33cd15 - Correcting definition for arrayMinLike. (darshna, Tue Aug 24 12:30:16 2021 +0530)
 * b462966e5 - Merge branch 'v4.1.x' (Ronald Holshausen, Tue Aug 24 11:39:55 2021 +1000)
-* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List&lt;String&gt; #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
 * a6be37e5f - chore: upgrade kotlin-result (Ronald Holshausen, Tue Aug 24 10:37:29 2021 +1000)
 * 65b3b4dd4 - bump version to 4.2.10 in README (JapuDCret, Mon Aug 23 15:28:59 2021 +0200)
 * a7d66d873 - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
@@ -537,7 +591,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 89f2a56c5 - Merge pull request #1421 from JapuDCret/plugin-handle-404-correctly (Ronald Holshausen, Sun Aug 29 10:03:30 2021 +1000)
 * d1d33cd15 - Correcting definition for arrayMinLike. (darshna, Tue Aug 24 12:30:16 2021 +0530)
 * b462966e5 - Merge branch 'v4.1.x' (Ronald Holshausen, Tue Aug 24 11:39:55 2021 +1000)
-* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List&lt;String&gt; #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
 * a6be37e5f - chore: upgrade kotlin-result (Ronald Holshausen, Tue Aug 24 10:37:29 2021 +1000)
 * 65b3b4dd4 - bump version to 4.2.10 in README (JapuDCret, Mon Aug 23 15:28:59 2021 +0200)
 * a7d66d873 - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
@@ -549,7 +603,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 8ef861125 - feat: force standalone="yes" when standalone is set to true on the XML builder #1414 (Ronald Holshausen, Sat Sep 4 13:02:14 2021 +1000)
 * 3c752cd1c - fix: allow Gradle providerTags to be an array #1423 (Ronald Holshausen, Sat Sep 4 12:52:36 2021 +1000)
 * d8bb675ce - feat: add handling for 404 responses in Maven plugin #1419 (Marvin Kienitz, Mon Aug 23 15:20:31 2021 +0200)
-* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List<String> #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
+* 04d911779 - fix: Illegal cast of au.com.dius.pact.core.support.Auth to List&lt;String&gt; #1422 (Ronald Holshausen, Tue Aug 24 11:39:38 2021 +1000)
 * 54d6ca8e6 - bump version to 4.1.26 (Ronald Holshausen, Sun Aug 22 18:21:26 2021 +1000)
 
 # 4.3.0-beta.1 - Updated plugin driver + fixes from master

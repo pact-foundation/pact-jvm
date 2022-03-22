@@ -18,6 +18,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.unwrap
+import com.google.common.net.UrlEscapers.urlFormParameterEscaper
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import mu.KLogging
 import java.io.File
@@ -104,7 +105,13 @@ sealed class Latest {
 /**
  * Model for a CanIDeploy result
  */
-data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String, val unknown: Int? = null)
+data class CanIDeployResult(
+  val ok: Boolean,
+  val message: String,
+  val reason: String,
+  val unknown: Int? = null,
+  val verificationResultUrl: String? = null
+)
 
 /**
  * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
@@ -400,8 +407,8 @@ open class PactBrokerClient(
             properties["wip"].asBoolean()!!
           else false
 
-          PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending, wip = wip,
-              usedNewEndpoint = true)
+          PactBrokerResult(name, href, pactBrokerUrl, halClient.getAuth()?.legacyForm() ?: emptyList(),
+            notices, pending, wip = wip, usedNewEndpoint = true, auth = halClient.getAuth())
         }
       }
     }
@@ -805,8 +812,15 @@ open class PactBrokerClient(
       when (val result = halClient.getJson(path, false)) {
         is Ok<JsonValue> -> {
           val summary: JsonValue.Object = result.value["summary"].downcast()
+          val verificationResultUrl = result.value["matrix"].asArray()
+            ?.get(0)?.asObject()
+            ?.get("verificationResult")?.asObject()
+            ?.get("_links")?.asObject()
+            ?.get("self")?.asObject()
+            ?.get("href")
+            ?.let{ url -> Json.toString(url) }
           CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
-            Json.toInteger(summary["unknown"]))
+            Json.toInteger(summary["unknown"]), verificationResultUrl)
         }
         is Err<Exception> -> {
           logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
@@ -903,8 +917,8 @@ open class PactBrokerClient(
       to: String?,
       ignore: List<IgnoreSelector>
     ): String {
-      val escaper = urlPathSegmentEscaper()
-      var params = mutableListOf("q[][pacticipant]" to escaper.escape(pacticipant), "latestby" to "cvp")
+      val escaper = urlFormParameterEscaper()
+      val params = mutableListOf("q[][pacticipant]" to escaper.escape(pacticipant), "latestby" to "cvp")
 
       when (latest) {
         is Latest.UseLatest -> if (latest.latest) {
@@ -927,7 +941,7 @@ open class PactBrokerClient(
           if (key.isNotEmpty()) {
             params.add("ignore[][pacticipant]" to key)
             if (value.isNotEmpty()) {
-              params.add("ignore[][version]" to value)
+              params.add("ignore[][version]" to escaper.escape(value))
             }
           }
         }

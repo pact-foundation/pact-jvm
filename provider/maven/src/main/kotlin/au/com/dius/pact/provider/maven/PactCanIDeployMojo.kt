@@ -59,6 +59,10 @@ open class PactCanIDeployMojo : PactBaseMojo() {
       println("Computer says no ¯\\_(ツ)_/¯ ${result.message}\n\n${t.red(result.reason)}")
     }
 
+    if (result.verificationResultUrl != null) {
+      println("VERIFICATION RESULTS\n--------------------\n1. ${result.verificationResultUrl}\n")
+    }
+
     if (!result.ok) {
       throw MojoExecutionException("Can you deploy? Computer says no ¯\\_(ツ)_/¯ ${result.message}", null)
     }

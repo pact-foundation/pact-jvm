@@ -412,7 +412,7 @@ class PactBrokerClientSpec extends Specification {
         new VerificationNotice('before_verification',
          'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')
       ],
-      false, null, false, true
+      false, null, false, true, null
     )
   }
 
@@ -683,13 +683,20 @@ class PactBrokerClientSpec extends Specification {
     'Test'       | '100'              | new Latest.UseLatest(false)        | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][version]=100&latest=true'
     'Test'       | ''                 | new Latest.UseLatestTag('tst')     | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][tag]=tst&latest=true'
     'Test'       | ''                 | new Latest.UseLatest(true)         | 'tst'     | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&tag=tst'
-    'Test 1 2 3' | ''                 | new Latest.UseLatest(true)         | null      | []                                                                  || 'q[][pacticipant]=Test%201%202%203&latestby=cvp&q[][latest]=true&latest=true'
-    'Test'       | '1 0 0'            | new Latest.UseLatest(false)        | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][version]=1%200%200&latest=true'
-    'Test'       | ''                 | new Latest.UseLatestTag('tst 3/4') | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][tag]=tst%203%2F4&latest=true'
-    'Test'       | ''                 | new Latest.UseLatest(true)         | 'tst 3/4' | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&tag=tst%203%2F4'
+    'Test 1 2 3' | ''                 | new Latest.UseLatest(true)         | null      | []                                                                  || 'q[][pacticipant]=Test+1+2+3&latestby=cvp&q[][latest]=true&latest=true'
+    'Test'       | '1 0 0'            | new Latest.UseLatest(false)        | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][version]=1+0+0&latest=true'
+    'Test'       | ''                 | new Latest.UseLatestTag('tst 3/4') | null      | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][tag]=tst+3%2F4&latest=true'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | 'tst 3/4' | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&tag=tst+3%2F4'
     'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', null)]                                   || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob'
     'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', '100')]                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob&ignore[][version]=100'
     'Test'       | ''                 | new Latest.UseLatest(true)         | null      | [new IgnoreSelector('bob', null), new IgnoreSelector('fred', null)] || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&latest=true&ignore[][pacticipant]=bob&ignore[][pacticipant]=fred'
+  }
+
+  @Issue('#1511')
+  def 'can-i-deploy - matrix query - encodes + correctly'() {
+    expect:
+    PactBrokerClient.internalBuildMatrixQuery('test', '0.0.1+4a2a964',
+      new Latest.UseLatest(false), null, []) == 'q[][pacticipant]=test&latestby=cvp&q[][version]=0.0.1%2B4a2a964&latest=true'
   }
 
   def 'publishing pact with new publish endpoint'() {
@@ -728,5 +735,40 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * mockHalClient.postJson(PactBrokerClient.PUBLISH_CONTRACTS_LINK, [:], jsonBody) >> new Ok(new JsonValue.Object([:]))
+  }
+
+  @Issue('#1525')
+  def 'can-i-deploy - should return verificationResultUrl when there is one'() {
+    given:
+    def halClient = Mock(IHalClient)
+    def config = new PactBrokerClientConfig(10, 0)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl', [:], config]) {
+      newHalClient() >> halClient
+    }
+    def json = JsonParser.parseString('''
+    |{
+    |  "summary": {
+    |      "deployable": true,
+    |      "reason": "some text",
+    |      "unknown": 0
+    |  },
+    |  "matrix": [{
+    |      "verificationResult": {
+    |          "_links": {
+    |              "self": {
+    |                  "href": "verificationResultUrl"
+    |              }
+    |          }
+    |      }
+    |  }]
+    |}'''.stripMargin())
+
+    when:
+    def result = client.canIDeploy('test', '1.2.3', new Latest.UseLatest(true), '')
+
+    then:
+    1 * halClient.getJson(_, _) >> new Ok(json)
+    result.ok
+    result.verificationResultUrl == 'verificationResultUrl'
   }
 }
