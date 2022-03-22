@@ -2,9 +2,9 @@ name: Pact-JVM Build
 
 on:
   push:
-    branches: [ master, v4.1.x, v4.2.x, v4.3.x ]
+    branches: [ master, v4.1.x, v4.3.x, v4.4.x ]
   pull_request:
-    branches: [ master, v4.1.x, v4.2.x, v4.3.x ]
+    branches: [ master, v4.1.x, v4.3.x, v4.4.x ]
 
 jobs:
   latest_jdk:
