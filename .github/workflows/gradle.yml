@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ ubuntu-latest, windows-latest, macos-latest ]
-        module: [ core, consumer, provider, pact-specification-test ]
+        module: [ core, "consumer -x :consumer:junit:clojureTest", provider, pact-specification-test ]
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 17
