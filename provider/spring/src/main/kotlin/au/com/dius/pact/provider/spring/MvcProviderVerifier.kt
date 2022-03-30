@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
@@ -195,7 +196,8 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       ContentType.fromString(httpResponse.contentType.toString())
     }
 
-    val response = ProviderResponse(httpResponse.status, headers, contentType, httpResponse.contentAsString)
+    val response = ProviderResponse(httpResponse.status, headers, contentType,
+      OptionalBody.body(httpResponse.contentAsString, contentType))
 
     logger.debug { "Response: $response" }
 

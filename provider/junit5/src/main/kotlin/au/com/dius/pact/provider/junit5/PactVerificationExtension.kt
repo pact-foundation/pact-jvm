@@ -115,7 +115,7 @@ open class PactVerificationExtension(
 
     val executionContext = testContext.executionContext ?: mutableMapOf()
     executionContext["ArrayContainsJsonGenerator"] = ArrayContainsJsonGenerator
-    val requestAndClient = testContext.target.prepareRequest(interaction, executionContext)
+    val requestAndClient = testContext.target.prepareRequest(pact, interaction, executionContext)
     if (requestAndClient != null) {
       val (request, client) = requestAndClient
       store.put("request", request)
@@ -135,7 +135,7 @@ open class PactVerificationExtension(
 
     val verifier = ProviderVerifier()
     verifier.verificationSource = "junit5"
-    testContext.target.prepareVerifier(verifier, extContext.requiredTestInstance)
+    testContext.target.prepareVerifier(verifier, extContext.requiredTestInstance, pact)
 
     setupReporters(verifier, serviceName, interaction.description, extContext, testContext.valueResolver)
 

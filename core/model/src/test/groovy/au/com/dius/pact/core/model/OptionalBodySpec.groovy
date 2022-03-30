@@ -42,12 +42,12 @@ class OptionalBodySpec extends Specification {
     body.null == value
 
     where:
-    body                         | value
-    OptionalBody.missing()       | false
-    OptionalBody.empty()         | false
-    OptionalBody.nullBody()      | true
-    OptionalBody.body(null)      | true
-    OptionalBody.body('a'.bytes) | false
+    body                              | value
+    OptionalBody.missing()            | false
+    OptionalBody.empty()              | false
+    OptionalBody.nullBody()           | true
+    OptionalBody.body(null as byte[]) | true
+    OptionalBody.body('a'.bytes)      | false
   }
 
   @Unroll
@@ -56,13 +56,13 @@ class OptionalBodySpec extends Specification {
     body.present == value
 
     where:
-    body                         | value
-    OptionalBody.missing()       | false
-    OptionalBody.empty()         | false
-    OptionalBody.nullBody()      | false
-    OptionalBody.body(''.bytes)  | false
-    OptionalBody.body(null)      | false
-    OptionalBody.body('a'.bytes) | true
+    body                              | value
+    OptionalBody.missing()            | false
+    OptionalBody.empty()              | false
+    OptionalBody.nullBody()           | false
+    OptionalBody.body(''.bytes)       | false
+    OptionalBody.body(null as byte[]) | false
+    OptionalBody.body('a'.bytes)      | true
   }
 
   @Unroll
@@ -71,13 +71,13 @@ class OptionalBodySpec extends Specification {
     body.notPresent == value
 
     where:
-    body                         | value
-    OptionalBody.missing()       | true
-    OptionalBody.empty()         | true
-    OptionalBody.nullBody()      | true
-    OptionalBody.body(''.bytes)  | true
-    OptionalBody.body(null)      | true
-    OptionalBody.body('a'.bytes) | false
+    body                              | value
+    OptionalBody.missing()            | true
+    OptionalBody.empty()              | true
+    OptionalBody.nullBody()           | true
+    OptionalBody.body(''.bytes)       | true
+    OptionalBody.body(null as byte[]) | true
+    OptionalBody.body('a'.bytes)      | false
   }
 
   @Unroll
@@ -86,13 +86,13 @@ class OptionalBodySpec extends Specification {
     body.orElse('default'.bytes) == value.bytes
 
     where:
-    body                         | value
-    OptionalBody.missing()       | 'default'
-    OptionalBody.empty()         | ''
-    OptionalBody.nullBody()      | 'default'
-    OptionalBody.body(''.bytes)  | ''
-    OptionalBody.body(null)      | 'default'
-    OptionalBody.body('a'.bytes) | 'a'
+    body                              | value
+    OptionalBody.missing()            | 'default'
+    OptionalBody.empty()              | ''
+    OptionalBody.nullBody()           | 'default'
+    OptionalBody.body(''.bytes)       | ''
+    OptionalBody.body(null as byte[]) | 'default'
+    OptionalBody.body('a'.bytes)      | 'a'
   }
 
   def 'unwrap throws an exception when the body is missing'() {
@@ -106,7 +106,7 @@ class OptionalBodySpec extends Specification {
     body << [
       OptionalBody.nullBody(),
       OptionalBody.missing(),
-      OptionalBody.body(null)
+      OptionalBody.body(null as byte[])
     ]
   }
 

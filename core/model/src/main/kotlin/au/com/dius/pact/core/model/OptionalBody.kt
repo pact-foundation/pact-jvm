@@ -229,6 +229,10 @@ data class OptionalBody @JvmOverloads constructor(
     fun body(body: ByteArray?, contentType: ContentType) = body(body, contentType, ContentTypeHint.DEFAULT)
 
     @JvmStatic
+    @JvmOverloads
+    fun body(body: String?, contentType: ContentType = UNKNOWN) = body(body?.toByteArray(), contentType, ContentTypeHint.DEFAULT)
+
+    @JvmStatic
     fun body(
       body: ByteArray?,
       contentType: ContentType,
@@ -261,7 +265,7 @@ fun OptionalBody?.isNotPresent() = this == null || this.isNotPresent()
 
 fun OptionalBody?.orElse(defaultValue: ByteArray) = this?.orElse(defaultValue) ?: defaultValue
 
-fun OptionalBody?.orEmpty() = this?.orElse(ByteArray(0))
+fun OptionalBody?.orEmpty() = this?.orElse(ByteArray(0)) ?: ByteArray(0)
 
 fun OptionalBody?.valueAsString() = this?.valueAsString() ?: ""
 
@@ -269,3 +273,5 @@ fun OptionalBody?.isNullOrEmpty() = this == null || this.isEmpty() || this.isNul
 
 fun OptionalBody?.unwrap() = this?.unwrap() ?: throw UnwrapMissingBodyException(
   "Failed to unwrap value from a null body")
+
+fun OptionalBody?.orEmptyBody() = this ?: OptionalBody.empty()

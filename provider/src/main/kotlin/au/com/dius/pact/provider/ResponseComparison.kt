@@ -19,6 +19,8 @@ import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
+import au.com.dius.pact.core.model.orEmpty
+import au.com.dius.pact.core.model.orEmptyBody
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Utils.sizeOf
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -57,7 +59,7 @@ class ResponseComparison(
   private val expectedBody: OptionalBody,
   private val isJsonBody: Boolean,
   private val actualResponseContentType: ContentType,
-  private val actualBody: String?
+  private val actualBody: OptionalBody?
 ) {
 
   fun statusResult(mismatches: List<Mismatch>) = mismatches.filterIsInstance<StatusMismatch>().firstOrNull()
@@ -89,9 +91,9 @@ class ResponseComparison(
       val contentType = this.actualResponseContentType
       val expected = expectedBody.valueAsString()
       val actual = actualBody.orEmpty()
-      val diff = when (val shouldIncludeDiff = shouldGenerateDiff(resolver, max(actual.length, expected.length))) {
+      val diff = when (val shouldIncludeDiff = shouldGenerateDiff(resolver, max(actual.size, expected.length))) {
         is Ok -> if (shouldIncludeDiff.value) {
-          generateFullDiff(actual, contentType, expected, isJsonBody)
+          generateFullDiff(actual.toString(contentType.asCharset()), contentType, expected, isJsonBody)
         } else {
           emptyList()
         }
@@ -159,9 +161,9 @@ class ResponseComparison(
       val actualResponseContentType = actualResponse.contentType
       val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
         actualResponseContentType, actualResponse.body)
-      val body = OptionalBody.body(actualResponse.body?.toByteArray(actualResponseContentType.asCharset()))
-      val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode,
-        actualResponse.headers.toMutableMap(), body), pluginConfiguration)
+      val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode ?: 200,
+        actualResponse.headers?.toMutableMap() ?: mutableMapOf(),
+        actualResponse.body.orEmptyBody()), pluginConfiguration)
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches, SystemPropertyResolver))
     }
@@ -188,7 +190,7 @@ class ResponseComparison(
           val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
           val responseComparison = ResponseComparison(
             mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents.contents,
-            messageContentType.isJson(), messageContentType, actual.valueAsString())
+            messageContentType.isJson(), messageContentType, actual)
           responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
         }
         is Message -> {
@@ -204,7 +206,7 @@ class ResponseComparison(
           val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
           val responseComparison = ResponseComparison(
             mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents,
-            messageContentType.isJson(), messageContentType, actual.valueAsString())
+            messageContentType.isJson(), messageContentType, actual)
           responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
         }
         else -> TODO("Matching a ${message.javaClass.simpleName} is not implemented")

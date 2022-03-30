@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.spring.junit5
 
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import org.springframework.http.MediaType
@@ -28,9 +29,10 @@ class WebTestClientTargetSpec extends Specification {
     WebTestClientTarget webTestClientTarget = new WebTestClientTarget(bindToRouterFunction(routerFunction).build())
     def request = new Request('GET', '/data', [id: ['1234']])
     def interaction = new RequestResponseInteraction('some description', [], request)
+    def pact = Mock(Pact)
 
     when:
-    def requestAndClient = webTestClientTarget.prepareRequest(interaction, [:])
+    def requestAndClient = webTestClientTarget.prepareRequest(pact, interaction, [:])
     def requestBuilder = requestAndClient.first
     def builtRequest = requestBuilder.exchange().expectBody().returnResult()
 
@@ -52,9 +54,10 @@ class WebTestClientTargetSpec extends Specification {
     def request = new Request('POST', '/data', [id: ['1234']], [:],
             OptionalBody.body('{"foo":"bar"}'.getBytes(StandardCharsets.UTF_8)))
     def interaction = new RequestResponseInteraction('some description', [], request)
+    def pact = Mock(Pact)
 
     when:
-    def requestAndClient = webTestClientTarget.prepareRequest(interaction, [:])
+    def requestAndClient = webTestClientTarget.prepareRequest(pact, interaction, [:])
     def requestBuilder = requestAndClient.first
 
     then:
@@ -69,8 +72,9 @@ class WebTestClientTargetSpec extends Specification {
     given:
     def request = new Request('GET', '/data', [id: ['1234']])
     def interaction = new RequestResponseInteraction('some description', [], request)
+    def pact = Mock(Pact)
     WebTestClientTarget webTestClientTarget = new WebTestClientTarget(bindToRouterFunction(routerFunction).build())
-    def requestAndClient = webTestClientTarget.prepareRequest(interaction, [:])
+    def requestAndClient = webTestClientTarget.prepareRequest(pact, interaction, [:])
     def requestBuilder = requestAndClient.first
 
     when:
@@ -79,6 +83,6 @@ class WebTestClientTargetSpec extends Specification {
     then:
     response.statusCode == 200
     response.contentType.toString() == 'application/json'
-    response.body == '{"id":1234}'
+    response.body.valueAsString() == '{"id":1234}'
   }
 }

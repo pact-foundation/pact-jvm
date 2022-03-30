@@ -3,6 +3,7 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
@@ -11,6 +12,7 @@ import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonValue
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
@@ -176,12 +178,62 @@ open class ConsumerInfo @JvmOverloads constructor (
   }
 }
 
+/**
+ * Response back from the provider
+ */
 data class ProviderResponse @JvmOverloads constructor(
-  val statusCode: Int,
-  val headers: Map<String, List<String>> = emptyMap(),
+  /**
+   * Status code. Only used for HTTP interactions.
+   */
+  val statusCode: Int? = 200,
+
+  /**
+   * Headers received from the provider. Only used for HTTP interactions.
+   */
+  val headers: Map<String, List<String>>? = emptyMap(),
+
+  /**
+   * Content type of any body returned
+   */
   val contentType: au.com.dius.pact.core.model.ContentType = au.com.dius.pact.core.model.ContentType.UNKNOWN,
-  val body: String? = null
+
+  /**
+   * Body returned from the provider
+   */
+  val body: OptionalBody? = null,
+
+  /**
+   * Metadata returned by the provider. This will also include the headers for HTTP interactions.
+   */
+  val metadata: Map<String, MetadataValue> = emptyMap()
 )
+
+sealed class MetadataValue {
+  /**
+   * Data is stored as bytes
+   */
+  data class BinaryData(val data: ByteArray) : MetadataValue() {
+    override fun equals(other: Any?): Boolean {
+      if (this === other) return true
+      if (javaClass != other?.javaClass) return false
+
+      other as BinaryData
+
+      if (!data.contentEquals(other.data)) return false
+
+      return true
+    }
+
+    override fun hashCode(): Int {
+      return data.contentHashCode()
+    }
+  }
+
+  /**
+   * Data is stored in a format that can be converted to JSON
+   */
+  data class NonBinaryData(val data: JsonValue) : MetadataValue()
+}
 
 /**
  * Client HTTP utility for providers
@@ -390,20 +442,25 @@ open class ProviderClient(
       })
       .mapValues { it.value.flatten() }
 
-    var body: String? = null
+    var body: OptionalBody? = null
     val entity = httpResponse.entity
     if (entity != null) {
       if (entity.contentType != null) {
         contentType = PactContentType.fromString(entity.contentType)
       }
-      body = EntityUtils.toString(entity, contentType.asCharset())
+      body = OptionalBody.body(entity.content.readAllBytes(), contentType)
     }
 
     val response = ProviderResponse(
       httpResponse.code,
       headers,
       contentType,
-      body
+      body,
+      headers.mapValues { headerEntry ->
+        MetadataValue.NonBinaryData(JsonValue.Array(
+          headerEntry.value.map { JsonValue.StringValue(it) }.toMutableList()
+        ))
+      }
     )
 
     logger.debug { "Response: $response" }

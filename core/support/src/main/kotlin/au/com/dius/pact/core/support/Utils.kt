@@ -7,6 +7,7 @@ import mu.KLogging
 import org.apache.commons.lang3.RandomUtils
 import java.io.IOException
 import java.net.ServerSocket
+import java.util.Locale
 import java.util.jar.JarInputStream
 import kotlin.math.pow
 import kotlin.reflect.full.cast
@@ -127,6 +128,7 @@ object Utils : KLogging() {
         is Boolean -> value
         is String -> value
         is Number -> value
+        is Enum<*> -> value.toString()
         is Map<*, *> -> value.entries.associate { it.key.toString() to jsonSafeValue(it.value) }
         is Collection<*> -> value.map { jsonSafeValue(it) }
         else -> objectToJsonMap(value)
@@ -162,7 +164,7 @@ object Utils : KLogging() {
   private val DATA_SIZES = listOf("b", "kb", "mb", "gb", "tb")
 
   fun sizeOf(value: String): Result<Int, String> {
-    val matchResult = SIZE_REGEX.matchEntire(value.toLowerCase())
+    val matchResult = SIZE_REGEX.matchEntire(value.lowercase(Locale.getDefault()))
     return if (matchResult != null) {
       val unitPower = DATA_SIZES.indexOf(matchResult.groupValues[2])
       if (unitPower >= 0) {
@@ -199,5 +201,5 @@ object Utils : KLogging() {
   /**
    * Convert a value to snake-case form (a.b.c -> A_B_C)
    */
-  private fun snakeCase(key: String) = key.split('.').joinToString("_") { it.toUpperCase() }
+  private fun snakeCase(key: String) = key.split('.').joinToString("_") { it.uppercase(Locale.getDefault()) }
 }

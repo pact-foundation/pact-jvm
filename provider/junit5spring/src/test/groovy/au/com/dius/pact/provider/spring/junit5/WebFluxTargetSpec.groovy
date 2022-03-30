@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.spring.junit5
 
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import org.springframework.http.MediaType
@@ -26,9 +27,10 @@ class WebFluxTargetSpec extends Specification {
     WebFluxTarget webFluxTarget = new WebFluxTarget(routerFunction)
     def request = new Request('GET', '/data', [id: ['1234']])
     def interaction = new RequestResponseInteraction('some description', [], request)
+    def pact = Mock(Pact)
 
     when:
-    def requestAndClient = webFluxTarget.prepareRequest(interaction, [:])
+    def requestAndClient = webFluxTarget.prepareRequest(pact, interaction, [:])
     def requestBuilder = requestAndClient.first
     def builtRequest = requestBuilder.exchange().expectBody().returnResult()
 
@@ -50,9 +52,10 @@ class WebFluxTargetSpec extends Specification {
     def request = new Request('POST', '/data', [id: ['1234']], [:],
       OptionalBody.body('{"foo":"bar"}'.getBytes(StandardCharsets.UTF_8)))
     def interaction = new RequestResponseInteraction('some description', [], request)
+    def pact = Mock(Pact)
 
     when:
-    def requestAndClient = webFluxTarget.prepareRequest(interaction, [:])
+    def requestAndClient = webFluxTarget.prepareRequest(pact, interaction, [:])
     def requestBuilder = requestAndClient.first
 
     then:
@@ -67,8 +70,9 @@ class WebFluxTargetSpec extends Specification {
     given:
     def request = new Request('GET', '/data', [id: ['1234']])
     def interaction = new RequestResponseInteraction('some description', [], request)
+    def pact = Mock(Pact)
     WebFluxTarget webFluxTarget = new WebFluxTarget(routerFunction)
-    def requestAndClient = webFluxTarget.prepareRequest(interaction, [:])
+    def requestAndClient = webFluxTarget.prepareRequest(pact, interaction, [:])
     def requestBuilder = requestAndClient.first
 
     when:
@@ -77,6 +81,6 @@ class WebFluxTargetSpec extends Specification {
     then:
     response.statusCode == 200
     response.contentType.toString() == 'application/json'
-    response.body == '{"id":1234}'
+    response.body.valueAsString() == '{"id":1234}'
   }
 }

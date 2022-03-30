@@ -3,6 +3,8 @@ package au.com.dius.pact.provider.spring.junit5
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
@@ -48,12 +50,15 @@ class MockMvcTestTarget @JvmOverloads constructor(
   var printRequestResponse: Boolean = false,
   var servletPath: String? = null
 ) : TestTarget {
+  override val userConfig: Map<String, Any?> = emptyMap()
+
     override fun getProviderInfo(serviceName: String, pactSource: PactSource?) = ProviderInfo(serviceName)
 
     override fun prepareRequest(
+      pact: Pact,
       interaction: Interaction,
       context: MutableMap<String, Any>
-    ): Pair<MockHttpServletRequestBuilder, MockMvc> {
+    ): Pair<Any, Any>? {
       if (interaction is SynchronousRequestResponse) {
           val request = interaction.request.generatedRequest(context, GeneratorTestMode.Provider)
           return toMockRequestBuilder(request) to buildMockMvc()
@@ -200,14 +205,15 @@ class MockMvcTestTarget @JvmOverloads constructor(
           ContentType.fromString(httpResponse.contentType)
       }
 
-      val response = ProviderResponse(httpResponse.status, headers, contentType, httpResponse.contentAsString)
+      val response = ProviderResponse(httpResponse.status, headers, contentType,
+        OptionalBody.body(httpResponse.contentAsString, contentType))
 
       logger.debug { "Response: $response" }
 
       return response
     }
 
-    override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {
+    override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact) {
         /* NO-OP */
     }
 

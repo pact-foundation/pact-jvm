@@ -36,7 +36,7 @@ class ResponseComparisonSpec extends Specification {
       def response = opts.response ?: response
       def actualHeaders = opts.actualHeaders ?: actualHeaders
       ResponseComparison.compareResponse(response,
-        new ProviderResponse(status, actualHeaders, ContentType.JSON, actualBody))
+        new ProviderResponse(status, actualHeaders, ContentType.JSON, OptionalBody.body(actualBody.toString(), ContentType.JSON)))
     }
   }
 

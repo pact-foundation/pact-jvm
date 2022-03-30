@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.spring.junit5
 
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import org.springframework.http.HttpStatus
@@ -26,10 +27,13 @@ class MockMvcTestTargetSpec extends Specification {
         given:
         def request = new Request('GET', '/data', [id: ['1234']])
         def interaction = new RequestResponseInteraction('some description', [], request)
+        def pact = Mock(Pact)
+
         when:
-        def requestAndClient = mockMvcTestTarget.prepareRequest(interaction, [:])
+        def requestAndClient = mockMvcTestTarget.prepareRequest(pact, interaction, [:])
         def requestBuilder = requestAndClient.first
         def client = requestAndClient.second
+
         then:
         client instanceof MockMvc
         def builtRequest = requestBuilder.buildRequest(null)
@@ -44,10 +48,13 @@ class MockMvcTestTargetSpec extends Specification {
         def mockMvcTestTarget = new MockMvcTestTarget(mockMvc)
         def request = new Request('GET', '/data', [id: ['1234']])
         def interaction = new RequestResponseInteraction('some description', [], request)
+        def pact = Mock(Pact)
+
         when:
-        def requestAndClient = mockMvcTestTarget.prepareRequest(interaction, [:])
+        def requestAndClient = mockMvcTestTarget.prepareRequest(pact, interaction, [:])
         def requestBuilder = requestAndClient.first
         def client = requestAndClient.second
+
         then:
         client === mockMvc
         def builtRequest = requestBuilder.buildRequest(null)
@@ -61,10 +68,13 @@ class MockMvcTestTargetSpec extends Specification {
         def request = new Request('POST', '/data', [id: ['1234']], [:],
                 OptionalBody.body('{"foo":"bar"}'.getBytes(StandardCharsets.UTF_8)))
         def interaction = new RequestResponseInteraction('some description', [], request)
+        def pact = Mock(Pact)
+
         when:
-        def requestAndClient = mockMvcTestTarget.prepareRequest(interaction, [:])
+        def requestAndClient = mockMvcTestTarget.prepareRequest(pact, interaction, [:])
         def requestBuilder = requestAndClient.first
         def client = requestAndClient.second
+
         then:
         client instanceof MockMvc
         def builtRequest = requestBuilder.characterEncoding('UTF-8').buildRequest(null)
@@ -78,15 +88,18 @@ class MockMvcTestTargetSpec extends Specification {
         given:
         def request = new Request('GET', '/data', [id: ['1234']])
         def interaction = new RequestResponseInteraction('some description', [], request)
-        def requestAndClient = mockMvcTestTarget.prepareRequest(interaction, [:])
+        def pact = Mock(Pact)
+        def requestAndClient = mockMvcTestTarget.prepareRequest(pact, interaction, [:])
         def requestBuilder = requestAndClient.first
         def client = requestAndClient.second
+
         when:
         def response = mockMvcTestTarget.executeInteraction(client, requestBuilder)
+
         then:
         response.statusCode == 200
         response.contentType.toString() == 'application/json'
-        response.body == 'Hello 1234'
+        response.body.valueAsString() == 'Hello 1234'
     }
 
     def 'should execute interaction with custom mockMvc'() {
@@ -96,15 +109,18 @@ class MockMvcTestTargetSpec extends Specification {
 
         def request = new Request('GET', '/data', [id: ['1234']])
         def interaction = new RequestResponseInteraction('some description', [], request)
-        def requestAndClient = mockMvcTestTarget.prepareRequest(interaction, [:])
+        def pact = Mock(Pact)
+        def requestAndClient = mockMvcTestTarget.prepareRequest(pact, interaction, [:])
         def requestBuilder = requestAndClient.first
         def client = requestAndClient.second
+
         when:
         def responseMap = mockMvcTestTarget.executeInteraction(client, requestBuilder)
+
         then:
         responseMap.statusCode == 200
         responseMap.contentType.toString() == 'application/json'
-        responseMap.body == 'Hello 1234'
+        responseMap.body.valueAsString() == 'Hello 1234'
     }
 
     @RestController

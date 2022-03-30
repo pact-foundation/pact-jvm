@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
@@ -193,7 +194,7 @@ class WebFluxProviderVerifier : ProviderVerifier() {
       exchangeResult.status.value(),
       headers,
       contentType,
-      exchangeResult.responseBody?.let { String(it) }
+      OptionalBody.body(exchangeResult.responseBody?.let { String(it) }, contentType)
     )
 
     logger.debug { "Response: $response" }

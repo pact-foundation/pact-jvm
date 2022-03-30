@@ -37,6 +37,9 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
+import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.DefaultPluginManager
+import io.pact.plugins.jvm.core.InteractionVerificationData
 import mu.KLogging
 import java.io.File
 import java.lang.reflect.Method
@@ -47,8 +50,29 @@ import java.util.function.Function
 import java.util.function.Supplier
 import kotlin.reflect.KMutableProperty1
 
+/**
+ * Type of verification being preformed
+ */
 enum class PactVerification {
-  REQUEST_RESPONSE, ANNOTATED_METHOD, RESPONSE_FACTORY
+  /**
+   * Standard HTTP request/response
+   */
+  REQUEST_RESPONSE,
+
+  /**
+   * Annotated method that will return the response (for message interactions)
+   */
+  ANNOTATED_METHOD,
+
+  /**
+   * Factory facade used to get the response
+   */
+  RESPONSE_FACTORY,
+
+  /**
+   * Verification is provided by a plugin
+   */
+  PLUGIN
 }
 
 /**
@@ -261,6 +285,18 @@ interface IProviderVerifier {
   fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?)
 
   /**
+   * Verification executed by a plugin
+   */
+  fun verifyInteractionViaPlugin(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    client: Any?,
+    request: Any?,
+    context: Map<String, Any>
+  ): VerificationResult
+
+  /**
    * Source of the verification (Gradle/Maven/Junit)
    */
   var verificationSource: String?
@@ -358,8 +394,10 @@ open class ProviderVerifier @JvmOverloads constructor (
           var result: VerificationResult = VerificationResult.Ok(interactionId)
           methodsAnnotatedWith.forEach {
             val response = invokeProviderMethod(it, null) as Map<String, Any>
+            val body = OptionalBody.body(response["data"] as String?)
             val actualResponse = ProviderResponse(response["statusCode"] as Int,
-              response["headers"] as Map<String, List<String>>, ContentType.UNKNOWN, response["data"] as String?)
+              response["headers"] as Map<String, List<String>>, ContentType.UNKNOWN, body
+            )
             result = result.merge(this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage,
               failures, interactionId.orEmpty(), pending))
           }
@@ -403,11 +441,12 @@ open class ProviderVerifier @JvmOverloads constructor (
         val expectedResponse = (interaction as SynchronousRequestResponse).response
         val response = factory.apply(interaction.description) as Map<String, Any>
         val contentType = response["contentType"] as String?
+        val ct = if (contentType == null) ContentType.UNKNOWN else ContentType(contentType)
         val actualResponse = ProviderResponse(
           response["statusCode"] as Int,
           response["headers"] as Map<String, List<String>>,
-          if (contentType == null) ContentType.UNKNOWN else ContentType(contentType),
-          response["data"] as String?
+          ct,
+          OptionalBody.body(response["data"] as String?, ct)
         )
         this.verifyRequestResponsePact(
           expectedResponse,
@@ -650,6 +689,16 @@ open class ProviderVerifier @JvmOverloads constructor (
           logger.debug { "Verifying via response factory function" }
           verifyResponseByFactory(provider, consumer, interaction, interactionMessage, failures, pending)
         }
+        PactVerification.PLUGIN -> {
+          logger.debug { "Verifying via plugin" }
+//          when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
+//            interaction.asV4Interaction(), config)) {
+//            is Ok -> result.value to null
+//            is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
+//          }
+//          verifyInteractionViaPlugin(provider, consumer, interaction, providerClient, )
+          TODO("Not yet implemented")
+        }
         else -> {
           logger.debug { "Verifying via provider methods" }
           verifyResponseByInvokingProviderMethods(
@@ -888,6 +937,25 @@ open class ProviderVerifier @JvmOverloads constructor (
           it.verifyConsumerFromFile(pactSource, consumer)
         }
       }
+    }
+  }
+
+  override fun verifyInteractionViaPlugin(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    client: Any?,
+    request: Any?,
+    context: Map<String, Any>
+  ): VerificationResult {
+    val userConfig = context["userConfig"] as Map<String, Any?>? ?: emptyMap()
+    return when (val result = DefaultPluginManager.verifyInteraction(client as CatalogueEntry, request as InteractionVerificationData, userConfig)) {
+      is Ok -> if (result.value.ok) {
+        VerificationResult.Ok(interaction.interactionId)
+      } else {
+        VerificationResult.Failed("Failed")
+      }
+      is Err -> VerificationResult.Failed("Failed to configure the interaction for verification - ${result.error}")
     }
   }
 

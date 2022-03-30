@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.SynchronousRequestResponse
@@ -13,6 +14,7 @@ import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderClient
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest
@@ -26,16 +28,21 @@ import java.util.function.Supplier
  */
 interface TestTarget {
   /**
+   * Any user provided configuration
+   */
+  val userConfig: Map<String, Any?>
+
+  /**
    * Returns information about the provider
    */
-  fun getProviderInfo(serviceName: String, pactSource: PactSource? = null): ProviderInfo
+  fun getProviderInfo(serviceName: String, pactSource: PactSource? = null): IProviderInfo
 
   /**
    * Prepares the request for the interaction.
    *
    * @return a pair of the client class and request to use for the test, or null if there is none
    */
-  fun prepareRequest(interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>?
+  fun prepareRequest(pact: Pact, interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any?>?
 
   /**
    * If this is a request response (HTTP or HTTPS) target
@@ -52,7 +59,7 @@ interface TestTarget {
   /**
    * Prepares the verifier for use during the test
    */
-  fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any)
+  fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact)
 }
 
 /**
@@ -70,7 +77,9 @@ open class HttpTestTarget @JvmOverloads constructor (
 ) : TestTarget {
   override fun isHttpTarget() = true
 
-  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
+  override val userConfig: Map<String, Any?> = emptyMap()
+
+  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): IProviderInfo {
     val providerInfo = ProviderInfo(serviceName)
     providerInfo.port = port
     providerInfo.host = host
@@ -79,7 +88,7 @@ open class HttpTestTarget @JvmOverloads constructor (
     return providerInfo
   }
 
-  override fun prepareRequest(interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>? {
+  override fun prepareRequest(pact: Pact, interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>? {
     val providerClient = ProviderClient(getProviderInfo("provider"), this.httpClientFactory.invoke())
     if (interaction is SynchronousRequestResponse) {
       val request = interaction.request.generatedRequest(context, GeneratorTestMode.Provider)
@@ -88,7 +97,7 @@ open class HttpTestTarget @JvmOverloads constructor (
     throw UnsupportedOperationException("Only request/response interactions can be used with an HTTP test target")
   }
 
-  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) { }
+  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact) { }
 
   override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
     val providerClient = client as ProviderClient
@@ -124,7 +133,7 @@ open class HttpsTestTarget @JvmOverloads constructor (
   httpClientFactory: () -> IHttpClientFactory = { HttpClientFactory() }
 ) : HttpTestTarget(host, port, path, httpClientFactory) {
 
-  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
+  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): IProviderInfo {
     val providerInfo = super.getProviderInfo(serviceName, pactSource)
     providerInfo.protocol = "https"
     providerInfo.insecure = insecure
@@ -159,8 +168,9 @@ open class MessageTestTarget @JvmOverloads constructor(
   private val classLoader: ClassLoader? = null
 ) : TestTarget {
   override fun isHttpTarget() = false
+  override val userConfig: Map<String, Any?> = emptyMap()
 
-  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
+  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): IProviderInfo {
     val providerInfo = ProviderInfo(serviceName)
     providerInfo.verificationType = PactVerification.ANNOTATED_METHOD
     providerInfo.packagesToScan = packagesToScan
@@ -177,14 +187,14 @@ open class MessageTestTarget @JvmOverloads constructor(
     return providerInfo
   }
 
-  override fun prepareRequest(interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>? {
+  override fun prepareRequest(pact: Pact, interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>? {
     if (interaction is MessageInteraction) {
       return null
     }
     throw UnsupportedOperationException("Only message interactions can be used with an AMPQ test target")
   }
 
-  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {
+  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact) {
     verifier.projectClassLoader = Supplier { classLoader }
     verifier.projectClasspath = Supplier {
       when (val classLoader = classLoader ?: testInstance.javaClass.classLoader) {

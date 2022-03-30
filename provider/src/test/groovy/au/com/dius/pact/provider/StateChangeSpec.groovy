@@ -2,6 +2,7 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
 import com.github.michaelbull.result.Ok
 import org.apache.hc.core5.http.ClassicHttpResponse
@@ -31,7 +32,7 @@ class StateChangeSpec extends Specification {
         makeStateChangeRequestArgs << args
         stateChangeResponse
       }
-      makeRequest(_) >> new ProviderResponse(200, [:], ContentType.JSON, '{}')
+      makeRequest(_) >> new ProviderResponse(200, [:], ContentType.JSON, OptionalBody.body('{}', ContentType.JSON))
     }
   }
 

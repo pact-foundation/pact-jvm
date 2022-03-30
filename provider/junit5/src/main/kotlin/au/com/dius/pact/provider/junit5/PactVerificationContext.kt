@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit5
 
+import au.com.dius.pact.core.matchers.DefaultResponseGenerator
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
@@ -77,36 +78,55 @@ data class PactVerificationContext @JvmOverloads constructor(
     request: Any?,
     context: MutableMap<String, Any>
   ): List<VerificationResult> {
-    if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
-      var interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
-        " - ${interaction.description}"
-      if (interaction.isV4() && interaction.asV4Interaction().pending) {
-        interactionMessage += " [PENDING]"
-      }
-      return try {
-        val reqResInteraction = if (interaction is V4Interaction.SynchronousHttp) {
-          interaction.asV3Interaction()
-        } else {
-          interaction as RequestResponseInteraction
+    when (providerInfo.verificationType) {
+      null, PactVerification.REQUEST_RESPONSE -> {
+        var interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
+          " - ${interaction.description}"
+        if (interaction.isV4() && interaction.asV4Interaction().pending) {
+          interactionMessage += " [PENDING]"
         }
-        val expectedResponse = reqResInteraction.response.generatedResponse(context, GeneratorTestMode.Provider)
-        val actualResponse = target.executeInteraction(client, request)
+        return try {
+          val reqResInteraction = if (interaction is V4Interaction.SynchronousHttp) {
+            interaction.asV3Interaction()
+          } else {
+            interaction as RequestResponseInteraction
+          }
+          val expectedResponse = DefaultResponseGenerator.generateResponse(reqResInteraction.response, context, GeneratorTestMode.Provider)
+          val actualResponse = target.executeInteraction(client, request)
 
-        listOf(verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, mutableMapOf(),
-          reqResInteraction.interactionId.orEmpty(), consumer.pending))
-      } catch (e: Exception) {
-        verifier!!.reporters.forEach {
-          it.requestFailed(providerInfo, interaction, interactionMessage, e,
-            verifier!!.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
+          listOf(
+            verifier!!.verifyRequestResponsePact(
+              expectedResponse, actualResponse, interactionMessage, mutableMapOf(),
+              reqResInteraction.interactionId.orEmpty(), consumer.pending
+            )
+          )
+        } catch (e: Exception) {
+          verifier!!.reporters.forEach {
+            it.requestFailed(
+              providerInfo, interaction, interactionMessage, e,
+              verifier!!.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE)
+            )
+          }
+          listOf(
+            VerificationResult.Failed(
+              "Request to provider failed with an exception", interactionMessage,
+              mapOf(
+                interaction.interactionId.orEmpty() to
+                  listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))
+              ),
+              consumer.pending
+            )
+          )
         }
-        listOf(VerificationResult.Failed("Request to provider failed with an exception", interactionMessage,
-          mapOf(interaction.interactionId.orEmpty() to
-            listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
-          consumer.pending))
       }
-    } else {
-      return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
-        interaction.description, mutableMapOf(), false))
+      PactVerification.PLUGIN -> {
+        return listOf(verifier!!.verifyInteractionViaPlugin(providerInfo, consumer, interaction,
+          client, request, context + ("userConfig" to target.userConfig)))
+      }
+      else -> {
+        return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
+          interaction.description, mutableMapOf(), false))
+      }
     }
   }
 

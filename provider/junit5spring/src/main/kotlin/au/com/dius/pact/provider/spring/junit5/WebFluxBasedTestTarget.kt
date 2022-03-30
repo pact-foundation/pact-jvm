@@ -2,6 +2,8 @@ package au.com.dius.pact.provider.spring.junit5
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
@@ -47,11 +49,11 @@ interface WebFluxBasedTestTarget : TestTarget {
       exchangeResult.status.value(),
       headers,
       contentType,
-      exchangeResult.responseBody?.let { String(it) }
+      OptionalBody.body(exchangeResult.responseBody?.let { String(it) }, contentType)
     )
   }
 
-  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {
+  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact) {
     /* NO-OP */
   }
 

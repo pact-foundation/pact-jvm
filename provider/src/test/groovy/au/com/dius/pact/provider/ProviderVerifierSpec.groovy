@@ -701,7 +701,7 @@ class ProviderVerifierSpec extends Specification {
       [new ProviderState('Test State')], new Request(),
       new Response(200, [:], OptionalBody.body(json.bytes), matchingRules), '1234')
     def client = Mock(ProviderClient)
-    client.makeRequest(_) >> new ProviderResponse(200, [:], ContentType.JSON, json)
+    client.makeRequest(_) >> new ProviderResponse(200, [:], ContentType.JSON, OptionalBody.body(json, ContentType.JSON))
 
     when:
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
@@ -785,7 +785,7 @@ class ProviderVerifierSpec extends Specification {
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
 
     then:
-    client.makeRequest(_) >> new ProviderResponse(500, [:], ContentType.JSON, '')
+    client.makeRequest(_) >> new ProviderResponse(500, [:], ContentType.JSON, OptionalBody.empty())
     result instanceof VerificationResult.Failed
     result.pending == true
   }
