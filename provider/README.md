@@ -48,7 +48,7 @@ class ReadmeExamplePactJVMProviderJUnitTest {
     consumer.setPactSource(new UrlSource(
       ReadmeExamplePactJVMProviderJUnitTest.getResource('/pacts/zoo_app-animal_service.json').toString()))
 
-    testConsumerPact = DefaultPactReader.INSTANCE.loadPact(consumer.getPactSource()) as Pact<RequestResponseInteraction>
+    testConsumerPact = DefaultPactReader.INSTANCE.loadPact(consumer.getPactSource())
   }
 
   @Test

@@ -42,7 +42,7 @@ class PactVerificationExtensionSpec extends Specification {
     PactBrokerSource pactSource = new PactBrokerSource('localhost', '80', 'http')
 
     context = new PactVerificationContext(store, extContext, Stub(TestTarget), Stub(IProviderVerifier),
-      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, [])
+      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, pact, [])
 
     PactVerificationExtension extension = new PactVerificationExtension(filteredPact, pactSource, interaction1,
       'service', 'consumer', mockValueResolver)
@@ -77,7 +77,7 @@ class PactVerificationExtensionSpec extends Specification {
     PactBrokerSource pactSource = new PactBrokerSource('localhost', '80', 'http')
 
     context = new PactVerificationContext(store, extContext, Stub(TestTarget), Stub(IProviderVerifier),
-      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, [])
+      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, pact, [])
 
     PactVerificationExtension extension = new PactVerificationExtension(pact, pactSource, interaction1,
       'service', 'consumer', mockValueResolver)
@@ -111,7 +111,7 @@ class PactVerificationExtensionSpec extends Specification {
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction1, interaction2 ], [:], pactSource)
 
     context = new PactVerificationContext(store, extContext, Stub(TestTarget), Stub(IProviderVerifier),
-      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, [])
+      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, pact, [])
 
     PactVerificationExtension extension = new PactVerificationExtension(pact, pactSource, interaction1,
       'service', 'consumer', mockValueResolver)

@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.matchers.DefaultResponseGenerator
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.V4Interaction
@@ -19,6 +20,8 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.TestDescription
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import org.junit.jupiter.api.extension.ExtensionContext
 
 /**
@@ -34,6 +37,7 @@ data class PactVerificationContext @JvmOverloads constructor(
   var providerInfo: IProviderInfo,
   val consumer: IConsumerInfo,
   val interaction: Interaction,
+  val pact: Pact,
   var testExecutionResult: MutableList<VerificationResult.Failed> = mutableListOf()
 ) {
   val stateChangeHandlers: MutableList<Any> = mutableListOf()
@@ -120,7 +124,11 @@ data class PactVerificationContext @JvmOverloads constructor(
         }
       }
       PactVerification.PLUGIN -> {
-        return listOf(verifier!!.verifyInteractionViaPlugin(providerInfo, consumer, interaction,
+        val v4pact = when(val p = pact.asV4Pact()) {
+          is Ok -> p.value
+          is Err -> throw RuntimeException("Plugins can only be used with V4 Pacts")
+        }
+        return listOf(verifier!!.verifyInteractionViaPlugin(providerInfo, consumer, v4pact, interaction.asV4Interaction(),
           client, request, context + ("userConfig" to target.userConfig)))
       }
       else -> {

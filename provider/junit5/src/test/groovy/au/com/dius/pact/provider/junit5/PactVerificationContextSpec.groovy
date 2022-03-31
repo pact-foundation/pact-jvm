@@ -1,8 +1,11 @@
 package au.com.dius.pact.provider.junit5
 
+import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.ConsumerInfo
@@ -41,10 +44,11 @@ class PactVerificationContextSpec extends Specification {
     IConsumerInfo consumer = new ConsumerInfo('Test')
     Interaction interaction = new RequestResponseInteraction('Test Interaction', [], new Request(),
       new Response(), '12345')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction ])
     List<VerificationResult> testResults = []
 
     context = new PactVerificationContext(store, extContext, target, verifier, valueResolver,
-      provider, consumer, interaction, testResults)
+      provider, consumer, interaction, pact, testResults)
 
     when:
     context.verifyInteraction()
@@ -85,10 +89,11 @@ class PactVerificationContextSpec extends Specification {
     }
     Interaction interaction = new RequestResponseInteraction('Test Interaction', [], new Request(),
       new Response(), '12345')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction ])
     List<VerificationResult> testResults = []
 
     context = new PactVerificationContext(store, extContext, target, verifier, valueResolver,
-      provider, consumer, interaction, testResults)
+      provider, consumer, interaction, pact, testResults)
 
     when:
     context.verifyInteraction()

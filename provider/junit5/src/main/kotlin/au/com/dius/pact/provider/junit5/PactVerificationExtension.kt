@@ -97,9 +97,14 @@ open class PactVerificationExtension(
     val store = context.getStore(namespace)
     val pending = interaction.isV4() && interaction.asV4Interaction().pending ||
       pactSource is BrokerUrlSource && pactSource.result?.pending == true
-    val verificationContext = PactVerificationContext(store, context,
+    val verificationContext = PactVerificationContext(
+      store,
+      context,
       consumer = ConsumerInfo(pact.consumer.name, pactSource = pactSource, pending = pending),
-      interaction = interaction, providerInfo = ProviderInfo(serviceName))
+      interaction = interaction,
+      pact = pact,
+      providerInfo = ProviderInfo(serviceName)
+    )
     store.put("interactionContext", verificationContext)
   }
 

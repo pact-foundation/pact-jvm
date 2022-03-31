@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
@@ -56,7 +55,7 @@ class ReadmeExamplePactJVMProviderJUnitTest {
     consumer.setPactSource(new UrlSource(
       ReadmeExamplePactJVMProviderJUnitTest.getResource('/pacts/zoo_app-animal_service.json').toString()))
 
-    testConsumerPact = DefaultPactReader.INSTANCE.loadPact(consumer.getPactSource()) as Pact<RequestResponseInteraction>
+    testConsumerPact = DefaultPactReader.INSTANCE.loadPact(consumer.getPactSource())
   }
 
   @Test

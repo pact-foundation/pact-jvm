@@ -80,7 +80,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     store = Mock(ExtensionContext.Store)
     provider = Mock()
     consumer = Mock()
-    pactContext = new PactVerificationContext(store, testContext, provider, consumer, interaction)
+    pactContext = new PactVerificationContext(store, testContext, provider, consumer, interaction, pact)
   }
 
   @Unroll
@@ -120,6 +120,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     given:
     def state = new ProviderState('test state')
     def interaction = new RequestResponseInteraction('test', [ state ])
+    pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction ])
     def context = Mock(ExtensionContext) {
       getStore(_) >> store
       getRequiredTestClass() >> TestClass
@@ -129,7 +130,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     IProviderVerifier verifier = Mock()
     ValueResolver resolver = Mock()
     def verificationContext = new PactVerificationContext(store, context, target, verifier, resolver, provider,
-      consumer, interaction, [])
+      consumer, interaction, pact, [])
     store.get(_) >> verificationContext
     verificationExtension = new PactVerificationStateChangeExtension(interaction, pactSource)
 

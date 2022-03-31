@@ -19,6 +19,8 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.V4Interaction
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
@@ -290,7 +292,8 @@ interface IProviderVerifier {
   fun verifyInteractionViaPlugin(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
-    interaction: Interaction,
+    pact: V4Pact,
+    interaction: V4Interaction,
     client: Any?,
     request: Any?,
     context: Map<String, Any>
@@ -943,13 +946,20 @@ open class ProviderVerifier @JvmOverloads constructor (
   override fun verifyInteractionViaPlugin(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
-    interaction: Interaction,
+    pact: V4Pact,
+    interaction: V4Interaction,
     client: Any?,
     request: Any?,
     context: Map<String, Any>
   ): VerificationResult {
     val userConfig = context["userConfig"] as Map<String, Any?>? ?: emptyMap()
-    return when (val result = DefaultPluginManager.verifyInteraction(client as CatalogueEntry, request as InteractionVerificationData, userConfig)) {
+    return when (val result = DefaultPluginManager.verifyInteraction(
+      client as CatalogueEntry,
+      request as InteractionVerificationData,
+      userConfig,
+      pact,
+      interaction
+    )) {
       is Ok -> if (result.value.ok) {
         VerificationResult.Ok(interaction.interactionId)
       } else {
