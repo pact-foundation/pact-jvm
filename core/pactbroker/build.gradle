@@ -15,9 +15,9 @@ dependencies {
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

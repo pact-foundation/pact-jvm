@@ -3,9 +3,9 @@ package au.com.dius.pact.consumer.groovy
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
-import groovyx.net.http.HttpBuilder
 import org.junit.Test
 
 class HyperMediaPactTest {
@@ -16,22 +16,15 @@ class HyperMediaPactTest {
 
     @SuppressWarnings('UnnecessaryIfStatement')
     boolean execute() {
-      def http = HttpBuilder.configure {
-        request.uri = url
-        response.parser('application/vnd.siren+json') { config, resp ->
-          new JsonSlurper().parse(resp.reader)
-        }
-      }
-      def root = http.get()
+      def http = new SimpleHttp(url)
+      def resp = http.get('/')
+      def root = new JsonSlurper().parse(resp.inputStream)
       def ordersUrl = root['links'].find { it['rel'] == ['orders'] }['href']
-      def orders = http.get {
-        request.uri = ordersUrl
-      }
+      resp = http.get(ordersUrl)
+      def orders = new JsonSlurper().parse(resp.inputStream)
       def deleteAction = orders['entities'][0]['actions'].find { it['name'] == 'delete' }
-      http.delete {
-        request.uri = deleteAction['href']
-        response.when(204) { true }
-      }
+      def deleteResp = http.delete(deleteAction['href'])
+      deleteResp.statusCode == 204
     }
   }
 

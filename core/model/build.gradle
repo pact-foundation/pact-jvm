@@ -35,12 +35,12 @@ dependencies {
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testImplementation "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   testRuntimeOnly project(path: project.path, configuration: 'testJars')
-  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}"
-  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy-datetime:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testImplementation "junit:junit:${project.junitVersion}"

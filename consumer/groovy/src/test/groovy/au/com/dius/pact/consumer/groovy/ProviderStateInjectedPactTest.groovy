@@ -2,10 +2,9 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.support.BuiltToolConfig
+import au.com.dius.pact.core.support.SimpleHttp
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
 import org.junit.Test
 
 @SuppressWarnings('GStringExpressionWithinString')
@@ -39,17 +38,10 @@ class ProviderStateInjectedPactTest {
     }
 
     PactVerificationResult result = service.runTest { mockServer, context ->
-      def client = HttpBuilder.configure {
-        request.uri = mockServer.url
-        request.contentType = 'application/json'
-      }
-      def resp = client.post(FromServer) {
-        request.uri.path = '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'
-        request.body = [userName: 'Test', userClass: 'Shoddy']
-        response.parser(ContentTypes.ANY) { config, r ->
-          r
-        }
-      }
+      def client = new SimpleHttp(mockServer.url)
+      def resp = client.post(
+        '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa',
+        JsonOutput.toJson([userName: 'Test', userClass: 'Shoddy']), 'application/json')
 
       assert resp.statusCode == 200
       assert new JsonSlurper().parse(resp.inputStream) == [userName: 'Test', userId: 100]

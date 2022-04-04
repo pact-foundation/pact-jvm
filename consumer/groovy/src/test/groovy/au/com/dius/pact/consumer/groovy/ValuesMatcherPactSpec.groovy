@@ -1,13 +1,9 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
 import spock.lang.Specification
-
-import static groovyx.net.http.ContentTypes.JSON
 
 @SuppressWarnings(['AbcMetric'])
 class ValuesMatcherPactSpec extends Specification {
@@ -47,15 +43,8 @@ class ValuesMatcherPactSpec extends Specification {
 
     when:
     PactVerificationResult result = articleService.runTest { server, context ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def response = client.get(FromServer) {
-        request.contentType = JSON[0]
-        response.parser(ContentTypes.ANY) { config, resp ->
-          resp
-        }
-      }
+      def client = new SimpleHttp(server.url)
+      def response = client.get()
 
       assert response.statusCode == 200
       def data = new JsonSlurper().parse(response.inputStream)
@@ -100,7 +89,7 @@ class ValuesMatcherPactSpec extends Specification {
       uponReceiving('a request for events with useMatchValuesMatcher turned on')
       withAttributes(method: 'get', path: '/')
       willRespondWith(status: 200)
-      withBody(mimeType: ContentTypes.JSON[0].toString()) {
+      withBody(mimeType: 'application/json') {
         events {
           keyLike('001') {
             description string('some description')
@@ -117,15 +106,8 @@ class ValuesMatcherPactSpec extends Specification {
 
     when:
     PactVerificationResult result = articleService.runTest { server, context ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def response = client.get(FromServer) {
-        request.contentType = JSON[0]
-        response.parser(ContentTypes.ANY) { config, resp ->
-          resp
-        }
-      }
+      def client = new SimpleHttp(server.url)
+      def response = client.get()
 
       assert response.statusCode == 200
       def data = new JsonSlurper().parse(response.inputStream)

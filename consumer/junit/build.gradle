@@ -21,31 +21,30 @@ dependencies {
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
     "com.google.guava:guava:${project.guavaVersion}"
 
-  testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
-    "ch.qos.logback:logback-classic:${project.logbackVersion}",
-    'org.apache.commons:commons-collections4:4.1'
   implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
   implementation "org.apache.httpcomponents.client5:httpclient5-fluent:${project.httpClientVersion}"
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
-  testImplementation('com.jayway.restassured:rest-assured:2.9.0') {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
-  testImplementation "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
+
+  testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
+    "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testImplementation 'org.apache.commons:commons-collections4:4.4'
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.1'
+  testImplementation 'io.rest-assured:rest-assured:5.0.0'
+  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy-xml:${project.groovyVersion}"
+
   // Required for Java 9
   testImplementation 'javax.xml.bind:jaxb-api:2.3.0'
+
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
   testRuntimeOnly 'org.objenesis:objenesis:3.1'
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0.rc1'
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.1'
 
-  testImplementation 'org.clojure:clojure:1.10.1',
-    'http-kit:http-kit:2.3.0'
+  testImplementation 'org.clojure:clojure:1.10.1', 'http-kit:http-kit:2.3.0'
   testImplementation 'javax.xml.bind:jaxb-api:2.3.0'
   testImplementation 'javax.activation:activation:1.1'
   testImplementation 'org.glassfish.jaxb:jaxb-runtime:2.3.0'

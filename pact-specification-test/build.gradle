@@ -7,9 +7,9 @@ dependencies {
   testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
       exclude group: 'org.codehaus.groovy'
   }
   testImplementation 'org.apache.tika:tika-core:1.27'

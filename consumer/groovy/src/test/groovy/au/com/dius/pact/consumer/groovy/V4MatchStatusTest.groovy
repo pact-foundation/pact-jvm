@@ -2,8 +2,7 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.PactSpecVersion
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
+import au.com.dius.pact.core.support.SimpleHttp
 import org.junit.Test
 
 class V4MatchStatusTest {
@@ -22,14 +21,8 @@ class V4MatchStatusTest {
     }
 
     PactVerificationResult result = service.runTest { server ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def response = client.get(FromServer) {
-        request.uri.path = '/test'
-        response.success { FromServer fs, Object body -> fs }
-        response.failure { FromServer fs, Object body -> fs }
-      }
+      def client = new SimpleHttp(server.url)
+      def response = client.get('/test')
 
       assert response.statusCode == 200
     }
@@ -50,14 +43,8 @@ class V4MatchStatusTest {
     }
 
     PactVerificationResult result = service.runTest { server ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def response = client.get(FromServer) {
-        request.uri.path = '/test'
-        response.success { FromServer fs, Object body -> fs }
-        response.failure { FromServer fs, Object body -> fs }
-      }
+      def client = new SimpleHttp(server.url)
+      def response = client.get('/test')
 
       assert response.statusCode == 400
     }

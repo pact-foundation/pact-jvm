@@ -4,8 +4,8 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
-import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
-import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.support.HttpClientUtils
+import au.com.dius.pact.core.support.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.HttpClient

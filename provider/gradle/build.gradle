@@ -12,6 +12,8 @@ dependencies {
   testImplementation "junit:junit:${project.junitVersion}"
   testImplementation 'org.mockito:mockito-core:2.28.2'
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+
+  // This needs to match the version of Groovy provided by Gradle
   testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }

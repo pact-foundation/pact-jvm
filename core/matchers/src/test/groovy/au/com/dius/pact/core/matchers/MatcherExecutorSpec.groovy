@@ -313,20 +313,21 @@ class MatcherExecutorSpec extends Specification {
   }
 
   @Unroll
+  @SuppressWarnings('UnnecessaryGetter')
   def 'display #value as #display'() {
     expect:
     MatcherExecutorKt.valueOf(value) == display
 
     where:
 
-    value                         || display
-    null                          || 'null'
-    'foo'                         || "'foo'"
-    55                            || '55'
-    xml('<foo/>')                 || '<foo>'
-    xml('<foo><bar/></foo>')      || '<foo>'
-    xml('<foo xmlns="a"/>')       || '<{a}foo>'
-    xml('<a>text</a>').firstChild || "'text'"
+    value                              || display
+    null                               || 'null'
+    'foo'                              || "'foo'"
+    55                                 || '55'
+    xml('<foo/>')                      || '<foo>'
+    xml('<foo><bar/></foo>')           || '<foo>'
+    xml('<foo xmlns="a"/>')            || '<{a}foo>'
+    xml('<a>text</a>').getFirstChild() || "'text'"
   }
 
   @Unroll

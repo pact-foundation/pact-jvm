@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
-import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.support.HttpClientUtils.buildUrl
+import au.com.dius.pact.core.support.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json

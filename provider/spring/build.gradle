@@ -1,6 +1,6 @@
 dependencies {
   api project(':provider:junit')
-  implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  implementation "org.apache.groovy:groovy:${project.groovyVersion}"
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.3'
   implementation group: 'org.springframework', name: 'spring-webmvc', version: '5.3.9'
   implementation group: 'org.springframework', name: 'spring-webflux', version: '5.3.9'
@@ -14,8 +14,8 @@ dependencies {
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.5.3'
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
       exclude group: 'org.codehaus.groovy'
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

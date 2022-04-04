@@ -2,9 +2,7 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.PactVerificationResult
-import org.apache.http.client.methods.RequestBuilder
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
+import au.com.dius.pact.core.support.SimpleHttp
 import spock.lang.Specification
 
 class BinaryFileSpec extends Specification {
@@ -23,13 +21,10 @@ class BinaryFileSpec extends Specification {
 
     when:
     def result = service.runTest { MockServer mockServer, context ->
-      CloseableHttpClient httpclient = HttpClients.createDefault()
-      def response = httpclient.withCloseable {
-        def request = RequestBuilder.get(mockServer.url + '/get-doco').build()
-        httpclient.execute(request)
-      }
-      assert response.statusLine.statusCode == 200
-      assert response.entity.contentLength == pdf.size()
+      def client = new SimpleHttp(mockServer.url)
+      def response = client.get('/get-doco')
+      assert response.statusCode == 200
+      assert response.contentLength == pdf.size()
     }
 
     then:

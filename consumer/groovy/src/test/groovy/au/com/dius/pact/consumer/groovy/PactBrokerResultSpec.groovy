@@ -1,9 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
 import spock.lang.Specification
 
 class PactBrokerResultSpec extends Specification {
@@ -26,17 +24,8 @@ class PactBrokerResultSpec extends Specification {
         def resp
         def data
         testService.runTestAndVerify { mockServer, context ->
-            def client = HttpBuilder.configure {
-                request.uri = mockServer.url
-            }
-            resp = client.get(FromServer) {
-                request.uri.path = '/path'
-                request.uri.query = [status: 'good', name: 'ron']
-                request.contentType = 'application/json'
-                response.parser(ContentTypes.JSON) { config, r ->
-                    r
-                }
-            }
+            def client = new SimpleHttp(mockServer.url)
+            resp = client.get('/path', [status: 'good', name: 'ron'])
             data = new JsonSlurper().parse(resp.inputStream)
         }
 
@@ -62,18 +51,8 @@ class PactBrokerResultSpec extends Specification {
       when:
         def resp
         testService.runTestAndVerify { mockServer, context ->
-          def client = HttpBuilder.configure {
-              request.uri = mockServer.url
-          }
-          resp = client.get(FromServer) {
-              request.uri.path = '/path'
-              request.uri.query = [status: 'good', name: 'ron']
-              request.contentType = 'application/json'
-              response.parser(ContentTypes.ANY) { config, r ->
-                  r
-              }
-          }
-
+          def client = new SimpleHttp(mockServer.url)
+          resp = client.get('/path', [status: 'good', name: 'ron'])
           assert resp.statusCode == 201
         }
 
@@ -103,14 +82,8 @@ class PactBrokerResultSpec extends Specification {
       when:
         def response
         testService.runTestAndVerify { mockServer, context ->
-            def client = HttpBuilder.configure {
-                request.uri = mockServer.url
-            }
-            response = client.get(FromServer) {
-                request.uri.path = '/path'
-                request.uri.query = [status: 'bad', name: 'ron']
-                request.contentType = 'application/json'
-            }
+            def client = new SimpleHttp(mockServer.url)
+            response = client.get('/path', [status: 'bad', name: 'ron'])
             assert response.statusCode == 200
         }
 
@@ -145,17 +118,8 @@ class PactBrokerResultSpec extends Specification {
 
       when:
         testService.runTestAndVerify { mockServer, context ->
-            def client = HttpBuilder.configure {
-                request.uri = mockServer.url
-            }
-            def resp = client.get(FromServer) {
-                request.uri.path = '/path'
-                request.uri.query = [status: 'good', name: 'ron']
-                request.contentType = 'application/json'
-                response.parser(ContentTypes.ANY) { config, r ->
-                    r
-                }
-            }
+            def client = new SimpleHttp(mockServer.url)
+            def resp = client.get('/path', [status: 'good', name: 'ron'])
             assert resp.statusCode == 200
         }
 

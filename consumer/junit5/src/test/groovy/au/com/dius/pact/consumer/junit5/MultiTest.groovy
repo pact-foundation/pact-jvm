@@ -7,9 +7,8 @@ import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonOutput
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.junit.jupiter.api.Disabled
@@ -52,7 +51,6 @@ class MultiTest {
       .uponReceiving('existing user lookup')
         .path(SOME_SERVICE_USER + EXPECTED_USER_ID)
         .method('GET')
-        .matchHeader('Content-Type', APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
       .willRespondWith()
         .status(200)
         .matchHeader('Content-Type', APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
@@ -63,27 +61,14 @@ class MultiTest {
   @Test
   @PactTestFor(pactMethod = 'createFragment1', pactVersion = PactSpecVersion.V3)
   void runTest1(MockServer mockServer) {
-    def http = HttpBuilder.configure { request.uri = mockServer.url }
+    def http = new SimpleHttp(mockServer.url)
 
-    http.post {
-      request.uri.path = '/some-service/users'
-      request.body = user()
-      request.contentType = 'application/json'
+    def response = http.post('/some-service/users', JsonOutput.toJson(user()), 'application/json')
+    assert response.statusCode == 201
+    assert response.headers['Location'].first().contains(SOME_SERVICE_USER)
 
-      response.success { FromServer fs, Object body ->
-        assert fs.statusCode == 201
-        assert fs.headers.find { it.key == 'Location' }?.value?.contains(SOME_SERVICE_USER)
-      }
-    }
-
-    http.get {
-      request.uri.path = SOME_SERVICE_USER + EXPECTED_USER_ID
-      request.contentType = 'application/json'
-      response.success { FromServer fs, Object body ->
-        assert fs.statusCode == 200
-      }
-    }
-
+    response = http.get(SOME_SERVICE_USER + EXPECTED_USER_ID)
+    assert response.statusCode == 200
   }
 
   @Pact(provider= 'multitest_provider', consumer= 'test_consumer')

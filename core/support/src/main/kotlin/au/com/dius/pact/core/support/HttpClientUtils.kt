@@ -1,4 +1,4 @@
-package au.com.dius.pact.core.pactbroker.util
+package au.com.dius.pact.core.support
 
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.net.URIBuilder

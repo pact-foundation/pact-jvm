@@ -4,8 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
+import au.com.dius.pact.core.support.SimpleHttp
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,7 +46,7 @@ class TextXMLContentTypeTest {
   @Test
   @PactVerification
   void runTest1() {
-    def http = HttpBuilder.configure { request.uri = mockProvider.url }
+    def http = new SimpleHttp(mockProvider.url)
     def xml = '''<?xml version="1.0" encoding="UTF-8"?>
        <providerService version="1.0">
          <attribute1>
@@ -63,13 +62,6 @@ class TextXMLContentTypeTest {
        </providerService>
     '''
 
-    http.post {
-      request.uri.path = '/attr'
-      request.body = xml
-      request.contentType = 'application/xml'
-      response.success { FromServer fs, Object body ->
-        assert fs.statusCode == 201
-      }
-    }
+    assert http.post('/attr', xml, 'application/xml').statusCode == 201
   }
 }

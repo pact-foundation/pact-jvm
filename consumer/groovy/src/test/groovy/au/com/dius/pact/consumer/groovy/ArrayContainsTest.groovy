@@ -2,9 +2,8 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.HttpBuilder
 import org.junit.Test
 
 @SuppressWarnings('ClosureAsLastMethodParameter')
@@ -59,16 +58,12 @@ class ArrayContainsTest {
     }
 
     assert service.runTest { server ->
-      def http = HttpBuilder.configure { request.uri = server.url }
-      http.get {
-        request.uri.path = '/orders'
-        response.parser(ContentTypes.ANY[0]) { config, resp ->
-          assert resp.statusCode == 200
-          assert resp.hasBody
-          def result = new JsonSlurper().parse(resp.reader)
-          assert result.entities instanceof List
-        }
-      }
+      def http = new SimpleHttp(server.url)
+      def response = http.get('/orders')
+      assert response.statusCode == 200
+      assert response.hasBody
+      def result = new JsonSlurper().parse(response.reader)
+      assert result.entities instanceof List
     } instanceof PactVerificationResult.Ok
   }
 }

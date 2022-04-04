@@ -1,15 +1,10 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import groovyx.net.http.ChainedHttpConfig
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
 import org.junit.Test
-
-import java.util.function.BiFunction
 
 class ExampleGroovyConsumerPactTest {
 
@@ -61,14 +56,8 @@ class ExampleGroovyConsumerPactTest {
         }
 
         PactVerificationResult result = aliceService.runTest {
-            def client = HttpBuilder.configure {
-                request.uri = 'http://localhost:1233/'
-            }
-            def aliceResponse = client.get(FromServer) {
-                request.uri.path = '/mallory'
-                request.uri.query = [status: 'good', name: 'ron']
-                response.parser(ContentTypes.HTML, DEFAULT_RESPONSE_HANDLER)
-            }
+            def client = new SimpleHttp('http://localhost:1233/')
+            def aliceResponse = client.get('/mallory', [status: 'good', name: 'ron'])
 
             assert aliceResponse.statusCode == 200
             assert aliceResponse.contentType == 'text/html'
@@ -79,41 +68,22 @@ class ExampleGroovyConsumerPactTest {
         assert result instanceof PactVerificationResult.Ok
 
         result = bobService.runTest { mockServer, context ->
-            def client = HttpBuilder.configure {
-                request.uri = mockServer.url
-            }
+            def client = new SimpleHttp(mockServer.url)
             def body = new JsonBuilder([name: 'Bobby'])
-            def bobPostResponse = client.post(FromServer) {
-                request.uri.path = '/donuts'
-                request.contentType = 'application/json'
-                request.headers = [
-                        'Accept': 'text/plain',
-                        'Content-Type': 'application/json'
-                ]
-                request.body = body.toPrettyString()
-                response.parser(ContentTypes.TEXT, DEFAULT_RESPONSE_HANDLER)
-            }
+            def bobPostResponse = client.post('/donuts', body.toPrettyString(),
+              'application/json', [ 'Accept': 'text/plain' ])
 
             assert bobPostResponse.statusCode == 201
             assert bobPostResponse.inputStream.text == '"Donut created."'
 
             body = new JsonBuilder([ [name: 'Roger'] ])
-            def bobPutResponse = client.put(FromServer) {
-                request.uri.path = '/alligators'
-                request.contentType = 'application/json'
-                request.headers = [ 'Content-Type': 'application/json' ]
-                request.body = body.toPrettyString()
-                response.parser(ContentTypes.ANY, DEFAULT_RESPONSE_HANDLER)
-            }
+            def bobPutResponse = client.put('/alligators', body.toPrettyString(), 'application/json')
+                //request.headers = [ 'Content-Type': 'application/json' ]
 
             assert bobPutResponse.statusCode == 200
             assert new JsonSlurper().parse(bobPutResponse.inputStream) == [[age: 20, name: 'Roger'] ]
         }
         assert result instanceof PactVerificationResult.ExpectedButNotReceived
         assert result.expectedRequests.size() == 1
-    }
-
-    private static final BiFunction<ChainedHttpConfig, FromServer, Object> DEFAULT_RESPONSE_HANDLER = { config, resp ->
-        resp
     }
 }

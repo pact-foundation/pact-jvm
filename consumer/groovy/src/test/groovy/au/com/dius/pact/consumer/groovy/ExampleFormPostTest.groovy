@@ -1,8 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.HttpBuilder
+import au.com.dius.pact.core.support.SimpleHttp
 import org.junit.Test
 
 class ExampleFormPostTest {
@@ -24,16 +23,9 @@ class ExampleFormPostTest {
         }
 
         assert service.runTest {
-            def http = HttpBuilder.configure { request.uri = 'http://localhost:8000' }
-            http.post {
-                request.uri.path = '/path'
-                request.body = [number: '12345678']
-                request.contentType = ContentTypes.URLENC[0]
-                response.parser(ContentTypes.ANY[0]) { config, resp ->
-                    assert resp.statusCode == 201
-                }
-            }
+            def http = new SimpleHttp('http://localhost:8000')
+            def response = http.post('/path', 'number=12345678', 'application/x-www-form-urlencoded')
+            assert response.statusCode == 201
         } instanceof PactVerificationResult.Ok
     }
-
 }

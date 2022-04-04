@@ -16,12 +16,12 @@ dependencies {
     exclude group: 'org.jetbrains.kotlin'
   }
 
-  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
   testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'org.hamcrest:hamcrest:2.2'
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testImplementation "junit:junit:${project.junitVersion}"

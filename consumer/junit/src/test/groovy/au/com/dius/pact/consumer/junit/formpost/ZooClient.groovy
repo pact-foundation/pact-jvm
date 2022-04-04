@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer.junit.formpost
 
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.HttpBuilder
+import au.com.dius.pact.core.support.SimpleHttp
 
 class ZooClient {
   private final String url
@@ -11,23 +10,16 @@ class ZooClient {
   }
 
   Animal saveAnimal(String type, String name) {
-    def http = HttpBuilder.configure { request.uri = url }
-    def response = http.post {
-      request.uri.path = '/zoo-ws/animals'
-      request.body = [type: type, name: name]
-      request.contentType = ContentTypes.URLENC[0]
-    }
-    new Animal(response)
+    def http = new SimpleHttp(url)
+    def response = http.post('/zoo-ws/animals', "type=$type&name=$name",
+      'application/x-www-form-urlencoded')
+    new Animal(response.bodyToMap())
   }
 
   Animal saveAnimal(String type, String name, String level) {
-    def http = HttpBuilder.configure { request.uri = url }
-    def response = http.post {
-      request.uri.path = '/zoo-ws/animals'
-      request.uri.query = [level: level]
-      request.body = [type: type, name: name]
-      request.contentType = ContentTypes.URLENC[0]
-    }
-    new Animal(response)
+    def http = new SimpleHttp(url)
+    def response = http.post("/zoo-ws/animals?level=$level", "type=$type&name=$name",
+      'application/x-www-form-urlencoded')
+    new Animal(response.bodyToMap())
   }
 }

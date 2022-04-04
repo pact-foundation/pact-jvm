@@ -2,10 +2,8 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.support.BuiltToolConfig
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
 import org.junit.Test
 
 import java.time.LocalDate
@@ -38,17 +36,9 @@ class ExampleGroovyConsumerV3PactTest {
         }
 
         PactVerificationResult result = aliceService.runTest { mockServer ->
-            def client = HttpBuilder.configure {
-                request.uri = mockServer.url
-            }
-            def aliceResponse = client.get(FromServer) {
-                request.uri.path = '/mallory'
-                request.uri.query = [status: 'good', name: 'ron',
-                                     date: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)]
-                response.parser(ContentTypes.ANY) { config, resp ->
-                    resp
-                }
-            }
+            def client = new SimpleHttp(mockServer.url)
+            def aliceResponse = client.get('/mallory', [
+              status: 'good', name: 'ron', date: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) ])
 
             assert aliceResponse.statusCode == 200
             assert aliceResponse.contentType == 'text/html'

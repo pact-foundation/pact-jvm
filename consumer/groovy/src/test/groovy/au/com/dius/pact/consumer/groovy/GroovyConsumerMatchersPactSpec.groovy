@@ -1,14 +1,10 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovyx.net.http.ContentTypes
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
 import spock.lang.Specification
-
-import static groovyx.net.http.ContentTypes.JSON
 
 class GroovyConsumerMatchersPactSpec extends Specification {
 
@@ -24,7 +20,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     matcherService {
       uponReceiving('a request')
       withAttributes(method: 'put', path: '/')
-      withBody(mimeType: ContentTypes.JSON[0]) {
+      withBody(mimeType: 'application/json') {
         name(~/\w+/, 'harry')
         surname includesStr('larry')
         position regexp(~/staff|contractor/, 'staff')
@@ -61,19 +57,16 @@ class GroovyConsumerMatchersPactSpec extends Specification {
         }
       }
       willRespondWith(status: 200)
-      withBody(mimeType: ContentTypes.JSON[0]) {
+      withBody(mimeType: 'application/json') {
         name(~/\w+/, 'harry')
       }
     }
 
     when:
     PactVerificationResult result = matcherService.runTest { server, context ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def resp = client.put(FromServer) {
-        request.contentType = JSON[0]
-        request.body = JsonOutput.toJson([
+      def client = new SimpleHttp(server.url)
+      def resp = client.put('/',
+        JsonOutput.toJson([
                 'name': 'harry',
                 'surname': 'larry',
                 'position': 'staff',
@@ -110,11 +103,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
                         ]
                 ],
                 nextReview: '2001-01-01'
-        ])
-        response.parser(JSON) { config, r ->
-          r
-        }
-      }
+        ]), 'application/json')
 
       assert resp.statusCode == 200
       assert new JsonSlurper().parse(resp.inputStream) == [name: 'harry']
@@ -141,15 +130,8 @@ class GroovyConsumerMatchersPactSpec extends Specification {
 
     when:
     PactVerificationResult result = matcherService.runTest { server ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def resp = client.get(FromServer) {
-        request.uri.query = [a: '100', b: 'Z']
-        response.success { r, v ->
-          r
-        }
-      }
+      def client = new SimpleHttp(server.url)
+      def resp = client.get('/', [a: '100', b: 'Z'])
 
       assert resp.statusCode == 200
     }
@@ -180,17 +162,9 @@ class GroovyConsumerMatchersPactSpec extends Specification {
 
     when:
     PactVerificationResult result = matcherService.runTest { server ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def resp = client.put(FromServer) {
-        request.contentType = JSON[0]
-        request.body = JsonOutput.toJson([
-                valueA: 100, valueB: 'AZB', valueC: null])
-        response.success { resp, v ->
-          resp
-        }
-      }
+      def client = new SimpleHttp(server.url)
+      def resp = client.put('/', JsonOutput.toJson([valueA: 100, valueB: 'AZB', valueC: null]),
+        'application/json')
 
       assert resp.statusCode == 200
     }

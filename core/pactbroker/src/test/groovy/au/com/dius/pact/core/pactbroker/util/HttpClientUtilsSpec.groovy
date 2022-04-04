@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.pactbroker.util
 
+import au.com.dius.pact.core.support.HttpClientUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 

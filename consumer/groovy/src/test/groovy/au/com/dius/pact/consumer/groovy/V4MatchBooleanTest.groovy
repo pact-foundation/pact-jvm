@@ -2,8 +2,7 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.PactSpecVersion
-import groovyx.net.http.FromServer
-import groovyx.net.http.HttpBuilder
+import au.com.dius.pact.core.support.SimpleHttp
 import org.junit.Test
 
 class V4MatchBooleanTest {
@@ -22,15 +21,8 @@ class V4MatchBooleanTest {
     }
 
     PactVerificationResult result = service.runTest { server ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def response = client.get(FromServer) {
-        request.uri.path = '/test'
-        request.uri.query = [status: 'good', name: 'true']
-        response.success { FromServer fs, Object body -> fs }
-        response.failure { FromServer fs, Object body -> fs }
-      }
+      def client = new SimpleHttp(server.url)
+      def response = client.get('/test', [status: 'good', name: 'true'])
 
       assert response.statusCode == 500
     }
@@ -52,16 +44,8 @@ class V4MatchBooleanTest {
     }
 
     PactVerificationResult result = service.runTest { server ->
-      def client = HttpBuilder.configure {
-        request.uri = server.url
-      }
-      def response = client.get(FromServer) {
-        request.uri.path = '/test'
-        request.headers['test'] = 'yes'
-        request.headers['test2'] = 'false'
-        response.success { FromServer fs, Object body -> fs }
-        response.failure { FromServer fs, Object body -> fs }
-      }
+      def client = new SimpleHttp(server.url)
+      def response = client.get('/test', [:], [test: 'yes', test2: 'false'])
 
       assert response.statusCode == 500
     }
