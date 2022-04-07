@@ -82,13 +82,14 @@ data class PactVerificationContext @JvmOverloads constructor(
     request: Any?,
     context: MutableMap<String, Any>
   ): List<VerificationResult> {
+    var interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
+      " - ${interaction.description}"
+    if (interaction.isV4() && interaction.asV4Interaction().pending) {
+      interactionMessage += " [PENDING]"
+    }
+
     when (providerInfo.verificationType) {
       null, PactVerification.REQUEST_RESPONSE -> {
-        var interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
-          " - ${interaction.description}"
-        if (interaction.isV4() && interaction.asV4Interaction().pending) {
-          interactionMessage += " [PENDING]"
-        }
         return try {
           val reqResInteraction = if (interaction is V4Interaction.SynchronousHttp) {
             interaction.asV3Interaction()
@@ -126,7 +127,16 @@ data class PactVerificationContext @JvmOverloads constructor(
       PactVerification.PLUGIN -> {
         val v4pact = when(val p = pact.asV4Pact()) {
           is Ok -> p.value
-          is Err -> throw RuntimeException("Plugins can only be used with V4 Pacts")
+          is Err -> return listOf(
+            VerificationResult.Failed(
+              "Plugins can only be used with V4 Pacts", interactionMessage,
+              mapOf(
+                interaction.interactionId.orEmpty() to
+                  listOf(VerificationFailureType.InvalidInteractionFailure("Plugins can only be used with V4 Pacts"))
+              ),
+              consumer.pending
+            )
+          )
         }
         return listOf(verifier!!.verifyInteractionViaPlugin(providerInfo, consumer, v4pact, interaction.asV4Interaction(),
           client, request, context + ("userConfig" to target.userConfig)))

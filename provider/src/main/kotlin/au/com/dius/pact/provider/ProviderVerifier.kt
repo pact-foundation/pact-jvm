@@ -963,9 +963,10 @@ open class ProviderVerifier @JvmOverloads constructor (
       is Ok -> if (result.value.ok) {
         VerificationResult.Ok(interaction.interactionId)
       } else {
-        VerificationResult.Failed("Failed")
+        VerificationResult.Failed("Verification via plugin failed", "Verification Failed")
       }
-      is Err -> VerificationResult.Failed("Failed to configure the interaction for verification - ${result.error}")
+      is Err -> VerificationResult.Failed("Verification via plugin failed",
+        "Verification Failed - ${result.error}")
     }
   }
 
