@@ -56,6 +56,7 @@ open class PactBrokerLoader(
   val providerTags: List<String> = emptyList(),
   val includeWipPactsSince: String = "",
   val pactBrokerUrl: String? = null,
+  val enableInsecureTls: String = "false",
   val ep: ExpressionParser = ExpressionParser()
 ) : OverrideablePactLoader {
 
@@ -79,7 +80,8 @@ open class PactBrokerLoader(
     pactBroker.enablePendingPacts,
     pactBroker.providerTags.toList(),
     pactBroker.includeWipPactsSince,
-    pactBroker.url
+    pactBroker.url,
+    pactBroker.enableInsecureTls
   )
 
   override fun description(): String {
@@ -305,7 +307,8 @@ open class PactBrokerLoader(
 
   open fun newPactBrokerClient(url: URI, resolver: ValueResolver): IPactBrokerClient {
     var options = mapOf<String, Any>()
-    val config = PactBrokerClientConfig()
+    val insecureTls = ep.parseExpression(enableInsecureTls, DataType.BOOLEAN, resolver) as Boolean
+    val config = PactBrokerClientConfig(insecureTLS = insecureTls)
 
     if (authentication == null) {
       logger.debug { "Authentication: None" }
