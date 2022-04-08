@@ -953,6 +953,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     context: Map<String, Any>
   ): VerificationResult {
     val userConfig = context["userConfig"] as Map<String, Any?>? ?: emptyMap()
+    logger.debug { "Verifying interaction => $request" }
     return when (val result = DefaultPluginManager.verifyInteraction(
       client as CatalogueEntry,
       request as InteractionVerificationData,
