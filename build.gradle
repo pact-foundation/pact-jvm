@@ -51,7 +51,7 @@ subprojects {
 
   apply plugin: 'java'
   apply plugin: 'groovy'
-  apply plugin: 'codenarc'
+//  apply plugin: 'codenarc'
   apply plugin: 'jacoco'
   apply plugin: 'org.jetbrains.kotlin.jvm'
   apply plugin: 'io.gitlab.arturbosch.detekt'
@@ -197,13 +197,13 @@ subprojects {
     sign publishing.publications.mavenPublication
   }
 
-  codenarcMain {
-      configFile = rootProject.file('config/codenarc/ruleset.groovy')
-  }
-
-  codenarcTest {
-      configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
-  }
+//  codenarcMain {
+//    configFile = rootProject.file('config/codenarc/ruleset.groovy')
+//  }
+//
+//  codenarcTest {
+//      configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
+//  }
 
   check.dependsOn << 'jacocoTestReport'
 

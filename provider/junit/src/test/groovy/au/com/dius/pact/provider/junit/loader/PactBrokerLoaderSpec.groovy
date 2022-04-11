@@ -8,6 +8,7 @@ import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.InvalidNavigationRequest
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
@@ -46,6 +47,7 @@ class PactBrokerLoaderSpec extends Specification {
   private Pact mockPact
   private PactReader mockReader
   private ValueResolver valueResolver
+  private String enableInsecureTls
   private ExpressionParser expressionParser
 
   void setup() {
@@ -67,13 +69,14 @@ class PactBrokerLoaderSpec extends Specification {
       loadPact(_) >> mockPact
     }
     valueResolver = null
+    enableInsecureTls = ''
     expressionParser = new ExpressionParser()
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       IPactBrokerClient client = brokerClient
       def loader = new PactBrokerLoader(host, port, protocol, tags, consumerVersionSelectors, consumers,
         failIfNoPactsFound, null, null, valueResolver, enablePendingPacts, providerTags, includeWipPactsSince, url,
-        expressionParser) {
+              enableInsecureTls, expressionParser) {
         @Override
         IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           client
@@ -1355,6 +1358,84 @@ class PactBrokerLoaderSpec extends Specification {
     thrown(InvalidNavigationRequest)
   }
 
+  void 'Does not enable insecure TLS when not set in PactBroker annotation and not using the fallback system property'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+          assert !expressionParser.parseExpression(enableInsecureTls, DataType.BOOLEAN, resolver) as Boolean
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
+  }
+
+  void 'Enables insecure TLS from explicit PactBroker annotation setting'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(EnableInsecureTlsPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+          assert expressionParser.parseExpression(enableInsecureTls, DataType.BOOLEAN, resolver) as Boolean
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
+  }
+
+  @RestoreSystemProperties
+  void 'Enables insecure TLS using fallback PactBroker annotation system property'() {
+    given:
+    System.setProperty('pactbroker.host', 'my.pactbroker.host')
+    System.setProperty('pactbroker.port', '4711')
+    System.setProperty('pactbroker.enableInsecureTls', 'true')
+    pactBrokerLoader = {
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+          assert expressionParser.parseExpression(enableInsecureTls, DataType.BOOLEAN, resolver) as Boolean
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _, _) >> new Ok([])
+  }
+
+  def 'Uses the insecure TlS setting when creating the PactBrokerClient'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(EnableInsecureTlsPactBrokerAnnotation.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.config.insecureTLS == true
+  }
+
   private static VersionSelector createVersionSelector(Map args = [:]) {
     new VersionSelector() {
       @Override
@@ -1441,6 +1522,11 @@ class PactBrokerLoaderSpec extends Specification {
 
   @PactBroker(host = 'pactbroker.host', port = '1000', tags = 'master')
   static class PactBrokerAnnotationWithTags {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host', port = '1000', enableInsecureTls = 'true')
+  static class EnableInsecureTlsPactBrokerAnnotation {
 
   }
 
