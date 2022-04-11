@@ -1,5 +1,36 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0-beta.1 - Support verifying interactions via plugins
+
+* 154691dce - chore: Upgrade Kotlin to 1.6.20 (Ronald Holshausen, Mon Apr 11 16:42:15 2022 +1000)
+* b585db1e5 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Mon Apr 11 16:31:05 2022 +1000)
+* 784f6502c - Merge pull request #1531 from cwanderson/allow-insecure-tls-when-verifying-against-pact-broker (Ronald Holshausen, Mon Apr 11 16:22:56 2022 +1000)
+* dcd81d13e - fix: Correctly return verification results from plugin (Ronald Holshausen, Mon Apr 11 15:37:48 2022 +1000)
+* 4a64af7a9 - chore: add debug statement to verifyInteractionViaPlugin (Ronald Holshausen, Fri Apr 8 15:50:07 2022 +1000)
+* abee6c3e5 - feat: Add support for enabling insecure TLS to the PactBrokerLoader. (Colin Anderson, Thu Apr 7 22:06:23 2022 +0100)
+* 91f86f51f - fix: handle failed verification from plugins correctly (Ronald Holshausen, Thu Apr 7 12:15:50 2022 +1000)
+* c1315aa1e - chore: Upgrade Groovy to 4.0.1 #1529 (Ronald Holshausen, Mon Apr 4 17:57:29 2022 +1000)
+* 53baadfa9 - feat: Plugin verifyInteraction requires the Pact and Interaction (Ronald Holshausen, Thu Mar 31 11:40:13 2022 +1100)
+* 1220ed21d - feat: add support for validating an interaction via a plugin (Ronald Holshausen, Wed Mar 30 16:54:09 2022 +1100)
+* 1e270c5c5 - chore: clojure tests fail on Windows with JDK 17 (Ronald Holshausen, Wed Mar 23 10:25:49 2022 +1100)
+* 3fc057b86 - chore: remove v4.2.x from CI, add v4.4.x (Ronald Holshausen, Tue Mar 22 17:34:21 2022 +1100)
+* f2f78a5f7 - chore: add JDK 17 to CI build (Ronald Holshausen, Tue Mar 22 17:22:21 2022 +1100)
+* f169bcba0 - chore: Update project to run on JDK 17 (Ronald Holshausen, Tue Mar 22 17:20:23 2022 +1100)
+* ea72cddc7 - chore: add 4.4.x to the version table (Ronald Holshausen, Tue Mar 22 16:48:44 2022 +1100)
+* 75e53c410 - bump version to 4.4.0-beta.1 (Ronald Holshausen, Tue Mar 22 16:35:44 2022 +1100)
+* bf7609253 - update changelog for release 4.4.0-beta.0 (Ronald Holshausen, Tue Mar 22 16:20:48 2022 +1100)
+* a10524d34 - chore: update release script for beta verion (Ronald Holshausen, Tue Mar 22 16:10:02 2022 +1100)
+* 203f37e15 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Tue Mar 22 16:07:27 2022 +1100)
+* 5835a5856 - chore: update version table in readme (Ronald Holshausen, Tue Mar 22 16:06:07 2022 +1100)
+* a3e2426a8 - bump version to 4.3.7 (Ronald Holshausen, Tue Mar 22 16:01:17 2022 +1100)
+* 4bd1201b6 - feat: Allow lookup of mock server if only the transport is given (Ronald Holshausen, Tue Mar 22 15:25:25 2022 +1100)
+* 6cc4fae6a - refactor: rename mock-server -> transport (Ronald Holshausen, Mon Mar 21 15:19:07 2022 +1100)
+* 97de8d546 - feat: Plugin mock servers needs to presist the transport in the Pact files (Ronald Holshausen, Fri Mar 18 14:07:42 2022 +1100)
+* ba5e6dcdb - fix: avoid NPE when the plugin does not start correctly (Ronald Holshausen, Thu Mar 17 16:36:18 2022 +1100)
+* b270f6977 - feat: support mock servers from plugins (Ronald Holshausen, Fri Mar 11 16:38:39 2022 +1100)
+* 0cd62bf7a - chore: add 4.4 build to CI (Ronald Holshausen, Mon Jan 17 15:11:27 2022 +1100)
+* 4c994b18e - chore: create v4.4 version branch; Upgrade Kotlin to 1.6.10 (Ronald Holshausen, Mon Jan 17 15:02:23 2022 +1100)
+
 # 4.4.0-beta.0 - Support for mock servers from plugins
 
 * a10524d34 - chore: update release script for beta verion (Ronald Holshausen, Tue Mar 22 16:10:02 2022 +1100)
