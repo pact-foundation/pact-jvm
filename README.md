@@ -106,8 +106,11 @@ You want to look at: [pact4s](https://github.com/jbwheatley/pact4s) or [scala-pa
 ### I Use Java
 
 You want to look at: [junit](consumer/junit) for JUnit 4 tests and
-[junit5](consumer/junit5) for JUnit 5 tests. Also, if you are using Java 8 or above, there is [an
-updated DSL for consumer tests](consumer/java8).
+[junit5](consumer/junit5) for JUnit 5 tests. Also, if you are using Java 11 or above, there is [an
+updated DSL for consumer tests](/consumer).
+
+**NOTE:** If you are using Java 8, there is no separate Java 8 support library anymore, see the above library.
+
 
 ### I Use Groovy or Grails
 
