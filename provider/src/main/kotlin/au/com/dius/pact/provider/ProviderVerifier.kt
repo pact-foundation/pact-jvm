@@ -1,8 +1,10 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
+import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
 import au.com.dius.pact.core.model.BrokerUrlSource
@@ -42,6 +44,7 @@ import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationData
+import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import mu.KLogging
 import java.io.File
 import java.lang.reflect.Method
@@ -964,7 +967,17 @@ open class ProviderVerifier @JvmOverloads constructor (
       is Ok -> if (result.value.ok) {
         VerificationResult.Ok(interaction.interactionId)
       } else {
-        VerificationResult.Failed("Verification via plugin failed", "Verification Failed")
+        VerificationResult.Failed("Verification via plugin failed", "Verification Failed",
+          mapOf(interaction.interactionId.orEmpty() to
+            result.value.details.map {
+              when (it) {
+                is InteractionVerificationDetails.Error -> VerificationFailureType.InvalidInteractionFailure(it.message)
+                is InteractionVerificationDetails.Mismatch -> VerificationFailureType.MismatchFailure(
+                  BodyMismatch(it.expected, it.actual, it.mismatch, it.path)
+                )
+              }
+            })
+        )
       }
       is Err -> VerificationResult.Failed("Verification via plugin failed",
         "Verification Failed - ${result.error}")
