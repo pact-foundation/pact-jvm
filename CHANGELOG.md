@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.35 - Bugfix Release
+
+* fdf0a5e90 - fix: PactCanIDeployTask needs to have internal fields maked @Internal for Gradle 7 #1430 (Ronald Holshausen, Sat Sep 18 12:20:55 2021 +1000)
+* 310e66b35 - Merge pull request #1534 from cwanderson/add_support_for_insecure_tls_to_v4-1-x_of_the_pactbrokerloader (Ronald Holshausen, Tue Apr 19 12:32:29 2022 +1000)
+* c3ea56917 - feat: Add support for enabling insecure TLS to the PactBrokerLoader. (Colin Anderson, Thu Apr 7 22:06:23 2022 +0100)
+* 8a97a23ad - bump version to 4.1.35 (Ronald Holshausen, Wed Feb 9 17:39:25 2022 +1100)
+
 # 4.1.34 - Bugfix Release
 
 * e3651f62d - fix(Gradle): Authentication needs to be propagated when using fromPactBroker #1483 (Ronald Holshausen, Wed Feb 9 17:07:19 2022 +1100)
