@@ -101,4 +101,10 @@ public @interface PactBroker {
    * included.
    */
   String includeWipPactsSince() default "${pactbroker.includeWipPactsSince:}";
+
+  /**
+   * Enabling insecure TLS by setting this to true will disable hostname validation and trust all certificates. Use with caution.
+   * This can be set with the pactbroker.enableInsecureTls JVM system property.
+   */
+  String enableInsecureTls() default "${pactbroker.enableInsecureTls:false}";
 }
