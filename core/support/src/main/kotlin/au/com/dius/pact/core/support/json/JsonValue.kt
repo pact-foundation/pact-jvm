@@ -63,6 +63,10 @@ sealed class JsonValue {
     fun append(value: JsonValue) {
       values.add(value)
     }
+
+    fun appendAll(list: List<JsonValue>) {
+      values.addAll(list)
+    }
   }
 
   class Object @JvmOverloads constructor (val entries: MutableMap<String, JsonValue> = mutableMapOf()) : JsonValue() {

@@ -303,6 +303,11 @@ interface IProviderVerifier {
   ): VerificationResult
 
   /**
+   * Display any output to the user
+   */
+  fun displayOutput(output: List<String>)
+
+  /**
    * Source of the verification (Gradle/Maven/Junit)
    */
   var verificationSource: String?
@@ -397,7 +402,7 @@ open class ProviderVerifier @JvmOverloads constructor (
             failures, pending)
         } else {
           val expectedResponse = (interaction as SynchronousRequestResponse).response
-          var result: VerificationResult = VerificationResult.Ok(interactionId)
+          var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
           methodsAnnotatedWith.forEach {
             val response = invokeProviderMethod(it, null) as Map<String, Any>
             val body = OptionalBody.body(response["data"] as String?)
@@ -512,7 +517,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (comparison is Ok && comparison.value.mismatches.isEmpty()) {
       emitEvent(Event.BodyComparisonOk)
-      VerificationResult.Ok(interactionId)
+      VerificationResult.Ok(interactionId, emptyList())
     } else {
       emitEvent(Event.BodyComparisonFailed(comparison))
       val description = "$comparisonDescription has a matching body"
@@ -540,7 +545,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean
   ): VerificationResult {
     val interactionId = message.interactionId
-    var result: VerificationResult = VerificationResult.Ok(interactionId)
+    var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
     methods.forEach { method ->
       val messageFactory: Function<String, Any> =
         Function { invokeProviderMethod(method, providerMethodInstance.apply(method))!! }
@@ -620,7 +625,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (comparison.isEmpty()) {
       emitEvent(Event.MetadataComparisonOk())
-      VerificationResult.Ok(interactionId)
+      VerificationResult.Ok(interactionId, emptyList())
     } else {
       emitEvent(Event.IncludesMetadata)
       var result: VerificationResult = VerificationResult.Failed("Metadata had differences",
@@ -773,7 +778,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     return if (mismatch == null) {
       reporters.forEach { it.statusComparisonOk(status) }
-      VerificationResult.Ok(interactionId)
+      VerificationResult.Ok(interactionId, emptyList())
     } else {
       reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
       val description = "$comparisonDescription: has status code $status"
@@ -791,7 +796,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionId: String,
     pending: Boolean
   ): VerificationResult {
-    val ok = VerificationResult.Ok(interactionId)
+    val ok = VerificationResult.Ok(interactionId, emptyList())
     return if (headers.isEmpty()) {
       ok
     } else {
@@ -965,7 +970,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       interaction
     )) {
       is Ok -> if (result.value.ok) {
-        VerificationResult.Ok(interaction.interactionId)
+        VerificationResult.Ok(interaction.interactionId, result.value.output)
       } else {
         VerificationResult.Failed("Verification via plugin failed", "Verification Failed",
           mapOf(interaction.interactionId.orEmpty() to
@@ -976,12 +981,16 @@ open class ProviderVerifier @JvmOverloads constructor (
                   BodyMismatch(it.expected, it.actual, it.mismatch, it.path)
                 )
               }
-            })
+            }), output = result.value.output
         )
       }
       is Err -> VerificationResult.Failed("Verification via plugin failed",
         "Verification Failed - ${result.error}")
     }
+  }
+
+  override fun displayOutput(output: List<String>) {
+    emitEvent(Event.DisplayUserOutput(output))
   }
 
   @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")

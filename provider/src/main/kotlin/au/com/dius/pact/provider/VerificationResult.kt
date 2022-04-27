@@ -119,13 +119,18 @@ sealed class VerificationResult {
   /**
    * Result was successful
    */
-  data class Ok @JvmOverloads constructor(val interactionIds: Set<String> = emptySet()) : VerificationResult() {
+  data class Ok @JvmOverloads constructor(
+    val interactionIds: Set<String> = emptySet(),
+    val output: List<String> = emptyList()
+  ) : VerificationResult() {
 
-    constructor(interactionId: String?) : this(if (interactionId.isNullOrEmpty())
-      emptySet() else setOf(interactionId))
+    constructor(
+      interactionId: String?,
+      output: List<String>
+    ) : this(if (interactionId.isNullOrEmpty()) emptySet() else setOf(interactionId), output)
 
     override fun merge(result: VerificationResult) = when (result) {
-      is Ok -> this.copy(interactionIds = interactionIds + result.interactionIds)
+      is Ok -> this.copy(interactionIds = interactionIds + result.interactionIds, output = output + result.output)
       is Failed -> result.merge(this)
     }
 
@@ -141,19 +146,21 @@ sealed class VerificationResult {
     val failures: VerificationFailures = mapOf(),
     val pending: Boolean = false,
     @Deprecated("use failures instead")
-    var results: List<Map<String, Any?>> = emptyList()
+    var results: List<Map<String, Any?>> = emptyList(),
+    val output: List<String> = emptyList()
   ) : VerificationResult() {
     override fun merge(result: VerificationResult) = when (result) {
       is Ok -> this.copy(failures = failures + result.interactionIds
         .associateWith {
           (if (failures.containsKey(it)) failures[it] else emptyList<VerificationFailureType>())!!
-        })
+        }, output = output + result.output)
       is Failed -> Failed(when {
         description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
           "$description, ${result.description}"
         description.isNotEmpty() -> description
         else -> result.description
-      }, verificationDescription, mergeFailures(failures, result.failures), pending && result.pending)
+      }, verificationDescription, mergeFailures(failures, result.failures),
+        pending && result.pending, output = output + result.output)
     }
 
     private fun mergeFailures(failures: VerificationFailures, other: VerificationFailures): VerificationFailures {
@@ -209,4 +216,14 @@ sealed class VerificationResult {
    * Convert to a test result
    */
   abstract fun toTestResult(): TestResult
+
+  /**
+   * Return any output for the result
+   */
+  fun getResultOutput(): List<String> {
+    return when (this) {
+      is Failed -> this.output
+      is Ok -> this.output
+    }
+  }
 }

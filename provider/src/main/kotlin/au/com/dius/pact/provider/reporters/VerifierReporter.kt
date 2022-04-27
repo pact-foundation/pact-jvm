@@ -100,6 +100,7 @@ abstract class BaseVerifierReporter: VerifierReporter {
       is Event.MetadataComparisonFailed -> metadataComparisonFailed(event.key, event.value, event.comparison)
       is Event.InteractionDescription -> interactionDescription(event.interaction)
       is Event.DisplayInteractionComments -> {}
+      else -> {}
     }
   }
 }

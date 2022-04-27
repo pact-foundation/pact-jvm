@@ -17,4 +17,9 @@ sealed class Event {
   data class MetadataComparisonFailed(val key: String, val value: Any?, val comparison: Any): Event()
   data class InteractionDescription(val interaction: Interaction): Event()
   data class DisplayInteractionComments(val comments: Map<String, JsonValue>) : Event()
+
+  /**
+   * Output to display to the user
+   */
+  class DisplayUserOutput(val output: List<String>) : Event()
 }

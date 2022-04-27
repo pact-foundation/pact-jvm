@@ -55,9 +55,11 @@ data class PactVerificationContext @JvmOverloads constructor(
     val testContext = store.get("interactionContext") as PactVerificationContext
     try {
       Metrics.sendMetrics(MetricEvent.ProviderVerificationRan(1, "junit5"))
+
       val result = validateTestExecution(client, request, testContext.executionContext ?: mutableMapOf())
-        .filterIsInstance<VerificationResult.Failed>()
-      this.testExecutionResult.addAll(result)
+      verifier!!.displayOutput(result.flatMap { it.getResultOutput() })
+
+      this.testExecutionResult.addAll(result.filterIsInstance<VerificationResult.Failed>())
       if (testExecutionResult.isNotEmpty()) {
         verifier!!.displayFailures(testExecutionResult)
         if (testExecutionResult.any { !it.pending }) {

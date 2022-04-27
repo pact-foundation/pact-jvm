@@ -91,7 +91,7 @@ abstract class MockTestingTarget(
       callVerifierFn(provider, consumer, verifier, failures)
     }
 
-    val initial = VerificationResult.Ok(interaction.interactionId)
+    val initial = VerificationResult.Ok(interaction.interactionId, emptyList())
     val result = results.fold(initial) { acc: VerificationResult, r -> acc.merge(r) }
 
     reportTestResult(result, verifier)

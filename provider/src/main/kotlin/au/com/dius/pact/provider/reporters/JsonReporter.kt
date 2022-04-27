@@ -305,6 +305,16 @@ class JsonReporter(
       is Event.DisplayInteractionComments ->
         jsonData["execution"].asArray()!!.last()["consumer"].asObject()!!["comments"] =
           JsonValue.Object(event.comments.toMutableMap())
+      is Event.DisplayUserOutput -> {
+        val consumer = jsonData["execution"].asArray()!!.last()["consumer"].asObject()!!
+        val outputJson = event.output.map { JsonValue.StringValue(it) }
+
+        if (!consumer.has("output")) {
+          consumer["output"] = JsonValue.Array(outputJson.toMutableList())
+        } else {
+          consumer["output"].asArray()!!.appendAll(outputJson)
+        }
+      }
       else -> super.receive(event)
     }
   }

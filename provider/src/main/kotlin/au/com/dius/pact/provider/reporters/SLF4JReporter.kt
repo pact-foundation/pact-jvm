@@ -322,6 +322,7 @@ class SLF4JReporter(
   override fun receive(event: Event) {
     when (event) {
       is Event.DisplayInteractionComments -> displayComments(event)
+      is Event.DisplayUserOutput -> log.info(event.output.joinToString("\n"))
       else -> super.receive(event)
     }
   }

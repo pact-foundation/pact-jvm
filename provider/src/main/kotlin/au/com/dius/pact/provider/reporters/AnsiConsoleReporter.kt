@@ -318,6 +318,9 @@ class AnsiConsoleReporter(
   override fun receive(event: Event) {
     when (event) {
       is Event.DisplayInteractionComments -> displayComments(event)
+      is Event.DisplayUserOutput -> for (line in event.output) {
+        println(line)
+      }
       else -> super.receive(event)
     }
   }

@@ -533,6 +533,7 @@ class MarkdownReporter(
   override fun receive(event: Event) {
     when (event) {
       is Event.DisplayInteractionComments -> events.add(MREvent("displayComments", displayComments(event)))
+      is Event.DisplayUserOutput -> events.add(MREvent("displayOutput", event.output.joinToString("\n")))
       else -> super.receive(event)
     }
   }

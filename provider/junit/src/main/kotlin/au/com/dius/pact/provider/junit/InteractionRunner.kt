@@ -156,7 +156,7 @@ open class InteractionRunner(
     for (interaction in pact.interactions) {
       val description = describeChild(interaction)
       val interactionId = interaction.interactionId
-      var testResult: VerificationResult = VerificationResult.Ok(interactionId)
+      var testResult: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
       val pending = when {
         interaction.isV4() && interaction.asV4Interaction().pending -> true
         pact.source is BrokerUrlSource -> (pact.source as BrokerUrlSource).result?.pending == true
