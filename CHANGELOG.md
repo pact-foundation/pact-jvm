@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0-beta.2 - Support handling output from verification via plugins
+
+* 9a88653ac - feat: support handling output from verification via plugins (Ronald Holshausen, Wed Apr 27 13:30:29 2022 +1000)
+* 6691a4c1c - chore: correct changelog (Ronald Holshausen, Mon Apr 11 17:08:18 2022 +1000)
+* 17039bde2 - chore: fix release script (Ronald Holshausen, Mon Apr 11 17:01:55 2022 +1000)
+* 21836e7e4 - bump version to 4.4.0-beta.2 (Ronald Holshausen, Mon Apr 11 17:00:52 2022 +1000)
+
 # 4.4.0-beta.1 - Support verifying interactions via plugins
 
 * 154691dce - chore: Upgrade Kotlin to 1.6.20 (Ronald Holshausen, Mon Apr 11 16:42:15 2022 +1000)
