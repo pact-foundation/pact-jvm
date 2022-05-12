@@ -7,8 +7,13 @@ on:
     paths:
       - '**.md'
 
+permissions:
+  contents: read
+
 jobs:
   run:
+    permissions:
+      contents: none
     runs-on: ubuntu-latest
     steps:
       - name: Trigger docs.pact.io update workflow

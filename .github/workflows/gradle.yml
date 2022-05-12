@@ -6,8 +6,15 @@ on:
   pull_request:
     branches: [ master, v4.1.x, v4.3.x, v4.4.x ]
 
+permissions:
+  contents: read
+
 jobs:
   latest_jdk:
+    permissions:
+      checks: write  # for EnricoMi/publish-unit-test-result-action/composite to check test results
+      contents: read  # for EnricoMi/publish-unit-test-result-action/composite to fetch code
+      issues: read  # for EnricoMi/publish-unit-test-result-action/composite to get issues
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
@@ -36,6 +43,10 @@ jobs:
         files: "**/test-results/**/*.xml"
 
   supported_jdks:
+    permissions:
+      checks: write  # for EnricoMi/publish-unit-test-result-action/composite to check test results
+      contents: read  # for EnricoMi/publish-unit-test-result-action/composite to fetch code
+      issues: read  # for EnricoMi/publish-unit-test-result-action/composite to get issues
     runs-on: ubuntu-latest
     strategy:
       matrix:
