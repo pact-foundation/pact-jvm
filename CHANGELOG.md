@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.7 - Maintenance Release
+
+* 16e72b61b - Merge pull request #1550 from rejeeshg/patch-11 (Ronald Holshausen, Wed May 11 10:28:05 2022 +1000)
+* 1316da1b3 - Merge pull request #1546 from rejeeshg/patch-7 (Ronald Holshausen, Wed May 11 10:25:37 2022 +1000)
+* 37ba29941 - Updating build.gradle to fix vulnerability (rejeeshg, Tue May 10 23:01:39 2022 +0530)
+* c5df12d0e - Update gradle.properties to fix Vulnerability (rejeeshg, Tue May 10 18:59:13 2022 +0530)
+* bfd2586fb - Merge pull request #1544 from rejeeshg/patch-6 (Ronald Holshausen, Mon May 9 11:54:03 2022 +1000)
+* 099d6cf4b - Update build.gradle to mitigate Vuln CVE-2022-22965 (rejeeshg, Fri May 6 17:41:42 2022 +0530)
+* 4712d3257 - Merge pull request #1533 from pact-foundation/java-8-update-link (Ronald Holshausen, Tue Apr 12 09:11:16 2022 +1000)
+* 892f6c8e4 - docs: make jvm link relative (Yousaf Nabi, Mon Apr 11 15:24:51 2022 +0100)
+* de2662462 - docs: update link in main readme (Yousaf Nabi, Mon Apr 11 15:22:33 2022 +0100)
+* dc02522f1 - chore: add **NOTE:** not :::note (Yousaf Nabi, Mon Apr 11 15:00:52 2022 +0100)
+* cd442d683 - docs: remove links to java8 guide (Yousaf Nabi, Mon Apr 11 14:59:11 2022 +0100)
+* ba271ad90 - chore: update readme (Ronald Holshausen, Mon Apr 11 17:13:24 2022 +1000)
+* 784f6502c - Merge pull request #1531 from cwanderson/allow-insecure-tls-when-verifying-against-pact-broker (Ronald Holshausen, Mon Apr 11 16:22:56 2022 +1000)
+* abee6c3e5 - feat: Add support for enabling insecure TLS to the PactBrokerLoader. (Colin Anderson, Thu Apr 7 22:06:23 2022 +0100)
+* 1e270c5c5 - chore: clojure tests fail on Windows with JDK 17 (Ronald Holshausen, Wed Mar 23 10:25:49 2022 +1100)
+* 3fc057b86 - chore: remove v4.2.x from CI, add v4.4.x (Ronald Holshausen, Tue Mar 22 17:34:21 2022 +1100)
+* f2f78a5f7 - chore: add JDK 17 to CI build (Ronald Holshausen, Tue Mar 22 17:22:21 2022 +1100)
+* f169bcba0 - chore: Update project to run on JDK 17 (Ronald Holshausen, Tue Mar 22 17:20:23 2022 +1100)
+* ea72cddc7 - chore: add 4.4.x to the version table (Ronald Holshausen, Tue Mar 22 16:48:44 2022 +1100)
+* 5835a5856 - chore: update version table in readme (Ronald Holshausen, Tue Mar 22 16:06:07 2022 +1100)
+* a3e2426a8 - bump version to 4.3.7 (Ronald Holshausen, Tue Mar 22 16:01:17 2022 +1100)
+
 # 4.4.0-beta.2 - Support handling output from verification via plugins
 
 * 9a88653ac - feat: support handling output from verification via plugins (Ronald Holshausen, Wed Apr 27 13:30:29 2022 +1000)
