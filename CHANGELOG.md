@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.2.21 - Maintenance Release
+
+* 0d5b8f5de - chore: Upgrade JUnit 5 to 5.8.2 (Ronald Holshausen, Fri May 13 14:41:13 2022 +1000)
+* 845699701 - Merge pull request #1552 from rejeeshg/patch-8 (Ronald Holshausen, Wed May 11 10:29:39 2022 +1000)
+* 8e9200204 - Merge pull request #1549 from rejeeshg/patch-10 (Ronald Holshausen, Wed May 11 10:26:43 2022 +1000)
+* d29710333 - Update gradle.properties to fix Vulnerability issu (rejeeshg, Wed May 11 00:16:35 2022 +0530)
+* 2ff4a3ab2 - Upgrade build.gradle to mitigate Vulnerability (rejeeshg, Tue May 10 19:57:55 2022 +0530)
+* 2edb55471 - Merge pull request #1543 from rejeeshg/patch-5 (Ronald Holshausen, Mon May 9 11:50:35 2022 +1000)
+* 12ac2833f - Update build.gradle to mitigate Vulnerabilities from dependencies: CVE-2022-22965 (rejeeshg, Fri May 6 17:34:23 2022 +0530)
+* c4926c432 - bump version to 4.2.21 (Ronald Holshausen, Thu Feb 10 11:31:08 2022 +1100)
+
 # 4.2.20 - Bugfix Release
 
 * 69587d6a4 - Merge branch 'v4.1.x' into v4.2.x (Ronald Holshausen, Thu Feb 10 10:15:39 2022 +1100)
