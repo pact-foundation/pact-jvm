@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.36 - Maintenance Release
+
+* 989e176ee - Merge pull request #1551 from rejeeshg/patch-12 (Ronald Holshausen, Wed May 11 10:28:41 2022 +1000)
+* ddf1ef151 - Merge pull request #1548 from rejeeshg/patch-9 (Ronald Holshausen, Wed May 11 10:26:04 2022 +1000)
+* a90d0e903 - Updating build.gradle to fix Vulnerability (rejeeshg, Tue May 10 23:15:40 2022 +0530)
+* 548012cb2 - Update gradle.properties to fix Vulnerability (rejeeshg, Tue May 10 19:03:52 2022 +0530)
+* 1048a6b0b - Merge pull request #1542 from rejeeshg/patch-4 (Ronald Holshausen, Mon May 9 11:50:11 2022 +1000)
+* d67ab750f - Update build.gradle (rejeeshg, Fri May 6 17:28:28 2022 +0530)
+* 1ebcbd7c2 - bump version to 4.1.36 (Ronald Holshausen, Tue Apr 19 13:45:54 2022 +1000)
+
 # 4.1.35 - Bugfix Release
 
 * fdf0a5e90 - fix: PactCanIDeployTask needs to have internal fields maked @Internal for Gradle 7 #1430 (Ronald Holshausen, Sat Sep 18 12:20:55 2021 +1000)
