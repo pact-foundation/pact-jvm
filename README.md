@@ -49,14 +49,14 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 | Branch                                                                 | Specification | JDK  | Kotlin Version | Latest Version | Notes                                  |
 |------------------------------------------------------------------------|---------------|------|----------------|----------------|----------------------------------------|
 | [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md)        | V4 + plugins  | 11+  | 1.6.20         | 4.4.0-beta.1   |                                        |
-| [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md) master | V4            | 11+  | 1.5.21         | 4.3.6          | [Upgrade notes](./upgrade-to-4.3.x.md) |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12 | 1.3.72         | 4.1.34         |                                        |
+| [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md) master | V4            | 11+  | 1.5.21         | 4.3.7          | [Upgrade notes](./upgrade-to-4.3.x.md) |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12 | 1.3.72         | 4.1.36         |                                        |
 
 ### Previous versions (not actively supported)
 
 | Branch                                                                    | Specification | JDK       | Kotlin Version | Scala Versions | Latest Version |
 |---------------------------------------------------------------------------|---------------|-----------|----------------|----------------|----------------|
-| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md)           | V4 (1)        | 11-15 (2) | 1.4.32         | N/A            | 4.2.20         |
+| [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md)           | V4 (1)        | 11-15 (2) | 1.4.32         | N/A            | 4.2.21         |
 | [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md)             | V3            | 8-12      | 1.3.71         | N/A            | 4.0.10         |
 | [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md)           | V3            | 8         | 1.3.71         | 2.12           | 3.6.15         |
 | [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md)           | V3            | 8         | 1.1.4-2        | 2.12, 2.11     | 3.5.25         |
