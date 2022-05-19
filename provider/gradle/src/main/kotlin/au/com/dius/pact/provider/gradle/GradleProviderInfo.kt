@@ -105,10 +105,11 @@ open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo
 
     val pending = brokerConfig!!.enablePending ?: false
     if (pending && (brokerConfig!!.providerTags.isNullOrEmpty() ||
-      brokerConfig!!.providerTags!!.any { it.trim().isEmpty() })) {
+      brokerConfig!!.providerTags!!.any { it.trim().isEmpty() }) && (brokerConfig!!.providerBranches.isNullOrEmpty() ||
+              brokerConfig!!.providerBranches!!.any { it.trim().isEmpty() })) {
       throw GradleScriptException(
         """
-        |No providerTags: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results.
+        |No providerTags or providerBranches: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results.
         |
         |For instance:
         |
