@@ -76,7 +76,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], [], false, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
     result.size == 1
@@ -84,7 +84,7 @@ class ProviderInfoSpec extends Specification {
     !result[0].pending
   }
 
-  def 'hasPactsFromPactBrokerWithSelectors - does include pending pacts if the option is present'() {
+  def 'hasPactsFromPactBrokerWithSelectors - does include pending pacts if the option is present and tags are specified'() {
     given:
     def options = [
       enablePending: true,
@@ -99,7 +99,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], [], true, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
     ])
     result.size == 1
@@ -107,7 +107,30 @@ class ProviderInfoSpec extends Specification {
     result[0].pending
   }
 
-  def 'hasPactsFromPactBrokerWithSelectors - throws an exception if the pending pacts option is present but there is no provider tags'() {
+  def 'hasPactsFromPactBrokerWithSelectors - does include pending pacts if the option is present and branches are specified'() {
+    given:
+    def options = [
+            enablePending: true,
+            providerBranches: ['master']
+    ]
+    def url = 'http://localhost:8080'
+    def selectors = [
+            new ConsumerVersionSelector('test', true, null, null)
+    ]
+
+    when:
+    def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
+
+    then:
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], ['master'], true, '') >> new Ok([
+            new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
+    ])
+    result.size == 1
+    result[0].name == 'consumer'
+    result[0].pending
+  }
+
+  def 'hasPactsFromPactBrokerWithSelectors - throws an exception if the pending pacts option is present but there is no provider tags or provider branches'() {
     given:
     def options = [
       enablePending: true
@@ -122,7 +145,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     def exception = thrown(RuntimeException)
-    exception.message == 'No providerTags: To use the pending pacts feature, you need to provide the list of ' +
+    exception.message == 'No providerTags or providerBranches: To use the pending pacts feature, you need to provide the list of ' +
       'provider names for the provider application version that will be published with the verification results'
   }
 
@@ -141,7 +164,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], [], true, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
     result.size == 1
@@ -165,7 +188,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true, '2020-05-23') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], [], true, '2020-05-23') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
     result.size == 1
@@ -187,7 +210,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     providerInfo.pactBrokerClient(_, { it.auth == new Auth.BearerAuthentication('123ABC') }) >> pactBrokerClient
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], [], false, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
     result.size == 1

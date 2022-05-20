@@ -495,7 +495,7 @@ class PactBrokerClientSpec extends Specification {
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true, null, null) ]
     def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}],"includePendingStatus":true,' +
-      '"includeWipPactsSince":"2020-24-06","providerVersionTags":[]}'
+      '"includeWipPactsSince":"2020-24-06","providerVersionTags":[],"providerVersionBranches":[]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {
