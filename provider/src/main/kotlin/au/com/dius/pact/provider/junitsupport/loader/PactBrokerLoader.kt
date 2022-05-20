@@ -209,6 +209,7 @@ open class PactBrokerLoader(
   }
 
   @Throws(IOException::class, IllegalArgumentException::class)
+  @Suppress("ThrowsCount")
   private fun loadPactsForProvider(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
@@ -219,11 +220,12 @@ open class PactBrokerLoader(
     val pending = ep.parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
     val providerTags = providerTags.flatMap { ep.parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
     val providerBranches = providerBranches.flatMap { ep.parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
-    if (pending && providerTags.none { it.isNotEmpty() } && providerTags.none { it.isNotEmpty() } && providerBranches.none { it.isNotEmpty() } && providerBranches.none { it.isNotEmpty() }) {
-      throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags or branches have been " +
-        "specified. To use the pending pacts feature, you need to provide the list of provider names for the " +
-        "provider application version with the providerTags or providerBranches property that will be published with the verification " +
-        "results.")
+    if (pending && providerTags.none { it.isNotEmpty() } && providerTags.none { it.isNotEmpty() } &&
+      providerBranches.none { it.isNotEmpty() } && providerBranches.none { it.isNotEmpty() }) {
+      throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags or branches have" +
+        " been specified. To use the pending pacts feature, you need to provide the list of provider names for the" +
+        " provider application version with the providerTags or providerBranches property that will be published with" +
+        " the verification results.")
     }
     val wipSinceDate = if (pending) {
       ep.parseExpression(includeWipPactsSince, DataType.STRING, resolver) as String
@@ -233,8 +235,8 @@ open class PactBrokerLoader(
     try {
       val pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver)
 
-      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, providerBranches, pending,
-        wipSinceDate)
+      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags,
+              providerBranches, pending, wipSinceDate)
       var consumers = when (result) {
         is Ok -> result.value
         is Err -> throw result.error

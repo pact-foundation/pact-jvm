@@ -83,8 +83,8 @@ open class ProviderInfo @JvmOverloads constructor (
       emptyList()
     }
     val includePactsSince = Utils.lookupInMap(options, "includeWipPactsSince", String::class.java, "")
-    val pactBrokerOptions = PactBrokerOptions(enablePending, providerTags.orEmpty(), providerBranches.orEmpty(), includePactsSince, false,
-      PactBrokerOptions.parseAuthSettings(options))
+    val pactBrokerOptions = PactBrokerOptions(enablePending, providerTags.orEmpty(), providerBranches.orEmpty(),
+            includePactsSince, false, PactBrokerOptions.parseAuthSettings(options))
 
     return hasPactsFromPactBrokerWithSelectors(pactBrokerUrl, selectors, pactBrokerOptions)
   }
@@ -96,12 +96,13 @@ open class ProviderInfo @JvmOverloads constructor (
     options: PactBrokerOptions
   ): List<ConsumerInfo> {
     if (options.enablePending && options.providerTags.isEmpty() && options.providerBranches.isEmpty()) {
-      throw RuntimeException("No providerTags or providerBranches: To use the pending pacts feature, you need to provide the list of " +
-        "provider names for the provider application version that will be published with the verification results")
+      throw RuntimeException("No providerTags or providerBranches: To use the pending pacts feature, you need to" +
+        " provide the list of provider names for the provider application version that will be published with the" +
+        " verification results")
     }
     val client = pactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, options.providerTags, options.providerBranches,
-      options.enablePending, options.includeWipPactsSince)
+    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, options.providerTags,
+      options.providerBranches, options.enablePending, options.includeWipPactsSince)
       .map { results -> results.map { ConsumerInfo.from(it) } }
 
     return when (consumersFromBroker) {
