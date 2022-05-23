@@ -363,7 +363,7 @@ an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`.
 
 ## Provider States
 
-For a description of what provider states are, see the pact documentations: http://docs.pact.io/documentation/provider_states.html
+For a description of what provider states are, see the pact documentations: https://docs.pact.io/getting_started/provider_states
 
 ### Using a state change URL
 
