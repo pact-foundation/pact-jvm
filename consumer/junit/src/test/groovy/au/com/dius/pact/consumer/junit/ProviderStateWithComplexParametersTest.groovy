@@ -17,7 +17,7 @@ class ProviderStateWithComplexParametersTest {
     @Rule
     @SuppressWarnings('PublicInstanceField')
     public final PactProviderRule provider = new PactProviderRule('provider_with_complex_params',
-      'localhost', 8113, this)
+      'localhost', 0, this)
 
     @Pact(consumer='test_consumer')
     @SuppressWarnings('JUnitPublicNonTestMethod')
@@ -42,7 +42,7 @@ class ProviderStateWithComplexParametersTest {
     @PactVerification
     void runTest() {
         assert '{"data":1234.0,"name":"harry","responsetest":true}' ==
-          Request.Put('http://localhost:8113/numbertest')
+          Request.Put('http://localhost:' + provider.port + '/numbertest')
             .addHeader('Accept', APPLICATION_JSON)
             .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
             .execute().returnContent().asString()
