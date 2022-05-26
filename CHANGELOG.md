@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.8 - Support providerVersionBranches in JUnit tests
+
+* eeba50278 - Merge branch 'TGNThump-feature/providerVersionBranches' (Ronald Holshausen, Tue May 24 08:56:30 2022 +1000)
+* 1c3b69f6b - Merge pull request #1558 from pact-foundation/correct_provider_states_url (Yousaf Nabi, Mon May 23 12:59:53 2022 +0100)
+* 31f8d9ddd - docs: update gradle readme provider states link (Yousaf Nabi, Mon May 23 12:57:38 2022 +0100)
+* 5917d5169 - Merge pull request #1557 from TGNThump/feature/providerVersionBranches (Ronald Holshausen, Fri May 20 12:41:27 2022 +1000)
+* b985a6233 - chore: fix failing tests #1557 (Ronald Holshausen, Fri May 20 12:40:51 2022 +1000)
+* 968e69c7c - chore: fix static code check errros #1557 (Ronald Holshausen, Fri May 20 12:05:21 2022 +1000)
+* 936ac74c3 - Add support for providerVersionBranches #1554 (Ben Pilgrim, Thu May 19 11:15:28 2022 +0100)
+* 36788ed47 - chore: Update versions in readme (Ronald Holshausen, Fri May 13 16:50:02 2022 +1000)
+* 469511218 - bump version to 4.3.8 (Ronald Holshausen, Fri May 13 16:39:13 2022 +1000)
+
 # 4.3.7 - Maintenance Release
 
 * 16e72b61b - Merge pull request #1550 from rejeeshg/patch-11 (Ronald Holshausen, Wed May 11 10:28:05 2022 +1000)
