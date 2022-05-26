@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.37 - Support providerVersionBranches in JUnit tests
+
+* 26f415222 - chore: run test mock server on random port (Ronald Holshausen, Thu May 26 10:36:58 2022 +1000)
+* df53e6577 - chore: fix build after cherry-pick from master (Ronald Holshausen, Thu May 26 10:20:38 2022 +1000)
+* 90f821f49 - Add support for providerVersionBranches #1554 (Ben Pilgrim, Thu May 19 11:15:28 2022 +0100)
+* 2931d69b1 - bump version to 4.1.37 (Ronald Holshausen, Fri May 13 13:48:15 2022 +1000)
+
 # 4.1.36 - Maintenance Release
 
 * 989e176ee - Merge pull request #1551 from rejeeshg/patch-12 (Ronald Holshausen, Wed May 11 10:28:41 2022 +1000)
