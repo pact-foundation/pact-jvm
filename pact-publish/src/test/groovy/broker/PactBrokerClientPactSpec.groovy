@@ -11,7 +11,8 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
-@SuppressWarnings(['GroovyAssignabilityCheck','UnnecessaryGetter', 'LineLength', 'NestedBlockDepth', 'AbcMetric', 'MethodSize', 'ClassSize'])
+@SuppressWarnings(['GroovyAssignabilityCheck', 'UnnecessaryGetter', 'LineLength', 'NestedBlockDepth', 'AbcMetric',
+        'MethodSize', 'ClassSize'])
 class PactBrokerClientPactSpec extends Specification {
 
   private PactBrokerClient pactBrokerClient

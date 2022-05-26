@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class GradleProviderInfoSpec extends Specification {
 
   def 'defaults the consumer verification type to what is set on the provider'() {
