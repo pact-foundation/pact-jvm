@@ -99,7 +99,7 @@ public @interface PactBroker {
   /**
    * Provider Branches to use to evaluate pending pacts
    */
-  String[] providerBranches() default "${pactbroker.providerBranches:}";
+  String providerBranch() default "${pactbroker.providerBranch:}";
 
   /**
    * The earliest date WIP pacts should be included (ex: YYYY-MM-DD). If no date is provided, WIP pacts will not be

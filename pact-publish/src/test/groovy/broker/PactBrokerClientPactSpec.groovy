@@ -918,7 +918,7 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
           new ConsumerVersionSelector('test', true, null, null)
-      ], [], [], false, '')
+      ], [], '', false, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
@@ -962,7 +962,7 @@ class PactBrokerClientPactSpec extends Specification {
           }
         ])
         providerVersionTags(['tag'])
-        providerVersionBranches(['master'])
+        providerVersionBranch 'master'
         includePendingStatus true
       }
       willRespondWith(status: 200)
@@ -1032,7 +1032,7 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
         new ConsumerVersionSelector('test', true, null, null)
-      ], ['tag'], ['master'], true, '')
+      ], ['tag'], 'master', true, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
@@ -1076,7 +1076,7 @@ class PactBrokerClientPactSpec extends Specification {
           }
         ])
         providerVersionTags(['tag'])
-        providerVersionBranches(['master'])
+        providerVersionBranch 'master'
         includePendingStatus true
         includeWipPactsSince '2020-06-24'
       }
@@ -1157,7 +1157,7 @@ class PactBrokerClientPactSpec extends Specification {
     def result = pactBroker.runTest { server, context ->
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
         new ConsumerVersionSelector('test', true, null, null)
-      ], ['tag'], ['master'], true, '2020-06-24')
+      ], ['tag'], 'master', true, '2020-06-24')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].wip

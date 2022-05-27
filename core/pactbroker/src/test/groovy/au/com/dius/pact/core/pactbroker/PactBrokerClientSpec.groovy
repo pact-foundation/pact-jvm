@@ -95,7 +95,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], [], false, '').value
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], '', false, '').value
 
     then:
     consumers == []
@@ -113,7 +113,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], [], false, '').value
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], '', false, '').value
 
     then:
     consumers != []
@@ -134,7 +134,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true, null, null) ], [], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null, null) ], [], '', false, '').value
 
     then:
     consumers != []
@@ -156,7 +156,7 @@ class PactBrokerClientSpec extends Specification {
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
             [ new ConsumerVersionSelector('tag', true, null, null),
-              new ConsumerVersionSelector('anotherTag', true, null, null) ], [], [], false, '').value
+              new ConsumerVersionSelector('anotherTag', true, null, null) ], [], '', false, '').value
 
     then:
     consumers.size() == 2
@@ -185,7 +185,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true, null, null) ], [], [], false, '').value
+            [ new ConsumerVersionSelector('tag', true, null, null) ], [], '', false, '').value
 
     then:
     consumers != []
@@ -206,7 +206,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-      [ new ConsumerVersionSelector('tag', true, null, null) ], [], [], false, '').value
+      [ new ConsumerVersionSelector('tag', true, null, null) ], [], '', false, '').value
 
     then:
     consumers == []
@@ -399,7 +399,7 @@ class PactBrokerClientSpec extends Specification {
     ''')
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', selectors, [], [], false, '')
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], '', false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -432,7 +432,7 @@ class PactBrokerClientSpec extends Specification {
     ''')
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', [], [], [], false, '')
+    def result = client.fetchConsumersWithSelectors('provider', [], [], '', false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -450,7 +450,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', [], [], [], false, '')
+    def result = client.fetchConsumersWithSelectors('provider', [], [], '', false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -478,7 +478,7 @@ class PactBrokerClientSpec extends Specification {
     }
     ''')
     when:
-    def result = client.fetchConsumersWithSelectors('provider', selectors, [], [], false, '2020-24-06')
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], '', false, '2020-24-06')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -495,7 +495,7 @@ class PactBrokerClientSpec extends Specification {
     }
     def selectors = [ new ConsumerVersionSelector('DEV', true, null, null) ]
     def json = '{"consumerVersionSelectors":[{"latest":true,"tag":"DEV"}],"includePendingStatus":true,' +
-      '"includeWipPactsSince":"2020-24-06","providerVersionBranches":[],"providerVersionTags":[]}'
+      '"includeWipPactsSince":"2020-24-06","providerVersionTags":[]}'
     def jsonResult = JsonParser.INSTANCE.parseString('''
     {
       "_embedded": {
@@ -505,7 +505,7 @@ class PactBrokerClientSpec extends Specification {
     }
     ''')
     when:
-    def result = client.fetchConsumersWithSelectors('provider', selectors, [], [], true, '2020-24-06')
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], '', true, '2020-24-06')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -524,7 +524,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def result = client.fetchConsumersWithSelectors('provider',
-      [ new ConsumerVersionSelector(null, true, 'consumer', null) ], [], [], false, '')
+      [ new ConsumerVersionSelector(null, true, 'consumer', null) ], [], '', false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -580,7 +580,7 @@ class PactBrokerClientSpec extends Specification {
     ]
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', selectors, [], [], false, '')
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], '', false, '')
 
     then:
     1 * halClient.navigate() >> halClient
@@ -604,7 +604,7 @@ class PactBrokerClientSpec extends Specification {
     ]
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', selectors, [], [], false, '')
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], '', false, '')
 
     then:
     1 * halClient.navigate() >> {
@@ -664,7 +664,7 @@ class PactBrokerClientSpec extends Specification {
     def expectedJson = '{"consumerVersionSelectors":[{"mainBranch":true}],"includePendingStatus":false}'
 
     when:
-    client.fetchConsumersWithSelectors('provider', [], [], [], false, '')
+    client.fetchConsumersWithSelectors('provider', [], [], '', false, '')
 
     then:
     1 * halClient.postJson('pb:provider-pacts-for-verification', _, expectedJson)

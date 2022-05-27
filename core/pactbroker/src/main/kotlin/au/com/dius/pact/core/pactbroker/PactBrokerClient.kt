@@ -158,7 +158,7 @@ interface IPactBrokerClient {
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
-    providerBranches: List<String> = emptyList(),
+    providerBranch: String?,
     enablePending: Boolean = false,
     includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception>
@@ -227,7 +227,7 @@ interface IPactBrokerClient {
   fun uploadPactFile(pactFile: File, version: String, tags: List<String>): Result<String?, Exception>
 
   /**
-   * Uploads the given pact file to the broker and applies any tags/branches
+   * Uploads the given pact file to the broker and applies any tags/Branch
    */
   fun uploadPactFile(pactFile: File, config: PublishConfiguration): Result<String?, Exception>
 }
@@ -300,7 +300,7 @@ open class PactBrokerClient(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String>,
-    providerBranches: List<String>,
+    providerBranch: String?,
     enablePending: Boolean,
     includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception> {
@@ -316,9 +316,9 @@ open class PactBrokerClient(
     return if (pactsForVerification != null) {
       val selectorsRawJson = System.getProperty("pactbroker.consumerversionselectors.rawjson")
       if(!selectorsRawJson.isNullOrBlank()){
-        fetchPactsUsingNewEndpointRaw(selectorsRawJson, enablePending, providerTags, providerBranches, includeWipPactsSince, halClient, pactsForVerification, providerName)
+        fetchPactsUsingNewEndpointRaw(selectorsRawJson, enablePending, providerTags, providerBranch, includeWipPactsSince, halClient, pactsForVerification, providerName)
       } else {
-        fetchPactsUsingNewEndpointTyped(selectors, enablePending, providerTags, providerBranches, includeWipPactsSince, halClient, pactsForVerification, providerName)
+        fetchPactsUsingNewEndpointTyped(selectors, enablePending, providerTags, providerBranch, includeWipPactsSince, halClient, pactsForVerification, providerName)
       }
     } else {
       handleWith {
@@ -343,34 +343,34 @@ open class PactBrokerClient(
     selectorsTyped: List<ConsumerVersionSelector>,
     enablePending: Boolean,
     providerTags: List<String>,
-    providerBranches: List<String>,
+    providerBranch: String?,
     includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
     providerName: String
   ): Result<List<PactBrokerResult>, Exception> {
     val selectorsJson = jsonArray(selectorsTyped.map { it.toJson() })
-    return fetchPactsUsingNewEndpoint(selectorsJson, enablePending, providerTags, providerBranches, includeWipPactsSince, halClient, pactsForVerification, providerName)
+    return fetchPactsUsingNewEndpoint(selectorsJson, enablePending, providerTags, providerBranch, includeWipPactsSince, halClient, pactsForVerification, providerName)
   }
 
   private fun fetchPactsUsingNewEndpointRaw(
     selectorsRaw: String,
     enablePending: Boolean,
     providerTags: List<String>,
-    providerBranches: List<String>,
+    providerBranch: String?,
     includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
     providerName: String
   ): Result<List<PactBrokerResult>, Exception> {
-    return fetchPactsUsingNewEndpoint(JsonParser.parseString(selectorsRaw), enablePending, providerTags, providerBranches, includeWipPactsSince, halClient, pactsForVerification, providerName)
+    return fetchPactsUsingNewEndpoint(JsonParser.parseString(selectorsRaw), enablePending, providerTags, providerBranch, includeWipPactsSince, halClient, pactsForVerification, providerName)
   }
 
   private fun fetchPactsUsingNewEndpoint(
     selectorsJson: JsonValue,
     enablePending: Boolean,
     providerTags: List<String>,
-    providerBranches: List<String>,
+    providerBranch: String?,
     includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
@@ -384,7 +384,9 @@ open class PactBrokerClient(
     body["includePendingStatus"] = enablePending
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
-      body["providerVersionBranches"] = jsonArray(providerBranches)
+      if (providerBranch.isNotEmpty()) {
+        body["providerVersionBranch"] = providerBranch
+      }
       if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }

@@ -9,7 +9,7 @@ data class PactBrokerConsumerConfig @JvmOverloads constructor(
   var selectors: List<ConsumerVersionSelector>? = listOf(),
   var enablePending: Boolean? = false,
   var providerTags: List<String>? = listOf(),
-  var providerBranches: List<String>? = listOf()
+  var providerBranch: String? = ""
 ) {
   companion object {
     @JvmStatic
