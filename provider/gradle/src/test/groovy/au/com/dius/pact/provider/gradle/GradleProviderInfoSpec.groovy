@@ -32,16 +32,16 @@ class GradleProviderInfoSpec extends Specification {
       selectors = latestTags('test')
       enablePending = true
       providerTags = ['master']
-      providerBranches = ['master']
+      providerBranch = 'master'
     }
 
     then:
     provider.brokerConfig == new PactBrokerConsumerConfig([new ConsumerVersionSelector('test', true, null, null)],
-      true, ['master'], ['master'])
+      true, ['master'], 'master')
   }
 
   @Unroll
-  def 'fromPactBroker throws an exception if pending pacts is enabled but there are no provider tags or provider branches'() {
+  def 'fromPactBroker throws an exception if pending pacts is enabled but there are no provider tags or provider branch'() {
     given:
     def provider = new GradleProviderInfo('provider', Mock(Project))
 
@@ -50,18 +50,18 @@ class GradleProviderInfoSpec extends Specification {
       selectors = latestTags('test')
       enablePending = true
       providerTags = tags
-      providerBranches = branches
+      providerBranch = branch
     }
 
     then:
     def ex = thrown(GradleScriptException)
-    ex.message.trim().startsWith('No providerTags or providerBranches: To use the pending pacts feature, you need to provide the list of ' +
+    ex.message.trim().startsWith('No providerTags or providerBranch: To use the pending pacts feature, you need to provide the list of ' +
       'provider names')
 
     where:
 
     tags << [null, [], ['']]
-    branches << [null, [], ['']]
+    branch << [null, ' ', '']
   }
 
   def 'supports specifying a fallback tag'() {

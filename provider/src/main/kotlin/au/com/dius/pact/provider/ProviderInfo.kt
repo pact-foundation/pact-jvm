@@ -77,13 +77,10 @@ open class ProviderInfo @JvmOverloads constructor (
     } else {
       emptyList()
     }
-    val providerBranches = if (enablePending) {
-      options["providerBranches"] as List<String>?
-    } else {
-      emptyList()
-    }
+
+    val providerBranch = Utils.lookupInMap(options, "providerBranch", String::class.java, "")
     val includePactsSince = Utils.lookupInMap(options, "includeWipPactsSince", String::class.java, "")
-    val pactBrokerOptions = PactBrokerOptions(enablePending, providerTags.orEmpty(), providerBranches.orEmpty(),
+    val pactBrokerOptions = PactBrokerOptions(enablePending, providerTags.orEmpty(), providerBranch,
             includePactsSince, false, PactBrokerOptions.parseAuthSettings(options))
 
     return hasPactsFromPactBrokerWithSelectors(pactBrokerUrl, selectors, pactBrokerOptions)
@@ -95,14 +92,14 @@ open class ProviderInfo @JvmOverloads constructor (
     selectors: List<ConsumerVersionSelector>,
     options: PactBrokerOptions
   ): List<ConsumerInfo> {
-    if (options.enablePending && options.providerTags.isEmpty() && options.providerBranches.isEmpty()) {
-      throw RuntimeException("No providerTags or providerBranches: To use the pending pacts feature, you need to" +
+    if (options.enablePending && options.providerTags.isEmpty() && options.providerBranch.isNullOrBlank() ) {
+      throw RuntimeException("No providerTags or providerBranch: To use the pending pacts feature, you need to" +
         " provide the list of provider names for the provider application version that will be published with the" +
         " verification results")
     }
     val client = pactBrokerClient(pactBrokerUrl, options)
     val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, options.providerTags,
-      options.providerBranches, options.enablePending, options.includeWipPactsSince)
+      options.providerBranch, options.enablePending, options.includeWipPactsSince)
       .map { results -> results.map { ConsumerInfo.from(it) } }
 
     return when (consumersFromBroker) {
