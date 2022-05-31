@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.38 - Rename pactbroker.providerBranches to pactbroker.providerBranch
+
+* a37409b23 - fix: providerVersionBranch for pending pacts (Praveen Erode Mohanasundaram, Fri May 27 22:15:52 2022 +0100)
+* d68690790 - Updating build.gradle to fix Vulnerability CVE-2022-22970 (Colin, Tue May 24 13:45:25 2022 +1200)
+* 46852570b - bump version to 4.1.38 (Ronald Holshausen, Thu May 26 11:23:12 2022 +1000)
+
 # 4.1.37 - Support providerVersionBranches in JUnit tests
 
 * 26f415222 - chore: run test mock server on random port (Ronald Holshausen, Thu May 26 10:36:58 2022 +1000)
