@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.9 - Rename providerBranches to providerBranch
+
+* e4523335e - Merge pull request #1565 from praveen-em/issue-1562 (Ronald Holshausen, Mon May 30 17:35:34 2022 +1000)
+* 12b0cbfa1 - Merge pull request #1559 from itstheceo/master (Ronald Holshausen, Mon May 30 10:59:02 2022 +1000)
+* 39d3739f1 - fix: providerVersionBranch for pending pacts (Praveen Erode Mohanasundaram, Fri May 27 22:15:52 2022 +0100)
+* 56c972491 - bump version to 4.3.9 (Ronald Holshausen, Thu May 26 11:51:11 2022 +1000)
+* 6e4b18002 - Updating build.gradle to fix Vulnerability CVE-2022-22970 (Colin, Tue May 24 13:45:25 2022 +1200)
+
 # 4.3.8 - Support providerVersionBranches in JUnit tests
 
 * eeba50278 - Merge branch 'TGNThump-feature/providerVersionBranches' (Ronald Holshausen, Tue May 24 08:56:30 2022 +1000)
