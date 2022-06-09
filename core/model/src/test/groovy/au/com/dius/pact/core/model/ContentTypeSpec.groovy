@@ -34,7 +34,7 @@ class ContentTypeSpec extends Specification {
     'application/vnd.schemaregistry.v1+json' || false
     'application/x-thrift'                   || true
     'application/x-other'                    || false
-    'application/graphql'                    || true
+    'application/graphql'                    || false
 
     contentType = new ContentType(value)
   }
