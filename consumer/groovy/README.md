@@ -122,13 +122,12 @@ Sets the port that the mock server will run on. If not supplied, a random port w
 
 #### given(String providerState)
 
-Defines a state that the provider needs to be in for the request to succeed. For more info, see
-https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times.
+Defines a state that the provider needs to be in for the request to succeed. For more info, see [Using provider states effectively][provider-state]. Can be called multiple times.
 
 #### given(String providerState, Map params)
 
 Defines a state that the provider needs to be in for the request to succeed. For more info, see
-https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times, and the params
+[Using provider states effectively][provider-state]. Can be called multiple times, and the params
 map can contain the data required for the state.
 
 #### uponReceiving(String requestDescription)
@@ -690,3 +689,5 @@ You can change the markers of the expressions using the following system propert
 We are tracking anonymous analytics to gather important usage statistics like JVM version
 and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
 variable to 'true'.
+
+[provider-state]: https://docs.pact.io/provider/using_provider_states_effectively
