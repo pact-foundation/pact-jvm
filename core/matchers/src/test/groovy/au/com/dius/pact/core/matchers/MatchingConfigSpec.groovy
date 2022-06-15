@@ -30,7 +30,6 @@ class MatchingConfigSpec extends Specification {
     'application/jsonrequest'                 | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
     'application/x-thrift'                    | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
     'application/x-bob'                       | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
-    'application/x-bob'                       | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
     'application/x-other'                     | 'au.com.dius.pact.core.matchers.PlainTextBodyMatcher'
   }
 }
