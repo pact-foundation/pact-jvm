@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.ContentType
 import kotlin.reflect.full.createInstance
 
 object MatchingConfig {
@@ -21,7 +22,8 @@ object MatchingConfig {
         val clazz = Class.forName(matcher).kotlin
         (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
       } else {
-        when (System.getProperty("pact.content_type.override.$contentType")) {
+        val ct = ContentType(contentType)
+        when (ct.override()) {
           "json" -> JsonBodyMatcher
           "text" -> PlainTextBodyMatcher()
           else -> null
