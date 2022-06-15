@@ -16,7 +16,7 @@ class ContentType(val contentType: MediaType?) {
 
   fun isJson(): Boolean {
     return if (contentType != null) {
-      when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
+      when (overrideForContentType(contentType)) {
         "json" -> true
         else -> {
           if ("vnd.schemaregistry.v1+json" == contentType.subtype)
@@ -33,7 +33,7 @@ class ContentType(val contentType: MediaType?) {
   }
 
   fun isXml(): Boolean = if (contentType != null) {
-    when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
+    when (overrideForContentType(contentType)) {
       "xml" -> true
       else -> xmlRegex.matches(contentType.subtype.toLowerCase())
     }
@@ -81,8 +81,7 @@ class ContentType(val contentType: MediaType?) {
       val superType = registry.getSupertype(contentType) ?: MediaType.OCTET_STREAM
       val type = contentType.type
       val baseType = superType.type
-      val override = System.getProperty("pact.content_type.override.$type.${contentType.subtype}")
-        ?: System.getProperty("pact.content_type.override.$type/${contentType.subtype}")
+      val override = overrideForContentType(contentType)
       when {
         override.isNotEmpty() -> override == "binary"
         type == "text" || baseType == "text" -> false
@@ -133,6 +132,12 @@ class ContentType(val contentType: MediaType?) {
     }
   }
 
+  /**
+   * If there is an override defined for the content type. Overrides are defined with a JVM system property
+   * in the format pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary|...
+   */
+  fun override() = overrideForContentType(this.contentType)
+
   companion object : KLogging() {
     @JvmStatic
     fun fromString(contentType: String?) = if (contentType.isNullOrEmpty()) {
@@ -164,5 +169,18 @@ class ContentType(val contentType: MediaType?) {
     val XML = ContentType("application/xml")
     @JvmStatic
     val KAFKA_SCHEMA_REGISTRY_JSON = ContentType("application/vnd.schemaregistry.v1+json")
+
+    /**
+     * If there is an override defined for the given content type. Overrides are defined with a JVM system property
+     * in the format pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary|...
+     */
+    fun overrideForContentType(contentType: MediaType?): String? {
+      return if (contentType != null) {
+        (System.getProperty("pact.content_type.override.${contentType.type}.${contentType.subtype}")
+                ?: System.getProperty("pact.content_type.override.${contentType.type}/${contentType.subtype}"))
+      } else {
+        null
+      }
+    }
   }
 }

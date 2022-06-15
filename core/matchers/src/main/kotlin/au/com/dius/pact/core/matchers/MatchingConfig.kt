@@ -22,11 +22,11 @@ object MatchingConfig {
   @JvmStatic
   fun lookupContentMatcher(contentType: String?): ContentMatcher? {
     return if (contentType != null) {
-      val contentType1 = ContentType(contentType)
-      val contentMatcher = CatalogueManager.findContentMatcher(contentType1)
+      val ct = ContentType(contentType)
+      val contentMatcher = CatalogueManager.findContentMatcher(ct)
       if (contentMatcher != null) {
         if (!contentMatcher.isCore) {
-          PluginContentMatcher(contentMatcher, contentType1)
+          PluginContentMatcher(contentMatcher, ct)
         } else {
           coreContentMatcher(contentType)
         }
@@ -44,7 +44,8 @@ object MatchingConfig {
       val clazz = Class.forName(matcher).kotlin
       (clazz.objectInstance ?: clazz.createInstance()) as ContentMatcher?
     } else {
-      when (System.getProperty("pact.content_type.override.$contentType")) {
+      val ct = ContentType(contentType)
+        when (ct.override()) {
         "json" -> JsonContentMatcher
         "text" -> PlainTextContentMatcher()
         else -> null
