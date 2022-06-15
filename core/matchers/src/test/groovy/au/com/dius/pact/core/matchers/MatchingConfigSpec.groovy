@@ -28,7 +28,7 @@ class MatchingConfigSpec extends Specification {
     'application/json-rpc'                   | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
     'application/jsonrequest'                | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
     'application/x-thrift'                   | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
-    'application/x-bob'                      | 'au.com.dius.pact.core.matchers.JsonBodyMatcher'
+    'application/x-bob'                      | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
     'application/x-other'                    | 'au.com.dius.pact.core.matchers.PlainTextContentMatcher'
   }
 }

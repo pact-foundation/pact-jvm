@@ -6,7 +6,7 @@ import spock.util.environment.RestoreSystemProperties
 
 import java.nio.charset.Charset
 
-@SuppressWarnings('UnnecessaryBooleanExpression')
+@SuppressWarnings(['UnnecessaryBooleanExpression', 'CyclomaticComplexity', 'UnnecessaryObjectReferences'])
 @RestoreSystemProperties
 class ContentTypeSpec extends Specification {
 
