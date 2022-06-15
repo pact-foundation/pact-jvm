@@ -18,7 +18,16 @@ class ContentType(val contentType: MediaType?) {
     return if (contentType != null) {
       when (overrideForContentType(contentType)) {
         "json" -> true
-        else -> jsonRegex.matches(contentType.subtype.toLowerCase())
+        else -> {
+          if ("vnd.schemaregistry.v1+json" == contentType.subtype)
+            false
+          else if (jsonRegex.matches(contentType.subtype.toLowerCase())) {
+            true
+          } else {
+            val superType = registry.getSupertype(contentType)
+            superType != null && superType.type == "application" && superType.subtype == "json"
+          }
+        }
       }
     } else false
   }
@@ -27,6 +36,13 @@ class ContentType(val contentType: MediaType?) {
     when (overrideForContentType(contentType)) {
       "xml" -> true
       else -> xmlRegex.matches(contentType.subtype.toLowerCase())
+    }
+  } else false
+
+  fun isKafkaSchemaRegistryJson(): Boolean = if (contentType != null) {
+    when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
+      "kafkaSchemaRegistryJson" -> true
+      else -> contentType.subtype == "vnd.schemaregistry.v1+json"
     }
   } else false
 
@@ -59,6 +75,7 @@ class ContentType(val contentType: MediaType?) {
 
   fun getBaseType() = contentType?.baseType?.toString()
 
+  @Suppress("ComplexMethod")
   fun isBinaryType(): Boolean {
     return if (contentType != null) {
       val superType = registry.getSupertype(contentType) ?: MediaType.OCTET_STREAM
@@ -102,6 +119,19 @@ class ContentType(val contentType: MediaType?) {
     return contentType?.hashCode() ?: 0
   }
 
+  fun getSupertype() : ContentType? {
+    return if (contentType != null && contentType.subtype.endsWith("+json")) {
+      JSON
+    } else {
+      val supertype = registry.getSupertype(contentType)
+      if (supertype != null) {
+        ContentType(supertype)
+      } else {
+        null
+      }
+    }
+  }
+
   /**
    * If there is an override defined for the content type. Overrides are defined with a JVM system property
    * in the format pact.content_type.override.<TYPE>.<SUBTYPE>=text|json|binary|...
@@ -136,6 +166,8 @@ class ContentType(val contentType: MediaType?) {
     val JSON = ContentType("application/json")
     @JvmStatic
     val XML = ContentType("application/xml")
+    @JvmStatic
+    val KAFKA_SCHEMA_REGISTRY_JSON = ContentType("application/vnd.schemaregistry.v1+json")
 
     /**
      * If there is an override defined for the given content type. Overrides are defined with a JVM system property

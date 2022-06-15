@@ -28,16 +28,41 @@ class ContentTypeSpec extends Specification {
 
     where:
 
-    value                  || result
-    ''                     || false
-    'text/plain'           || false
-    'application/pdf'      || false
-    'application/json'     || true
-    'application/hal+json' || true
-    'application/HAL+JSON' || true
-    'application/x-thrift' || true
-    'application/x-other'  || false
-    'application/other'    || true
+    value                                    || result
+    ''                                       || false
+    'text/plain'                             || false
+    'application/pdf'                        || false
+    'application/json'                       || true
+    'application/hal+json'                   || true
+    'application/HAL+JSON'                   || true
+    'application/vnd.schemaregistry.v1+json' || false
+    'application/x-thrift'                   || true
+    'application/x-other'                    || false
+    'application/graphql'                    || true
+    'application/other'                      || true
+
+    contentType = new ContentType(value)
+  }
+
+  @Unroll
+  def '"#value" is kafka schema registry -> #result'() {
+    expect:
+    result == contentType.kafkaSchemaRegistryJson
+
+    where:
+
+    value                                    || result
+    ''                                       || false
+    'text/plain'                             || false
+    'application/pdf'                        || false
+    'application/json'                       || false
+    'application/hal+json'                   || false
+    'application/HAL+JSON'                   || false
+    'application/vnd.schemaregistry.v1+json' || true
+    'application/x-thrift'                   || false
+    'application/x-other'                    || false
+    'application/graphql'                    || false
+    'application/xml'                        || false
 
     contentType = new ContentType(value)
   }
@@ -106,6 +131,34 @@ class ContentTypeSpec extends Specification {
     'application/x-bin'                 || true
     'application/other-bin'             || true
     'application/other'                 || false
+
+    contentType = new ContentType(value)
+  }
+
+  @Unroll
+  def '"#value" supertype -> #result'() {
+    expect:
+    contentType.supertype?.asString() == result
+
+    where:
+
+    value                               || result
+    ''                                  || null
+    'text/plain'                        || 'application/octet-stream'
+    'application/pdf'                   || 'application/octet-stream'
+    'application/zip'                   || 'application/octet-stream'
+    'application/json'                  || 'application/javascript'
+    'application/hal+json'              || 'application/json'
+    'application/HAL+JSON'              || 'application/json'
+    'application/xml'                   || 'text/plain'
+    'application/atom+xml'              || 'application/xml'
+    'application/octet-stream'          || null
+    'image/jpeg'                        || 'application/octet-stream'
+    'video/H264'                        || 'application/octet-stream'
+    'audio/aac'                         || 'application/octet-stream'
+    'text/csv'                          || 'text/plain'
+    'multipart/form-data'               || 'application/octet-stream'
+    'application/x-www-form-urlencoded' || 'text/plain'
 
     contentType = new ContentType(value)
   }

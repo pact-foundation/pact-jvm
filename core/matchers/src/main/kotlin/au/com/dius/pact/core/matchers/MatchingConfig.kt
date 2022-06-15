@@ -5,6 +5,7 @@ import kotlin.reflect.full.createInstance
 
 object MatchingConfig {
   val bodyMatchers = mapOf(
+    "application/vnd.schemaregistry.v1\\+json" to "au.com.dius.pact.core.matchers.KafkaJsonSchemaContentMatcher",
     "application/.*xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
     "text/xml" to "au.com.dius.pact.core.matchers.XmlBodyMatcher",
     ".*json.*" to "au.com.dius.pact.core.matchers.JsonBodyMatcher",
