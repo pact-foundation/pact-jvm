@@ -98,16 +98,17 @@ The following project properties can be specified with `-Pproperty=value` on the
 
 The following project properties must be specified as system properties:
 
-|Property|Description|
-|--------|-----------|
-|`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
-|`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
-|`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|
-|`pact.provider.branch`|Sets the provider branch to push before publishing verification results|
-|`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
-|`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
-|`pact.verifier.ignoreNoConsumers`|If set to `true`, don't fail the build if there are no consumers to verify [4.1.19+]|
-|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]|
+| Property                                                                                            | Description                                                                                           |
+|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `pact.verifier.disableUrlPathDecoding`                                                              | Disables decoding of request paths                                                                    |
+| `pact.pactbroker.httpclient.usePreemptiveAuthentication`                                            | Enables preemptive authentication with the pact broker when set to `true`                             |
+| `pact.provider.tag`                                                                                 | Sets the provider tag to push before publishing verification results (can use a comma separated list) |
+| `pact.provider.branch`                                                                              | Sets the provider branch to push before publishing verification results                               |
+| `pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary` | Overrides the handling of a particular content type [4.1.3+]                                          |
+| `pact.verifier.enableRedirectHandling`                                                              | Enables automatically handling redirects [4.1.8+]                                                     |
+| `pact.verifier.ignoreNoConsumers`                                                                   | If set to `true`, don't fail the build if there are no consumers to verify [4.1.19+]                  |
+| `pact.verifier.buildUrl`                                                                            | Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]              |
+| `pactbroker.consumerversionselectors.rawjson`                                                       | Overrides the consumer version selectors with raw JSON [4.1.29+/4.3.0+]                               |
 
 ## Specifying the provider hostname at runtime
 

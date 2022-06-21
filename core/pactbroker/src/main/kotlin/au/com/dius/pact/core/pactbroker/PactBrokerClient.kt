@@ -314,7 +314,7 @@ open class PactBrokerClient(
       else -> null
     }
     return if (pactsForVerification != null) {
-      val selectorsRawJson = System.getProperty("pactbroker.consumerversionselectors.rawjson")
+      val selectorsRawJson = lookupEnvironmentValue("pactbroker.consumerversionselectors.rawjson")
       if(!selectorsRawJson.isNullOrBlank()){
         fetchPactsUsingNewEndpointRaw(selectorsRawJson, enablePending, providerTags, providerBranch, includeWipPactsSince, halClient, pactsForVerification, providerName)
       } else {
