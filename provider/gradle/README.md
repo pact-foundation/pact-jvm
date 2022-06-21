@@ -108,7 +108,7 @@ The following project properties must be specified as system properties:
 | `pact.verifier.enableRedirectHandling`                                                              | Enables automatically handling redirects [4.1.8+]                                                     |
 | `pact.verifier.ignoreNoConsumers`                                                                   | If set to `true`, don't fail the build if there are no consumers to verify [4.1.19+]                  |
 | `pact.verifier.buildUrl`                                                                            | Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]              |
-| `pactbroker.consumerversionselectors.rawjson`                                                       | Overrides the consumer version selectors with raw JSON [4.1.29+/4.3.0+]                               |
+| `pactbroker.consumerversionselectors.rawjson`                                                       | Overrides the consumer version selectors with raw JSON [4.1.29+/4.3.0+]                               || `pactbroker.consumerversionselectors.rawjson`                                                       | Overrides the consumer version selectors with raw JSON [4.1.29+/4.3.0+]                               |
 
 ## Specifying the provider hostname at runtime
 
