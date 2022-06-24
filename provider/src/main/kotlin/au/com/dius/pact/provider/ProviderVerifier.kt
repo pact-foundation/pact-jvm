@@ -23,8 +23,9 @@ import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
-import au.com.dius.pact.core.support.Metrics
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.ifNullOrEmpty
@@ -910,7 +911,7 @@ open class ProviderVerifier @JvmOverloads constructor (
 
     return if (pactSource is UrlPactSource) {
       val options = mutableMapOf<String, Any>()
-      if (consumer.auth != null) {
+      if (consumer.auth != null && consumer.auth !is Auth.None) {
         options["authentication"] = consumer.auth!!
       } else if (consumer.pactFileAuthentication.isNotEmpty()) {
         options["authentication"] = consumer.pactFileAuthentication

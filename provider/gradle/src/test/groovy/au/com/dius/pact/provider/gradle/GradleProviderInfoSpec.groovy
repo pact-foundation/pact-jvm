@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.provider.PactVerification
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
@@ -9,7 +10,7 @@ import spock.lang.Unroll
 
 class GradleProviderInfoSpec extends Specification {
 
-  def 'defaults the consumer verification type to what is set on the provider'() {
+  def 'hasPactWith - defaults the consumer verification type to what is set on the provider'() {
     given:
     def provider = new GradleProviderInfo('provider', Mock(Project))
     provider.verificationType = PactVerification.ANNOTATED_METHOD

@@ -100,7 +100,7 @@ open class ConsumerInfo @JvmOverloads constructor (
   override val notices: List<VerificationNotice> = emptyList(),
   override val pending: Boolean = false,
   override val wip: Boolean = false,
-  override val auth: Auth? = null
+  override val auth: Auth? = Auth.None
 ) : IConsumerInfo {
 
   override fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
