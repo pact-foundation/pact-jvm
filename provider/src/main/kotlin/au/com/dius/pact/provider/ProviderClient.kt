@@ -67,6 +67,8 @@ interface IProviderInfo {
   var insecure: Boolean
   var trustStore: File?
   var trustStorePassword: String?
+
+  var consumers: MutableList<IConsumerInfo>
 }
 
 interface IConsumerInfo {

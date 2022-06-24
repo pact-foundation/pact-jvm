@@ -39,7 +39,7 @@ open class ProviderInfo @JvmOverloads constructor (
   open var isDependencyForPactVerify: Boolean = true,
   override var verificationType: PactVerification? = PactVerification.REQUEST_RESPONSE,
   override var packagesToScan: List<String> = emptyList(),
-  open var consumers: MutableList<IConsumerInfo> = mutableListOf()
+  override var consumers: MutableList<IConsumerInfo> = mutableListOf()
 ) : IProviderInfo {
 
   override fun hashCode() = HashCodeBuilder()

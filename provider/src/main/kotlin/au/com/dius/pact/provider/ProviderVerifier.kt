@@ -169,7 +169,7 @@ interface IProviderVerifier {
   /**
    * Run the verification for the given provider and return any failures
    */
-  fun verifyProvider(provider: ProviderInfo): List<VerificationResult>
+  fun verifyProvider(provider: IProviderInfo): List<VerificationResult>
 
   /**
    * Reports the state of the interaction to all the registered reporters
@@ -797,7 +797,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  override fun verifyProvider(provider: ProviderInfo): List<VerificationResult> {
+  override fun verifyProvider(provider: IProviderInfo): List<VerificationResult> {
     initialiseReporters(provider)
 
     val consumers = provider.consumers.filter(::filterConsumers)
