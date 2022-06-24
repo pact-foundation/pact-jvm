@@ -223,7 +223,7 @@ class PactPluginSpec extends Specification {
     consumer.auth == Auth.None.INSTANCE
     consumer.packagesToScan == ['one', 'two']
     consumer.pactSource instanceof File
-    consumer.pactSource.toString().endsWith('path/to/pact')
+    consumer.pactSource.toURL().toString().endsWith('path/to/pact')
     consumer.stateChange.toString() == 'http://localhost:8001/tasks/pactStateChange'
     !consumer.stateChangeUsesBody
   }
