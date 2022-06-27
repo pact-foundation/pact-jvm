@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.provider.PactVerification
 import org.gradle.api.Project
@@ -226,5 +228,82 @@ class PactPluginSpec extends Specification {
     consumer.pactSource.toURL().toString().endsWith('path/to/pact')
     consumer.stateChange.toString() == 'http://localhost:8001/tasks/pactStateChange'
     !consumer.stateChangeUsesBody
+  }
+
+  def 'hasPactWith - configures a group from a directory'() {
+    given:
+    def resource = getClass().classLoader.getResource('pacts/foo_pact.json')
+    File pactFileDirectory = new File(resource.file).parentFile
+    project.pact {
+      serviceProviders {
+        ProviderA {
+          hasPactsWith('all consumers') {
+            stateChange = url('http://localhost:8001/tasks/pactStateChange')
+            stateChangeUsesBody = false
+            pactFileLocation = pactFileDirectory
+          }
+        }
+      }
+    }
+
+    when:
+    project.evaluate()
+    def consumer = project.tasks.pactVerify_ProviderA.providerToVerify.consumers.find { it.name == 'Foo Consumer' }
+
+    then:
+    consumer.auth == Auth.None.INSTANCE
+    consumer.packagesToScan == []
+    consumer.pactSource instanceof FileSource
+    consumer.pactSource.file.toURL().toString().endsWith('foo_pact.json')
+    consumer.stateChange.toString() == 'http://localhost:8001/tasks/pactStateChange'
+    !consumer.stateChangeUsesBody
+  }
+
+  def 'fromPactBroker - configures the pact broker config values from the closure'() {
+    given:
+    project.pact {
+      serviceProviders {
+        ProviderA {
+          fromPactBroker {
+            enablePending = true
+            providerTags = ['1', '2']
+            providerBranch = 'test'
+
+            withSelectors {
+              mainBranch()
+              branch('<branch>')
+              deployedOrReleased()
+              matchingBranch()
+
+              branch('<branch>', '<consumer>')
+              branch('<branch>', null, '<fallback>')
+              deployedTo('<environment>')
+              releasedTo('<environment>')
+              environment('<environment>')
+            }
+          }
+        }
+      }
+    }
+
+    when:
+    project.evaluate()
+    def config = project.tasks.pactVerify_ProviderA.providerToVerify.brokerConfig
+
+    then:
+    config.selectors == [
+      ConsumerVersionSelectors.MainBranch.INSTANCE,
+      new ConsumerVersionSelectors.Branch('<branch>', null, null),
+      ConsumerVersionSelectors.DeployedOrReleased.INSTANCE,
+      ConsumerVersionSelectors.MatchingBranch.INSTANCE,
+      new ConsumerVersionSelectors.Branch('<branch>', '<consumer>', null),
+      new ConsumerVersionSelectors.Branch('<branch>', null, '<fallback>'),
+      new ConsumerVersionSelectors.DeployedTo('<environment>'),
+      new ConsumerVersionSelectors.ReleasedTo('<environment>'),
+      new ConsumerVersionSelectors.Environment('<environment>')
+    ]
+    config.enablePending
+    config.providerTags == ['1', '2']
+    config.providerBranch == 'test'
   }
 }
