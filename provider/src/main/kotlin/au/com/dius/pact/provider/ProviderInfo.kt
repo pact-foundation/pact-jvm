@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.support.Utils
@@ -40,7 +41,7 @@ open class ProviderInfo @JvmOverloads constructor (
   open var isDependencyForPactVerify: Boolean = true,
   override var verificationType: PactVerification? = PactVerification.REQUEST_RESPONSE,
   override var packagesToScan: List<String> = emptyList(),
-  open var consumers: MutableList<IConsumerInfo> = mutableListOf()
+  override var consumers: MutableList<IConsumerInfo> = mutableListOf()
 ) : IProviderInfo {
 
   override fun hashCode() = HashCodeBuilder()
@@ -66,11 +67,28 @@ open class ProviderInfo @JvmOverloads constructor (
   open fun hasPactsFromPactBroker(options: Map<String, Any> = mapOf(), pactBrokerUrl: String) =
     hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, emptyList())
 
-  @JvmOverloads
+  @Deprecated("Use version that takes list of ConsumerVersionSelectors",
+    replaceWith = ReplaceWith("hasPactsFromPactBrokerWithSelectorsV2"))
   open fun hasPactsFromPactBrokerWithSelectors(
     options: Map<String, Any?> = mapOf(),
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>
+  ) = hasPactsFromPactBrokerWithSelectorsV2(options, pactBrokerUrl, selectors.map { it.toSelector() })
+
+  /**
+   * Fetches all pacts from the broker that match the given selectors.
+   *
+   * Options:
+   * * enablePending (boolean) - Enables pending Pact support
+   * * providerTags (List<String>) - List of provider tag names
+   * * providerBranch (String) - Provider branch
+   * * includeWipPactsSince (String) - Date to include Pacts as WIP
+   */
+  @JvmOverloads
+  open fun hasPactsFromPactBrokerWithSelectorsV2(
+    options: Map<String, Any?> = mapOf(),
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelectors>
   ): List<ConsumerInfo> {
     val enablePending = Utils.lookupInMap(options, "enablePending", Boolean::class.java, false)
     val providerTags = if (enablePending) {
@@ -84,13 +102,22 @@ open class ProviderInfo @JvmOverloads constructor (
     val pactBrokerOptions = PactBrokerOptions(enablePending, providerTags.orEmpty(), providerBranch,
             includePactsSince, false, PactBrokerOptions.parseAuthSettings(options))
 
-    return hasPactsFromPactBrokerWithSelectors(pactBrokerUrl, selectors, pactBrokerOptions)
+    return hasPactsFromPactBrokerWithSelectorsV2(pactBrokerUrl, selectors, pactBrokerOptions)
   }
 
   @Suppress("TooGenericExceptionThrown")
+  @Deprecated("Use version that takes list of ConsumerVersionSelectors",
+    replaceWith = ReplaceWith("hasPactsFromPactBrokerWithSelectorsV2"))
   open fun hasPactsFromPactBrokerWithSelectors(
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>,
+    options: PactBrokerOptions
+  ) = hasPactsFromPactBrokerWithSelectorsV2(pactBrokerUrl, selectors.map { it.toSelector() }, options)
+
+  @Suppress("TooGenericExceptionThrown")
+  open fun hasPactsFromPactBrokerWithSelectorsV2(
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelectors>,
     options: PactBrokerOptions
   ): List<ConsumerInfo> {
     if (options.enablePending && options.providerTags.isEmpty() && options.providerBranch.isNullOrBlank() ) {
@@ -99,7 +126,7 @@ open class ProviderInfo @JvmOverloads constructor (
         " verification results")
     }
     val client = pactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, options.providerTags,
+    val consumersFromBroker = client.fetchConsumersWithSelectorsV2(name, selectors, options.providerTags,
       options.providerBranch, options.enablePending, options.includeWipPactsSince)
       .map { results -> results.map { ConsumerInfo.from(it) } }
 
