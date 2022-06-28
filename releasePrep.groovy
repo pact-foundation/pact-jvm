@@ -116,7 +116,7 @@ ask('Publish artifacts to maven central?: [Y]') {
   executeOnShell './gradlew clean publish :provider:gradle:publishPlugins -S -x :pact-publish:publish -PisRelease=true'
 }
 
-ask('Publish pacts to pact-foundation.pact.dius.com.au?: [Y]') {
+ask('Publish pacts to pact-foundation.pactflow.io?: [Y]') {
   executeOnShell 'PACT_PUBLISH=true ./gradlew :pact-publish:test :pact-publish:pactPublish'
 }
 

@@ -69,6 +69,8 @@ interface IProviderInfo {
   var insecure: Boolean
   var trustStore: File?
   var trustStorePassword: String?
+
+  var consumers: MutableList<IConsumerInfo>
 }
 
 interface IConsumerInfo {
@@ -102,27 +104,11 @@ open class ConsumerInfo @JvmOverloads constructor (
   override val notices: List<VerificationNotice> = emptyList(),
   override val pending: Boolean = false,
   override val wip: Boolean = false,
-  override val auth: Auth? = null
+  override val auth: Auth? = Auth.None
 ) : IConsumerInfo {
 
   override fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
-  override fun resolvePactSource(): PactSource? {
-    val source = pactSource
-    val result = when (source) {
-      is Callable<*> -> source.call()
-      else -> source
-    }
-    return when (result) {
-      is PactSource -> result
-      is File -> FileSource(result)
-      is URL -> UrlSource(result.toString())
-      is URI -> UrlSource(result.toString())
-      else -> {
-        logger.warn { "Expected a PactSource, but got $source (${source?.javaClass})" }
-        null
-      }
-    }
-  }
+  override fun resolvePactSource() = Companion.resolvePactSource(pactSource)
 
   var stateChangeUrl: URL?
     get() = if (stateChange != null) URL(stateChange.toString()) else null
@@ -175,6 +161,26 @@ open class ConsumerInfo @JvmOverloads constructor (
         pactFileAuthentication = result.pactFileAuthentication, notices = result.notices, pending = result.pending,
         wip = result.wip, auth = result.auth
       )
+
+    /**
+     * Resolves the source by looking at the type. If it is a callable object, will invoke that first.
+     */
+    fun resolvePactSource(source: Any?): PactSource? {
+      val result = when (source) {
+        is Callable<*> -> source.call()
+        else -> source
+      }
+      return when (result) {
+        is PactSource -> result
+        is File -> FileSource(result)
+        is URL -> UrlSource(result.toString())
+        is URI -> UrlSource(result.toString())
+        else -> {
+          logger.warn { "Expected a PactSource, but got $source (${source?.javaClass})" }
+          null
+        }
+      }
+    }
   }
 }
 

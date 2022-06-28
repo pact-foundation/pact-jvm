@@ -54,6 +54,7 @@ open class PactBrokerLoader(
   valueResolver: ValueResolver? = null,
   val enablePendingPacts: String = "false",
   val providerTags: List<String> = emptyList(),
+  val providerBranch: String = "",
   val includeWipPactsSince: String = "",
   val pactBrokerUrl: String? = null,
   val enableInsecureTls: String = "false",
@@ -79,6 +80,7 @@ open class PactBrokerLoader(
     null,
     pactBroker.enablePendingPacts,
     pactBroker.providerTags.toList(),
+    pactBroker.providerBranch,
     pactBroker.includeWipPactsSince,
     pactBroker.url,
     pactBroker.enableInsecureTls
@@ -207,6 +209,7 @@ open class PactBrokerLoader(
   }
 
   @Throws(IOException::class, IllegalArgumentException::class)
+  @Suppress("ThrowsCount")
   private fun loadPactsForProvider(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
@@ -216,11 +219,13 @@ open class PactBrokerLoader(
       "$selectors" }
     val pending = ep.parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
     val providerTags = providerTags.flatMap { ep.parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
-    if (pending && providerTags.none { it.isNotEmpty() }) {
-      throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags have been " +
-        "specified. To use the pending pacts feature, you need to provide the list of provider names for the " +
-        "provider application version with the providerTags property that will be published with the verification " +
-        "results.")
+    val providerBranch = ep.parseExpression(providerBranch, DataType.STRING, resolver) as String
+
+    if (pending && providerTags.none { it.isNotEmpty() } && providerBranch.isNullOrBlank() ) {
+      throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags or branch have" +
+        " been specified. To use the pending pacts feature, you need to provide the list of provider names for the" +
+        " provider application version with the providerTags or providerBranch property that will be published with" +
+        " the verification results.")
     }
     val wipSinceDate = if (pending) {
       ep.parseExpression(includeWipPactsSince, DataType.STRING, resolver) as String
@@ -230,8 +235,8 @@ open class PactBrokerLoader(
     try {
       val pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver)
 
-      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, pending,
-        wipSinceDate)
+      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags,
+              providerBranch, pending, wipSinceDate)
       var consumers = when (result) {
         is Ok -> result.value
         is Err -> throw result.error

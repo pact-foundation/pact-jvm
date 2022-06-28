@@ -79,4 +79,20 @@ class HttpPartSpec extends Specification {
     0 * decoder.decode(_)
     result.valueAsString() == '{}'
   }
+
+  @Issue('#1569')
+  @RestoreSystemProperties
+  def 'takes into account content type overrides with dot format'() {
+    given:
+    def json = new JsonValue.Object([body: new JsonValue.StringValue('{}'.chars)])
+    System.setProperty('pact.content_type.override.application.x-thrift', 'json')
+    def decoder = Mock(Base64.Decoder)
+
+    when:
+    def result = HttpPart.extractBody(json, ContentType.fromString('application/x-thrift'), decoder)
+
+    then:
+    0 * decoder.decode(_)
+    result.valueAsString() == '{}'
+  }
 }

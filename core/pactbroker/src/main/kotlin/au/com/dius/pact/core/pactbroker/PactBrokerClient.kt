@@ -19,7 +19,6 @@ import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.unwrap
 import com.google.common.net.UrlEscapers.urlFormParameterEscaper
-import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import mu.KLogging
 import java.io.File
 import java.io.IOException
@@ -116,6 +115,7 @@ data class CanIDeployResult(
 /**
  * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
  */
+@Deprecated(message = "Has been replaced with ConsumerVersionSelectors sealed classes")
 data class ConsumerVersionSelector(
   val tag: String? = null,
   val latest: Boolean = true,
@@ -134,6 +134,153 @@ data class ConsumerVersionSelector(
       obj.add("fallbackTag", Json.toJson(fallbackTag))
     }
     return obj
+  }
+
+  /**
+   * Converts this deprecated version to a ConsumerVersionSelectors
+   */
+  fun toSelector(): ConsumerVersionSelectors {
+    return ConsumerVersionSelectors.Selector(tag, latest, consumer, fallbackTag)
+  }
+}
+
+/**
+ * Consumer version selectors. See https://docs.pact.io/pact_broker/advanced_topics/selectors
+ */
+sealed class ConsumerVersionSelectors {
+  /**
+   * The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
+   */
+  object MainBranch: ConsumerVersionSelectors()
+
+  /**
+   * The latest version from a particular branch of each consumer, or for a particular consumer if the second
+   * parameter is provided. If fallback is provided, falling back to the fallback branch if none is found from the
+   * specified branch.
+   */
+  data class Branch @JvmOverloads constructor(
+    val name: String,
+    val consumer: String? = null,
+    val fallback: String? = null
+  ): ConsumerVersionSelectors()
+
+  /**
+   * All the currently deployed and currently released and supported versions of each consumer.
+   */
+  object DeployedOrReleased: ConsumerVersionSelectors()
+
+  /**
+   * The latest version from any branch of the consumer that has the same name as the current branch of the provider.
+   * Used for coordinated development between consumer and provider teams using matching feature branch names.
+   */
+  object MatchingBranch: ConsumerVersionSelectors()
+
+  /**
+   * Any versions currently deployed to the specified environment
+   */
+  data class DeployedTo(val environment: String): ConsumerVersionSelectors()
+
+  /**
+   * Any versions currently released and supported in the specified environment
+   */
+  data class ReleasedTo(val environment: String): ConsumerVersionSelectors()
+
+  /**
+   * Any versions currently deployed or released and supported in the specified environment
+   */
+  data class Environment(val environment: String): ConsumerVersionSelectors()
+
+  /**
+   * All versions with the specified tag
+   */
+  @Deprecated(message = "Tags have been deprecated in favor of branches")
+  data class Tag(val tag: String): ConsumerVersionSelectors()
+
+  /**
+   * The latest version for each consumer with the specified tag. If fallback is provided, will fall back to the
+   * fallback tag if none is found with the specified tag
+   */
+  @Deprecated(message = "Tags have been deprecated in favor of branches")
+  data class LatestTag @JvmOverloads constructor(
+    val tag: String,
+    val fallback: String? = null
+  ): ConsumerVersionSelectors()
+
+  /**
+   * Corresponds to the old consumer version selectors
+   */
+  @Deprecated(message = "Tags have been deprecated in favor of branches")
+  data class Selector @JvmOverloads constructor(
+    val tag: String? = null,
+    val latest: Boolean? = null,
+    val consumer: String? = null,
+    val fallbackTag: String? = null
+  ): ConsumerVersionSelectors()
+
+  fun toJson(): JsonValue {
+    return when (this) {
+      is Branch -> {
+        val entries = mutableMapOf<String, JsonValue>("branch" to JsonValue.StringValue(this.name))
+
+        if (this.consumer.isNotEmpty()) {
+          entries["consumer"] = JsonValue.StringValue(this.consumer!!)
+        }
+
+        if (this.fallback.isNotEmpty()) {
+          entries["fallbackBranch"] = JsonValue.StringValue(this.fallback!!)
+        }
+
+        JsonValue.Object(entries)
+      }
+      DeployedOrReleased -> JsonValue.Object("deployedOrReleased" to JsonValue.True)
+      is DeployedTo -> JsonValue.Object(
+        "deployed" to JsonValue.True,
+        "environment" to JsonValue.StringValue(this.environment)
+      )
+      is Environment -> JsonValue.Object("environment" to JsonValue.StringValue(this.environment))
+      is LatestTag -> {
+        val entries = mutableMapOf(
+          "tag" to JsonValue.StringValue(this.tag),
+          "latest" to JsonValue.True
+        )
+
+        if (this.fallback.isNotEmpty()) {
+          entries["fallbackTag"] = JsonValue.StringValue(this.fallback!!)
+        }
+
+        JsonValue.Object(entries)
+      }
+      MainBranch -> JsonValue.Object("mainBranch" to JsonValue.True)
+      MatchingBranch -> JsonValue.Object("matchingBranch" to JsonValue.True)
+      is ReleasedTo -> JsonValue.Object(
+        "released" to JsonValue.True,
+        "environment" to JsonValue.StringValue(this.environment)
+      )
+      is Selector -> {
+        val entries = mutableMapOf<String, JsonValue>()
+
+        if (this.tag.isNotEmpty()) {
+          entries["tag"] = JsonValue.StringValue(this.tag!!)
+        }
+
+        if (this.consumer.isNotEmpty()) {
+          entries["consumer"] = JsonValue.StringValue(this.consumer!!)
+        }
+
+        if (this.latest == true) {
+          entries["latest"] = JsonValue.True
+        } else if (this.latest == false) {
+          entries["latest"] = JsonValue.False
+        }
+
+        if (this.fallbackTag.isNotEmpty()) {
+          entries["fallbackTag"] = JsonValue.StringValue(this.fallbackTag!!)
+        }
+
+        JsonValue.Object(entries)
+      }
+      is Tag -> JsonValue.Object("tag" to JsonValue.StringValue(this.tag))
+    }
   }
 }
 
@@ -157,13 +304,31 @@ data class IgnoreSelector @JvmOverloads constructor(var name: String = "", var v
  */
 interface IPactBrokerClient {
   /**
-   * Fetches all consumers for the given provider and selectors
+   * Fetches all consumers for the given provider and selectors. If `pactbroker.consumerversionselectors.rawjson` is set
+   * as a system property or environment variable, that will override the selectors provided to this method.
    */
   @Throws(IOException::class)
+  @Deprecated("use version that takes a list of ConsumerVersionSelectors",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectorsV2"))
   fun fetchConsumersWithSelectors(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
+    providerBranch: String?,
+    enablePending: Boolean = false,
+    includeWipPactsSince: String?
+  ): Result<List<PactBrokerResult>, Exception>
+
+  /**
+   * Fetches all consumers for the given provider and selectors. If `pactbroker.consumerversionselectors.rawjson` is set
+   * as a system property or environment variable, that will override the selectors provided to this method.
+   */
+  @Throws(IOException::class)
+  fun fetchConsumersWithSelectorsV2(
+    providerName: String,
+    selectors: List<ConsumerVersionSelectors>,
+    providerTags: List<String> = emptyList(),
+    providerBranch: String?,
     enablePending: Boolean = false,
     includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception>
@@ -232,7 +397,7 @@ interface IPactBrokerClient {
   fun uploadPactFile(pactFile: File, version: String, tags: List<String>): Result<String?, Exception>
 
   /**
-   * Uploads the given pact file to the broker and applies any tags/branches
+   * Uploads the given pact file to the broker and applies any tags/Branch
    */
   fun uploadPactFile(pactFile: File, config: PublishConfiguration): Result<String?, Exception>
 }
@@ -305,6 +470,17 @@ open class PactBrokerClient(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String>,
+    providerBranch: String?,
+    enablePending: Boolean,
+    includeWipPactsSince: String?
+  ) = fetchConsumersWithSelectorsV2(providerName, selectors.map { it.toSelector() }, providerTags, providerBranch,
+    enablePending, includeWipPactsSince)
+
+  override fun fetchConsumersWithSelectorsV2(
+    providerName: String,
+    selectors: List<ConsumerVersionSelectors>,
+    providerTags: List<String>,
+    providerBranch: String?,
     enablePending: Boolean,
     includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception> {
@@ -318,15 +494,20 @@ open class PactBrokerClient(
       else -> null
     }
     return if (pactsForVerification != null) {
-      val selectorsRawJson = System.getProperty("pactbroker.consumerversionselectors.rawjson")
-      if(!selectorsRawJson.isNullOrBlank()){
-        fetchPactsUsingNewEndpointRaw(selectorsRawJson, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+      val selectorsRawJson = lookupEnvironmentValue("pactbroker.consumerversionselectors.rawjson")
+      if (selectorsRawJson.isNotEmpty()) {
+        fetchPactsUsingNewEndpointRaw(selectorsRawJson!!, enablePending, providerTags, providerBranch,
+          includeWipPactsSince, halClient, pactsForVerification, providerName)
       } else {
-        fetchPactsUsingNewEndpointTyped(selectors, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+        fetchPactsUsingNewEndpointTyped(selectors, enablePending, providerTags, providerBranch, includeWipPactsSince,
+          halClient, pactsForVerification, providerName)
       }
     } else {
       handleWith {
-        val tags = selectors.filter { it.tag.isNotEmpty() }.map { it.tag to it.fallbackTag }
+        val tags = selectors
+          .filterIsInstance(ConsumerVersionSelectors.Selector::class.java)
+          .filter { it.tag.isNotEmpty() }
+          .map { it.tag to it.fallbackTag }
         if (tags.isEmpty()) {
           fetchConsumers(providerName)
         } else {
@@ -344,34 +525,39 @@ open class PactBrokerClient(
   }
 
   private fun fetchPactsUsingNewEndpointTyped(
-    selectorsTyped: List<ConsumerVersionSelector>,
+    selectorsTyped: List<ConsumerVersionSelectors>,
     enablePending: Boolean,
     providerTags: List<String>,
+    providerBranch: String?,
     includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
     providerName: String
   ): Result<List<PactBrokerResult>, Exception> {
     val selectorsJson = jsonArray(selectorsTyped.map { it.toJson() })
-    return fetchPactsUsingNewEndpoint(selectorsJson, enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+    return fetchPactsUsingNewEndpoint(selectorsJson, enablePending, providerTags, providerBranch, includeWipPactsSince,
+      halClient, pactsForVerification, providerName)
   }
 
   private fun fetchPactsUsingNewEndpointRaw(
     selectorsRaw: String,
     enablePending: Boolean,
     providerTags: List<String>,
+    providerBranch: String?,
     includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
     providerName: String
   ): Result<List<PactBrokerResult>, Exception> {
-    return fetchPactsUsingNewEndpoint(JsonParser.parseString(selectorsRaw), enablePending, providerTags, includeWipPactsSince, halClient, pactsForVerification, providerName)
+    return fetchPactsUsingNewEndpoint(JsonParser.parseString(selectorsRaw), enablePending, providerTags,
+      providerBranch, includeWipPactsSince, halClient, pactsForVerification, providerName)
   }
 
   private fun fetchPactsUsingNewEndpoint(
     selectorsJson: JsonValue,
     enablePending: Boolean,
     providerTags: List<String>,
+    providerBranch: String?,
     includeWipPactsSince: String?,
     halClient: IHalClient,
     pactsForVerification: String,
@@ -385,6 +571,9 @@ open class PactBrokerClient(
     body["includePendingStatus"] = enablePending
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
+      if (providerBranch.isNotEmpty()) {
+        body["providerVersionBranch"] = providerBranch
+      }
       if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }

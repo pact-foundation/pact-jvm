@@ -9,6 +9,7 @@ class MatchingConfigSpec extends Specification {
 
   def setupSpec() {
     System.setProperty('pact.content_type.override.application/x-thrift', 'json')
+    System.setProperty('pact.content_type.override.application.x-bob', 'json')
     System.setProperty('pact.content_type.override.application/x-other', 'text')
   }
 
@@ -27,6 +28,7 @@ class MatchingConfigSpec extends Specification {
     'application/json-rpc'                   | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
     'application/jsonrequest'                | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
     'application/x-thrift'                   | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
+    'application/x-bob'                      | 'au.com.dius.pact.core.matchers.JsonContentMatcher'
     'application/x-other'                    | 'au.com.dius.pact.core.matchers.PlainTextContentMatcher'
   }
 }
