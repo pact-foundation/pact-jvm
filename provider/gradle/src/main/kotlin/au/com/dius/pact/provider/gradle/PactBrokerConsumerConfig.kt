@@ -98,7 +98,7 @@ open class ConsumerVersionSelectorConfig {
   }
 
   /**
-   * Any versions currently released and supported in the specified environment
+   * any versions currently deployed or released and supported in the specified environment
    */
   fun environment(environment: String) {
     selectors.add(ConsumerVersionSelectors.Environment(environment))

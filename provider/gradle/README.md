@@ -13,12 +13,12 @@ not `-D` as with the other Pact-JVM modules!*__
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "4.1.0"
+  id "au.com.dius.pact" version "4.3.10"
 }
 ```
 
 
-### For Gradle versions prior to 2.1
+### For Gradle versions prior to 2.1 or if you can't access the Gradle plugin portal
 
 #### 1.1. Add the gradle jar file to your build script class path:
 
@@ -28,7 +28,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius.pact.provider:gradle:4.1.0'
+        classpath 'au.com.dius.pact.provider:gradle:4.3.10'
     }
 }
 ```
@@ -540,6 +540,12 @@ pact {
     myProvider { // Define the name of your provider here
 
       fromPactBroker {
+        // For 4.3.10+ 
+        withSelectors {
+          branch('test') // the latest version from a particular branch of each consumer.
+        }
+       
+        // For versions before 4.3.10
         selectors = latestTags('test') // specify your tags here. You can leave this out to just use the latest pacts  
       }
 
@@ -547,6 +553,106 @@ pact {
   }
 
 }
+```
+
+#### Using consumer version selectors (4.3.10+)
+
+You can use a number of different selectors to fetch Pact files that match some criteria. See [Consumer Version Selectors](https://docs.pact.io/pact_broker/advanced_topics/consumer_version_selectors)
+for more information. The following selectors are available:
+
+##### Main branch
+
+The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            mainBranch()
+        }
+    }
+```
+
+##### Matching branch
+
+The latest version from any branch of the consumer that has the same name as the current branch of the provider.
+Used for coordinated development between consumer and provider teams using matching feature branch names.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            matchingBranch()
+        }
+    }
+```
+
+##### Branch
+
+The latest version from a particular branch of each consumer, or for a particular consumer if the second
+parameter is provided. If fallback is provided, falling back to the fallback branch if none is found from the
+specified branch.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            branch('FEAT-1234') // Latest version from the particular branch of each consumer
+          
+            branch('FEAT-1234', 'consumer-a') // Latest version from the particular branch of the provided consumer
+         
+            branch('FEAT-1234', null, 'master') // Fall back to master branch if none is found from the specified feature branch
+            branch('FEAT-1234', 'consumer-a', 'master') // As above, but for a single consumer
+        }
+    }
+```
+
+##### Deployed or released
+
+All the currently deployed and currently released and supported versions of each consumer. You can also specify if
+deployed or released to a particular environment.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            deployedOrReleased() // All the currently deployed and currently released and supported versions of each consumer.
+
+            deployedTo('test') // Any versions currently deployed to the specified environment
+            releasedTo('test') // Any versions currently released and supported in the specified environment   
+            environment('test') // any versions currently deployed or released and supported in the specified environment
+        }
+    }
+```
+
+##### Tags
+
+**NOTE: Tags are deprecated in favor of branches**
+
+Supports all the forms of selecting Pacts with tags.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            tag('test') // All versions with the specified tag.
+            latestTag('test') // The latest version for each consumer with the specified tag
+        }
+    }
+```
+
+Using the generic selector:
+
+* With just the tag name, returns all versions with the specified tag.
+* With latest, returns the latest version for each consumer with the specified tag.
+* With a fallback tag, returns the latest version for each consumer with the specified tag, falling back to the fallbackTag if none is found with the specified tag.
+* With a consumer name, returns the latest version for a specified consumer with the specified tag.
+* With only latest, returns the latest version for each consumer. **NOT RECOMMENDED** as it suffers from race conditions when pacts are published from multiple branches.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            selector('test') // All versions with the specified tag.
+            selector('test', true) // The latest version for each consumer with the specified tag
+            selector('test', true, 'fallback') // the latest version for each consumer with the specified tag, falling back to the fallbackTag if none is found with the specified tag
+            selector('test', true, null, 'consumer-a') // the latest version for a specified consumer with the specified tag
+        }
+    }
 ```
 
 ### For Pact-JVM versions before 4.1.0
