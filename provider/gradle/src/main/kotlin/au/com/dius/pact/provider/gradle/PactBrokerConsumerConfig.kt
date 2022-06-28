@@ -103,4 +103,36 @@ open class ConsumerVersionSelectorConfig {
   fun environment(environment: String) {
     selectors.add(ConsumerVersionSelectors.Environment(environment))
   }
+
+  /**
+   * All versions with the specified tag
+   */
+  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
+  fun tag(name: String) {
+    selectors.add(ConsumerVersionSelectors.Tag(name))
+  }
+
+  /**
+   * The latest version for each consumer with the specified tag
+   */
+  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
+  fun latestTag(name: String) {
+    selectors.add(ConsumerVersionSelectors.LatestTag(name))
+  }
+
+  /**
+   * Generic selector.
+   *
+   * * With just the tag name, returns all versions with the specified tag.
+   * * With latest, returns the latest version for each consumer with the specified tag.
+   * * With a fallback tag, returns the latest version for each consumer with the specified tag, falling back to the
+   * fallbackTag if non is found with the specified tag.
+   * * With a consumer name, returns the latest version for a specified consumer with the specified tag.
+   * * With only latest, returns the latest version for each consumer. NOT RECOMMENDED as it suffers from race
+   * conditions when pacts are published from multiple branches.
+   */
+  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
+  fun selector(tagName: String?, latest: Boolean?, fallbackTag: String?, consumer: String?) {
+    selectors.add(ConsumerVersionSelectors.Selector(tagName, latest, consumer, fallbackTag))
+  }
 }
