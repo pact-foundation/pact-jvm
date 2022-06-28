@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.10 - Branches and releases with Gradle plugin
+
+* ba88e3019 - feat: add Gradle DSL functions for deprecated tag forms of selectors (Ronald Holshausen, Tue Jun 28 12:26:41 2022 +1000)
+* 60712c465 - fix: call the updated selector method from the Gradle plugin (Ronald Holshausen, Tue Jun 28 11:42:36 2022 +1000)
+* f927119bf - Feat: Implement new Gradle DSL for consumer version selectors (Ronald Holshausen, Mon Jun 27 17:03:09 2022 +1000)
+* 5acf7d226 - refactor(Gradle): use delegation instead of inheritance to allow supporting Gradle 8 changes (Ronald Holshausen, Fri Jun 24 17:12:46 2022 +1000)
+* 905ed6560 - fix: failing test on Windows (Ronald Holshausen, Fri Jun 24 16:14:25 2022 +1000)
+* 832718413 - feat(Gradle): Add auth option for no auth (Ronald Holshausen, Fri Jun 24 15:57:15 2022 +1000)
+* 7027f0955 - Update system-properties.md (Ronald Holshausen, Thu Jun 23 09:09:43 2022 +1000)
+* d8f7ee3f6 - docs: add raw JSON property description (Ronald Holshausen, Tue Jun 21 14:54:52 2022 +1000)
+* de753fc2f - feat: allow consumer version selector JSON to be provided with an environment variable (Ronald Holshausen, Tue Jun 21 14:05:48 2022 +1000)
+* 05309c11a - fix: correct codenarc violations #1569 (Ronald Holshausen, Wed Jun 15 17:32:29 2022 +1000)
+* 0fa5b5eae - fix: make the use of content type overrides consistent #1569 (Ronald Holshausen, Wed Jun 15 17:29:07 2022 +1000)
+* 87a06c8a9 - Merge pull request #1571 from edouard-lopez/patch-1 (Ronald Holshausen, Tue Jun 14 14:14:20 2022 +1000)
+* 7a2a77b56 - docs: link to 'Using provider states effectively' (Édouard Lopez, Fri Jun 10 11:21:21 2022 +0200)
+* 0e411319e - chore: add example tests with attributes that contain slashes #1556 (Ronald Holshausen, Thu Jun 9 11:45:10 2022 +1000)
+* c5077953b - Update README.md (Ronald Holshausen, Tue May 31 17:28:47 2022 +1000)
+* 9acc5c23f - bump version to 4.3.10 (Ronald Holshausen, Tue May 31 17:27:01 2022 +1000)
+
 # 4.3.9 - Rename providerBranches to providerBranch
 
 * e4523335e - Merge pull request #1565 from praveen-em/issue-1562 (Ronald Holshausen, Mon May 30 17:35:34 2022 +1000)
