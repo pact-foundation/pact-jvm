@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ConsumersGroup
 import au.com.dius.pact.provider.IConsumerInfo
@@ -125,6 +126,25 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
   ): List<ConsumerInfo> {
     return try {
       provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
+    } catch (e: Exception) {
+      val verifyTaskName = PACT_VERIFY.lowercase()
+      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
+        logger.error(e) { "Failed to access Pact Broker" }
+        throw e
+      } else {
+        logger.warn { "Failed to access Pact Broker, no provider tasks will be configured - ${e.message}" }
+        emptyList()
+      }
+    }
+  }
+
+  fun hasPactsFromPactBrokerWithSelectorsV2(
+    options: Map<String, Any?>,
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelectors>
+  ): List<IConsumerInfo> {
+    return try {
+      provider.hasPactsFromPactBrokerWithSelectorsV2(options, pactBrokerUrl, selectors)
     } catch (e: Exception) {
       val verifyTaskName = PACT_VERIFY.lowercase()
       if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {

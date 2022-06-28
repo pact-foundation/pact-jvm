@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import groovy.transform.CompileStatic
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
 
@@ -80,6 +81,7 @@ class PactPlugin extends PactPluginBase {
     }
 
   @SuppressWarnings('CatchRuntimeException')
+  @CompileStatic
   private void setupPactConsumersFromBroker(GradleProviderInfo provider, Project project, PactPluginExtension ext) {
     if (provider.brokerConfig && project.gradle.startParameter.taskNames.any {
       it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
@@ -94,7 +96,7 @@ class PactPlugin extends PactPluginBase {
         options.providerTags = provider.brokerConfig.providerTags
       }
       try {
-        provider.consumers = provider.hasPactsFromPactBrokerWithSelectors(options, ext.broker.pactBrokerUrl,
+        provider.consumers = provider.hasPactsFromPactBrokerWithSelectorsV2(options, ext.broker.pactBrokerUrl,
           provider.brokerConfig.selectors)
       } catch (RuntimeException ex) {
         throw new GradleScriptException("Failed to fetch pacts from pact broker ${ext.broker.pactBrokerUrl}",
