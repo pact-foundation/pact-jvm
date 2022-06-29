@@ -5,13 +5,16 @@ import au.com.dius.pact.provider.ProviderVerifier
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to verify a pact against a provider
  */
 class PactVerificationTask extends PactVerificationBaseTask {
+  @Internal
   IProviderVerifier verifier = new ProviderVerifier()
+  @Internal
   GradleProviderInfo providerToVerify
 
   @TaskAction

@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -55,7 +56,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     val serviceName = if (providerInfo.isPresent && providerInfo.get().value.isNotEmpty()) {
       parseExpression(providerInfo.get().value, DataType.STRING)?.toString()
     } else {
-      System.getProperty("pact.provider.name")
+      Utils.lookupEnvironmentValue("pact.provider.name")
     }
     if (serviceName.isNullOrEmpty()) {
       throw UnsupportedOperationException("Provider name should be specified by using either " +

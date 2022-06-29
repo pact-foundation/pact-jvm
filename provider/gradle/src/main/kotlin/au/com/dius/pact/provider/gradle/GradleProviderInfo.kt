@@ -186,8 +186,8 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
     return try {
       provider.hasPactsFromPactBrokerWithSelectorsV2(options, pactBrokerUrl, selectors)
     } catch (e: Exception) {
-      val verifyTaskName = PACT_VERIFY.lowercase()
-      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
+      val verifyTaskName = PACT_VERIFY.toLowerCase()
+      if (project.gradle.startParameter.taskNames.any { it.toLowerCase().contains(verifyTaskName) }) {
         logger.error(e) { "Failed to access Pact Broker" }
         throw e
       } else {
