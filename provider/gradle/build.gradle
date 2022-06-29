@@ -24,8 +24,8 @@ groovydoc {
 }
 
 pluginBundle {
-  website = 'https://github.com/DiUS/pact-jvm/tree/master/gradle'
-  vcsUrl = 'https://github.com/DiUS/pact-jvm.git'
+  website = 'https://github.com/pact-foundation/pact-jvm/tree/master/provider/gradle'
+  vcsUrl = 'https://github.com/pact-foundation/pact-jvm'
   description = 'Gradle plugin for verifying pacts against a provider.'
   tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']
 }
@@ -36,6 +36,7 @@ gradlePlugin {
       id = 'au.com.dius.pact'
       displayName = 'Gradle Pact Provider plugin'
       implementationClass = 'au.com.dius.pact.provider.gradle.PactPlugin'
+      description = 'Gradle plugin for verifying pacts against a provider.'
     }
   }
 }
