@@ -25,7 +25,7 @@ public interface PactLoader {
   PactSource getPactSource();
 
   /**
-   * Sets the value resolver to use to resolve property expressions. By default a system property resolver will be used.
+   * Sets the value resolver to use to resolve property expressions. By default, a system property resolver will be used.
    *
    * @param valueResolver Value Resolver
    */
@@ -40,4 +40,9 @@ public interface PactLoader {
    * Enables pending pact feature
    */
   default void enablePendingPacts(boolean flag) { };
+
+  /**
+   * Supports additional initialisation using the test class
+   */
+  default void initLoader(Class testClass) { };
 }

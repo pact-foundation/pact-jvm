@@ -50,7 +50,7 @@ public @interface PactBroker {
    * Tags to use to fetch pacts for, defaults to `latest`
    * If you set the tags through the `pactbroker.tags` system property, separate the tags by commas
    *
-   * @deprecated Use {@link #consumerVersionSelectors} instead
+   * @deprecated Use consumerVersionSelectors method or pactbroker.consumerversionselectors property instead
    */
   @Deprecated
   String[] tags() default "${pactbroker.tags:}";
@@ -58,7 +58,9 @@ public @interface PactBroker {
   /**
    * Consumer version selectors to fetch pacts for, defaults to latest version
    * If you set the version selector tags or latest fields through system properties, separate values by commas
+   * @deprecated Use consumerVersionSelectors method or pactbroker.consumerversionselectors property instead
    */
+  @Deprecated
   VersionSelector[] consumerVersionSelectors() default @VersionSelector(
     tag = "${pactbroker.consumerversionselectors.tags:}",
     latest = "${pactbroker.consumerversionselectors.latest:}",
@@ -69,7 +71,7 @@ public @interface PactBroker {
    * Consumers to fetch pacts for, defaults to all consumers
    * If you set the consumers through the `pactbroker.consumers` system property, separate the consumers by commas
    *
-   * @deprecated Use {@link #consumerVersionSelectors} instead
+   * @deprecated Use consumerVersionSelectors method or pactbroker.consumerversionselectors property instead
    */
   @Deprecated
   String[] consumers() default "${pactbroker.consumers:}";
