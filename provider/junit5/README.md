@@ -6,7 +6,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.provider`
 * artifact-id = `junit5`
-* version-id = `4.1.x`
+* version-id = `4.3.x`
 
 ## Overview
 
@@ -102,13 +102,12 @@ For example, configure it by adding the following to your POM:
 </plugin>
 ```
 
-### IMPORTANT NOTE!!!: JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.
+## IMPORTANT NOTE!!!: JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.
 
 Gradle and Maven do not pass in the system properties in to the test JVM from the command line. The system properties
 specified on the command line only control the build JVM (the one that runs Gradle or Maven), but the tests will run in
 a new JVM. See [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
 and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
-
 
 ### For Message Tests and Spring and Maven
 
@@ -117,6 +116,53 @@ that the same class loader is used to execute your annotated test method as Spri
 In particular, options like the Maven Surefire plugin's `forkCount == 0` can impact this. Either don't supply any 
 packages to scan (this will use the default class loader and the annotated methods **have** to be on your test class), 
 or you can provide the classloader to use as the second parameter to `MessageTestTarget`.
+
+## Selecting the Pacts to verify with Consumer Version Selectors [4.3.12+]
+
+If you are using a Pact broker to host your Pact files, you can select the Pacts to verify using [Consumer Version Selectors](https://docs.pact.io/pact_broker/advanced_topics/consumer_version_selectors).
+There are a few ways to do this.
+
+### Using an annotated method with a builder
+You can add a static method to your test class annotated with `au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors` 
+which returns a `SelectorBuilder`. The builder will allow you to specify the selectors to use in a type-safe manner.
+
+For example:
+
+```java
+    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    static SelectorBuilder consumerVersionSelectors() {
+      // Select Pacts for consumers deployed to production with branch 'FEAT-123' 
+      return new SelectorBuilder()
+        .environment('production')
+        .branch('FEAT-123')
+    }
+```
+
+The builder has the following methods:
+
+- `mainBranch()` - The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
+- `branch(name: String, consumer: String? = null, fallback: String? = null)` - The latest version from a particular branch 
+of each consumer, or for a particular consumer if the second parameter is provided. If fallback is provided, falling 
+back to the fallback branch if none is found from the specified branch.
+- `matchingBranch()` - All the currently deployed and currently released and supported versions of each consumer.
+- `deployedOrReleased()` - All the currently deployed and currently released and supported versions of each consumer. 
+- `matchingBranch()` - The latest version from any branch of the consumer that has the same name as the current branch of the provider.
+Used for coordinated development between consumer and provider teams using matching feature branch names.
+- `deployedTo(environment: String)` - Any versions currently deployed to the specified environment.
+- `releasedTo(environment: String)` - Any versions currently released and supported in the specified environment.
+- `environment(environment: String)` - Any versions currently deployed or released and supported in the specified environment.
+- `tag(name: String)` - [DEPRECATED] All versions with the specified tag. Tags are deprecated in favor of branches.
+- `latestTag(name: String)` - [DEPRECATED] The latest version for each consumer with the specified tag. Tags are deprecated in favor of branches.
+
+### Providing the raw Consumer Version Selectors JSON
+
+You can also set the consumer versions selectors as raw JSON with the `pactbroker.consumerversionselectors.rawjson` JVM
+system property or environment variable. This will allow you to pass the selectors in from a CI build.
+
+*IMPORTANT NOTE!!!: JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.* 
+Just passing them in on the command line won't work, as they will not be available to the test JVM that is running your test.
+To set the properties, see [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
+and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
 
 ## Provider State Methods
 
