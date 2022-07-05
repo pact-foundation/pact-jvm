@@ -144,7 +144,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
 
     logger.debug { "Pact sources on test class:\n ${pactSources.joinToString("\n") { it.first.toString() }}" }
     return pactSources.map { (pactSource, annotation) ->
-      instantiatePactLoader(pactSource, context.requiredTestClass, annotation)
+      instantiatePactLoader(pactSource, context.requiredTestClass, context.testInstance, annotation)
     }.map {
       checkForOverriddenPactUrl(it,
         context.requiredTestClass.getAnnotation(AllowOverridePactUrl::class.java),

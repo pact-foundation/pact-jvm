@@ -171,7 +171,7 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
 
     val (pactSource, annotation) = pactSources.first()
     return try {
-      val loader = instantiatePactLoader(pactSource, clazz.javaClass, annotation)
+      val loader = instantiatePactLoader(pactSource, clazz.javaClass, null, annotation)
       checkForOverriddenPactUrl(loader, findAnnotation(clazz.javaClass, AllowOverridePactUrl::class.java),
         consumerInfo)
       loader
