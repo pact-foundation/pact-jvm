@@ -3,7 +3,6 @@ package au.com.dius.pact.provider.junit.loader
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactReader
-import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
@@ -14,6 +13,7 @@ import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.junitsupport.loader.IConsumerVersionSelectors
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
 import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder
 import au.com.dius.pact.provider.junitsupport.loader.VersionSelector
 import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
@@ -1568,36 +1568,36 @@ class PactBrokerLoaderSpec extends Specification {
   }
 
   static class IncorrectTypesOnSelectorMethod {
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @PactBrokerConsumerVersionSelectors
     void consumerVersionSelectors(int i) {}
   }
 
   static class IncorrectTypesOnSelectorMethod2 {
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @PactBrokerConsumerVersionSelectors
     int consumerVersionSelectors() { 0 }
   }
 
   static class IncorrectScopeOnSelectorMethod {
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @PactBrokerConsumerVersionSelectors
     private SelectorBuilder consumerVersionSelectors() { null }
   }
 
   static class CorrectSelectorMethod implements IConsumerVersionSelectors {
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @PactBrokerConsumerVersionSelectors
     SelectorBuilder consumerVersionSelectors() {
       new SelectorBuilder().environment('CorrectSelectorMethod')
     }
   }
 
   static class CorrectSelectorMethod2 {
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @PactBrokerConsumerVersionSelectors
     List<ConsumerVersionSelectors> consumerVersionSelectors() {
       new SelectorBuilder().environment('CorrectSelectorMethod2').build()
     }
   }
 
   static class CorrectSelectorMethod3 {
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @PactBrokerConsumerVersionSelectors
     static List<ConsumerVersionSelectors> consumerVersionSelectors() {
       new SelectorBuilder().environment('CorrectSelectorMethod3').build()
     }
