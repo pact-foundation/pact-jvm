@@ -142,8 +142,6 @@ subprojects {
     publications {
       mavenPublication(MavenPublication) {
         from components.java
-        artifact sourceJar
-        artifact javadocJar
         pom {
           name = project.name
           description = StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
