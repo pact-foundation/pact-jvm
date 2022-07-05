@@ -134,11 +134,11 @@ For example:
       // Select Pacts for consumers deployed to production with branch 'FEAT-123' 
       return new SelectorBuilder()
         .environment('production')
-        .branch('FEAT-123')
+        .branch('FEAT-123');
     }
 ```
 
-or where the branch is set as an environment variable:
+Or for example where the branch is set with the `BRANCH_NAME` environment variable:
 
 ```java
     @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
@@ -146,7 +146,7 @@ or where the branch is set as an environment variable:
       // Select Pacts for consumers deployed to production with branch from CI build 
       return new SelectorBuilder()
         .environment('production')
-        .branch(System.getenv('BRANCH_NAME'))
+        .branch(System.getenv('BRANCH_NAME'));
     }
 ```
 
@@ -165,6 +165,9 @@ Used for coordinated development between consumer and provider teams using match
 - `environment(environment: String)` - Any versions currently deployed or released and supported in the specified environment.
 - `tag(name: String)` - [DEPRECATED] All versions with the specified tag. Tags are deprecated in favor of branches.
 - `latestTag(name: String)` - [DEPRECATED] The latest version for each consumer with the specified tag. Tags are deprecated in favor of branches.
+
+If you require more control, your selector method can also return a list of `au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors` 
+instead of the builder class.   
 
 ### Providing the raw Consumer Version Selectors JSON
 
