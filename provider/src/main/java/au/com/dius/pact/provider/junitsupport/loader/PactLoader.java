@@ -44,5 +44,5 @@ public interface PactLoader {
   /**
    * Supports additional initialisation using the test class
    */
-  default void initLoader(Class testClass) { };
+  default void initLoader(Class<?> testClass, Object testInstance) { };
 }

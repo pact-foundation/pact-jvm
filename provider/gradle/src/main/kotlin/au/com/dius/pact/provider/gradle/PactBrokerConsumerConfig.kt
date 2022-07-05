@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
+import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder
 import mu.KLogging
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
@@ -44,95 +45,4 @@ open class PactBrokerConsumerConfig @Inject constructor(
   }
 }
 
-open class ConsumerVersionSelectorConfig {
-  val selectors: MutableList<ConsumerVersionSelectors> = mutableListOf()
-
-  /**
-   * The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
-   */
-  fun mainBranch() {
-    selectors.add(ConsumerVersionSelectors.MainBranch)
-  }
-
-  /**
-   * The latest version from a particular branch of each consumer, or for a particular consumer if the second
-   * parameter is provided. If fallback is provided, falling back to the fallback branch if none is found from the
-   * specified branch.
-   *
-   * @param name - Branch name
-   * @param consumer - Consumer name (optional)
-   * @param fallback - Fall back to this branch if none is found from the specified branch (optional)
-   */
-  @JvmOverloads
-  fun branch(name: String, consumer: String? = null, fallback: String? = null) {
-    selectors.add(ConsumerVersionSelectors.Branch(name, consumer, fallback))
-  }
-
-  /**
-   * All the currently deployed and currently released and supported versions of each consumer.
-   */
-  fun deployedOrReleased() {
-    selectors.add(ConsumerVersionSelectors.DeployedOrReleased)
-  }
-
-  /**
-   * The latest version from any branch of the consumer that has the same name as the current branch of the provider.
-   * Used for coordinated development between consumer and provider teams using matching feature branch names.
-   */
-  fun matchingBranch() {
-    selectors.add(ConsumerVersionSelectors.MatchingBranch)
-  }
-
-  /**
-   * Any versions currently deployed to the specified environment
-  */
-  fun deployedTo(environment: String) {
-    selectors.add(ConsumerVersionSelectors.DeployedTo(environment))
-  }
-
-  /**
-   * Any versions currently released and supported in the specified environment
-   */
-  fun releasedTo(environment: String) {
-    selectors.add(ConsumerVersionSelectors.ReleasedTo(environment))
-  }
-
-  /**
-   * any versions currently deployed or released and supported in the specified environment
-   */
-  fun environment(environment: String) {
-    selectors.add(ConsumerVersionSelectors.Environment(environment))
-  }
-
-  /**
-   * All versions with the specified tag
-   */
-  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
-  fun tag(name: String) {
-    selectors.add(ConsumerVersionSelectors.Tag(name))
-  }
-
-  /**
-   * The latest version for each consumer with the specified tag
-   */
-  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
-  fun latestTag(name: String) {
-    selectors.add(ConsumerVersionSelectors.LatestTag(name))
-  }
-
-  /**
-   * Generic selector.
-   *
-   * * With just the tag name, returns all versions with the specified tag.
-   * * With latest, returns the latest version for each consumer with the specified tag.
-   * * With a fallback tag, returns the latest version for each consumer with the specified tag, falling back to the
-   * fallbackTag if non is found with the specified tag.
-   * * With a consumer name, returns the latest version for a specified consumer with the specified tag.
-   * * With only latest, returns the latest version for each consumer. NOT RECOMMENDED as it suffers from race
-   * conditions when pacts are published from multiple branches.
-   */
-  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
-  fun selector(tagName: String?, latest: Boolean?, fallbackTag: String?, consumer: String?) {
-    selectors.add(ConsumerVersionSelectors.Selector(tagName, latest, consumer, fallbackTag))
-  }
-}
+open class ConsumerVersionSelectorConfig: SelectorBuilder()
