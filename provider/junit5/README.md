@@ -138,6 +138,18 @@ For example:
     }
 ```
 
+or where the branch is set as an environment variable:
+
+```java
+    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    static SelectorBuilder consumerVersionSelectors() {
+      // Select Pacts for consumers deployed to production with branch from CI build 
+      return new SelectorBuilder()
+        .environment('production')
+        .branch(System.getenv('BRANCH_NAME'))
+    }
+```
+
 The builder has the following methods:
 
 - `mainBranch()` - The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
@@ -159,7 +171,7 @@ Used for coordinated development between consumer and provider teams using match
 You can also set the consumer versions selectors as raw JSON with the `pactbroker.consumerversionselectors.rawjson` JVM
 system property or environment variable. This will allow you to pass the selectors in from a CI build.
 
-*IMPORTANT NOTE!!!: JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.* 
+**IMPORTANT NOTE:** *JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.* 
 Just passing them in on the command line won't work, as they will not be available to the test JVM that is running your test.
 To set the properties, see [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
 and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
