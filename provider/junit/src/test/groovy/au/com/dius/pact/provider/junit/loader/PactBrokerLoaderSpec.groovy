@@ -1573,33 +1573,33 @@ class PactBrokerLoaderSpec extends Specification {
   @SuppressWarnings('UnusedMethodParameter')
   static class IncorrectTypesOnSelectorMethod2 {
     @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
-    int consumerVersionSelectors(SelectorBuilder builder) { 0 }
+    int consumerVersionSelectors() { 0 }
   }
 
   @SuppressWarnings(['UnusedPrivateMethod', 'UnusedPrivateMethodParameter'])
   static class IncorrectScopeOnSelectorMethod {
     @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
-    private SelectorBuilder consumerVersionSelectors(SelectorBuilder builder) { null }
+    private SelectorBuilder consumerVersionSelectors() { null }
   }
 
   static class CorrectSelectorMethod implements IConsumerVersionSelectors {
     @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
-    SelectorBuilder consumerVersionSelectors(SelectorBuilder builder) {
-      builder.environment('CorrectSelectorMethod')
+    SelectorBuilder consumerVersionSelectors() {
+      new SelectorBuilder().environment('CorrectSelectorMethod')
     }
   }
 
   static class CorrectSelectorMethod2 {
     @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
-    List<ConsumerVersionSelectors> consumerVersionSelectors(SelectorBuilder builder) {
-      builder.environment('CorrectSelectorMethod2').build()
+    List<ConsumerVersionSelectors> consumerVersionSelectors() {
+      new SelectorBuilder().environment('CorrectSelectorMethod2').build()
     }
   }
 
   static class CorrectSelectorMethod3 {
     @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
-    static List<ConsumerVersionSelectors> consumerVersionSelectors(SelectorBuilder builder) {
-      builder.environment('CorrectSelectorMethod3').build()
+    static List<ConsumerVersionSelectors> consumerVersionSelectors() {
+      new SelectorBuilder().environment('CorrectSelectorMethod3').build()
     }
   }
 }

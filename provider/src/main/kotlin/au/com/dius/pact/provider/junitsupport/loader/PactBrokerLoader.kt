@@ -28,6 +28,8 @@ import java.net.URI
 import java.net.URISyntaxException
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+import kotlin.reflect.KType
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubtypeOf
@@ -351,20 +353,20 @@ open class PactBrokerLoader(
     fun invokeSelectorsMethod(testInstance: Any?, selectorsMethod: KCallable<*>): List<ConsumerVersionSelectors> {
       val projectedType = SelectorBuilder::class.starProjectedType
       return when (selectorsMethod.parameters.size) {
-        1 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
-          val builder = selectorsMethod.call(SelectorBuilder()) as SelectorBuilder
+        0 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
+          val builder = selectorsMethod.call() as SelectorBuilder
           builder.build()
         } else {
-          selectorsMethod.call(SelectorBuilder()) as List<ConsumerVersionSelectors>
+          selectorsMethod.call() as List<ConsumerVersionSelectors>
         }
-        2 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
-          val builder = selectorsMethod.call(testInstance, SelectorBuilder()) as SelectorBuilder
+        1 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
+          val builder = selectorsMethod.call(testInstance) as SelectorBuilder
           builder.build()
         } else {
-          selectorsMethod.call(testInstance, SelectorBuilder()) as List<ConsumerVersionSelectors>
+          selectorsMethod.call(testInstance) as List<ConsumerVersionSelectors>
         }
         else -> throw java.lang.IllegalArgumentException(
-          "Consumer version selector method should take one parameter of type SelectorBuilder")
+          "Consumer version selector method should not take any parameters and return an instance of SelectorBuilder")
       }
     }
 
@@ -375,9 +377,9 @@ open class PactBrokerLoader(
         method.findAnnotation<au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors>() != null
           && (
             // static method
-            (method.parameters.size == 1 && method.parameters[0].type.isSubtypeOf(projectedType))
+            method.parameters.isEmpty()
             // instance method
-            || (method.parameters.size == 2 && method.parameters[1].type.isSubtypeOf(projectedType))
+            || (method.parameters.size == 1 && method.parameters[0].kind == KParameter.Kind.INSTANCE)
           )
           && method.visibility == KVisibility.PUBLIC
           && (method.returnType.isSubtypeOf(projectedType) || method.returnType.isSubtypeOf(List::class.starProjectedType))
