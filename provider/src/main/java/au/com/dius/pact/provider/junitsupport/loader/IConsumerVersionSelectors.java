@@ -7,6 +7,6 @@ public interface IConsumerVersionSelectors {
     /**
      * Return the consumer version selectors to use in the test
      */
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @PactBrokerConsumerVersionSelectors
     SelectorBuilder consumerVersionSelectors();
 }

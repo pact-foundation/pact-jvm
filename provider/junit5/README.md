@@ -123,13 +123,13 @@ If you are using a Pact broker to host your Pact files, you can select the Pacts
 There are a few ways to do this.
 
 ### Using an annotated method with a builder
-You can add a static method to your test class annotated with `au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors` 
+You can add a static method to your test class annotated with `au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors` 
 which returns a `SelectorBuilder`. The builder will allow you to specify the selectors to use in a type-safe manner.
 
 For example:
 
 ```java
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
     static SelectorBuilder consumerVersionSelectors() {
       // Select Pacts for consumers deployed to production with branch 'FEAT-123' 
       return new SelectorBuilder()
@@ -141,7 +141,7 @@ For example:
 Or for example where the branch is set with the `BRANCH_NAME` environment variable:
 
 ```java
-    @au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors
+    @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
     static SelectorBuilder consumerVersionSelectors() {
       // Select Pacts for consumers deployed to production with branch from CI build 
       return new SelectorBuilder()

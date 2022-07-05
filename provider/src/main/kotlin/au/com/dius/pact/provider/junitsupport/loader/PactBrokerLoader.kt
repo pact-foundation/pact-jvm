@@ -29,7 +29,6 @@ import java.net.URISyntaxException
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
-import kotlin.reflect.KType
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubtypeOf
@@ -374,7 +373,7 @@ open class PactBrokerLoader(
     fun testClassHasSelectorsMethod(testClass: Class<*>?): KCallable<*>? {
       val projectedType = SelectorBuilder::class.starProjectedType
       return testClass?.kotlin?.members?.firstOrNull { method ->
-        method.findAnnotation<au.com.dius.pact.provider.junitsupport.loader.ConsumerVersionSelectors>() != null
+        method.findAnnotation<PactBrokerConsumerVersionSelectors>() != null
           && (
             // static method
             method.parameters.isEmpty()
