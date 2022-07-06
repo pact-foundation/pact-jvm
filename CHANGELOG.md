@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.11 - Support consumer version selectors DSL for JUnit 5
+
+* a47176118 - refactor: rename ConsumerVersionSelectors annotation so it does not clash with the model class (Ronald Holshausen, Tue Jul 5 17:04:10 2022 +1000)
+* 8335063df - fix: correct publish config to work with Gradle 7 (Ronald Holshausen, Tue Jul 5 16:19:56 2022 +1000)
+* 0ccc32dd2 - feat: Update JUnit 5 readme with Consumer Version Selectors DSL (Ronald Holshausen, Tue Jul 5 16:02:18 2022 +1000)
+* 79b0038c3 - feat: Update JUnit 5 readme with Consumer Version Selectors DSL (Ronald Holshausen, Tue Jul 5 15:49:02 2022 +1000)
+* d50014ce2 - feat: Update JUnit 5 readme with Consumer Version Selectors DSL (Ronald Holshausen, Tue Jul 5 15:43:00 2022 +1000)
+* 471c13e8f - refactor: Consumer Version Selectors method does not need a parameter (Ronald Holshausen, Tue Jul 5 15:42:29 2022 +1000)
+* f37c1379f - Feat: Support consumer version selectors DSL for JUnit 5 (Ronald Holshausen, Tue Jul 5 14:29:04 2022 +1000)
+* 3932b2456 - feat(JUnit): allow pact loader to setup from the test class instead of just annotations (Ronald Holshausen, Wed Jun 29 13:55:05 2022 +1000)
+* 7b739a19f - chore: correct the GitHub URL in Gradle plugin (Ronald Holshausen, Wed Jun 29 10:42:19 2022 +1000)
+* cb3d021f2 - docs: Update Gradle readme with branches and releases support (Ronald Holshausen, Tue Jun 28 15:17:44 2022 +1000)
+* 5da217cb0 - bump version to 4.3.11 (Ronald Holshausen, Tue Jun 28 14:04:15 2022 +1000)
+* 0c066254d - chore: upgrade Gradle project to use 1.0 of the plugin-publish plugin (Ronald Holshausen, Tue Jun 28 14:03:26 2022 +1000)
+
 # 4.3.10 - Branches and releases with Gradle plugin
 
 * ba88e3019 - feat: add Gradle DSL functions for deprecated tag forms of selectors (Ronald Holshausen, Tue Jun 28 12:26:41 2022 +1000)
