@@ -156,7 +156,8 @@ The builder has the following methods:
 - `branch(name: String, consumer: String? = null, fallback: String? = null)` - The latest version from a particular branch 
 of each consumer, or for a particular consumer if the second parameter is provided. If fallback is provided, falling 
 back to the fallback branch if none is found from the specified branch.
-- `matchingBranch()` - All the currently deployed and currently released and supported versions of each consumer.
+- `matchingBranch()` - The latest version from any branch of the consumer that has the same name as the current branch
+of the provider. Used for coordinated development between consumer and provider teams using matching feature branch names.
 - `deployedOrReleased()` - All the currently deployed and currently released and supported versions of each consumer. 
 - `matchingBranch()` - The latest version from any branch of the consumer that has the same name as the current branch of the provider.
 Used for coordinated development between consumer and provider teams using matching feature branch names.
