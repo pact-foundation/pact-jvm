@@ -76,7 +76,6 @@ open class SelectorBuilder {
   /**
    * All versions with the specified tag
    */
-  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
   fun tag(name: String): SelectorBuilder {
     selectors.add(ConsumerVersionSelectors.Tag(name))
     return this
@@ -85,7 +84,6 @@ open class SelectorBuilder {
   /**
    * The latest version for each consumer with the specified tag
    */
-  @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
   fun latestTag(name: String): SelectorBuilder {
     selectors.add(ConsumerVersionSelectors.LatestTag(name))
     return this
