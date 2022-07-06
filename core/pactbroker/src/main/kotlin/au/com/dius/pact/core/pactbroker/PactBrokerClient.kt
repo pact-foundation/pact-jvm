@@ -187,14 +187,12 @@ sealed class ConsumerVersionSelectors {
   /**
    * All versions with the specified tag
    */
-  @Deprecated(message = "Tags have been deprecated in favor of branches")
   data class Tag(val tag: String): ConsumerVersionSelectors()
 
   /**
    * The latest version for each consumer with the specified tag. If fallback is provided, will fall back to the
    * fallback tag if none is found with the specified tag
    */
-  @Deprecated(message = "Tags have been deprecated in favor of branches")
   data class LatestTag @JvmOverloads constructor(
     val tag: String,
     val fallback: String? = null
