@@ -1,6 +1,6 @@
-plugins {
-  id "com.gradle.plugin-publish" version "1.0.0-rc-3"
-}
+//plugins {
+//  id "com.gradle.plugin-publish" version "1.0.0-rc-3"
+//}
 
 dependencies {
   implementation project(":provider")
@@ -23,23 +23,23 @@ groovydoc {
   enabled = false
 }
 
-pluginBundle {
-  website = 'https://github.com/pact-foundation/pact-jvm/tree/master/provider/gradle'
-  vcsUrl = 'https://github.com/pact-foundation/pact-jvm'
-  description = 'Gradle plugin for verifying pacts against a provider.'
-  tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']
-}
-
-gradlePlugin {
-  plugins {
-    pactProviderPlugin {
-      id = 'au.com.dius.pact'
-      displayName = 'Gradle Pact Provider plugin'
-      implementationClass = 'au.com.dius.pact.provider.gradle.PactPlugin'
-      description = 'Gradle plugin for verifying pacts against a provider.'
-    }
-  }
-}
+//pluginBundle {
+//  website = 'https://github.com/pact-foundation/pact-jvm/tree/master/provider/gradle'
+//  vcsUrl = 'https://github.com/pact-foundation/pact-jvm'
+//  description = 'Gradle plugin for verifying pacts against a provider.'
+//  tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']
+//}
+//
+//gradlePlugin {
+//  plugins {
+//    pactProviderPlugin {
+//      id = 'au.com.dius.pact'
+//      displayName = 'Gradle Pact Provider plugin'
+//      implementationClass = 'au.com.dius.pact.provider.gradle.PactPlugin'
+//      description = 'Gradle plugin for verifying pacts against a provider.'
+//    }
+//  }
+//}
 
 compileGroovy {
   dependsOn compileKotlin
