@@ -1,5 +1,7 @@
-plugins {
-  id "com.gradle.plugin-publish" version "1.0.0"
+if (project.hasProperty('isGradleRelease')) {
+  plugins {
+    id "com.gradle.plugin-publish" version "1.0.0"
+  }
 }
 
 dependencies {
@@ -23,20 +25,22 @@ groovydoc {
   enabled = false
 }
 
-pluginBundle {
-  website = 'https://github.com/pact-foundation/pact-jvm/tree/master/provider/gradle'
-  vcsUrl = 'https://github.com/pact-foundation/pact-jvm'
-  description = 'Gradle plugin for verifying pacts against a provider.'
-  tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']
-}
+if (project.hasProperty('isGradleRelease')) {
+  pluginBundle {
+    website = 'https://github.com/pact-foundation/pact-jvm/tree/master/provider/gradle'
+    vcsUrl = 'https://github.com/pact-foundation/pact-jvm'
+    description = 'Gradle plugin for verifying pacts against a provider.'
+    tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']
+  }
 
-gradlePlugin {
-  plugins {
-    pactProviderPlugin {
-      id = 'au.com.dius.pact'
-      displayName = 'Gradle Pact Provider plugin'
-      implementationClass = 'au.com.dius.pact.provider.gradle.PactPlugin'
-      description = 'Gradle plugin for verifying pacts against a provider.'
+  gradlePlugin {
+    plugins {
+      pactProviderPlugin {
+        id = 'au.com.dius.pact'
+        displayName = 'Gradle Pact Provider plugin'
+        implementationClass = 'au.com.dius.pact.provider.gradle.PactPlugin'
+        description = 'Gradle plugin for verifying pacts against a provider.'
+      }
     }
   }
 }
