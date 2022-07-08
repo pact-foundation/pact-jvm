@@ -47,7 +47,7 @@ open class PactVerificationExtension(
   var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
   override fun getDisplayName(invocationIndex: Int): String {
-    val displayName = when {
+    var displayName = when {
       pactSource is BrokerUrlSource && pactSource.result != null -> {
         var displayName = pactSource.result!!.name + " - ${interaction.description}"
         if (pactSource.tag.isNotEmpty()) displayName += " (tag ${pactSource.tag})"

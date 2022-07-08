@@ -2,6 +2,7 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import mu.KLogging
@@ -133,13 +134,13 @@ object ProviderUtils : KLogging() {
     return result
   }
 
-  fun instantiatePactLoader(pactSource: PactSource, testClass: Class<*>, testInstance: Any?, annotation: Annotation?): PactLoader {
+  fun instantiatePactLoader(pactSource: PactSource, clazz: Class<*>, annotation: Annotation?): PactLoader {
     val pactLoaderClass = pactSource.value
-    val pactLoader = try {
+    return try {
       // Checks if there is a constructor with one argument of type Class.
       val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
       constructorWithClass.isAccessible = true
-      constructorWithClass.newInstance(testClass)
+      constructorWithClass.newInstance(clazz)
     } catch (e: NoSuchMethodException) {
       logger.debug { "Pact source does not have a constructor with one argument of type Class" }
       if (annotation != null) {
@@ -168,7 +169,5 @@ object ProviderUtils : KLogging() {
         pactLoaderClass.createInstance()
       }
     }
-    pactLoader.initLoader(testClass, testInstance)
-    return pactLoader
   }
 }

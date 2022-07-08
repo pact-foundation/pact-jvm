@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit
 
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.json.JsonException
@@ -170,7 +171,7 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
 
     val (pactSource, annotation) = pactSources.first()
     return try {
-      val loader = instantiatePactLoader(pactSource, clazz.javaClass, null, annotation)
+      val loader = instantiatePactLoader(pactSource, clazz.javaClass, annotation)
       checkForOverriddenPactUrl(loader, findAnnotation(clazz.javaClass, AllowOverridePactUrl::class.java),
         consumerInfo)
       loader
