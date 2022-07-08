@@ -31,7 +31,7 @@ project.afterEvaluate {
 if (System.env.PACT_PUBLISH == 'true') {
   pact {
     publish {
-      pactBrokerUrl = 'https://pact-foundation.pactflow.io'
+      pactBrokerUrl = 'https://pact-foundation.pact.dius.com.au'
       if (project.hasProperty('pactBrokerToken')) {
         pactBrokerToken = project.pactBrokerToken
       }

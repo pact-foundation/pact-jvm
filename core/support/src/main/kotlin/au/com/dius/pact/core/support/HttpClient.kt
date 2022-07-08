@@ -28,11 +28,6 @@ import java.net.URI
  */
 sealed class Auth {
   /**
-   * No Auth
-   */
-  object None : Auth()
-
-  /**
    * Basic authentication (username/password)
    */
   data class BasicAuthentication(val username: String, val password: String) : Auth()
@@ -49,7 +44,6 @@ sealed class Auth {
         ep.parseExpression(this.username, DataType.RAW, resolver).toString(),
         ep.parseExpression(this.password, DataType.RAW, resolver).toString())
       is BearerAuthentication -> BearerAuthentication(ep.parseExpression(this.token, DataType.RAW, resolver).toString())
-      else -> this
     }
   }
 
@@ -57,7 +51,6 @@ sealed class Auth {
     return when (this) {
       is BasicAuthentication -> listOf("basic", this.username, this.password)
       is BearerAuthentication -> listOf("bearer", this.token)
-      else -> emptyList()
     }
   }
 }
@@ -90,7 +83,6 @@ object HttpClient : KLogging() {
             defaultHeaders["Authorization"] = "Bearer " + authentication.token
             SystemDefaultCredentialsProvider()
           }
-          else -> SystemDefaultCredentialsProvider()
         }
       }
       is List<*> -> {

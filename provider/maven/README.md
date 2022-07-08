@@ -287,23 +287,22 @@ correctly encoded. The verifier will not be able to make a request with an inval
 
 The following plugin properties can be specified with `-Dproperty=value` on the command line or in the configuration section:
 
-| Property                                                 | Description                                                                                                                                                                               |
-|----------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `pact.showStacktrace`                                    | This turns on stacktrace printing for each request. It can help with diagnosing network errors                                                                                            |
-| `pact.showFullDiff`                                      | This turns on displaying the full diff of the expected versus actual bodies                                                                                                               |
-| `pact.filter.consumers`                                  | Comma separated list of consumer names to verify                                                                                                                                          |
-| `pact.filter.description`                                | Only verify interactions whose description match the provided regular expression                                                                                                          |
-| `pact.filter.providerState`                              | Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state                                              |
-| `pact.filter.pacturl`                                    | This filter allows just the just the changed pact specified in a webhook to be run. It should be used in conjunction with `pact.filter.consumers`                                         |
-| `pact.verifier.publishResults`                           | Publishing of verification results will be skipped unless this property is set to `true` [version 3.5.18+]                                                                                |
-| `pact.verifier.disableUrlPathDecoding`                   | Disables decoding of request paths                                                                                                                                                        |
-| `pact.pactbroker.httpclient.usePreemptiveAuthentication` | Enables preemptive authentication with the pact broker when set to `true`                                                                                                                 |
-| `pact.consumer.tags`                                     | Overrides the tags used when publishing pacts [version 4.0.7+]                                                                                                                            |
-| `pact.content_type.override.<TYPE>.<SUBTYPE>=text\|json\|binary`| Overrides the handling of a particular content type [version 4.1.3+]                                                                                                                      |
-| `pact.verifier.enableRedirectHandling`                   | Enables automatically handling redirects [4.1.8+]                                                                                                                                         |
-| `pact.verifier.generateDiff`                             | Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+] |
-| `pact.verifier.buildUrl`                                 | Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]                                                                                                  |
-| `pactbroker.consumerversionselectors.rawjson`            | Overrides the consumer version selectors with raw JSON [4.1.29+/4.3.0+]                                                                                                                   |
+|Property|Description|
+|--------|-----------|
+|`pact.showStacktrace`|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|`pact.showFullDiff`|This turns on displaying the full diff of the expected versus actual bodies|
+|`pact.filter.consumers`|Comma separated list of consumer names to verify|
+|`pact.filter.description`|Only verify interactions whose description match the provided regular expression|
+|`pact.filter.providerState`|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
+|`pact.filter.pacturl`|This filter allows just the just the changed pact specified in a webhook to be run. It should be used in conjunction with `pact.filter.consumers`|
+|`pact.verifier.publishResults`|Publishing of verification results will be skipped unless this property is set to `true` [version 3.5.18+]|
+|`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
+|`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
+|`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|
+|`pact.content_type.override.<TYPE>.<SUBTYPE>=text\|json\|binary`|Overrides the handling of a particular content type [version 4.1.3+]|
+|`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
+|`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
+|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.3.2+]|
 
 Example in the configuration section:
 

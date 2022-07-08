@@ -15,8 +15,7 @@ data class ConsumersGroup @JvmOverloads constructor (
   var include: Regex = Regex(".*\\.json$")
 ) {
 
-  fun url(path: String): URL {
+  fun url(path: String) {
     stateChange = URL(path)
-    return stateChange as URL
   }
 }

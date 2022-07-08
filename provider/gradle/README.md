@@ -98,17 +98,16 @@ The following project properties can be specified with `-Pproperty=value` on the
 
 The following project properties must be specified as system properties:
 
-| Property                                                                                            | Description                                                                                                                                                                               |
-|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `pact.verifier.disableUrlPathDecoding`                                                              | Disables decoding of request paths                                                                                                                                                        |
-| `pact.pactbroker.httpclient.usePreemptiveAuthentication`                                            | Enables preemptive authentication with the pact broker when set to `true`                                                                                                                 |
-| `pact.provider.tag`                                                                                 | Sets the provider tag to push before publishing verification results (can use a comma separated list)                                                                                     |
-| `pact.provider.branch`                                                                              | Sets the provider branch to push before publishing verification results                                                                                                                   |
-| `pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary` | Overrides the handling of a particular content type [4.1.3+]                                                                                                                              |
-| `pact.verifier.enableRedirectHandling`                                                              | Enables automatically handling redirects [4.1.8+]                                                                                                                                         |
-| `pact.verifier.generateDiff`                                                                        | Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+] |
-| `pact.verifier.buildUrl`                                                                            | Specifies buildUrl to report to the broker when publishing verification results [4.2.16/4.3.2+]                                                                                           |
-| `pactbroker.consumerversionselectors.rawjson`                                                       | Overrides the consumer version selectors with raw JSON [4.1.29+/4.3.0+]                                                                                                                   |
+|Property|Description|
+|--------|-----------|
+|`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
+|`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
+|`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|
+|`pact.provider.branch`|Sets the provider branch to push before publishing verification results|
+|`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
+|`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
+|`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
+|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.2.16/4.3.2+]|
 
 ## Specifying the provider hostname at runtime
 
@@ -364,7 +363,7 @@ an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`.
 
 ## Provider States
 
-For a description of what provider states are, see the pact documentations: https://docs.pact.io/getting_started/provider_states
+For a description of what provider states are, see the pact documentations: http://docs.pact.io/documentation/provider_states.html
 
 ### Using a state change URL
 

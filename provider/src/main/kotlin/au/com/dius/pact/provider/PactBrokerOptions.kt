@@ -11,14 +11,9 @@ data class PactBrokerOptions @JvmOverloads constructor(
   val enablePending: Boolean = false,
 
   /**
-   * Provider tags. Either this or providerBranch if pending pacts are enabled
+   * Provider tags. Required if pending pacts are enabled
    */
   val providerTags: List<String> = listOf(),
-
-  /**
-   * Provider branch. Either this or providerTags if pending pacts are enabled
-   */
-  val providerBranch: String? = null,
 
   /**
    * Only include WIP pacts since the provided date. Dates need to be in ISO format (YYYY-MM-DD).

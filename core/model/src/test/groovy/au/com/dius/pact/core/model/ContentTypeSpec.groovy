@@ -6,7 +6,7 @@ import spock.util.environment.RestoreSystemProperties
 
 import java.nio.charset.Charset
 
-@SuppressWarnings(['UnnecessaryBooleanExpression', 'CyclomaticComplexity', 'UnnecessaryObjectReferences'])
+@SuppressWarnings('UnnecessaryBooleanExpression')
 @RestoreSystemProperties
 class ContentTypeSpec extends Specification {
 
@@ -15,10 +15,6 @@ class ContentTypeSpec extends Specification {
     System.setProperty('pact.content_type.override.application/x-other', 'text')
     System.setProperty('pact.content_type.override.application/x-bin', 'binary')
     System.setProperty('pact.content_type.override.application/x-ml', 'xml')
-    System.setProperty('pact.content_type.override.application.other', 'json')
-    System.setProperty('pact.content_type.override.application.other-bin', 'binary')
-    System.setProperty('pact.content_type.override.application.other-text', 'text')
-    System.setProperty('pact.content_type.override.application.other-xml', 'xml')
   }
 
   @Unroll
@@ -39,7 +35,6 @@ class ContentTypeSpec extends Specification {
     'application/x-thrift'                   || true
     'application/x-other'                    || false
     'application/graphql'                    || true
-    'application/other'                      || true
 
     contentType = new ContentType(value)
   }
@@ -83,7 +78,6 @@ class ContentTypeSpec extends Specification {
     'application/STUFF+XML' || true
     'application/x-ml'      || true
     'application/x-thrift'  || false
-    'application/other-xml' || true
 
     contentType = new ContentType(value)
   }
@@ -129,8 +123,6 @@ class ContentTypeSpec extends Specification {
     'multipart/form-data'               || true
     'application/x-www-form-urlencoded' || false
     'application/x-bin'                 || true
-    'application/other-bin'             || true
-    'application/other'                 || false
 
     contentType = new ContentType(value)
   }
