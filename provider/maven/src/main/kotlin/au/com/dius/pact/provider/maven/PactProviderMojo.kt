@@ -2,10 +2,12 @@ package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.handleWith
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
@@ -116,17 +118,21 @@ open class PactProviderMojo : PactBaseMojo() {
             it
           }
         })
+
         if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory!!))
         }
+
         if (provider.pactFileDirectories != null && provider.pactFileDirectories!!.isNotEmpty()) {
           provider.pactFileDirectories!!.forEach {
             consumers.addAll(loadPactFiles(provider, it))
           }
         }
+
         if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
           loadPactsFromPactBroker(provider, consumers)
         }
+
         if (provider.pactFileDirectory == null &&
           (provider.pactFileDirectories == null || provider.pactFileDirectories!!.isEmpty()) &&
           provider.pactBrokerUrl == null && provider.pactBroker == null && (
@@ -184,9 +190,7 @@ open class PactProviderMojo : PactBaseMojo() {
       options["insecureTLS"] = true
     }
 
-    var selectors: List<ConsumerVersionSelector>? = null;
-
-    when {
+    val selectors = when {
       pactBroker?.enablePending != null -> {
         if (pactBroker.enablePending!!.providerTags.isEmpty()) {
           throw MojoFailureException("""
@@ -201,20 +205,29 @@ open class PactProviderMojo : PactBaseMojo() {
             |</enablePending>
           """.trimMargin())
         }
-        selectors = pactBroker.tags?.map {
-          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) } ?: emptyList()
         options.putAll(mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags))
+        if (pactBroker.selectors.isNotEmpty()) {
+          pactBroker.selectors.map { it.toSelector() }
+        } else {
+          pactBroker.tags?.map {
+            ConsumerVersionSelectors.Selector(it, true, fallbackTag = pactBroker.fallbackTag)
+          } ?: emptyList()
+        }
       }
-      pactBroker?.tags != null && pactBroker.tags.isNotEmpty() -> {
-        selectors = pactBroker.tags.map {
-          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) }
+      pactBroker?.selectors.isNotEmpty() -> pactBroker?.selectors?.map { it.toSelector() } ?: emptyList()
+      pactBroker?.tags.isNotEmpty() -> {
+        log.warn("Tags are deprecated. Use selectors instead.")
+        pactBroker?.tags?.map {
+          ConsumerVersionSelectors.Selector(it, true, fallbackTag = pactBroker.fallbackTag)
+        } ?: emptyList()
       }
+      else -> emptyList()
     }
 
     consumers.addAll(
-            handleWith<List<ConsumerInfo>> {
-              provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors ?: emptyList())
-            }.getOrElse { handleException(it) }
+      handleWith<List<ConsumerInfo>> {
+        provider.hasPactsFromPactBrokerWithSelectorsV2(options, pactBrokerUrl.toString(), selectors)
+      }.getOrElse { handleException(it) }
     )
   }
 

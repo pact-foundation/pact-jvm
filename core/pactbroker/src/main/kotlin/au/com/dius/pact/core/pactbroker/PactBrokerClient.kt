@@ -207,7 +207,7 @@ sealed class ConsumerVersionSelectors {
   /**
    * Corresponds to the old consumer version selectors
    */
-  @Deprecated(message = "Tags have been deprecated in favor of branches")
+  @Deprecated(message = "Old form of consumer version selectors have been deprecated in favor of the newer forms (Branches, Tags, etc.)")
   data class Selector @JvmOverloads constructor(
     val tag: String? = null,
     val latest: Boolean? = null,
