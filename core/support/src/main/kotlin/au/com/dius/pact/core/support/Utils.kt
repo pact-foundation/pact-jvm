@@ -180,11 +180,19 @@ object Utils : KLogging() {
    * looking for an environment variable with the key, then looking for the snake-cased version of the key as an
    * environment variable.
    */
-  @JvmOverloads
+  fun lookupEnvironmentValue(key: String): String? {
+    return lookupEnvironmentValue(key, { k: String -> System.getProperty(k) }, { k: String -> System.getenv(k) })
+  }
+
+  /**
+   * Looks up a value from the environment, first by looking for the JVM system property with the key, then
+   * looking for an environment variable with the key, then looking for the snake-cased version of the key as an
+   * environment variable.
+   */
   fun lookupEnvironmentValue(
     key: String,
-    sysLookup: (key: String) -> String? = System::getProperty,
-    envLookup: (key: String) -> String? = System::getenv
+    sysLookup: (key: String) -> String?,
+    envLookup: (key: String) -> String?
   ): String? {
     var value: String? = sysLookup(key)
     if (value.isNullOrEmpty()) {
