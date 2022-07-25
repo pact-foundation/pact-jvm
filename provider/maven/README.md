@@ -478,7 +478,190 @@ configuration in your POM.
 </plugin>
 ```
 
-### Verifying pacts from a pact broker that match particular tags
+### Verifying pacts from a pact broker using consumer version selectors [4.3.12+] 
+
+You can use a number of different selectors to fetch Pact files that match some criteria. See [Consumer Version Selectors](https://docs.pact.io/pact_broker/advanced_topics/consumer_version_selectors)
+for more information. The following selectors are available:
+
+##### Main branch
+
+The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
+
+```xml
+<plugin>
+  <groupId>au.com.dius.pact.provider</groupId>
+  <artifactId>maven</artifactId>
+  <version>4.3.12</version>
+  <configuration>
+    <serviceProviders>
+      <serviceProvider>
+        <name>provider1</name>
+        <PactBroker>
+          <selectors>
+            <mainBranch/>
+          </selectors>
+        </PactBroker>
+      </serviceProvider>
+    </serviceProviders>
+  </configuration>
+</plugin>
+```
+
+##### Matching branch
+
+The latest version from any branch of the consumer that has the same name as the current branch of the provider.
+Used for coordinated development between consumer and provider teams using matching feature branch names.
+
+```xml
+<plugin>
+  <groupId>au.com.dius.pact.provider</groupId>
+  <artifactId>maven</artifactId>
+  <version>4.3.12</version>
+  <configuration>
+    <serviceProviders>
+      <serviceProvider>
+        <name>provider1</name>
+        <PactBroker>
+          <selectors>
+            <matchingBranch/>
+          </selectors>
+        </PactBroker>
+      </serviceProvider>
+    </serviceProviders>
+  </configuration>
+</plugin>
+```
+
+##### Branch
+
+The latest version from a particular branch of each consumer, or for a particular consumer if the second
+parameter is provided. If fallback is provided, falling back to the fallback branch if none is found from the
+specified branch.
+
+```xml
+<plugin>
+  <groupId>au.com.dius.pact.provider</groupId>
+  <artifactId>maven</artifactId>
+  <version>4.3.12</version>
+  <configuration>
+    <serviceProviders>
+      <serviceProvider>
+        <name>provider1</name>
+        <PactBroker>
+          <selectors>
+            <!--Latest version from the particular branch of each consumer -->
+            <branch>
+               <name>FEAT-1234</name>
+            </branch>
+
+            <!-- Latest version from the particular branch of the provided consumer -->
+            <branch>
+                <name>FEAT-1234</name>
+                <consumer>consumer-a</consumer>
+            </branch>
+
+           <!-- Fall back to master branch if none is found from the specified feature branch -->
+           <branch>
+                <name>FEAT-1234</name>
+                <fallback>master</fallback>
+           </branch>
+
+           <!-- As above, but for a single consumer -->
+           <branch>
+                <name>FEAT-1234</name>
+                <fallback>master</fallback>
+                <consumer>consumer-a</consumer>
+           </branch>
+          </selectors>
+        </PactBroker>
+      </serviceProvider>
+    </serviceProviders>
+  </configuration>
+</plugin>
+```
+
+##### Deployed or released
+
+All the currently deployed and currently released and supported versions of each consumer. You can also specify if
+deployed or released to a particular environment.
+
+```xml
+<plugin>
+  <groupId>au.com.dius.pact.provider</groupId>
+  <artifactId>maven</artifactId>
+  <version>4.3.12</version>
+  <configuration>
+    <serviceProviders>
+      <serviceProvider>
+        <name>provider1</name>
+        <PactBroker>
+          <selectors>
+            <!-- All the currently deployed and currently released and supported versions of each consumer. -->
+            <deployedOrReleased/>
+
+            <!-- Any versions currently deployed to the specified environment -->
+            <deployedTo>
+                <environment>test</environment>
+            </deployedTo>
+
+            <!-- Any versions currently released and supported in the specified environment -->
+            <releasedTo>
+                <environment>test</environment>
+            </releasedTo>
+
+            <!-- Any versions currently deployed or released and supported in the specified environment -->
+            <environment>
+                <name>test</name>
+            </environment>
+          </selectors>
+        </PactBroker>
+      </serviceProvider>
+    </serviceProviders>
+  </configuration>
+</plugin>
+```
+
+##### Tags
+
+Supports all the forms of selecting Pacts with tags.
+
+```xml
+<plugin>
+  <groupId>au.com.dius.pact.provider</groupId>
+  <artifactId>maven</artifactId>
+  <version>4.3.12</version>
+  <configuration>
+    <serviceProviders>
+      <serviceProvider>
+        <name>provider1</name>
+        <PactBroker>
+          <selectors>
+            <!-- All versions with the specified tag. -->
+            <tagName>
+               <name>test</name>
+            </tagName>
+
+            <!-- The latest version for each consumer with the specified tag -->
+            <latestTag>
+                <name>FEAT-1234</name>
+            </latestTag>
+
+            <!-- The latest version for each consumer with the specified tag with a fallback -->
+            <latestTag>
+                <name>FEAT-1234</name>
+                <fallback>master</fallback>
+            </latestTag>
+          </selectors>
+        </PactBroker>
+      </serviceProvider>
+    </serviceProviders>
+  </configuration>
+</plugin>
+```
+
+### Verifying pacts from a pact broker that match particular tags [DEPRECATED]
+
+**NOTE: Using tags has been deprecated in favour of using consumer version selectors (above).**
 
 If your pacts in your pact broker have been tagged, you can set the tags to fetch by configuring the `tags` 
 element of the `pactBroker` element of your provider.
