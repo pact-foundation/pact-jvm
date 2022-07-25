@@ -623,8 +623,6 @@ deployed or released to a particular environment.
 
 ##### Tags
 
-**NOTE: Tags are deprecated in favor of branches**
-
 Supports all the forms of selecting Pacts with tags.
 
 ```groovy
@@ -637,6 +635,8 @@ Supports all the forms of selecting Pacts with tags.
 ```
 
 Using the generic selector:
+
+**NOTE: Generic Tag selectors are deprecated in favor of the more specific selectors (branches/tags/environments etc.)**
 
 * With just the tag name, returns all versions with the specified tag.
 * With latest, returns the latest version for each consumer with the specified tag.
