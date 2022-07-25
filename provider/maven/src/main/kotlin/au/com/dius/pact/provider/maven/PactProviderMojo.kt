@@ -1,8 +1,14 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.handleWith
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
@@ -95,19 +101,37 @@ open class PactProviderMojo : PactBaseMojo() {
 
     try {
       val failures = serviceProviders.flatMap { provider ->
+        provider.host = if (provider.host is String) {
+          ExpressionParser.parseExpression(provider.host as String, DataType.RAW)
+        } else provider.host
+        provider.port = if (provider.port is String) {
+          ExpressionParser.parseExpression(provider.port as String, DataType.RAW)
+        } else provider.port
+
         val consumers = mutableListOf<IConsumerInfo>()
-        consumers.addAll(provider.consumers)
+        consumers.addAll(provider.consumers.map {
+          if (it.pactSource is String) {
+            it.pactSource = FileSource<Interaction>(File(it.pactSource as String))
+            it
+          } else {
+            it
+          }
+        })
+
         if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory!!))
         }
+
         if (provider.pactFileDirectories != null && provider.pactFileDirectories!!.isNotEmpty()) {
           provider.pactFileDirectories!!.forEach {
             consumers.addAll(loadPactFiles(provider, it))
           }
         }
+
         if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
           loadPactsFromPactBroker(provider, consumers)
         }
+
         if (provider.pactFileDirectory == null &&
           (provider.pactFileDirectories == null || provider.pactFileDirectories!!.isEmpty()) &&
           provider.pactBrokerUrl == null && provider.pactBroker == null && (
@@ -165,7 +189,7 @@ open class PactProviderMojo : PactBaseMojo() {
       options["insecureTLS"] = true
     }
 
-    when {
+    val selectors = when {
       pactBroker?.enablePending != null -> {
         if (pactBroker.enablePending!!.providerTags.isEmpty()) {
           throw MojoFailureException("""
@@ -180,27 +204,34 @@ open class PactProviderMojo : PactBaseMojo() {
             |</enablePending>
           """.trimMargin())
         }
-        val selectors = pactBroker.tags?.map {
-          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) } ?: emptyList()
-        consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options +
-          mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags),
-          pactBrokerUrl.toString(), selectors))
+        options.putAll(mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags))
+        if (pactBroker.selectors.isNotEmpty()) {
+          pactBroker.selectors.map { it.toSelector() }
+        } else {
+          pactBroker.tags?.map {
+            ConsumerVersionSelectors.Selector(it, true, fallbackTag = pactBroker.fallbackTag)
+          } ?: emptyList()
+        }
       }
-      pactBroker?.tags != null && pactBroker.tags.isNotEmpty() -> {
-        val selectors = pactBroker.tags.map {
-          ConsumerVersionSelector(it, true, fallbackTag = pactBroker.fallbackTag) }
-        consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors))
+      pactBroker?.selectors.isNotEmpty() -> pactBroker?.selectors?.map { it.toSelector() } ?: emptyList()
+      pactBroker?.tags.isNotEmpty() -> {
+        log.warn("Tags are deprecated. Use selectors instead.")
+        pactBroker?.tags?.map {
+          ConsumerVersionSelectors.Selector(it, true, fallbackTag = pactBroker.fallbackTag)
+        } ?: emptyList()
       }
-      else -> consumers.addAll(
-              handleWith<List<ConsumerInfo>> {
-                provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), emptyList())
-              }.getOrElse { handleException(it) }
-      )
+      else -> emptyList()
     }
+
+    consumers.addAll(
+      handleWith<List<ConsumerInfo>> {
+        provider.hasPactsFromPactBrokerWithSelectorsV2(options, pactBrokerUrl.toString(), selectors)
+      }.getOrElse { handleException(it) }
+    )
   }
 
   private fun handleException(exception: Exception): List<ConsumerInfo> {
-    return when (exception) {
+    return when (exception.cause) {
       is NotFoundHalResponse -> when {
         failIfNoPactsFound -> throw exception
         else -> emptyList()

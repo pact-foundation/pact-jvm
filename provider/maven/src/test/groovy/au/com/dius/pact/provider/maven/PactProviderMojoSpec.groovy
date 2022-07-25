@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.maven
 
-import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IProviderVerifier
@@ -32,7 +32,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >>
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', []) >>
       [ new Consumer(name: 'test consumer') ]
     list.size() == 1
     list[0].name == 'test consumer'
@@ -48,7 +48,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> [ new Consumer() ]
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', []) >> [ new Consumer() ]
     list
   }
 
@@ -62,7 +62,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> [ new Consumer() ]
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', []) >> [ new Consumer() ]
     list
   }
 
@@ -77,7 +77,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', []) >> [
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2(map, 'http://broker:1234', []) >> [
       new Consumer()
     ]
     list
@@ -94,7 +94,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', []) >> [
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2(map, 'http://broker:1234', []) >> [
             new Consumer()
     ]
     list
@@ -112,7 +112,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', []) >> [
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2(map, 'http://broker:1234', []) >> [
             new Consumer()
     ]
     list
@@ -123,13 +123,15 @@ class PactProviderMojoSpec extends Specification {
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
       new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null)))
     def list = []
-    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null, null) }
+    def selectors = ['1', '2', '3'].collect {
+      new ConsumerVersionSelectors.Selector(it, true, null, null)
+    }
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', selectors) >> [new Consumer()]
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', selectors) >> [new Consumer()]
     list.size() == 1
   }
 
@@ -138,13 +140,39 @@ class PactProviderMojoSpec extends Specification {
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
       new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null, null, 'fallback')))
     def list = []
-    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null, 'fallback') }
+    def selectors = ['1', '2', '3'].collect {
+      new ConsumerVersionSelectors.Selector(it, true, null, 'fallback')
+    }
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', selectors) >> [new Consumer()]
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', selectors) >> [new Consumer()]
+    list.size() == 1
+  }
+
+  def 'load pacts from pact broker using any configured selectors'() {
+    given:
+    def pactBroker = new PactBroker(
+      new URL('http://broker:1234'),
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [new MainBranch()]
+    )
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL, pactBroker))
+    def list = []
+    def selectors = [ ConsumerVersionSelectors.MainBranch.INSTANCE ]
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', selectors) >> [new Consumer()]
     list.size() == 1
   }
 
@@ -166,7 +194,7 @@ class PactProviderMojoSpec extends Specification {
     then:
     1 * settings.getServer('test-server') >> serverDetails
     1 * decrypter.decrypt({ it.servers == [serverDetails] }) >> decryptResult
-    1 * provider.hasPactsFromPactBrokerWithSelectors([authentication: ['basic', 'MavenTest', 'MavenPassword']],
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([authentication: ['basic', 'MavenTest', 'MavenPassword']],
       'http://broker:1234', []) >> [
       new Consumer()
     ]
@@ -183,7 +211,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [authentication: ['bearer', '1234']])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([authentication: ['bearer', '1234']],
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([authentication: ['bearer', '1234']],
       'http://broker:1235', []) >> [ new Consumer() ]
     list
   }
@@ -194,14 +222,16 @@ class PactProviderMojoSpec extends Specification {
       new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null,
         new EnablePending(['master']))))
     def list = []
-    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true, null, null) }
+    def selectors = ['1', '2', '3'].collect {
+      new ConsumerVersionSelectors.Selector(it, true, null, null)
+    }
     def map = [enablePending: true, providerTags: ['master']]
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', selectors) >> [new Consumer()]
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2(map, 'http://broker:1234', selectors) >> [new Consumer()]
     list.size() == 1
   }
 
@@ -290,6 +320,7 @@ class PactProviderMojoSpec extends Specification {
     noExceptionThrown()
   }
 
+  @SuppressWarnings('ThrowRuntimeException')
   def 'do fail the build if the Broker returns 404 and failIfNoPactsFound is true'() {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1234'),
@@ -301,13 +332,15 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> {
-      throw new NotFoundHalResponse()
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', []) >> {
+      throw new RuntimeException(new NotFoundHalResponse())
     }
-    thrown(NotFoundHalResponse)
+    def ex = thrown(RuntimeException)
+    ex.cause instanceof NotFoundHalResponse
     list.size() == 0
   }
 
+  @SuppressWarnings('ThrowRuntimeException')
   def 'do not fail the build if the Broker returns 404 and failIfNoPactsFound is false'() {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1234'),
@@ -319,8 +352,8 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> {
-      throw new NotFoundHalResponse()
+    1 * provider.hasPactsFromPactBrokerWithSelectorsV2([:], 'http://broker:1234', []) >> {
+      throw new RuntimeException(new NotFoundHalResponse())
     }
     noExceptionThrown()
     list.size() == 0
