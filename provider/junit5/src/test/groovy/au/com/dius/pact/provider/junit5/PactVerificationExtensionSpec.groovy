@@ -16,6 +16,7 @@ import au.com.dius.pact.provider.TestResultAccumulator
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import org.junit.jupiter.api.extension.ExtensionContext
+import spock.lang.Issue
 import spock.lang.Specification
 
 class PactVerificationExtensionSpec extends Specification {
@@ -125,5 +126,32 @@ class PactVerificationExtensionSpec extends Specification {
       new Err(['failed'])
     def exception = thrown(AssertionError)
     exception.message == 'Failed to update the test results: failed'
+  }
+
+  @Issue('#1572')
+  def 'beforeEach method passes the property resolver on to the verification context'() {
+    given:
+    def map = [:]
+    ExtensionContext.Store store = Stub {
+      get(_) >> { args -> map[args[0]]  }
+      put(_, _) >> { args -> map[args[0]] = args[1]  }
+    }
+    ExtensionContext extContext = Stub {
+      getStore(_) >> store
+    }
+    def mockValueResolver = Mock(ValueResolver)
+
+    def interaction1 = new RequestResponseInteraction('interaction1')
+    PactBrokerSource pactSource = new PactBrokerSource('localhost', '80', 'http')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction1], [:], pactSource)
+
+    PactVerificationExtension extension = new PactVerificationExtension(pact, pactSource, interaction1,
+      'service', 'consumer', mockValueResolver)
+
+    when:
+    extension.beforeEach(extContext)
+
+    then:
+    map['interactionContext'].valueResolver == mockValueResolver
   }
 }

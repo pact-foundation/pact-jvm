@@ -99,7 +99,10 @@ open class PactVerificationExtension(
       pactSource is BrokerUrlSource && pactSource.result?.pending == true
     val verificationContext = PactVerificationContext(store, context,
       consumer = ConsumerInfo(pact.consumer.name, pactSource = pactSource, pending = pending),
-      interaction = interaction, providerInfo = ProviderInfo(serviceName))
+      interaction = interaction,
+      providerInfo = ProviderInfo(serviceName),
+      valueResolver = propertyResolver
+    )
     store.put("interactionContext", verificationContext)
   }
 
