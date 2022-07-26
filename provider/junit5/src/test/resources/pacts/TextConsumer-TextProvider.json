@@ -1,0 +1,57 @@
+{
+  "consumer": {
+    "name": "TextConsumer"
+  },
+  "interactions": [
+    {
+      "description": "A request to download text",
+      "providerStates": [
+        {
+          "name": "A text generation job finished successfully"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "dataType": "STRING",
+            "expression": "/textresult/${jobId}",
+            "type": "ProviderState"
+          }
+        },
+        "method": "GET",
+        "path": "/textresult/dummyJobId"
+      },
+      "response": {
+        "body": "whatever",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^.+$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.3.12"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "TextProvider"
+  }
+}

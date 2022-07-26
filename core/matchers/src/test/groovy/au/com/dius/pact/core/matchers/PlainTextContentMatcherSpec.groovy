@@ -41,4 +41,19 @@ class PlainTextContentMatcherSpec extends Specification {
     'expected' | 'actual'   | [body: ['$': [matchers: [[match: 'regex', regex: '\\w+']]]]] | true
     'expected' | '12324'    | [body: ['$': [matchers: [[match: 'integer']]]]]              | false
   }
+
+  @Unroll
+  def 'supports matching multiple line text'() {
+    expect:
+    matcher.compareText(expected, actual, new MatchingContext(
+      MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(rules)).rulesForCategory('body'), true)
+    ).every { it.result.empty }
+
+    where:
+
+    expected   | actual           | rules
+    'expected' | 'Hello\nWorld'   | [body: ['$': [matchers: [[match: 'regex', regex: '(^\\w+$\n?)*']]]]]
+    'expected' | 'Hello\nWorld'   | [body: ['$': [matchers: [[match: 'regex', regex: '^.+$']]]]]
+    'expected' | '12324\n12\n122' | [body: ['$': [matchers: [[match: 'regex', regex: '(^\\d+$\n?)+']]]]]
+  }
 }
