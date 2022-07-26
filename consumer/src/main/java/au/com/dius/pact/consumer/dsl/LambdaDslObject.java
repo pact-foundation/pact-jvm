@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Date;
@@ -322,6 +323,18 @@ public class LambdaDslObject {
      */
     public LambdaDslObject date(String name, String format, ZonedDateTime example) {
         object.date(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
+        return this;
+    }
+
+    /**
+     * Attribute that must match the provided date format
+     *
+     * @param name    attribute date
+     * @param format  date format to match
+     * @param example example date to use for generated values
+     */
+    public LambdaDslObject date(String name, String format, LocalDate example) {
+        object.localDate(name, format, example);
         return this;
     }
 

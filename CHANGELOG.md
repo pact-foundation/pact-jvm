@@ -1,5 +1,78 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.12 - Bugfixes + Update Maven plugin with latest consumer version selectors
+
+* ad812c438 - feat: add support for LocalDate to LambdaDslObject #1530 (Ronald Holshausen, Tue Jul 26 15:15:10 2022 +1000)
+* d914ff1d3 - fix: pass the value resolver on to the PactVerificationContext, fixes issues with Spring tests #1572 (Ronald Holshausen, Tue Jul 26 14:47:20 2022 +1000)
+* c085da667 - fix: pass consumer.pending through when validating an async message interaction #1573 (Ronald Holshausen, Tue Jul 26 14:17:13 2022 +1000)
+* fe762dc9c - fix: support multipart form posts with multiple parts #1574 (Ronald Holshausen, Tue Jul 26 13:45:48 2022 +1000)
+* 67b2a8c1e - chore: add example test with negative numbers #1575 (Ronald Holshausen, Tue Jul 26 11:45:36 2022 +1000)
+* 021c0c7e7 - fix: support multi-line matching with plain text matcher #1579 (Ronald Holshausen, Tue Jul 26 11:16:08 2022 +1000)
+* 27e9c3f3e - chore: Update JUnit 4 readme (Ronald Holshausen, Tue Jul 26 10:09:31 2022 +1000)
+* 2a0f97761 - fix: for NoSuchMethodError: void kotlin.jvm.internal.FunctionReferenceImpl (Ronald Holshausen, Mon Jul 25 16:40:42 2022 +1000)
+* 6c60109c3 - feat: Update Maven plugin readme with latest consumer version selectors (Ronald Holshausen, Mon Jul 25 15:02:39 2022 +1000)
+* d46c317d3 - feat: Update Maven plugin with latest consumer version selectors (Ronald Holshausen, Mon Jul 25 14:16:02 2022 +1000)
+* 884f6ff38 - Merge pull request #1560 from turrisxyz/Dependabot-GitHub-Actions (Ronald Holshausen, Mon Jul 25 11:07:37 2022 +1000)
+* e0d911e2d - chore: split the Maven Central and Gradle Portal releases into seperate steps (Ronald Holshausen, Thu Jul 7 10:39:43 2022 +1000)
+* 1ca0db917 - chore: correct JUnit 5 readme (Ronald Holshausen, Wed Jul 6 13:01:26 2022 +1000)
+* 84337cea7 - chore: remove deprecation anotation from selector tag methods (Ronald Holshausen, Wed Jul 6 12:53:50 2022 +1000)
+* 04974aa97 - bump version to 4.3.12 (Ronald Holshausen, Wed Jul 6 11:11:39 2022 +1000)
+* 601d49f76 - chore: Included githubactions in the dependabot config (nathannaveen, Wed May 25 00:35:12 2022 +0000)
+
+# 4.3.11 - Support consumer version selectors DSL for JUnit 5
+
+* a47176118 - refactor: rename ConsumerVersionSelectors annotation so it does not clash with the model class (Ronald Holshausen, Tue Jul 5 17:04:10 2022 +1000)
+* 8335063df - fix: correct publish config to work with Gradle 7 (Ronald Holshausen, Tue Jul 5 16:19:56 2022 +1000)
+* 0ccc32dd2 - feat: Update JUnit 5 readme with Consumer Version Selectors DSL (Ronald Holshausen, Tue Jul 5 16:02:18 2022 +1000)
+* 79b0038c3 - feat: Update JUnit 5 readme with Consumer Version Selectors DSL (Ronald Holshausen, Tue Jul 5 15:49:02 2022 +1000)
+* d50014ce2 - feat: Update JUnit 5 readme with Consumer Version Selectors DSL (Ronald Holshausen, Tue Jul 5 15:43:00 2022 +1000)
+* 471c13e8f - refactor: Consumer Version Selectors method does not need a parameter (Ronald Holshausen, Tue Jul 5 15:42:29 2022 +1000)
+* f37c1379f - Feat: Support consumer version selectors DSL for JUnit 5 (Ronald Holshausen, Tue Jul 5 14:29:04 2022 +1000)
+* 3932b2456 - feat(JUnit): allow pact loader to setup from the test class instead of just annotations (Ronald Holshausen, Wed Jun 29 13:55:05 2022 +1000)
+* 7b739a19f - chore: correct the GitHub URL in Gradle plugin (Ronald Holshausen, Wed Jun 29 10:42:19 2022 +1000)
+* cb3d021f2 - docs: Update Gradle readme with branches and releases support (Ronald Holshausen, Tue Jun 28 15:17:44 2022 +1000)
+* 5da217cb0 - bump version to 4.3.11 (Ronald Holshausen, Tue Jun 28 14:04:15 2022 +1000)
+* 0c066254d - chore: upgrade Gradle project to use 1.0 of the plugin-publish plugin (Ronald Holshausen, Tue Jun 28 14:03:26 2022 +1000)
+
+# 4.3.10 - Branches and releases with Gradle plugin
+
+* ba88e3019 - feat: add Gradle DSL functions for deprecated tag forms of selectors (Ronald Holshausen, Tue Jun 28 12:26:41 2022 +1000)
+* 60712c465 - fix: call the updated selector method from the Gradle plugin (Ronald Holshausen, Tue Jun 28 11:42:36 2022 +1000)
+* f927119bf - Feat: Implement new Gradle DSL for consumer version selectors (Ronald Holshausen, Mon Jun 27 17:03:09 2022 +1000)
+* 5acf7d226 - refactor(Gradle): use delegation instead of inheritance to allow supporting Gradle 8 changes (Ronald Holshausen, Fri Jun 24 17:12:46 2022 +1000)
+* 905ed6560 - fix: failing test on Windows (Ronald Holshausen, Fri Jun 24 16:14:25 2022 +1000)
+* 832718413 - feat(Gradle): Add auth option for no auth (Ronald Holshausen, Fri Jun 24 15:57:15 2022 +1000)
+* 7027f0955 - Update system-properties.md (Ronald Holshausen, Thu Jun 23 09:09:43 2022 +1000)
+* d8f7ee3f6 - docs: add raw JSON property description (Ronald Holshausen, Tue Jun 21 14:54:52 2022 +1000)
+* de753fc2f - feat: allow consumer version selector JSON to be provided with an environment variable (Ronald Holshausen, Tue Jun 21 14:05:48 2022 +1000)
+* 05309c11a - fix: correct codenarc violations #1569 (Ronald Holshausen, Wed Jun 15 17:32:29 2022 +1000)
+* 0fa5b5eae - fix: make the use of content type overrides consistent #1569 (Ronald Holshausen, Wed Jun 15 17:29:07 2022 +1000)
+* 87a06c8a9 - Merge pull request #1571 from edouard-lopez/patch-1 (Ronald Holshausen, Tue Jun 14 14:14:20 2022 +1000)
+* 7a2a77b56 - docs: link to 'Using provider states effectively' (Édouard Lopez, Fri Jun 10 11:21:21 2022 +0200)
+* 0e411319e - chore: add example tests with attributes that contain slashes #1556 (Ronald Holshausen, Thu Jun 9 11:45:10 2022 +1000)
+* c5077953b - Update README.md (Ronald Holshausen, Tue May 31 17:28:47 2022 +1000)
+* 9acc5c23f - bump version to 4.3.10 (Ronald Holshausen, Tue May 31 17:27:01 2022 +1000)
+
+# 4.3.9 - Rename providerBranches to providerBranch
+
+* e4523335e - Merge pull request #1565 from praveen-em/issue-1562 (Ronald Holshausen, Mon May 30 17:35:34 2022 +1000)
+* 12b0cbfa1 - Merge pull request #1559 from itstheceo/master (Ronald Holshausen, Mon May 30 10:59:02 2022 +1000)
+* 39d3739f1 - fix: providerVersionBranch for pending pacts (Praveen Erode Mohanasundaram, Fri May 27 22:15:52 2022 +0100)
+* 56c972491 - bump version to 4.3.9 (Ronald Holshausen, Thu May 26 11:51:11 2022 +1000)
+* 6e4b18002 - Updating build.gradle to fix Vulnerability CVE-2022-22970 (Colin, Tue May 24 13:45:25 2022 +1200)
+
+# 4.3.8 - Support providerVersionBranches in JUnit tests
+
+* eeba50278 - Merge branch 'TGNThump-feature/providerVersionBranches' (Ronald Holshausen, Tue May 24 08:56:30 2022 +1000)
+* 1c3b69f6b - Merge pull request #1558 from pact-foundation/correct_provider_states_url (Yousaf Nabi, Mon May 23 12:59:53 2022 +0100)
+* 31f8d9ddd - docs: update gradle readme provider states link (Yousaf Nabi, Mon May 23 12:57:38 2022 +0100)
+* 5917d5169 - Merge pull request #1557 from TGNThump/feature/providerVersionBranches (Ronald Holshausen, Fri May 20 12:41:27 2022 +1000)
+* b985a6233 - chore: fix failing tests #1557 (Ronald Holshausen, Fri May 20 12:40:51 2022 +1000)
+* 968e69c7c - chore: fix static code check errros #1557 (Ronald Holshausen, Fri May 20 12:05:21 2022 +1000)
+* 936ac74c3 - Add support for providerVersionBranches #1554 (Ben Pilgrim, Thu May 19 11:15:28 2022 +0100)
+* 36788ed47 - chore: Update versions in readme (Ronald Holshausen, Fri May 13 16:50:02 2022 +1000)
+* 469511218 - bump version to 4.3.8 (Ronald Holshausen, Fri May 13 16:39:13 2022 +1000)
+
 # 4.3.7 - Maintenance Release
 
 * 16e72b61b - Merge pull request #1550 from rejeeshg/patch-11 (Ronald Holshausen, Wed May 11 10:28:05 2022 +1000)

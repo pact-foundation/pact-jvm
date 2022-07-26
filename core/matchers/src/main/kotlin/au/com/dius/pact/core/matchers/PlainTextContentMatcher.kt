@@ -2,8 +2,6 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -33,10 +31,10 @@ class PlainTextContentMatcher : ContentMatcher {
   }
 
   fun compareText(expected: String, actual: String, context: MatchingContext): List<BodyItemMatchResult> {
-    val regexMatcher = context.matchers.matchingRules["$"]
-    val regex = regexMatcher?.rules?.first()
+    val matchers = context.matchers.matchingRules["$"]
+    val regexMatcher = matchers?.rules?.first()
 
-    if (regexMatcher == null || regexMatcher.rules.isEmpty() || regex !is RegexMatcher) {
+    if (matchers == null || matchers.rules.isEmpty() || regexMatcher !is RegexMatcher) {
       logger.debug { "No regex for '$expected', using equality" }
       return if (expected == actual) {
         listOf(BodyItemMatchResult("$", emptyList()))
@@ -46,11 +44,12 @@ class PlainTextContentMatcher : ContentMatcher {
       }
     }
 
-    return if (actual.matches(Regex(regex.regex))) {
+    val regex = Regex(regexMatcher.regex, setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
+    return if (regex.matches(actual)) {
       emptyList()
     } else {
       listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expected, actual,
-        "Expected body '$expected' to match '$actual' using regex '${regex.regex}' but did not match"))))
+        "Expected body '$expected' to match '$actual' using regex '${regexMatcher.regex}' but did not match"))))
     }
   }
 

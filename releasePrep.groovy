@@ -113,7 +113,7 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-  executeOnShell './gradlew clean publish :provider:gradle:publishPlugins -S -x :pact-publish:publish -PisRelease=true'
+  executeOnShell './gradlew clean publish -S -x :pact-publish:publish -PisRelease=true'
 }
 
 ask('Publish pacts to pact-foundation.pactflow.io?: [Y]') {

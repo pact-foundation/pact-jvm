@@ -26,6 +26,7 @@ class PostImageBodyTest {
         .method('POST')
         .path('/images')
         .withFileUpload('photo', 'ron.jpg', 'image/jpeg', stream.bytes)
+        .withFileUpload('text', 'ron.txt', 'text/plain', 'hello world!'.bytes)
         .willRespondWith()
         .status(200)
         .body(new PactDslJsonBody()
@@ -45,6 +46,7 @@ class PostImageBodyTest {
         def data = MultipartEntityBuilder.create()
           .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
           .addBinaryBody('photo', stream, ContentType.create('image/jpeg'), 'ron.jpg')
+          .addBinaryBody('text', 'some text stuff'.bytes, ContentType.create('text/plain'), 'ron.txt')
           .build()
         def request = RequestBuilder
           .post(mockServer.url + '/images')

@@ -13,7 +13,7 @@ not `-D` as with the other Pact-JVM modules!*__
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "4.1.0"
+  id "au.com.dius.pact" version "4.3.10"
 }
 ```
 
@@ -28,7 +28,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius.pact.provider:gradle:4.1.0'
+        classpath 'au.com.dius.pact.provider:gradle:4.3.10'
     }
 }
 ```
@@ -98,16 +98,17 @@ The following project properties can be specified with `-Pproperty=value` on the
 
 The following project properties must be specified as system properties:
 
-|Property|Description|
-|--------|-----------|
-|`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
-|`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
-|`pact.provider.tag`|Sets the provider tag to push before publishing verification results (can use a comma separated list)|
-|`pact.provider.branch`|Sets the provider branch to push before publishing verification results|
-|`pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary`|Overrides the handling of a particular content type [4.1.3+]|
-|`pact.verifier.enableRedirectHandling`|Enables automatically handling redirects [4.1.8+]|
-|`pact.verifier.generateDiff`|Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+]|
-|`pact.verifier.buildUrl`|Specifies buildUrl to report to the broker when publishing verification results [4.2.16/4.3.2+]|
+| Property                                                                                            | Description                                                                                                                                                                               |
+|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pact.verifier.disableUrlPathDecoding`                                                              | Disables decoding of request paths                                                                                                                                                        |
+| `pact.pactbroker.httpclient.usePreemptiveAuthentication`                                            | Enables preemptive authentication with the pact broker when set to `true`                                                                                                                 |
+| `pact.provider.tag`                                                                                 | Sets the provider tag to push before publishing verification results (can use a comma separated list)                                                                                     |
+| `pact.provider.branch`                                                                              | Sets the provider branch to push before publishing verification results                                                                                                                   |
+| `pact.content_type.override.<TYPE>.<SUBTYPE>=<VAL>` where `<VAL>` may be `text`, `json` or `binary` | Overrides the handling of a particular content type [4.1.3+]                                                                                                                              |
+| `pact.verifier.enableRedirectHandling`                                                              | Enables automatically handling redirects [4.1.8+]                                                                                                                                         |
+| `pact.verifier.generateDiff`                                                                        | Controls the generation of diffs. Can be set to `true`, `false` or a size threshold (for instance `1mb` or `100kb`) which only enables diffs for payloads of size less than that [4.2.7+] |
+| `pact.verifier.buildUrl`                                                                            | Specifies buildUrl to report to the broker when publishing verification results [4.2.16/4.3.2+]                                                                                           |
+| `pactbroker.consumerversionselectors.rawjson`                                                       | Overrides the consumer version selectors with raw JSON [4.1.29+/4.3.0+]                                                                                                                   |
 
 ## Specifying the provider hostname at runtime
 
@@ -363,7 +364,7 @@ an override property: `pact.content_type.override.<TYPE>.<SUBTYPE>=text|binary`.
 
 ## Provider States
 
-For a description of what provider states are, see the pact documentations: http://docs.pact.io/documentation/provider_states.html
+For a description of what provider states are, see the pact documentations: https://docs.pact.io/getting_started/provider_states
 
 ### Using a state change URL
 
@@ -539,6 +540,12 @@ pact {
     myProvider { // Define the name of your provider here
 
       fromPactBroker {
+        // For 4.3.10+ 
+        withSelectors {
+          branch('test') // the latest version from a particular branch of each consumer.
+        }
+       
+        // For versions before 4.3.10
         selectors = latestTags('test') // specify your tags here. You can leave this out to just use the latest pacts  
       }
 
@@ -546,6 +553,106 @@ pact {
   }
 
 }
+```
+
+#### Using consumer version selectors (4.3.10+)
+
+You can use a number of different selectors to fetch Pact files that match some criteria. See [Consumer Version Selectors](https://docs.pact.io/pact_broker/advanced_topics/consumer_version_selectors)
+for more information. The following selectors are available:
+
+##### Main branch
+
+The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            mainBranch()
+        }
+    }
+```
+
+##### Matching branch
+
+The latest version from any branch of the consumer that has the same name as the current branch of the provider.
+Used for coordinated development between consumer and provider teams using matching feature branch names.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            matchingBranch()
+        }
+    }
+```
+
+##### Branch
+
+The latest version from a particular branch of each consumer, or for a particular consumer if the second
+parameter is provided. If fallback is provided, falling back to the fallback branch if none is found from the
+specified branch.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            branch('FEAT-1234') // Latest version from the particular branch of each consumer
+          
+            branch('FEAT-1234', 'consumer-a') // Latest version from the particular branch of the provided consumer
+         
+            branch('FEAT-1234', null, 'master') // Fall back to master branch if none is found from the specified feature branch
+            branch('FEAT-1234', 'consumer-a', 'master') // As above, but for a single consumer
+        }
+    }
+```
+
+##### Deployed or released
+
+All the currently deployed and currently released and supported versions of each consumer. You can also specify if
+deployed or released to a particular environment.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            deployedOrReleased() // All the currently deployed and currently released and supported versions of each consumer.
+
+            deployedTo('test') // Any versions currently deployed to the specified environment
+            releasedTo('test') // Any versions currently released and supported in the specified environment   
+            environment('test') // any versions currently deployed or released and supported in the specified environment
+        }
+    }
+```
+
+##### Tags
+
+Supports all the forms of selecting Pacts with tags.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            tag('test') // All versions with the specified tag.
+            latestTag('test') // The latest version for each consumer with the specified tag
+        }
+    }
+```
+
+Using the generic selector:
+
+**NOTE: Generic Tag selectors are deprecated in favor of the more specific selectors (branches/tags/environments etc.)**
+
+* With just the tag name, returns all versions with the specified tag.
+* With latest, returns the latest version for each consumer with the specified tag.
+* With a fallback tag, returns the latest version for each consumer with the specified tag, falling back to the fallbackTag if none is found with the specified tag.
+* With a consumer name, returns the latest version for a specified consumer with the specified tag.
+* With only latest, returns the latest version for each consumer. **NOT RECOMMENDED** as it suffers from race conditions when pacts are published from multiple branches.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+            selector('test') // All versions with the specified tag.
+            selector('test', true) // The latest version for each consumer with the specified tag
+            selector('test', true, 'fallback') // the latest version for each consumer with the specified tag, falling back to the fallbackTag if none is found with the specified tag
+            selector('test', true, null, 'consumer-a') // the latest version for a specified consumer with the specified tag
+        }
+    }
 ```
 
 ### For Pact-JVM versions before 4.1.0
