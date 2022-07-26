@@ -1,7 +1,9 @@
+plugins {
+  id "com.gradle.plugin-publish" version "1.0.0" apply false
+}
+
 if (project.hasProperty('isGradleRelease')) {
-  plugins {
-    id "com.gradle.plugin-publish" version "1.0.0"
-  }
+  apply plugin: 'com.gradle.plugin-publish'
 }
 
 dependencies {
