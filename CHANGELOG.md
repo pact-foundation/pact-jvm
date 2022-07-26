@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.12 - Bugfixes + Update Maven plugin with latest consumer version selectors
+
+* ad812c438 - feat: add support for LocalDate to LambdaDslObject #1530 (Ronald Holshausen, Tue Jul 26 15:15:10 2022 +1000)
+* d914ff1d3 - fix: pass the value resolver on to the PactVerificationContext, fixes issues with Spring tests #1572 (Ronald Holshausen, Tue Jul 26 14:47:20 2022 +1000)
+* c085da667 - fix: pass consumer.pending through when validating an async message interaction #1573 (Ronald Holshausen, Tue Jul 26 14:17:13 2022 +1000)
+* fe762dc9c - fix: support multipart form posts with multiple parts #1574 (Ronald Holshausen, Tue Jul 26 13:45:48 2022 +1000)
+* 67b2a8c1e - chore: add example test with negative numbers #1575 (Ronald Holshausen, Tue Jul 26 11:45:36 2022 +1000)
+* 021c0c7e7 - fix: support multi-line matching with plain text matcher #1579 (Ronald Holshausen, Tue Jul 26 11:16:08 2022 +1000)
+* 27e9c3f3e - chore: Update JUnit 4 readme (Ronald Holshausen, Tue Jul 26 10:09:31 2022 +1000)
+* 2a0f97761 - fix: for NoSuchMethodError: void kotlin.jvm.internal.FunctionReferenceImpl (Ronald Holshausen, Mon Jul 25 16:40:42 2022 +1000)
+* 6c60109c3 - feat: Update Maven plugin readme with latest consumer version selectors (Ronald Holshausen, Mon Jul 25 15:02:39 2022 +1000)
+* d46c317d3 - feat: Update Maven plugin with latest consumer version selectors (Ronald Holshausen, Mon Jul 25 14:16:02 2022 +1000)
+* 884f6ff38 - Merge pull request #1560 from turrisxyz/Dependabot-GitHub-Actions (Ronald Holshausen, Mon Jul 25 11:07:37 2022 +1000)
+* e0d911e2d - chore: split the Maven Central and Gradle Portal releases into seperate steps (Ronald Holshausen, Thu Jul 7 10:39:43 2022 +1000)
+* 1ca0db917 - chore: correct JUnit 5 readme (Ronald Holshausen, Wed Jul 6 13:01:26 2022 +1000)
+* 84337cea7 - chore: remove deprecation anotation from selector tag methods (Ronald Holshausen, Wed Jul 6 12:53:50 2022 +1000)
+* 04974aa97 - bump version to 4.3.12 (Ronald Holshausen, Wed Jul 6 11:11:39 2022 +1000)
+* 601d49f76 - chore: Included githubactions in the dependabot config (nathannaveen, Wed May 25 00:35:12 2022 +0000)
+
 # 4.3.11 - Support consumer version selectors DSL for JUnit 5
 
 * a47176118 - refactor: rename ConsumerVersionSelectors annotation so it does not clash with the model class (Ronald Holshausen, Tue Jul 5 17:04:10 2022 +1000)
