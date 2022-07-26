@@ -330,6 +330,9 @@ pact file. To allow only the changed pact file to be verified, you can override 
 values as either Java system properties or environment variables. If you have annotated your test class with `@Consumer`
 you don't need to provide `pact.filter.consumers`.
 
+**NOTE:** If you use different tests for different consumers, you need to annotate each test with `@Consumer` and
+`@IgnoreNoPactsToVerify`. Otherwise, all the tests will run with the provided Pact from the URL.
+
 ### Pact Url
 
 To use pacts from urls annotate the test class with
