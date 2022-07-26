@@ -106,7 +106,7 @@ data class PactVerificationContext @JvmOverloads constructor(
       }
     } else {
       return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
-        interaction.description, mutableMapOf(), false))
+        interaction.description, mutableMapOf(), consumer.pending))
     }
   }
 
