@@ -43,6 +43,8 @@ open class PactDslRequestBase(
   @JvmField
   var requestGenerators = Generators()
 
+  var multipartBuilder: MultipartEntityBuilder? = null
+
   protected fun setupDefaultValues() {
     if (defaultRequestValues != null) {
       if (StringUtils.isNotEmpty(defaultRequestValues.requestMethod)) {
@@ -67,21 +69,29 @@ open class PactDslRequestBase(
       ContentType.create(fileContentType)
     else
       ContentType.DEFAULT_TEXT
-    val multipart = MultipartEntityBuilder.create()
-      .setMode(HttpMultipartMode.EXTENDED)
-      .addBinaryBody(partName, data, contentType, fileName)
-    setupMultipart(multipart)
+    if (multipartBuilder == null) {
+      multipartBuilder = MultipartEntityBuilder.create()
+        .setMode(HttpMultipartMode.EXTENDED)
+        .addBinaryBody(partName, data, contentType, fileName)
+    } else {
+      multipartBuilder!!.addBinaryBody(partName, data, contentType, fileName)
+    }
+    setupMultipart(multipartBuilder!!)
   }
 
   fun setupMultipart(multipart: MultipartEntityBuilder) {
     val entity = multipart.build()
     val os = ByteArrayOutputStream()
     entity.writeTo(os)
-    requestBody = body(os.toByteArray(),
-      au.com.dius.pact.core.model.ContentType(entity.contentType))
-    requestMatchers.addCategory("header").addRule(CONTENT_TYPE, RegexMatcher(MULTIPART_HEADER_REGEX,
-      entity.contentType))
-    requestHeaders[CONTENT_TYPE] = listOf(entity.contentType)
+    requestBody = body(os.toByteArray(), au.com.dius.pact.core.model.ContentType(entity.contentType))
+    val matchingRuleCategory = requestMatchers.addCategory("header")
+    if (!matchingRuleCategory.matchingRules.containsKey(CONTENT_TYPE)) {
+      matchingRuleCategory.addRule(CONTENT_TYPE, RegexMatcher(MULTIPART_HEADER_REGEX,
+        entity.contentType))
+    }
+    if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+      requestHeaders[CONTENT_TYPE] = listOf(entity.contentType)
+    }
   }
 
   protected fun queryMatchingDateBase(field: String, pattern: String?, example: String?): PactDslRequestBase {
