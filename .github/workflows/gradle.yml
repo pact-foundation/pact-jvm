@@ -26,7 +26,7 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: ${{ runner.os }}-gradle
     - run: ./gradlew -v
-    - run: ./gradlew :core:pactbroker:publishToMavenLocal
+    - run: ./gradlew :core:pactbroker:publishToMavenLocal :core:support:publishToMavenLocal
     - name: Build with Gradle
       run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
     - name: Publish Unit Test Results
@@ -54,7 +54,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - run: ./gradlew -v
-      - run: ./gradlew :core:pactbroker:publishToMavenLocal
+      - run: ./gradlew :core:pactbroker:publishToMavenLocal :core:support:publishToMavenLocal
       - name: Build with Gradle
         run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
       - name: Publish Unit Test Results
