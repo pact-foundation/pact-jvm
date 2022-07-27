@@ -1,11 +1,12 @@
 dependencies {
     api project(':core:model')
     api project(':core:matchers')
-    api project(':core:support')
 
     // For some wierd reason, this is not resolving correctly
+    api project(':core:support')
     api project(':core:pactbroker')
-//    api 'au.com.dius.pact.core:pactbroker:4.3.0-beta.7'
+//    api "au.com.dius.pact.core:support:${project.version}"
+//    api "au.com.dius.pact.core:pactbroker:${project.version}"
 
     api 'io.github.classgraph:classgraph:4.8.129'
     api('com.michael-bull.kotlin-result:kotlin-result:1.1.12') {

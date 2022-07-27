@@ -1,58 +1,97 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ConsumersGroup
 import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.gradle.PactPluginBase.Companion.PACT_VERIFY
 import groovy.lang.Closure
 import mu.KLogging
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
-import org.gradle.util.ConfigureUtil
+import java.io.File
 import java.net.URL
 
 /**
  * Extends the provider info to be setup in a gradle build
  */
-open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo(name) {
+open class GradleProviderInfo(override var name: String, val project: Project) : IProviderInfo {
   var providerVersion: Any? = null
   var providerTags: Any? = null
-  var brokerConfig: PactBrokerConsumerConfig? = null
+  var brokerConfig: PactBrokerConsumerConfig = PactBrokerConsumerConfig(project.objects)
+  val provider = ProviderInfo(name)
 
-  open fun hasPactWith(consumer: String, closure: Closure<*>): IConsumerInfo {
-    val consumerInfo = ConsumerInfo(consumer, null, true, listOf(), this.verificationType)
-    consumers.add(consumerInfo)
-    ConfigureUtil.configure(closure, consumerInfo)
+  override var protocol: String by provider::protocol
+  override var host: Any? by provider::host
+  override var port: Any? by provider::port
+  override var path: String by provider::path
+  override var requestFilter: Any? by provider::requestFilter
+  override var stateChangeRequestFilter: Any? by provider::stateChangeRequestFilter
+  override var stateChangeUrl: URL? by provider::stateChangeUrl
+  override var stateChangeUsesBody: Boolean by provider::stateChangeUsesBody
+  override var stateChangeTeardown: Boolean by provider::stateChangeTeardown
+  override var packagesToScan: List<String> by provider::packagesToScan
+  override var verificationType: PactVerification? by provider::verificationType
+  override var createClient: Any? by provider::createClient
+  override var insecure: Boolean by provider::insecure
+  override var trustStore: File? by provider::trustStore
+  override var trustStorePassword: String? by provider::trustStorePassword
+  override var consumers: MutableList<IConsumerInfo> by provider::consumers
+  var startProviderTask: Any? by provider::startProviderTask
+  var terminateProviderTask: Any? by provider::terminateProviderTask
+  var isDependencyForPactVerify: Boolean by provider::isDependencyForPactVerify
+
+  open fun hasPactWith(consumer: String, closure: Closure<GradleConsumerInfo>): IConsumerInfo {
+    val consumerInfo = project.objects.newInstance(GradleConsumerInfo::class.java, consumer)
+    consumerInfo.name = consumer
+    consumerInfo.verificationType = this.verificationType
+
+    closure.resolveStrategy = Closure.DELEGATE_FIRST
+    closure.delegate = consumerInfo
+    closure.call(consumerInfo)
+
+    provider.consumers.add(consumerInfo)
     return consumerInfo
   }
 
-  open fun hasPactsWith(consumersGroupName: String, closure: Closure<*>): List<IConsumerInfo> {
+  open fun hasPactsWith(consumersGroupName: String, closure: Closure<ConsumersGroup>): List<IConsumerInfo> {
     val consumersGroup = ConsumersGroup(consumersGroupName)
-    ConfigureUtil.configure(closure, consumersGroup)
-    return setupConsumerListFromPactFiles(consumersGroup)
+
+    closure.resolveStrategy = Closure.DELEGATE_FIRST
+    closure.delegate = consumersGroup
+    closure.call(consumersGroup)
+
+    return provider.setupConsumerListFromPactFiles(consumersGroup)
   }
 
   @JvmOverloads
+  @Deprecated(message = "hasPactsFromPactBroker has been deprecated in favor of fromPactBroker")
   open fun hasPactsFromPactBroker(
     options: Map<String, Any> = mapOf(),
     pactBrokerUrl: String,
-    closure: Closure<*>
+    closure: Closure<IConsumerInfo>
   ): List<ConsumerInfo> {
+    logger.warn { "hasPactsFromPactBroker has been deprecated in favor of fromPactBroker" }
     val fromPactBroker = this.hasPactsFromPactBroker(options, pactBrokerUrl)
     fromPactBroker.forEach {
-      ConfigureUtil.configure(closure, it)
+      closure.resolveStrategy = Closure.DELEGATE_FIRST
+      closure.delegate = it
+      closure.call(it)
     }
     return fromPactBroker
   }
 
-  override fun hasPactsFromPactBroker(options: Map<String, Any>, pactBrokerUrl: String): List<ConsumerInfo> {
+  @Deprecated(message = "hasPactsFromPactBroker has been deprecated in favor of fromPactBroker")
+  fun hasPactsFromPactBroker(options: Map<String, Any>, pactBrokerUrl: String): List<ConsumerInfo> {
     return try {
-      super.hasPactsFromPactBroker(options, pactBrokerUrl)
+      provider.hasPactsFromPactBroker(options, pactBrokerUrl)
     } catch (e: Exception) {
-      val verifyTaskName = PACT_VERIFY.toLowerCase()
-      if (project.gradle.startParameter.taskNames.any { it.toLowerCase().contains(verifyTaskName) }) {
+      val verifyTaskName = PACT_VERIFY.lowercase()
+      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
         logger.error(e) { "Failed to access Pact Broker" }
         throw e
       } else {
@@ -63,29 +102,52 @@ open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo
   }
 
   @JvmOverloads
+  @Deprecated(message = "hasPactsFromPactBroker has been deprecated in favor of fromPactBroker")
   open fun hasPactsFromPactBrokerWithSelectors(
     options: Map<String, Any> = mapOf(),
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>,
-    closure: Closure<*>
+    closure: Closure<IConsumerInfo>
   ): List<ConsumerInfo> {
     val fromPactBroker = this.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
     fromPactBroker.forEach {
-      ConfigureUtil.configure(closure, it)
+      closure.resolveStrategy = Closure.DELEGATE_FIRST
+      closure.delegate = it
+      closure.call(it)
     }
     return fromPactBroker
   }
 
-  override fun hasPactsFromPactBrokerWithSelectors(
+  @Deprecated(message = "hasPactsFromPactBroker has been deprecated in favor of fromPactBroker")
+  fun hasPactsFromPactBrokerWithSelectors(
     options: Map<String, Any?>,
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>
   ): List<ConsumerInfo> {
     return try {
-      super.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
+      provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
     } catch (e: Exception) {
-      val verifyTaskName = PACT_VERIFY.toLowerCase()
-      if (project.gradle.startParameter.taskNames.any { it.toLowerCase().contains(verifyTaskName) }) {
+      val verifyTaskName = PACT_VERIFY.lowercase()
+      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
+        logger.error(e) { "Failed to access Pact Broker" }
+        throw e
+      } else {
+        logger.warn { "Failed to access Pact Broker, no provider tasks will be configured - ${e.message}" }
+        emptyList()
+      }
+    }
+  }
+
+  fun hasPactsFromPactBrokerWithSelectorsV2(
+    options: Map<String, Any?>,
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelectors>
+  ): List<IConsumerInfo> {
+    return try {
+      provider.hasPactsFromPactBrokerWithSelectorsV2(options, pactBrokerUrl, selectors)
+    } catch (e: Exception) {
+      val verifyTaskName = PACT_VERIFY.lowercase()
+      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
         logger.error(e) { "Failed to access Pact Broker" }
         throw e
       } else {
@@ -97,16 +159,20 @@ open class GradleProviderInfo(name: String, val project: Project) : ProviderInfo
 
   open fun url(path: String) = URL(path)
 
-  open fun fromPactBroker(closure: Closure<*>) {
-    brokerConfig = PactBrokerConsumerConfig()
-    ConfigureUtil.configure(closure, brokerConfig!!)
+  open fun fromPactBroker(closure: Closure<PactBrokerConsumerConfig>) {
+    brokerConfig = project.objects.newInstance(PactBrokerConsumerConfig::class.java)
+    closure.resolveStrategy = Closure.DELEGATE_FIRST
+    closure.delegate = brokerConfig
+    closure.call(brokerConfig)
 
-    val pending = brokerConfig!!.enablePending ?: false
-    if (pending && (brokerConfig!!.providerTags.isNullOrEmpty() ||
-      brokerConfig!!.providerTags!!.any { it.trim().isEmpty() })) {
+    val pending = brokerConfig.enablePending ?: false
+    if (pending
+      && (brokerConfig.providerTags.isNullOrEmpty() || brokerConfig.providerTags!!.any { it.trim().isEmpty() })
+      && (brokerConfig.providerBranch.isNullOrBlank())
+      ) {
       throw GradleScriptException(
         """
-        |No providerTags: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results.
+        |No providerTags or providerBranch: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results.
         |
         |For instance:
         |

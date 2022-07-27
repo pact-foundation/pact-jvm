@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
@@ -136,10 +137,11 @@ class PactVerificationContextSpec extends Specification {
       getPending() >> true
     }
     Interaction interaction = new Message('Test Interaction')
+    def pact = new MessagePact(new Provider(), new Consumer(), [interaction])
     List<VerificationResult> testResults = []
 
     context = new PactVerificationContext(store, extContext, target, verifier, valueResolver,
-      provider, consumer, interaction, testResults)
+      provider, consumer, interaction, pact, testResults)
 
     when:
     context.verifyInteraction()

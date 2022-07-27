@@ -269,6 +269,7 @@ The following keys may be managed through the environment
 * `pactbroker.auth.password` (for basic auth)
 * `pactbroker.auth.token` (for bearer auth)
 * `pactbroker.consumers` (comma separated list to filter pacts by consumer; if not provided, will fetch all pacts for the provider)
+* `pactbroker.consumerversionselectors.rawjson` (overrides the selectors with the RAW JSON)
 
 
 #### Using tags with the pact broker

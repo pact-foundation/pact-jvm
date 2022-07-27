@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
@@ -67,6 +68,7 @@ data class PluginProvider(
   override var insecure: Boolean = false
   override var trustStore: File? = null
   override var trustStorePassword: String? = null
+  override var consumers: MutableList<IConsumerInfo> = mutableListOf()
 }
 
 /**

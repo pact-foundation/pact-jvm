@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
@@ -25,12 +25,13 @@ import org.apache.hc.core5.net.URIBuilder
 import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
+import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
-
-data class SelectorResult(
-  val selectors: List<ConsumerVersionSelector>,
-  val filtered: Boolean
-)
+import kotlin.reflect.KParameter
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.starProjectedType
 
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
@@ -43,9 +44,9 @@ open class PactBrokerLoader(
   val pactBrokerPort: String?,
   @Deprecated("Use pactBrokerUrl")
   val pactBrokerScheme: String?,
-  @Deprecated(message = "Use Consumer version selectors instead",
-    replaceWith = ReplaceWith("pactBrokerConsumerVersionSelectors"))
-  val pactBrokerTags: List<String>? = listOf("latest"),
+  @Deprecated(message = "use consumerVersionSelectors method or pactbroker.consumerversionselectors property")
+  val pactBrokerTags: List<String>? = emptyList(),
+  @Deprecated(message = "use consumerVersionSelectors method or pactbroker.consumerversionselectors property")
   val pactBrokerConsumerVersionSelectors: List<VersionSelector>,
   val pactBrokerConsumers: List<String> = emptyList(),
   var failIfNoPactsFound: Boolean = true,
@@ -54,12 +55,15 @@ open class PactBrokerLoader(
   valueResolver: ValueResolver? = null,
   val enablePendingPacts: String = "false",
   val providerTags: List<String> = emptyList(),
+  val providerBranch: String = "",
   val includeWipPactsSince: String = "",
   val pactBrokerUrl: String? = null,
   val enableInsecureTls: String = "false",
   val ep: ExpressionParser = ExpressionParser()
 ) : OverrideablePactLoader {
 
+  private var testClass: Class<*>? = null
+  private var testInstance: Any? = null
   private var resolver: ValueResolver? = valueResolver
   private var overriddenPactUrl: String? = null
   private var overriddenConsumer: String? = null
@@ -79,6 +83,7 @@ open class PactBrokerLoader(
     null,
     pactBroker.enablePendingPacts,
     pactBroker.providerTags.toList(),
+    pactBroker.providerBranch,
     pactBroker.includeWipPactsSince,
     pactBroker.url,
     pactBroker.enableInsecureTls
@@ -126,11 +131,14 @@ open class PactBrokerLoader(
     }
   }
 
-  fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelector> {
+  fun buildConsumerVersionSelectors(resolver: ValueResolver): List<ConsumerVersionSelectors> {
     val tags = pactBrokerTags.orEmpty().flatMap { ep.parseListExpression(it, resolver) }
-    return if (shouldFallBackToTags(tags, pactBrokerConsumerVersionSelectors, resolver)) {
+    val selectorsMethod = testClassHasSelectorsMethod(this.testClass)
+    return if (selectorsMethod != null) {
+      invokeSelectorsMethod(this.testInstance, selectorsMethod)
+    } else if (shouldFallBackToTags(tags, pactBrokerConsumerVersionSelectors, resolver)) {
       permutations(tags, pactBrokerConsumers.flatMap { ep.parseListExpression(it, resolver) })
-        .map { ConsumerVersionSelector(it.first, consumer = it.second) }
+        .map { ConsumerVersionSelectors.Selector(it.first, true, it.second) }
     } else {
       pactBrokerConsumerVersionSelectors.flatMap {
         val tags = ep.parseListExpression(it.tag, resolver)
@@ -151,19 +159,17 @@ open class PactBrokerLoader(
         when {
           tags.isNotEmpty() && consumers.isNotEmpty() -> {
             permutations(tags.mapIndexed { index, tag -> tag to index  }, consumers).map { (tag, consumer) ->
-              ConsumerVersionSelector(tag!!.first, latest[tag.second].toBoolean(), fallbackTag = fallbackTag,
-                consumer = consumer)
+              ConsumerVersionSelectors.Selector(tag!!.first, latest[tag.second].toBoolean(), consumer, fallbackTag)
             }
           }
           tags.isNotEmpty() -> {
             tags.mapIndexed { index, tag ->
-              ConsumerVersionSelector(tag, latest[index].toBoolean(), fallbackTag = fallbackTag,
-                consumer = consumers.firstOrNull())
+              ConsumerVersionSelectors.Selector(tag, latest[index].toBoolean(), consumers.firstOrNull(), fallbackTag)
             }
           }
           consumers.isNotEmpty() -> {
             consumers.map { name ->
-              ConsumerVersionSelector(null, true, fallbackTag = fallbackTag, consumer = name)
+              ConsumerVersionSelectors.Selector(null, true, name, fallbackTag)
             }
           }
           else -> listOf()
@@ -207,20 +213,23 @@ open class PactBrokerLoader(
   }
 
   @Throws(IOException::class, IllegalArgumentException::class)
+  @Suppress("ThrowsCount")
   private fun loadPactsForProvider(
     providerName: String,
-    selectors: List<ConsumerVersionSelector>,
+    selectors: List<ConsumerVersionSelectors>,
     resolver: ValueResolver
   ): List<Pact> {
     logger.debug { "Loading pacts from pact broker for provider $providerName and consumer version selectors " +
       "$selectors" }
     val pending = ep.parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
     val providerTags = providerTags.flatMap { ep.parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
-    if (pending && providerTags.none { it.isNotEmpty() }) {
-      throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags have been " +
-        "specified. To use the pending pacts feature, you need to provide the list of provider names for the " +
-        "provider application version with the providerTags property that will be published with the verification " +
-        "results.")
+    val providerBranch = ep.parseExpression(providerBranch, DataType.STRING, resolver) as String?
+
+    if (pending && providerTags.none { it.isNotEmpty() } && providerBranch.isNullOrBlank()) {
+      throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags or branch have" +
+        " been specified. To use the pending pacts feature, you need to provide the list of provider names for the" +
+        " provider application version with the providerTags or providerBranch property that will be published with" +
+        " the verification results.")
     }
     val wipSinceDate = if (pending) {
       ep.parseExpression(includeWipPactsSince, DataType.STRING, resolver) as String
@@ -230,8 +239,8 @@ open class PactBrokerLoader(
     try {
       val pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver)
 
-      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, pending,
-        wipSinceDate)
+      val result = pactBrokerClient.fetchConsumersWithSelectorsV2(providerName, selectors, providerTags,
+              providerBranch, pending, wipSinceDate)
       var consumers = when (result) {
         is Ok -> result.value
         is Err -> throw result.error
@@ -335,5 +344,47 @@ open class PactBrokerLoader(
     return PactBrokerClient(url.toString(), options.toMutableMap(), config)
   }
 
-  companion object : KLogging()
+  override fun initLoader(testClass: Class<*>?, testInstance: Any?) {
+    this.testClass = testClass
+    this.testInstance = testInstance
+  }
+
+  companion object : KLogging() {
+    @JvmStatic
+    fun invokeSelectorsMethod(testInstance: Any?, selectorsMethod: KCallable<*>): List<ConsumerVersionSelectors> {
+      val projectedType = SelectorBuilder::class.starProjectedType
+      return when (selectorsMethod.parameters.size) {
+        0 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
+          val builder = selectorsMethod.call() as SelectorBuilder
+          builder.build()
+        } else {
+          selectorsMethod.call() as List<ConsumerVersionSelectors>
+        }
+        1 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
+          val builder = selectorsMethod.call(testInstance) as SelectorBuilder
+          builder.build()
+        } else {
+          selectorsMethod.call(testInstance) as List<ConsumerVersionSelectors>
+        }
+        else -> throw java.lang.IllegalArgumentException(
+          "Consumer version selector method should not take any parameters and return an instance of SelectorBuilder")
+      }
+    }
+
+    @JvmStatic
+    fun testClassHasSelectorsMethod(testClass: Class<*>?): KCallable<*>? {
+      val projectedType = SelectorBuilder::class.starProjectedType
+      return testClass?.kotlin?.members?.firstOrNull { method ->
+        method.findAnnotation<PactBrokerConsumerVersionSelectors>() != null
+          && (
+            // static method
+            method.parameters.isEmpty()
+            // instance method
+            || (method.parameters.size == 1 && method.parameters[0].kind == KParameter.Kind.INSTANCE)
+          )
+          && method.visibility == KVisibility.PUBLIC
+          && (method.returnType.isSubtypeOf(projectedType) || method.returnType.isSubtypeOf(List::class.starProjectedType))
+      }
+    }
+  }
 }

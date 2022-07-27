@@ -134,13 +134,13 @@ object ProviderUtils : KLogging() {
     return result
   }
 
-  fun instantiatePactLoader(pactSource: PactSource, clazz: Class<*>, annotation: Annotation?): PactLoader {
+  fun instantiatePactLoader(pactSource: PactSource, testClass: Class<*>, testInstance: Any?, annotation: Annotation?): PactLoader {
     val pactLoaderClass = pactSource.value
-    return try {
+    val pactLoader = try {
       // Checks if there is a constructor with one argument of type Class.
       val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
       constructorWithClass.isAccessible = true
-      constructorWithClass.newInstance(clazz)
+      constructorWithClass.newInstance(testClass)
     } catch (e: NoSuchMethodException) {
       logger.debug { "Pact source does not have a constructor with one argument of type Class" }
       if (annotation != null) {
@@ -169,5 +169,7 @@ object ProviderUtils : KLogging() {
         pactLoaderClass.createInstance()
       }
     }
+    pactLoader.initLoader(testClass, testInstance)
+    return pactLoader
   }
 }

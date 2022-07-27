@@ -1,6 +1,12 @@
 dependencies {
-    api project(':core:support')
     api project(':provider')
+
+    // For some wierd reason, this is not resolving correctly
+    api project(':core:support')
+    api project(':core:pactbroker')
+//    api "au.com.dius.pact.core:support:${project.version}"
+//    api "au.com.dius.pact.core:pactbroker:${project.version}"
+
     api "junit:junit:${project.junitVersion}"
     implementation  "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
       'org.jooq:jool:0.9.14'
