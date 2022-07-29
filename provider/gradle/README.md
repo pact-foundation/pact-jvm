@@ -693,11 +693,7 @@ pact {
 }
 ```
 
-**NOTE: Currently the pacts are fetched from the broker during the configuration phase of the build. This means that
-if the broker is not available, you will not be able to run any Gradle tasks.** This should be fixed in a forth coming
-release.
-
-In the mean time, to only load the pacts when running the validate task, you can do something like:
+To only load the pacts when running the validate task, you can do something like:
 
 ```groovy
 pact {
