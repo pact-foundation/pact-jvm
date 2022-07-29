@@ -83,7 +83,7 @@ class PactPlugin extends PactPluginBase {
   @SuppressWarnings('CatchRuntimeException')
   @CompileStatic
   private void setupPactConsumersFromBroker(GradleProviderInfo provider, Project project, PactPluginExtension ext) {
-    if (provider.brokerConfig && project.gradle.startParameter.taskNames.any {
+    if (ext.broker && project.gradle.startParameter.taskNames.any {
       it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
       def options = [:]
       if (ext.broker.pactBrokerUsername) {
