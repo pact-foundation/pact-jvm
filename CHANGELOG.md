@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.13 - Bugfix Release
+
+* b85250936 - fix(Gradle): fixes gradle provider verification from pact file #1587 (Ronald Holshausen, Fri Jul 29 14:29:50 2022 +1000)
+* d7ec72411 - fix(Gradle): Update methods on GradleProviderInfo to support calling hasPactsFromPactBroker without options #1586 (Ronald Holshausen, Fri Jul 29 13:20:09 2022 +1000)
+* 9e98f0b18 - Update README.md (Ronald Holshausen, Wed Jul 27 11:55:08 2022 +1000)
+* 0bc7cdfe5 - chore: upgrade plugin-publish Gradle plugin to 1.0.0 (Ronald Holshausen, Wed Jul 27 09:00:49 2022 +1000)
+* 84fa682ed - chore: correct publishing Gradle plugin (Ronald Holshausen, Tue Jul 26 16:42:06 2022 +1000)
+* 76d846abf - bump version to 4.3.13 (Ronald Holshausen, Tue Jul 26 16:41:26 2022 +1000)
+
 # 4.3.12 - Bugfixes + Update Maven plugin with latest consumer version selectors
 
 * ad812c438 - feat: add support for LocalDate to LambdaDslObject #1530 (Ronald Holshausen, Tue Jul 26 15:15:10 2022 +1000)
