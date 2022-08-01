@@ -85,8 +85,9 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
     return fromPactBroker
   }
 
+  @JvmOverloads
   @Deprecated(message = "hasPactsFromPactBroker has been deprecated in favor of fromPactBroker")
-  fun hasPactsFromPactBroker(options: Map<String, Any>, pactBrokerUrl: String): List<ConsumerInfo> {
+  fun hasPactsFromPactBroker(options: Map<String, Any> = mapOf(), pactBrokerUrl: String): List<ConsumerInfo> {
     return try {
       provider.hasPactsFromPactBroker(options, pactBrokerUrl)
     } catch (e: Exception) {
@@ -118,9 +119,10 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
     return fromPactBroker
   }
 
+  @JvmOverloads
   @Deprecated(message = "hasPactsFromPactBroker has been deprecated in favor of fromPactBroker")
   fun hasPactsFromPactBrokerWithSelectors(
-    options: Map<String, Any?>,
+    options: Map<String, Any?> = mapOf(),
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>
   ): List<ConsumerInfo> {
@@ -177,7 +179,7 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
         |For instance:
         |
         |fromPactBroker {
-        |    selectors = latestTags('test')
+        |    withSelectors { latestTag('test') }
         |    enablePending = true
         |    providerTags = ['master']
         |}
