@@ -33,6 +33,7 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.kotlinFunction
 
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
@@ -372,16 +373,22 @@ open class PactBrokerLoader(
     @JvmStatic
     fun testClassHasSelectorsMethod(testClass: Class<*>?): KCallable<*>? {
       val projectedType = SelectorBuilder::class.starProjectedType
-      return testClass?.kotlin?.members?.firstOrNull { method ->
-        method.findAnnotation<PactBrokerConsumerVersionSelectors>() != null
-          && (
+      return try {
+        testClass?.kotlin?.members?.firstOrNull { method ->
+          method.findAnnotation<PactBrokerConsumerVersionSelectors>() != null && (
             // static method
             method.parameters.isEmpty()
-            // instance method
-            || (method.parameters.size == 1 && method.parameters[0].kind == KParameter.Kind.INSTANCE)
+              // instance method
+              || (method.parameters.size == 1 && method.parameters[0].kind == KParameter.Kind.INSTANCE)
+            && method.visibility == KVisibility.PUBLIC
+            && (
+              method.returnType.isSubtypeOf(projectedType)
+              || method.returnType.isSubtypeOf(List::class.starProjectedType)
+            )
           )
-          && method.visibility == KVisibility.PUBLIC
-          && (method.returnType.isSubtypeOf(projectedType) || method.returnType.isSubtypeOf(List::class.starProjectedType))
+        }
+      } catch (e: NullPointerException) {
+        null
       }
     }
   }
