@@ -9,12 +9,14 @@ import au.com.dius.pact.provider.junitsupport.target.Target;
 import au.com.dius.pact.provider.junitsupport.target.TestTarget;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+
 @RunWith(PactRunner.class)
 @Provider("AmqpProvider")
 @PactFolder("src/test/resources/amqp_pacts")
 public class MessageTest {
   @TestTarget
-  public final Target target = new MessageTarget();
+  public final Target target = new MessageTarget(Arrays.asList("au.com.dius.pact.provider.junit"));
 
   @State("SomeProviderState")
   public void someProviderState() {}
