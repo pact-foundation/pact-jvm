@@ -1,32 +1,39 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.difflib.DiffUtils
+import com.github.difflib.patch.ChangeDelta
 
 private const val NEW_LINE = '\n'
 
 fun generateDiff(expectedBodyString: String, actualBodyString: String): List<String> {
   val expectedLines = expectedBodyString.split(NEW_LINE)
   val actualLines = actualBodyString.split(NEW_LINE)
-  val patch = difflib.DiffUtils.diff(expectedLines, actualLines)
+  val patch = DiffUtils.diff(expectedLines, actualLines)
 
   val diff = mutableListOf<String>()
-
+  var line = 0
   patch.deltas.forEach { delta ->
-    if (delta.original.position >= 1 && (diff.isEmpty() || expectedLines[delta.original.position - 1] != diff.last())) {
-      diff.add(expectedLines[delta.original.position - 1])
-    }
+    when (delta) {
+      is ChangeDelta<*> -> {
+        if (delta.source.position >= 1 && (diff.isEmpty() ||
+            expectedLines[delta.source.position - 1] != diff.last())) {
+          diff.addAll(expectedLines.slice(line until delta.source.position))
+        }
 
-    delta.original.lines.forEach {
-      diff.add("-$it")
-    }
-    delta.revised.lines.forEach {
-      diff.add("+$it")
-    }
+        delta.source.lines.forEach {
+          diff.add("-$it")
+        }
+        delta.target.lines.forEach {
+          diff.add("+$it")
+        }
 
-    val pos = delta.original.position + delta.original.lines.size
-    if (pos < expectedLines.size) {
-      diff.add(expectedLines[pos])
+        line = delta.source.position + delta.source.lines.size
+      }
     }
+  }
+  if (line < expectedLines.size) {
+    diff.addAll(expectedLines.listIterator(line).asSequence())
   }
   return diff
 }
