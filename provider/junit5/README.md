@@ -130,7 +130,7 @@ For example:
 
 ```java
     @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
-    static SelectorBuilder consumerVersionSelectors() {
+    public static SelectorBuilder consumerVersionSelectors() {
       // Select Pacts for consumers deployed to production with branch 'FEAT-123' 
       return new SelectorBuilder()
         .environment('production')
@@ -142,7 +142,7 @@ Or for example where the branch is set with the `BRANCH_NAME` environment variab
 
 ```java
     @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
-    static SelectorBuilder consumerVersionSelectors() {
+    public static SelectorBuilder consumerVersionSelectors() {
       // Select Pacts for consumers deployed to production with branch from CI build 
       return new SelectorBuilder()
         .environment('production')
