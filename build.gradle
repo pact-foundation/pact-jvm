@@ -55,10 +55,15 @@ subprojects {
   apply plugin: 'jacoco'
   apply plugin: 'org.jetbrains.kotlin.jvm'
   apply plugin: 'io.gitlab.arturbosch.detekt'
-  if (System.env.TRAVIS != 'true') {
+  if (System.env.CI != 'true') {
     apply plugin: 'org.jetbrains.dokka'
   }
   //apply plugin: "org.javamodularity.moduleplugin"
+
+  dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  }
 
     compileTestGroovy {
       classpath = classpath.plus(files(compileTestKotlin.destinationDir))
@@ -101,11 +106,13 @@ subprojects {
   if (System.env.CI != 'true') {
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
       archiveClassifier = 'javadoc'
+      duplicatesStrategy = 'exclude'
       from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
     }
   } else {
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc]) {
       archiveClassifier = 'javadoc'
+      duplicatesStrategy = 'exclude'
       from javadoc.destinationDir, groovydoc.destinationDir
     }
   }
@@ -125,7 +132,7 @@ subprojects {
         showExceptions true
         showStackTraces true
         showStandardStreams false
-        events "passed", "skipped", "failed" //, "standardOut", "standardError"
+        events "passed", "skipped", "failed"
       }
     } else {
       // Show test results.
@@ -138,60 +145,61 @@ subprojects {
     systemProperty 'pact_do_not_track', 'true'
   }
 
-  publishing {
-    publications {
-      mavenPublication(MavenPublication) {
-        from components.java
-        if (!project.hasProperty('isGradleRelease')) {
+  // Gradle plugin plugin will automatically add these
+  if (name != 'gradle') {
+    publishing {
+      publications {
+        mavenPublication(MavenPublication) {
+          from components.java
           artifact sourceJar
           artifact javadocJar
-        }
-        pom {
-          name = project.name
-          description = StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
-          url = 'https://github.com/DiUS/pact-jvm'
-          licenses {
-            license {
-              name = 'Apache 2'
-              url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-              distribution = 'repo'
-            }
-          }
-          scm {
+
+          pom {
+            name = project.name
+            description = StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
             url = 'https://github.com/DiUS/pact-jvm'
-            connection = 'https://github.com/DiUS/pact-jvm.git'
-          }
-
-          developers {
-            developer {
-              id = 'thetrav'
-              name = 'Travis Dixon'
-              email = 'the.trav@gmail.com'
+            licenses {
+              license {
+                name = 'Apache 2'
+                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution = 'repo'
+              }
             }
-            developer {
-              id = 'rholshausen'
-              name = 'Ronald Holshausen'
-              email = 'rholshausen@dius.com.au'
+            scm {
+              url = 'https://github.com/pact-foundation/pact-jvm'
+              connection = 'https://github.com/pact-foundation/pact-jvm.git'
+            }
+
+            developers {
+              developer {
+                id = 'thetrav'
+                name = 'Travis Dixon'
+                email = 'the.trav@gmail.com'
+              }
+              developer {
+                id = 'rholshausen'
+                name = 'Ronald Holshausen'
+                email = 'rholshausen@dius.com.au'
+              }
+            }
+          }
+        }
+      }
+      repositories {
+        maven {
+          url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+          if (project.hasProperty('sonatypeUsername')) {
+            credentials {
+              username sonatypeUsername
+              password sonatypePassword
             }
           }
         }
       }
     }
-    repositories {
-      maven {
-        url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-        if (project.hasProperty('sonatypeUsername')) {
-          credentials {
-            username sonatypeUsername
-            password sonatypePassword
-          }
-        }
-      }
-    }
-  }
 
-  if (System.env.CI != 'true') {
     signing {
+      required { project.hasProperty('isRelease') }
       sign publishing.publications.mavenPublication
     }
   }
