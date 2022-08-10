@@ -35,3 +35,8 @@ compileTestGroovy {
   dependsOn compileTestScala
   classpath = classpath.plus(files(compileTestScala.destinationDir))
 }
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = "1g"
+}
