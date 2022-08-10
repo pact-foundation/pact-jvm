@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.junit.loader
+package au.com.dius.pact.provider.junitsupport.loader
 
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
@@ -12,14 +12,6 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
-import au.com.dius.pact.provider.junitsupport.loader.IConsumerVersionSelectors
-import au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
-import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder
-import au.com.dius.pact.provider.junitsupport.loader.VersionSelector
-import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
-import au.com.dius.pact.provider.junitsupport.loader.PactBroker
-import au.com.dius.pact.provider.junitsupport.loader.PactBrokerAuth
-import au.com.dius.pact.provider.junitsupport.loader.PactBrokerLoader
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import spock.lang.Issue
@@ -1448,16 +1440,19 @@ class PactBrokerLoaderSpec extends Specification {
 
     where:
 
-    clazz                           | result
-    null                            | false
-    PactBrokerLoaderSpec            | false
-    FullPactBrokerAnnotation        | false
-    IncorrectTypesOnSelectorMethod  | false
-    IncorrectTypesOnSelectorMethod2 | false
-    IncorrectScopeOnSelectorMethod  | false
-    CorrectSelectorMethod           | true
-    CorrectSelectorMethod2          | true
-    CorrectSelectorMethod3          | true
+    clazz                                 | result
+    null                                  | false
+    PactBrokerLoaderSpec                  | false
+    FullPactBrokerAnnotation              | false
+    IncorrectTypesOnSelectorMethod        | false
+    IncorrectTypesOnSelectorMethod2       | false
+    IncorrectScopeOnSelectorMethod        | false
+    CorrectSelectorMethod                 | true
+    CorrectSelectorMethod2                | true
+    CorrectSelectorMethod3                | true
+    KotlinClassWithSelectorMethod         | true
+    ExtendedFromKotlin                    | true
+    KotlinAbstractClassWithSelectorMethod | true
   }
 
   @Unroll
@@ -1467,10 +1462,12 @@ class PactBrokerLoaderSpec extends Specification {
 
     where:
 
-    clazz                  | instance                     | result
-    CorrectSelectorMethod  | new CorrectSelectorMethod()  | [new ConsumerVersionSelectors.Environment('CorrectSelectorMethod')]
-    CorrectSelectorMethod2 | new CorrectSelectorMethod2() | [new ConsumerVersionSelectors.Environment('CorrectSelectorMethod2')]
-    CorrectSelectorMethod3 | null                         | [new ConsumerVersionSelectors.Environment('CorrectSelectorMethod3')]
+    clazz                               | instance                            | result
+    CorrectSelectorMethod               | new CorrectSelectorMethod()         | [new ConsumerVersionSelectors.Environment('CorrectSelectorMethod')]
+    CorrectSelectorMethod2              | new CorrectSelectorMethod2()        | [new ConsumerVersionSelectors.Environment('CorrectSelectorMethod2')]
+    CorrectSelectorMethod3              | null                                | [new ConsumerVersionSelectors.Environment('CorrectSelectorMethod3')]
+    KotlinClassWithSelectorMethod       | new KotlinClassWithSelectorMethod() | [new ConsumerVersionSelectors.Environment('KotlinSelectorMethod')]
+    ExtendedFromKotlin                  | new ExtendedFromKotlin()            | [new ConsumerVersionSelectors.Environment('KotlinSelectorMethod')]
   }
 
   private static VersionSelector createVersionSelector(Map args = [:]) {
@@ -1602,4 +1599,6 @@ class PactBrokerLoaderSpec extends Specification {
       new SelectorBuilder().environment('CorrectSelectorMethod3').build()
     }
   }
+
+  static class ExtendedFromKotlin extends KotlinAbstractClassWithSelectorMethod { }
 }
