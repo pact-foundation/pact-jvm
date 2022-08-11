@@ -1444,8 +1444,6 @@ class PactBrokerLoaderSpec extends Specification {
     null                                  | false
     PactBrokerLoaderSpec                  | false
     FullPactBrokerAnnotation              | false
-    IncorrectTypesOnSelectorMethod        | false
-    IncorrectTypesOnSelectorMethod2       | false
     IncorrectScopeOnSelectorMethod        | false
     CorrectSelectorMethod                 | true
     CorrectSelectorMethod2                | true
@@ -1453,6 +1451,18 @@ class PactBrokerLoaderSpec extends Specification {
     KotlinClassWithSelectorMethod         | true
     ExtendedFromKotlin                    | true
     KotlinAbstractClassWithSelectorMethod | true
+  }
+
+  @Unroll
+  def 'test Class Has Selectors Method - invalid methods'() {
+    when:
+    PactBrokerLoader.testClassHasSelectorsMethod(clazz)
+
+    then:
+    thrown(IllegalAccessException)
+
+    where:
+    clazz << [IncorrectTypesOnSelectorMethod, IncorrectTypesOnSelectorMethod2 ]
   }
 
   @Unroll
