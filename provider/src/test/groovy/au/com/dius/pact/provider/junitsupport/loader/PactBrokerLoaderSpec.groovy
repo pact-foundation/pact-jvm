@@ -1468,7 +1468,7 @@ class PactBrokerLoaderSpec extends Specification {
   @Unroll
   def 'Invoke Selectors Method'() {
     expect:
-    PactBrokerLoader.invokeSelectorsMethod(instance, PactBrokerLoader.testClassHasSelectorsMethod(clazz)) == result
+    PactBrokerLoader.invokeSelectorsMethod(instance, clazz, PactBrokerLoader.testClassHasSelectorsMethod(clazz)) == result
 
     where:
 

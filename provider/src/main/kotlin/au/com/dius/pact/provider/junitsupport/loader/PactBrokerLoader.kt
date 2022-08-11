@@ -23,15 +23,12 @@ import com.github.michaelbull.result.Ok
 import mu.KLogging
 import org.apache.hc.core5.net.URIBuilder
 import java.io.IOException
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.net.URI
 import java.net.URISyntaxException
-import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.kotlinFunction
@@ -138,7 +135,7 @@ open class PactBrokerLoader(
     val tags = pactBrokerTags.orEmpty().flatMap { ep.parseListExpression(it, resolver) }
     val selectorsMethod = testClassHasSelectorsMethod(this.testClass)
     return if (selectorsMethod != null) {
-      invokeSelectorsMethod(this.testInstance, selectorsMethod)
+      invokeSelectorsMethod(this.testInstance, this.testClass, selectorsMethod)
     } else if (shouldFallBackToTags(tags, pactBrokerConsumerVersionSelectors, resolver)) {
       permutations(tags, pactBrokerConsumers.flatMap { ep.parseListExpression(it, resolver) })
         .map { ConsumerVersionSelectors.Selector(it.first, true, it.second) }
@@ -354,28 +351,49 @@ open class PactBrokerLoader(
 
   companion object : KLogging() {
     @JvmStatic
-    fun invokeSelectorsMethod(testInstance: Any?, selectorsMethod: KCallable<*>): List<ConsumerVersionSelectors> {
+    fun invokeSelectorsMethod(
+      testInstance: Any?,
+      testClass: Class<*>?,
+      method: Method
+    ): List<ConsumerVersionSelectors> {
       val projectedType = SelectorBuilder::class.starProjectedType
+      method.trySetAccessible()
+      val selectorsMethod = method.kotlinFunction!!
       return when (selectorsMethod.parameters.size) {
         0 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
-          val builder = selectorsMethod.call() as SelectorBuilder
+          val builder = method.invoke(null) as SelectorBuilder
           builder.build()
         } else {
-          selectorsMethod.call() as List<ConsumerVersionSelectors>
+          method.invoke(null) as List<ConsumerVersionSelectors>
         }
-        1 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
-          val builder = selectorsMethod.call(testInstance) as SelectorBuilder
-          builder.build()
-        } else {
-          selectorsMethod.call(testInstance) as List<ConsumerVersionSelectors>
+        1 -> {
+          val instance = instanceForMethod(testInstance, testClass, method)
+          if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
+            val builder = method.invoke(instance) as SelectorBuilder
+            builder.build()
+          } else {
+            method.invoke(instance) as List<ConsumerVersionSelectors>
+          }
         }
         else -> throw java.lang.IllegalArgumentException(
           "Consumer version selector method should not take any parameters and return an instance of SelectorBuilder")
       }
     }
 
+    private fun instanceForMethod(testInstance: Any?, testClass: Class<*>?, selectorsMethod: Method): Any? {
+      return if (testInstance == null) {
+        val declaringClass = testClass?.kotlin ?: selectorsMethod.declaringClass.kotlin
+        if (declaringClass.isCompanion) {
+          declaringClass.companionObjectInstance
+        } else {
+          declaringClass.java.newInstance()
+        }
+      } else testInstance
+    }
+
     @JvmStatic
-    fun testClassHasSelectorsMethod(testClass: Class<*>?): KFunction<*>? {
+    @Suppress("ThrowsCount")
+    fun testClassHasSelectorsMethod(testClass: Class<*>?): Method? {
       val method = testClass?.methods?.firstOrNull { method ->
         method.getAnnotation(PactBrokerConsumerVersionSelectors::class.java) != null
       }
@@ -402,7 +420,7 @@ open class PactBrokerLoader(
         }
       }
 
-      return method?.kotlinFunction
+      return method
     }
   }
 }

@@ -5,11 +5,13 @@ class KotlinClassWithSelectorMethod {
   fun consumerVersionSelectors() = SelectorBuilder().environment("KotlinSelectorMethod")
 }
 
+@Suppress("UnnecessaryAbstractClass")
 abstract class KotlinAbstractClassWithSelectorMethod {
   @PactBrokerConsumerVersionSelectors
   fun consumerVersionSelectors() = SelectorBuilder().environment("KotlinSelectorMethod")
 }
 
+@Suppress("UtilityClassWithPublicConstructor")
 class KotlinClassWithStaticSelectorMethod {
   companion object {
     @PactBrokerConsumerVersionSelectors
