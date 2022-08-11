@@ -134,7 +134,12 @@ object ProviderUtils : KLogging() {
     return result
   }
 
-  fun instantiatePactLoader(pactSource: PactSource, testClass: Class<*>, testInstance: Any?, annotation: Annotation?): PactLoader {
+  fun instantiatePactLoader(
+    pactSource: PactSource,
+    testClass: Class<*>,
+    testInstance: Any?,
+    annotation: Annotation?
+  ): PactLoader {
     val pactLoaderClass = pactSource.value
     val pactLoader = try {
       // Checks if there is a constructor with one argument of type Class.

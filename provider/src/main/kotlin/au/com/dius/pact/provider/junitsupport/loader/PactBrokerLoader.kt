@@ -24,10 +24,12 @@ import com.github.michaelbull.result.Ok
 import mu.KLogging
 import org.apache.http.client.utils.URIBuilder
 import java.io.IOException
+import java.lang.reflect.Modifier
 import java.net.URI
 import java.net.URISyntaxException
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
@@ -371,25 +373,34 @@ open class PactBrokerLoader(
     }
 
     @JvmStatic
-    fun testClassHasSelectorsMethod(testClass: Class<*>?): KCallable<*>? {
-      val projectedType = SelectorBuilder::class.starProjectedType
-      return try {
-        testClass?.kotlin?.members?.firstOrNull { method ->
-          method.findAnnotation<PactBrokerConsumerVersionSelectors>() != null && (
-            // static method
-            method.parameters.isEmpty()
-              // instance method
-              || (method.parameters.size == 1 && method.parameters[0].kind == KParameter.Kind.INSTANCE)
-            && method.visibility == KVisibility.PUBLIC
-            && (
-              method.returnType.isSubtypeOf(projectedType)
-              || method.returnType.isSubtypeOf(List::class.starProjectedType)
-            )
-          )
-        }
-      } catch (e: NullPointerException) {
-        null
+    fun testClassHasSelectorsMethod(testClass: Class<*>?): KFunction<*>? {
+      val method = testClass?.methods?.firstOrNull { method ->
+        method.getAnnotation(PactBrokerConsumerVersionSelectors::class.java) != null
       }
+
+      if (method != null) {
+        if (method.parameterCount > 0) {
+          throw IllegalAccessException("Consumer version selector methods must not have any parameters. " +
+            "Method ${method.name} has ${method.parameterCount}.")
+        }
+        val modifiers = method.modifiers
+        if (!Modifier.isPublic(modifiers)) {
+          throw IllegalAccessException("Consumer version selector methods must be public and static. " +
+            "Method ${method.name} is not accessible.")
+        }
+        if (!method.trySetAccessible() && !method.canAccess(null)) {
+          throw IllegalAccessException("Consumer version selector methods must be public and static. " +
+            "Method ${method.name} is not accessible (canAccess returned false).")
+        }
+
+        if (!SelectorBuilder::class.java.isAssignableFrom(method.returnType)
+          && !List::class.java.isAssignableFrom(method.returnType)) {
+          throw IllegalAccessException("Consumer version selector methods must be return either a SelectorBuilder or" +
+            " a list of ConsumerVersionSelectors. ${method.name} returns a ${method.returnType.simpleName}.")
+        }
+      }
+
+      return method?.kotlinFunction
     }
   }
 }

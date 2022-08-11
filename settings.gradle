@@ -35,4 +35,4 @@ project(':provider:scalasupport_2.13').projectDir = file('provider/scalasupport'
 
 include 'pact-jvm-server'
 include   'pact-specification-test'
-include 'pact-publish'
+//include 'pact-publish'
