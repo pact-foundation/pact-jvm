@@ -130,7 +130,7 @@ For example:
 
 ```java
     @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
-    static SelectorBuilder consumerVersionSelectors() {
+    public static SelectorBuilder consumerVersionSelectors() {
       // Select Pacts for consumers deployed to production with branch 'FEAT-123' 
       return new SelectorBuilder()
         .environment('production')
@@ -142,7 +142,7 @@ Or for example where the branch is set with the `BRANCH_NAME` environment variab
 
 ```java
     @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
-    static SelectorBuilder consumerVersionSelectors() {
+    public static SelectorBuilder consumerVersionSelectors() {
       // Select Pacts for consumers deployed to production with branch from CI build 
       return new SelectorBuilder()
         .environment('production')
@@ -164,8 +164,8 @@ Used for coordinated development between consumer and provider teams using match
 - `deployedTo(environment: String)` - Any versions currently deployed to the specified environment.
 - `releasedTo(environment: String)` - Any versions currently released and supported in the specified environment.
 - `environment(environment: String)` - Any versions currently deployed or released and supported in the specified environment.
-- `tag(name: String)` - [DEPRECATED] All versions with the specified tag. Tags are deprecated in favor of branches.
-- `latestTag(name: String)` - [DEPRECATED] The latest version for each consumer with the specified tag. Tags are deprecated in favor of branches.
+- `tag(name: String)` - All versions with the specified tag. Tags are deprecated in favor of branches.
+- `latestTag(name: String)` - The latest version for each consumer with the specified tag. Tags are deprecated in favor of branches.
 
 If you require more control, your selector method can also return a list of `au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors` 
 instead of the builder class.   

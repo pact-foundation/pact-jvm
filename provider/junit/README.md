@@ -271,6 +271,68 @@ The following keys may be managed through the environment
 * `pactbroker.consumers` (comma separated list to filter pacts by consumer; if not provided, will fetch all pacts for the provider)
 * `pactbroker.consumerversionselectors.rawjson` (overrides the selectors with the RAW JSON)
 
+## Selecting the Pacts to verify with Consumer Version Selectors [4.3.14+]
+
+You can select the Pacts to verify using [Consumer Version Selectors](https://docs.pact.io/pact_broker/advanced_topics/consumer_version_selectors).
+There are a few ways to do this.
+
+### Using an annotated method with a builder
+You can add a public static method to your test class annotated with `au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors`
+which returns a `SelectorBuilder`. The builder will allow you to specify the selectors to use in a type-safe manner.
+
+For example:
+
+```java
+    @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
+    public static SelectorBuilder consumerVersionSelectors() {
+      // Select Pacts for consumers deployed to production with branch 'FEAT-123' 
+      return new SelectorBuilder()
+        .environment('production')
+        .branch('FEAT-123');
+    }
+```
+
+Or for example where the branch is set with the `BRANCH_NAME` environment variable:
+
+```java
+    @au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors
+    public static SelectorBuilder consumerVersionSelectors() {
+      // Select Pacts for consumers deployed to production with branch from CI build 
+      return new SelectorBuilder()
+        .environment('production')
+        .branch(System.getenv('BRANCH_NAME'));
+    }
+```
+
+The builder has the following methods:
+
+- `mainBranch()` - The latest version from the main branch of each consumer, as specified by the consumer's mainBranch property.
+- `branch(name: String, consumer: String? = null, fallback: String? = null)` - The latest version from a particular branch
+  of each consumer, or for a particular consumer if the second parameter is provided. If fallback is provided, falling
+  back to the fallback branch if none is found from the specified branch.
+- `matchingBranch()` - The latest version from any branch of the consumer that has the same name as the current branch
+  of the provider. Used for coordinated development between consumer and provider teams using matching feature branch names.
+- `deployedOrReleased()` - All the currently deployed and currently released and supported versions of each consumer.
+- `matchingBranch()` - The latest version from any branch of the consumer that has the same name as the current branch of the provider.
+  Used for coordinated development between consumer and provider teams using matching feature branch names.
+- `deployedTo(environment: String)` - Any versions currently deployed to the specified environment.
+- `releasedTo(environment: String)` - Any versions currently released and supported in the specified environment.
+- `environment(environment: String)` - Any versions currently deployed or released and supported in the specified environment.
+- `tag(name: String)` - All versions with the specified tag. Tags are deprecated in favor of branches.
+- `latestTag(name: String)` - The latest version for each consumer with the specified tag. Tags are deprecated in favor of branches.
+
+If you require more control, your selector method can also return a list of `au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors`
+instead of the builder class.
+
+### Providing the raw Consumer Version Selectors JSON
+
+You can also set the consumer versions selectors as raw JSON with the `pactbroker.consumerversionselectors.rawjson` JVM
+system property or environment variable. This will allow you to pass the selectors in from a CI build.
+
+**IMPORTANT NOTE:** *JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.*
+Just passing them in on the command line won't work, as they will not be available to the test JVM that is running your test.
+To set the properties, see [Maven Surefire Using System Properties](https://maven.apache.org/surefire/maven-surefire-plugin/examples/system-properties.html)
+and [Gradle Test docs](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:systemProperties).
 
 #### Using tags with the pact broker
 
