@@ -36,7 +36,7 @@ subprojects {
     return
   }
 
-  version = '4.3.14'
+  version = '4.3.15'
   
   buildscript {
     repositories {
