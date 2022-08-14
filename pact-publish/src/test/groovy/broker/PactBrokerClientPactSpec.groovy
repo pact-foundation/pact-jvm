@@ -3,6 +3,7 @@ package broker
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
@@ -915,9 +916,9 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
-          new ConsumerVersionSelector('test', true, null, null)
-      ], [], false, '')
+      def consumerPacts = pactBrokerClient.fetchConsumersWithSelectorsV2('Activity Service', [
+        new ConsumerVersionSelectors.Selector('test', true, null, null )
+      ], [], '', false, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
@@ -1028,9 +1029,9 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
-        new ConsumerVersionSelector('test', true, null, null)
-      ], ['master'], true, '')
+      def consumerPacts = pactBrokerClient.fetchConsumersWithSelectorsV2('Activity Service', [
+        new ConsumerVersionSelectors.Selector('test', true, null, null)
+      ], ['master'], '', true, '')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
@@ -1152,9 +1153,9 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
-        new ConsumerVersionSelector('test', true, null, null)
-      ], ['master'], true, '2020-06-24')
+      def consumerPacts = pactBrokerClient.fetchConsumersWithSelectorsV2('Activity Service', [
+        new ConsumerVersionSelectors.Selector('test', true, null, null)
+      ], ['master'], '', true, '2020-06-24')
       assert consumerPacts instanceof Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].wip
