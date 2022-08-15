@@ -1,5 +1,34 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0-beta.4 - Fixes from master + fix for tests using gRPC plugin
+
+* e4d37b9a8 - chore: Upgrade plugin driver to 0.1.5 (Ronald Holshausen, Mon Aug 15 09:48:53 2022 +1000)
+* 9a1c9c3cf - fix: Upgrade plugin driver to 0.1.4. Supports plugins that use IP4 addresses (Ronald Holshausen, Fri Aug 12 16:27:09 2022 +1000)
+* 87e053d06 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Fri Aug 12 13:07:54 2022 +1000)
+* d0947165c - bump version to 4.3.15 (Ronald Holshausen, Fri Aug 12 12:52:03 2022 +1000)
+* 5cc2bdba1 - update changelog for release 4.3.14 (Ronald Holshausen, Fri Aug 12 12:27:04 2022 +1000)
+* ddf7d794b - feat: add example JUnit4 Spring test using new consumer version selector method (Ronald Holshausen, Thu Aug 11 14:18:30 2022 +1000)
+* 09d907b79 - feat: Add docs for using consumer version selector methods with JUnit4 (Ronald Holshausen, Thu Aug 11 14:05:42 2022 +1000)
+* 1a7952908 - chore: Update readme with updated Kotlin version (Ronald Holshausen, Thu Aug 11 13:40:26 2022 +1000)
+* 9be3a9bb7 - Merge pull request #1597 from jaswanthm/fix/CVE-2022-24329-upgrade-kotlin-jvm-to-1.6.21 (Ronald Holshausen, Thu Aug 11 13:37:25 2022 +1000)
+* cfc6e3893 - fix: support consumer version selector methods on Kotlin test classes #1594 (Ronald Holshausen, Thu Aug 11 13:21:40 2022 +1000)
+* d56079c0d - fix: raise an exception when the consumerVersionSelectors method has the wrong signature #1594 (Ronald Holshausen, Thu Aug 11 11:53:19 2022 +1000)
+* 4ee099dae - Updated kotlin version from 1.5.31 to 1.6.21 (Jaswanth, Thu Aug 11 11:51:00 2022 +1000)
+* 561f0428d - fix: allways apply the plugin-publish plugin to the Gradle plugin project #1588 (Ronald Holshausen, Wed Aug 10 16:17:49 2022 +1000)
+* 5ef6270da - chore: move PactBrokerLoaderSpec to provider test source (Ronald Holshausen, Wed Aug 10 15:49:04 2022 +1000)
+* 510c48482 - chore: Correct JUnit 5 readme (Ronald Holshausen, Wed Aug 10 09:43:52 2022 +1000)
+* 59498da32 - Merge pull request #1595 from stefano-lucka/consumerVersionSelectors-must-be-public (Ronald Holshausen, Wed Aug 10 09:20:03 2022 +1000)
+* 37de1f298 - Consumer version selector method must be public (Stefano Lucka, Tue Aug 9 19:30:32 2022 +0200)
+* 1217b6148 - Merge pull request #1590 from bfugas/diff-utils-upgrade (Ronald Holshausen, Mon Aug 8 10:59:12 2022 +1000)
+* 18832534b - Replace diff-utils with the latest actively maintained version 4.12 (Bernard Fugas, Fri Aug 5 08:38:11 2022 +0200)
+* c8a799bb6 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Mon Aug 1 10:16:47 2022 +1000)
+* 8c31b4f1d - bump version to 4.3.14 (Ronald Holshausen, Mon Aug 1 09:30:12 2022 +1000)
+* aa425a9fe - update changelog for release 4.3.13 (Ronald Holshausen, Mon Aug 1 09:15:51 2022 +1000)
+* b85250936 - fix(Gradle): fixes gradle provider verification from pact file #1587 (Ronald Holshausen, Fri Jul 29 14:29:50 2022 +1000)
+* d7ec72411 - fix(Gradle): Update methods on GradleProviderInfo to support calling hasPactsFromPactBroker without options #1586 (Ronald Holshausen, Fri Jul 29 13:20:09 2022 +1000)
+* 9e98f0b18 - Update README.md (Ronald Holshausen, Wed Jul 27 11:55:08 2022 +1000)
+* 30b8d7dbd - bump version to 4.4.0-beta.4 (Ronald Holshausen, Wed Jul 27 11:43:36 2022 +1000)
+
 # 4.3.14 - Bugfix Release
 
 * ddf7d794b - feat: add example JUnit4 Spring test using new consumer version selector method (Ronald Holshausen, Thu Aug 11 14:18:30 2022 +1000)
