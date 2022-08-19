@@ -410,6 +410,16 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   }
 
   /**
+   * Variant of [PactDslRequestWithPath.willRespondWith] that introduces a Lambda DSL syntax to better visually
+   * separate request and response in a pact.
+   *
+   * @see PactDslRequestWithPath.willRespondWith
+   * @sample au.com.dius.pact.consumer.dsl.samples.PactLambdaDslSamples.requestResponse
+   */
+  fun willRespondWith(addResponseMatchers: PactDslResponse.() -> PactDslResponse): PactDslResponse =
+    addResponseMatchers(willRespondWith())
+
+  /**
    * Match a query parameter with a regex. A random query parameter value will be generated from the regex
    * if the example value is not provided.
    *
