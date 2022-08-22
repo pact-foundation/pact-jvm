@@ -292,6 +292,18 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
   }
 
   /**
+   * Variant of [PactDslRequestWithPath.path] that introduces a Lambda DSL syntax to better visually separate
+   * request and response in a pact.
+   *
+   * @see PactDslRequestWithPath.path
+   * @sample au.com.dius.pact.consumer.dsl.samples.PactLambdaDslSamples.requestResponse
+   */
+  inline fun path(
+    path: String,
+    addRequestMatchers: PactDslRequestWithPath.() -> PactDslRequestWithPath
+  ): PactDslRequestWithPath = addRequestMatchers(path(path))
+
+  /**
    * The path of the request. This will generate a random path to use when generating requests if the example
    * value is not provided.
    *
@@ -310,6 +322,20 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
       description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
       defaultRequestValues, defaultResponseValues, comments, version, additionalMetadata)
   }
+
+  /**
+   * Variant of [PactDslRequestWithoutPath.matchPath] that introduces a Lambda DSL syntax to better visually separate
+   * request and response in a pact.
+   *
+   * @see PactDslRequestWithoutPath.matchPath
+   * @sample au.com.dius.pact.consumer.dsl.samples.PactLambdaDslSamples.requestResponse
+   */
+  @JvmOverloads
+  inline fun matchPath(
+    pathRegex: String,
+    path: String = Generex(pathRegex).random(),
+    addRequestMatchers: PactDslRequestWithPath.() -> PactDslRequestWithPath
+  ): PactDslRequestWithPath = addRequestMatchers(matchPath(pathRegex, path))
 
   /**
    * Sets up a file upload request. This will add the correct content type header to the request
@@ -364,6 +390,19 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
       description, example, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
       defaultRequestValues, defaultResponseValues, comments, version, additionalMetadata)
   }
+
+  /**
+   * Variant of [PactDslRequestWithoutPath.pathFromProviderState] that introduces a Lambda DSL syntax to better
+   * visually separate request and response in a pact.
+   *
+   * @see PactDslRequestWithoutPath.pathFromProviderState
+   * @sample au.com.dius.pact.consumer.dsl.samples.PactLambdaDslSamples.requestResponse
+   */
+  inline fun pathFromProviderState(
+    expression: String,
+    example: String,
+    addRequestMatchers: PactDslRequestWithPath.() -> PactDslRequestWithPath
+  ): PactDslRequestWithPath = addRequestMatchers(pathFromProviderState(expression, example))
 
   /**
    * Matches a date field using the provided date pattern
