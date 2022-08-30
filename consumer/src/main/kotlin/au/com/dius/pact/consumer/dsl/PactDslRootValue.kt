@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.generators.UuidGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.Json.toJson
@@ -453,7 +454,7 @@ open class PactDslRootValue : DslPart("", "") {
     }
 
     /**
-     * Value that must be a decimal value
+     * Value that must be a decimal value (has significant digits after the decimal point)
      */
     @JvmStatic
     fun decimalType(): PactDslRootValue {
@@ -465,7 +466,7 @@ open class PactDslRootValue : DslPart("", "") {
     }
 
     /**
-     * Value that must be a decimalType value
+     * Value that must be a decimalType value (has significant digits after the decimal point)
      * @param number example decimalType value
      */
     @JvmStatic
@@ -477,7 +478,7 @@ open class PactDslRootValue : DslPart("", "") {
     }
 
     /**
-     * Value that must be a decimalType value
+     * Value that must be a decimalType value (has significant digits after the decimal point)
      * @param number example decimalType value
      */
     @JvmStatic
@@ -485,6 +486,73 @@ open class PactDslRootValue : DslPart("", "") {
       val value = PactDslRootValue()
       value.setValue(number)
       value.setMatcher(NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
+      return value
+    }
+
+    /**
+     * Attribute that can be any number and which must match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    @JvmStatic
+    fun numberMatching(regex: String, example: Number): PactDslRootValue {
+      require(example.toString().matches(Regex(regex))) {
+        "Example value $example does not match the provided regular expression '$regex'"
+      }
+
+      val value = PactDslRootValue()
+      value.setValue(example)
+
+      value.matchers.addRules("", listOf(
+        NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER),
+        RegexMatcher(regex, example.toString())
+      ))
+
+      return value
+    }
+
+    /**
+     * Attribute that can be any number decimal number (has significant digits after the decimal point) and which must
+     * match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    @JvmStatic
+    fun decimalMatching(regex: String, example: Double): PactDslRootValue {
+      require(example.toString().matches(Regex(regex))) {
+        "Example value $example does not match the provided regular expression '$regex'"
+      }
+
+      val value = PactDslRootValue()
+      value.setValue(example)
+
+      value.matchers.addRules("", listOf(
+        NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL),
+        RegexMatcher(regex, example.toString())
+      ))
+
+      return value
+    }
+
+    /**
+     * Attribute that can be any integer and which must match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example integer to use for generated bodies
+     */
+    @JvmStatic
+    fun integerMatching(regex: String, example: Int): PactDslRootValue {
+      require(example.toString().matches(Regex(regex))) {
+        "Example value $example does not match the provided regular expression $regex"
+      }
+
+      val value = PactDslRootValue()
+      value.setValue(example)
+
+      value.matchers.addRules("", listOf(
+        NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
+        RegexMatcher(regex, example.toString())
+      ))
+
       return value
     }
 

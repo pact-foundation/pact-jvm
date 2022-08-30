@@ -47,3 +47,57 @@ compileGroovy {
   dependsOn compileKotlin
   classpath = classpath.plus(files(compileKotlin.destinationDir))
 }
+
+publishing {
+  publications {
+    pluginMaven(MavenPublication) {
+//      from components.java
+
+      pom {
+        name = project.name
+        description = 'Gradle Pact plugin'
+        url = 'https://github.com/pact-foundation/pact-jvm'
+        licenses {
+          license {
+            name = 'Apache 2'
+            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution = 'repo'
+          }
+        }
+        scm {
+          url = 'https://github.com/pact-foundation/pact-jvm'
+          connection = 'https://github.com/pact-foundation/pact-jvm.git'
+        }
+
+        developers {
+          developer {
+            id = 'thetrav'
+            name = 'Travis Dixon'
+            email = 'the.trav@gmail.com'
+          }
+          developer {
+            id = 'rholshausen'
+            name = 'Ronald Holshausen'
+            email = 'rholshausen@dius.com.au'
+          }
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+      if (project.hasProperty('sonatypeUsername')) {
+        credentials {
+          username sonatypeUsername
+          password sonatypePassword
+        }
+      }
+    }
+  }
+}
+
+signing {
+  required { project.hasProperty('isRelease') }
+  sign publishing.publications.pluginMaven
+}

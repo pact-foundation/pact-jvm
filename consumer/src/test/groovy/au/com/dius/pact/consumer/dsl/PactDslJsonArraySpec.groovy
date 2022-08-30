@@ -1,6 +1,9 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import spock.lang.Issue
 import spock.lang.Specification
@@ -312,5 +315,21 @@ class PactDslJsonArraySpec extends Specification {
       '[0]': [matchers: [[match: 'type']], combine: 'AND'],
       '[1]': [matchers: [[match: 'type']], combine: 'AND']
     ]
+  }
+
+  @Issue('1600')
+  def 'Match number type with Regex'() {
+    when:
+    PactDslJsonArray body = new PactDslJsonArray()
+      .numberMatching('\\d+\\.\\d{2}', 2.01)
+      .decimalMatching('\\d+\\.\\d{2}', 2.01)
+      .integerMatching('\\d{5}', 90210)
+      .close()
+
+    then:
+    body.toString() == '[2.01,2.01,90210]'
+    body.matchers.matchingRules['$[0]'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$[1]'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$[2]'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER), new RegexMatcher('\\d{5}', '90210')])
   }
 }

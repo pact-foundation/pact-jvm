@@ -190,6 +190,37 @@ public class LambdaDslJsonArray {
     }
 
     /**
+     * Attribute that can be any number and which must match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    public LambdaDslJsonArray numberMatching(String regex, Number example) {
+        pactArray.numberMatching(regex, example);
+        return this;
+    }
+
+    /**
+     * Attribute that can be any number decimal number (has significant digits after the decimal point) and which must
+     * match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    public LambdaDslJsonArray decimalMatching(String regex, Double example) {
+        pactArray.decimalMatching(regex, example);
+        return this;
+    }
+
+    /**
+     * Attribute that can be any integer and which must match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example integer to use for generated bodies
+     */
+    public LambdaDslJsonArray integerMatching(String regex, Integer example) {
+        pactArray.integerMatching(regex, example);
+        return this;
+    }
+
+    /**
      * Element that must be the specified value
      *
      * @param value boolean value
