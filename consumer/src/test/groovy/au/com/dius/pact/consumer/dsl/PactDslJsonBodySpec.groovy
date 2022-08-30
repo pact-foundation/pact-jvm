@@ -412,4 +412,21 @@ class PactDslJsonBodySpec extends Specification {
       '$.foo[*].baz': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)])
     ]
   }
+
+  @Issue('1600')
+  def 'Match number type with Regex'() {
+    when:
+    PactDslJsonBody body = new PactDslJsonBody()
+            .numberMatching('foo', '\\d+\\.\\d{2}', 2.01)
+            .decimalMatching('bar', '\\d+\\.\\d{2}', 2.01)
+            .integerMatching('baz', '\\d{5}', 90210)
+            .close()
+
+    then:
+    body.toString() == '{"bar":2.01,"baz":90210,"foo":2.01}'
+    body.matchers.matchingRules.keySet() == ['$.foo', '$.bar', '$.baz'] as Set
+    body.matchers.matchingRules['$.foo'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$.bar'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$.baz'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER), new RegexMatcher('\\d{5}', '90210')])
+  }
 }

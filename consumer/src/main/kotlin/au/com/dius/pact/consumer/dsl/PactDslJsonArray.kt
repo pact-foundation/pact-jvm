@@ -22,9 +22,9 @@ import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.expressions.DataType.Companion.from
 import au.com.dius.pact.core.support.json.JsonValue
@@ -379,7 +379,7 @@ open class PactDslJsonArray : DslPart {
   }
 
   /**
-   * Element that must be a decimal value
+   * Element that must be a decimal value (has significant digits after the decimal point)
    */
   fun decimalType(): PactDslJsonArray {
     generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), RandomDecimalGenerator(10))
@@ -387,7 +387,7 @@ open class PactDslJsonArray : DslPart {
   }
 
   /**
-   * Element that must be a decimalType value
+   * Element that must be a decimalType value (has significant digits after the decimal point)
    *
    * @param number example decimalType value
    */
@@ -398,13 +398,74 @@ open class PactDslJsonArray : DslPart {
   }
 
   /**
-   * Attribute that must be a decimalType value
+   * Attribute that must be a decimalType value (has significant digits after the decimal point)
    *
    * @param number example decimalType value
    */
   fun decimalType(number: Double): PactDslJsonArray {
     body.add(JsonValue.Decimal(number.toString().toCharArray()))
     matchers.addRule(rootPath + appendArrayIndex(0), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
+    return this
+  }
+
+  /**
+   * Attribute that can be any number and which must match the provided regular expression
+   * @param regex Regular expression that the numbers string form must match
+   * @param example example number to use for generated bodies
+   */
+  fun numberMatching(regex: String, example: Number): PactDslJsonArray {
+    require(example.toString().matches(Regex(regex))) {
+      "Example value $example does not match the provided regular expression '$regex'"
+    }
+
+    body.add(JsonValue.Decimal(example.toString().toCharArray()))
+
+    matchers.addRules(rootPath + appendArrayIndex(0), listOf(
+      NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER),
+      RegexMatcher(regex, example.toString())
+    ))
+
+    return this
+  }
+
+  /**
+   * Attribute that can be any number decimal number (has significant digits after the decimal point) and which must
+   * match the provided regular expression
+   * @param regex Regular expression that the numbers string form must match
+   * @param example example number to use for generated bodies
+   */
+  fun decimalMatching(regex: String, example: Double): PactDslJsonArray {
+    require(example.toString().matches(Regex(regex))) {
+      "Example value $example does not match the provided regular expression '$regex'"
+    }
+
+    body.add(JsonValue.Decimal(example.toString().toCharArray()))
+
+    matchers.addRules(rootPath + appendArrayIndex(0), listOf(
+      NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL),
+      RegexMatcher(regex, example.toString())
+    ))
+
+    return this
+  }
+
+  /**
+   * Attribute that can be any integer and which must match the provided regular expression
+   * @param regex Regular expression that the numbers string form must match
+   * @param example example integer to use for generated bodies
+   */
+  fun integerMatching(regex: String, example: Int): PactDslJsonArray {
+    require(example.toString().matches(Regex(regex))) {
+      "Example value $example does not match the provided regular expression $regex"
+    }
+
+    body.add(JsonValue.Integer(example.toString().toCharArray()))
+
+    matchers.addRules(rootPath + appendArrayIndex(0), listOf(
+      NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
+      RegexMatcher(regex, example.toString())
+    ))
+
     return this
   }
 

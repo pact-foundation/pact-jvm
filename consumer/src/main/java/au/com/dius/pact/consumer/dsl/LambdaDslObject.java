@@ -147,7 +147,7 @@ public class LambdaDslObject {
     }
 
     /**
-     * Attribute that must be a decimalType value
+     * Attribute that must be a decimalType value (has significant digits after the decimal point)
      *
      * @param name    attribute name
      * @param example example decimalType value
@@ -158,7 +158,7 @@ public class LambdaDslObject {
     }
 
     /**
-     * Attribute that must be a decimalType value
+     * Attribute that must be a decimalType value (has significant digits after the decimal point)
      *
      * @param name    attribute name
      * @param example example decimalType value
@@ -169,12 +169,46 @@ public class LambdaDslObject {
     }
 
     /**
-     * Attributes that must be decimal values
+     * Attributes that must be decimal values (have significant digits after the decimal point)
      *
      * @param names attribute names
      */
     public LambdaDslObject decimalType(final String... names) {
         object.decimalTypes(names);
+        return this;
+    }
+
+    /**
+     * Attribute that can be any number and which must match the provided regular expression
+     * @param name attribute name
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    public LambdaDslObject numberMatching(String name, String regex, Number example) {
+        object.numberMatching(name, regex, example);
+        return this;
+    }
+
+    /**
+     * Attribute that can be any number decimal number (has significant digits after the decimal point) and which must
+     * match the provided regular expression
+     * @param name    attribute name
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    public LambdaDslObject decimalMatching(String name, String regex, Double example) {
+        object.decimalMatching(name, regex, example);
+        return this;
+    }
+
+    /**
+     * Attribute that can be any integer and which must match the provided regular expression
+     * @param name attribute name
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example integer to use for generated bodies
+     */
+    public LambdaDslObject integerMatching(String name, String regex, Integer example) {
+        object.integerMatching(name, regex, example);
         return this;
     }
 

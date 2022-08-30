@@ -472,7 +472,7 @@ open class PactDslJsonRootValue : DslPart("", "") {
     }
 
     /**
-     * Value that must be a decimal value
+     * Value that must be a decimal value (has significant digits after the decimal point)
      */
     @JvmStatic
     fun decimalType(): PactDslJsonRootValue {
@@ -484,7 +484,7 @@ open class PactDslJsonRootValue : DslPart("", "") {
     }
 
     /**
-     * Value that must be a decimalType value
+     * Value that must be a decimalType value (has significant digits after the decimal point)
      * @param number example decimalType value
      */
     @JvmStatic
@@ -496,7 +496,7 @@ open class PactDslJsonRootValue : DslPart("", "") {
     }
 
     /**
-     * Value that must be a decimalType value
+     * Value that must be a decimalType value (has significant digits after the decimal point)
      * @param number example decimalType value
      */
     @JvmStatic
@@ -504,6 +504,73 @@ open class PactDslJsonRootValue : DslPart("", "") {
       val value = PactDslJsonRootValue()
       value.value = number
       value.setMatcher(NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
+      return value
+    }
+
+    /**
+     * Attribute that can be any number and which must match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    @JvmStatic
+    fun numberMatching(regex: String, example: Number): PactDslJsonRootValue {
+      require(example.toString().matches(Regex(regex))) {
+        "Example value $example does not match the provided regular expression '$regex'"
+      }
+
+      val value = PactDslJsonRootValue()
+      value.value = example
+
+      value.matchers.addRules("", listOf(
+        NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER),
+        RegexMatcher(regex, example.toString())
+      ))
+
+      return value
+    }
+
+    /**
+     * Attribute that can be any number decimal number (has significant digits after the decimal point) and which must
+     * match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example number to use for generated bodies
+     */
+    @JvmStatic
+    fun decimalMatching(regex: String, example: Double): PactDslJsonRootValue {
+      require(example.toString().matches(Regex(regex))) {
+        "Example value $example does not match the provided regular expression '$regex'"
+      }
+
+      val value = PactDslJsonRootValue()
+      value.value = example
+
+      value.matchers.addRules("", listOf(
+        NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL),
+        RegexMatcher(regex, example.toString())
+      ))
+
+      return value
+    }
+
+    /**
+     * Attribute that can be any integer and which must match the provided regular expression
+     * @param regex Regular expression that the numbers string form must match
+     * @param example example integer to use for generated bodies
+     */
+    @JvmStatic
+    fun integerMatching(regex: String, example: Int): PactDslJsonRootValue {
+      require(example.toString().matches(Regex(regex))) {
+        "Example value $example does not match the provided regular expression $regex"
+      }
+
+      val value = PactDslJsonRootValue()
+      value.value = example
+
+      value.matchers.addRules("", listOf(
+        NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
+        RegexMatcher(regex, example.toString())
+      ))
+
       return value
     }
 
