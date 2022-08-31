@@ -709,8 +709,8 @@ open class PactBrokerClient(
   }
 
   private fun consumerVersion(config: PublishConfiguration): JsonValue {
-    return config.consumerVersion.ifNullOrEmpty {
-      lookupEnvironmentValue("pact.publish.consumer.version")
+    return lookupEnvironmentValue("pact.publish.consumer.version").ifNullOrEmpty {
+      config.consumerVersion
     }.toJson()
   }
 

@@ -736,4 +736,60 @@ class PactBrokerClientSpec extends Specification {
     then:
     1 * mockHalClient.postJson(PactBrokerClient.PUBLISH_CONTRACTS_LINK, [:], jsonBody) >> new Ok(new JsonValue.Object([:]))
   }
+
+  @RestoreSystemProperties
+  @Issue('#1601')
+  def 'publishing pact with new publish endpoint - defaults to the consumer version system property'() {
+    given:
+    def mockHalClient = Mock(IHalClient)
+    def providerName = 'provider'
+    def consumerName = 'consumer'
+    def config = new PublishConfiguration('1.0.0')
+    def pactText = '{}'
+    def jsonBody = '{"contracts":[{"consumerName":"consumer","content":"e30=","contentType":"application/json"' +
+            ',"providerName":"provider","specification":"pact"}],"pacticipantName":"consumer",' +
+            '"pacticipantVersionNumber":"1.2.3.4","tags":[]}'
+    System.setProperty('pact.publish.consumer.version', '1.2.3.4')
+
+    when:
+    pactBrokerClient.publishContract(mockHalClient, providerName, consumerName, config, pactText)
+
+    then:
+    1 * mockHalClient.postJson(PactBrokerClient.PUBLISH_CONTRACTS_LINK, [:], jsonBody) >> new Ok(new JsonValue.Object([:]))
+  }
+
+  @Issue('#1525')
+  def 'can-i-deploy - should return verificationResultUrl when there is one'() {
+    given:
+    def halClient = Mock(IHalClient)
+    def config = new PactBrokerClientConfig(10, 0)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl', [:], config]) {
+      newHalClient() >> halClient
+    }
+    def json = JsonParser.parseString('''
+    |{
+    |  "summary": {
+    |      "deployable": true,
+    |      "reason": "some text",
+    |      "unknown": 0
+    |  },
+    |  "matrix": [{
+    |      "verificationResult": {
+    |          "_links": {
+    |              "self": {
+    |                  "href": "verificationResultUrl"
+    |              }
+    |          }
+    |      }
+    |  }]
+    |}'''.stripMargin())
+
+    when:
+    def result = client.canIDeploy('test', '1.2.3', new Latest.UseLatest(true), '')
+
+    then:
+    1 * halClient.getJson(_, _) >> new Ok(json)
+    result.ok
+    result.verificationResultUrl == 'verificationResultUrl'
+  }
 }
