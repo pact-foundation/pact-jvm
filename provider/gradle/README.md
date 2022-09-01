@@ -655,6 +655,18 @@ Using the generic selector:
     }
 ```
 
+##### Raw JSON
+
+You can also provide the raw JSON snippets for selectors.
+
+```groovy
+    fromPactBroker {
+        withSelectors {
+          rawSelectorJson('{"tag": "tagname"}')
+        }
+    }
+```
+
 ### For Pact-JVM versions before 4.1.0
 
 You configure your service provider and then use the `hasPactsFrom..` methods.

@@ -320,6 +320,7 @@ The builder has the following methods:
 - `environment(environment: String)` - Any versions currently deployed or released and supported in the specified environment.
 - `tag(name: String)` - All versions with the specified tag. Tags are deprecated in favor of branches.
 - `latestTag(name: String)` - The latest version for each consumer with the specified tag. Tags are deprecated in favor of branches.
+- `rawSelectorJson(json: String)` - You can also provide the raw JSON snippets for selectors.
 
 If you require more control, your selector method can also return a list of `au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors`
 instead of the builder class.

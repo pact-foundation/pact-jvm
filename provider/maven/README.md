@@ -659,6 +659,32 @@ Supports all the forms of selecting Pacts with tags.
 </plugin>
 ```
 
+##### Raw JSON
+
+You can also provide the raw JSON snippets for selectors.
+
+```xml
+<plugin>
+  <groupId>au.com.dius.pact.provider</groupId>
+  <artifactId>maven</artifactId>
+  <version>4.3.12</version>
+  <configuration>
+    <serviceProviders>
+      <serviceProvider>
+        <name>provider1</name>
+        <PactBroker>
+          <selectors>
+            <rawJson>
+               <json>{"tag": "tagname"}</json>
+            </rawJson>
+          </selectors>
+        </PactBroker>
+      </serviceProvider>
+    </serviceProviders>
+  </configuration>
+</plugin>
+```
+
 ### Verifying pacts from a pact broker that match particular tags [DEPRECATED]
 
 **NOTE: Using tags has been deprecated in favour of using consumer version selectors (above).**
