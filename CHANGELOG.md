@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0-beta.5 - Bugfix Release
+
+* 674562d27 - fix: Update PactBuilder DSL to support TRANSPORT and default to HTTP interactions (Ronald Holshausen, Wed Sep 7 13:13:14 2022 +1000)
+* 666f0fe98 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Wed Sep 7 12:07:57 2022 +1000)
+* ef2fc842a - Merge pull request #1602 from pact-foundation/feat/raw-selector-json (Ronald Holshausen, Thu Sep 1 13:31:41 2022 +1000)
+* d31b3e6f4 - feat: update docs on providing raw selector JSON (Ronald Holshausen, Thu Sep 1 12:10:14 2022 +1000)
+* 416b19d23 - feat: add capability to the selector builder DSL to add raw JSON snippets (Ronald Holshausen, Wed Aug 31 16:54:53 2022 +1000)
+* fa7d27065 - fix(Gradle): publishing pacts - default to the consumer version system property if it is set #1601 (Ronald Holshausen, Wed Aug 31 14:14:01 2022 +1000)
+* 3e9217d23 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Tue Aug 30 15:19:41 2022 +1000)
+* 488d1fc01 - Merge branch 'release/gradle-plugin' (Ronald Holshausen, Tue Aug 30 15:18:22 2022 +1000)
+* 67204596b - chore: fix publishing Gradle plugin to Maven Central #1588 (Ronald Holshausen, Tue Aug 30 15:18:04 2022 +1000)
+* 08bb852a3 - feat: add matching functions to consumer DSL to matcher numbers with a regex #1600 (Ronald Holshausen, Tue Aug 30 14:15:39 2022 +1000)
+* a9e81689b - Merge pull request #1598 from Zabuzard/lambda_dsl_pact_request_response (Ronald Holshausen, Tue Aug 23 09:41:31 2022 +1000)
+* 7580b4599 - Adding Lambda DSL variants for request/response (Zabuzard, Fri Aug 19 14:57:09 2022 +0200)
+* 07441a8b3 - bump version to 4.4.0-beta.5 (Ronald Holshausen, Mon Aug 15 10:34:06 2022 +1000)
+
 # 4.4.0-beta.4 - Fixes from master + fix for tests using gRPC plugin
 
 * e4d37b9a8 - chore: Upgrade plugin driver to 0.1.5 (Ronald Holshausen, Mon Aug 15 09:48:53 2022 +1000)
