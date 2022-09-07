@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
+import au.com.dius.pact.core.support.json.JsonParser
 import org.apache.maven.plugin.MojoFailureException
 import java.net.URL
 
@@ -177,6 +178,19 @@ open class Selector: BaseSelector() {
 
   override fun toString(): String {
     return "Selector(tag=$tag, latest=$latest, consumer=$consumer, fallbackTag=$fallbackTag)"
+  }
+}
+
+/**
+ * Corresponds to the old consumer version selectors
+ */
+open class RawJson: BaseSelector() {
+  var json: String? = null
+
+  override fun toSelector() = ConsumerVersionSelectors.RawSelector(JsonParser.parseString(json.orEmpty()))
+
+  override fun toString(): String {
+    return "RawJson(json=$json)"
   }
 }
 

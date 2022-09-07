@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junitsupport.loader
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
+import au.com.dius.pact.core.support.json.JsonParser
 
 /**
  * Builder for setting up consumer version selectors in provider JUnit tests.
@@ -103,6 +104,14 @@ open class SelectorBuilder {
   @Deprecated("Tags are deprecated in favor of branches", ReplaceWith("branch"))
   fun selector(tagName: String?, latest: Boolean?, fallbackTag: String?, consumer: String?): SelectorBuilder {
     selectors.add(ConsumerVersionSelectors.Selector(tagName, latest, consumer, fallbackTag))
+    return this
+  }
+
+  /**
+   * Selector in raw JSON form.
+   */
+  fun rawSelectorJson(json: String): SelectorBuilder {
+    selectors.add(ConsumerVersionSelectors.RawSelector(JsonParser.parseString(json)))
     return this
   }
 

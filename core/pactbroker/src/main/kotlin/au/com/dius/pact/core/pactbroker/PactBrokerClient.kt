@@ -216,6 +216,11 @@ sealed class ConsumerVersionSelectors {
     val fallbackTag: String? = null
   ): ConsumerVersionSelectors()
 
+  /**
+   * Raw JSON form of a selector.
+   */
+  data class RawSelector(val selector: JsonValue): ConsumerVersionSelectors()
+
   fun toJson(): JsonValue {
     return when (this) {
       is Branch -> {
@@ -279,6 +284,7 @@ sealed class ConsumerVersionSelectors {
         JsonValue.Object(entries)
       }
       is Tag -> JsonValue.Object("tag" to JsonValue.StringValue(this.tag))
+      is RawSelector -> this.selector
     }
   }
 }
@@ -717,8 +723,8 @@ open class PactBrokerClient(
   }
 
   private fun consumerVersion(config: PublishConfiguration): JsonValue {
-    return config.consumerVersion.ifNullOrEmpty {
-      lookupEnvironmentValue("pact.publish.consumer.version")
+    return lookupEnvironmentValue("pact.publish.consumer.version").ifNullOrEmpty {
+      config.consumerVersion
     }.toJson()
   }
 

@@ -2,7 +2,7 @@ dependencies {
     api project(':core:model')
     api project(':core:matchers')
 
-    // For some wierd reason, this is not resolving correctly
+    // For some weird reason, this is not resolving correctly
 //    api project(':core:support')
 //    api project(':core:pactbroker')
     api "au.com.dius.pact.core:support:${project.version}"
