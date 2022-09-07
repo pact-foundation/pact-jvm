@@ -113,7 +113,13 @@ open class PactBuilder(
   }
 
   /**
-   * Adds an interaction with the given description and type
+   * Adds an interaction with the given description and type. If interactionType is not specified (is the empty string)
+   * will default to an HTTP interaction
+   *
+   * @param description The interaction description. Must be unique.
+   * @param interactionType The key of the interaction type as found in the catalogue manager. If empty, will default to
+   * a HTTP interaction ('core/transport/http').
+   * @param key (Optional) unique key to assign to the interaction
    */
   @JvmOverloads
   fun expectsToReceive(description: String, interactionType: String, key: String? = null): PactBuilder {
@@ -121,17 +127,17 @@ open class PactBuilder(
       interactions.add(currentInteraction!!)
     }
 
-    val entry = CatalogueManager.lookupEntry(interactionType)
+    val entry = CatalogueManager.lookupEntry(interactionType.ifEmpty { "core/transport/http" })
     when {
       entry == null -> {
         logger.error { "No interaction type of '$interactionType' was found in the catalogue" }
         throw PactPluginEntryNotFoundException(interactionType)
       }
-      entry.type == CatalogueEntryType.INTERACTION -> {
+      entry.type == CatalogueEntryType.INTERACTION || entry.type == CatalogueEntryType.TRANSPORT -> {
         currentInteraction = forEntry(entry, description, key)
       }
       else -> {
-        TODO("Interactions of type $interactionType are not currently supported")
+        TODO("Interactions of type '$interactionType' are not currently supported")
       }
     }
     return this
@@ -143,7 +149,7 @@ open class PactBuilder(
         "http", "https" -> V4Interaction.SynchronousHttp(key.orEmpty(), description)
         "message" -> V4Interaction.AsynchronousMessage(key.orEmpty(), description)
         "synchronous-message" -> V4Interaction.SynchronousMessages(key.orEmpty(), description)
-        else -> TODO("Interactions of type ${entry.key} are not currently supported")
+        else -> TODO("Interactions of type '${entry.key}' are not currently supported")
       }
       CatalogueEntryProviderType.PLUGIN -> TODO()
     }
