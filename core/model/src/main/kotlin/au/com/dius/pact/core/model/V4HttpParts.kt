@@ -28,8 +28,8 @@ private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
 data class HttpRequest @JvmOverloads constructor(
   override var method: String = "GET",
   override var path: String = "/",
-  override val query: MutableMap<String, List<String>> = mutableMapOf(),
-  override val headers: MutableMap<String, List<String>> = mutableMapOf(),
+  override var query: MutableMap<String, List<String>> = mutableMapOf(),
+  override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
@@ -123,15 +123,45 @@ data class HttpRequest @JvmOverloads constructor(
   }
 
   fun updateProperties(values: Map<String, Any?>) {
+    logger.debug { "updateProperties(values=$values)" }
     values.forEach { (key, value) ->
-      BeanUtils.setProperty(this, key, value)
+      when (key) {
+        "headers" -> when (value) {
+          is Map<*, *> -> {
+            headers = value
+              .mapKeys { it.key.toString() }
+              .mapValues { (_, headerValue) ->
+              when (headerValue) {
+                is List<*> -> headerValue.map { it.toString() }
+                else -> listOf(headerValue.toString())
+              }
+            }.toMutableMap()
+          }
+          else -> throw IllegalArgumentException("$value is not a valid value for headers")
+        }
+        "query" -> when (value) {
+          is Map<*, *> -> value.forEach { (name, queryValue) ->
+              val queryName = name.toString()
+              if (!query.containsKey(queryName)) {
+                query[queryName] = mutableListOf()
+              }
+              when (queryValue) {
+                is List<*> -> query[queryName] = query[queryName]!! + queryValue.map { it.toString() }
+                else -> query[queryName] = query[queryName]!! + queryValue.toString()
+              }
+            }
+          is String -> query.putAll(queryStringToMap(value.toString()))
+          else -> throw IllegalArgumentException("$value is not a valid value for query parameters")
+        }
+        else -> BeanUtils.setProperty(this, key, value)
+      }
     }
   }
 }
 
 data class HttpResponse @JvmOverloads constructor(
   override var status: Int = 200,
-  override val headers: MutableMap<String, List<String>> = mutableMapOf(),
+  override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
@@ -171,8 +201,24 @@ data class HttpResponse @JvmOverloads constructor(
   override fun asHttpPart() = toV3Response()
 
   fun updateProperties(values: Map<String, Any?>) {
+    V4Interaction.logger.debug { "updateProperties(values=$values)" }
     values.forEach { (key, value) ->
-      BeanUtils.setProperty(this, key, value)
+      when (key) {
+        "headers" -> when (value) {
+          is Map<*, *> -> {
+            headers = value
+              .mapKeys { it.key.toString() }
+              .mapValues { (_, headerValue) ->
+                when (headerValue) {
+                  is List<*> -> headerValue.map { it.toString() }
+                  else -> listOf(headerValue.toString())
+                }
+              }.toMutableMap()
+          }
+          else -> throw IllegalArgumentException("$value is not a valid value for headers")
+        }
+        else -> BeanUtils.setProperty(this, key, value)
+      }
     }
   }
 

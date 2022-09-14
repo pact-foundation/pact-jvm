@@ -16,7 +16,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import mu.KLogging
 import mu.KotlinLogging
-import org.apache.commons.beanutils.BeanUtils
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
 
@@ -213,9 +212,14 @@ sealed class V4Interaction(
     }
 
     override fun updateProperties(values: Map<String, Any?>) {
-      values.forEach { (key, value) ->
-        BeanUtils.setProperty(this, key, value)
-      }
+      val requestConfig = values.filter { it.key.startsWith("request.") }
+        .mapKeys { it.key.substring("request.".length) }
+        .toMap()
+      this.request.updateProperties(requestConfig)
+      val responseConfig = values.filter { it.key.startsWith("response.") }
+        .mapKeys { it.key.substring("response.".length) }
+        .toMap()
+      this.response.updateProperties(responseConfig)
     }
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
@@ -315,9 +319,7 @@ sealed class V4Interaction(
       return builder.build().toUInt().toString(16)
     }
 
-    override fun updateProperties(values: Map<String, Any?>) {
-
-    }
+    override fun updateProperties(values: Map<String, Any?>) { }
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
       val map = (mapOf(
@@ -459,9 +461,7 @@ sealed class V4Interaction(
 
     override fun asV4Interaction() = this
 
-    override fun updateProperties(values: Map<String, Any?>) {
-
-    }
+    override fun updateProperties(values: Map<String, Any?>) { }
 
     override fun isSynchronousMessages() = true
 

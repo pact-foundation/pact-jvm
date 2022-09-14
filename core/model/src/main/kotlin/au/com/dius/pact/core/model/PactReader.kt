@@ -119,6 +119,7 @@ fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClie
         is Auth.BearerAuthentication -> {
           builder.setDefaultHeaders(listOf(BasicHeader("Authorization", "Bearer " + auth.token)))
         }
+        else -> {}
       }
     }
     options["authentication"] is List<*> -> {
