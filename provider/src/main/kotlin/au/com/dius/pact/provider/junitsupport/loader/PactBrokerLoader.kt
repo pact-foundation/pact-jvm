@@ -28,9 +28,14 @@ import java.lang.reflect.Modifier
 import java.net.URI
 import java.net.URISyntaxException
 import kotlin.reflect.KClass
+import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.kotlinFunction
 
 /**
@@ -394,9 +399,7 @@ open class PactBrokerLoader(
     @JvmStatic
     @Suppress("ThrowsCount")
     fun testClassHasSelectorsMethod(testClass: Class<*>?): Method? {
-      val method = testClass?.methods?.firstOrNull { method ->
-        method.getAnnotation(PactBrokerConsumerVersionSelectors::class.java) != null
-      }
+      val method = findConsumerVersionSelectorAnnotatedMethod(testClass)
 
       if (method != null) {
         if (method.parameterCount > 0) {
@@ -422,5 +425,34 @@ open class PactBrokerLoader(
 
       return method
     }
+
+    private fun findConsumerVersionSelectorAnnotatedMethod(testClass: Class<*>?) : Method? {
+      if (testClass == null) {
+        return null
+      }
+
+      var klass : Class<*> = testClass
+      while (klass != Object::class.java) {
+
+        for (declaredMethod in klass.declaredMethods) {
+          if (declaredMethod.isAnnotationPresent(PactBrokerConsumerVersionSelectors::class.java)) {
+            return declaredMethod
+          }
+
+          val method = klass.kotlin.companionObject?.declaredFunctions?.firstOrNull {
+            it.hasAnnotation<PactBrokerConsumerVersionSelectors>()
+          }
+
+          if (method != null) {
+            return method.javaMethod
+          }
+        }
+
+        klass = klass.superclass
+      }
+
+      return null
+    }
+
   }
 }
