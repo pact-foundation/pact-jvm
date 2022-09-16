@@ -6,6 +6,7 @@ import static au.com.dius.pact.core.support.JsonKt.jsonArray
 
 class SelectorBuilderSpec extends Specification {
 
+  @SuppressWarnings('UnnecessaryCollectCall')
   def 'allow providing selectors in raw form'() {
     expect:
     jsonArray(new SelectorBuilder()

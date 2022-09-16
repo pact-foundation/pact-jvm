@@ -24,17 +24,18 @@ import com.github.michaelbull.result.Ok
 import mu.KLogging
 import org.apache.http.client.utils.URIBuilder
 import java.io.IOException
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.net.URI
 import java.net.URISyntaxException
-import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.companionObject
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.kotlinFunction
 
 /**
@@ -352,7 +353,7 @@ open class PactBrokerLoader(
 
   companion object : KLogging() {
     @JvmStatic
-    fun invokeSelectorsMethod(testInstance: Any?, selectorsMethod: KCallable<*>): List<ConsumerVersionSelectors> {
+    fun invokeSelectorsMethod(testInstance: Any?, selectorsMethod: KFunction<*>): List<ConsumerVersionSelectors> {
       val projectedType = SelectorBuilder::class.starProjectedType
       return when (selectorsMethod.parameters.size) {
         0 -> if (selectorsMethod.returnType.isSubtypeOf(projectedType)) {
@@ -373,10 +374,9 @@ open class PactBrokerLoader(
     }
 
     @JvmStatic
+    @Suppress("ThrowsCount")
     fun testClassHasSelectorsMethod(testClass: Class<*>?): KFunction<*>? {
-      val method = testClass?.methods?.firstOrNull { method ->
-        method.getAnnotation(PactBrokerConsumerVersionSelectors::class.java) != null
-      }
+      val method = findConsumerVersionSelectorAnnotatedMethod(testClass)
 
       if (method != null) {
         if (method.parameterCount > 0) {
@@ -404,5 +404,35 @@ open class PactBrokerLoader(
 
       return method?.kotlinFunction
     }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun findConsumerVersionSelectorAnnotatedMethod(testClass: Class<*>?) : Method? {
+      if (testClass == null) {
+        return null
+      }
+
+      var klass : Class<*> = testClass
+      while (klass != Object::class.java) {
+
+        for (declaredMethod in klass.declaredMethods) {
+          if (declaredMethod.isAnnotationPresent(PactBrokerConsumerVersionSelectors::class.java)) {
+            return declaredMethod
+          }
+
+          val method = klass.kotlin.companionObject?.declaredFunctions?.firstOrNull {
+            it.hasAnnotation<PactBrokerConsumerVersionSelectors>()
+          }
+
+          if (method != null) {
+            return method.javaMethod
+          }
+        }
+
+        klass = klass.superclass
+      }
+
+      return null
+    }
+
   }
 }
