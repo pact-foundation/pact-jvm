@@ -56,7 +56,7 @@ public class PactBrokerLoaderTest {
         }
     }
 
-    class Test4 extends Test4Super {}
+    static class Test4 extends Test4Super {}
 
     static class Test4Super {
         @PactBrokerConsumerVersionSelectors
@@ -65,7 +65,7 @@ public class PactBrokerLoaderTest {
         }
     }
 
-    class Test5 extends Test5Super {}
+    static class Test5 extends Test5Super {}
 
     static class Test5Super {
         @PactBrokerConsumerVersionSelectors
