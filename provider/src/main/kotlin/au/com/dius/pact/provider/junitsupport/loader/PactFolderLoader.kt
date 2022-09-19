@@ -64,7 +64,7 @@ class PactFolderLoader : PactLoader {
   override fun getPactSource() = this.pactSource
 
   private fun resolvePath(): File {
-    val resourcePath = PactFolderLoader::class.java.classLoader.getResource(path.path)
+    val resourcePath = Thread.currentThread().getContextClassLoader().getResource(path.path)
     return if (resourcePath != null) {
       File(URLDecoder.decode(resourcePath.path, "UTF-8"))
     } else {
