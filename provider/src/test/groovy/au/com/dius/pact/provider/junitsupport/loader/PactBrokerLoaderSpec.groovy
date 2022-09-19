@@ -1444,7 +1444,6 @@ class PactBrokerLoaderSpec extends Specification {
     null                                  | false
     PactBrokerLoaderSpec                  | false
     FullPactBrokerAnnotation              | false
-    IncorrectScopeOnSelectorMethod        | false
     CorrectSelectorMethod                 | true
     CorrectSelectorMethod2                | true
     CorrectSelectorMethod3                | true
@@ -1462,13 +1461,13 @@ class PactBrokerLoaderSpec extends Specification {
     thrown(IllegalAccessException)
 
     where:
-    clazz << [IncorrectTypesOnSelectorMethod, IncorrectTypesOnSelectorMethod2 ]
+    clazz << [ IncorrectTypesOnSelectorMethod, IncorrectTypesOnSelectorMethod2, IncorrectScopeOnSelectorMethod ]
   }
 
   @Unroll
   def 'Invoke Selectors Method'() {
     expect:
-    PactBrokerLoader.invokeSelectorsMethod(instance, clazz, PactBrokerLoader.testClassHasSelectorsMethod(clazz)) == result
+    PactBrokerLoader.invokeSelectorsMethod(instance, clazz, PactBrokerLoader.testClassHasSelectorsMethod(clazz).first) == result
 
     where:
 

@@ -36,38 +36,38 @@ public class PactBrokerLoaderTest {
         assertNotNull(PactBrokerLoader.testClassHasSelectorsMethod(Test5.class));
     }
 
-    class Test1 {
+    static class Test1 {
         @PactBrokerConsumerVersionSelectors
         public static SelectorBuilder cvs() {
             return new SelectorBuilder();
         }
     }
-    class Test2 {
+    static class Test2 {
         @PactBrokerConsumerVersionSelectors
         static SelectorBuilder cvs() {
             return new SelectorBuilder();
         }
     }
 
-    class Test3 {
+    static class Test3 {
         @PactBrokerConsumerVersionSelectors
         private static SelectorBuilder cvs() {
             return new SelectorBuilder();
         }
     }
 
-    class Test4 extends Test4Super {}
+    static class Test4 extends Test4Super {}
 
-    class Test4Super {
+    static class Test4Super {
         @PactBrokerConsumerVersionSelectors
         protected static SelectorBuilder cvs() {
             return new SelectorBuilder();
         }
     }
 
-    class Test5 extends Test5Super {}
+    static class Test5 extends Test5Super {}
 
-    class Test5Super {
+    static class Test5Super {
         @PactBrokerConsumerVersionSelectors
         public static SelectorBuilder cvs() {
             return new SelectorBuilder();

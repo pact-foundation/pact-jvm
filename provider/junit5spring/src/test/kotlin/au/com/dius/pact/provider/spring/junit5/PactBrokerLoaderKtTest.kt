@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
+@Suppress("UnnecessaryAbstractClass", "UnusedPrivateMember")
 class PactBrokerLoaderKtTest {
 
     @Test
@@ -87,7 +88,7 @@ class PactBrokerLoaderKtTest {
 
     class Test6 : Test6Super()
 
-    abstract class Test6Super() {
+    abstract class Test6Super {
         companion object {
             @PactBrokerConsumerVersionSelectors
             fun cvs(): SelectorBuilder {

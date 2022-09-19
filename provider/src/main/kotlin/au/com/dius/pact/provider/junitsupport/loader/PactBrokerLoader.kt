@@ -140,7 +140,10 @@ open class PactBrokerLoader(
     val tags = pactBrokerTags.orEmpty().flatMap { ep.parseListExpression(it, resolver) }
     val selectorsMethod = testClassHasSelectorsMethod(this.testClass)
     return if (selectorsMethod != null) {
-      invokeSelectorsMethod(this.testInstance, this.testClass, selectorsMethod)
+      val (method, methodClass) = selectorsMethod
+      val instance = if (methodClass.isCompanion) methodClass.objectInstance
+        else this.testInstance
+      invokeSelectorsMethod(instance, methodClass.java, method)
     } else if (shouldFallBackToTags(tags, pactBrokerConsumerVersionSelectors, resolver)) {
       permutations(tags, pactBrokerConsumers.flatMap { ep.parseListExpression(it, resolver) })
         .map { ConsumerVersionSelectors.Selector(it.first, true, it.second) }
@@ -398,10 +401,11 @@ open class PactBrokerLoader(
 
     @JvmStatic
     @Suppress("ThrowsCount")
-    fun testClassHasSelectorsMethod(testClass: Class<*>?): Method? {
-      val method = findConsumerVersionSelectorAnnotatedMethod(testClass)
+    fun testClassHasSelectorsMethod(testClass: Class<*>?): Pair<Method, KClass<*>>? {
+      val result = findConsumerVersionSelectorAnnotatedMethod(testClass)
 
-      if (method != null) {
+      if (result != null) {
+        val (method, _) = result;
         if (method.parameterCount > 0) {
           throw IllegalAccessException("Consumer version selector methods must not have any parameters. " +
             "Method ${method.name} has ${method.parameterCount}.")
@@ -423,10 +427,10 @@ open class PactBrokerLoader(
         }
       }
 
-      return method
+      return result
     }
 
-    private fun findConsumerVersionSelectorAnnotatedMethod(testClass: Class<*>?) : Method? {
+    private fun findConsumerVersionSelectorAnnotatedMethod(testClass: Class<*>?) : Pair<Method, KClass<*>>? {
       if (testClass == null) {
         return null
       }
@@ -436,16 +440,16 @@ open class PactBrokerLoader(
 
         for (declaredMethod in klass.declaredMethods) {
           if (declaredMethod.isAnnotationPresent(PactBrokerConsumerVersionSelectors::class.java)) {
-            return declaredMethod
+            return declaredMethod to testClass.kotlin
           }
+        }
 
-          val method = klass.kotlin.companionObject?.declaredFunctions?.firstOrNull {
-            it.hasAnnotation<PactBrokerConsumerVersionSelectors>()
-          }
+        val method = klass.kotlin.companionObject?.declaredFunctions?.firstOrNull {
+          it.hasAnnotation<PactBrokerConsumerVersionSelectors>()
+        }
 
-          if (method != null) {
-            return method.javaMethod
-          }
+        if (method != null) {
+          return method.javaMethod!! to klass.kotlin.companionObject!!
         }
 
         klass = klass.superclass
