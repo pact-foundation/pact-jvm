@@ -39,7 +39,7 @@ class MultiCookieTest {
 
       response.success { FromServer fs, Object body ->
         assert fs.statusCode == 200
-        assert fs.headers.findAll { it.key == 'set-cookie' }*.value == [
+        assert fs.headers.findAll { it.key.toLowerCase() == 'set-cookie' }*.value == [
           'someCookie=someValue; Path=/', 'someOtherCookie=someValue; Path=/', 'someThirdCookie=someValue; Path=/'
         ]
       }
