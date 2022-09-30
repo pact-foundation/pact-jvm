@@ -64,6 +64,11 @@ interface IHalClient {
   fun linkUrl(name: String): String?
 
   /**
+   * Returns the current HAL document
+   */
+  fun currentDoc(): JsonValue.Object?
+
+  /**
    * Calls the closure with a Map of attributes for all links associated with the link name
    * @param linkName Name of the link to loop over
    * @param closure Closure to invoke with the link attributes
@@ -250,6 +255,8 @@ open class HalClient @JvmOverloads constructor(
   }
 
   override fun navigate(link: String) = navigate(mapOf(), link)
+
+  override fun currentDoc() = pathInfo
 
   override fun fetch(path: String) = fetch(path, true)
 
