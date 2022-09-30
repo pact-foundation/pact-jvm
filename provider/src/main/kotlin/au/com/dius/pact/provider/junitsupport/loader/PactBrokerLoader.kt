@@ -28,9 +28,14 @@ import java.lang.reflect.Modifier
 import java.net.URI
 import java.net.URISyntaxException
 import kotlin.reflect.KClass
+import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.kotlinFunction
 
 /**
@@ -135,7 +140,10 @@ open class PactBrokerLoader(
     val tags = pactBrokerTags.orEmpty().flatMap { ep.parseListExpression(it, resolver) }
     val selectorsMethod = testClassHasSelectorsMethod(this.testClass)
     return if (selectorsMethod != null) {
-      invokeSelectorsMethod(this.testInstance, this.testClass, selectorsMethod)
+      val (method, methodClass) = selectorsMethod
+      val instance = if (methodClass.isCompanion) methodClass.objectInstance
+        else this.testInstance
+      invokeSelectorsMethod(instance, methodClass.java, method)
     } else if (shouldFallBackToTags(tags, pactBrokerConsumerVersionSelectors, resolver)) {
       permutations(tags, pactBrokerConsumers.flatMap { ep.parseListExpression(it, resolver) })
         .map { ConsumerVersionSelectors.Selector(it.first, true, it.second) }
@@ -393,12 +401,11 @@ open class PactBrokerLoader(
 
     @JvmStatic
     @Suppress("ThrowsCount")
-    fun testClassHasSelectorsMethod(testClass: Class<*>?): Method? {
-      val method = testClass?.methods?.firstOrNull { method ->
-        method.getAnnotation(PactBrokerConsumerVersionSelectors::class.java) != null
-      }
+    fun testClassHasSelectorsMethod(testClass: Class<*>?): Pair<Method, KClass<*>>? {
+      val result = findConsumerVersionSelectorAnnotatedMethod(testClass)
 
-      if (method != null) {
+      if (result != null) {
+        val (method, _) = result;
         if (method.parameterCount > 0) {
           throw IllegalAccessException("Consumer version selector methods must not have any parameters. " +
             "Method ${method.name} has ${method.parameterCount}.")
@@ -420,7 +427,36 @@ open class PactBrokerLoader(
         }
       }
 
-      return method
+      return result
     }
+
+    private fun findConsumerVersionSelectorAnnotatedMethod(testClass: Class<*>?) : Pair<Method, KClass<*>>? {
+      if (testClass == null) {
+        return null
+      }
+
+      var klass : Class<*> = testClass
+      while (klass != Object::class.java) {
+
+        for (declaredMethod in klass.declaredMethods) {
+          if (declaredMethod.isAnnotationPresent(PactBrokerConsumerVersionSelectors::class.java)) {
+            return declaredMethod to testClass.kotlin
+          }
+        }
+
+        val method = klass.kotlin.companionObject?.declaredFunctions?.firstOrNull {
+          it.hasAnnotation<PactBrokerConsumerVersionSelectors>()
+        }
+
+        if (method != null) {
+          return method.javaMethod!! to klass.kotlin.companionObject!!
+        }
+
+        klass = klass.superclass
+      }
+
+      return null
+    }
+
   }
 }

@@ -22,6 +22,7 @@ artifacts {
 dependencies {
   api project(":core:support")
   api project(":core:pactbroker")
+
   implementation 'org.apache.commons:commons-collections4:4.4'
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'javax.mail:mail:1.5.0-b01'
@@ -32,6 +33,7 @@ dependencies {
   implementation 'commons-beanutils:commons-beanutils:1.9.4'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
 
+  testImplementation project(":core:support")
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testImplementation "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   testRuntimeOnly project(path: project.path, configuration: 'testJars')
@@ -48,7 +50,7 @@ dependencies {
   testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.32'
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 
-  antlr "org.antlr:antlr4:4.9.2"
+  antlr "org.antlr:antlr4:4.11.1"
 }
 
 compileKotlin {

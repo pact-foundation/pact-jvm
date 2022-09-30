@@ -1,5 +1,30 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.15 - Bugfix Release
+
+* 3d9bcedf2 - chore: Update the HAL client to return the current navigated document (Ronald Holshausen, Fri Sep 30 15:16:18 2022 +1000)
+* 8d1bb0565 - chore: fix build after upgrading Antlr (Ronald Holshausen, Mon Sep 26 15:19:13 2022 +1000)
+* 205bbd341 - chore: fix for 'compileTestJava' task (current target is 18) and 'compileTestKotlin' task (current target is 11) jvm target compatibility should be set to the same Java version (Ronald Holshausen, Mon Sep 26 14:35:36 2022 +1000)
+* 6f8a347b3 - Merge pull request #1609 from Codex-/bump_antlr (Ronald Holshausen, Mon Sep 26 14:01:01 2022 +1000)
+* 6a53c7f68 - chore: Bump Antlr4 to 4.11.1 (Alex Miller, Wed Sep 21 17:27:21 2022 +1200)
+* 7258f435e - Merge pull request #1607 from holly-cummins/use-tccl-in-loader (Ronald Holshausen, Mon Sep 19 12:18:27 2022 +1000)
+* 03a8b3deb - Merge pull request #1606 from holly-cummins/bump-kotlinresult (Ronald Holshausen, Mon Sep 19 11:50:17 2022 +1000)
+* bfa1a4ca3 - Merge branch 'stefano-lucka-fix/cvs' (Ronald Holshausen, Mon Sep 19 10:43:02 2022 +1000)
+* ca37bdb8b - chore: correct static code issues and failing tests from PR #1605 (Ronald Holshausen, Mon Sep 19 10:42:49 2022 +1000)
+* 873b0e5b3 - Use Thread Context ClassLoader to find test resources (Holly Cummins, Sat Sep 17 12:36:48 2022 +0100)
+* 50863b9f6 - Bump version of Kotlin Result to work around Unresolved reference build failures (Holly Cummins, Fri Sep 16 20:10:55 2022 +0100)
+* db962337e - Fix issue with base classes (Stefano Lucka, Fri Sep 16 20:08:34 2022 +0200)
+* ef2fc842a - Merge pull request #1602 from pact-foundation/feat/raw-selector-json (Ronald Holshausen, Thu Sep 1 13:31:41 2022 +1000)
+* d31b3e6f4 - feat: update docs on providing raw selector JSON (Ronald Holshausen, Thu Sep 1 12:10:14 2022 +1000)
+* 416b19d23 - feat: add capability to the selector builder DSL to add raw JSON snippets (Ronald Holshausen, Wed Aug 31 16:54:53 2022 +1000)
+* fa7d27065 - fix(Gradle): publishing pacts - default to the consumer version system property if it is set #1601 (Ronald Holshausen, Wed Aug 31 14:14:01 2022 +1000)
+* 488d1fc01 - Merge branch 'release/gradle-plugin' (Ronald Holshausen, Tue Aug 30 15:18:22 2022 +1000)
+* 67204596b - chore: fix publishing Gradle plugin to Maven Central #1588 (Ronald Holshausen, Tue Aug 30 15:18:04 2022 +1000)
+* 08bb852a3 - feat: add matching functions to consumer DSL to matcher numbers with a regex #1600 (Ronald Holshausen, Tue Aug 30 14:15:39 2022 +1000)
+* a9e81689b - Merge pull request #1598 from Zabuzard/lambda_dsl_pact_request_response (Ronald Holshausen, Tue Aug 23 09:41:31 2022 +1000)
+* 7580b4599 - Adding Lambda DSL variants for request/response (Zabuzard, Fri Aug 19 14:57:09 2022 +0200)
+* d0947165c - bump version to 4.3.15 (Ronald Holshausen, Fri Aug 12 12:52:03 2022 +1000)
+
 # 4.4.0-beta.5 - Bugfix Release
 
 * 674562d27 - fix: Update PactBuilder DSL to support TRANSPORT and default to HTTP interactions (Ronald Holshausen, Wed Sep 7 13:13:14 2022 +1000)
