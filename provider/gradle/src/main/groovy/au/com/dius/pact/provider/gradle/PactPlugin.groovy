@@ -13,12 +13,20 @@ class PactPlugin extends PactPluginBase {
     void apply(Project project) {
 
         // Create and install the extension object
-        project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo,
+        def extension = project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo,
           new ProviderInfoFactory(project)))
 
         project.task(PACT_VERIFY, description: 'Verify your pacts against your providers', group: GROUP)
-        project.task('pactPublish', description: 'Publish your pacts to a pact broker', type: PactPublishTask,
-            group: GROUP)
+
+        project.tasks.register('pactPublish', PactPublishTask) {
+          group = GROUP
+          description = 'Publish your pacts to a pact broker'
+          pactPublish.set(extension.publish)
+          broker.set(extension.broker)
+          projectVersion.set(project.version)
+          pactDir.set(project.file("${project.buildDir}/pacts"))
+        }
+
         project.task('canIDeploy', description: 'Check if it is safe to deploy by checking whether or not the ' +
           'specified pacticipant versions are compatible', type: PactCanIDeployTask,
           group: GROUP)
