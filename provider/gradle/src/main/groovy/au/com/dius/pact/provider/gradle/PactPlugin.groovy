@@ -10,6 +10,7 @@ import org.gradle.api.Project
 class PactPlugin extends PactPluginBase {
 
   @Override
+  @SuppressWarnings('AbcMetric')
     void apply(Project project) {
 
         // Create and install the extension object
@@ -27,9 +28,17 @@ class PactPlugin extends PactPluginBase {
           pactDir.set(project.file("${project.buildDir}/pacts"))
         }
 
-        project.task('canIDeploy', description: 'Check if it is safe to deploy by checking whether or not the ' +
-          'specified pacticipant versions are compatible', type: PactCanIDeployTask,
-          group: GROUP)
+        project.tasks.register('canIDeploy', PactCanIDeployTask) {
+          group = GROUP
+          description = 'Check if it is safe to deploy by checking whether or not the ' +
+                  'specified pacticipant versions are compatible'
+          broker.set(extension.broker)
+          pacticipant.set(project.hasProperty(PACTICIPANT) ? project.property(PACTICIPANT) : null)
+          pacticipantVersion.set(project.hasProperty(PACTICIPANT_VERSION)
+            ? project.property(PACTICIPANT_VERSION) : null)
+          toProp.set(project.hasProperty(TO) ? project.property(TO) : null)
+          latestProp.set(project.hasProperty(LATEST) ? project.property(LATEST) : null)
+        }
 
         project.afterEvaluate {
           if (it.pact == null) {
