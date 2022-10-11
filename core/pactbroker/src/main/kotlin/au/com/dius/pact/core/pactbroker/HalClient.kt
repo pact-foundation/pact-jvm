@@ -127,6 +127,11 @@ interface IHalClient {
   fun putJson(link: String, options: Map<String, Any>, json: String): Result<String?, Exception>
 
   /**
+   * Upload a JSON document to the given URL, using a PUT request
+   */
+  fun putJson(url: URI, json: String): Result<String?, Exception>
+
+  /**
    * Upload a JSON document to the current path link, using a POST request
    */
   fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonValue.Object, Exception>
@@ -476,7 +481,12 @@ open class HalClient @JvmOverloads constructor(
 
   override fun putJson(link: String, options: Map<String, Any>, json: String): Result<String?, Exception> {
     val href = hrefForLink(link, options)
-    val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href, false)))
+    val url = buildUrl(baseUrl, href, false)
+    return putJson(url, json)
+  }
+
+  override fun putJson(url: URI, json: String): Result<String?, Exception> {
+    val httpPut = initialiseRequest(HttpPut(url))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(json, ContentType.APPLICATION_JSON)
 
