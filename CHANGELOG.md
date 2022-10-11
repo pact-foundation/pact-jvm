@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0-beta.6 - Maintenance Release
+
+* ccca23c95 - fix: Upgrade plugin driver to 0.1.6 (fixes plugin loading with multiple versions of the same plugin) (Ronald Holshausen, Wed Oct 5 17:17:51 2022 +1100)
+* 3e4689d2e - Merge branch 'master' into v4.4.x (Ronald Holshausen, Fri Sep 30 15:47:09 2022 +1000)
+* 79d21743a - bump version to 4.3.16 (Ronald Holshausen, Fri Sep 30 15:35:24 2022 +1000)
+* ef423a527 - update changelog for release 4.3.15 (Ronald Holshausen, Fri Sep 30 15:22:23 2022 +1000)
+* 3d9bcedf2 - chore: Update the HAL client to return the current navigated document (Ronald Holshausen, Fri Sep 30 15:16:18 2022 +1000)
+* 8d1bb0565 - chore: fix build after upgrading Antlr (Ronald Holshausen, Mon Sep 26 15:19:13 2022 +1000)
+* 205bbd341 - chore: fix for 'compileTestJava' task (current target is 18) and 'compileTestKotlin' task (current target is 11) jvm target compatibility should be set to the same Java version (Ronald Holshausen, Mon Sep 26 14:35:36 2022 +1000)
+* 6f8a347b3 - Merge pull request #1609 from Codex-/bump_antlr (Ronald Holshausen, Mon Sep 26 14:01:01 2022 +1000)
+* 6a53c7f68 - chore: Bump Antlr4 to 4.11.1 (Alex Miller, Wed Sep 21 17:27:21 2022 +1200)
+* 7258f435e - Merge pull request #1607 from holly-cummins/use-tccl-in-loader (Ronald Holshausen, Mon Sep 19 12:18:27 2022 +1000)
+* 03a8b3deb - Merge pull request #1606 from holly-cummins/bump-kotlinresult (Ronald Holshausen, Mon Sep 19 11:50:17 2022 +1000)
+* bfa1a4ca3 - Merge branch 'stefano-lucka-fix/cvs' (Ronald Holshausen, Mon Sep 19 10:43:02 2022 +1000)
+* ca37bdb8b - chore: correct static code issues and failing tests from PR #1605 (Ronald Holshausen, Mon Sep 19 10:42:49 2022 +1000)
+* 873b0e5b3 - Use Thread Context ClassLoader to find test resources (Holly Cummins, Sat Sep 17 12:36:48 2022 +0100)
+* 50863b9f6 - Bump version of Kotlin Result to work around Unresolved reference build failures (Holly Cummins, Fri Sep 16 20:10:55 2022 +0100)
+* db962337e - Fix issue with base classes (Stefano Lucka, Fri Sep 16 20:08:34 2022 +0200)
+* 11811508c - fix: PactBuilder was not correctly setting up HTTP interaction given a Map structure (Ronald Holshausen, Wed Sep 14 10:55:34 2022 +1000)
+* 9593dec64 - bump version to 4.4.0-beta.6 (Ronald Holshausen, Wed Sep 7 13:46:57 2022 +1000)
+
 # 4.3.15 - Bugfix Release
 
 * 3d9bcedf2 - chore: Update the HAL client to return the current navigated document (Ronald Holshausen, Fri Sep 30 15:16:18 2022 +1000)
