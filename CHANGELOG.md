@@ -1,5 +1,10 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0-beta.7 - Maintenance Release
+
+* 354678ce7 - chore: Update HAL client to be able to PUT to a URL (Ronald Holshausen, Wed Oct 12 10:44:17 2022 +1100)
+* 5ed38519e - bump version to 4.4.0-beta.7 (Ronald Holshausen, Tue Oct 11 12:23:01 2022 +1100)
+
 # 4.4.0-beta.6 - Maintenance Release
 
 * ccca23c95 - fix: Upgrade plugin driver to 0.1.6 (fixes plugin loading with multiple versions of the same plugin) (Ronald Holshausen, Wed Oct 5 17:17:51 2022 +1100)
