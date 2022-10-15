@@ -2,34 +2,61 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderVerifier
+import javax.inject.Inject
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.GradleBuild
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to verify a pact against a provider
  */
-class PactVerificationTask extends PactVerificationBaseTask {
+abstract class PactVerificationTask extends PactVerificationBaseTask {
   @Internal
   IProviderVerifier verifier = new ProviderVerifier()
   @Internal
   GradleProviderInfo providerToVerify
 
+  @Inject
+  protected abstract ProviderFactory getProviderFactory();
+
+  @Input
+  @Optional
+  abstract ListProperty<URL> getTestClasspathURL()
+
+  @Input
+  abstract SetProperty<Task> getTaskContainer()
+
+  @Input
+  abstract Property<Object> getProjectVersion()
+
+  @Input
+  @Optional
+  abstract Property<VerificationReports> getReport()
+
+  @Input
+  abstract Property<File> getBuildDir()
+
   @TaskAction
   void verifyPact() {
     verifier.with {
       verificationSource = 'gradle'
-      projectHasProperty = { project.hasProperty(it) }
-      projectGetProperty = { project.property(it) }
+      projectHasProperty = { providerFactory.gradleProperty(it).present }
+      projectGetProperty = { providerFactory.gradleProperty(it).get() }
       pactLoadFailureMessage = { 'You must specify the pact file to execute (use pactSource = file(...) etc.)' }
-      checkBuildSpecificTask = { it instanceof Task || it instanceof String && project.tasks.findByName(it) }
+      checkBuildSpecificTask = { it instanceof Task || it instanceof String && taskContainer.get().find { t -> t.name == it } }
       executeBuildSpecificTask = this.&executeStateChangeTask
       projectClasspath = {
-        project.sourceSets.test.runtimeClasspath*.toURL()
+        testClasspathURL.get()
       }
-      providerVersion = providerToVerify.providerVersion ?: { project.version }
+        providerVersion = providerToVerify.providerVersion ?: { projectVersion.get() }
       if (providerToVerify.providerTags) {
         if (providerToVerify.providerTags instanceof Closure ) {
           providerTags = providerToVerify.providerTags
@@ -43,9 +70,10 @@ class PactVerificationTask extends PactVerificationBaseTask {
         }
       }
 
-      if (project.pact.reports) {
-        def reportsDir = new File(project.buildDir, 'reports/pact')
-        reporters = project.pact.reports.toVerifierReporters(reportsDir, it)
+      def report = report.getOrElse(null)
+      if (report != null) {
+        def reportsDir = new File(buildDir.get(), 'reports/pact')
+        reporters = report.toVerifierReporters(reportsDir, it)
       }
     }
 
@@ -57,7 +85,8 @@ class PactVerificationTask extends PactVerificationBaseTask {
   }
 
   def executeStateChangeTask(t, state) {
-    def task = t instanceof String ? project.tasks.getByName(t) : t
+    def taskSet = taskContainer.get()
+    def task = t instanceof String ? taskSet.find {it.name == t } : t
     task.setProperty('providerState', state)
     task.ext.providerState = state
     def build = project.task(type: GradleBuild) {

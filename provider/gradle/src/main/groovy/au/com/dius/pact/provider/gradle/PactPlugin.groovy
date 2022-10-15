@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.gradle
 import groovy.transform.CompileStatic
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
+import org.gradle.api.tasks.GradleBuild
 
 /**
  * Main plugin class
@@ -13,8 +14,7 @@ class PactPlugin extends PactPluginBase {
     void apply(Project project) {
 
         // Create and install the extension object
-        def extension = project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo,
-          new ProviderInfoFactory(project)))
+        def extension = project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo))
 
         project.task(PACT_VERIFY, description: 'Verify your pacts against your providers', group: GROUP)
 
@@ -50,7 +50,7 @@ class PactPlugin extends PactPluginBase {
           it.pact.serviceProviders.all { GradleProviderInfo provider ->
             setupPactConsumersFromBroker(provider, project, it.pact)
 
-                def taskName = {
+                String taskName = {
                   def defaultName = "pactVerify_${provider.name.replaceAll(/\s+/, '_')}".toString()
                   try {
                     def clazz = this.getClass().classLoader.loadClass('org.gradle.util.NameValidator').metaClass
@@ -70,22 +70,45 @@ class PactPlugin extends PactPluginBase {
                   }
                 } ()
 
-                def providerTask = project.task(taskName,
-                    description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
-                    group: GROUP) {
+                provider.taskNames = project.gradle.startParameter.taskNames
+
+                def providerTask = project.tasks.register(taskName, PactVerificationTask) {
+                    group = GROUP
+                    description = "Verify the pacts against ${provider.name}"
+
+                    notCompatibleWithConfigurationCache("Configuration Cache is disabled for this task because of `executeStateChangeTask`")
+
                     providerToVerify = provider
+
+                    taskContainer.addAll(project.tasks)
+                    List<URL> classPathUrl = []
+                    try {
+                        classPathUrl = project.sourceSets.test.runtimeClasspath*.toURL()
+                    } catch (MissingPropertyException ignored) {
+                        // do nothing, the list will be empty
+                    }
+                    testClasspathURL.set(classPathUrl)
+                    projectVersion.set(project.version)
+                    report.set(extension.reports)
+                    buildDir.set(project.buildDir)
                 }
 
                 if (project.tasks.findByName(TEST_CLASSES)) {
-                  providerTask.dependsOn TEST_CLASSES
+                    providerTask.configure {
+                      dependsOn TEST_CLASSES
+                    }
                 }
 
                 if (provider.startProviderTask != null) {
-                    providerTask.dependsOn(provider.startProviderTask)
+                    providerTask.configure {
+                      dependsOn(provider.startProviderTask)
+                    }
                 }
 
                 if (provider.terminateProviderTask != null) {
-                    providerTask.finalizedBy(provider.terminateProviderTask)
+                    providerTask.configure {
+                      finalizedBy(provider.terminateProviderTask)
+                    }
                 }
 
                 if (provider.dependencyForPactVerify) {
