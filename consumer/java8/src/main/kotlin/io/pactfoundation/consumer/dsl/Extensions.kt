@@ -2,11 +2,20 @@ package io.pactfoundation.consumer.dsl
 
 import au.com.dius.pact.consumer.dsl.DslPart
 
+import kotlin.reflect.KClass
+
 /**
  * DSL function to simplify creating a [DslPart] generated from a [LambdaDslJsonBody].
  */
 fun newJsonObject(body: LambdaDslJsonBody.() -> Unit): DslPart {
     return LambdaDsl.newJsonBody { it.body() }.build()
+}
+
+/**
+ * DSL function to simplify creating a [DslPart] generated from a [LambdaDslJsonBody].
+ */
+fun newJsonObject(kClass: KClass<*>): DslPart {
+    return LambdaDsl.newJsonBody(DslJsonBodyBuilder().basedOnRequiredConstructorFields(kClass)).build()
 }
 
 /**

@@ -1,6 +1,8 @@
 dependencies {
   api project(path: ":consumer", configuration: 'default')
 
+  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+
   testImplementation "org.junit.jupiter:junit-jupiter:${project.junit5Version}"
   testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
