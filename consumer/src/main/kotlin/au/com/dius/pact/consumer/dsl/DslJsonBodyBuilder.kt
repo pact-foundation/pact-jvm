@@ -14,19 +14,20 @@ class DslJsonBodyBuilder {
     }
 
     /**
-     * Build a {@link LambdaDslJsonBody} based on the Data Object required constructor fields
+     * Build a {@link LambdaDslJsonBody} based on the required constructor fields
      */
     fun basedOnRequiredConstructorFields(kClass: KClass<*>): (LambdaDslJsonBody) -> Unit =
         { root: LambdaDslJsonBody ->
             root.run {
                 val constructor = kClass.primaryConstructor
-                fillBasedOnConstructorFields(constructor, root)
+                fillBasedOnConstructorFields(constructor, root, setOf(kClass))
             }
         }
 
     private fun fillBasedOnConstructorFields(
         constructor: KFunction<Any>?,
-        root: LambdaDslObject
+        root: LambdaDslObject,
+        alreadyProcessedObject: Set<KClass<*>> = setOf()
     ) {
         constructor?.parameters?.filterNot { it.isOptional }?.forEach {
             when (val baseField = it.type.jvmErasure) {
@@ -45,10 +46,13 @@ class DslJsonBodyBuilder {
                 else ->
                     root.`object`(it.name) { objDsl ->
                         objDsl.run {
-                            fillBasedOnConstructorFields(
-                                baseField.primaryConstructor,
-                                objDsl
-                            )
+                            if (!alreadyProcessedObject.contains(baseField)){
+                                fillBasedOnConstructorFields(
+                                    baseField.primaryConstructor,
+                                    objDsl,
+                                    alreadyProcessedObject + baseField
+                                )
+                            }
                         }
                     }
             }
