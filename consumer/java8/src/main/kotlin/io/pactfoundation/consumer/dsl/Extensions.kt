@@ -12,7 +12,8 @@ fun newJsonObject(body: LambdaDslJsonBody.() -> Unit): DslPart {
 }
 
 /**
- * DSL function to simplify creating a [DslPart] generated from a [LambdaDslJsonBody].
+ * DSL function to simplify creating a [DslPart] generated from a [LambdaDslJsonBody]
+ * based on a required constructor fields for a give [KClass].
  */
 fun newJsonObject(kClass: KClass<*>): DslPart {
     return LambdaDsl.newJsonBody(DslJsonBodyBuilder().basedOnRequiredConstructorFields(kClass)).build()

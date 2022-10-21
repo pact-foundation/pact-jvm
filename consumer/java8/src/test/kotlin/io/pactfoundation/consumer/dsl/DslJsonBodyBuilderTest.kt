@@ -118,8 +118,92 @@ internal class DslJsonBodyBuilderTest {
             .isEqualTo(expectedBody.pactDslObject.toString())
     }
 
+    @Test
+    internal fun `should map inner object multiple occurrences`() {
+        data class InnerObjectRequiredProperty(val property: String)
+        data class ObjectRequiredProperty(val inner: InnerObjectRequiredProperty,
+                                          val second: InnerObjectRequiredProperty)
+
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(ObjectRequiredProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { root ->
+                root.`object`("inner") {
+                    it.stringType("property")
+                }
+                root.`object`("second") {
+                    it.stringType("property")
+                }
+            }
+
+        assertThat(actualJsonBody.pactDslObject.toString())
+            .isEqualTo(expectedBody.pactDslObject.toString())
+    }
+
+    data class InnerObjectRequiredProperty(val property: ObjectRequiredProperty)
+    data class ObjectRequiredProperty(val inner: InnerObjectRequiredProperty)
+    @Test
+    internal fun `should map inner object with loop reference for the first level`() {
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(ObjectRequiredProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { root ->
+                root.`object`("inner") { it.`object`("property") { } }
+            }
+
+        assertThat(actualJsonBody.pactDslObject.toString())
+            .isEqualTo(expectedBody.pactDslObject.toString())
+    }
+
+    data class ThirdProperty(val dependOnFirst: FirstProperty, val property: String)
+    data class SecondProperty(val third: ThirdProperty)
+    data class FirstProperty(val second: SecondProperty)
+    @Test
+    internal fun `should map inner object with loop reference keeping other fields`() {
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(FirstProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { root ->
+                root.`object`("second") {
+                    it.`object`("third") { loop ->
+                        loop.`object`("dependOnFirst") { }
+                        loop.stringType("property")
+                    }
+                }
+            }
+
+        assertThat(actualJsonBody.pactDslObject.toString())
+            .isEqualTo(expectedBody.pactDslObject.toString())
+    }
+
+    @Test
+    internal fun `should map inner object reusing the same class internally`() {
+        data class CommonClass(val name: String)
+        data class ThirdToUseCommonProperty(val common: CommonClass)
+        data class SecondToUseCommonProperty(val third: ThirdToUseCommonProperty, val common: CommonClass)
+        data class FirstToUseCommonProperty(val second: SecondToUseCommonProperty)
+
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(FirstToUseCommonProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { root ->
+                root.`object`("second") {
+                    it.`object`("third") { loop ->
+                        loop.`object`("common") { third -> third.stringType("name") }
+                    }
+                    it.`object`("common") { loop ->
+                        loop.stringType("name")
+                    }
+                }
+            }
+
+        assertThat(actualJsonBody.pactDslObject.toString())
+            .isEqualTo(expectedBody.pactDslObject.toString())
+    }
+
     companion object {
         @JvmStatic
+        @Suppress("UnusedPrivateMember")
         private fun numberPropertyNonOptional(): Stream<KClass<*>> {
             data class ByteObjectNonRequiredProperty(val property: Byte)
             data class ShortObjectNonRequiredProperty(val property: Short)
@@ -141,6 +225,7 @@ internal class DslJsonBodyBuilderTest {
         }
 
         @JvmStatic
+        @Suppress("UnusedPrivateMember")
         private fun stringPropertyOptionalProperties(): Stream<KClass<*>> {
             data class StringObjectNonRequiredPropertyImmutable(val property: String = "")
             data class StringObjectNonRequiredPropertyMutable(var property: String = "")
@@ -152,6 +237,7 @@ internal class DslJsonBodyBuilderTest {
         }
 
         @JvmStatic
+        @Suppress("UnusedPrivateMember")
         private fun stringPropertyNonOptionalProperties(): Stream<KClass<*>> {
             data class StringObjectRequiredPropertyImmutable(val property: String)
             data class StringObjectRequiredPropertyMutable(var property: String)
