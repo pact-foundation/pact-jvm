@@ -38,4 +38,17 @@ class ExtensionsTest {
 
         assertThat(actualJson, equalTo(expectedJson))
     }
+
+    @Test
+    fun `can use Kotlin DSL to create a Json body based on required constructor args`() {
+        data class DataClassObject(val string: String, val number: Number, val optional: String? = null)
+
+        val expectedJson = """
+            |{"number":100,"string":"string"}
+            |""".trimMargin().replace("\n", "")
+
+        val actualJson = newJsonObject(DataClassObject::class).body.toString()
+
+        assertThat(actualJson, equalTo(expectedJson))
+    }
 }
