@@ -24,27 +24,37 @@ interface ContentTypeHandler {
 }
 
 val contentTypeHandlers: MutableMap<String, ContentTypeHandler> = mutableMapOf(
-  "application/json" to JsonContentTypeHandler
+  "application/json" to JsonContentTypeHandler,
+  "application/x-www-form-urlencoded" to FormUrlEncodedContentTypeHandler
 )
 
 fun setupDefaultContentTypeHandlers() {
   contentTypeHandlers.clear()
   contentTypeHandlers["application/json"] = JsonContentTypeHandler
+  contentTypeHandlers["application/x-www-form-urlencoded"] = FormUrlEncodedContentTypeHandler
 }
 
-data class QueryResult(var value: JsonValue?, val key: Any? = null, val parent: JsonValue? = null)
+interface QueryResult {
+  var value: Any?
+  val key: Any?
+}
+data class JsonQueryResult(var jsonValue: JsonValue?, override val key: Any? = null, val parent: JsonValue? = null): QueryResult {
+  override var value: Any?
+    get() = jsonValue
+    set(value) { jsonValue = Json.toJson(value) }
+}
 
 object JsonContentTypeHandler : ContentTypeHandler {
   override fun processBody(value: OptionalBody, fn: (QueryResult) -> Unit): OptionalBody {
-    val bodyJson = QueryResult(JsonParser.parseString(value.valueAsString()))
+    val bodyJson = JsonQueryResult(JsonParser.parseString(value.valueAsString()))
     fn.invoke(bodyJson)
-    return OptionalBody.body(bodyJson.value.orNull().serialise()
+    return OptionalBody.body(bodyJson.jsonValue.orNull().serialise()
       .toByteArray(value.contentType.asCharset()), ContentType.JSON)
   }
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: MutableMap<String, Any>) {
     val pathExp = parsePath(key)
-    queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
+    queryObjectGraph(pathExp.iterator(), body as JsonQueryResult) { (_, valueKey, parent) ->
       when (parent) {
         is JsonValue.Object ->
           parent[valueKey.toString()] = Json.toJson(generator.generate(context, parent[valueKey.toString()]))
@@ -56,25 +66,25 @@ object JsonContentTypeHandler : ContentTypeHandler {
   }
 
   @Suppress("ReturnCount")
-  private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: QueryResult, fn: (QueryResult) -> Unit) {
+  private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: JsonQueryResult, fn: (JsonQueryResult) -> Unit) {
     var bodyCursor = body
     while (pathExp.hasNext()) {
       val cursorValue = bodyCursor.value
       when (val token = pathExp.next()) {
         is PathToken.Field -> if (cursorValue is JsonValue.Object && cursorValue.has(token.name)) {
-          bodyCursor = QueryResult(cursorValue[token.name], token.name, bodyCursor.value)
+          bodyCursor = JsonQueryResult(cursorValue[token.name], token.name, bodyCursor.jsonValue)
         } else {
           return
         }
         is PathToken.Index -> if (cursorValue is JsonValue.Array && cursorValue.values.size > token.index) {
-          bodyCursor = QueryResult(cursorValue[token.index], token.index, bodyCursor.value)
+          bodyCursor = JsonQueryResult(cursorValue[token.index], token.index, bodyCursor.jsonValue)
         } else {
           return
         }
         is PathToken.Star -> if (cursorValue is JsonValue.Object) {
           val pathIterator = IteratorUtils.toList(pathExp)
           cursorValue.entries.forEach { (key, value) ->
-            queryObjectGraph(pathIterator.iterator(), QueryResult(value, key, cursorValue), fn)
+            queryObjectGraph(pathIterator.iterator(), JsonQueryResult(value, key, cursorValue), fn)
           }
           return
         } else {
@@ -83,7 +93,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
         is PathToken.StarIndex -> if (cursorValue is JsonValue.Array) {
           val pathIterator = IteratorUtils.toList(pathExp)
           cursorValue.values.forEachIndexed { index, item ->
-            queryObjectGraph(pathIterator.iterator(), QueryResult(item, index, cursorValue), fn)
+            queryObjectGraph(pathIterator.iterator(), JsonQueryResult(item, index, cursorValue), fn)
           }
           return
         } else {

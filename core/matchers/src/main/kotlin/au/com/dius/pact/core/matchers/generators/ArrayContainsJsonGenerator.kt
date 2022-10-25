@@ -5,7 +5,7 @@ import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.JsonContentTypeHandler
-import au.com.dius.pact.core.model.generators.QueryResult
+import au.com.dius.pact.core.model.generators.JsonQueryResult
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.json.JsonValue
 import mu.KLogging
@@ -20,12 +20,12 @@ object ArrayContainsJsonGenerator : KLogging(), Generator {
         val variant = findMatchingVariant(example, context)
         if (variant != null) {
           logger.debug { "Generating values for variant $variant and value $example" }
-          val json = QueryResult(example)
+          val json = JsonQueryResult(example)
           for ((key, generator) in variant.third) {
             JsonContentTypeHandler.applyKey(json, key, generator, context)
           }
           logger.debug { "Generated value ${json.value}" }
-          exampleValue[index] = json.value ?: JsonValue.Null
+          exampleValue[index] = json.jsonValue ?: JsonValue.Null
         }
       }
       exampleValue
