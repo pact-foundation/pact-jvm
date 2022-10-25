@@ -56,7 +56,7 @@ data class HttpRequest @JvmOverloads constructor(
     if (query.isNotEmpty()) {
       map["query"] = query
     }
-    if (body.isPresent()) {
+    if (body.isPresent() || body.isEmpty()) {
       map["body"] = body.toV4Format()
     }
     if (matchingRules.isNotEmpty()) {
@@ -152,7 +152,7 @@ data class HttpResponse @JvmOverloads constructor(
     if (headers.isNotEmpty()) {
       map["headers"] = headers
     }
-    if (body.isPresent()) {
+    if (body.isPresent() || body.isEmpty()) {
       map["body"] = body.toV4Format()
     }
     if (matchingRules.isNotEmpty()) {

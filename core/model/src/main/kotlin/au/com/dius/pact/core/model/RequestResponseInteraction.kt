@@ -78,6 +78,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   companion object : KLogging() {
     const val COMMA = ", "
 
+    @JvmStatic
     fun requestToMap(request: Request, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
       val map = mutableMapOf<String, Any?>(
         "method" to request.method.toUpperCase(),
@@ -89,9 +90,13 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       if (request.query.isNotEmpty()) {
         map["query"] = if (pactSpecVersion >= PactSpecVersion.V3) request.query else mapToQueryStr(request.query)
       }
+
       if (request.body.isPresent()) {
         map["body"] = setupBodyForJson(request)
+      } else if (request.body.isEmpty()) {
+        map["body"] = ""
       }
+
       if (request.matchingRules.isNotEmpty()) {
         map["matchingRules"] = request.matchingRules.toMap(pactSpecVersion)
       }
@@ -102,14 +107,19 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       return map
     }
 
+    @JvmStatic
     fun responseToMap(response: Response, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
       val map = mutableMapOf<String, Any?>("status" to response.status)
       if (response.headers.isNotEmpty()) {
         map["headers"] = response.headers.entries.associate { (key, value) -> key to value.joinToString(COMMA) }
       }
+
       if (response.body.isPresent()) {
         map["body"] = setupBodyForJson(response)
+      } else if (response.body.isEmpty()) {
+        map["body"] = ""
       }
+
       if (response.matchingRules.isNotEmpty()) {
         map["matchingRules"] = response.matchingRules.toMap(pactSpecVersion)
       }

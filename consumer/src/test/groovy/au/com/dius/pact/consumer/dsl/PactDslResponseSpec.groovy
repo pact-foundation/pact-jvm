@@ -2,6 +2,8 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -161,5 +163,28 @@ class PactDslResponseSpec extends Specification {
     pact.metadata.findAll {
       !['pactSpecification', 'pact-jvm', 'plugins'].contains(it.key)
     } == [test: new JsonValue.StringValue('value')]
+  }
+
+  @Issue('#1611')
+  def 'supports empty bodies'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('empty-body-consumer')
+      .hasPactWith('empty-body-service')
+      .uponReceiving('a request for an empty body')
+      .path('/path')
+      .willRespondWith()
+      .body("")
+
+    when:
+    def pact = builder.toPact()
+    def interaction = pact.interactions.first()
+    def pactV4 = builder.toPact(V4Pact)
+    def v4Interaction = pactV4.interactions.first()
+
+    then:
+    interaction.response.body.state == OptionalBody.State.EMPTY
+    interaction.toMap(PactSpecVersion.V3).response == [status: 200, body: '']
+    v4Interaction.response.body.state == OptionalBody.State.EMPTY
+    v4Interaction.toMap(PactSpecVersion.V4).response == [status: 200, body: [content: '']]
   }
 }

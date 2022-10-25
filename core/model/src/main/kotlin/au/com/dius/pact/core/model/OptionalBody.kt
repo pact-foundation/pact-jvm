@@ -179,31 +179,34 @@ data class OptionalBody @JvmOverloads constructor(
 
   fun toV4Format(): Map<String, Any?> {
     return when (state) {
-      State.PRESENT -> if (value!!.isNotEmpty()) {
-        if (contentTypeHint == ContentTypeHint.BINARY || contentType.isBinaryType()) {
-          mapOf(
-            "content" to valueAsBase64(),
-            "contentType" to contentType.toString(),
-            "encoded" to "base64",
-            "contentTypeHint" to contentTypeHint.name
-          )
-        } else if (contentType.isJson()) {
-          mapOf(
-            "content" to JsonParser.parseString(valueAsString()),
-            "contentType" to contentType.toString(),
-            "encoded" to false
-          )
+      State.PRESENT -> {
+        if (value!!.isNotEmpty()) {
+          if (contentTypeHint == ContentTypeHint.BINARY || contentType.isBinaryType()) {
+            mapOf(
+              "content" to valueAsBase64(),
+              "contentType" to contentType.toString(),
+              "encoded" to "base64",
+              "contentTypeHint" to contentTypeHint.name
+            )
+          } else if (contentType.isJson()) {
+            mapOf(
+              "content" to JsonParser.parseString(valueAsString()),
+              "contentType" to contentType.toString(),
+              "encoded" to false
+            )
+          } else {
+            mapOf(
+              "content" to valueAsString(),
+              "contentType" to contentType.toString(),
+              "encoded" to false,
+              "contentTypeHint" to contentTypeHint.name
+            )
+          }
         } else {
-          mapOf(
-            "content" to valueAsString(),
-            "contentType" to contentType.toString(),
-            "encoded" to false,
-            "contentTypeHint" to contentTypeHint.name
-          )
+          mapOf("content" to "")
         }
-      } else {
-        mapOf("content" to "")
       }
+      State.EMPTY -> mapOf("content" to "")
       else -> mapOf()
     }
   }
