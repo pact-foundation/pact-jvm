@@ -116,4 +116,12 @@ class RequestResponseInteractionSpec extends Specification {
       'include[]=course_image&include[]=favorites'
   }
 
+  @Issue('#1611')
+  def 'supports empty bodies'() {
+    expect:
+    RequestResponseInteraction.requestToMap(new Request(body: OptionalBody.empty()), PactSpecVersion.V3) ==
+      [method: 'GET', path: '/', body: '']
+    RequestResponseInteraction.responseToMap(new Response(body: OptionalBody.empty()), PactSpecVersion.V3) ==
+      [status: 200, body: '']
+  }
 }

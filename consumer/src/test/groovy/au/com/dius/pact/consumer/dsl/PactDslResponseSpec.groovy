@@ -2,12 +2,12 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import com.google.common.net.MediaType
 import org.apache.http.entity.ContentType
 import spock.lang.Issue
 import spock.lang.Specification
@@ -45,7 +45,6 @@ class PactDslResponseSpec extends Specification {
       'application/json;charset=iso-8859-1'   | true
       'application/json'                      | true
       ContentType.APPLICATION_JSON.toString() | true
-      MediaType.JSON_UTF_8.toString()         | true
       'application/json;foo=bar'              | false
       'application/json;charset=*'            | false
       'application/xml'                       | false
@@ -146,4 +145,22 @@ class PactDslResponseSpec extends Specification {
     response.responseHeaders == ['content-type': ['text/plain']]
   }
 
+  @Issue('#1611')
+  def 'supports empty bodies'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('empty-body-consumer')
+      .hasPactWith('empty-body-service')
+      .uponReceiving('a request for an empty body')
+      .path('/path')
+      .willRespondWith()
+      .body('')
+
+    when:
+    def pact = builder.toPact()
+    def interaction = pact.interactions.first()
+
+    then:
+    interaction.response.body.state == OptionalBody.State.EMPTY
+    interaction.toMap(PactSpecVersion.V3).response == [status: 200, body: '']
+  }
 }

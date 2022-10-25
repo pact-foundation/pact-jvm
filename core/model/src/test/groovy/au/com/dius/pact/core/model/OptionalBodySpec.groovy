@@ -5,6 +5,7 @@ import spock.lang.Unroll
 
 import java.nio.charset.Charset
 
+@SuppressWarnings('LineLength')
 class OptionalBodySpec extends Specification {
 
   @Unroll
@@ -13,11 +14,11 @@ class OptionalBodySpec extends Specification {
     body.missing == value
 
     where:
-    body                    | value
-    OptionalBody.missing()  | true
-    OptionalBody.empty()    | false
-    OptionalBody.nullBody() | false
-    OptionalBody.body('a'.bytes)  | false
+    body                         | value
+    OptionalBody.missing()       | true
+    OptionalBody.empty()         | false
+    OptionalBody.nullBody()      | false
+    OptionalBody.body('a'.bytes) | false
   }
 
   @Unroll

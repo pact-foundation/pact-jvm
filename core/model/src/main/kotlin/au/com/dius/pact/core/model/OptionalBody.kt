@@ -2,8 +2,10 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.ContentType.Companion.HTMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.JSONREGEXP
+import au.com.dius.pact.core.model.ContentType.Companion.UNKNOWN
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
+import au.com.dius.pact.core.support.json.JsonParser
 import mu.KLogging
 import org.apache.commons.codec.binary.Hex
 import org.apache.tika.config.TikaConfig
@@ -15,14 +17,14 @@ import java.util.Base64
 /**
  * Class to represent missing, empty, null and present bodies
  */
-data class OptionalBody(
+data class OptionalBody @JvmOverloads constructor(
   val state: State,
   val value: ByteArray? = null,
-  var contentType: ContentType = ContentType.UNKNOWN
+  var contentType: ContentType = UNKNOWN
 ) {
 
   init {
-    if (contentType == ContentType.UNKNOWN) {
+    if (contentType == UNKNOWN) {
       val detectedContentType = detectContentType()
       if (detectedContentType != null) {
         this.contentType = detectedContentType
@@ -130,7 +132,7 @@ data class OptionalBody(
     else -> null
   }
 
-  private fun detectStandardTextContentType(): ContentType? = when {
+  fun detectStandardTextContentType(): ContentType? = when {
     isPresent() -> {
       val newLine = '\n'.toByte()
       val cReturn = '\r'.toByte()
@@ -190,6 +192,7 @@ data class OptionalBody(
       }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private val tika = try { TikaConfig() } catch (e: RuntimeException) {
       logger.warn(e) { "Could not initialise Tika, detecting content types will be disabled" }
       null
