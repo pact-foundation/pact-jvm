@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
@@ -149,4 +150,28 @@ class PactDslRequestWithPathSpec extends Specification {
     request.requestHeaders == ['content-type': ['text/plain']]
   }
 
+  @Issue('#1612')
+  def 'queryMatchingDatetime creates invalid generator'() {
+    given:
+    PactDslWithProvider consumerPactBuilder = ConsumerPactBuilder
+      .consumer('spec')
+      .hasPactWith('spec')
+
+    when:
+    def pact = consumerPactBuilder
+      .uponReceiving("a request")
+      .path("/api/myrequest")
+      .method("POST")
+      .queryMatchingDatetime("startDateTime", "yyyy-MM-dd'T'hh:mm:ss'Z'")
+      .willRespondWith()
+      .status(200)
+      .toPact()
+    def request = pact.interactions.first()
+    def generators = request.request.generators
+
+    then:
+    generators.toMap(PactSpecVersion.V3) == [
+      query: [startDateTime: [type: 'DateTime', format: "yyyy-MM-dd'T'hh:mm:ss'Z'"]]
+    ]
+  }
 }

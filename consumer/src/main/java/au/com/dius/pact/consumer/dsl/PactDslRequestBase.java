@@ -83,7 +83,7 @@ public abstract class PactDslRequestBase {
     if (StringUtils.isNotEmpty(example)) {
       query.put(field, Collections.singletonList(example));
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, new DateGenerator(pattern, null));
+      requestGenerators.addGenerator(Category.QUERY, field, new DateGenerator(pattern, null));
       FastDateFormat instance = FastDateFormat.getInstance(pattern);
       query.put(field, Collections.singletonList(instance.format(new Date(DATE_2000))));
     }
@@ -95,7 +95,7 @@ public abstract class PactDslRequestBase {
     if (StringUtils.isNotEmpty(example)) {
       query.put(field, Collections.singletonList(example));
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, new TimeGenerator(pattern, null));
+      requestGenerators.addGenerator(Category.QUERY, field, new TimeGenerator(pattern, null));
       FastDateFormat instance = FastDateFormat.getInstance(pattern);
       query.put(field, Collections.singletonList(instance.format(new Date(DATE_2000))));
     }
@@ -107,7 +107,7 @@ public abstract class PactDslRequestBase {
     if (StringUtils.isNotEmpty(example)) {
       query.put(field, Collections.singletonList(example));
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, new DateTimeGenerator(pattern, null));
+      requestGenerators.addGenerator(Category.QUERY , field, new DateTimeGenerator(pattern, null));
       FastDateFormat instance = FastDateFormat.getInstance(pattern);
       query.put(field, Collections.singletonList(instance.format(new Date(DATE_2000))));
     }
