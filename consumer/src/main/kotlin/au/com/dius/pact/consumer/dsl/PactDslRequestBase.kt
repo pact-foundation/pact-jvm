@@ -99,7 +99,7 @@ open class PactDslRequestBase(
     if (example.isNotEmpty()) {
       query[field] = listOf(example!!)
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, DateGenerator(pattern, null))
+      requestGenerators.addGenerator(Category.QUERY, field, DateGenerator(pattern, null))
       val instance = FastDateFormat.getInstance(pattern)
       query[field] = listOf(instance.format(Date(DATE_2000)))
     }
@@ -111,7 +111,7 @@ open class PactDslRequestBase(
     if (example.isNotEmpty()) {
       query[field] = listOf(example!!)
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, TimeGenerator(pattern, null))
+      requestGenerators.addGenerator(Category.QUERY, field, TimeGenerator(pattern, null))
       val instance = FastDateFormat.getInstance(pattern)
       query[field] = listOf(instance.format(Date(DATE_2000)))
     }
@@ -123,7 +123,7 @@ open class PactDslRequestBase(
     if (example.isNotEmpty()) {
       query[field] = listOf(example!!)
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, DateTimeGenerator(pattern, null))
+      requestGenerators.addGenerator(Category.QUERY, field, DateTimeGenerator(pattern, null))
       val instance = FastDateFormat.getInstance(pattern)
       query[field] = listOf(instance.format(Date(DATE_2000)))
     }
