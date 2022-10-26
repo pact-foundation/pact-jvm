@@ -528,6 +528,18 @@ open class PactDslResponse @JvmOverloads constructor(
     return this
   }
 
+  /**
+   * Sets up a content type matcher to match any body of the given content type
+   */
+  fun bodyMatchingContentType(contentType: String, exampleContents: String): PactDslResponse {
+    val ct = au.com.dius.pact.core.model.ContentType(contentType)
+    val charset = ct.asCharset()
+    responseBody = body(exampleContents.toByteArray(charset), ct)
+    responseHeaders[PactDslRequestBase.CONTENT_TYPE] = listOf(contentType)
+    responseMatchers.addCategory("body").addRule("$", ContentTypeMatcher(contentType))
+    return this
+  }
+
   protected val isContentTypeHeaderNotSet: Boolean
     get() = responseHeaders.keys.none { key -> key.equals(CONTENT_TYPE, ignoreCase = true) }
   protected val contentTypeHeader: String

@@ -210,7 +210,10 @@ open class PactBuilder(
     return this
   }
 
-  private fun setupMessageContents(contents: Any?, interaction: V4Interaction): List<Pair<MessageContents, InteractionMarkup>> {
+  private fun setupMessageContents(
+    contents: Any?,
+    interaction: V4Interaction
+  ): List<Pair<MessageContents, InteractionMarkup>> {
     logger.debug { "Explicit contents, will look for a content matcher" }
     return when (contents) {
       is Map<*, *> -> if (contents.containsKey("pact:content-type")) {

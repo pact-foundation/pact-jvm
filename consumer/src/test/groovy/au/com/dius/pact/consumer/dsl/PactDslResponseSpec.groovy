@@ -187,4 +187,25 @@ class PactDslResponseSpec extends Specification {
     v4Interaction.response.body.state == OptionalBody.State.EMPTY
     v4Interaction.toMap(PactSpecVersion.V4).response == [status: 200, body: [content: '']]
   }
+
+  @Issue('#1623')
+  def 'supports setting a content type matcher'() {
+    given:
+    def response = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('a XML request')
+      .path("/path")
+      .willRespondWith()
+    def example = '<?xml version=\"1.0\" encoding=\"utf-8\"?><example>foo</example>'
+
+    when:
+    def result = response.bodyMatchingContentType('application/xml', example)
+
+    then:
+    response.responseHeaders['Content-Type'] == ['application/xml']
+    result.responseBody.valueAsString() == example
+    result.responseMatchers.rulesForCategory('body').toMap(PactSpecVersion.V4) == [
+      '$': [matchers: [[match: 'contentType', value: 'application/xml']], combine: 'AND']
+    ]
+  }
 }

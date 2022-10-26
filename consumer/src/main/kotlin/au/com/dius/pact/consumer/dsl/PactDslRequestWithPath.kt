@@ -360,6 +360,13 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   }
 
   /**
+   * Sets up a content type matcher to match any body of the given content type
+   */
+  public override fun bodyMatchingContentType(contentType: String, exampleContents: String): PactDslRequestWithPath {
+    return super.bodyMatchingContentType(contentType, exampleContents) as PactDslRequestWithPath
+  }
+
+  /**
    * The path of the request
    *
    * @param path string path
