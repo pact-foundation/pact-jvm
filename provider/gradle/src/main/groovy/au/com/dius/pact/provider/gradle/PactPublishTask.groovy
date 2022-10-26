@@ -10,28 +10,45 @@ import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to push pact files to a pact broker
  */
 @SuppressWarnings(['Println', 'AbcMetric'])
-class PactPublishTask extends DefaultTask {
+abstract class PactPublishTask extends DefaultTask {
+
+    @Input
+    @Optional
+    abstract Property<PactPublish> getPactPublish()
+
+    @Input
+    @Optional
+    abstract Property<Broker> getBroker()
+
+    @Input
+    abstract Property<Object> getProjectVersion()
+
+    @Input
+    abstract Property<File> getPactDir()
 
     @TaskAction
     void publishPacts() {
-        if (!project.pact.publish) {
+        PactPublish pactPublish = pactPublish.getOrElse(null)
+        if (pactPublish == null) {
             throw new GradleScriptException('You must add a pact publish configuration to your build before you can ' +
                 'use the pactPublish task', null)
         }
 
-        PactPublish pactPublish = project.pact.publish
         if (pactPublish.pactDirectory == null) {
-            pactPublish.pactDirectory = project.file("${project.buildDir}/pacts")
+            pactPublish.pactDirectory = pactDir.get()
         }
         def version = pactPublish.consumerVersion
         if (version == null) {
-          version = project.version
+          version = projectVersion.get()
         } else if (version instanceof Closure) {
           version = version.call()
         }
@@ -40,7 +57,8 @@ class PactPublishTask extends DefaultTask {
           throw new GradleScriptException('The consumer version is required to publish Pact files', null)
         }
 
-        def brokerConfig = project.pact.broker ?: project.pact.publish
+        Broker broker = broker.getOrElse(null)
+        def brokerConfig = broker ?: pactPublish
         def options = [:]
         if (StringUtils.isNotEmpty(brokerConfig.pactBrokerToken)) {
             options.authentication = [brokerConfig.pactBrokerAuthenticationScheme ?: 'bearer',
