@@ -14,7 +14,7 @@ dependencies {
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testImplementation 'org.mockito:mockito-core:2.28.2'
   testImplementation 'org.hamcrest:hamcrest:2.1'
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
   testImplementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"

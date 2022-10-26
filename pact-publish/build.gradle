@@ -18,7 +18,7 @@ dependencies {
   testImplementation(project(":consumer"))
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testRuntimeOnly "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
 }

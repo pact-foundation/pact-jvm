@@ -29,7 +29,7 @@ dependencies {
 
   testImplementation 'org.clojure:tools.nrepl:0.2.13'
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
 

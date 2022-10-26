@@ -21,7 +21,7 @@ dependencies {
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'org.hamcrest:hamcrest:2.2'
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
   testImplementation "junit:junit:${project.junitVersion}"

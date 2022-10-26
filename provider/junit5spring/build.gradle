@@ -12,7 +12,7 @@ dependencies {
   testImplementation "org.springframework.boot:spring-boot-starter-test:${project.springboot}"
   testImplementation "org.springframework.boot:spring-boot-starter-web:${project.springboot}"
   testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
 }

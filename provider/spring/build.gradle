@@ -15,7 +15,7 @@ dependencies {
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: project.springboot
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
       exclude group: 'org.codehaus.groovy'
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

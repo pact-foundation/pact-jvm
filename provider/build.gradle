@@ -30,7 +30,7 @@ dependencies {
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testImplementation 'org.mockito:mockito-core:2.28.2'
     testImplementation 'javax.xml.bind:jaxb-api:2.3.1'
-    testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
+    testImplementation("org.spockframework:spock-core:${project.spock}") {
         exclude group: 'org.codehaus.groovy'
     }
     testImplementation 'org.hamcrest:hamcrest:2.2'
