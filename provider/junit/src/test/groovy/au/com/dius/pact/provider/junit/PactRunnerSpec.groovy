@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
 import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder
@@ -14,7 +15,9 @@ import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.InitializationError
+import spock.lang.Issue
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings('UnusedObject')
 class PactRunnerSpec extends Specification {
@@ -112,6 +115,21 @@ class PactRunnerSpec extends Specification {
   @Provider('Bob')
   @PactSource(PactLoaderWithDefaultConstructor)
   class PactLoaderWithDefaultConstructorClass {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('${provider.name}')
+  @PactFolder('pacts')
+  class ProviderFromSystemPropTestClass {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('myAwesomeService')
+  @Consumer('${consumer.name}')
+  @PactFolder('pacts')
+  class ConsumerFromSystemPropTestClass {
     @TestTarget
     Target target
   }
@@ -219,4 +237,31 @@ class PactRunnerSpec extends Specification {
     !runner.children.empty
   }
 
+  @Issue('#528')
+  @RestoreSystemProperties
+  def 'PactRunner supports getting the provider name from a system property or environment variable'() {
+    given:
+    System.setProperty('provider.name', 'myAwesomeService')
+
+    when:
+    def runner = new PactRunner(ProviderFromSystemPropTestClass)
+    runner.run(new RunNotifier())
+
+    then:
+    !runner.children.empty
+  }
+
+  @Issue('#528')
+  @RestoreSystemProperties
+  def 'PactRunner supports getting the consumer name from a system property or environment variable'() {
+    given:
+    System.setProperty('consumer.name', 'anotherService')
+
+    when:
+    def runner = new PactRunner(ConsumerFromSystemPropTestClass)
+    runner.run(new RunNotifier())
+
+    then:
+    !runner.children.empty
+  }
 }

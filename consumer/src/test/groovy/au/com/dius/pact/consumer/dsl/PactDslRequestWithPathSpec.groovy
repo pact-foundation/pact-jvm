@@ -159,10 +159,10 @@ class PactDslRequestWithPathSpec extends Specification {
 
     when:
     def pact = consumerPactBuilder
-      .uponReceiving("a request")
-      .path("/api/myrequest")
-      .method("POST")
-      .queryMatchingDatetime("startDateTime", "yyyy-MM-dd'T'hh:mm:ss'Z'")
+      .uponReceiving('a request')
+      .path('/api/request')
+      .method('POST')
+      .queryMatchingDatetime('startDateTime', "yyyy-MM-dd'T'hh:mm:ss'Z'")
       .willRespondWith()
       .status(200)
       .toPact()
