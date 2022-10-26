@@ -1,9 +1,11 @@
 package au.com.dius.pact.consumer.dsl
 
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import kotlin.reflect.KClass
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 import java.util.stream.Stream
@@ -22,8 +24,7 @@ internal class DslJsonBodyBuilderTest {
         val expectedBody =
             LambdaDsl.newJsonBody { }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @ParameterizedTest
@@ -34,8 +35,7 @@ internal class DslJsonBodyBuilderTest {
         val expectedBody =
             LambdaDsl.newJsonBody { it.stringType("property") }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @Test
@@ -47,8 +47,7 @@ internal class DslJsonBodyBuilderTest {
         val expectedBody =
             LambdaDsl.newJsonBody { it.stringType("property") }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @Test
@@ -60,8 +59,7 @@ internal class DslJsonBodyBuilderTest {
         val expectedBody =
             LambdaDsl.newJsonBody { it.booleanType("property") }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @ParameterizedTest
@@ -72,8 +70,7 @@ internal class DslJsonBodyBuilderTest {
         val expectedBody =
             LambdaDsl.newJsonBody { it.numberType("property") }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @Test
@@ -85,8 +82,7 @@ internal class DslJsonBodyBuilderTest {
         val expectedBody =
             LambdaDsl.newJsonBody { it.datetime("property", "yyyy-MM-dd'T'HH:mm:ssZZ") }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @Test
@@ -98,8 +94,7 @@ internal class DslJsonBodyBuilderTest {
         val expectedBody =
             LambdaDsl.newJsonBody { it.array("property") {} }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @Test
@@ -114,8 +109,7 @@ internal class DslJsonBodyBuilderTest {
                 root.`object`("inner") { it.stringType("property") }
             }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @Test
@@ -136,8 +130,7 @@ internal class DslJsonBodyBuilderTest {
                 }
             }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     data class InnerObjectRequiredProperty(val property: ObjectRequiredProperty)
@@ -151,8 +144,7 @@ internal class DslJsonBodyBuilderTest {
                 root.`object`("inner") { it.`object`("property") { } }
             }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     data class ThirdProperty(val dependOnFirst: FirstProperty, val property: String)
@@ -172,8 +164,7 @@ internal class DslJsonBodyBuilderTest {
                 }
             }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     @Test
@@ -197,8 +188,7 @@ internal class DslJsonBodyBuilderTest {
                 }
             }
 
-        assertThat(actualJsonBody.pactDslObject.toString())
-            .isEqualTo(expectedBody.pactDslObject.toString())
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
 
     companion object {
