@@ -10,6 +10,7 @@ import javax.net.ssl.SSLHandshakeException;
 
 import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import io.restassured.RestAssured;
 import org.hamcrest.Matchers;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -17,7 +18,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jayway.restassured.RestAssured;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;

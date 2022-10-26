@@ -10,7 +10,7 @@ dependencies {
   runtimeOnly group: 'org.synchronoss.cloud', name: 'nio-multipart-parser', version: '1.1.0'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation 'javax.mail:mail:1.5.0-b01'
-  implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation "org.apache.commons:commons-collections4:${project.commonsCollections4}"
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: project.springboot
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"

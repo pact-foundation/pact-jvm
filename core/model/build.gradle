@@ -23,7 +23,7 @@ dependencies {
   api project(":core:support")
   api project(":core:pactbroker")
 
-  implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation "org.apache.commons:commons-collections4:${project.commonsCollections4}"
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'javax.mail:mail:1.5.0-b01'
   implementation "org.jetbrains.kotlin:kotlin-reflect:${project.kotlinVersion}"
@@ -47,7 +47,7 @@ dependencies {
   }
   testImplementation "junit:junit:${project.junitVersion}"
   testImplementation 'org.hamcrest:hamcrest:2.1'
-  testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.32'
+  testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.232'
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 
   antlr "org.antlr:antlr4:4.11.1"

@@ -23,12 +23,12 @@ dependencies {
 
   testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}",
-    'org.apache.commons:commons-collections4:4.1'
+    "org.apache.commons:commons-collections4:${project.commonsCollections4}"
   implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
   implementation "org.apache.httpcomponents.client5:httpclient5-fluent:${project.httpClientVersion}"
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
-  testImplementation('com.jayway.restassured:rest-assured:2.9.0') {
-    exclude group: 'org.codehaus.groovy'
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
+  testImplementation('io.rest-assured:rest-assured:5.2.0') {
+    exclude group: 'org.apache.groovy'
   }
   testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
