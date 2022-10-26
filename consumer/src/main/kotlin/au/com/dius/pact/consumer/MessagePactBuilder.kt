@@ -18,6 +18,7 @@ import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.model.v4.MessageContents
+import java.util.Locale
 
 /**
  * PACT DSL builder for v3 specification messages or v4 asynchronous messages
@@ -168,7 +169,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     val message = messages.last()
     val metadata = message.contents.metadata.toMutableMap()
     val contentTypeEntry = metadata.entries.find {
-      it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
+      it.key.lowercase() == "contenttype" || it.key.lowercase() == "content-type"
     }
 
     var contentType = ContentType.JSON
@@ -202,7 +203,7 @@ class MessagePactBuilder @JvmOverloads constructor(
     val message = messages.last()
     val metadata = message.contents.metadata.toMutableMap()
     val contentTypeEntry = metadata.entries.find {
-      it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
+      it.key.lowercase() == "contenttype" || it.key.lowercase() == "content-type"
     }
 
     var contentType = ContentType.XML
@@ -220,6 +221,28 @@ class MessagePactBuilder @JvmOverloads constructor(
     )
     message.contents.matchingRules.addCategory(xmlBuilder.matchingRules)
     message.contents.generators.addGenerators(xmlBuilder.generators)
+
+    return this
+  }
+
+  /**
+   * Adds the text as the message contents
+   */
+  @JvmOverloads
+  fun withContent(contents: String, contentType: String = "text/plain"): MessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before withMetaData")
+    }
+
+    val message = messages.last()
+    val metadata = message.contents.metadata.toMutableMap()
+    metadata["contentType"] = contentType
+
+    val ct = ContentType(contentType)
+    message.contents = message.contents.copy(
+      contents = OptionalBody.body(contents.toByteArray(ct.asCharset()), ct),
+      metadata = metadata
+    )
 
     return this
   }
