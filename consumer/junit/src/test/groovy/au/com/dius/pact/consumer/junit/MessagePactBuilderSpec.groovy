@@ -205,4 +205,19 @@ class MessagePactBuilderSpec extends Specification {
     then:
     generators.categories[category] == ['$.DT': new DateTimeGenerator("yyyy-MM-dd'T'HH:mm:ss")]
   }
+
+  @Issue('#1619')
+  def 'support non-json text formats'() {
+    when:
+    def pact = new MessagePactBuilder()
+      .consumer('MessagePactBuilderSpec')
+      .expectsToReceive('a message with text contents')
+      .withContent('a=b&c=d', 'application/x-www-form-urlencoded')
+      .toPact()
+    Message message = pact.interactions.first()
+
+    then:
+    message.contents.valueAsString() == 'a=b&c=d'
+    message.contents.contentType.toString() == 'application/x-www-form-urlencoded'
+  }
 }

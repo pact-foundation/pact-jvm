@@ -17,11 +17,11 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 /**
  * PACT DSL builder for v3 specification
  */
-class MessagePactBuilder(
+class MessagePactBuilder @JvmOverloads constructor(
   /**
    * The consumer for the pact.
    */
-  private var consumer: Consumer,
+  private var consumer: Consumer = Consumer(),
 
   /**
    * The provider for the pact.
@@ -38,7 +38,6 @@ class MessagePactBuilder(
    */
   private var messages: MutableList<Message> = mutableListOf()
 ) {
-
   /**
    * Name the provider that the consumer has a pact with.
    *
@@ -194,6 +193,24 @@ class MessagePactBuilder(
     message.metaData = metadata
     message.matchingRules.addCategory(xmlBuilder.matchingRules)
     message.generators.addGenerators(xmlBuilder.generators)
+
+    return this
+  }
+
+  /**
+   * Adds the text as the message contents
+   */
+  @JvmOverloads
+  fun withContent(contents: String, contentType: String = "text/plain"): MessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before withMetaData")
+    }
+
+    val message = messages.last()
+    message.metaData["contentType"] = contentType
+
+    val ct = ContentType(contentType)
+    message.contents = OptionalBody.body(contents.toByteArray(ct.asCharset()), ct)
 
     return this
   }
