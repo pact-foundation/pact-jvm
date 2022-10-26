@@ -1,7 +1,10 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderUtils.findAnnotation
@@ -56,7 +59,8 @@ import java.io.IOException
 open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) {
 
   private val children = mutableListOf<InteractionRunner>()
-  private var valueResolver = SystemPropertyResolver
+  private var valueResolver: ValueResolver = SystemPropertyResolver
+  private val ep: ExpressionParser = ExpressionParser()
   private var initialized = false
 
   private fun initialize() {
@@ -67,16 +71,8 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
     if (clazz.getAnnotation(Ignore::class.java) != null) {
       logger.info("Ignore annotation detected, exiting")
     } else {
-      val providerInfo = findAnnotation(clazz, Provider::class.java) ?: throw InitializationError(
-              "Provider name should be specified by using ${Provider::class.java.simpleName} annotation")
-      logger.debug { "Found annotation $providerInfo" }
-      val serviceName = providerInfo.value
-
-      val consumerInfo = findAnnotation(clazz, Consumer::class.java)
-      if (consumerInfo != null) {
-        logger.debug { "Found annotation $consumerInfo" }
-      }
-      val consumerName = consumerInfo?.value
+      val (providerInfo, serviceName) = lookupProviderInfo()
+      val (consumerInfo, consumerName) = lookupConsumerInfo()
 
       val testClass = TestClass(clazz)
       val ignoreNoPactsToVerify = findAnnotation(clazz, IgnoreNoPactsToVerify::class.java)
@@ -119,6 +115,31 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
       setupInteractionRunners(testClass, pacts, pactLoader)
     }
     initialized = true
+  }
+
+  private fun lookupConsumerInfo(): Pair<Consumer?, String?> {
+    val consumerInfo = findAnnotation(clazz, Consumer::class.java)
+    return if (consumerInfo != null) {
+      logger.debug { "Found annotation $consumerInfo" }
+      val consumerName = ep.parseExpression(consumerInfo.value, DataType.STRING, valueResolver)?.toString()
+      Pair(consumerInfo, consumerName)
+    } else {
+      Pair(null, null)
+    }
+  }
+
+  private fun lookupProviderInfo(): Pair<Provider, String> {
+    val providerInfo = findAnnotation(clazz, Provider::class.java) ?: throw InitializationError(
+      "Provider name should be specified by using ${Provider::class.java.simpleName} annotation"
+    )
+    logger.debug { "Found annotation $providerInfo" }
+    val serviceName = ep.parseExpression(providerInfo.value, DataType.STRING, valueResolver)?.toString()
+    if (serviceName.isNullOrEmpty()) {
+      throw InitializationError(
+        "Provider name specified by ${Provider::class.java.simpleName} annotation is null or empty"
+      )
+    }
+    return Pair(providerInfo, serviceName)
   }
 
   private fun checkIgnoreIoException(ignoreIoErrors: String, e: Exception) = if (ignoreIoErrors == "true") {
