@@ -2,7 +2,7 @@ dependencies {
   api project(":provider")
   implementation 'org.apache.maven:maven-plugin-api:3.8.1',
     'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1'
-  implementation 'org.apache.maven:maven-core:3.8.1'
+  implementation 'org.apache.maven:maven-core:3.8.6'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'com.github.ajalt:mordant:1.2.1'

@@ -42,7 +42,6 @@ dependencies {
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
   testRuntimeOnly 'org.objenesis:objenesis:3.1'
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0.rc1'
 
   testImplementation 'org.clojure:clojure:1.10.1',
     'http-kit:http-kit:2.3.0'

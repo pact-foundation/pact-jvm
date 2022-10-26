@@ -20,7 +20,7 @@ dependencies {
   implementation 'org.clojure:clojure:1.10.1'
   implementation 'org.clojure:core.match:1.0.0'
   implementation 'org.clojure:core.rrb-vector:0.1.1'
-  implementation 'leiningen-core:leiningen-core:2.9.4'
+  implementation 'leiningen-core:leiningen-core:2.9.10'
   implementation 'org.apache.maven:maven-aether-provider:3.0.5'
   implementation 'org.sonatype.aether:aether-connector-file:1.13.1'
   implementation 'org.sonatype.aether:aether-connector-wagon:1.13.1'
@@ -53,4 +53,11 @@ clojureTest {
 
 processResources {
   expand project.properties
+}
+
+repositories {
+  maven {
+    url 'https://repo.clojars.org'
+    name 'Clojars'
+  }
 }

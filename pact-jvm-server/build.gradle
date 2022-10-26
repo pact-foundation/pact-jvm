@@ -25,9 +25,9 @@ dependencies {
   implementation("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
       exclude group: 'org.scala-lang'
   }
-  implementation "ws.unfiltered:unfiltered-netty-server_2.12:0.9.1"
+  implementation 'ws.unfiltered:unfiltered-netty-server_2.12:0.10.4'
   implementation 'org.apache.commons:commons-io:1.3.2'
-  implementation 'org.apache.tika:tika-core:1.27'
+  implementation "org.apache.tika:tika-core:${project.tika}"
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
 
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
