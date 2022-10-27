@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.support
 
 import spock.lang.Specification
-import org.antlr.v4.runtime.InputMismatchException
 import spock.lang.Unroll
 
 class VersionParserSpec extends Specification {

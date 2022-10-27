@@ -1,7 +1,3 @@
-plugins {
-  id 'antlr'
-}
-
 dependencies {
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
@@ -25,8 +21,6 @@ dependencies {
     exclude group: 'org.codehaus.groovy'
   }
   testImplementation "junit:junit:${project.junitVersion}"
-
-  antlr "org.antlr:antlr4:4.11.1"
 }
 
 compileJava {

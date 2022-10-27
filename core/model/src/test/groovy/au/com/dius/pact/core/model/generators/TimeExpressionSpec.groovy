@@ -1,6 +1,5 @@
-package au.com.dius.pact.model.generators
+package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.core.model.generators.TimeExpression
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -51,8 +50,8 @@ class TimeExpressionSpec extends Specification {
     where:
 
     expression | expected
-    '+'        | 'Error parsing expression: line 1:1 mismatched input \'<EOF>\' expecting INT'
-    'now +'    | 'Error parsing expression: line 1:5 mismatched input \'<EOF>\' expecting INT'
+    '+'        | 'Error parsing expression: Was expecting an integer at index 1'
+    'now +'    | 'Error parsing expression: Was expecting an integer at index 5'
     'noo'      | /^Error parsing expression.*/
   }
 }

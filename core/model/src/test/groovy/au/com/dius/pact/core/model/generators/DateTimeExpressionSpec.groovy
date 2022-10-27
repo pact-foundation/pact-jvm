@@ -104,10 +104,10 @@ class DateTimeExpressionSpec extends Specification {
         '+'             | 'Error parsing expression: Was expecting an integer at index 1'
         'now +'         | 'Error parsing expression: Was expecting an integer at index 5'
         'tomorr'        | /^Error parsing expression.*/
-        'now @ +'       | 'Error parsing expression: line 1:7 mismatched input \'<EOF>\' expecting INT'
-        '+ @ +'         | 'Error parsing expression: Was expecting an integer at index 2, Error parsing expression: line 1:5 mismatched input \'<EOF>\' expecting INT'
-        'now+ @ now +'  | 'Error parsing expression: Was expecting an integer at index 5, Error parsing expression: line 1:12 mismatched input \'<EOF>\' expecting INT'
-        'now @ now +'   | 'Error parsing expression: line 1:11 mismatched input \'<EOF>\' expecting INT'
+        'now @ +'       | 'Error parsing expression: Was expecting an integer at index 7'
+        '+ @ +'         | 'Error parsing expression: Was expecting an integer at index 2, Error parsing expression: Was expecting an integer at index 5'
+        'now+ @ now +'  | 'Error parsing expression: Was expecting an integer at index 5, Error parsing expression: Was expecting an integer at index 12'
+        'now @ now +'   | 'Error parsing expression: Was expecting an integer at index 11'
         'now @ noo'     | /^Error parsing expression.*/
     }
 
