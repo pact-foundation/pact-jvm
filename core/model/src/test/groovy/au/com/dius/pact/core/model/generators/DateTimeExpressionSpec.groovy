@@ -1,6 +1,5 @@
-package au.com.dius.pact.model.generators
+package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.core.model.generators.DateTimeExpression
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -102,12 +101,12 @@ class DateTimeExpressionSpec extends Specification {
         where:
 
         expression      | expected
-        '+'             | 'Error parsing expression: line 1:1 mismatched input \'<EOF>\' expecting INT'
-        'now +'         | 'Error parsing expression: line 1:5 mismatched input \'<EOF>\' expecting INT'
+        '+'             | 'Error parsing expression: Was expecting an integer at index 1'
+        'now +'         | 'Error parsing expression: Was expecting an integer at index 5'
         'tomorr'        | /^Error parsing expression.*/
         'now @ +'       | 'Error parsing expression: line 1:7 mismatched input \'<EOF>\' expecting INT'
-        '+ @ +'         | 'Error parsing expression: line 1:2 mismatched input \'<EOF>\' expecting INT, Error parsing expression: line 1:5 mismatched input \'<EOF>\' expecting INT'
-        'now+ @ now +'  | 'Error parsing expression: line 1:5 mismatched input \'<EOF>\' expecting INT, Error parsing expression: line 1:12 mismatched input \'<EOF>\' expecting INT'
+        '+ @ +'         | 'Error parsing expression: Was expecting an integer at index 2, Error parsing expression: line 1:5 mismatched input \'<EOF>\' expecting INT'
+        'now+ @ now +'  | 'Error parsing expression: Was expecting an integer at index 5, Error parsing expression: line 1:12 mismatched input \'<EOF>\' expecting INT'
         'now @ now +'   | 'Error parsing expression: line 1:11 mismatched input \'<EOF>\' expecting INT'
         'now @ noo'     | /^Error parsing expression.*/
     }

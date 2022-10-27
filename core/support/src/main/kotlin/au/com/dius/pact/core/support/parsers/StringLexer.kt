@@ -1,6 +1,10 @@
 package au.com.dius.pact.core.support.parsers
 
-class StringLexer(private val buffer: String) {
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+
+open class StringLexer(private val buffer: String) {
   var index = 0
     private set
 
@@ -31,7 +35,7 @@ class StringLexer(private val buffer: String) {
   }
 
   fun advance(count: Int) {
-    for (i in 0 until count) {
+    for (_i in 0 until count) {
       index++
     }
   }
@@ -52,5 +56,34 @@ class StringLexer(private val buffer: String) {
         result.value
       }
     }
+  }
+
+  fun matchString(s: String): Boolean {
+    return if (buffer.startsWith(s, index)) {
+      index += s.length
+      true
+    } else {
+      false
+    }
+  }
+
+  fun matchChar(c: Char): Boolean {
+    return if (peekNextChar() == c) {
+      index++
+      true
+    } else {
+      false
+    }
+  }
+
+  fun parseInt(): Result<Int, String> {
+    return when (val result = matchRegex(INT)) {
+      null -> Err("Was expecting an integer at index $index")
+      else -> Ok(result.toInt())
+    }
+  }
+
+  companion object {
+    val INT = Regex("^\\d+")
   }
 }

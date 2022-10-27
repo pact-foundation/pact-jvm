@@ -19,13 +19,11 @@ data class Version(
   }
 
   companion object {
-    val INT = Regex("^\\d+")
-
     @JvmStatic
     fun parse(version: String): Result<Version, String> {
       val lexer = StringLexer(version)
 
-      val major = when (val result = parseInt(lexer)) {
+      val major = when (val result = lexer.parseInt()) {
         is Ok -> result.value
         is Err -> return result
       }
@@ -35,7 +33,7 @@ data class Version(
         return Err(err)
       }
 
-      val minor = when (val result = parseInt(lexer)) {
+      val minor = when (val result = lexer.parseInt()) {
         is Ok -> result.value
         is Err -> return result
       }
@@ -43,7 +41,7 @@ data class Version(
       return when {
         lexer.peekNextChar() == '.' -> {
           lexer.advance()
-          when (val result = parseInt(lexer)) {
+          when (val result = lexer.parseInt()) {
             is Ok -> if (lexer.empty) {
               Ok(Version(major, minor, result.value))
             } else {
@@ -62,13 +60,6 @@ data class Version(
         null -> "Was expecting a '$c' at index ${lexer.index} but got the end of the input"
         c -> null
         else -> "Was expecting a '$c' at index ${lexer.index - 1} but got '$ch'"
-      }
-    }
-
-    private fun parseInt(lexer: StringLexer): Result<Int, String> {
-      return when (val result = lexer.matchRegex(INT)) {
-        null -> Err("Was expecting an integer at index ${lexer.index}")
-        else -> Ok(result.toInt())
       }
     }
   }

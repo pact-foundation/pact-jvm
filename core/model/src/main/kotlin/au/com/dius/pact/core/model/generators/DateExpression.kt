@@ -10,8 +10,6 @@ import au.com.dius.pact.core.support.generators.expressions.DateExpressionParser
 import au.com.dius.pact.core.support.generators.expressions.DateOffsetType
 import au.com.dius.pact.core.support.generators.expressions.Operation
 import mu.KLogging
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
 import java.time.DayOfWeek
 import java.time.Month
 import java.time.OffsetDateTime
@@ -142,17 +140,11 @@ object DateExpression : KLogging() {
   }
 
   private fun parseDateExpression(expression: String): Result<ParsedDateExpression, String> {
-    val charStream = CharStreams.fromString(expression)
-    val lexer = DateExpressionLexer(charStream)
-    val tokens = CommonTokenStream(lexer)
-    val parser = DateExpressionParser(tokens)
-    val errorListener = ErrorListener()
-    parser.addErrorListener(errorListener)
-    val result = parser.expression()
-    return if (errorListener.errors.isNotEmpty()) {
-      Err("Error parsing expression: ${errorListener.errors.joinToString(", ")}")
-    } else {
-      Ok(ParsedDateExpression(result.dateBase, result.adj))
+    val lexer = DateExpressionLexer(expression)
+    val parser = DateExpressionParser(lexer)
+    return when (val result = parser.expression()) {
+      is Err -> Err("Error parsing expression: ${result.error}")
+      is Ok -> Ok(ParsedDateExpression(result.value.first, result.value.second.toMutableList()))
     }
   }
 }
