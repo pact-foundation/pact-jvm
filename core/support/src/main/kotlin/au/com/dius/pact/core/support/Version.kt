@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.support
 
+import au.com.dius.pact.core.support.parsers.StringLexer
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -22,68 +23,52 @@ data class Version(
 
     @JvmStatic
     fun parse(version: String): Result<Version, String> {
-      var buffer = version
-      var index = 0
+      val lexer = StringLexer(version)
 
-      val major = when (val result = parseInt(buffer, index)) {
-        is Ok -> {
-          buffer = result.value.second
-          index = result.value.third
-          result.value.first
-        }
+      val major = when (val result = parseInt(lexer)) {
+        is Ok -> result.value
         is Err -> return result
       }
 
-      when (val dot = parseChar('.', buffer, index)) {
-        is Ok -> {
-          buffer = dot.value.first
-          index = dot.value.second
-        }
-        is Err -> {
-          return dot
-        }
+      val err = parseChar('.', lexer)
+      if (err != null) {
+        return Err(err)
       }
 
-      val minor = when (val result = parseInt(buffer, index)) {
-        is Ok -> {
-          buffer = result.value.second
-          index = result.value.third
-          result.value.first
-        }
+      val minor = when (val result = parseInt(lexer)) {
+        is Ok -> result.value
         is Err -> return result
       }
 
-      val dot = parseChar('.', buffer, index)
       return when {
-        dot is Ok -> {
-          buffer = dot.value.first
-          index = dot.value.second
-          when (val result = parseInt(buffer, index)) {
-            is Ok -> Ok(Version(major, minor, result.value.first))
+        lexer.peekNextChar() == '.' -> {
+          lexer.advance()
+          when (val result = parseInt(lexer)) {
+            is Ok -> if (lexer.empty) {
+              Ok(Version(major, minor, result.value))
+            } else {
+              Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
+            }
             is Err -> result
           }
         }
-        buffer.isEmpty() -> Ok(Version(major, minor))
-        else -> Err("Unexpected character '${buffer[0]}' at index $index")
+        lexer.empty -> Ok(Version(major, minor))
+        else -> Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
       }
     }
 
-    private fun parseChar(c: Char, buffer: String, index: Int): Result<Pair<String, Int>, String> {
-      return when {
-        buffer.isNotEmpty() && buffer[0] == c -> {
-          Ok(buffer.substring(1) to (index + 1))
-        }
-        else -> Err("Was expecting a $c at index $index")
+    private fun parseChar(c: Char, lexer: StringLexer): String? {
+      return when (val ch = lexer.nextChar()) {
+        null -> "Was expecting a '$c' at index ${lexer.index} but got the end of the input"
+        c -> null
+        else -> "Was expecting a '$c' at index ${lexer.index - 1} but got '$ch'"
       }
     }
 
-    private fun parseInt(buffer: String, index: Int): Result<Triple<Int, String, Int>, String> {
-      return when (val result = INT.find(buffer)) {
-        null -> Err("Was expecting an integer at index $index")
-        else -> {
-          val i = result.value.toInt()
-          Ok(Triple(i, buffer.substring(result.value.length), index + result.value.length))
-        }
+    private fun parseInt(lexer: StringLexer): Result<Int, String> {
+      return when (val result = lexer.matchRegex(INT)) {
+        null -> Err("Was expecting an integer at index ${lexer.index}")
+        else -> Ok(result.toInt())
       }
     }
   }

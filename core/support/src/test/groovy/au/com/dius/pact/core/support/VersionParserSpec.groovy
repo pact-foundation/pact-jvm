@@ -31,12 +31,13 @@ class VersionParserSpec extends Specification {
     version      | error
     ''           | 'Was expecting an integer at index 0'
     'sdsd'       | 'Was expecting an integer at index 0'
-    '0'          | 'Was expecting a . at index 1'
-    '0sass'      | 'Was expecting a . at index 1'
-    '100'        | 'Was expecting a . at index 3'
+    '0'          | "Was expecting a '.' at index 1 but got the end of the input"
+    '0sass'      | "Was expecting a '.' at index 1 but got 's'"
+    '100'        | "Was expecting a '.' at index 3 but got the end of the input"
     '100.'       | 'Was expecting an integer at index 4'
     '100.10.'    | 'Was expecting an integer at index 7'
-    '100.10x'    | "Unexpected character 'x' at index 6"
+    '100.10x'    | "Unexpected characters 'x' at index 6"
     '100.10.sss' | 'Was expecting an integer at index 7'
+    '100.10.1ss' | "Unexpected characters 'ss' at index 8"
   }
 }
