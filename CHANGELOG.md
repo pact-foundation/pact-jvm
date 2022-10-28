@@ -1,5 +1,37 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.16 - Bugfix Release
+
+* 532beabab - refactor: Convert ANTLR MatchingRuleDefinition parser to a recursive decent parser #1615 (Ronald Holshausen, Fri Oct 28 18:08:05 2022 +1100)
+* 2d730c799 - refactor: Convert ANTLR TimeExpression parser to a recursive decent parser #1615 (Ronald Holshausen, Thu Oct 27 18:02:42 2022 +1100)
+* 5d78360b2 - refactor: Convert ANTLR DateExpression parser to a recursive decent parser #1615 (Ronald Holshausen, Thu Oct 27 17:04:00 2022 +1100)
+* 739a40dd3 - refactor: extract common lexer functions from version parser #1615 (Ronald Holshausen, Thu Oct 27 13:56:37 2022 +1100)
+* 0b1be93af - Merge branch 'samukce-feat/kotlin-build-dsl-based-dataobject' (Ronald Holshausen, Thu Oct 27 10:02:34 2022 +1100)
+* 4d7a28bbf - fix: replace AssertJ with Hamcrest (Ronald Holshausen, Thu Oct 27 10:02:07 2022 +1100)
+* 7174c4291 - Merge branch 'feat/kotlin-build-dsl-based-dataobject' of github.com:samukce/pact-jvm into samukce-feat/kotlin-build-dsl-based-dataobject (Ronald Holshausen, Thu Oct 27 09:53:09 2022 +1100)
+* b4ff3a854 - feat: protect json body generation against loop for cicly reference (Samuel, Fri Oct 21 16:56:16 2022 +0200)
+* 47e8c9e63 - refactor: Replace ANTLR version parser with a recursive decent parser #1615 (Ronald Holshausen, Wed Oct 26 18:04:32 2022 +1100)
+* c77ddf2ef - Merge pull request #1627 from prof18/gradle-conf-cache-compatible (Ronald Holshausen, Wed Oct 26 17:09:16 2022 +1100)
+* 7e2e11aaf - chore: Upgrade all test dependencies with reported CSVs #1626 (Ronald Holshausen, Wed Oct 26 16:48:24 2022 +1100)
+* 4cf345f31 - chore: Upgrade Spock to 2.3 (Ronald Holshausen, Wed Oct 26 16:26:56 2022 +1100)
+* 625cdfc1c - chore: Upgrade all dependencies with reported CSVs #1626 (Ronald Holshausen, Wed Oct 26 16:14:44 2022 +1100)
+* 72f9193ba - feat: add method to setup content type body matching in the consumer DSL #1623 (Ronald Holshausen, Wed Oct 26 15:14:40 2022 +1100)
+* c1f84860f - Merge pull request #1622 from Okeanos/bump-pipeline-actions (Ronald Holshausen, Wed Oct 26 13:59:33 2022 +1100)
+* b6b073e13 - Merge pull request #1621 from Okeanos/json-version (Ronald Holshausen, Wed Oct 26 13:40:02 2022 +1100)
+* 8bd14d589 - feat: support MessagePact with a string as a content #1619 (Ronald Holshausen, Wed Oct 26 13:22:28 2022 +1100)
+* 86813ba68 - feat: Support system properties or environment variables for consumer and provider annotation with JUnit4 provider tests #528 #1616 (Ronald Holshausen, Wed Oct 26 12:21:38 2022 +1100)
+* aabee8c44 - fix:  queryMatchingDatetime creates invalid genetator #1612 (Ronald Holshausen, Wed Oct 26 10:18:41 2022 +1100)
+* 2750d8a8e - chore: add Kotlin Junit5 message test (Ronald Holshausen, Wed Oct 26 10:00:57 2022 +1100)
+* fc7e13e87 - fix: write empty bodies to the Pact file #1611 (Ronald Holshausen, Tue Oct 25 18:21:14 2022 +1100)
+* 870a99956 - feat: Support generators with URI FORM encoded bodies #1610 (Ronald Holshausen, Tue Oct 25 16:47:55 2022 +1100)
+* 719f07b9b - feat: add capabilityi to build json body based on data class required constructor fields (Samuel, Fri Oct 21 16:02:57 2022 +0200)
+* d1e76e376 - Make PactVerificationTask as much ready as possible for configuration cache (Marco Gomiero, Sat Oct 15 12:42:19 2022 +0200)
+* 1fd9c0901 - bump actions/setup-java to v3 (Nikolas Grottendieck, Sun Oct 16 13:34:01 2022 +0200)
+* 0a804b139 - bump org.json:json version to latest (Nikolas Grottendieck, Sun Oct 16 13:17:02 2022 +0200)
+* 0a23caba1 - Make PactCanIDeployTask compatible with Gradle Configuration Cache (Marco Gomiero, Mon Oct 10 23:19:53 2022 +0200)
+* e3dd8bf5d - Make PactPublishTask compatible with Gradle Configuration Cache (Marco Gomiero, Mon Oct 10 21:50:52 2022 +0200)
+* 79d21743a - bump version to 4.3.16 (Ronald Holshausen, Fri Sep 30 15:35:24 2022 +1000)
+
 # 4.3.15 - Bugfix Release
 
 * 3d9bcedf2 - chore: Update the HAL client to return the current navigated document (Ronald Holshausen, Fri Sep 30 15:16:18 2022 +1000)
