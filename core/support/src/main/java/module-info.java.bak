@@ -3,5 +3,4 @@ module au.com.dius.pact.core.support {
   requires kotlin.logging.jvm;
   requires httpcore;
   requires kotlin.result.jvm;
-  requires org.antlr.antlr4.runtime;
 }

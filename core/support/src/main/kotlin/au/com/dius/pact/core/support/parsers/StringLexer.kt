@@ -14,9 +14,13 @@ open class StringLexer(private val buffer: String) {
   val remainder: String
     get() = buffer.substring(index)
 
+  var lastMatch: String? = null
+    private set
+
   fun nextChar(): Char? {
     val c = peekNextChar()
     if (c != null) {
+      lastMatch = c.toString()
       index++
     }
     return c
@@ -53,6 +57,7 @@ open class StringLexer(private val buffer: String) {
       null -> null
       else -> {
         index += result.value.length
+        lastMatch = result.value
         result.value
       }
     }
@@ -61,6 +66,7 @@ open class StringLexer(private val buffer: String) {
   fun matchString(s: String): Boolean {
     return if (buffer.startsWith(s, index)) {
       index += s.length
+      lastMatch = s
       true
     } else {
       false
@@ -70,6 +76,7 @@ open class StringLexer(private val buffer: String) {
   fun matchChar(c: Char): Boolean {
     return if (peekNextChar() == c) {
       index++
+      lastMatch = c.toString()
       true
     } else {
       false
@@ -79,7 +86,10 @@ open class StringLexer(private val buffer: String) {
   fun parseInt(): Result<Int, String> {
     return when (val result = matchRegex(INT)) {
       null -> Err("Was expecting an integer at index $index")
-      else -> Ok(result.toInt())
+      else -> {
+        lastMatch = result
+        Ok(result.toInt())
+      }
     }
   }
 
