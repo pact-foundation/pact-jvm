@@ -127,7 +127,7 @@ class PactPlugin extends PactPluginBase {
       if (ext.broker.pactBrokerUsername) {
         options.authentication = ['basic', ext.broker.pactBrokerUsername, ext.broker.pactBrokerPassword]
       } else if (ext.broker.pactBrokerToken) {
-        options.authentication = ['bearer', ext.broker.pactBrokerToken]
+        options.authentication = ['bearer', ext.broker.pactBrokerToken, ext.broker.pactBrokerAuthenticationHeader]
       }
       if (provider.brokerConfig.enablePending) {
         options.enablePending = true

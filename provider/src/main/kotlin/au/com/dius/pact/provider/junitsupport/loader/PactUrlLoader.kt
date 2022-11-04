@@ -19,7 +19,7 @@ open class PactUrlLoader(val urls: Array<String>, val authentication: Auth? = nu
   var resolver: ValueResolver = SystemPropertyResolver
 
   constructor(pactUrl: PactUrl) : this(pactUrl.urls, when {
-    pactUrl.auth.token.isNotEmpty() -> Auth.BearerAuthentication(pactUrl.auth.token)
+    pactUrl.auth.token.isNotEmpty() -> Auth.BearerAuthentication(pactUrl.auth.token, pactUrl.auth.headerName)
     pactUrl.auth.username.isNotEmpty() -> Auth.BasicAuthentication(pactUrl.auth.username,
       pactUrl.auth.password)
     else -> null

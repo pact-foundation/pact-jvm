@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
+import au.com.dius.pact.core.support.Auth.Companion.DEFAULT_AUTH_HEADER
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Parameter
@@ -27,6 +28,9 @@ abstract class PactBaseMojo : AbstractMojo() {
   @Parameter(defaultValue = "basic", property = "pact.broker.authenticationScheme")
   protected var pactBrokerAuthenticationScheme: String? = null
 
+  @Parameter(defaultValue = DEFAULT_AUTH_HEADER, property = "pact.broker.authenticationHeader")
+  protected var pactBrokerAuthenticationHeader: String? = null
+
   @Parameter(defaultValue = "\${settings}", readonly = true)
   protected lateinit var settings: Settings
 
@@ -46,7 +50,7 @@ abstract class PactBaseMojo : AbstractMojo() {
     val options = mutableMapOf<String, Any>()
     if (!pactBrokerToken.isNullOrEmpty()) {
       pactBrokerAuthenticationScheme = "bearer"
-      options["authentication"] = listOf(pactBrokerAuthenticationScheme, pactBrokerToken)
+      options["authentication"] = listOf(pactBrokerAuthenticationScheme, pactBrokerToken, pactBrokerAuthenticationHeader)
     } else if (!pactBrokerUsername.isNullOrEmpty()) {
       options["authentication"] = listOf(pactBrokerAuthenticationScheme ?: "basic", pactBrokerUsername,
         pactBrokerPassword)

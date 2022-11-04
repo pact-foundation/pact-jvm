@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.support.Auth
+import au.com.dius.pact.core.support.Auth.Companion.DEFAULT_AUTH_HEADER
 import java.util.LinkedHashMap
 
 data class PactBrokerOptions @JvmOverloads constructor(
@@ -64,8 +65,10 @@ data class PactBrokerOptions @JvmOverloads constructor(
               } else {
                 Auth.BasicAuthentication(auth[1]?.toString().orEmpty(), "")
               }
-              "bearer" -> {
-                Auth.BearerAuthentication(auth[1]?.toString().orEmpty())
+              "bearer" -> if (auth.size > 2) {
+                Auth.BearerAuthentication(auth[1]?.toString().orEmpty(), auth[2]?.toString().orEmpty())
+              } else {
+                Auth.BearerAuthentication(auth[1]?.toString().orEmpty(), DEFAULT_AUTH_HEADER)
               }
               else -> throw RuntimeException("'${auth[0]}' ia not a valid authentication scheme. Only basic or " +
                 "bearer is supported")

@@ -928,10 +928,24 @@ class PactBrokerLoaderSpec extends Specification {
             .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
 
     then:
-    pactBrokerClient.options == ['authentication': ['bearer', 'token-value']]
+    pactBrokerClient.options == ['authentication': ['bearer', 'token-value', 'Authorization']]
   }
 
-  def 'Auth: Uses bearer auth if token and password are provided'() {
+  def 'Auth: Uses bearer auth if token is provided having a custom auth header'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationWithTokenAndCustomHeader.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.options == ['authentication': ['bearer', 'token-value', 'custom-auth-header']]
+  }
+
+  def 'Auth: Uses bearer auth if token and custom auth header are provided'() {
     given:
     pactBrokerLoader = {
       new PactBrokerLoader(PactBrokerAnnotationWithPasswordAndToken.getAnnotation(PactBroker))
@@ -942,7 +956,7 @@ class PactBrokerLoaderSpec extends Specification {
             .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
 
     then:
-    pactBrokerClient.options == ['authentication': ['bearer', 'token-value']]
+    pactBrokerClient.options == ['authentication': ['bearer', 'token-value', 'Authorization']]
   }
 
   def 'Auth: No auth if neither token nor username is provided'() {
@@ -1554,6 +1568,12 @@ class PactBrokerLoaderSpec extends Specification {
   @PactBroker(host = 'pactbroker.host',
       authentication = @PactBrokerAuth(token = 'token-value'))
   static class PactBrokerAnnotationWithOnlyToken {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      authentication = @PactBrokerAuth(token = 'token-value', headerName = 'custom-auth-header'))
+  static class PactBrokerAnnotationWithTokenAndCustomHeader {
 
   }
 

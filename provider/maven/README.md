@@ -460,6 +460,8 @@ Here is how you configure the plugin to use bearer token authentication for veri
               <authentication>
                   <scheme>bearer</scheme>
                   <token>TOKEN</token>
+                  <!-- Customise the authentication header from the default `Authorization` -->
+                  <authHeaderName>my-auth-header</authHeaderName>
               </authentication>
           </pactBroker>
         </serviceProvider>
@@ -953,6 +955,16 @@ Or to use a bearer token:
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerToken>TOKEN</pactBrokerToken> <!-- Replace TOKEN with the actual token -->
       <pactBrokerAuthenticationScheme>Bearer</pactBrokerAuthenticationScheme>
+    </configuration>
+</plugin>
+```
+
+Customise the authentication header from the default `Authorization` please use `pactBrokerAuthenticationScheme`:
+
+```xml
+<plugin>
+    <configuration>
+      <pactBrokerAuthenticationHeader>my-auth-header</pactBrokerAuthenticationHeader>
     </configuration>
 </plugin>
 ```

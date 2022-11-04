@@ -12,7 +12,7 @@ open class PactCanIDeployBaseTask : DefaultTask() {
       val options = mutableMapOf<String, Any>()
       if (brokerConfig.pactBrokerToken.isNotEmpty()) {
         options["authentication"] = listOf(brokerConfig.pactBrokerAuthenticationScheme ?: "bearer",
-          brokerConfig.pactBrokerToken)
+          brokerConfig.pactBrokerToken, brokerConfig.pactBrokerAuthenticationHeader)
       } else if (brokerConfig.pactBrokerUsername.isNotEmpty()) {
         options["authentication"] = listOf(brokerConfig.pactBrokerAuthenticationScheme ?: "basic",
           brokerConfig.pactBrokerUsername, brokerConfig.pactBrokerPassword)

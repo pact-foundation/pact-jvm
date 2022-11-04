@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
+import au.com.dius.pact.core.support.Auth.Companion.DEFAULT_AUTH_HEADER
 import au.com.dius.pact.core.support.json.JsonParser
 import org.apache.maven.plugin.MojoFailureException
 import java.net.URL
@@ -216,6 +217,7 @@ data class PactBroker @JvmOverloads constructor(
 data class PactBrokerAuth @JvmOverloads constructor (
   val scheme: String? = "basic",
   val token: String? = null,
+  val authHeaderName: String? = DEFAULT_AUTH_HEADER,
   val username: String? = null,
   val password: String? = null
 )

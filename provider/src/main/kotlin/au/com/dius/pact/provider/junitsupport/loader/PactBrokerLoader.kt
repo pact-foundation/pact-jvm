@@ -332,6 +332,7 @@ open class PactBrokerLoader(
     } else {
       val username = ep.parseExpression(authentication!!.username, DataType.RAW, resolver)?.toString()
       val token = ep.parseExpression(authentication!!.token, DataType.RAW, resolver)?.toString()
+      val headerName = ep.parseExpression(authentication!!.headerName, DataType.RAW, resolver)?.toString()
 
       // Check if username is set. If yes, use basic auth.
       if (username.isNotEmpty()) {
@@ -345,7 +346,7 @@ open class PactBrokerLoader(
       // Check if token is set. If yes, use bearer auth.
       } else if (token.isNotEmpty()) {
         logger.debug { "Authentication: Bearer" }
-        options = mapOf("authentication" to listOf("bearer", token))
+        options = mapOf("authentication" to listOf("bearer", token, headerName))
       }
     }
 
