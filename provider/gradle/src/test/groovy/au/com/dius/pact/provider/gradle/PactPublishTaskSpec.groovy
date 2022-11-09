@@ -107,7 +107,26 @@ class PactPublishTaskSpec extends Specification {
     project.tasks.pactPublish.publishPacts()
 
     then:
-    1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']], _) >> brokerClient
+    1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234', 'Authorization']], _) >> brokerClient
+    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
+  }
+
+  def 'passes in bearer token to the broker client with custom auth header'() {
+    given:
+    project.pact {
+      publish {
+        pactBrokerToken = 'token1234'
+        pactBrokerUrl = 'pactBrokerUrl'
+        pactBrokerAuthenticationHeader = 'custom-header'
+      }
+    }
+    project.evaluate()
+
+    when:
+    project.tasks.pactPublish.publishPacts()
+
+    then:
+    1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234', 'custom-header']], _) >> brokerClient
     1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
   }
 

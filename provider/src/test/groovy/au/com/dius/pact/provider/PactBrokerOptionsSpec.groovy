@@ -16,13 +16,13 @@ class PactBrokerOptionsSpec extends Specification {
 
     options                                                | result
     [:]                                                    | null
-    [authentication: new Auth.BearerAuthentication('123')] | new Auth.BearerAuthentication('123')
+    [authentication: new Auth.BearerAuthentication('123', 'Authorization')] | new Auth.BearerAuthentication('123', 'Authorization')
     [authentication: ['basic', 'bob']]                     | new Auth.BasicAuthentication('bob', '')
     [authentication: ['BASIC', 'bob']]                     | new Auth.BasicAuthentication('bob', '')
     [authentication: ['BASIC', null]]                      | new Auth.BasicAuthentication('', '')
     [authentication: ['basic', 'bob', '1234']]             | new Auth.BasicAuthentication('bob', '1234')
-    [authentication: ['bearer', '1234']]                   | new Auth.BearerAuthentication('1234')
-    [authentication: ['Bearer', '1234']]                   | new Auth.BearerAuthentication('1234')
+    [authentication: ['bearer', '1234']]                   | new Auth.BearerAuthentication('1234', 'Authorization')
+    [authentication: ['Bearer', '1234', 'custom-header']]  | new Auth.BearerAuthentication('1234', 'custom-header')
   }
 
   @Unroll

@@ -756,6 +756,21 @@ pact {
 }
 ```
 
+Customise the authentication header from the default `Authorization` please use `pactBrokerAuthenticationScheme`:
+
+```groovy
+pact {
+
+    serviceProviders {
+        provider1 {
+            hasPactsFromPactBroker('http://pact-broker:5000/', authentication: ['Bearer', pactBrokerToken, 'my-auth-header'])
+        }
+    }
+    
+}
+```
+
+
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` property to `true`.
 
 **NOTE:** If you're using [pactflow.io](https://pactflow.io/), follow these instructions for configuring your [bearer token](https://docs.pactflow.io/docs/getting-started/#configuring-your-api-token).
@@ -860,6 +875,9 @@ pact {
     
         // OR to use a bearer token
         pactBrokerToken = '<TOKEN>'
+        
+        // Customise the authentication header from the default `Authorization`
+        pactBrokerAuthenticationHeader = 'my-auth-header' 
     }
 
 }
@@ -887,6 +905,9 @@ pact {
     publish {
         pactBrokerUrl = 'https://mypactbroker.com'
         pactBrokerToken = 'token'
+     
+        // Customise the authentication header from the default `Authorization`
+        pactBrokerAuthenticationHeader = 'my-auth-header'
     }
 
 }

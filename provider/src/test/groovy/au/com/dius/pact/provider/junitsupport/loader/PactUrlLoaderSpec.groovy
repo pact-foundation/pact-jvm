@@ -88,7 +88,7 @@ class PactUrlLoaderSpec extends Specification {
     def pacts = loader.load('bob')
 
     then:
-    loader.pactReader.loadPact(new UrlSource('http://localhost:1234'), [authentication: new Auth.BearerAuthentication('1234abcd')]) >> pact1
+    loader.pactReader.loadPact(new UrlSource('http://localhost:1234'), [authentication: new Auth.BearerAuthentication('1234abcd', 'Authorization')]) >> pact1
     pacts == [pact1]
   }
 
@@ -104,7 +104,7 @@ class PactUrlLoaderSpec extends Specification {
     def pacts = loader.load('bob')
 
     then:
-    loader.pactReader.loadPact(new UrlSource('http://localhost:1234'), [authentication: new Auth.BearerAuthentication('1234567890')]) >> pact1
+    loader.pactReader.loadPact(new UrlSource('http://localhost:1234'), [authentication: new Auth.BearerAuthentication('1234567890', 'Authorization')]) >> pact1
     pacts == [pact1]
   }
 }

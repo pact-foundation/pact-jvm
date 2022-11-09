@@ -117,7 +117,7 @@ fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClie
       when (val auth = options["authentication"] as Auth) {
         is Auth.BasicAuthentication -> basicAuth(baseUrl, auth.username, auth.password, builder)
         is Auth.BearerAuthentication -> {
-          builder.setDefaultHeaders(listOf(BasicHeader("Authorization", "Bearer " + auth.token)))
+          builder.setDefaultHeaders(listOf(BasicHeader(auth.headerName, "Bearer " + auth.token)))
         }
       }
     }

@@ -174,7 +174,7 @@ open class PactProviderMojo : PactBaseMojo() {
 
     if (pactBroker?.authentication != null) {
       if ("bearer" == provider.pactBroker?.authentication?.scheme || provider.pactBroker?.authentication?.token != null) {
-        options["authentication"] = listOf("bearer", provider.pactBroker!!.authentication!!.token)
+        options["authentication"] = listOf("bearer", provider.pactBroker!!.authentication!!.token, provider.pactBroker!!.authentication!!.authHeaderName)
       } else if ("basic" == provider.pactBroker?.authentication?.scheme) {
         options["authentication"] = listOf(provider.pactBroker!!.authentication!!.scheme, provider.pactBroker!!.authentication!!.username,
                 provider.pactBroker!!.authentication!!.password)
