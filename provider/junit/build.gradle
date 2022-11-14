@@ -4,8 +4,10 @@ dependencies {
     // For some wierd reason, this is not resolving correctly
 //    api project(':core:support')
 //    api project(':core:pactbroker')
+//    api project(':core:model')
     api "au.com.dius.pact.core:support:${project.version}"
     api "au.com.dius.pact.core:pactbroker:${project.version}"
+    api "au.com.dius.pact.core:model:${project.version}"
 
     api "junit:junit:${project.junitVersion}"
     implementation  "org.apache.commons:commons-lang3:${project.commonsLang3Version}",

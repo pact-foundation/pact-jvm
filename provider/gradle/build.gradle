@@ -3,7 +3,11 @@ plugins {
 }
 
 dependencies {
-  implementation project(":provider")
+  implementation project(':provider')
+
+//  implementation project(':core:model')
+  implementation "au.com.dius.pact.core:model:${project.version}"
+
   implementation gradleApi()
   implementation localGroovy()
   implementation 'com.github.ajalt:mordant:1.2.1'

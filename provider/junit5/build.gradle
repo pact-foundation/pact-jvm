@@ -4,8 +4,10 @@ dependencies {
   // For some wierd reason, this is not resolving correctly
 //    api project(':core:support')
 //    api project(':core:pactbroker')
+//    api project(':core:model')
   api "au.com.dius.pact.core:support:${project.version}"
   api "au.com.dius.pact.core:pactbroker:${project.version}"
+  api "au.com.dius.pact.core:model:${project.version}"
 
   api "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
