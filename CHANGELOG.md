@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.17 - [?62;1;4cMaintenance Release
+
+* cb64ea090 - Merge pull request #1633 from artemptushkin/feature/GH-1632-default-headers (Ronald Holshausen, Wed Nov 9 16:58:46 2022 +1100)
+* da6efdec9 - GH-1632 invent default auth header with additional tests (Artem Ptushkin, Fri Nov 4 15:29:26 2022 +0100)
+* 416a326f5 - bump version to 4.3.17 (Ronald Holshausen, Fri Oct 28 18:42:59 2022 +1100)
+
 # 4.3.16 - Bugfix Release
 
 * 532beabab - refactor: Convert ANTLR MatchingRuleDefinition parser to a recursive decent parser #1615 (Ronald Holshausen, Fri Oct 28 18:08:05 2022 +1100)
