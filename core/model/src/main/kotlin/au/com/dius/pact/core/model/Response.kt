@@ -46,7 +46,8 @@ class Response @JvmOverloads constructor(
   override fun toString() =
     "\tstatus: $status\n\theaders: $headers\n\tmatchers: $matchingRules\n\tgenerators: $generators\n\tbody: $body"
 
-  override fun copyResponse() = Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
+  override fun copyResponse() =
+    Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
 
   override fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse {
     val r = this.copyResponse()

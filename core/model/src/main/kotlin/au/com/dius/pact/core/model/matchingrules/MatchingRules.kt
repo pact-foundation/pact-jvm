@@ -93,6 +93,7 @@ interface MatchingRule {
       }
     }
 
+    @Suppress("LongMethod", "ComplexMethod")
     fun create(type: String, values: JsonValue): MatchingRule {
       logger.trace { "MatchingRule.create($type, $values)" }
       return when (type) {

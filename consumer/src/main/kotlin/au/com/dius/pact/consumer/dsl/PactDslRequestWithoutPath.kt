@@ -281,6 +281,13 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
   }
 
   /**
+   * Sets up a content type matcher to match any body of the given content type
+   */
+  public override fun bodyMatchingContentType(contentType: String, exampleContents: String): PactDslRequestWithoutPath {
+    return super.bodyMatchingContentType(contentType, exampleContents) as PactDslRequestWithoutPath
+  }
+
+  /**
    * The path of the request
    *
    * @param path string path

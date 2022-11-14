@@ -1,17 +1,15 @@
 package au.com.dius.pact.core.model.generators
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.support.generators.expressions.Adjustment
 import au.com.dius.pact.core.support.generators.expressions.Operation
 import au.com.dius.pact.core.support.generators.expressions.TimeBase
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionLexer
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionParser
 import au.com.dius.pact.core.support.generators.expressions.TimeOffsetType
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import mu.KLogging
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -20,6 +18,7 @@ import java.time.temporal.ChronoUnit
 data class ParsedTimeExpression(val base: TimeBase, val adjustments: MutableList<Adjustment<TimeOffsetType>>)
 
 object TimeExpression : KLogging() {
+  @Suppress("ComplexMethod")
   fun executeTimeExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {
       return when (val result = parseTimeExpression(expression)) {
@@ -68,17 +67,11 @@ object TimeExpression : KLogging() {
   }
 
   private fun parseTimeExpression(expression: String): Result<ParsedTimeExpression, String> {
-    val charStream = CharStreams.fromString(expression)
-    val lexer = TimeExpressionLexer(charStream)
-    val tokens = CommonTokenStream(lexer)
-    val parser = TimeExpressionParser(tokens)
-    val errorListener = ErrorListener()
-    parser.addErrorListener(errorListener)
-    val result = parser.expression()
-    return if (errorListener.errors.isNotEmpty()) {
-      Err("Error parsing expression: ${errorListener.errors.joinToString(", ")}")
-    } else {
-      Ok(ParsedTimeExpression(result.timeBase, result.adj))
+    val lexer = TimeExpressionLexer(expression)
+    val parser = TimeExpressionParser(lexer)
+    return when (val result = parser.expression()) {
+      is Err -> Err("Error parsing expression: ${result.error}")
+      is Ok -> Ok(ParsedTimeExpression(result.value.first, result.value.second.toMutableList()))
     }
   }
 }

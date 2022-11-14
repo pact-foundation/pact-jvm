@@ -1,9 +1,16 @@
 package au.com.dius.pact.core.model
 
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class HttpResponseSpec extends Specification {
+  @Issue('#1611')
+  def 'supports empty bodies'() {
+    expect:
+    new HttpResponse(200, [:], OptionalBody.empty()).toMap() == [status: 200, body: [content: '']]
+  }
+
   def 'allows configuring the interaction from properties'() {
     given:
     def interaction = new HttpResponse()

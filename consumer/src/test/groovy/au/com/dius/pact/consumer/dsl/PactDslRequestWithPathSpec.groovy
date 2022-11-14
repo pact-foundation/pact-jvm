@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
@@ -195,5 +196,25 @@ class PactDslRequestWithPathSpec extends Specification {
 
     then:
     request.additionalMetadata == [test: 'value']
+  }
+
+  @Issue('#1623')
+  def 'supports setting a content type matcher'() {
+    given:
+    def request = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('a XML request')
+      .path("/path")
+    def example = '<?xml version=\"1.0\" encoding=\"utf-8\"?><example>foo</example>'
+
+    when:
+    def result = request.bodyMatchingContentType('application/xml', example)
+
+    then:
+    result.requestHeaders['Content-Type'] == ['application/xml']
+    result.requestBody.valueAsString() == example
+    result.requestMatchers.rulesForCategory('body').toMap(PactSpecVersion.V4) == [
+      '$': [matchers: [[match: 'contentType', value: 'application/xml']], combine: 'AND']
+    ]
   }
 }

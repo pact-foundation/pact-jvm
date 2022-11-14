@@ -9,10 +9,10 @@ dependencies {
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation 'javax.mail:mail:1.5.0-b01'
 
-  testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.3'
-  testImplementation 'org.springframework.boot:spring-boot-starter-web:2.5.3'
+  testImplementation "org.springframework.boot:spring-boot-starter-test:${project.springboot}"
+  testImplementation "org.springframework.boot:spring-boot-starter-web:${project.springboot}"
   testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
 }

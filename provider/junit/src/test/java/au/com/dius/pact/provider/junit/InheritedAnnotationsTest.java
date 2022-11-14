@@ -8,7 +8,7 @@ import au.com.dius.pact.provider.junitsupport.TargetRequestFilter;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
 import au.com.dius.pact.provider.junitsupport.loader.PactFilter;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,7 +43,7 @@ public class InheritedAnnotationsTest {
         }
 
         @TargetRequestFilter
-        public void requestFilter(HttpRequest  httpRequest) {
+        public void requestFilter(HttpRequest httpRequest) {
 
         }
     }

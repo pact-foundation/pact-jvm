@@ -17,7 +17,7 @@ dependencies {
   testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
   testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

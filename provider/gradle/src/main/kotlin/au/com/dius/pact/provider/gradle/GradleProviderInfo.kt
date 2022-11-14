@@ -13,17 +13,23 @@ import groovy.lang.Closure
 import mu.KLogging
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
+import org.gradle.api.model.ObjectFactory
 import java.io.File
 import java.net.URL
+import javax.inject.Inject
 
 /**
  * Extends the provider info to be setup in a gradle build
  */
-open class GradleProviderInfo(override var name: String, val project: Project) : IProviderInfo {
+open class GradleProviderInfo @Inject constructor(
+  override var name: String,
+  private val objectFactory: ObjectFactory,
+) : IProviderInfo {
   var providerVersion: Any? = null
   var providerTags: Any? = null
-  var brokerConfig: PactBrokerConsumerConfig = PactBrokerConsumerConfig(project.objects)
+  var brokerConfig: PactBrokerConsumerConfig = PactBrokerConsumerConfig(objectFactory)
   val provider = ProviderInfo(name)
+  var taskNames: List<String> = emptyList()
 
   override var protocol: String by provider::protocol
   override var host: Any? by provider::host
@@ -46,7 +52,7 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
   var isDependencyForPactVerify: Boolean by provider::isDependencyForPactVerify
 
   open fun hasPactWith(consumer: String, closure: Closure<GradleConsumerInfo>): IConsumerInfo {
-    val consumerInfo = project.objects.newInstance(GradleConsumerInfo::class.java, consumer)
+    val consumerInfo = objectFactory.newInstance(GradleConsumerInfo::class.java, consumer)
     consumerInfo.name = consumer
     consumerInfo.verificationType = this.verificationType
 
@@ -92,7 +98,7 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
       provider.hasPactsFromPactBroker(options, pactBrokerUrl)
     } catch (e: Exception) {
       val verifyTaskName = PACT_VERIFY.lowercase()
-      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
+      if (taskNames.any { it.lowercase().contains(verifyTaskName) }) {
         logger.error(e) { "Failed to access Pact Broker" }
         throw e
       } else {
@@ -130,7 +136,7 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
       provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
     } catch (e: Exception) {
       val verifyTaskName = PACT_VERIFY.lowercase()
-      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
+      if (taskNames.any { it.lowercase().contains(verifyTaskName) }) {
         logger.error(e) { "Failed to access Pact Broker" }
         throw e
       } else {
@@ -149,7 +155,7 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
       provider.hasPactsFromPactBrokerWithSelectorsV2(options, pactBrokerUrl, selectors)
     } catch (e: Exception) {
       val verifyTaskName = PACT_VERIFY.lowercase()
-      if (project.gradle.startParameter.taskNames.any { it.lowercase().contains(verifyTaskName) }) {
+      if (taskNames.any { it.lowercase().contains(verifyTaskName) }) {
         logger.error(e) { "Failed to access Pact Broker" }
         throw e
       } else {
@@ -162,7 +168,7 @@ open class GradleProviderInfo(override var name: String, val project: Project) :
   open fun url(path: String) = URL(path)
 
   open fun fromPactBroker(closure: Closure<PactBrokerConsumerConfig>) {
-    brokerConfig = project.objects.newInstance(PactBrokerConsumerConfig::class.java)
+    brokerConfig = objectFactory.newInstance(PactBrokerConsumerConfig::class.java)
     closure.resolveStrategy = Closure.DELEGATE_FIRST
     closure.delegate = brokerConfig
     closure.call(brokerConfig)

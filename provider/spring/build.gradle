@@ -1,21 +1,21 @@
 dependencies {
   api project(':provider:junit')
   implementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.3'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: project.springboot
   implementation group: 'org.springframework', name: 'spring-webmvc', version: '5.3.19'
   implementation group: 'org.springframework', name: 'spring-webflux', version: '5.3.19'
   implementation group: 'org.springframework', name: 'spring-test', version: '5.3.19'
   implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.10.2'
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.13.4'
   runtimeOnly group: 'org.synchronoss.cloud', name: 'nio-multipart-parser', version: '1.1.0'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation 'javax.mail:mail:1.5.0-b01'
-  implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation "org.apache.commons:commons-collections4:${project.commonsCollections4}"
 
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.5.3'
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: project.springboot
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
       exclude group: 'org.codehaus.groovy'
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

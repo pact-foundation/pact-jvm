@@ -56,7 +56,7 @@ data class HttpRequest @JvmOverloads constructor(
     if (query.isNotEmpty()) {
       map["query"] = query
     }
-    if (body.isPresent()) {
+    if (body.isPresent() || body.isEmpty()) {
       map["body"] = body.toV4Format()
     }
     if (matchingRules.isNotEmpty()) {
@@ -122,6 +122,7 @@ data class HttpRequest @JvmOverloads constructor(
     return generators + matchingRuleGenerators
   }
 
+  @Suppress("ComplexMethod")
   fun updateProperties(values: Map<String, Any?>) {
     logger.debug { "updateProperties(values=$values)" }
     values.forEach { (key, value) ->
@@ -182,7 +183,7 @@ data class HttpResponse @JvmOverloads constructor(
     if (headers.isNotEmpty()) {
       map["headers"] = headers
     }
-    if (body.isPresent()) {
+    if (body.isPresent() || body.isEmpty()) {
       map["body"] = body.toV4Format()
     }
     if (matchingRules.isNotEmpty()) {

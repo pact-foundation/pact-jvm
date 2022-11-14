@@ -67,6 +67,7 @@ object Matchers : KLogging() {
 
   @JvmStatic
   @JvmOverloads
+  @Suppress("LongParameterList")
   fun <M : Mismatch> domatch(
     context: MatchingContext,
     path: List<String>,
@@ -82,6 +83,7 @@ object Matchers : KLogging() {
   /**
    * Compares the expected and actual maps using the provided matching rule
    */
+  @Suppress("LongParameterList")
   fun <T> compareMaps(
     path: List<String>,
     matcher: MatchingRule,
@@ -113,7 +115,7 @@ object Matchers : KLogging() {
     return result
   }
 
-  @Suppress("LongMethod")
+  @Suppress("LongMethod", "LongParameterList")
   fun <T> compareLists(
     path: List<String>,
     matcher: MatchingRule,
@@ -193,6 +195,7 @@ object Matchers : KLogging() {
   /**
    * Compares any "extra" actual elements to expected
    */
+  @Suppress("LongParameterList")
   private fun <T> compareActualElements(
     path: List<String>,
     actualIndex: Int,
@@ -212,6 +215,7 @@ object Matchers : KLogging() {
   /**
    * Compares every permutation of actual against expected.
    */
+  @Suppress("LongParameterList")
   fun <T> compareListContentUnordered(
     expectedList: List<T>,
     actualList: List<T>,

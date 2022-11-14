@@ -154,4 +154,21 @@ class MatchingSpec extends Specification {
     !result.empty
     result[0].mismatch.endsWith("is not equal to the expected body 'hello'")
   }
+
+  def 'Body Matching - ignores well known body matchers if there is a content type matcher'() {
+    given:
+    def example = '<?xml version="1.0" encoding="utf-8"?><example>foo</example>'
+    def example2 = '<?xml version="1.0" encoding="utf-8"?><someOther>foo</someOther>'
+    def matchingRulesImpl = new MatchingRulesImpl()
+    matchingRulesImpl.addCategory('body').addRule('$', new ContentTypeMatcher('application/xml'))
+    def expected = new Response(200, ['Content-Type': ['application/xml']], OptionalBody.body(example.bytes),
+      matchingRulesImpl)
+    def actual = new Response(200, [:], OptionalBody.body(example2.bytes))
+
+    when:
+    def result = Matching.INSTANCE.matchBody(expected, actual, bodyContext)
+
+    then:
+    result.mismatches.empty
+  }
 }

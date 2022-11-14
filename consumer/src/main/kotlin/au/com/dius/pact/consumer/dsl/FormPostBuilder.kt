@@ -108,7 +108,7 @@ class FormPostBuilder(
    */
   fun datetime(name: String): FormPostBuilder {
     val pattern = DateFormatUtils.ISO_DATETIME_FORMAT.pattern
-    generators.addGenerator(Category.BODY, name, DateTimeGenerator(pattern, null))
+    generators.addGenerator(Category.BODY, ROOT + name, DateTimeGenerator(pattern, null))
     body[name] = listOf(DateFormatUtils.ISO_DATETIME_FORMAT.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.timestamp(pattern))
     return this
@@ -120,7 +120,7 @@ class FormPostBuilder(
    * @param format datetime format
    */
   fun datetime(name: String, format: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, DateTimeGenerator(format, null))
+    generators.addGenerator(Category.BODY, ROOT + name, DateTimeGenerator(format, null))
     val formatter = DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault())
     body[name] = listOf(formatter.format(Date(DslPart.DATE_2000).toInstant()))
     matchers.addRule(ROOT + name, PM.timestamp(format))
@@ -181,7 +181,7 @@ class FormPostBuilder(
    */
   fun date(name: String): FormPostBuilder {
     val pattern = DateFormatUtils.ISO_DATE_FORMAT.pattern
-    generators.addGenerator(Category.BODY, name, DateGenerator(pattern, null))
+    generators.addGenerator(Category.BODY, ROOT + name, DateGenerator(pattern, null))
     body[name] = listOf(DateFormatUtils.ISO_DATE_FORMAT.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.date(pattern))
     return this
@@ -193,7 +193,7 @@ class FormPostBuilder(
    * @param format date format to match
    */
   fun date(name: String, format: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, DateGenerator(format, null))
+    generators.addGenerator(Category.BODY, ROOT + name, DateGenerator(format, null))
     val instance = FastDateFormat.getInstance(format)
     body[name] = listOf(instance.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.date(format))
@@ -230,7 +230,7 @@ class FormPostBuilder(
    */
   fun time(name: String): FormPostBuilder {
     val pattern = DateFormatUtils.ISO_TIME_FORMAT.pattern
-    generators.addGenerator(Category.BODY, name, TimeGenerator(pattern, null))
+    generators.addGenerator(Category.BODY, ROOT + name, TimeGenerator(pattern, null))
     body[name] = listOf(DateFormatUtils.ISO_TIME_FORMAT.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.time(pattern))
     return this
@@ -242,7 +242,7 @@ class FormPostBuilder(
    * @param format time format to match
    */
   fun time(name: String, format: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, TimeGenerator(format, null))
+    generators.addGenerator(Category.BODY, ROOT + name, TimeGenerator(format, null))
     val instance = FastDateFormat.getInstance(format)
     body[name] = listOf(instance.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.time(format))
@@ -278,7 +278,7 @@ class FormPostBuilder(
    * @param name attribute name
    */
   fun hexValue(name: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, RandomHexadecimalGenerator(10))
+    generators.addGenerator(Category.BODY, ROOT + name, RandomHexadecimalGenerator(10))
     return hexValue(name, "1234a")
   }
 
@@ -301,7 +301,7 @@ class FormPostBuilder(
    * @param name attribute name
    */
   fun uuid(name: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, UuidGenerator())
+    generators.addGenerator(Category.BODY, ROOT + name, UuidGenerator())
     return uuid(name, "e2490de5-5bd3-43d5-b7c4-526e33f71304")
   }
 
@@ -346,7 +346,7 @@ class FormPostBuilder(
    * @param example Example value to be used in the consumer test
    */
   fun parameterFromProviderState(name: String, expression: String, example: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, ProviderStateGenerator(expression, DataType.STRING))
+    generators.addGenerator(Category.BODY, ROOT + name, ProviderStateGenerator(expression, DataType.STRING))
     body[name] = listOf(example)
     return this
   }
@@ -367,7 +367,7 @@ class FormPostBuilder(
    * @param format Date format to use
    */
   fun dateExpression(name: String, expression: String, format: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, DateGenerator(format, expression))
+    generators.addGenerator(Category.BODY, ROOT + name, DateGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
     body[name] = listOf(instance.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.date(format))
@@ -390,7 +390,7 @@ class FormPostBuilder(
    * @param format Time format to use
    */
   fun timeExpression(name: String, expression: String, format: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, TimeGenerator(format, expression))
+    generators.addGenerator(Category.BODY, ROOT + name, TimeGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
     body[name] = listOf(instance.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.time(format))
@@ -413,7 +413,7 @@ class FormPostBuilder(
    * @param format Datetime format to use
    */
   fun datetimeExpression(name: String, expression: String, format: String): FormPostBuilder {
-    generators.addGenerator(Category.BODY, name, DateTimeGenerator(format, expression))
+    generators.addGenerator(Category.BODY, ROOT + name, DateTimeGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
     body[name] = listOf(instance.format(Date(DslPart.DATE_2000)))
     matchers.addRule(ROOT + name, PM.timestamp(format))

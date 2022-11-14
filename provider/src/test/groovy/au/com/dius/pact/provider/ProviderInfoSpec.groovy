@@ -210,7 +210,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectorsV2(options, url, selectors)
 
     then:
-    providerInfo.pactBrokerClient(_, { it.auth == new Auth.BearerAuthentication('123ABC') }) >> pactBrokerClient
+    providerInfo.pactBrokerClient(_, { it.auth == new Auth.BearerAuthentication('Authorization', '123ABC') }) >> pactBrokerClient
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])

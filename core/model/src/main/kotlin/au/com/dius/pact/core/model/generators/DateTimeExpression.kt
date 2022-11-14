@@ -20,16 +20,16 @@ object DateTimeExpression : KLogging() {
           TimeExpression.executeTimeExpression(base, split[1])
         when {
           datePart is Err<String> && timePart is Err<String> -> datePart.mapError { "$it, " +
-            Regex("1:(\\d+)").replace(timePart.error) { mr ->
+            Regex("index (\\d+)").replace(timePart.error) { mr ->
               val pos = parseInt(mr.groupValues[1])
-              "1:${pos + split[0].length + 1}"
+              "index ${pos + split[0].length + 1}"
             }
           }
           datePart is Err<String> -> datePart
           timePart is Err<String> -> timePart.mapError {
-            Regex("1:(\\d+)").replace(timePart.error) { mr ->
+            Regex("index (\\d+)").replace(timePart.error) { mr ->
               val pos = parseInt(mr.groupValues[1])
-              "1:${pos + split[0].length + 1}"
+              "index ${pos + split[0].length + 1}"
             }
           }
           else -> timePart

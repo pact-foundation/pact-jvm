@@ -14,12 +14,14 @@ dependencies {
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testImplementation 'org.mockito:mockito-core:2.28.2'
   testImplementation 'org.hamcrest:hamcrest:2.1'
-  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
   testImplementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
-  testImplementation 'io.rest-assured:rest-assured:5.0.0'
-  testImplementation 'org.apache.commons:commons-collections4:4.4'
+  testImplementation('io.rest-assured:rest-assured:5.2.0') {
+    exclude group: 'org.apache.groovy'
+  }
+  testImplementation "org.apache.commons:commons-collections4:${project.commonsCollections4}"
 
   // JAX-B dependencies for JDK 9+
   testImplementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"

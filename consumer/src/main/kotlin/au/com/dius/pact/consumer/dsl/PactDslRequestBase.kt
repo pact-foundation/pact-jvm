@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.TimeGenerator
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -23,6 +24,7 @@ import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.apache.hc.core5.http.ContentType
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.nio.charset.Charset
 import java.util.Date
 
 open class PactDslRequestBase(
@@ -99,7 +101,7 @@ open class PactDslRequestBase(
     if (example.isNotEmpty()) {
       query[field] = listOf(example!!)
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, DateGenerator(pattern, null))
+      requestGenerators.addGenerator(Category.QUERY, field, DateGenerator(pattern, null))
       val instance = FastDateFormat.getInstance(pattern)
       query[field] = listOf(instance.format(Date(DATE_2000)))
     }
@@ -111,7 +113,7 @@ open class PactDslRequestBase(
     if (example.isNotEmpty()) {
       query[field] = listOf(example!!)
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, TimeGenerator(pattern, null))
+      requestGenerators.addGenerator(Category.QUERY, field, TimeGenerator(pattern, null))
       val instance = FastDateFormat.getInstance(pattern)
       query[field] = listOf(instance.format(Date(DATE_2000)))
     }
@@ -123,10 +125,22 @@ open class PactDslRequestBase(
     if (example.isNotEmpty()) {
       query[field] = listOf(example!!)
     } else {
-      requestGenerators.addGenerator(Category.BODY, field, DateTimeGenerator(pattern, null))
+      requestGenerators.addGenerator(Category.QUERY, field, DateTimeGenerator(pattern, null))
       val instance = FastDateFormat.getInstance(pattern)
       query[field] = listOf(instance.format(Date(DATE_2000)))
     }
+    return this
+  }
+
+  /**
+   * Sets up a content type matcher to match any body of the given content type
+   */
+  protected open fun bodyMatchingContentType(contentType: String, exampleContents: String): PactDslRequestBase {
+    val ct = au.com.dius.pact.core.model.ContentType(contentType)
+    val charset = ct.asCharset()
+    requestBody = body(exampleContents.toByteArray(charset), ct)
+    requestHeaders[CONTENT_TYPE] = listOf(contentType)
+    requestMatchers.addCategory("body").addRule("$", ContentTypeMatcher(contentType))
     return this
   }
 

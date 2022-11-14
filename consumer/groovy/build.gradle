@@ -1,11 +1,11 @@
 dependencies {
-  api project(":consumer")
+  implementation project(":consumer")
   implementation "org.apache.groovy:groovy:${project.groovyVersion}"
   implementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
   implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
-  implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation "org.apache.commons:commons-collections4:${project.commonsCollections4}"
   implementation "io.pact.plugin.driver:core:${project.pluginDriverVersion}"
 
   testImplementation "junit:junit:${project.junitVersion}"
@@ -13,8 +13,8 @@ dependencies {
   testImplementation "org.apache.groovy:groovy-xml:${project.groovyVersion}"
   testImplementation "org.apache.groovy:groovy-dateutil:${project.groovyVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
-      exclude group: 'org.codehaus.groovy'
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
+      exclude group: 'org.apache.groovy'
   }
 
   groovyDoc "org.apache.groovy:groovy-all:${project.groovyVersion}"

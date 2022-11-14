@@ -380,6 +380,12 @@ Bearer tokens are also supported. For example:
   authentication = @PactBrokerAuth(token = "test"))
 ```
 
+Customise the authentication header from the default `Authorization` with `headerName` property of `@PactBrokerAuth`:
+
+```java
+@PactBrokerAuth(token = "test", headerName = "custom-auth-header")
+```
+
 The `token`, `username` and `password` values also take Java system property expressions.
 
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java

@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.restassured.RestAssured;
+import io.restassured.RestAssured;
 import org.hamcrest.Matchers;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -22,6 +23,12 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.consumer.junit.PactVerification;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.junit.exampleclients.ConsumerHttpsClient;
+import au.com.dius.pact.consumer.model.MockHttpsKeystoreProviderConfig;
+import au.com.dius.pact.core.model.PactSpecVersion;
 
 @Ignore
 public class PactProviderHttpsKeystoreTest {

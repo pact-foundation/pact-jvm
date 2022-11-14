@@ -40,7 +40,7 @@ sealed class Auth {
   /**
    * Bearer token authentication
    */
-  data class BearerAuthentication(val token: String) : Auth()
+  data class BearerAuthentication(val token: String, val headerName: String) : Auth()
 
   @JvmOverloads
   fun resolveProperties(resolver: ValueResolver, ep: ExpressionParser = ExpressionParser()): Auth {
@@ -48,7 +48,10 @@ sealed class Auth {
       is BasicAuthentication -> BasicAuthentication(
         ep.parseExpression(this.username, DataType.RAW, resolver).toString(),
         ep.parseExpression(this.password, DataType.RAW, resolver).toString())
-      is BearerAuthentication -> BearerAuthentication(ep.parseExpression(this.token, DataType.RAW, resolver).toString())
+      is BearerAuthentication -> BearerAuthentication(
+        ep.parseExpression(this.token, DataType.RAW, resolver).toString(),
+        ep.parseExpression(this.headerName, DataType.RAW, resolver).toString()
+      )
       else -> this
     }
   }
@@ -59,6 +62,10 @@ sealed class Auth {
       is BearerAuthentication -> listOf("bearer", this.token)
       else -> emptyList()
     }
+  }
+
+  companion object {
+    const val DEFAULT_AUTH_HEADER = "Authorization"
   }
 }
 
@@ -87,7 +94,7 @@ object HttpClient : KLogging() {
         when (authentication) {
           is Auth.BasicAuthentication -> basicAuth(uri, authentication.username, authentication.password, builder)
           is Auth.BearerAuthentication -> {
-            defaultHeaders["Authorization"] = "Bearer " + authentication.token
+            defaultHeaders[authentication.headerName] = "Bearer " + authentication.token
             SystemDefaultCredentialsProvider()
           }
           else -> SystemDefaultCredentialsProvider()

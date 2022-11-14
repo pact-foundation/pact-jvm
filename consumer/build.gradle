@@ -11,8 +11,8 @@ dependencies {
   implementation "org.json:json:${project.jsonVersion}"
   implementation "io.netty:netty-handler:${project.nettyVersion}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  implementation 'io.ktor:ktor-server-netty:1.6.7'
-  implementation 'io.ktor:ktor-network-tls-certificates:1.6.7'
+  implementation "io.ktor:ktor-server-netty:${project.ktor}"
+  implementation "io.ktor:ktor-network-tls-certificates:${project.ktor}"
   implementation "io.pact.plugin.driver:core:${project.pluginDriverVersion}"
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation 'com.github.mifmif:generex:1.0.2'
@@ -31,11 +31,11 @@ dependencies {
   testImplementation "org.apache.groovy:groovy-xml:${project.groovyVersion}"
   testImplementation "org.apache.groovy:groovy-dateutil:${project.groovyVersion}"
   testImplementation 'org.hamcrest:hamcrest:2.2'
-  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
   testRuntimeOnly 'org.objenesis:objenesis:3.2'
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
   testImplementation 'io.grpc:grpc-protobuf:1.43.2'
 }

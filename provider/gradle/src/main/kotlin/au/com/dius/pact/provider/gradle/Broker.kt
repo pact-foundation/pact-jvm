@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.core.support.Auth
+
 /**
  * Config for pact broker
  */
@@ -9,6 +11,7 @@ data class Broker(
   var pactBrokerUsername: String? = null,
   var pactBrokerPassword: String? = null,
   var pactBrokerAuthenticationScheme: String? = null,
+  var pactBrokerAuthenticationHeader: String = Auth.DEFAULT_AUTH_HEADER,
   var retryCountWhileUnknown: Int? = null,
   var retryWhileUnknownInterval: Int? = null
 ) {
@@ -17,6 +20,7 @@ data class Broker(
     return "Broker(pactBrokerUrl=$pactBrokerUrl, pactBrokerToken=$pactBrokerToken, " +
       "pactBrokerUsername=$pactBrokerUsername, pactBrokerPassword=$password, " +
       "pactBrokerAuthenticationScheme=$pactBrokerAuthenticationScheme, " +
+      "pactBrokerAuthenticationHeader=$pactBrokerAuthenticationHeader, " +
       "retryCountWhileUnknown=$retryCountWhileUnknown, retryWhileUnknownInterval=$retryWhileUnknownInterval)"
   }
 }

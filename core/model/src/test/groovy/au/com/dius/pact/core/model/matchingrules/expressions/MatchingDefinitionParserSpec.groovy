@@ -52,6 +52,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
     expression                   | value      | matcher
     'matching(number,100)'       | '100'      | NumberTypeMatcher.NumberType.NUMBER
+    'matching( number , 100 )'   | '100'      | NumberTypeMatcher.NumberType.NUMBER
     'matching(number, -100.101)' | '-100.101' | NumberTypeMatcher.NumberType.NUMBER
     'matching(integer,100)'      | '100'      | NumberTypeMatcher.NumberType.INTEGER
     'matching(decimal,100.101)'  | '100.101'  | NumberTypeMatcher.NumberType.DECIMAL
@@ -79,6 +80,7 @@ class MatchingDefinitionParserSpec extends Specification {
     "matching(datetime, 'yyyy-MM-dd HH:mm:ss','2000-01-01 12:00:00')" | 'yyyy-MM-dd HH:mm:ss' | '2000-01-01 12:00:00' | TimestampMatcher
     "matching(date, 'yyyy-MM-dd','2000-01-01')"                       | 'yyyy-MM-dd'          | '2000-01-01'          | DateMatcher
     "matching(time, 'HH:mm:ss','12:00:00')"                           | 'HH:mm:ss'            | '12:00:00'            | TimeMatcher
+    "matching( time , 'HH:mm:ss' , '12:00:00' )"                      | 'HH:mm:ss'            | '12:00:00'            | TimeMatcher
   }
 
   def 'parse regex matcher'() {
@@ -88,8 +90,18 @@ class MatchingDefinitionParserSpec extends Specification {
 
     where:
 
-    expression                       | regex  | value
-    "matching(regex, '\\w+','Fred')" | '\\w+' | 'Fred'
+    expression                            | regex  | value
+    "matching(regex, '\\w+','Fred')"      | '\\w+' | 'Fred'
+    "matching( regex , '\\w+' , 'Fred' )" | '\\w+' | 'Fred'
+  }
+
+  def 'invalid regex matcher'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
+
+    where:
+
+    expression << [ "matching(regex, null, 'Fred')" ]
   }
 
   def 'parse include matcher'() {
@@ -99,8 +111,9 @@ class MatchingDefinitionParserSpec extends Specification {
 
     where:
 
-    expression                          | value
-    "matching(include, 'Fred and Bob')" | 'Fred and Bob'
+    expression                             | value
+    "matching(include, 'Fred and Bob')"    | 'Fred and Bob'
+    "matching( include , 'Fred and Bob' )" | 'Fred and Bob'
   }
 
   def 'parse boolean matcher'() {
@@ -110,8 +123,9 @@ class MatchingDefinitionParserSpec extends Specification {
 
     where:
 
-    expression                | value
-    'matching(boolean, true)' | 'true'
+    expression                    | value
+    'matching(boolean, true)'     | 'true'
+    'matching( boolean , false )' | 'false'
   }
 
   def 'each key and value'() {
@@ -146,8 +160,9 @@ class MatchingDefinitionParserSpec extends Specification {
 
     where:
 
-    expression         | value  | type
-    "notEmpty('true')" | 'true' | ValueType.String
-    'notEmpty(true)'   | 'true' | ValueType.Boolean
+    expression           | value  | type
+    "notEmpty('true')"   | 'true' | ValueType.String
+    "notEmpty( 'true' )" | 'true' | ValueType.String
+    'notEmpty(true)'     | 'true' | ValueType.Boolean
   }
 }

@@ -221,36 +221,46 @@ object Matching : KLogging() {
     if (expected.equals(actual, ignoreCase = true)) null
     else MethodMismatch(expected, actual)
 
+  @Suppress("ComplexMethod")
   fun matchBody(expected: HttpPart, actual: HttpPart, context: MatchingContext): BodyMatchResult {
     logger.debug { "matchBody: context=$context" }
+
     val expectedContentType = expected.determineContentType()
     val actualContentType = actual.determineContentType()
-    return if (expectedContentType.getBaseType() == actualContentType.getBaseType()) {
-      val matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
-      if (matcher != null) {
-        logger.debug { "Found a matcher for $actualContentType -> $matcher" }
-        matcher.matchBody(expected.body, actual.body, context)
-      } else {
-        logger.debug { "No matcher for $actualContentType, using equality" }
-        when {
-          expected.body.isMissing() -> BodyMatchResult(null, emptyList())
-          expected.body.isNull() && actual.body.isPresent() -> BodyMatchResult(null,
-            listOf(BodyItemMatchResult("$", listOf(BodyMismatch(null, actual.body.unwrap(),
-              "Expected an empty body but received '${actual.body.unwrap()}'")))))
-          expected.body.isNull() -> BodyMatchResult(null, emptyList())
-          actual.body.isMissing() -> BodyMatchResult(null,
-            listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expected.body.unwrap(), null,
-              "Expected body '${expected.body.unwrap()}' but was missing")))))
-          else -> matchBodyContents(expected, actual)
+    val rootMatcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
+
+    return when {
+      rootMatcher != null && rootMatcher.canMatch(expectedContentType) -> BodyMatchResult(null,
+        listOf(BodyItemMatchResult("$", domatch(rootMatcher, listOf("$"), expected.body.unwrap(),
+          actual.body.unwrap(), BodyMismatchFactory))))
+      expectedContentType.getBaseType() == actualContentType.getBaseType() -> {
+        val matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
+        if (matcher != null) {
+          logger.debug { "Found a matcher for $actualContentType -> $matcher" }
+          matcher.matchBody(expected.body, actual.body, context)
+        } else {
+          logger.debug { "No matcher for $actualContentType, using equality" }
+          when {
+            expected.body.isMissing() -> BodyMatchResult(null, emptyList())
+            expected.body.isNull() && actual.body.isPresent() -> BodyMatchResult(null,
+              listOf(BodyItemMatchResult("$", listOf(BodyMismatch(null, actual.body.unwrap(),
+                "Expected an empty body but received '${actual.body.unwrap()}'")))))
+            expected.body.isNull() -> BodyMatchResult(null, emptyList())
+            actual.body.isMissing() -> BodyMatchResult(null,
+              listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expected.body.unwrap(), null,
+                "Expected body '${expected.body.unwrap()}' but was missing")))))
+            else -> matchBodyContents(expected, actual)
+          }
         }
       }
-    } else {
-      if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty())
-        BodyMatchResult(null, emptyList())
-      else
-        BodyMatchResult(
-          BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()),
-          emptyList())
+      else -> {
+        if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty())
+          BodyMatchResult(null, emptyList())
+        else
+          BodyMatchResult(
+            BodyTypeMismatch(expectedContentType.getBaseType(), actualContentType.getBaseType()),
+            emptyList())
+      }
     }
   }
 

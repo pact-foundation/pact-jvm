@@ -1,7 +1,3 @@
-plugins {
-  id 'antlr'
-}
-
 task pactsJar(type: Jar, dependsOn: testClasses) {
   classifier = 'test-pacts'
   into('jar-pacts') {
@@ -23,13 +19,13 @@ dependencies {
   api project(":core:support")
   api project(":core:pactbroker")
 
-  implementation 'org.apache.commons:commons-collections4:4.4'
+  implementation "org.apache.commons:commons-collections4:${project.commonsCollections4}"
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'javax.mail:mail:1.5.0-b01'
   implementation "org.jetbrains.kotlin:kotlin-reflect:${project.kotlinVersion}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  implementation 'org.apache.tika:tika-core:1.27'
-  implementation 'io.ktor:ktor-http-jvm:1.6.1'
+  implementation "org.apache.tika:tika-core:${project.tika}"
+  implementation "io.ktor:ktor-http-jvm:${project.ktor}"
   implementation 'commons-beanutils:commons-beanutils:1.9.4'
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
 
@@ -42,17 +38,11 @@ dependencies {
   testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
-  testImplementation('org.spockframework:spock-core:2.2-M1-groovy-4.0') {
+  testImplementation("org.spockframework:spock-core:${project.spock}") {
     exclude group: 'org.codehaus.groovy'
   }
   testImplementation "junit:junit:${project.junitVersion}"
   testImplementation 'org.hamcrest:hamcrest:2.1'
-  testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.32'
+  testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.232'
   testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
-
-  antlr "org.antlr:antlr4:4.11.1"
-}
-
-compileKotlin {
-  dependsOn 'generateGrammarSource'
 }

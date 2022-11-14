@@ -31,7 +31,7 @@ class GradleProviderInfoSpec extends Specification {
 
   def 'hasPactWith - defaults the consumer verification type to what is set on the provider'() {
     given:
-    def provider = new GradleProviderInfo('provider', project)
+    def provider = new GradleProviderInfo('provider', project.objects)
     provider.verificationType = PactVerification.ANNOTATED_METHOD
 
     when:
@@ -45,7 +45,7 @@ class GradleProviderInfoSpec extends Specification {
 
   def 'fromPactBroker configures the pact broker options'() {
     given:
-    def provider = new GradleProviderInfo('provider', project)
+    def provider = new GradleProviderInfo('provider', project.objects)
 
     when:
     provider.fromPactBroker {
@@ -67,7 +67,7 @@ class GradleProviderInfoSpec extends Specification {
   @Unroll
   def 'fromPactBroker throws an exception if pending pacts is enabled but there are no provider tags or provider branch'() {
     given:
-    def provider = new GradleProviderInfo('provider', project)
+    def provider = new GradleProviderInfo('provider', project.objects)
 
     when:
     provider.fromPactBroker {
@@ -90,7 +90,7 @@ class GradleProviderInfoSpec extends Specification {
 
   def 'supports specifying a fallback tag'() {
     given:
-    def provider = new GradleProviderInfo('provider', project)
+    def provider = new GradleProviderInfo('provider', project.objects)
 
     when:
     provider.fromPactBroker {
@@ -109,7 +109,7 @@ class GradleProviderInfoSpec extends Specification {
   def 'supports specifying selectors with a block'() {
     given:
     def project = ProjectBuilder.builder().build()
-    def provider = new GradleProviderInfo('provider', project)
+    def provider = new GradleProviderInfo('provider', project.objects)
 
     when:
     provider.fromPactBroker {

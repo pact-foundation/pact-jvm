@@ -72,9 +72,11 @@ data class UuidMatcher(override val value: String?) :
   Matcher(value, RegexMatcher(Matchers.UUID_REGEX.toString(), value),
     if (value == null) UuidGenerator() else null)
 
-data class EqualsMatcher(override val value: Any?) : Matcher(value, au.com.dius.pact.core.model.matchingrules.EqualsMatcher)
+data class EqualsMatcher(override val value: Any?) : Matcher(value,
+  au.com.dius.pact.core.model.matchingrules.EqualsMatcher)
 
-data class IncludeMatcher(override val value: String) : Matcher(value, au.com.dius.pact.core.model.matchingrules.IncludeMatcher(value))
+data class IncludeMatcher(override val value: String) : Matcher(value,
+  au.com.dius.pact.core.model.matchingrules.IncludeMatcher(value))
 
 object NullMatcher : Matcher(null, au.com.dius.pact.core.model.matchingrules.NullMatcher)
 
