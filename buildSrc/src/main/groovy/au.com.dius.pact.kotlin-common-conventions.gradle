@@ -5,6 +5,8 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'groovy'
+    id 'codenarc'
+    id "io.gitlab.arturbosch.detekt"
 }
 
 repositories {
@@ -37,7 +39,6 @@ dependencies {
 
         testImplementation 'org.apache.groovy:groovy:4.0.6'
         testImplementation 'org.hamcrest:hamcrest:2.2'
-        testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
         testImplementation 'junit:junit:4.13.2'
     }
 
@@ -50,6 +51,9 @@ dependencies {
 
     // Align versions of all Kotlin components
     implementation platform('org.jetbrains.kotlin:kotlin-bom')
+
+    testImplementation platform("org.spockframework:spock-bom:2.3-groovy-4.0")
+    testImplementation 'org.spockframework:spock-core'
 }
 
 testing {
@@ -65,4 +69,17 @@ testing {
 test {
     // Mark sure Pact-JVM builds don't skew the metrics
     systemProperty 'pact_do_not_track', 'true'
+}
+
+codenarcMain {
+    configFile = rootProject.file('config/codenarc/ruleset.groovy')
+}
+
+codenarcTest {
+    configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
+}
+
+detekt {
+    failFast = false
+    config = files(rootProject.file("config/detekt-config.yml"))
 }
