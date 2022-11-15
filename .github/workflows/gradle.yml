@@ -16,11 +16,11 @@ jobs:
         module: [ core ]
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 17
+    - name: Set up JDK 19
       uses: actions/setup-java@v3
       with:
         distribution: zulu
-        java-version: 17
+        java-version: 19
     - name: Cache Gradle packages
       uses: actions/cache@v2
       with:
@@ -42,7 +42,7 @@ jobs:
       matrix:
 #        module: [ core, consumer, provider, pact-specification-test ]
         module: [ core ]
-        jdk: [ 11, 15, 16 ]
+        jdk: [ 11, 15, 16, 17, 18 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
