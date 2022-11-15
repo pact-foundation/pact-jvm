@@ -9,24 +9,25 @@ import java.lang.annotation.Target
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@interface ToFind {}
+@interface ToFind { }
 
+@SuppressWarnings('EmptyClass')
 class AnnotationsSpec extends Specification {
   @ToFind
-  static class WithAnnotation {}
+  static class WithAnnotation { }
 
-  static class ChildClass extends WithAnnotation {}
+  static class ChildClass extends WithAnnotation { }
 
   @ToFind
   static class OuterClass {
     class InnerClass {
-      class InnerClass2 {}
+      class InnerClass2 { }
     }
   }
 
   static class OuterChildClass extends WithAnnotation {
     class InnerClass {
-      class InnerClass2 {}
+      class InnerClass2 { }
     }
   }
 

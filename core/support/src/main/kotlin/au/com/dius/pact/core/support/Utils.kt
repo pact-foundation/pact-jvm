@@ -71,7 +71,8 @@ object Utils : KLogging() {
   }
 
   /**
-   * Determines if the given port number is available. Does this by trying to open a socket and then immediately closing it.
+   * Determines if the given port number is available. Does this by trying to open a socket and then immediately
+   * closing it.
    */
   fun portAvailable(p: Int): Boolean {
     var socket: ServerSocket? = null

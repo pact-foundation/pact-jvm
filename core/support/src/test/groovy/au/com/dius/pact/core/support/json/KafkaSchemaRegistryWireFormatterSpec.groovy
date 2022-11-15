@@ -16,24 +16,24 @@ class KafkaSchemaRegistryWireFormatterSpec extends Specification {
     where:
 
     value                           | expected
-    '     '                         | getMagicBytesString() + '     '
-    '  \t\n\r'                      | getMagicBytesString() + '  \t\n\r'
-    '       \t\n\r'                 | getMagicBytesString() + '       \t\n\r'
-    '  -'                           | getMagicBytesString() + '  -'
-    'Null'                          | getMagicBytesString() + 'Null'
-    '     null true'                | getMagicBytesString() + '     null true'
-    '     "null true'               | getMagicBytesString() + '     "null true'
-    '["null", true'                 | getMagicBytesString() + '["null", true'
-    '{"null": true'                 | getMagicBytesString() + '{"null": true'
-    '12]'                           | getMagicBytesString() + '12]'
-    'true}'                         | getMagicBytesString() + 'true}'
-    '1234,'                         | getMagicBytesString() + '1234,'
-    '{null: true}'                  | getMagicBytesString() + '{null: true}'
-    '{"null: true}'                 | getMagicBytesString() + '{"null: true}'
-    '{"nu\\ll": true}'              | getMagicBytesString() + '{"nu\\ll": true}'
-    '{"null" true}'                 | getMagicBytesString() + '{"null" true}'
-    '["null" true]'                 | getMagicBytesString() + '["null" true]'
-    '{"null": true "other": false}' | getMagicBytesString() + '{"null": true "other": false}'
+    '     '                         | magicBytesString + '     '
+    '  \t\n\r'                      | magicBytesString + '  \t\n\r'
+    '       \t\n\r'                 | magicBytesString + '       \t\n\r'
+    '  -'                           | magicBytesString + '  -'
+    'Null'                          | magicBytesString + 'Null'
+    '     null true'                | magicBytesString + '     null true'
+    '     "null true'               | magicBytesString + '     "null true'
+    '["null", true'                 | magicBytesString + '["null", true'
+    '{"null": true'                 | magicBytesString + '{"null": true'
+    '12]'                           | magicBytesString + '12]'
+    'true}'                         | magicBytesString + 'true}'
+    '1234,'                         | magicBytesString + '1234,'
+    '{null: true}'                  | magicBytesString + '{null: true}'
+    '{"null: true}'                 | magicBytesString + '{"null: true}'
+    '{"nu\\ll": true}'              | magicBytesString + '{"nu\\ll": true}'
+    '{"null" true}'                 | magicBytesString + '{"null" true}'
+    '["null" true]'                 | magicBytesString + '["null" true]'
+    '{"null": true "other": false}' | magicBytesString + '{"null": true "other": false}'
   }
 
   def 'addMagicBytesToString - returns empty string when input is empty'() {
@@ -147,27 +147,27 @@ class KafkaSchemaRegistryWireFormatterSpec extends Specification {
   }
 
   def removeMagicBytesLength(byte[] value) {
-    int magicBytesLength = getMagicBytes().length
+    int magicBytesLength = magicBytes.length
     int valueLength = value.length
 
-    if(magicBytesLength < valueLength) {
+    if (magicBytesLength < valueLength) {
       return Arrays.copyOfRange(value, magicBytesLength, valueLength)
     }
-    return new byte[]{}
+    new byte[]{}
   }
 
   def prependMagicBytes(byte[] value) {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
-    outputStream.write(getMagicBytes())
+    outputStream.write(magicBytes)
     outputStream.write(value)
-    return outputStream.toByteArray()
+    outputStream.toByteArray()
   }
 
   def getMagicBytesString() {
-    return new String(getMagicBytes(), StandardCharsets.UTF_8)
+    new String(magicBytes, StandardCharsets.UTF_8)
   }
 
   def getMagicBytes() {
-    return new byte[]{0x00, 0x00, 0x00, 0x00, 0x01}
+    new byte[]{0x00, 0x00, 0x00, 0x00, 0x01}
   }
 }

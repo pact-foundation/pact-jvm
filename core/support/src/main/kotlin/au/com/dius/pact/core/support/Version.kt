@@ -20,6 +20,7 @@ data class Version(
 
   companion object {
     @JvmStatic
+    @Suppress("ReturnCount")
     fun parse(version: String): Result<Version, String> {
       val lexer = StringLexer(version)
 

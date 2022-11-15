@@ -48,6 +48,7 @@ open class ExpressionParser(
   open fun containsExpressions(value: String?, allowReplacement: Boolean = false) =
     value != null && value.contains(startExpression(allowReplacement))
 
+  @Suppress("TooGenericExceptionThrown")
   private fun replaceExpressions(value: String, valueResolver: ValueResolver, allowReplacement: Boolean): String {
     val joiner = StringJoiner("")
 

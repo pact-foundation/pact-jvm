@@ -56,6 +56,7 @@ sealed class JsonToken(val chars: CharArray) {
   }
 }
 
+@Suppress("ReturnCount")
 class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
   fun nextToken(): Result<JsonToken?, JsonException> {
     val next = json.nextChar()
