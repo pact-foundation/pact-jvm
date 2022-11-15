@@ -1,24 +1,23 @@
-dependencies {
-  api project(":core:support")
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-  implementation "org.apache.commons:commons-lang3:$commonsLang3Version"
-  implementation "com.google.guava:guava:${project.guavaVersion}"
-  implementation("io.github.microutils:kotlin-logging:$kotlinLogging") {
-    exclude group: 'org.jetbrains.kotlin'
-  }
-  implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  api("com.michael-bull.kotlin-result:kotlin-result:$kotlinResult") {
-    exclude group: 'org.jetbrains.kotlin'
-  }
+plugins {
+    id 'au.com.dius.pact.kotlin-library-conventions'
+}
 
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
-  testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-  testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+description = 'Pact-JVM - Pact Broker Client'
+group = 'au.com.dius.pact.core'
+
+dependencies {
+    api project(':core:support')
+
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.google.guava:guava'
+    api 'io.github.microutils:kotlin-logging'
+    api 'org.apache.httpcomponents.client5:httpclient5'
+    api 'com.michael-bull.kotlin-result:kotlin-result'
+    implementation 'org.slf4j:slf4j-api'
+
+    testImplementation 'org.apache.groovy:groovy'
+    testImplementation 'org.apache.groovy:groovy-json'
+    testImplementation 'org.spockframework:spock-core'
+    testImplementation 'ch.qos.logback:logback-classic'
+    testRuntimeOnly 'net.bytebuddy:byte-buddy'
 }

@@ -3,6 +3,7 @@ plugins {
 }
 
 description = 'Pact-JVM Support module with common utilities'
+group = 'au.com.dius.pact.core'
 
 dependencies {
     implementation 'org.apache.commons:commons-text'

@@ -208,7 +208,8 @@ sealed class ConsumerVersionSelectors {
   /**
    * Corresponds to the old consumer version selectors
    */
-  @Deprecated(message = "Old form of consumer version selectors have been deprecated in favor of the newer forms (Branches, Tags, etc.)")
+  @Deprecated(message = "Old form of consumer version selectors have been deprecated in favor of the newer forms " +
+    "(Branches, Tags, etc.)")
   data class Selector @JvmOverloads constructor(
     val tag: String? = null,
     val latest: Boolean? = null,
@@ -796,7 +797,7 @@ open class PactBrokerClient(
     buildUrl: String?
   ): Result<Boolean, String> {
     val halClient = newHalClient()
-    val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
+    val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"]
     return if (publishLink is Map<*, *>) {
       val jsonObject = buildPayload(result, version, buildUrl)
       val lowercaseMap = publishLink.mapKeys { it.key.toString().toLowerCase() }
@@ -919,7 +920,9 @@ open class PactBrokerClient(
   private fun logPublishingResults(halClient: IHalClient, version: String, tag: String, name: String) {
     when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
       is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
-      is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+      is Err<Exception> -> logger.error(result.error) {
+        "Failed to push tag $tag for provider $name and version $version"
+      }
     }
   }
 
@@ -938,7 +941,9 @@ open class PactBrokerClient(
         val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tagName), "{}")
         when (result) {
           is Ok<*> -> logger.debug { "Pushed tag $tagName for provider $name and version $version" }
-          is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tagName for provider $name and version $version" }
+          is Err<Exception> -> logger.error(result.error) {
+            "Failed to push tag $tagName for provider $name and version $version"
+          }
         }
         result.mapError { err -> "Publishing tag '$tagName' failed: ${err.message ?: err.toString()}" }
       }.fold(initial) { result, v ->
