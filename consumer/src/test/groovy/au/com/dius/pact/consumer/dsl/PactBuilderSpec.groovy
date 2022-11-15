@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer.dsl
 
-
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.HttpResponse
@@ -36,10 +35,10 @@ class PactBuilderSpec extends Specification {
     given:
     def builder = new PactBuilder()
     def pact = builder.usingLegacyDsl()
-      .uponReceiving("a request")
-      .path("/api/myrequest")
-      .method("POST")
-      .queryMatchingDatetime("startDateTime", "yyyy-MM-dd'T'hh:mm:ss'Z'")
+      .uponReceiving('a request')
+      .path('/api/request')
+      .method('POST')
+      .queryMatchingDatetime('startDateTime', "yyyy-MM-dd'T'hh:mm:ss'Z'")
       .willRespondWith()
       .status(200)
       .toPact(V4Pact)
@@ -59,7 +58,7 @@ class PactBuilderSpec extends Specification {
     def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
 
     when:
-    builder.expectsToReceive("test interaction", "")
+    builder.expectsToReceive('test interaction', '')
 
     then:
     builder.currentInteraction instanceof V4Interaction.SynchronousHttp
@@ -72,7 +71,7 @@ class PactBuilderSpec extends Specification {
     def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
 
     when:
-    def pact = builder.expectsToReceive("test interaction", "")
+    def pact = builder.expectsToReceive('test interaction', '')
       .with([
         'request.method': 'PUT',
         'request.path': '/reports/report002.csv',

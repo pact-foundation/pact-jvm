@@ -149,7 +149,12 @@ class XmlNode(private val builder: PactXmlBuilder, private val element: Element,
   }
 
   @JvmOverloads
-  fun eachLike(name: String, examples: Int = 1, attributes: Map<String, Any?> = emptyMap(), cl: Consumer<XmlNode>? = null) {
+  fun eachLike(
+    name: String,
+    examples: Int = 1,
+    attributes: Map<String, Any?> = emptyMap()
+    , cl: Consumer<XmlNode>? = null
+  ) {
     builder.matchingRules.addRule(matcherKey(path, name), TypeMatcher)
     val element = builder.doc.createElement(name)
     val node = XmlNode(builder, element, this.path + element.tagName)

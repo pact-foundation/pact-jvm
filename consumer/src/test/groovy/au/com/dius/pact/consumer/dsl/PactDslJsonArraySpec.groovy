@@ -328,8 +328,14 @@ class PactDslJsonArraySpec extends Specification {
 
     then:
     body.toString() == '[2.01,2.01,90210]'
-    body.matchers.matchingRules['$[0]'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
-    body.matchers.matchingRules['$[1]'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
-    body.matchers.matchingRules['$[2]'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER), new RegexMatcher('\\d{5}', '90210')])
+    body.matchers.matchingRules['$[0]'] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER),
+      new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$[1]'] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL),
+      new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$[2]'] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
+      new RegexMatcher('\\d{5}', '90210')])
   }
 }

@@ -5,7 +5,7 @@ include 'core:pactbroker'
 include 'core:model'
 include 'core:matchers'
 
-//include 'consumer'
+include 'consumer'
 //include 'consumer:groovy'
 //include 'consumer:junit'
 //include 'consumer:junit5'

@@ -67,10 +67,16 @@ class PactDslJsonRootValueSpec extends Specification {
 
     then:
     number.toString() == '2.01'
-    number.matchers.matchingRules[''] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    number.matchers.matchingRules[''] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER),
+      new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
     decimal.toString() == '2.01'
-    decimal.matchers.matchingRules[''] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    decimal.matchers.matchingRules[''] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL),
+      new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
     integer.toString() == '90210'
-    integer.matchers.matchingRules[''] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER), new RegexMatcher('\\d{5}', '90210')])
+    integer.matchers.matchingRules[''] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
+      new RegexMatcher('\\d{5}', '90210')])
   }
 }

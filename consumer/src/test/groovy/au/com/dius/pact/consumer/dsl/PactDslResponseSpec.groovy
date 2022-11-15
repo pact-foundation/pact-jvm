@@ -175,7 +175,7 @@ class PactDslResponseSpec extends Specification {
       .uponReceiving('a request for an empty body')
       .path('/path')
       .willRespondWith()
-      .body("")
+      .body('')
 
     when:
     def pact = builder.toPact()
@@ -196,7 +196,7 @@ class PactDslResponseSpec extends Specification {
     def response = ConsumerPactBuilder.consumer('spec')
       .hasPactWith('provider')
       .uponReceiving('a XML request')
-      .path("/path")
+      .path('/path')
       .willRespondWith()
     def example = '<?xml version=\"1.0\" encoding=\"utf-8\"?><example>foo</example>'
 

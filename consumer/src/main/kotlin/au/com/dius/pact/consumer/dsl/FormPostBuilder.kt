@@ -28,6 +28,7 @@ import java.util.UUID
 /**
  * Builder for constructing application/x-www-form-urlencoded bodies
  */
+@Suppress("TooManyFunctions")
 class FormPostBuilder(
         val body: MutableMap<String, List<String>> = mutableMapOf(),
         private var contentType: ContentType = ContentType(APPLICATION_FORM_URLENCODED),

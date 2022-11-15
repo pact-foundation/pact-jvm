@@ -425,8 +425,14 @@ class PactDslJsonBodySpec extends Specification {
     then:
     body.toString() == '{"bar":2.01,"baz":90210,"foo":2.01}'
     body.matchers.matchingRules.keySet() == ['$.foo', '$.bar', '$.baz'] as Set
-    body.matchers.matchingRules['$.foo'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
-    body.matchers.matchingRules['$.bar'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL), new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
-    body.matchers.matchingRules['$.baz'] == new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER), new RegexMatcher('\\d{5}', '90210')])
+    body.matchers.matchingRules['$.foo'] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER),
+      new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$.bar'] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL),
+      new RegexMatcher('\\d+\\.\\d{2}', '2.01')])
+    body.matchers.matchingRules['$.baz'] == new MatchingRuleGroup([
+      new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
+      new RegexMatcher('\\d{5}', '90210')])
   }
 }

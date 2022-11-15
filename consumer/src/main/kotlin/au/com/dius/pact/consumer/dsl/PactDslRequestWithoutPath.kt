@@ -21,7 +21,7 @@ import java.nio.charset.Charset
 import java.util.function.Supplier
 import javax.xml.transform.TransformerException
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 open class PactDslRequestWithoutPath @JvmOverloads constructor(
     private val consumerPactBuilder: ConsumerPactBuilder,
     private val pactDslWithState: PactDslWithState,

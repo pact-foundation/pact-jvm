@@ -204,7 +204,7 @@ class PactDslRequestWithPathSpec extends Specification {
     def request = ConsumerPactBuilder.consumer('spec')
       .hasPactWith('provider')
       .uponReceiving('a XML request')
-      .path("/path")
+      .path('/path')
     def example = '<?xml version=\"1.0\" encoding=\"utf-8\"?><example>foo</example>'
 
     when:

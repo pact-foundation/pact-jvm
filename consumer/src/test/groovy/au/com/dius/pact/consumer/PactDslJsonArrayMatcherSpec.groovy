@@ -124,7 +124,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.size == 3
+    result.size() == 3
     result.every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
@@ -139,7 +139,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.size == 3
+    result.size() == 3
     result.every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
@@ -154,7 +154,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.size == 3
+    result.size() == 3
     result.every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
@@ -171,7 +171,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.first().size == 2
+    result.first().size() == 2
     result.first().every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
@@ -188,7 +188,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.first().size == 2
+    result.first().size() == 2
     result.first().every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
@@ -205,7 +205,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.first().size == 2
+    result.first().size() == 2
     result.first().every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
