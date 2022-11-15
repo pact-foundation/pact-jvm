@@ -1,46 +1,11 @@
-*.class
-*.hprof
-*.log
-*/bin
-# sbt specific
-dist/*
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
-pact-jvm-provider-sbt/project/project/
-pact-jvm-provider-sbt/project/target/
+# Ignore Gradle project-specific cache directory
+.gradle
 
-# Scala-IDE specific
-.scala_dependencies
+# Ignore Gradle build output directory
+build
 
-.DS_Store
-
-*/.settings
-
+# IDE files and directories
 .idea
 .idea_modules
 *.iml
-
-# Eclipse
-*/.cache
-.classpath
-.settings
-.project
-build/
-pkgdiff_reports/
-.gradle/
-
-out/
-consumer/target/
-consumer/groovy/target/
-consumer/junit/target/
-consumer/junit5/target/
-consumer/specs2/target/
-consumer/scalasupport/target/
-provider/target/
-provider/scalasupport/target/
-.kotlintest/
-bin/
 .vscode/
-

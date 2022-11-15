@@ -12,7 +12,8 @@ jobs:
     strategy:
       matrix:
         operating-system: [ ubuntu-latest, windows-latest, macos-latest ]
-        module: [ core, "consumer -x :consumer:junit:clojureTest", provider, pact-specification-test ]
+#        module: [ core, consumer, provider, pact-specification-test ]
+        module: [ core ]
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 17
@@ -27,7 +28,6 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: ${{ runner.os }}-gradle
     - run: ./gradlew -v
-    - run: ./gradlew :core:pactbroker:publishToMavenLocal :core:support:publishToMavenLocal  :core:model:publishToMavenLocal
     - name: Build with Gradle
       run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
     - name: Publish Unit Test Results
@@ -40,7 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: [ core, consumer, provider, pact-specification-test ]
+#        module: [ core, consumer, provider, pact-specification-test ]
+        module: [ core ]
         jdk: [ 11, 15, 16 ]
     steps:
       - uses: actions/checkout@v2
@@ -56,7 +57,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - run: ./gradlew -v
-      - run: ./gradlew :core:pactbroker:publishToMavenLocal :core:support:publishToMavenLocal
       - name: Build with Gradle
         run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
       - name: Publish Unit Test Results

@@ -1,28 +1,20 @@
-rootProject.name = 'au.com.dius.pact'
+rootProject.name = 'pact-jvm'
 
 include 'core:support'
-include 'core:pactbroker'
-include 'core:model'
-include 'core:matchers'
-
-include 'consumer'
-include 'consumer:groovy'
-include 'consumer:junit'
-include 'consumer:junit5'
-include 'consumer:kotlin'
-
-include 'provider'
-include 'provider:gradle'
-include 'provider:maven'
-include 'provider:junit'
-include 'provider:junit5'
-include 'provider:spring'
-include 'provider:junit5spring'
-
-if (System.getenv('GITHUB_WORKFLOW') == null) {
-  include 'provider:lein'
-}
-
-include 'pact-jvm-server'
-include 'pact-specification-test'
-include 'pact-publish'
+//include 'core:pactbroker'
+//include 'core:model'
+//include 'core:matchers'
+//
+//include 'consumer'
+//include 'consumer:groovy'
+//include 'consumer:junit'
+//include 'consumer:junit5'
+//include 'consumer:kotlin'
+//
+//include 'provider'
+//include 'provider:gradle'
+//include 'provider:maven'
+//include 'provider:junit'
+//include 'provider:junit5'
+//include 'provider:spring'
+//include 'provider:junit5spring'
