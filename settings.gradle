@@ -2,7 +2,7 @@ rootProject.name = 'pact-jvm'
 
 include 'core:support'
 include 'core:pactbroker'
-//include 'core:model'
+include 'core:model'
 //include 'core:matchers'
 //
 //include 'consumer'

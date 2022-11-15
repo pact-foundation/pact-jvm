@@ -29,7 +29,7 @@ jobs:
         restore-keys: ${{ runner.os }}-gradle
     - run: ./gradlew -v
     - name: Build with Gradle
-      run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
+      run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} check
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
@@ -58,7 +58,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - run: ./gradlew -v
       - name: Build with Gradle
-        run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} build
+        run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} check
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         if: always()

@@ -67,7 +67,7 @@ class MessageSpec extends Specification {
   def 'defaults to V3 provider state format when converting from a map'() {
     given:
     def map = [
-            providerState : 'test state',
+            providerState: 'test state',
             providerStates: [
                     [name: 'V3 state']
             ]
@@ -91,6 +91,7 @@ class MessageSpec extends Specification {
     message.providerStates == [new ProviderState('test state')]
   }
 
+  @SuppressWarnings('SpaceAroundMapEntryColon')
   def 'Uses V3 provider state format when converting to a map'() {
     given:
     Message message = new Message('test', [new ProviderState('Test', [a: 'A', b: 100])],
@@ -276,7 +277,7 @@ class MessageSpec extends Specification {
     given:
     Message message = new Message('test',
             [],
-            OptionalBody.body('{"a": 100.0, "b": "test"}'.getBytes(),
+            OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes,
                     ContentType.fromString('application/vnd.schemaregistry.v1+json')),
             new MatchingRulesImpl(), new Generators(), ['contentType': 'application/vnd.schemaregistry.v1+json'])
 

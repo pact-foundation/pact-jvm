@@ -18,6 +18,7 @@ import java.time.temporal.ChronoUnit
 data class ParsedDateExpression(val base: DateBase, val adjustments: MutableList<Adjustment<DateOffsetType>>)
 
 object DateExpression : KLogging() {
+  @Suppress("NestedBlockDepth")
   fun executeDateExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {
       return when (val result = parseDateExpression(expression)) {

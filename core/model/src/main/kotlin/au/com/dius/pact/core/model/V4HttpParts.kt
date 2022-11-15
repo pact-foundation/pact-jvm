@@ -122,7 +122,7 @@ data class HttpRequest @JvmOverloads constructor(
     return generators + matchingRuleGenerators
   }
 
-  @Suppress("ComplexMethod")
+  @Suppress("ComplexMethod", "NestedBlockDepth")
   fun updateProperties(values: Map<String, Any?>) {
     logger.debug { "updateProperties(values=$values)" }
     values.forEach { (key, value) ->

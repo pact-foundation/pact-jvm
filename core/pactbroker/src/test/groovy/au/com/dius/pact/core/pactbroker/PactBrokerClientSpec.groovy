@@ -706,8 +706,8 @@ class PactBrokerClientSpec extends Specification {
     def consumerName = 'consumer'
     def config = new PublishConfiguration('1.0.0', [], 'test', 'http://123')
     def pactText = '{}'
-    def jsonBody = '{"branch":"test","buildUrl":"http:\\/\\/123","contracts":[{"consumerName":"consumer",' +
-      '"content":"e30=","contentType":"application\\/json","providerName":"provider","specification":"pact"}]' +
+    def jsonBody = '{"branch":"test","buildUrl":"http://123","contracts":[{"consumerName":"consumer",' +
+      '"content":"e30=","contentType":"application/json","providerName":"provider","specification":"pact"}]' +
       ',"pacticipantName":"consumer","pacticipantVersionNumber":"1.0.0","tags":[]}'
 
     when:
@@ -725,8 +725,8 @@ class PactBrokerClientSpec extends Specification {
     def consumerName = 'consumer'
     def config = new PublishConfiguration('1.0.0')
     def pactText = '{}'
-    def jsonBody = '{"branch":"feat\\/mine","contracts":[{"consumerName":"consumer",' +
-      '"content":"e30=","contentType":"application\\/json","providerName":"provider","specification":"pact"}],' +
+    def jsonBody = '{"branch":"feat/mine","contracts":[{"consumerName":"consumer",' +
+      '"content":"e30=","contentType":"application/json","providerName":"provider","specification":"pact"}],' +
       '"pacticipantName":"consumer","pacticipantVersionNumber":"1.0.0","tags":[]}'
     System.setProperty('pact.publish.consumer.branchName', 'feat/mine')
 
@@ -746,7 +746,7 @@ class PactBrokerClientSpec extends Specification {
     def consumerName = 'consumer'
     def config = new PublishConfiguration('1.0.0')
     def pactText = '{}'
-    def jsonBody = '{"contracts":[{"consumerName":"consumer","content":"e30=","contentType":"application\\/json"' +
+    def jsonBody = '{"contracts":[{"consumerName":"consumer","content":"e30=","contentType":"application/json"' +
             ',"providerName":"provider","specification":"pact"}],"pacticipantName":"consumer",' +
             '"pacticipantVersionNumber":"1.2.3.4","tags":[]}'
     System.setProperty('pact.publish.consumer.version', '1.2.3.4')

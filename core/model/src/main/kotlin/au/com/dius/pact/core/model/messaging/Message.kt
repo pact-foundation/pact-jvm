@@ -28,6 +28,7 @@ interface MessageInteraction {
 /**
  * Message in a Message Pact
  */
+@Suppress("LongParameterList", "TooManyFunctions")
 class Message @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),
@@ -50,6 +51,7 @@ class Message @JvmOverloads constructor(
 
   fun getContentType() = contentType(metadata).or(contents.contentType)
 
+  @Suppress("NestedBlockDepth")
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     val map: MutableMap<String, Any?> = mutableMapOf(
       "description" to description,

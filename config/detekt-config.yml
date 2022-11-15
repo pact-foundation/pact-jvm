@@ -136,7 +136,7 @@ complexity:
     ignoreArgumentsMatchingNames: false
   NestedBlockDepth:
     active: true
-    threshold: 4
+    threshold: 6
   NestedScopeFunctions:
     active: false
     threshold: 1
