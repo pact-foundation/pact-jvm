@@ -4,4 +4,92 @@ plugins {
 
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
+
+    id 'maven-publish'
+    id 'signing'
+    id 'org.jetbrains.dokka'
+}
+
+import org.apache.commons.text.StringEscapeUtils
+
+//configurations {
+//    groovyDoc
+//}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+javadocJar {
+    dependsOn javadoc, groovydoc, dokkaJavadoc
+    archiveClassifier = 'javadoc'
+    duplicatesStrategy = 'exclude'
+    from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
+}
+
+jar {
+    manifest {
+        attributes provider: 'gradle',
+          'Implementation-Title': project.name, 'Implementation-Version': archiveVersion,
+          'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
+          'Specification-Vendor': project.group,
+          'Specification-Title': project.name,
+          'Specification-Version': archiveVersion,
+          'Automatic-Module-Name': project.group + "." + project.name.replaceAll('-', '_')
+    }
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+
+            pom {
+                name = project.name
+                description = StringEscapeUtils.escapeXml11(new File(projectDir, 'description.txt').text)
+                url = 'https://github.com/pact-foundation/pact-jvm'
+                licenses {
+                    license {
+                        name = 'Apache 2'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/pact-foundation/pact-jvm'
+                    connection = 'https://github.com/pact-foundation/pact-jvm.git'
+                }
+
+                developers {
+                    developer {
+                        id = 'thetrav'
+                        name = 'Travis Dixon'
+                        email = 'the.trav@gmail.com'
+                    }
+                    developer {
+                        id = 'rholshausen'
+                        name = 'Ronald Holshausen'
+                        email = 'ronald.holshausen@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            if (project.hasProperty('sonatypeUsername')) {
+                credentials {
+                    username sonatypeUsername
+                    password sonatypePassword
+                }
+            }
+        }
+    }
+}
+
+signing {
+    required { project.hasProperty('isRelease') }
+    sign publishing.publications.mavenPublication
 }

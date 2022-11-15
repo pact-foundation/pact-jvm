@@ -4,10 +4,7 @@ import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonToken
 import au.com.dius.pact.core.support.json.JsonValue
-import org.apache.commons.lang3.text.translate.AggregateTranslator
-import org.apache.commons.lang3.text.translate.EntityArrays
-import org.apache.commons.lang3.text.translate.JavaUnicodeEscaper
-import org.apache.commons.lang3.text.translate.LookupTranslator
+import org.apache.commons.text.StringEscapeUtils.ESCAPE_JSON
 import java.io.Writer
 import java.math.BigInteger
 
@@ -103,13 +100,6 @@ object Json {
   }
 
   fun escape(s: String): String = ESCAPE_JSON.translate(s)
-
-  private val ESCAPE_JSON = AggregateTranslator(
-    LookupTranslator(
-      *arrayOf(arrayOf("\"", "\\\""), arrayOf("\\", "\\\\"))),
-    LookupTranslator(*EntityArrays.JAVA_CTRL_CHARS_ESCAPE()),
-    JavaUnicodeEscaper.outsideOf(32, 0x7f)
-  )
 }
 
 private fun Char.toJsonValue() = JsonValue.StringValue(JsonToken.StringValue(charArrayOf(this)))
