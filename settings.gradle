@@ -20,9 +20,9 @@ include 'provider:spring'
 include 'provider:junit5spring'
 
 //if (System.getenv('GITHUB_WORKFLOW') == null) {
-//  include 'provider:lein'
+  include 'provider:lein'
 //}
-//
+
 //include 'pact-jvm-server'
 include 'pact-specification-test'
-//include 'pact-publish'
+include 'pact-publish'

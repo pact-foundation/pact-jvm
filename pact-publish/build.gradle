@@ -1,7 +1,11 @@
 buildscript {
   dependencies {
-    classpath "au.com.dius.pact.provider:gradle:4.1.7"
+    classpath 'au.com.dius.pact.provider:gradle:4.3.14'
   }
+}
+
+plugins {
+  id 'au.com.dius.pact.kotlin-common-conventions'
 }
 
 if (System.env.PACT_PUBLISH == 'true') {
@@ -9,23 +13,15 @@ if (System.env.PACT_PUBLISH == 'true') {
 }
 
 dependencies {
-  testImplementation project(":core:pactbroker")
-  testImplementation("org.apache.groovy:groovy:${project.groovyVersion}")
-  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation(project(":consumer:groovy")) {
+  testImplementation project(':core:pactbroker')
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.apache.groovy:groovy-json'
+  testImplementation(project(':consumer:groovy')) {
     transitive = false
   }
-  testImplementation(project(":consumer"))
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testRuntimeOnly "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-    exclude group: 'org.codehaus.groovy'
-  }
-}
-
-project.afterEvaluate {
-  project.tasks.publishMavenPublicationPublicationToMavenLocal.enabled = false
-  project.tasks.publishMavenPublicationPublicationToMavenRepository.enabled = false
+  testImplementation(project(':consumer'))
+  testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+  testRuntimeOnly 'ch.qos.logback:logback-classic'
 }
 
 if (System.env.PACT_PUBLISH == 'true') {

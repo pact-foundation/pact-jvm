@@ -10,8 +10,12 @@ buildscript {
 }
 
 plugins {
+  id 'au.com.dius.pact.kotlin-library-conventions'
   id "nebula.clojure" version "9.4.1"
 }
+
+description = 'Pact-JVM - Leiningen Provider test support library'
+group = 'au.com.dius.pact.provider'
 
 import org.apache.commons.lang3.RandomStringUtils
 
@@ -24,16 +28,12 @@ dependencies {
   implementation 'org.apache.maven:maven-aether-provider:3.0.5'
   implementation 'org.sonatype.aether:aether-connector-file:1.13.1'
   implementation 'org.sonatype.aether:aether-connector-wagon:1.13.1'
-  implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
-  implementation "org.apache.groovy:groovy:${project.groovyVersion}"
+  implementation 'org.apache.httpcomponents.client5:httpclient5'
+  implementation 'org.apache.groovy:groovy'
 
   testImplementation 'org.clojure:tools.nrepl:0.2.13'
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-    exclude group: 'org.codehaus.groovy'
-  }
 
-  groovyDoc "org.apache.groovy:groovy-all:${project.groovyVersion}"
+  groovyDoc 'org.apache.groovy:groovy-all:4.0.6'
 }
 
 clojure.aotCompile = true
