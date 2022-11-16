@@ -33,6 +33,11 @@ jar {
             'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' ')
 }
 
+java {
+  withJavadocJar()
+  withSourcesJar()
+}
+
 publishing {
   publications {
     serverDistribution(MavenPublication) {
@@ -67,6 +72,17 @@ publishing {
             name = 'Ronald Holshausen'
             email = 'ronald.holshausen@gmail.com'
           }
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+      if (project.hasProperty('sonatypeUsername')) {
+        credentials {
+          username sonatypeUsername
+          password sonatypePassword
         }
       }
     }
