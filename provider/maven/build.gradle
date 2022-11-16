@@ -1,20 +1,23 @@
+plugins {
+  id 'au.com.dius.pact.kotlin-library-conventions'
+}
+
+description = 'Pact-JVM - Pact Maven plugin'
+group = 'au.com.dius.pact.provider'
+
 dependencies {
   api project(":provider")
-  implementation 'org.apache.maven:maven-plugin-api:3.8.1',
-    'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1'
+
+  implementation 'org.apache.maven:maven-plugin-api:3.8.1'
+  implementation 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1'
   implementation 'org.apache.maven:maven-core:3.8.6'
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'com.github.ajalt:mordant:1.2.1'
 
-  testImplementation "junit:junit:${project.junitVersion}"
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.apache.groovy:groovy-nio:${project.groovyVersion}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testImplementation 'junit:junit'
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.apache.groovy:groovy-nio'
+
+  testRuntimeOnly 'net.bytebuddy:byte-buddy'
   testRuntimeOnly 'org.objenesis:objenesis:3.1'
 }
 
@@ -39,7 +42,7 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:publishToMavenLo
         //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
         def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
         pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
-        pluginNode.appendNode('version', project.mavenPluginPluginVersion)
+        pluginNode.appendNode('version', '3.5')
         pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
     }
 }

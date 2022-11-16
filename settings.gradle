@@ -13,7 +13,7 @@ include 'consumer:kotlin'
 
 include 'provider'
 //include 'provider:gradle'
-//include 'provider:maven'
+include 'provider:maven'
 include 'provider:junit'
 include 'provider:junit5'
 include 'provider:spring'

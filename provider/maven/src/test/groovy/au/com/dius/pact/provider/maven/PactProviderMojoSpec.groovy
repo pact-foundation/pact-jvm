@@ -69,7 +69,8 @@ class PactProviderMojoSpec extends Specification {
   def 'load pacts from pact broker uses the configured pactBroker basic authentication'() {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
-      new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('basic', null, 'Authorization', 'test', 'test'), null)))
+      new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('basic',
+        null, 'Authorization', 'test', 'test'), null)))
     def list = []
     def map = [authentication: ['basic', 'test', 'test']]
 
@@ -86,7 +87,8 @@ class PactProviderMojoSpec extends Specification {
   def 'load pacts from pact broker uses the configured pactBroker bearer authentication'() {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
-      new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('bearer', 'test', 'Authorization', null, null), null)))
+      new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('bearer',
+        'test', 'Authorization', null, null), null)))
     def list = []
     def map = [authentication: ['bearer', 'test', 'Authorization']]
 
@@ -100,10 +102,11 @@ class PactProviderMojoSpec extends Specification {
     list
   }
 
-  def 'load pacts from pact broker uses the configured pactBroker bearer authentication with a custom auth header name'() {
+  def 'load pacts from broker uses the configured pactBroker bearer authentication with a custom auth header name'() {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
-            new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('bearer', 'test', 'custom-header', null, null), null)))
+            new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('bearer',
+              'test', 'custom-header', null, null), null)))
     def list = []
     def map = [authentication: ['bearer', 'test', 'custom-header']]
 
@@ -121,7 +124,8 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
       new PactBroker(new URL('http://broker:1234'), null,
-        new PactBrokerAuth(null, 'test', 'Authorization', null, null), null)))
+        new PactBrokerAuth(null, 'test', 'Authorization', null, null),
+        null)))
     def list = []
     def map = [authentication: ['bearer', 'test', 'Authorization']]
 

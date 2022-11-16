@@ -50,6 +50,7 @@ dependencies {
         testImplementation 'org.apache.groovy:groovy-json:4.0.6'
         testImplementation 'org.apache.groovy:groovy-datetime:4.0.6'
         testImplementation 'org.apache.groovy:groovy-xml:4.0.6'
+        testImplementation 'org.apache.groovy:groovy-nio:4.0.6'
         testImplementation 'org.hamcrest:hamcrest:2.2'
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'ch.qos.logback:logback-classic:1.4.4'
