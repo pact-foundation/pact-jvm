@@ -12,8 +12,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ ubuntu-latest, windows-latest, macos-latest ]
-#        module: [ core, consumer, provider, pact-specification-test ]
-        module: [ core, consumer, provider ]
+        module: [ core, consumer, provider, pact-specification-test ]
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 19
@@ -40,8 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-#        module: [ core, consumer, provider, pact-specification-test ]
-        module: [ core, consumer, provider ]
+        module: [ core, consumer, provider, pact-specification-test ]
         jdk: [ 11, 15, 16, 17 ]
     steps:
       - uses: actions/checkout@v2

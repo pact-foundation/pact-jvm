@@ -1,17 +1,18 @@
+plugins {
+  id 'au.com.dius.pact.kotlin-common-conventions'
+}
 
 dependencies {
   testImplementation project(":core:model")
   testImplementation project(":core:matchers")
   testImplementation project(":core:pactbroker")
   testImplementation project(":provider")
-  testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
-    "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-      exclude group: 'org.codehaus.groovy'
+  testImplementation 'ch.qos.logback:logback-core'
+  testImplementation 'ch.qos.logback:logback-classic'
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.apache.groovy:groovy-json'
+  testImplementation 'org.apache.tika:tika-core'
+  testImplementation('io.pact.plugin.driver:core:0.1.6') {
+    exclude group: 'au.com.dius.pact.core'
   }
-  testImplementation "org.apache.tika:tika-core:${project.tika}"
-  testImplementation "io.pact.plugin.driver:core:${project.pluginDriverVersion}"
 }
