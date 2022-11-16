@@ -10,7 +10,7 @@ import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.ExtendWith
 
 @Provider('connector')
-@PactFolder("src/test/resources/amqp_pacts")
+@PactFolder('src/test/resources/amqp_pacts')
 @Slf4j
 class MatchNegativeNumbersTest {
 
@@ -25,7 +25,7 @@ class MatchNegativeNumbersTest {
     context.setTarget(new MessageTestTarget())
   }
 
-  @PactVerifyProvider("a dispute lost event")
+  @PactVerifyProvider('a dispute lost event')
   String disputeLostEvent() {
     JsonOutput.toJson([
       event_type: 'DISPUTE_LOST',

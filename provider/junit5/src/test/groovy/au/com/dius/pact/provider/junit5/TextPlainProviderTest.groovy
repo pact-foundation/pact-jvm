@@ -11,7 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import ru.lanwen.wiremock.ext.WiremockResolver
 import ru.lanwen.wiremock.ext.WiremockUriResolver
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import static com.github.tomakehurst.wiremock.client.WireMock.get
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 
 @Provider('TextProvider')
 @PactFolder('pacts')

@@ -24,7 +24,7 @@ class PactFolderLoaderSpec extends Specification {
 
   def 'only includes json files'() {
     given:
-    PactFolder annotation = ParticularFolderPactLoaderAnnotation.class.getAnnotation(PactFolder)
+    PactFolder annotation = ParticularFolderPactLoaderAnnotation.getAnnotation(PactFolder)
 
     when:
     def result = new PactFolderLoader(annotation).load('myAwesomeService')
@@ -35,7 +35,7 @@ class PactFolderLoaderSpec extends Specification {
 
   def 'only includes json files that match the provider name'() {
     given:
-    PactFolder annotation = ParticularFolderPactLoaderAnnotation.class.getAnnotation(PactFolder)
+    PactFolder annotation = ParticularFolderPactLoaderAnnotation.getAnnotation(PactFolder)
 
     when:
     def result = new PactFolderLoader(annotation).load('myAwesomeService2')
@@ -71,10 +71,11 @@ class PactFolderLoaderSpec extends Specification {
   }
 
   @RestoreSystemProperties
-  def "resolves path using default resolver (SystemPropertyResolver)"() {
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'resolves path using default resolver (SystemPropertyResolver)'() {
     given:
     def exprPath = 'pact${valueToBeResolved}'
-    System.setProperty('valueToBeResolved', "s")
+    System.setProperty('valueToBeResolved', 's')
 
     when:
     def result = new PactFolderLoader(exprPath).load('myAwesomeService')
@@ -83,7 +84,8 @@ class PactFolderLoaderSpec extends Specification {
     result.size() == 3
   }
 
-  def "resolves path using given resolver"() {
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'resolves path using given resolver'() {
     given:
     def exprPath = 'pact${valueToBeResolved}'
     def valueResolver = [resolveValue: { val -> 's' }] as ValueResolver
@@ -95,10 +97,11 @@ class PactFolderLoaderSpec extends Specification {
     result.size() == 3
   }
 
-  def "resolves path using given resolver class"() {
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'resolves path using given resolver class'() {
     given:
     def exprPath = 'pact${valueToBeResolved}'
-    def constantValueResolver = JvmClassMappingKt.getKotlinClass(ConstantValueResolver.class)
+    def constantValueResolver = JvmClassMappingKt.getKotlinClass(ConstantValueResolver)
 
     when:
     def result = new PactFolderLoader(exprPath, constantValueResolver).load('myAwesomeService')
@@ -108,10 +111,10 @@ class PactFolderLoaderSpec extends Specification {
   }
 
   @RestoreSystemProperties
-  def "resolves path using minimal annotation (resolver SystemPropertyResolver)"() {
+  def 'resolves path using minimal annotation (resolver SystemPropertyResolver)'() {
     given:
-    System.setProperty('pactfolder.path', "pacts")
-    def annotation = MinimalPactLoaderAnnotation.class.getAnnotation(PactFolder.class)
+    System.setProperty('pactfolder.path', 'pacts')
+    def annotation = MinimalPactLoaderAnnotation.getAnnotation(PactFolder)
 
     when:
     def result = new PactFolderLoader(annotation).load('myAwesomeService')
@@ -121,10 +124,10 @@ class PactFolderLoaderSpec extends Specification {
   }
 
   @RestoreSystemProperties
-  def "resolves path using given revolver class via annotation"() {
+  def 'resolves path using given revolver class via annotation'() {
     given:
-    System.setProperty('pactfolder.path', "pacts")
-    def annotation = ParticularResolverPactLoaderAnnotation.class.getAnnotation(PactFolder.class)
+    System.setProperty('pactfolder.path', 'pacts')
+    def annotation = ParticularResolverPactLoaderAnnotation.getAnnotation(PactFolder)
 
     when:
     def result = new PactFolderLoader(annotation).load('myAwesomeService')
@@ -152,17 +155,17 @@ class PactFolderLoaderSpec extends Specification {
 
     @Override
     String resolveValue(@Nullable String property) {
-      return 's'
+      's'
     }
 
     @Override
     String resolveValue(@Nullable String property, @Nullable String s) {
-      return 's'
+      's'
     }
 
     @Override
     boolean propertyDefined(@NotNull String property) {
-      return true
+      true
     }
   }
 

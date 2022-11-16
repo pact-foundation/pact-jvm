@@ -55,6 +55,7 @@ dependencies {
         testImplementation 'ch.qos.logback:logback-classic:1.4.4'
         testImplementation 'ch.qos.logback:logback-core:1.4.4'
         testImplementation 'net.bytebuddy:byte-buddy:1.12.7'
+        testImplementation 'com.github.tomakehurst:wiremock-jre8:2.34.0'
     }
 
     // Align versions of all Kotlin components

@@ -1,29 +1,28 @@
+plugins {
+  id 'au.com.dius.pact.kotlin-library-conventions'
+}
+
+description = 'Pact-JVM - Junit 5 Extension Provider test support library'
+group = 'au.com.dius.pact.provider'
+
 dependencies {
   api project(':provider')
+  api project(':core:support')
+  api project(':core:pactbroker')
+  api project(':core:model')
+  api 'org.junit.jupiter:junit-jupiter-api:5.9.0'
 
-  // For some wierd reason, this is not resolving correctly
-//    api project(':core:support')
-//    api project(':core:pactbroker')
-//    api project(':core:model')
-  api "au.com.dius.pact.core:support:${project.version}"
-  api "au.com.dius.pact.core:pactbroker:${project.version}"
-  api "au.com.dius.pact.core:model:${project.version}"
-
-  api "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-  implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  implementation "io.pact.plugin.driver:core:${project.pluginDriverVersion}"
-
-  testRuntimeOnly "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testImplementation 'ru.lanwen.wiremock:wiremock-junit5:1.3.1'
-  testImplementation "com.github.tomakehurst:wiremock-jre8:${project.wiremock}"
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-      exclude group: 'org.codehaus.groovy'
+  implementation 'org.slf4j:slf4j-api'
+  implementation('io.pact.plugin.driver:core:0.1.6') {
+    exclude group: 'au.com.dius.pact.core'
   }
-  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+
+  testRuntimeOnly 'ch.qos.logback:logback-classic'
+  testImplementation 'ru.lanwen.wiremock:wiremock-junit5:1.3.1'
+  testImplementation 'com.github.tomakehurst:wiremock-jre8'
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.apache.groovy:groovy-json'
+  testRuntimeOnly 'net.bytebuddy:byte-buddy'
   testImplementation('com.github.javafaker:javafaker:1.0.2') {
     exclude group: 'org.yaml'
   }

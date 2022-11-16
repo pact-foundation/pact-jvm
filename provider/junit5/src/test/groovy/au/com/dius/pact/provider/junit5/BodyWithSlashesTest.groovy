@@ -10,7 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import ru.lanwen.wiremock.ext.WiremockResolver
 import ru.lanwen.wiremock.ext.WiremockUriResolver
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import static com.github.tomakehurst.wiremock.client.WireMock.get
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 
 @Provider('ProviderWithSlashes')
 @PactFolder('pacts')
@@ -28,6 +30,7 @@ class BodyWithSlashesTest {
   }
 
   @BeforeEach
+  @SuppressWarnings('LineLength')
   void before(PactVerificationContext context, @WiremockResolver.Wiremock WireMockServer server,
               @WiremockUriResolver.WiremockUri String uri) throws MalformedURLException {
     context.setTarget(HttpTestTarget.fromUrl(new URL(uri)))
@@ -37,7 +40,10 @@ class BodyWithSlashesTest {
         .willReturn(aResponse()
           .withStatus(200)
           .withHeader('Content-Type', 'application/json')
-          .withBody('{ "data": [ { "relationships": { "user/shippingAddress": { "data": { "id": "123", "type": "user/shipping-address" } } } } ] }'))
+          .withBody(
+            '{ "data": [ { "relationships": { "user/shippingAddress": { "data": { "id": "123", "type": "user/shipping-address" } } } } ] }'
+          )
+        )
     )
   }
 }
