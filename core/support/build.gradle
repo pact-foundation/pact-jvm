@@ -6,11 +6,12 @@ description = 'Pact-JVM Support module with common utilities'
 group = 'au.com.dius.pact.core'
 
 dependencies {
-    implementation 'org.apache.commons:commons-text'
     api 'io.github.microutils:kotlin-logging'
     api 'org.apache.httpcomponents.client5:httpclient5'
     api 'org.apache.httpcomponents.client5:httpclient5-fluent'
     api 'com.michael-bull.kotlin-result:kotlin-result'
+
+    implementation 'org.apache.commons:commons-text'
 
     testImplementation 'org.apache.groovy:groovy'
     testImplementation 'org.hamcrest:hamcrest'
