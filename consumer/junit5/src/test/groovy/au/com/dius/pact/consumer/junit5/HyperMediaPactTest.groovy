@@ -11,13 +11,11 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.HttpResponse
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'Siren Order Provider', pactVersion = PactSpecVersion.V3)
-@Disabled // TODO: Work out why this test fails after merge from master
 class HyperMediaPactTest {
 
   @Canonical

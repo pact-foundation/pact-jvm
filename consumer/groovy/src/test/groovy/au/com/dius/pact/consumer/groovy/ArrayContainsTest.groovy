@@ -5,10 +5,8 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
 import org.junit.Test
-import org.junit.Ignore
 
 @SuppressWarnings('ClosureAsLastMethodParameter')
-@Ignore // TODO: Work out why this test fails after merge from master
 class ArrayContainsTest {
   @Test
   void 'array contains matcher example'() {

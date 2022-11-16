@@ -11,7 +11,6 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.json.JsonValue
 import org.apache.hc.core5.http.ContentType
-import spock.lang.Ignore
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -167,7 +166,6 @@ class PactDslResponseSpec extends Specification {
   }
 
   @Issue('#1611')
-  @Ignore // TODO: Work out why this test fails after merge from master
   def 'supports empty bodies'() {
     given:
     def builder = ConsumerPactBuilder.consumer('empty-body-consumer')
