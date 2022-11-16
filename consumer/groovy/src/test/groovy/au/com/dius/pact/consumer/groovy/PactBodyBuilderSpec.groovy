@@ -222,11 +222,11 @@ class PactBodyBuilderSpec extends Specification {
       '$.orders[*].lineItems[*].productCodes': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '$.orders[*].lineItems[*].productCodes[*].code': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
-    body.orders.size == 2
+    body.orders.size() == 2
     body.orders.every { it.keySet() == ['id', 'lineItems'] as Set }
-    body.orders.first().lineItems.size == 3
+    body.orders.first().lineItems.size() == 3
     body.orders.first().lineItems.every { it.keySet() == ['id', 'amount', 'productCodes'] as Set }
-    body.orders.first().lineItems.first().productCodes.size == 4
+    body.orders.first().lineItems.first().productCodes.size() == 4
     body.orders.first().lineItems.first().productCodes.every { it.keySet() == ['code'] as Set }
   }
 
@@ -292,9 +292,9 @@ class PactBodyBuilderSpec extends Specification {
       '$.permissions3': new MatchingRuleGroup([new MaxTypeMatcher(4)]),
       '$.permissions3[*]': new MatchingRuleGroup([new RegexMatcher('\\d+')])
     ]
-    body.permissions.size == 3
-    body.permissions2.size == 3
-    body.permissions3.size == 3
+    body.permissions.size() == 3
+    body.permissions2.size() == 3
+    body.permissions3.size() == 3
   }
 
   def 'pretty prints bodies by default'() {

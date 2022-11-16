@@ -9,43 +9,42 @@ buildscript {
 }
 
 plugins {
+  id 'au.com.dius.pact.kotlin-library-conventions'
+
   id "nebula.clojure" version "9.4.1"
 }
 
-import org.apache.commons.lang3.RandomStringUtils
+description = 'Pact-JVM - Provides a DSL and a base test class for use with Junit to build consumer tests'
+group = 'au.com.dius.pact.consumer'
 
 dependencies {
-  implementation project(path: ":consumer", configuration: 'default')
-  implementation "junit:junit:${project.junitVersion}",
-    "org.json:json:${project.jsonVersion}",
-    "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
-    "com.google.guava:guava:${project.guavaVersion}"
+  api project(":consumer")
 
-  testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
-    "ch.qos.logback:logback-classic:${project.logbackVersion}",
-    "org.apache.commons:commons-collections4:${project.commonsCollections4}"
-  implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
-  implementation "org.apache.httpcomponents.client5:httpclient5-fluent:${project.httpClientVersion}"
+  api 'org.apache.httpcomponents.client5:httpclient5'
+  implementation 'org.apache.httpcomponents.client5:httpclient5-fluent'
 
-  testImplementation "ch.qos.logback:logback-core:${project.logbackVersion}",
-    "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testImplementation 'org.apache.commons:commons-collections4:4.4'
+  implementation 'junit:junit:4.13.2'
+  implementation 'org.json:json'
+  implementation 'org.apache.commons:commons-lang3'
+  implementation 'com.google.guava:guava'
+
+  testImplementation 'ch.qos.logback:logback-core'
+  testImplementation 'ch.qos.logback:logback-classic'
+  testImplementation 'org.apache.commons:commons-collections4'
+
+  testImplementation 'org.apache.commons:commons-collections4'
   testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
   testImplementation('io.rest-assured:rest-assured:5.2.0') {
     exclude group: 'org.apache.groovy'
   }
-  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
-  testImplementation "org.apache.groovy:groovy-xml:${project.groovyVersion}"
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.apache.groovy:groovy-json'
+  testImplementation 'org.apache.groovy:groovy-xml'
 
   // Required for Java 9
   testImplementation 'javax.xml.bind:jaxb-api:2.3.0'
 
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntimeOnly 'net.bytebuddy:byte-buddy'
   testRuntimeOnly 'org.objenesis:objenesis:3.1'
 
   testImplementation 'org.clojure:clojure:1.10.1', 'http-kit:http-kit:2.3.0'
@@ -56,7 +55,7 @@ dependencies {
 
 clojureTest {
   junit = true
-  junitOutputDir = file("$buildDir/test-results/clojure/" + RandomStringUtils.randomAlphanumeric(6))
+  junitOutputDir = file("$buildDir/test-results/clojure/" + org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(6))
   clojureTest.dependsOn 'testClasses'
 }
 

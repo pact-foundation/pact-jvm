@@ -1,0 +1,1 @@
+Pact-JVM - JUnit 5 support for Pact consumer tests

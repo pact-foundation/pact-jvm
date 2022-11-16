@@ -4,13 +4,11 @@ import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.dsl.Matchers
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
-import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.model.ProviderState
 import groovy.json.JsonSlurper
 import groovy.xml.XmlParser
-import groovy.xml.XmlSlurper
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -156,16 +154,16 @@ class MessagePactBuilderSpec extends Specification {
 
   def 'supports XML content'() {
     given:
-    def xmlContent = new PactXmlBuilder("root")
+    def xmlContent = new PactXmlBuilder('root')
     .build(root -> {
-      root.appendElement("element1", Matchers.string("value1"))
+      root.appendElement('element1', Matchers.string('value1'))
     })
     Map<String, String> metadata = [
             'contentType': 'application/xml',
             'destination': Matchers.regexp(~/\w+\d+/, 'X001')
     ]
     def builder = new MessagePactBuilder()
-            .consumer("MessagePactBuilderSpec")
+            .consumer('MessagePactBuilderSpec')
             .given('srm.countries.get_message')
             .expectsToReceive('srm.countries.get')
             .withContent(xmlContent)

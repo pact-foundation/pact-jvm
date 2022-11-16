@@ -1,23 +1,29 @@
-dependencies {
-  implementation project(":consumer")
-  implementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  implementation "org.apache.groovy:groovy-json:${project.groovyVersion}"
-  implementation "org.apache.httpcomponents.client5:httpclient5:${project.httpClientVersion}"
-  implementation 'com.github.mifmif:generex:1.0.2'
-  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
-  implementation "org.apache.commons:commons-collections4:${project.commonsCollections4}"
-  implementation "io.pact.plugin.driver:core:${project.pluginDriverVersion}"
+plugins {
+  id 'au.com.dius.pact.kotlin-library-conventions'
+}
 
-  testImplementation "junit:junit:${project.junitVersion}"
-  testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testImplementation "org.apache.groovy:groovy-xml:${project.groovyVersion}"
-  testImplementation "org.apache.groovy:groovy-dateutil:${project.groovyVersion}"
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-      exclude group: 'org.apache.groovy'
+description = 'Pact-JVM - Groovy DSL for Pact JVM consumer tests'
+group = 'au.com.dius.pact.consumer'
+
+dependencies {
+  api project(":consumer")
+
+  implementation 'org.apache.groovy:groovy'
+  implementation 'org.apache.groovy:groovy-json'
+  implementation 'org.apache.httpcomponents.client5:httpclient5'
+  implementation 'com.github.mifmif:generex:1.0.2'
+  implementation 'org.apache.commons:commons-lang3'
+  implementation 'org.apache.commons:commons-collections4'
+  implementation('io.pact.plugin.driver:core:0.1.6') {
+    exclude group: 'au.com.dius.pact.core'
   }
 
-  groovyDoc "org.apache.groovy:groovy-all:${project.groovyVersion}"
+  testImplementation 'junit:junit'
+  testImplementation 'ch.qos.logback:logback-classic'
+  testImplementation 'org.apache.groovy:groovy-xml'
+  testImplementation 'org.apache.groovy:groovy-dateutil'
+
+  groovyDoc 'org.apache.groovy:groovy-all:4.0.6'
 }
 
 compileGroovy {

@@ -12,6 +12,10 @@ plugins {
 
 import org.apache.commons.text.StringEscapeUtils
 
+configurations {
+    groovyDoc
+}
+
 java {
     withJavadocJar()
     withSourcesJar()
