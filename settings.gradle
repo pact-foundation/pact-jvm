@@ -16,9 +16,9 @@ include 'provider'
 //include 'provider:maven'
 include 'provider:junit'
 include 'provider:junit5'
-//include 'provider:spring'
-//include 'provider:junit5spring'
-//
+include 'provider:spring'
+include 'provider:junit5spring'
+
 //if (System.getenv('GITHUB_WORKFLOW') == null) {
 //  include 'provider:lein'
 //}
