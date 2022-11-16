@@ -1,22 +1,25 @@
 plugins {
+  id 'au.com.dius.pact.kotlin-common-conventions'
+  id 'java-library'
+  id 'java-gradle-plugin'
   id "com.gradle.plugin-publish" version "1.0.0"
 }
 
+group = 'au.com.dius.pact.provider'
+
 dependencies {
-  implementation project(':provider')
-
-//  implementation project(':core:model')
-  implementation "au.com.dius.pact.core:model:${project.version}"
-
   implementation gradleApi()
   implementation localGroovy()
+  implementation project(':provider')
+  implementation project(':core:model')
   implementation 'com.github.ajalt:mordant:1.2.1'
   implementation 'commons-io:commons-io:2.11.0'
-  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+  implementation 'org.apache.commons:commons-lang3'
+  implementation 'io.github.microutils:kotlin-logging'
+  implementation 'com.michael-bull.kotlin-result:kotlin-result'
 
-  testImplementation "junit:junit:${project.junitVersion}"
+  testImplementation 'junit:junit'
   testImplementation 'org.mockito:mockito-core:2.28.2'
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 
   // This needs to match the version of Groovy provided by Gradle
   testImplementation('org.spockframework:spock-core:2.3-groovy-3.0') {
@@ -24,7 +27,7 @@ dependencies {
   }
 }
 
-// There is a Groovy version mismatch between GroovyDoc, Gradle and the project  
+// There is a Groovy version mismatch between GroovyDoc, Gradle and the project
 groovydoc {
   enabled = false
 }
@@ -55,8 +58,6 @@ compileGroovy {
 publishing {
   publications {
     pluginMaven(MavenPublication) {
-//      from components.java
-
       pom {
         name = project.name
         description = 'Gradle Pact plugin'
@@ -82,7 +83,7 @@ publishing {
           developer {
             id = 'rholshausen'
             name = 'Ronald Holshausen'
-            email = 'rholshausen@dius.com.au'
+            email = 'ronald.holshausen@gmail.com'
           }
         }
       }

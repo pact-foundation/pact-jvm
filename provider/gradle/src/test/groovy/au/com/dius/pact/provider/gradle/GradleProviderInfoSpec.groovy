@@ -9,10 +9,12 @@ import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class GradleProviderInfoSpec extends Specification {
   Project project
   ObjectFactory objectFactory
 
+  @SuppressWarnings('ThrowRuntimeException')
   def setup() {
     objectFactory = [
       newInstance: { Class type, args ->

@@ -3,18 +3,20 @@ package au.com.dius.pact.provider.gradle
 import groovy.transform.CompileStatic
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
-import org.gradle.api.tasks.GradleBuild
 
 /**
  * Main plugin class
  */
+@SuppressWarnings('AbcMetric')
 class PactPlugin extends PactPluginBase {
 
-  @Override
+    @Override
+    @SuppressWarnings('MethodSize')
     void apply(Project project) {
 
         // Create and install the extension object
-        def extension = project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo))
+        def extension = project.extensions.create('pact', PactPluginExtension,
+          project.container(GradleProviderInfo))
 
         project.task(PACT_VERIFY, description: 'Verify your pacts against your providers', group: GROUP)
 
@@ -33,7 +35,8 @@ class PactPlugin extends PactPluginBase {
                   'specified pacticipant versions are compatible'
           broker.set(extension.broker)
           pacticipant.set(project.hasProperty(PACTICIPANT) ? project.property(PACTICIPANT) : null)
-          pacticipantVersion.set(project.hasProperty(PACTICIPANT_VERSION) ? project.property(PACTICIPANT_VERSION) : null)
+          pacticipantVersion.set(project.hasProperty(PACTICIPANT_VERSION) ? project.property(PACTICIPANT_VERSION)
+            : null)
           toProp.set(project.hasProperty(TO) ? project.property(TO) : null)
           latestProp.set(project.hasProperty(LATEST) ? project.property(LATEST) : null)
         }
@@ -76,7 +79,8 @@ class PactPlugin extends PactPluginBase {
                     group = GROUP
                     description = "Verify the pacts against ${provider.name}"
 
-                    notCompatibleWithConfigurationCache("Configuration Cache is disabled for this task because of `executeStateChangeTask`")
+                    notCompatibleWithConfigurationCache('Configuration Cache is disabled for this task ' +
+                      'because of `executeStateChangeTask`')
 
                     providerToVerify = provider
 

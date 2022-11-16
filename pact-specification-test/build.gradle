@@ -15,4 +15,5 @@ dependencies {
   testImplementation('io.pact.plugin.driver:core:0.1.6') {
     exclude group: 'au.com.dius.pact.core'
   }
+  testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
 }

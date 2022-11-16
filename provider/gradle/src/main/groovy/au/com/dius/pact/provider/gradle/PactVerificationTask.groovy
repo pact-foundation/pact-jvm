@@ -51,7 +51,9 @@ abstract class PactVerificationTask extends PactVerificationBaseTask {
       projectHasProperty = { providerFactory.gradleProperty(it).present }
       projectGetProperty = { providerFactory.gradleProperty(it).get() }
       pactLoadFailureMessage = { 'You must specify the pact file to execute (use pactSource = file(...) etc.)' }
-      checkBuildSpecificTask = { it instanceof Task || it instanceof String && taskContainer.get().find { t -> t.name == it } }
+      checkBuildSpecificTask = {
+        it instanceof Task || it instanceof String && taskContainer.get().find { t -> t.name == it }
+      }
       executeBuildSpecificTask = this.&executeStateChangeTask
       projectClasspath = {
         testClasspathURL.get()
@@ -86,7 +88,7 @@ abstract class PactVerificationTask extends PactVerificationBaseTask {
 
   def executeStateChangeTask(t, state) {
     def taskSet = taskContainer.get()
-    def task = t instanceof String ? taskSet.find {it.name == t } : t
+    def task = t instanceof String ? taskSet.find { it.name == t } : t
     task.setProperty('providerState', state)
     task.ext.providerState = state
     def build = project.task(type: GradleBuild) {

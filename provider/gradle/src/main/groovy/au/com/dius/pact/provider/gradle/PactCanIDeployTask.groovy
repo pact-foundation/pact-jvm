@@ -5,13 +5,10 @@ import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import com.github.ajalt.mordant.TermColors
 import org.gradle.api.GradleScriptException
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
-
-import javax.inject.Inject
 
 /**
  * Task to verify the deployment state using a pact broker
