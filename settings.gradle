@@ -10,8 +10,8 @@ include 'consumer'
 //include 'consumer:junit'
 //include 'consumer:junit5'
 //include 'consumer:kotlin'
-//
-//include 'provider'
+
+include 'provider'
 //include 'provider:gradle'
 //include 'provider:maven'
 //include 'provider:junit'

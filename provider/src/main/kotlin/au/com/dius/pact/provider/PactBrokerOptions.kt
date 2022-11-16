@@ -2,7 +2,6 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.Auth.Companion.DEFAULT_AUTH_HEADER
-import java.util.LinkedHashMap
 
 data class PactBrokerOptions @JvmOverloads constructor(
   /**
@@ -59,7 +58,7 @@ data class PactBrokerOptions @JvmOverloads constructor(
         when (val auth = options["authentication"]) {
           is Auth -> auth
           is List<*> -> if (auth.size > 1) {
-            when (auth[0].toString().toLowerCase()) {
+            when (auth[0].toString().lowercase()) {
               "basic" -> if (auth.size > 2) {
                 Auth.BasicAuthentication(auth[1]?.toString().orEmpty(), auth[2]?.toString().orEmpty())
               } else {

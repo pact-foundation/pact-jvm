@@ -1593,9 +1593,10 @@ class PactBrokerLoaderSpec extends Specification {
 
   }
 
+  @SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
   static class IncorrectTypesOnSelectorMethod {
     @PactBrokerConsumerVersionSelectors
-    void consumerVersionSelectors(int i) {}
+    void consumerVersionSelectors(int i) { }
   }
 
   static class IncorrectTypesOnSelectorMethod2 {
@@ -1603,6 +1604,7 @@ class PactBrokerLoaderSpec extends Specification {
     int consumerVersionSelectors() { 0 }
   }
 
+  @SuppressWarnings('UnusedPrivateMethod')
   static class IncorrectScopeOnSelectorMethod {
     @PactBrokerConsumerVersionSelectors
     private SelectorBuilder consumerVersionSelectors() { null }

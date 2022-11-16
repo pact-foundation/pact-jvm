@@ -11,7 +11,8 @@ class SelectorBuilderSpec extends Specification {
     jsonArray(new SelectorBuilder()
       .rawSelectorJson('{"iAmA": "selector"}')
       .build()
-      .collect { it.toJson() }).serialise() == '[{"iAmA":"selector"}]'
+      *.toJson())
+      .serialise() == '[{"iAmA":"selector"}]'
   }
 
 }

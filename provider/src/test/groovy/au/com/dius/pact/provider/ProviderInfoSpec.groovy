@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
@@ -80,7 +79,7 @@ class ProviderInfoSpec extends Specification {
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
-    result.size == 1
+    result.size() == 1
     result[0].name == 'consumer'
     !result[0].pending
   }
@@ -103,7 +102,7 @@ class ProviderInfoSpec extends Specification {
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
     ])
-    result.size == 1
+    result.size() == 1
     result[0].name == 'consumer'
     result[0].pending
   }
@@ -126,7 +125,7 @@ class ProviderInfoSpec extends Specification {
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], 'master', true, '') >> new Ok([
             new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
     ])
-    result.size == 1
+    result.size() == 1
     result[0].name == 'consumer'
     result[0].pending
   }
@@ -168,7 +167,7 @@ class ProviderInfoSpec extends Specification {
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
-    result.size == 1
+    result.size() == 1
     result[0].name == 'consumer'
     !result[0].pending
   }
@@ -192,7 +191,7 @@ class ProviderInfoSpec extends Specification {
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '2020-05-23') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
-    result.size == 1
+    result.size() == 1
     result[0].name == 'consumer'
     result[0].pending
   }
@@ -214,7 +213,7 @@ class ProviderInfoSpec extends Specification {
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
-    result.size == 1
+    result.size() == 1
     result[0].name == 'consumer'
     result[0].pending
   }
