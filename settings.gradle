@@ -19,10 +19,11 @@ include 'provider:junit5'
 include 'provider:spring'
 include 'provider:junit5spring'
 
-//if (System.getenv('GITHUB_WORKFLOW') == null) {
+// In Windows, fails with java.lang.NullPointerException
+if (System.getenv('GITHUB_WORKFLOW') == null) {
   include 'provider:lein'
-//}
+}
 
-//include 'pact-jvm-server'
+include 'pact-jvm-server'
 include 'pact-specification-test'
 include 'pact-publish'

@@ -1,41 +1,31 @@
-buildscript {
-  repositories {
-    mavenCentral()
-    mavenLocal()
-  }
-  dependencies {
-    classpath 'org.apache.commons:commons-text:1.5'
-  }
-}
-
 plugins {
+  id 'au.com.dius.pact.kotlin-application-conventions'
   id 'scala'
-  id 'application'
   id 'maven-publish'
+  id 'signing'
 }
 
+group = 'au.com.dius.pact'
 mainClassName = 'au.com.dius.pact.server.Server'
 
 dependencies {
-  implementation project(":consumer")
-  implementation project(":core:pactbroker")
-  implementation "ch.qos.logback:logback-core:${project.logbackVersion}",
-    "ch.qos.logback:logback-classic:${project.logbackVersion}",
-    "com.github.scopt:scopt_2.12:3.5.0"
-  implementation("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
+  implementation project(':consumer')
+  implementation project(':core:pactbroker')
+  implementation 'ch.qos.logback:logback-core:1.4.4'
+  implementation 'ch.qos.logback:logback-classic:1.4.4'
+  implementation 'com.github.scopt:scopt_2.12:3.5.0'
+  implementation('com.typesafe.scala-logging:scala-logging_2.12:3.7.2') {
       exclude group: 'org.scala-lang'
   }
   implementation 'ws.unfiltered:unfiltered-netty-server_2.12:0.10.4'
   implementation 'org.apache.commons:commons-io:1.3.2'
-  implementation "org.apache.tika:tika-core:${project.tika}"
-  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+  implementation 'org.apache.tika:tika-core'
+  implementation 'org.apache.commons:commons-lang3'
 
-  testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testImplementation "org.apache.groovy:groovy:${project.groovyVersion}"
-  testImplementation("org.spockframework:spock-core:${project.spock}") {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testRuntimeOnly "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation platform("org.spockframework:spock-bom:2.3-groovy-4.0")
+  testImplementation 'org.spockframework:spock-core'
+  testRuntimeOnly 'net.bytebuddy:byte-buddy'
 }
 
 jar {
@@ -43,7 +33,6 @@ jar {
             'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' ')
 }
 
-import org.apache.commons.text.StringEscapeUtils
 publishing {
   publications {
     serverDistribution(MavenPublication) {
@@ -53,18 +42,18 @@ publishing {
       pom {
         name = project.name
         packaging = 'jar'
-        description = StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
-        url = 'https://github.com/DiUS/pact-jvm'
+        description = 'Stand-alone Pact server'
+        url = 'https://github.com/pact-foundation/pact-jvm'
         licenses {
           license {
             name = 'Apache 2'
-            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
             distribution = 'repo'
           }
         }
         scm {
-          url = 'https://github.com/DiUS/pact-jvm'
-          connection = 'https://github.com/DiUS/pact-jvm.git'
+          url = 'https://github.com/pact-foundation/pact-jvm'
+          connection = 'https://github.com/pact-foundation/pact-jvm.git'
         }
 
         developers {
@@ -76,7 +65,7 @@ publishing {
           developer {
             id = 'rholshausen'
             name = 'Ronald Holshausen'
-            email = 'rholshausen@dius.com.au'
+            email = 'ronald.holshausen@gmail.com'
           }
         }
       }
