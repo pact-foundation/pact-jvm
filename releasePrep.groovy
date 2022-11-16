@@ -113,7 +113,7 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-  executeOnShell './gradlew clean publish -S -x :pact-publish:publish -x :provider:gradle:publish -PisRelease=true'
+  executeOnShell './gradlew clean publish -S -x :provider:gradle:publish -PisRelease=true'
   executeOnShell './gradlew :provider:gradle:publishPluginMavenPublicationToMavenRepository -PisRelease=true'
 }
 
@@ -127,8 +127,8 @@ ask('Publish pacts to pact-foundation.pactflow.io?: [Y]') {
 
 def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()
 ask("Bump version to $nextVer?: [Y]") {
-  executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
-  executeOnShell("git add build.gradle")
+  executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle"
+  executeOnShell("git add buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle")
   executeOnShell("git diff --cached")
   ask("Commit and push this change?: [Y]") {
     executeOnShell("git commit -m 'bump version to $nextVer'")
