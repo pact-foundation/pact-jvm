@@ -14,7 +14,7 @@ dependencies {
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'org.apache.commons:commons-collections4'
-  implementation('io.pact.plugin.driver:core:0.1.6') {
+  implementation('io.pact.plugin.driver:core:0.1.7') {
     exclude group: 'au.com.dius.pact.core'
   }
 
