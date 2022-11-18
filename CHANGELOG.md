@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.0 - [?62;1;4c4.4.0 Release
+
+* e273b2ebc - fix: Upgrade plugin driver to 0.1.7 (fixes startMockServer doesn't set hostInterface, port, and tls) (Ronald Holshausen, Fri Nov 18 14:34:14 2022 +1100)
+* 96eca26df - chore: remove beta from version (Ronald Holshausen, Fri Nov 18 14:28:19 2022 +1100)
+* 7454feaa0 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Fri Nov 18 14:25:25 2022 +1100)
+* 9efae6216 - Update README.md (Ronald Holshausen, Thu Nov 17 08:58:47 2022 +1100)
+* eb05b9489 - chore: fix publishing in pact-jvm-server (Ronald Holshausen, Wed Nov 16 17:52:13 2022 +1100)
+* 1161f8b8c - bump version to 4.4.0-beta.9 (Ronald Holshausen, Wed Nov 16 17:32:38 2022 +1100)
+
 # 4.4.0-beta.8 - Fixes from master
 
 * 571f6d756 - chore: re-enable all tests after cleaning up build (Ronald Holshausen, Wed Nov 16 17:08:46 2022 +1100)
