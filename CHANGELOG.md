@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.4.0 - [?62;1;4c4.4.0 Release
+# 4.4.0 - 4.4.0 Release
 
 * e273b2ebc - fix: Upgrade plugin driver to 0.1.7 (fixes startMockServer doesn't set hostInterface, port, and tls) (Ronald Holshausen, Fri Nov 18 14:34:14 2022 +1100)
 * 96eca26df - chore: remove beta from version (Ronald Holshausen, Fri Nov 18 14:28:19 2022 +1100)
