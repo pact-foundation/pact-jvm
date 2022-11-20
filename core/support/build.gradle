@@ -6,7 +6,7 @@ description = 'Pact-JVM Support module with common utilities'
 group = 'au.com.dius.pact.core'
 
 dependencies {
-    api 'io.github.microutils:kotlin-logging-jvm'
+    api 'io.github.microutils:kotlin-logging'
     api 'org.apache.httpcomponents.client5:httpclient5'
     api 'org.apache.httpcomponents.client5:httpclient5-fluent'
     api 'com.michael-bull.kotlin-result:kotlin-result-jvm'
