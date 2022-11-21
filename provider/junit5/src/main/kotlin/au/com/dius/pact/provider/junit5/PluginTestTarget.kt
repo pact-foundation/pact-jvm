@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
@@ -13,7 +14,6 @@ import com.github.michaelbull.result.Ok
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
-import io.pact.plugins.jvm.core.InteractionVerificationData
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
 import java.io.File
 import java.net.URL
@@ -86,12 +86,12 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
 
   override fun prepareRequest(pact: Pact, interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any?>? {
     return when (val v4pact = pact.asV4Pact()) {
-      is Ok -> when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
+      is Result.Ok -> when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
         interaction.asV4Interaction(), config)) {
         is Ok -> result.value to transportEntry
         is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
       }
-      is Err -> throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")
+      is Result.Err -> throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")
     }
   }
 
@@ -106,7 +106,7 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
   override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact) {
     if (pact.isV4Pact()) {
       when (val v4pact = pact.asV4Pact()) {
-        is Ok -> {
+        is Result.Ok -> {
           for (plugin in v4pact.value.pluginData()) {
             when (DefaultPluginManager.loadPlugin(plugin.name, plugin.version)) {
               is Ok -> {}
@@ -125,7 +125,7 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
             throw RuntimeException("PluginTestTarget requires the transport to be configured")
           }
         }
-        is Err -> throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")
+        is Result.Err -> throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")
       }
     } else {
       throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")

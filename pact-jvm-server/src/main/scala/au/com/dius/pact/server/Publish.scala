@@ -51,12 +51,12 @@ object Publish extends StrictLogging {
       val options = getOptions(authToken)
       val brokerClient: PactBrokerClient = new PactBrokerClient(broker, options.asJava, new PactBrokerClientConfig())
       val res = brokerClient.uploadPactFile(pact, consumerVersion, tags.getOrElse(List()).asJava)
-      if( res.component2() == null) {
+      if (res.errorValue() == null) {
         logger.debug("Pact successfully shared. deleting file..")
         removePact(pact)
-        new Response(200, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(res.component1().getBytes()))
+        new Response(200, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(res.get().getBytes()))
       } else {
-        new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(res.component2().getLocalizedMessage.getBytes()))
+        new Response(500, ResponseUtils.CrossSiteHeaders.asJava, OptionalBody.body(res.errorValue().getLocalizedMessage.getBytes()))
       }
 
     } catch {

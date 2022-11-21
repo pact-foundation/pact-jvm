@@ -94,7 +94,7 @@ public class BaseProviderRule extends ExternalResource {
         }
 
         if (config.getPactVersion() == PactSpecVersion.V4) {
-          pact.get().asV4Pact().component1().getInteractions()
+          pact.get().asV4Pact().get().getInteractions()
             .forEach(i -> i.getComments().put("testname", Json.toJson(description.getDisplayName())));
         }
 

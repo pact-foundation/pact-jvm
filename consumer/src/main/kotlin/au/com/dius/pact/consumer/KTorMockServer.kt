@@ -8,10 +8,8 @@ import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.install
@@ -127,13 +125,13 @@ class KTorMockServer(
   override fun updatePact(pact: Pact): Pact {
     return if (pact.isV4Pact()) {
       when (val p = pact.asV4Pact()) {
-        is Ok -> {
+        is Result.Ok -> {
           for (interaction in p.value.interactions) {
             interaction.asV4Interaction().transport = if (config is MockHttpsProviderConfig) "https" else "http"
           }
           p.value
         }
-        is Err -> pact
+        is Result.Err -> pact
       }
     } else {
       pact

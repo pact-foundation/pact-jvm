@@ -3,12 +3,9 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.mapEither
-import com.github.michaelbull.result.unwrap
+import au.com.dius.pact.core.support.mapEither
 import groovy.lang.Closure
 import mu.KLogging
 import org.apache.hc.core5.http.ContentType
@@ -67,12 +64,12 @@ object DefaultStateChange : StateChange, KLogging() {
     providerClient: ProviderClient
   ): StateChangeResult {
     var message = interactionMessage
-    var stateChangeResult: Result<Map<String, Any?>, Exception> = Ok(emptyMap())
+    var stateChangeResult: Result<Map<String, Any?>, Exception> = Result.Ok(emptyMap())
 
     if (interaction.providerStates.isNotEmpty()) {
       val iterator = interaction.providerStates.iterator()
       var first = true
-      while (stateChangeResult is Ok && iterator.hasNext()) {
+      while (stateChangeResult is Result.Ok && iterator.hasNext()) {
         val providerState = iterator.next()
         val result = stateChange(verifier, providerState, provider, consumer, true, providerClient)
         logger.debug { "State Change: \"$providerState\" -> $result" }
@@ -114,11 +111,11 @@ object DefaultStateChange : StateChange, KLogging() {
       }
       if (stateChangeHandler == null || (stateChangeHandler is String && stateChangeHandler.isBlank())) {
         verifier.reporters.forEach { it.warnStateChangeIgnored(state.name.toString(), provider, consumer) }
-        return Ok(emptyMap())
+        return Result.Ok(emptyMap())
       } else if (verifier.checkBuildSpecificTask.apply(stateChangeHandler)) {
         logger.debug { "Invoking build specific task $stateChangeHandler" }
         verifier.executeBuildSpecificTask.accept(stateChangeHandler, state)
-        return Ok(emptyMap())
+        return Result.Ok(emptyMap())
       } else if (stateChangeHandler is Closure<*>) {
         val result = if (provider.stateChangeTeardown) {
           stateChangeHandler.call(state, if (isSetup) "setup" else "teardown")
@@ -127,7 +124,7 @@ object DefaultStateChange : StateChange, KLogging() {
         }
         logger.debug { "Invoked state change closure -> $result" }
         if (result !is URL) {
-          return Ok(if (result is Map<*, *>) result as Map<String, Any> else emptyMap())
+          return Result.Ok(if (result is Map<*, *>) result as Map<String, Any> else emptyMap())
         }
         stateChangeHandler = result
       }
@@ -135,7 +132,7 @@ object DefaultStateChange : StateChange, KLogging() {
         providerClient)
     } catch (e: Exception) {
       verifier.reportStateChangeFailed(state, e, isSetup)
-      return Err(e)
+      return Result.Err(e)
     }
   }
 
@@ -174,16 +171,16 @@ object DefaultStateChange : StateChange, KLogging() {
               "${response.code} ${response.reasonPhrase}"
             )
           }
-          Err(Exception("State Change Request Failed - ${response.code} ${response.reasonPhrase}"))
+          Result.Err(Exception("State Change Request Failed - ${response.code} ${response.reasonPhrase}"))
         } else {
           parseJsonResponse(response.entity)
         }
-      } ?: Ok(emptyMap())
+      } ?: Result.Ok(emptyMap())
     } catch (ex: URISyntaxException) {
       verifier.reporters.forEach {
         it.warnStateChangeIgnoredDueToInvalidUrl(state.name.toString(), provider, isSetup, stateChangeHandler)
       }
-      Ok(emptyMap())
+      Result.Ok(emptyMap())
     }
   }
 
@@ -191,13 +188,13 @@ object DefaultStateChange : StateChange, KLogging() {
     return if (entity != null) {
       val contentType: ContentType? = ContentType.parse(entity.contentType)
       if (contentType != null && contentType.mimeType == ContentType.APPLICATION_JSON.mimeType) {
-      val body = EntityUtils.toString(entity)
-      Ok(Json.toMap(JsonParser.parseString(body)))
+        val body = EntityUtils.toString(entity)
+          Result.Ok(Json.toMap(JsonParser.parseString(body)))
+      } else {
+        Result.Ok(emptyMap())
+      }
     } else {
-      Ok(emptyMap())
-    }
-    } else {
-      Ok(emptyMap())
+      Result.Ok(emptyMap())
     }
   }
 }

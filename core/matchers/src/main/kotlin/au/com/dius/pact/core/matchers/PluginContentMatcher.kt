@@ -2,7 +2,9 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
@@ -28,7 +30,10 @@ class PluginContentMatcher(
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
   ): Result<List<InteractionContents>, String> {
-    return contentMatcher.configureContent(contentType.toString(), bodyConfig)
+    return when (val result = contentMatcher.configureContent(contentType.toString(), bodyConfig)) {
+      is Ok -> Result.Ok(result.value)
+      is Err -> Result.Err(result.error)
+    }
   }
 
   companion object : KLogging()

@@ -1,10 +1,8 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.jsonObject
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 
 /**
  * Pact between a consumer and a provider
@@ -42,12 +40,12 @@ class RequestResponsePact @JvmOverloads constructor(
 
   override fun isRequestResponsePact() = true
 
-  override fun asRequestResponsePact() = Ok(this)
+  override fun asRequestResponsePact() = Result.Ok(this)
 
-  override fun asMessagePact() = Err("A V3 Request/Response Pact can not be converted to a Message Pact")
+  override fun asMessagePact() = Result.Err("A V3 Request/Response Pact can not be converted to a Message Pact")
 
   override fun asV4Pact(): Result<V4Pact, String> {
-    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }.toMutableList(), metadata))
+    return Result.Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }.toMutableList(), metadata))
   }
 
   fun interactionFor(description: String, providerState: String): SynchronousRequestResponse? {

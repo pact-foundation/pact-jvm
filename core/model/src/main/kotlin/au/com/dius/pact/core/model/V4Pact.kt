@@ -6,14 +6,12 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.deepMerge
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonObject
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import mu.KLogging
 import mu.KotlinLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
@@ -473,7 +471,7 @@ sealed class V4Interaction(
       return if (json.has("type")) {
         val type = Json.toString(json["type"])
         when (val result = V4InteractionType.fromString(type)) {
-          is Ok -> {
+          is Result.Ok -> {
             val id = json["_id"].asString()
             val key = Json.toString(json["key"])
             val description = Json.toString(json["description"])
@@ -517,14 +515,14 @@ sealed class V4Interaction(
 
             when (result.value) {
               V4InteractionType.SynchronousHTTP -> {
-                Ok(SynchronousHttp(
+                Result.Ok(SynchronousHttp(
                   key, description, providerStates, HttpRequest.fromJson(json["request"]),
                   HttpResponse.fromJson(json["response"]), id, comments, pending, pluginConfiguration.toMutableMap(),
                   interactionMarkup, transport
                 ))
               }
               V4InteractionType.AsynchronousMessages -> {
-                Ok(AsynchronousMessage(key, description, MessageContents.fromJson(json), id,
+                Result.Ok(AsynchronousMessage(key, description, MessageContents.fromJson(json), id,
                   providerStates, comments, pending, pluginConfiguration.toMutableMap(), interactionMarkup, transport))
               }
               V4InteractionType.SynchronousMessages -> {
@@ -534,21 +532,21 @@ sealed class V4Interaction(
                 val response = if (json.has("response"))
                   json["response"].asArray().map { MessageContents.fromJson(it) }
                   else listOf()
-                Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request,
+                Result.Ok(SynchronousMessages(key, description, id, providerStates, comments, pending, request,
                   response.toMutableList(), pluginConfiguration.toMutableMap(), interactionMarkup, transport))
               }
             }
           }
-          is Err -> {
+          is Result.Err -> {
             val message = "Interaction $index has invalid type attribute '$type'. It will be ignored. Source: $source"
             logger.warn(message)
-            Err(message)
+            Result.Err(message)
           }
         }
       } else {
         val message = "Interaction $index has no type attribute. It will be ignored. Source: $source"
         logger.warn(message)
-        Err(message)
+        Result.Err(message)
       }
     }
   }
@@ -589,28 +587,28 @@ open class V4Pact @JvmOverloads constructor(
   }
 
   override fun asRequestResponsePact(): Result<RequestResponsePact, String> {
-    return Ok(RequestResponsePact(provider, consumer,
+    return Result.Ok(RequestResponsePact(provider, consumer,
       interactions.filterIsInstance<V4Interaction.SynchronousHttp>()
         .map { it.asV3Interaction() }.toMutableList()))
   }
 
   override fun asMessagePact(): Result<MessagePact, String> {
-    return Ok(MessagePact(provider, consumer,
+    return Result.Ok(MessagePact(provider, consumer,
       interactions.filterIsInstance<V4Interaction.AsynchronousMessage>()
         .map { it.asV3Interaction() }.toMutableList()))
   }
 
   override fun isV4Pact() = true
 
-  override fun asV4Pact() = Ok(this)
+  override fun asV4Pact() = Result.Ok(this)
 
   override fun isRequestResponsePact() = interactions.any { it is V4Interaction.SynchronousHttp }
 
   override fun compatibleTo(other: Pact): Result<Boolean, String> {
     return if (provider != other.provider) {
-      Err("Provider names are different: '$provider' and '${other.provider}'")
+      Result.Err("Provider names are different: '$provider' and '${other.provider}'")
     } else {
-      Ok(true)
+      Result.Ok(true)
     }
   }
 

@@ -10,8 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -83,7 +82,7 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     then:
-    result instanceof Err
+    result instanceof Result.Err
     result.error.description() ==
       'Expected a response type of \'application/json\' but the actual type was \'text/plain\''
   }
@@ -93,7 +92,7 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     expect:
-    result instanceof Ok
+    result instanceof Result.Ok
     result.value.mismatches.isEmpty()
   }
 
@@ -105,7 +104,7 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     expect:
-    result instanceof Ok
+    result instanceof Result.Ok
     result.value.mismatches.isEmpty()
   }
 
@@ -115,7 +114,7 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     expect:
-    result instanceof Ok
+    result instanceof Result.Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '$.stuff': ["Expected 'is good' (String) but received 'should make the test fail' (String)"]
     ]
@@ -164,14 +163,14 @@ class ResponseComparisonSpec extends Specification {
     where:
 
     desc                       | value   || result
-    'if property is not set'   | null    || new Ok(true)
-    'if property is empty'     | ''      || new Ok(false)
-    'if property is true'      | 'true'  || new Ok(true)
-    'if property is false'     | 'FALSE' || new Ok(false)
-    'if property > data size'  | '2kb'   || new Ok(false)
-    'if property == data size' | '4kb'   || new Ok(true)
-    'if property < data size'  | '8kb'   || new Ok(true)
-    'if property is invalid'   | 'jhjhj' || new Err("'jhjhj' is not a valid data size")
+    'if property is not set'   | null    || new Result.Ok(true)
+    'if property is empty'     | ''      || new Result.Ok(false)
+    'if property is true'      | 'true'  || new Result.Ok(true)
+    'if property is false'     | 'FALSE' || new Result.Ok(false)
+    'if property > data size'  | '2kb'   || new Result.Ok(false)
+    'if property == data size' | '4kb'   || new Result.Ok(true)
+    'if property < data size'  | '8kb'   || new Result.Ok(true)
+    'if property is invalid'   | 'jhjhj' || new Result.Err("'jhjhj' is not a valid data size")
   }
 
   @Issue('#1375')
@@ -183,7 +182,7 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     expect:
-    result instanceof Ok
+    result instanceof Result.Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '$.stuff': ["Expected 'is good' (String) but received 'should make the test fail' (String)"]
     ]

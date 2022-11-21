@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
 import au.com.dius.pact.core.support.handleWith
@@ -11,15 +12,10 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
+import au.com.dius.pact.core.support.mapOk
+import au.com.dius.pact.core.support.mapError
 import au.com.dius.pact.core.support.toJson
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.unwrap
 import com.google.common.net.UrlEscapers.urlFormParameterEscaper
-import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import mu.KLogging
 import java.io.File
 import java.io.IOException
@@ -491,8 +487,8 @@ open class PactBrokerClient(
     includeWipPactsSince: String?
   ): Result<List<PactBrokerResult>, Exception> {
     val halClient = when (val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }) {
-      is Err<Exception> -> return navigateResult
-      is Ok<IHalClient> -> navigateResult.value
+      is Result.Err<Exception> -> return navigateResult
+      is Result.Ok<IHalClient> -> navigateResult.value
     }
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
@@ -586,7 +582,7 @@ open class PactBrokerClient(
     }
 
     return handleWith {
-      halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.serialise()).map { result ->
+      halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.serialise()).mapOk { result ->
         result["_embedded"]["pacts"].asArray().map { pactJson ->
           val selfLink = pactJson["_links"]["self"]
           val href = Json.toString(selfLink["href"])
@@ -630,8 +626,8 @@ open class PactBrokerClient(
     val publishContractsLink = halClient.linkUrl(PUBLISH_CONTRACTS_LINK)
     return if (publishContractsLink != null) {
       when (val result = publishContract(halClient, providerName, consumerName, config, pactText)) {
-        is Ok -> Ok("OK")
-        is Err -> result
+        is Result.Ok -> Result.Ok("OK")
+        is Result.Err -> result
       }
     } else {
       if (config.tags.isNotEmpty()) {
@@ -684,15 +680,15 @@ open class PactBrokerClient(
 
     val body = JsonValue.Object(bodyValues)
     return when (val result = halClient.postJson(PUBLISH_CONTRACTS_LINK, mapOf(), body.serialise())) {
-      is Ok -> {
+      is Result.Ok -> {
         displayNotices(result.value)
         result
       }
-      is Err -> {
+      is Result.Err -> {
         val error = result.error
         if (error is RequestFailedException && error.body != null) {
           when (val json = handleWith<JsonValue> { JsonParser.parseString(error.body) }) {
-            is Ok -> if (json.value is JsonValue.Object) {
+            is Result.Ok -> if (json.value is JsonValue.Object) {
               val body: JsonValue.Object = json.value.downcast()
               displayNotices(body)
               if (error.status == 400) {
@@ -701,7 +697,7 @@ open class PactBrokerClient(
             } else {
               logger.error { "Response from Pact Broker was not in correct JSON format: got ${json.value}" }
             }
-            is Err -> {
+            is Result.Err -> {
               logger.error { "Response from Pact Broker was not in JSON format: ${json.error}" }
             }
           }
@@ -797,20 +793,20 @@ open class PactBrokerClient(
     buildUrl: String?
   ): Result<Boolean, String> {
     val halClient = newHalClient()
-    val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"]
+    val publishLink = docAttributes.mapKeys { it.key.lowercase() } ["pb:publish-verification-results"]
     return if (publishLink is Map<*, *>) {
       val jsonObject = buildPayload(result, version, buildUrl)
-      val lowercaseMap = publishLink.mapKeys { it.key.toString().toLowerCase() }
+      val lowercaseMap = publishLink.mapKeys { it.key.toString().lowercase() }
       if (lowercaseMap.containsKey("href")) {
         halClient.postJson(lowercaseMap["href"].toString(), jsonObject.serialise()).mapError {
           logger.error(it) { "Publishing verification results failed with an exception" }
           "Publishing verification results failed with an exception: ${it.message}"
         }
       } else {
-        Err("Unable to publish verification results as there is no pb:publish-verification-results link")
+        Result.Err("Unable to publish verification results as there is no pb:publish-verification-results link")
       }
     } else {
-      Err("Unable to publish verification results as there is no pb:publish-verification-results link")
+      Result.Err("Unable to publish verification results as there is no pb:publish-verification-results link")
     }
   }
 
@@ -919,8 +915,8 @@ open class PactBrokerClient(
 
   private fun logPublishingResults(halClient: IHalClient, version: String, tag: String, name: String) {
     when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
-      is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
-      is Err<Exception> -> logger.error(result.error) {
+      is Result.Ok -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+      is Result.Err -> logger.error(result.error) {
         "Failed to push tag $tag for provider $name and version $version"
       }
     }
@@ -936,28 +932,28 @@ open class PactBrokerClient(
       val halClient = newHalClient()
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
-      val initial: Result<Boolean, List<String>> = Ok(true)
+      val initial: Result<Boolean, List<String>> = Result.Ok(true)
       return tags.map { tagName ->
         val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tagName), "{}")
         when (result) {
-          is Ok<*> -> logger.debug { "Pushed tag $tagName for provider $name and version $version" }
-          is Err<Exception> -> logger.error(result.error) {
+          is Result.Ok -> logger.debug { "Pushed tag $tagName for provider $name and version $version" }
+          is Result.Err -> logger.error(result.error) {
             "Failed to push tag $tagName for provider $name and version $version"
           }
         }
         result.mapError { err -> "Publishing tag '$tagName' failed: ${err.message ?: err.toString()}" }
       }.fold(initial) { result, v ->
         when {
-          result is Ok && v is Ok -> result
-          result is Ok && v is Err -> Err(listOf(v.error))
-          result is Err && v is Ok -> result
-          result is Err && v is Err -> Err(result.error + v.error)
+          result is Result.Ok && v is Result.Ok -> result
+          result is Result.Ok && v is Result.Err -> Result.Err(listOf(v.error))
+          result is Result.Err && v is Result.Ok -> result
+          result is Result.Err && v is Result.Err -> Result.Err(result.error + v.error)
           else -> result
         }
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
-      return Err(listOf("Could not tag provider $name, link was missing"))
+      return Result.Err(listOf("Could not tag provider $name, link was missing"))
     }
   }
 
@@ -974,20 +970,20 @@ open class PactBrokerClient(
       val result = halClient.putJson(PROVIDER_BRANCH_VERSION,
         mapOf("version" to version, "branch" to branch), "{}")
       return when (result) {
-        is Ok<*> -> {
+        is Result.Ok<*> -> {
           logger.debug { "Pushed branch $branch for provider $name and version $version" }
-          Ok(true)
+          Result.Ok(true)
         }
-        is Err<Exception> -> {
+        is Result.Err<Exception> -> {
           logger.error(result.error) { "Failed to push branch $branch for provider $name and version $version" }
-          Err("Publishing branch '$branch' failed: ${result.error.message ?: result.error.toString()}")
+          Result.Err("Publishing branch '$branch' failed: ${result.error.message ?: result.error.toString()}")
         }
       }
     } catch (e: NotFoundHalResponse) {
       val message = "Could not create branch for provider $name, link was missing. It looks like your Pact Broker " +
         "does not support branches, please update to Pact Broker version 2.86.0 or later for branch support"
       logger.error(e) { message }
-      return Err(message)
+      return Result.Err(message)
     }
   }
 
@@ -1009,7 +1005,7 @@ open class PactBrokerClient(
       { result -> !result.ok && result.unknown != null && result.unknown > 0 }
     ) {
       when (val result = halClient.getJson(path, false)) {
-        is Ok<JsonValue> -> {
+        is Result.Ok<JsonValue> -> {
           val summary: JsonValue.Object = result.value["summary"].downcast()
           val verificationResultUrl = result.value["matrix"].asArray()
             ?.get(0)?.asObject()
@@ -1021,7 +1017,7 @@ open class PactBrokerClient(
           CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
             Json.toInteger(summary["unknown"]), verificationResultUrl)
         }
-        is Err<Exception> -> {
+        is Result.Err<Exception> -> {
           logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
           CanIDeployResult(false, result.error.message.toString(), "")
         }
@@ -1061,7 +1057,7 @@ open class PactBrokerClient(
       tags: List<String>
     ): Result<String?, Exception> {
       halClient.navigate()
-      var result = Ok("") as Result<String?, Exception>
+      var result = Result.Ok("") as Result<String?, Exception>
       tags.forEach {
         result = uploadTag(halClient, consumerName, version, it)
       }
@@ -1080,7 +1076,7 @@ open class PactBrokerClient(
           "tag" to it
       ), "{}")
 
-      if (result is Err<Exception>) {
+      if (result is Result.Err) {
         logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
       }
 

@@ -6,11 +6,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.V4PactFeaturesException
-import com.github.michaelbull.result.expect
 
 interface PactTestRun<R> {
   @Throws(Throwable::class)

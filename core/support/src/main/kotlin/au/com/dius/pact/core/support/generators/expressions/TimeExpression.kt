@@ -1,9 +1,7 @@
 package au.com.dius.pact.core.support.generators.expressions
 
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.parsers.StringLexer
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 
 class TimeExpressionLexer(expression: String): StringLexer(expression) {
   companion object {
@@ -33,50 +31,50 @@ class TimeExpressionParser(private val lexer: TimeExpressionLexer) {
     val timeBase = TimeBase.Now
 
     val baseResult = base()
-    if (baseResult is Ok && baseResult.value != null) {
+    if (baseResult is Result.Ok && baseResult.value != null) {
       return when (val opResult = parseOp()) {
-        is Ok -> if (opResult.value != null) {
-          Ok(baseResult.value!! to opResult.value!!)
+        is Result.Ok -> if (opResult.value != null) {
+          Result.Ok(baseResult.value to opResult.value)
         } else {
-          Ok(baseResult.value!! to emptyList())
+          Result.Ok(baseResult.value to emptyList())
         }
-        is Err -> opResult
+        is Result.Err -> opResult
       }
-    } else if (baseResult is Err) {
+    } else if (baseResult is Result.Err) {
       return baseResult
     }
 
     when (val opResult = parseOp()) {
-      is Ok -> if (opResult.value != null) {
-        return Ok(timeBase to opResult.value!!)
+      is Result.Ok -> if (opResult.value != null) {
+        return Result.Ok(timeBase to opResult.value)
       }
-      is Err -> return opResult
+      is Result.Err -> return opResult
     }
 
     val nextOrLastResult = parseNextOrLast()
     if (nextOrLastResult != null) {
       return when (val offsetResult = offset()) {
-        is Ok -> {
+        is Result.Ok -> {
           val adj = mutableListOf<Adjustment<TimeOffsetType>>()
           adj.add(Adjustment(offsetResult.value.first, offsetResult.value.second, nextOrLastResult))
           when (val opResult = parseOp()) {
-            is Ok -> if (opResult.value != null) {
-              adj.addAll(opResult.value!!)
-              Ok(timeBase to adj)
+            is Result.Ok -> if (opResult.value != null) {
+              adj.addAll(opResult.value)
+              Result.Ok(timeBase to adj)
             } else {
-              Ok(timeBase to adj)
+              Result.Ok(timeBase to adj)
             }
-            is Err -> opResult
+            is Result.Err -> opResult
           }
         }
-        is Err -> offsetResult
+        is Result.Err -> offsetResult
       }
     }
 
     return if (lexer.empty) {
-      Ok(timeBase to emptyList())
+      Result.Ok(timeBase to emptyList())
     } else {
-      Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
+      Result.Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
     }
   }
 
@@ -87,14 +85,14 @@ class TimeExpressionParser(private val lexer: TimeExpressionLexer) {
     if (opResult != null) {
       while (opResult != null) {
         when (val durationResult = duration()) {
-          is Ok -> adj.add(durationResult.value.withOperation(opResult))
-          is Err -> return durationResult
+          is Result.Ok -> adj.add(durationResult.value.withOperation(opResult))
+          is Result.Err -> return durationResult
         }
         opResult = op()
       }
-      return Ok(adj)
+      return Result.Ok(adj)
     }
-    return Ok(null)
+    return Result.Ok(null)
   }
 
   //base returns [ TimeBase t ] : 'now' { $t = TimeBase.Now.INSTANCE; }
@@ -109,15 +107,15 @@ class TimeExpressionParser(private val lexer: TimeExpressionLexer) {
     return if (result != null) {
       val intValue = result.toInt()
       when (val hourResult = oclock()) {
-        is Ok -> Ok(TimeBase.of(intValue, hourResult.value))
-        is Err -> Err(hourResult.error)
+        is Result.Ok -> Result.Ok(TimeBase.of(intValue, hourResult.value))
+        is Result.Err -> Result.Err(hourResult.error)
       }
     } else {
       when {
-        lexer.matchString("now") -> Ok(TimeBase.Now)
-        lexer.matchString("midnight") -> Ok(TimeBase.Midnight)
-        lexer.matchString("noon") -> Ok(TimeBase.Noon)
-        else -> Ok(null)
+        lexer.matchString("now") -> Result.Ok(TimeBase.Now)
+        lexer.matchString("midnight") -> Result.Ok(TimeBase.Midnight)
+        lexer.matchString("noon") -> Result.Ok(TimeBase.Noon)
+        else -> Result.Ok(null)
       }
     }
   }
@@ -130,12 +128,12 @@ class TimeExpressionParser(private val lexer: TimeExpressionLexer) {
     return if (lexer.matchString("o'clock")) {
       lexer.skipWhitespace()
       when {
-        lexer.matchString("am") -> Ok(ClockHour.AM)
-        lexer.matchString("pm") -> Ok(ClockHour.PM)
-        else -> Ok(ClockHour.NEXT)
+        lexer.matchString("am") -> Result.Ok(ClockHour.AM)
+        lexer.matchString("pm") -> Result.Ok(ClockHour.PM)
+        else -> Result.Ok(ClockHour.NEXT)
       }
     } else {
-      Err("Was expecting a clock hour at index ${lexer.index}")
+      Result.Err("Was expecting a clock hour at index ${lexer.index}")
     }
   }
 
@@ -144,15 +142,15 @@ class TimeExpressionParser(private val lexer: TimeExpressionLexer) {
     lexer.skipWhitespace()
 
     val intResult = when (val result = lexer.parseInt()) {
-      is Ok -> result.value
-      is Err -> return result
+      is Result.Ok -> result.value
+      is Result.Err -> return result
     }
 
     val durationTypeResult = durationType()
     return if (durationTypeResult != null) {
-      Ok(Adjustment(durationTypeResult, intResult))
+      Result.Ok(Adjustment(durationTypeResult, intResult))
     } else {
-      Err("Was expecting a duration type at index ${lexer.index}")
+      Result.Err("Was expecting a duration type at index ${lexer.index}")
     }
   }
 
@@ -196,11 +194,11 @@ class TimeExpressionParser(private val lexer: TimeExpressionLexer) {
   fun offset(): Result<Pair<TimeOffsetType, Int>, String> {
     lexer.skipWhitespace()
     return when {
-      lexer.matchString("hour") -> Ok(TimeOffsetType.HOUR to 1)
-      lexer.matchString("minute") -> Ok(TimeOffsetType.MINUTE to 1)
-      lexer.matchString("second") -> Ok(TimeOffsetType.SECOND to 1)
-      lexer.matchString("millisecond") -> Ok(TimeOffsetType.MILLISECOND to 1)
-      else -> Err("Was expecting an offset type at index ${lexer.index}")
+      lexer.matchString("hour") -> Result.Ok(TimeOffsetType.HOUR to 1)
+      lexer.matchString("minute") -> Result.Ok(TimeOffsetType.MINUTE to 1)
+      lexer.matchString("second") -> Result.Ok(TimeOffsetType.SECOND to 1)
+      lexer.matchString("millisecond") -> Result.Ok(TimeOffsetType.MILLISECOND to 1)
+      else -> Result.Err("Was expecting an offset type at index ${lexer.index}")
     }
   }
 

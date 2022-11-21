@@ -36,8 +36,6 @@ dependencies {
         implementation 'io.github.microutils:kotlin-logging:2.1.23'
         implementation 'org.apache.httpcomponents.client5:httpclient5:5.1.1'
         implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.1.1'
-        implementation 'com.michael-bull.kotlin-result:kotlin-result:1.1.16'
-        implementation 'com.michael-bull.kotlin-result:kotlin-result-jvm:1.1.16'
         implementation 'com.google.guava:guava:30.1.1-jre'
         implementation 'org.slf4j:slf4j-api:1.7.32'
         implementation 'io.ktor:ktor-http-jvm:1.6.8'

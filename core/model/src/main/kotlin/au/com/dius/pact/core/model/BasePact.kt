@@ -1,11 +1,9 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.json.JsonValue
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import mu.KLogging
 import java.io.File
 import java.util.Collections
@@ -30,11 +28,11 @@ abstract class BasePact @JvmOverloads constructor(
 
   override fun compatibleTo(other: Pact): Result<Boolean, String> {
     return if (provider != other.provider) {
-      Err("Provider names are different: '$provider' and '${other.provider}'")
+      Result.Err("Provider names are different: '$provider' and '${other.provider}'")
     } else if (!this::class.java.isAssignableFrom(other::class.java)) {
-      Err("Pact types different: '${other::class.simpleName}' can not be assigned to '${this::class.simpleName}'")
+      Result.Err("Pact types different: '${other::class.simpleName}' can not be assigned to '${this::class.simpleName}'")
     } else {
-      Ok(true)
+      Result.Ok(true)
     }
   }
 

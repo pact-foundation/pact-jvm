@@ -3,11 +3,10 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.KafkaSchemaRegistryWireFormatter
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
@@ -57,7 +56,7 @@ class KafkaJsonSchemaContentMatcher : ContentMatcher {
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
   ): Result<List<InteractionContents>, String> {
-    return Ok(listOf(InteractionContents("",
+    return Result.Ok(listOf(InteractionContents("",
       OptionalBody.body(
         Json.toJson(bodyConfig["body"]).serialise().toByteArray(),
         ContentType.KAFKA_SCHEMA_REGISTRY_JSON

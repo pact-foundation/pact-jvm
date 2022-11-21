@@ -4,7 +4,7 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import org.apache.hc.core5.http.ClassicHttpResponse
 import org.apache.hc.core5.http.HttpEntity
 import spock.lang.Specification
@@ -45,7 +45,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     makeStateChangeRequestArgs == []
   }
 
@@ -58,7 +58,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     makeStateChangeRequestArgs == []
   }
 
@@ -71,7 +71,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     makeStateChangeRequestArgs == []
   }
 
@@ -84,7 +84,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     makeStateChangeRequestArgs == [
       [new URI('http://localhost:2000/hello'), state, true, true, false]
     ]
@@ -105,7 +105,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
   }
 
   def 'if the state change is a closure, executes it with the state change as a parameter'() {
@@ -118,7 +118,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     makeStateChangeRequestArgs == []
     closureArgs == [state]
   }
@@ -132,7 +132,7 @@ class StateChangeSpec extends Specification {
       mockProviderClient)
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     makeStateChangeRequestArgs == []
   }
 
@@ -150,7 +150,7 @@ class StateChangeSpec extends Specification {
       '', [:], mockProviderClient)
 
     then:
-    result.stateChangeResult instanceof Ok
+    result.stateChangeResult instanceof Result.Ok
     result.message == ' Given one And two'
     makeStateChangeRequestArgs == [
       [new URI('http://localhost:2000/hello'), stateOne, true, true, false],

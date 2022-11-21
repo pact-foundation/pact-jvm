@@ -1,8 +1,6 @@
 package au.com.dius.pact.core.model.v4
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 
 enum class V4InteractionType {
   SynchronousHTTP,
@@ -20,10 +18,10 @@ enum class V4InteractionType {
   companion object {
     fun fromString(str: String): Result<V4InteractionType, String> {
       return when (str) {
-        "Synchronous/HTTP" -> Ok(SynchronousHTTP)
-        "Asynchronous/Messages" -> Ok(AsynchronousMessages)
-        "Synchronous/Messages" -> Ok(SynchronousMessages)
-        else -> Err("'$str' is not a valid V4 interaction type")
+        "Synchronous/HTTP" -> Result.Ok(SynchronousHTTP)
+        "Asynchronous/Messages" -> Result.Ok(AsynchronousMessages)
+        "Synchronous/Messages" -> Result.Ok(SynchronousMessages)
+        else -> Result.Err("'$str' is not a valid V4 interaction type")
       }
     }
   }

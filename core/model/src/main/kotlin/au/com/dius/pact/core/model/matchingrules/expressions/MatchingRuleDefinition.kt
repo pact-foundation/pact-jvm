@@ -3,10 +3,8 @@ package au.com.dius.pact.core.model.matchingrules.expressions
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.Either
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.isNotEmpty
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import mu.KLogging
 
 data class MatchingReference(
@@ -125,12 +123,12 @@ data class MatchingRuleDefinition(
       val lexer = MatcherDefinitionLexer(expression)
       val parser = MatcherDefinitionParser(lexer)
       return when (val result = parser.matchingDefinition()) {
-        is Ok -> if (result.value == null) {
-          Err("Error parsing expression")
+        is Result.Ok -> if (result.value == null) {
+          Result.Err("Error parsing expression")
         } else {
-          Ok(result.value!!)
+          Result.Ok(result.value!!)
         }
-        is Err -> Err("Error parsing expression: ${result.error}")
+        is Result.Err -> Result.Err("Error parsing expression: ${result.error}")
       }
     }
   }

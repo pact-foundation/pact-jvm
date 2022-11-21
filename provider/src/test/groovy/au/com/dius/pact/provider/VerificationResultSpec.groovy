@@ -4,7 +4,7 @@ import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.pactbroker.TestResult
-import com.github.michaelbull.result.Err
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -62,7 +62,7 @@ class VerificationResultSpec extends Specification {
     given:
     def description = 'Provider state change callback failed'
     def failures = [
-      '1234ABCD': [new VerificationFailureType.StateChangeFailure(description, new StateChangeResult(new Err(new RuntimeException('Boom'))))]
+      '1234ABCD': [new VerificationFailureType.StateChangeFailure(description, new StateChangeResult(new Result.Err(new RuntimeException('Boom'))))]
     ]
     def verification = new VerificationResult.Failed(description, '', failures, false)
 

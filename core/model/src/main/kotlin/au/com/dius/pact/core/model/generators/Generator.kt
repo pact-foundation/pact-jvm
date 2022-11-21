@@ -1,17 +1,14 @@
 package au.com.dius.pact.core.model.generators
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.getOr
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.MapValueResolver
+import au.com.dius.pact.core.support.getOr
 import au.com.dius.pact.core.support.json.JsonValue
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.get
 import com.mifmif.common.regex.Generex
 import mu.KLogging
 import mu.KotlinLogging
@@ -296,11 +293,11 @@ enum class UuidFormat {
   companion object : KLogging() {
     fun fromString(s: String?): Result<UuidFormat, String> {
       return when(s) {
-        "simple" -> Ok(Simple)
-        null, "lower-case-hyphenated" -> Ok(LowerCaseHyphenated)
-        "upper-case-hyphenated" -> Ok(UpperCaseHyphenated)
-        "URN" -> Ok(Urn)
-        else -> Err("'$s' is not a valid UUID format")
+        "simple" -> Result.Ok(Simple)
+        null, "lower-case-hyphenated" -> Result.Ok(LowerCaseHyphenated)
+        "upper-case-hyphenated" -> Result.Ok(UpperCaseHyphenated)
+        "URN" -> Result.Ok(Urn)
+        else -> Result.Err("'$s' is not a valid UUID format")
       }
     }
   }
@@ -368,7 +365,7 @@ data class DateGenerator @JvmOverloads constructor(
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseDate")) context["baseDate"] as OffsetDateTime
       else OffsetDateTime.now()
-    val date = DateExpression.executeDateExpression(base, expression).getOr { base }
+    val date = DateExpression.executeDateExpression(base, expression).getOr(base)
     return if (!format.isNullOrEmpty()) {
       date.format(DateTimeFormatter.ofPattern(format))
     } else {
@@ -409,7 +406,7 @@ data class TimeGenerator @JvmOverloads constructor(
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetDateTime else OffsetDateTime.now()
-    val time = TimeExpression.executeTimeExpression(base, expression).getOr { base }
+    val time = TimeExpression.executeTimeExpression(base, expression).getOr(base)
     return if (!format.isNullOrEmpty()) {
       time.format(DateTimeFormatter.ofPattern(format))
     } else {
@@ -451,7 +448,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     val base = if (context.containsKey("baseDateTime")) context["baseDateTime"] as OffsetDateTime
       else OffsetDateTime.now()
-    val datetime = DateTimeExpression.executeExpression(base, expression).getOr { base }
+    val datetime = DateTimeExpression.executeExpression(base, expression).getOr(base)
     return if (!format.isNullOrEmpty()) {
       datetime.toZonedDateTime().format(DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault()))
     } else {

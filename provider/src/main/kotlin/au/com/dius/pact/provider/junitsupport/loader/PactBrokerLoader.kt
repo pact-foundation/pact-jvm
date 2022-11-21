@@ -12,14 +12,13 @@ import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils.permutations
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import mu.KLogging
 import org.apache.hc.core5.net.URIBuilder
 import java.io.IOException
@@ -33,7 +32,6 @@ import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.kotlinFunction
@@ -250,8 +248,8 @@ open class PactBrokerLoader(
       val result = pactBrokerClient.fetchConsumersWithSelectorsV2(providerName, selectors, providerTags,
               providerBranch, pending, wipSinceDate)
       var consumers = when (result) {
-        is Ok -> result.value
-        is Err -> throw result.error
+        is Result.Ok -> result.value
+        is Result.Err -> throw result.error
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {

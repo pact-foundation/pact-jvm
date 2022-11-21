@@ -1,12 +1,9 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
-import au.com.dius.pact.core.support.json.JsonException
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.expect
 import mu.KLogging
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -66,7 +63,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
       Json.prettyPrint(pact.sortInteractions().toMap(pactSpecVersion))
     }
     writer.println(json)
-    return Ok(json.toByteArray().size)
+    return Result.Ok(json.toByteArray().size)
   }
 
   /**
@@ -104,7 +101,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
         val bytes = swriter.toString().toByteArray()
         raf.setLength(bytes.size.toLong())
         raf.write(bytes)
-        Ok(bytes.size)
+        Result.Ok(bytes.size)
       } finally {
         lock.release()
         raf.close()

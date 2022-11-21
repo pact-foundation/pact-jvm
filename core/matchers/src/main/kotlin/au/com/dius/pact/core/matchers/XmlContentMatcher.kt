@@ -2,11 +2,8 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.zipAll
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 import org.apache.xerces.dom.TextImpl
@@ -46,7 +43,7 @@ object XmlContentMatcher : ContentMatcher, KLogging() {
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
   ): Result<List<InteractionContents>, String> {
-    return Ok(listOf(InteractionContents("",
+    return Result.Ok(listOf(InteractionContents("",
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("application/xml")

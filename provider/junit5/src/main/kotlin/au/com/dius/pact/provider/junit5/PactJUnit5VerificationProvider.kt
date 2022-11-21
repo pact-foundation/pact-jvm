@@ -7,6 +7,7 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.getOrElse
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ProviderUtils
@@ -20,7 +21,6 @@ import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
-import com.github.michaelbull.result.getOrElse
 import mu.KLogging
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext

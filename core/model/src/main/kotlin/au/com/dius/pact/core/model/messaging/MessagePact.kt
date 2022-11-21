@@ -13,13 +13,11 @@ import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.extractFromJson
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils.extractFromMap
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonObject
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import mu.KLogging
 import java.io.File
 
@@ -80,12 +78,12 @@ class MessagePact @JvmOverloads constructor (
   override fun isRequestResponsePact() = false
 
   override fun asRequestResponsePact() =
-    Err("A V3 Message Pact can not be converted to a V3 Request/Response Pact")
+    Result.Err("A V3 Message Pact can not be converted to a V3 Request/Response Pact")
 
-  override fun asMessagePact() = Ok(this)
+  override fun asMessagePact() = Result.Ok(this)
 
   override fun asV4Pact(): Result<V4Pact, String> {
-    return Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }.toMutableList(), metadata))
+    return Result.Ok(V4Pact(consumer, provider, interactions.map { it.asV4Interaction() }.toMutableList(), metadata))
   }
 
   override val interactions: MutableList<Interaction>

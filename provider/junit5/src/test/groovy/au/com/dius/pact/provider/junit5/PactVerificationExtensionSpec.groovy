@@ -8,13 +8,12 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.TestResultAccumulator
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Issue
 import spock.lang.Specification
@@ -54,7 +53,7 @@ class PactVerificationExtensionSpec extends Specification {
 
     then:
     1 * extension.testResultAccumulator.updateTestResult(pact, interaction1, [], pactSource, mockValueResolver) >>
-      new Ok(true)
+      new Result.Ok(true)
   }
 
   def 'updateTestResult uses the pact itself when pact is not filtered '() {
@@ -123,7 +122,7 @@ class PactVerificationExtensionSpec extends Specification {
 
     then:
     1 * extension.testResultAccumulator.updateTestResult(pact, interaction1, [], pactSource, mockValueResolver) >>
-      new Err(['failed'])
+      new Result.Err(['failed'])
     def exception = thrown(AssertionError)
     exception.message == 'Failed to update the test results: failed'
   }

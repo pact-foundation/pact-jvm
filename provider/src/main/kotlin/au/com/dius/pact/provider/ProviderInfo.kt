@@ -6,10 +6,9 @@ import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.map
+import au.com.dius.pact.core.support.mapOk
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
@@ -127,15 +126,15 @@ open class ProviderInfo @JvmOverloads constructor (
     val client = pactBrokerClient(pactBrokerUrl, options)
     val consumersFromBroker = client.fetchConsumersWithSelectorsV2(name, selectors, options.providerTags,
       options.providerBranch, options.enablePending, options.includeWipPactsSince)
-      .map { results -> results.map { ConsumerInfo.from(it) } }
+      .mapOk { results -> results.map { ConsumerInfo.from(it) } }
 
     return when (consumersFromBroker) {
-      is Ok<List<ConsumerInfo>> -> {
+      is Result.Ok -> {
         val list = consumersFromBroker.value
         consumers.addAll(list)
         list
       }
-      is Err<Exception> -> {
+      is Result.Err -> {
         throw RuntimeException("Call to fetch pacts from Pact Broker failed with an exception",
           consumersFromBroker.error)
       }

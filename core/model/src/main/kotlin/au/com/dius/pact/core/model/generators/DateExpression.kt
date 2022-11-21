@@ -1,8 +1,6 @@
 package au.com.dius.pact.core.model.generators
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.generators.expressions.Adjustment
 import au.com.dius.pact.core.support.generators.expressions.DateBase
 import au.com.dius.pact.core.support.generators.expressions.DateExpressionLexer
@@ -22,8 +20,8 @@ object DateExpression : KLogging() {
   fun executeDateExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {
       return when (val result = parseDateExpression(expression)) {
-        is Err -> result
-        is Ok -> {
+        is Result.Err -> result
+        is Result.Ok -> {
           var date = baseDate(result, base)
           result.value.adjustments.forEach {
             date = when (it.operation) {
@@ -32,11 +30,11 @@ object DateExpression : KLogging() {
             }
           }
 
-          Ok(date)
+          Result.Ok(date)
         }
       }
     } else {
-      Ok(base)
+      Result.Ok(base)
     }
   }
 
@@ -98,7 +96,7 @@ object DateExpression : KLogging() {
     }
   }
 
-  private fun baseDate(result: Ok<ParsedDateExpression>, base: OffsetDateTime): OffsetDateTime {
+  private fun baseDate(result: Result.Ok<ParsedDateExpression>, base: OffsetDateTime): OffsetDateTime {
     return when (result.value.base) {
       DateBase.NOW, DateBase.TODAY -> base
       DateBase.YESTERDAY -> base.minusDays(1)
@@ -144,8 +142,8 @@ object DateExpression : KLogging() {
     val lexer = DateExpressionLexer(expression)
     val parser = DateExpressionParser(lexer)
     return when (val result = parser.expression()) {
-      is Err -> Err("Error parsing expression: ${result.error}")
-      is Ok -> Ok(ParsedDateExpression(result.value.first, result.value.second.toMutableList()))
+      is Result.Err -> Result.Err("Error parsing expression: ${result.error}")
+      is Result.Ok -> Result.Ok(ParsedDateExpression(result.value.first, result.value.second.toMutableList()))
     }
   }
 }

@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.model
 
-import com.github.michaelbull.result.Err
+import au.com.dius.pact.core.support.Result
 import mu.KLogging
 
 data class MergeResult(val ok: Boolean, val message: String, val result: Pact? = null)
@@ -13,7 +13,7 @@ object PactMerge : KLogging() {
   @JvmStatic
   fun merge(newPact: Pact, existing: Pact): MergeResult {
     val compatibleTo = newPact.compatibleTo(existing)
-    if (compatibleTo is Err) {
+    if (compatibleTo is Result.Err) {
       return MergeResult(false, "Cannot merge pacts as they are not compatible - ${compatibleTo.error}")
     }
 

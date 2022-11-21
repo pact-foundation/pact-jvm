@@ -5,12 +5,11 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ProviderVerifier.Companion.PACT_VERIFIER_PUBLISH_RESULTS
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
@@ -82,7 +81,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
           "Skipping publishing of verification results as it has been disabled " +
             "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')"
         }
-        Ok(false)
+        Result.Ok(false)
       } else {
         val calculatedTestResult = interactionResults.values.reduce { acc: TestResult, result -> acc.merge(result) }
         verificationReporter.reportResults(pact, calculatedTestResult, lookupProviderVersion(propertyResolver),
@@ -95,7 +94,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
       unverifiedInteractions.forEach {
         logger.warn { "    ${it.description}" }
       }
-      Ok(true)
+      Result.Ok(true)
     }
   }
 

@@ -18,8 +18,7 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import spock.lang.Issue
 import spock.lang.Specification
@@ -121,8 +120,8 @@ class TestResultAccumulatorSpec extends Specification {
       UnknownPactSource.INSTANCE, mockValueResolver)
 
     then:
-    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _) >> new Ok(false)
-    result == new Ok(false)
+    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _) >> new Result.Ok(false)
+    result == new Result.Ok(false)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -144,8 +143,8 @@ class TestResultAccumulatorSpec extends Specification {
       mockValueResolver)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _, _) >> new Ok(true)
-    updateTestResult == new Ok(true)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _, _) >> new Result.Ok(true)
+    updateTestResult == new Result.Ok(true)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -448,10 +447,10 @@ class TestResultAccumulatorSpec extends Specification {
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, new TestResult.Ok(), _, _, _, _) >>
-      new Err('failed')
+      new Result.Err('failed')
     testResultAccumulator.testResults.isEmpty()
-    result1 instanceof Ok
-    result2 instanceof Err
+    result1 instanceof Result.Ok
+    result2 instanceof Result.Err
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter

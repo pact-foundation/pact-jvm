@@ -1,8 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.auth.BasicScheme
 import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
@@ -226,7 +225,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
-    result instanceof Ok
+    result instanceof Result.Ok
   }
 
   def 'uploading a JSON doc returns an error'() {
@@ -243,7 +242,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
-    result instanceof Err
+    result instanceof Result.Err
   }
 
   def 'uploading a JSON doc unsuccessful due to 409'() {
@@ -260,7 +259,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockResponse) }
-    result instanceof Err
+    result instanceof Result.Err
   }
 
   @Unroll
@@ -302,8 +301,8 @@ class HalClientSpec extends Specification {
     where:
 
     success   | status | expectedResult
-    'success' | 200    | Ok
-    'failure' | 400    | Err
+    'success' | 200    | Result.Ok
+    'failure' | 400    | Result.Err
   }
 
   def 'post URL returns a failure result if an exception is thrown'() {
@@ -316,7 +315,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute(_, _, _) >> { throw new IOException('Boom!') }
-    result instanceof Err
+    result instanceof Result.Err
   }
 
   @SuppressWarnings('UnnecessaryGetter')

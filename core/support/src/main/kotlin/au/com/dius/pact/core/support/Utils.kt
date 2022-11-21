@@ -1,8 +1,5 @@
 package au.com.dius.pact.core.support
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import mu.KLogging
 import org.apache.commons.lang3.RandomUtils
 import java.io.IOException
@@ -169,12 +166,12 @@ object Utils : KLogging() {
     return if (matchResult != null) {
       val unitPower = DATA_SIZES.indexOf(matchResult.groupValues[2])
       if (unitPower >= 0) {
-        Ok(Integer.parseInt(matchResult.groupValues[1]) * 1024.0.pow(unitPower).toInt())
+        Result.Ok(Integer.parseInt(matchResult.groupValues[1]) * 1024.0.pow(unitPower).toInt())
       } else {
-        Err("'$value' is not a valid data size")
+        Result.Err("'$value' is not a valid data size")
       }
     } else {
-      Err("'$value' is not a valid data size")
+      Result.Err("'$value' is not a valid data size")
     }
   }
 

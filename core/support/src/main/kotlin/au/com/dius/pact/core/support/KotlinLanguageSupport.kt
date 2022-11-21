@@ -1,10 +1,6 @@
 package au.com.dius.pact.core.support
 
 import au.com.dius.pact.core.support.json.JsonValue
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.UnwrapException
 import java.lang.Integer.max
 import java.net.URL
 import kotlin.reflect.KProperty1
@@ -37,21 +33,21 @@ public fun String?.toUrl() = if (this.isNullOrEmpty()) {
 public fun <F> handleWith(f: () -> Any?): Result<F, Exception> {
   return try {
     val result = f()
-    if (result is Result<*, *>) result as Result<F, Exception> else Ok(result as F)
+    if (result is Result<*, *>) result as Result<F, Exception> else Result.Ok(result as F)
   } catch (ex: Exception) {
-    Err(ex)
+    Result.Err(ex)
   } catch (ex: Throwable) {
-    Err(RuntimeException(ex))
+    Result.Err(RuntimeException(ex))
   }
 }
 
 public fun <A, B> Result<A, B>.unwrap(): A {
   when (this) {
-    is Err<*> -> when (error) {
+    is Result.Err<*> -> when (error) {
       is Throwable -> throw error as Throwable
       else -> throw UnwrapException(error.toString())
     }
-    is Ok<*> -> return value as A
+    is Result.Ok<*> -> return value as A
   }
 }
 

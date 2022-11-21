@@ -12,11 +12,10 @@ dependencies {
   api project(':core:pactbroker')
   api 'org.apache.httpcomponents.client5:httpclient5'
   api 'io.github.classgraph:classgraph:4.8.129'
-  api 'com.michael-bull.kotlin-result:kotlin-result'
 
   implementation 'commons-io:commons-io:2.11.0'
   implementation 'org.slf4j:slf4j-api'
-  implementation('io.pact.plugin.driver:core:0.1.7') {
+  implementation('io.pact.plugin.driver:core:0.1.8') {
     exclude group: 'au.com.dius.pact.core'
   }
   implementation 'org.apache.commons:commons-lang3'
@@ -25,6 +24,7 @@ dependencies {
   implementation 'com.vladsch.flexmark:flexmark:0.62.2'
   implementation 'com.vladsch.flexmark:flexmark-ext-tables:0.62.2'
   implementation 'org.apache.groovy:groovy'
+  implementation 'com.michael-bull.kotlin-result:kotlin-result:1.1.14'
 
   testImplementation 'org.hamcrest:hamcrest'
   testImplementation 'org.spockframework:spock-core'

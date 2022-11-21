@@ -1,9 +1,6 @@
 package au.com.dius.pact.core.support
 
 import au.com.dius.pact.core.support.parsers.StringLexer
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 
 data class Version(
   var major: Int,
@@ -25,34 +22,34 @@ data class Version(
       val lexer = StringLexer(version)
 
       val major = when (val result = lexer.parseInt()) {
-        is Ok -> result.value
-        is Err -> return result
+        is Result.Ok -> result.value
+        is Result.Err -> return result
       }
 
       val err = parseChar('.', lexer)
       if (err != null) {
-        return Err(err)
+        return Result.Err(err)
       }
 
       val minor = when (val result = lexer.parseInt()) {
-        is Ok -> result.value
-        is Err -> return result
+        is Result.Ok -> result.value
+        is Result.Err -> return result
       }
 
       return when {
         lexer.peekNextChar() == '.' -> {
           lexer.advance()
           when (val result = lexer.parseInt()) {
-            is Ok -> if (lexer.empty) {
-              Ok(Version(major, minor, result.value))
+            is Result.Ok -> if (lexer.empty) {
+              Result.Ok(Version(major, minor, result.value))
             } else {
-              Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
+              Result.Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
             }
-            is Err -> result
+            is Result.Err -> result
           }
         }
-        lexer.empty -> Ok(Version(major, minor))
-        else -> Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
+        lexer.empty -> Result.Ok(Version(major, minor))
+        else -> Result.Err("Unexpected characters '${lexer.remainder}' at index ${lexer.index}")
       }
     }
 

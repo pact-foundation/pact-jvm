@@ -6,8 +6,7 @@ import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.contains
 import au.com.dius.pact.core.support.isNotEmpty
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
@@ -67,13 +66,13 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
   override fun updatePact(pact: Pact): Pact {
     return if (pact.isV4Pact()) {
       when (val p = pact.asV4Pact()) {
-        is Ok -> {
+        is Result.Ok -> {
           for (interaction in p.value.interactions) {
             interaction.asV4Interaction().transport = transportEntry.key
           }
           p.value
         }
-        is Err -> pact
+        is Result.Err -> pact
       }
     } else {
       pact

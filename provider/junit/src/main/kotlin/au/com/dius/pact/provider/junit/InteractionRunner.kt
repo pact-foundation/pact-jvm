@@ -9,9 +9,9 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
-import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
@@ -27,7 +27,6 @@ import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.junit.After
 import org.junit.Before
@@ -48,11 +47,19 @@ import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
-import java.lang.RuntimeException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Supplier
+import kotlin.Annotation
+import kotlin.Any
+import kotlin.Boolean
+import kotlin.Exception
+import kotlin.Pair
+import kotlin.RuntimeException
+import kotlin.String
+import kotlin.Throwable
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.kotlinProperty
+import kotlin.to
 import org.apache.commons.lang3.tuple.Pair as TuplePair
 
 /**
@@ -184,7 +191,7 @@ open class InteractionRunner(
         } finally {
           val updateTestResult = testResultAccumulator.updateTestResult(if (pact is FilteredPact) pact.pact else pact, interaction,
             testResult.toTestResult(), pactSource, propertyResolver)
-          if (testResult is VerificationResult.Ok && updateTestResult is Err) {
+          if (testResult is VerificationResult.Ok && updateTestResult is Result.Err) {
             testResult = VerificationResult.Failed("Failed to publish results to Pact broker",
               description.displayName, mapOf(interaction.interactionId.orEmpty() to
                 listOf(VerificationFailureType.PublishResultsFailure(updateTestResult.error))),

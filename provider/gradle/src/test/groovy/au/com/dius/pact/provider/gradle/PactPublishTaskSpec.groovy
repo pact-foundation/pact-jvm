@@ -2,9 +2,8 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PublishConfiguration
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Version
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import org.apache.commons.io.IOUtils
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
@@ -55,7 +54,7 @@ class PactPublishTaskSpec extends Specification {
     project.tasks.pactPublish.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null)
   }
 
   def 'failure to publish'() {
@@ -71,7 +70,7 @@ class PactPublishTaskSpec extends Specification {
     project.tasks.pactPublish.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _) >> new Err(new RuntimeException('Boom'))
+    1 * brokerClient.uploadPactFile(_, _) >> new Result.Err(new RuntimeException('Boom'))
     thrown(GradleScriptException)
   }
 
@@ -90,7 +89,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]], _) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null)
   }
 
   def 'passes in bearer token to the broker client'() {
@@ -108,7 +107,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234', 'Authorization']], _) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null)
   }
 
   def 'passes in bearer token to the broker client with custom auth header'() {
@@ -127,7 +126,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234', 'custom-header']], _) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null)
   }
 
   def 'passes in any tags to the broker client'() {
@@ -145,7 +144,7 @@ class PactPublishTaskSpec extends Specification {
     project.tasks.pactPublish.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1', ['tag1'])) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1', ['tag1'])) >> new Result.Ok(null)
   }
 
   def 'allows pact files to be excluded from publishing'() {
@@ -170,7 +169,7 @@ class PactPublishTaskSpec extends Specification {
     project.tasks.pactPublish.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(pactFile, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(pactFile, _) >> new Result.Ok(null)
     0 * brokerClient.uploadPactFile(excluded[0], _)
     0 * brokerClient.uploadPactFile(excluded[1], _)
     0 * brokerClient.uploadPactFile(excluded[2], _)
@@ -181,7 +180,7 @@ class PactPublishTaskSpec extends Specification {
     project.pact {
       publish {
         pactBrokerUrl = 'pactBrokerUrl'
-        consumerVersion = Version.parse('1.2.3').component1()
+        consumerVersion = Version.parse('1.2.3').get()
       }
     }
     project.evaluate()
@@ -190,6 +189,6 @@ class PactPublishTaskSpec extends Specification {
     project.tasks.pactPublish.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1.2.3')) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1.2.3')) >> new Result.Ok(null)
   }
 }

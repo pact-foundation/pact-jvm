@@ -8,6 +8,7 @@ import au.com.dius.pact.core.matchers.QueryMismatch
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.ajalt.mordant.TermColors
 import com.github.michaelbull.result.Err
@@ -83,12 +84,12 @@ sealed class VerificationFailureType {
   data class StateChangeFailure(val description: String, val result: StateChangeResult) : VerificationFailureType() {
     override fun description() = formatForDisplay(TermColors())
     override fun formatForDisplay(t: TermColors): String {
-      val e = result.stateChangeResult.getError()
+      val e = result.stateChangeResult.errorValue()
       return "State change callback failed with an exception - " + e?.message.toString()
     }
 
-    override fun hasException() = result.stateChangeResult is Err
-    override fun getException() = result.stateChangeResult.getError()
+    override fun hasException() = result.stateChangeResult is Result.Err
+    override fun getException() = result.stateChangeResult.errorValue()
   }
 
   data class PublishResultsFailure(val cause: List<String>) : VerificationFailureType() {

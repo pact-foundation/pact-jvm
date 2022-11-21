@@ -1,8 +1,6 @@
 package au.com.dius.pact.core.support.json;
 
-import com.github.michaelbull.result.Err;
-import com.github.michaelbull.result.Ok;
-import com.github.michaelbull.result.Result;
+import au.com.dius.pact.core.support.Result;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.function.Predicate;
@@ -42,51 +40,51 @@ public class BaseJsonLexer {
           case 'u': {
             Character u1 = json.nextChar();
             if (u1 == null) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), Unicode characters require 4 hex digits", json.documentPointer())));
             } else if (invalidHex(u1)) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), '%c' is not a valid hex code character", json.documentPointer(), u1)));
             }
             Character u2 = json.nextChar();
             if (u2 == null) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), Unicode characters require 4 hex digits", json.documentPointer())));
             } else if (invalidHex(u2)) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), '%c' is not a valid hex code character", json.documentPointer(), u2)));
             }
             Character u3 = json.nextChar();
             if (u3 == null) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), Unicode characters require 4 hex digits", json.documentPointer())));
             } else if (invalidHex(u3)) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), '%c' is not a valid hex code character", json.documentPointer(), u3)));
             }
             Character u4 = json.nextChar();
             if (u4 == null) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), Unicode characters require 4 hex digits", json.documentPointer())));
             } else if (invalidHex(u4)) {
-              return new Err(new JsonException(String.format(
+              return new Result.Err(new JsonException(String.format(
                 "Invalid JSON (%s), '%c' is not a valid hex code character", json.documentPointer(), u4)));
             }
             int hex = Integer.parseInt(new String(new char[]{u1, u2, u3, u4}), 16);
             if (index >= buffer.length) { buffer = allocate(buffer); }; buffer[index++] = (char) hex;
             break;
           }
-          default: return new Err(new JsonException(String.format(
+          default: return new Result.Err(new JsonException(String.format(
             "Invalid JSON (%s), '%c' is not a valid escape code", json.documentPointer(), escapeCode)));
         }
       } else if (next == null) {
-        return new Err(new JsonException(String.format("Invalid JSON (%s), End of document scanning for string terminator",
+        return new Result.Err(new JsonException(String.format("Invalid JSON (%s), End of document scanning for string terminator",
           json.documentPointer())));
       } else if (next != '"') {
         if (index >= buffer.length) { buffer = allocate(buffer); }; buffer[index++] = next;
       }
     } while (next != '"');
-    return new Ok(new JsonToken.StringValue(ArrayUtils.subarray(buffer, 0, index)));
+    return new Result.Ok(new JsonToken.StringValue(ArrayUtils.subarray(buffer, 0, index)));
   }
 
   private char[] allocate(char[] buffer) {
@@ -139,14 +137,14 @@ public class BaseJsonLexer {
   protected Result<JsonToken, JsonException> scanNumber(Character next) {
     char[] buffer = consumeChars(next, Character::isDigit);
     if (next == '-' && buffer.length == 1) {
-      return new Err(new JsonException(String.format(
+      return new Result.Err(new JsonException(String.format(
         "Invalid JSON (%s), found a '%c' that was not followed by any digits", json.documentPointer(), next)));
     }
     Character ch = json.peekNextChar();
     if (ch != null && (ch == '.' || ch == 'e' || ch == 'E')) {
       return scanDecimalNumber(buffer);
     } else {
-      return new Ok(new JsonToken.Integer(buffer));
+      return new Result.Ok(new JsonToken.Integer(buffer));
     }
   }
 
@@ -159,7 +157,7 @@ public class BaseJsonLexer {
       System.arraycopy(digits, 0, buffer, index, digits.length);
       index += digits.length;
       if (!Character.isDigit(buffer[index - 1])) {
-        return new Err(new JsonException(String.format("Invalid JSON (%s), '%s' is not a valid number",
+        return new Result.Err(new JsonException(String.format("Invalid JSON (%s), '%s' is not a valid number",
           json.documentPointer(), new String(ArrayUtils.subarray(buffer, 0, index)))));
       }
       next = json.peekNextChar();
@@ -175,10 +173,10 @@ public class BaseJsonLexer {
       System.arraycopy(digits, 0, buffer, index, digits.length);
       index += digits.length;
       if (!Character.isDigit(buffer[index - 1])) {
-        return new Err(new JsonException(String.format("Invalid JSON (%s), '%s' is not a valid number",
+        return new Result.Err(new JsonException(String.format("Invalid JSON (%s), '%s' is not a valid number",
           json.documentPointer(), new String(ArrayUtils.subarray(buffer, 0, index)))));
       }
     }
-    return new Ok(new JsonToken.Decimal(ArrayUtils.subarray(buffer, 0, index)));
+    return new Result.Ok(new JsonToken.Decimal(ArrayUtils.subarray(buffer, 0, index)));
   }
 }

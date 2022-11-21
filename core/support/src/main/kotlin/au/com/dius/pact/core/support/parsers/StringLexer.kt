@@ -1,8 +1,6 @@
 package au.com.dius.pact.core.support.parsers
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 
 open class StringLexer(private val buffer: String) {
   var index = 0
@@ -85,10 +83,10 @@ open class StringLexer(private val buffer: String) {
 
   fun parseInt(): Result<Int, String> {
     return when (val result = matchRegex(INT)) {
-      null -> Err("Was expecting an integer at index $index")
+      null -> Result.Err("Was expecting an integer at index $index")
       else -> {
         lastMatch = result
-        Ok(result.toInt())
+        Result.Ok(result.toInt())
       }
     }
   }

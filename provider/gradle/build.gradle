@@ -16,7 +16,6 @@ dependencies {
   implementation 'commons-io:commons-io:2.11.0'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'io.github.microutils:kotlin-logging'
-  implementation 'com.michael-bull.kotlin-result:kotlin-result'
 
   testImplementation 'junit:junit'
   testImplementation 'org.mockito:mockito-core:2.28.2'

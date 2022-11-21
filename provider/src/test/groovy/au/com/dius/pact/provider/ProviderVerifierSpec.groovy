@@ -29,11 +29,10 @@ import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import groovy.json.JsonOutput
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -421,7 +420,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.verificationReporter = Mock(VerificationReporter)
     verifier.pactReader = Stub(PactReader)
     def statechange = Stub(StateChange) {
-      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+      executeStateChange(*_) >> new StateChangeResult(new Result.Ok([:]))
     }
     def interaction1 = Stub(RequestResponseInteraction)
     def interaction2 = Stub(RequestResponseInteraction)
@@ -445,7 +444,8 @@ class ProviderVerifierSpec extends Specification {
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags, _) >> new Ok(true)
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags, _) >>
+      new Result.Ok(true)
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
@@ -469,7 +469,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.verificationReporter = Mock(VerificationReporter)
     verifier.pactReader = Stub(PactReader)
     def statechange = Stub(StateChange) {
-      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+      executeStateChange(*_) >> new StateChangeResult(new Result.Ok([:]))
     }
     def interaction1 = Stub(RequestResponseInteraction)
     def interaction2 = Stub(RequestResponseInteraction)
@@ -493,7 +493,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, [], branch) >> new Ok(true)
+    1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, [], branch) >> new Result.Ok(true)
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
@@ -514,7 +514,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.verificationReporter = Mock(VerificationReporter)
     verifier.pactReader = Stub(PactReader)
     def statechange = Stub(StateChange) {
-      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+      executeStateChange(*_) >> new StateChangeResult(new Result.Ok([:]))
     }
     def interaction1 = Stub(RequestResponseInteraction)
     def interaction2 = Stub(RequestResponseInteraction)
@@ -535,7 +535,8 @@ class ProviderVerifierSpec extends Specification {
     def result = verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * verifier.verificationReporter.reportResults(_, _, '0.0.0', pactBrokerClient, [], _) >> new Err(['failed'])
+    1 * verifier.verificationReporter.reportResults(_, _, '0.0.0', pactBrokerClient, [], _) >>
+      new Result.Err(['failed'])
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> new VerificationResult.Ok()
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> new VerificationResult.Ok()
     result instanceof VerificationResult.Failed
@@ -550,7 +551,7 @@ class ProviderVerifierSpec extends Specification {
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     verifier.pactReader = Mock(PactReader)
     def statechange = Mock(StateChange) {
-      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+      executeStateChange(*_) >> new StateChangeResult(new Result.Ok([:]))
     }
     def interaction1 = Mock(RequestResponseInteraction) {
       getDescription() >> 'Interaction 1'
@@ -614,7 +615,7 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     1 * verifier.pactReader.loadPact(_) >> pact
-    1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
+    1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Result.Ok([:]), '')
     1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _, false) >> new VerificationResult.Ok()
     0 * client.publishVerificationResults(_, new TestResult.Ok(), _, _)
   }
@@ -675,7 +676,7 @@ class ProviderVerifierSpec extends Specification {
     result.description == 'State change request failed'
     result.failures.size() == 1
     result.failures['1234'][0].description == 'Provider state change callback failed'
-    result.failures['1234'][0].result.stateChangeResult instanceof Err
+    result.failures['1234'][0].result.stateChangeResult instanceof Result.Err
   }
 
   def 'verifyInteraction returns an error result if any matcher paths are invalid'() {

@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.StateChangeResult
@@ -12,7 +13,6 @@ import au.com.dius.pact.provider.junitsupport.IgnoreMissingStateChange
 import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
-import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
@@ -41,7 +41,7 @@ class PactVerificationStateChangeExtension(
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      val error = StateChangeResult(Err(e))
+      val error = StateChangeResult(Result.Err(e))
       testContext.testExecutionResult.add(VerificationResult.Failed(
         description = "Provider state change callback failed",
         failures = mapOf(interaction.interactionId.orEmpty() to
@@ -64,7 +64,7 @@ class PactVerificationStateChangeExtension(
     } catch (e: Exception) {
       val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      val error = StateChangeResult(Err(e))
+      val error = StateChangeResult(Result.Err(e))
       testContext.testExecutionResult.add(VerificationResult.Failed(
         description = "Provider state change teardown callback failed",
         failures = mapOf(interaction.interactionId.orEmpty() to listOf(

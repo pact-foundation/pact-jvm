@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.InteractionContents
 
 interface ContentMatcher {

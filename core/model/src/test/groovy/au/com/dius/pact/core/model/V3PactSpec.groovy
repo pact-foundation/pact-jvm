@@ -2,9 +2,8 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Result
 import org.jetbrains.annotations.NotNull
 import spock.lang.Specification
 
@@ -122,17 +121,17 @@ class V3PactSpec extends Specification {
 
             @Override
             Result<RequestResponsePact, String> asRequestResponsePact() {
-              new Err('Not implemented')
+              new Result.Err('Not implemented')
             }
 
             @Override
             Result<MessagePact, String> asMessagePact() {
-              new Err('Not implemented')
+              new Result.Err('Not implemented')
             }
 
             @Override
             Result<V4Pact, String> asV4Pact() {
-              new Err('Not implemented')
+              new Result.Err('Not implemented')
             }
 
           @Override
@@ -188,17 +187,17 @@ class V3PactSpec extends Specification {
 
           @Override
           Result<RequestResponsePact, String> asRequestResponsePact() {
-            new Err('Not implemented')
+            new Result.Err('Not implemented')
           }
 
           @Override
           Result<MessagePact, String> asMessagePact() {
-            new Err('Not implemented')
+            new Result.Err('Not implemented')
           }
 
           @Override
           Result<V4Pact, String> asV4Pact() {
-            new Err('Not implemented')
+            new Result.Err('Not implemented')
           }
 
           @Override

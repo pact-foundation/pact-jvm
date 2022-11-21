@@ -4,7 +4,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
 @SuppressWarnings('LineLength')
@@ -19,7 +19,7 @@ class MessageComparisonSpec extends Specification {
     def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '$.b': ['Expected \'2\' (String) but received \'3\' (String)']
     ]
@@ -35,7 +35,7 @@ class MessageComparisonSpec extends Specification {
     def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
 
     then:
-    result instanceof Ok
+    result instanceof Result.Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '/': [
         'Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match'

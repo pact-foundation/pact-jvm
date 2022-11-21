@@ -6,12 +6,10 @@ import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.mapError
+import au.com.dius.pact.core.support.mapError
 import mu.KLogging
 
 /**
@@ -91,7 +89,7 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
       }
       else -> {
         logger.info { "Skipping publishing verification results for source $source" }
-        Ok(false)
+        Result.Ok(false)
       }
     }
   }
@@ -108,12 +106,12 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     val branchResult = if (branch?.isNotBlank() == true) {
       brokerClient.publishProviderBranch(source.attributes, pact.provider.name, branch, version)
     } else {
-      Ok(true)
+      Result.Ok(true)
     }
     val tagsResult = if (tags.isNotEmpty()) {
       brokerClient.publishProviderTags(source.attributes, pact.provider.name, tags, version)
     } else {
-      Ok(true)
+      Result.Ok(true)
     }
     val buildUrl = System.getProperty(ProviderVerifier.PACT_VERIFIER_BUILD_URL)
     val publishResult = if (buildUrl.isNullOrEmpty()) {
@@ -121,18 +119,18 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     } else {
       brokerClient.publishVerificationResults(source.attributes, result, version, buildUrl)
     }
-    if (publishResult is Err) {
+    if (publishResult is Result.Err) {
       logger.error { "Failed to publish verification results - ${publishResult.error}" }
     } else {
       logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
     }
 
     return when {
-      tagsResult is Err && branchResult is Ok && publishResult is Ok -> tagsResult
-      branchResult is Err && tagsResult is Ok && publishResult is Ok -> branchResult.mapError { listOf(it) }
-      tagsResult is Err && branchResult is Err && publishResult is Ok -> Err(
+      tagsResult is Result.Err && branchResult is Result.Ok && publishResult is Result.Ok -> tagsResult
+      branchResult is Result.Err && tagsResult is Result.Ok && publishResult is Result.Ok -> branchResult.mapError { listOf(it) }
+      tagsResult is Result.Err && branchResult is Result.Err && publishResult is Result.Ok -> Result.Err(
         tagsResult.error + branchResult.error)
-      tagsResult is Err && branchResult is Err && publishResult is Err -> Err(
+      tagsResult is Result.Err && branchResult is Result.Err && publishResult is Result.Err -> Result.Err(
         tagsResult.error + branchResult.error + publishResult.error)
       else -> publishResult.mapError { listOf(it) }
     }

@@ -6,10 +6,9 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
@@ -43,7 +42,7 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
   ): Result<List<InteractionContents>, String> {
-    return Ok(listOf(InteractionContents("",
+    return Result.Ok(listOf(InteractionContents("",
       OptionalBody.body(
         toJson(bodyConfig["body"]).serialise().toByteArray(),
         ContentType("application/json")

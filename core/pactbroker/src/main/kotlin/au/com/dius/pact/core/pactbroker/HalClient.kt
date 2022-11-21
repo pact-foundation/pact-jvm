@@ -1,11 +1,12 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.core.support.HttpClientUtils.buildUrl
-import au.com.dius.pact.core.support.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.HttpClient
+import au.com.dius.pact.core.support.HttpClientUtils.buildUrl
+import au.com.dius.pact.core.support.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Json.fromJson
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonParser
@@ -13,9 +14,6 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.get
 import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.unwrap
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import com.google.common.net.UrlEscapers
 import mu.KLogging
 import org.apache.hc.client5.http.classic.methods.HttpGet
@@ -207,7 +205,7 @@ open class HalClient @JvmOverloads constructor(
           handler(it.code, it)
         } else if (it.code >= 300) {
           logger.error { "PUT JSON request failed with status ${it.code} ${it.reasonPhrase}" }
-          Err(RequestFailedException(it.code, if (it.entity != null) EntityUtils.toString(it.entity) else null))
+          Result.Err(RequestFailedException(it.code, if (it.entity != null) EntityUtils.toString(it.entity) else null))
         } else {
           true
         }
@@ -244,8 +242,8 @@ open class HalClient @JvmOverloads constructor(
   @Throws(InvalidNavigationRequest::class)
   override fun navigate(): IHalClient {
     when (val result = fetch(ROOT)) {
-      is Ok<JsonValue.Object> -> pathInfo = result.value
-      is Err<Exception> -> {
+      is Result.Ok<JsonValue.Object> -> pathInfo = result.value
+      is Result.Err<Exception> -> {
         logger.warn { "Failed to fetch the root HAL document" }
         throw InvalidNavigationRequest("Failed to fetch the root HAL document", result.error)
       }
@@ -269,11 +267,11 @@ open class HalClient @JvmOverloads constructor(
     lastUrl = path
     logger.debug { "Fetching: $path" }
     return when (val result = getJson(path, encodePath)) {
-      is Ok -> when (result.value) {
-        is JsonValue.Object -> Ok(result.value)
-        else -> Err(RuntimeException("Expected a JSON document, but found a ${result.value}"))
+      is Result.Ok -> when (result.value) {
+        is JsonValue.Object -> Result.Ok(result.value)
+        else -> Result.Err(RuntimeException("Expected a JSON document, but found a ${result.value}"))
       }
-      is Err -> result
+      is Result.Err -> result
     } as Result<JsonValue.Object, Exception>
   }
 
@@ -326,16 +324,16 @@ open class HalClient @JvmOverloads constructor(
     return if (response.code < 300) {
       val contentType = ContentType.parseLenient(response.entity.contentType)
       if (isJsonResponse(contentType)) {
-        Ok(JsonParser.parseString(EntityUtils.toString(response.entity)))
+        Result.Ok(JsonParser.parseString(EntityUtils.toString(response.entity)))
       } else {
-        Err(InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'"))
+        Result.Err(InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'"))
       }
     } else {
       when (response.code) {
-        404 -> Err(NotFoundHalResponse("No HAL document found at path '$path'"))
+        404 -> Result.Err(NotFoundHalResponse("No HAL document found at path '$path'"))
         else -> {
           val body = if (response.entity != null) EntityUtils.toString(response.entity) else null
-          Err(RequestFailedException(response.code, body,
+          Result.Err(RequestFailedException(response.code, body,
             "Request to path '$path' failed with response ${response.code}"))
         }
       }
@@ -496,7 +494,7 @@ open class HalClient @JvmOverloads constructor(
           it.code < 300 -> if (it.entity != null) EntityUtils.toString(it.entity) else null
           else -> {
             logger.error { "PUT JSON request failed with status ${it.code} ${it.reasonPhrase}" }
-            Err(RequestFailedException(it.code, if (it.entity != null) EntityUtils.toString(it.entity) else null))
+            Result.Err(RequestFailedException(it.code, if (it.entity != null) EntityUtils.toString(it.entity) else null))
           }
         }
       }

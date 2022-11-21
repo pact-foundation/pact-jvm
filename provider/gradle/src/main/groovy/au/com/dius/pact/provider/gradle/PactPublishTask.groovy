@@ -4,7 +4,7 @@ import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.PublishConfiguration
 import au.com.dius.pact.core.pactbroker.RequestFailedException
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import groovy.io.FileType
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
@@ -86,7 +86,7 @@ abstract class PactPublishTask extends DefaultTask {
               println "Publishing '${pactFile.name}' ... "
             }
             result = brokerClient.uploadPactFile(pactFile, publishConfig)
-            if (result instanceof Ok) {
+            if (result instanceof Result.Ok) {
               println('OK')
             } else {
               println("Failed - ${result.error.message}")

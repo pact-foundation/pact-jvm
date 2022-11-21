@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.support.json
 
-import com.github.michaelbull.result.Err
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -51,7 +51,7 @@ class JsonLexerSpec extends Specification {
     def token = lexer.nextToken()
 
     then:
-    token instanceof Err
+    token instanceof Result.Err
 
     where:
 

@@ -1,14 +1,12 @@
 package au.com.dius.pact.core.model.generators
 
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.generators.expressions.Adjustment
 import au.com.dius.pact.core.support.generators.expressions.Operation
 import au.com.dius.pact.core.support.generators.expressions.TimeBase
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionLexer
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionParser
 import au.com.dius.pact.core.support.generators.expressions.TimeOffsetType
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import mu.KLogging
 import java.time.LocalTime
 import java.time.OffsetDateTime
@@ -22,8 +20,8 @@ object TimeExpression : KLogging() {
   fun executeTimeExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {
       return when (val result = parseTimeExpression(expression)) {
-        is Err -> result
-        is Ok -> {
+        is Result.Err -> result
+        is Result.Ok -> {
           val midnight = OffsetDateTime.of(base.toLocalDate(), LocalTime.MIDNIGHT, ZoneOffset.from(base))
           val noon = OffsetDateTime.of(base.toLocalDate(), LocalTime.NOON, ZoneOffset.from(base))
           var time = when (val valBase = result.value.base) {
@@ -58,11 +56,11 @@ object TimeExpression : KLogging() {
             }
           }
 
-          Ok(time)
+          Result.Ok(time)
         }
       }
     } else {
-      Ok(base)
+      Result.Ok(base)
     }
   }
 
@@ -70,8 +68,8 @@ object TimeExpression : KLogging() {
     val lexer = TimeExpressionLexer(expression)
     val parser = TimeExpressionParser(lexer)
     return when (val result = parser.expression()) {
-      is Err -> Err("Error parsing expression: ${result.error}")
-      is Ok -> Ok(ParsedTimeExpression(result.value.first, result.value.second.toMutableList()))
+      is Result.Err -> Result.Err("Error parsing expression: ${result.error}")
+      is Result.Ok -> Result.Ok(ParsedTimeExpression(result.value.first, result.value.second.toMutableList()))
     }
   }
 }

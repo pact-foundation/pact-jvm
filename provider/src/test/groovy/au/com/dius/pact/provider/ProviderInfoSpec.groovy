@@ -4,7 +4,7 @@ import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.support.Auth
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -76,7 +76,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectorsV2(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Result.Ok([
       new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
     result.size() == 1
@@ -99,7 +99,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectorsV2(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Result.Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
     ])
     result.size() == 1
@@ -122,7 +122,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectorsV2(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], 'master', true, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], 'master', true, '') >> new Result.Ok([
             new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
     ])
     result.size() == 1
@@ -164,7 +164,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectorsV2(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Result.Ok([
       new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
     ])
     result.size() == 1
@@ -188,7 +188,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectorsV2(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '2020-05-23') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '2020-05-23') >> new Result.Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
     result.size() == 1
@@ -210,7 +210,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     providerInfo.pactBrokerClient(_, { it.auth == new Auth.BearerAuthentication('Authorization', '123ABC') }) >> pactBrokerClient
-    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Ok([
+    pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Result.Ok([
       new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
     ])
     result.size() == 1

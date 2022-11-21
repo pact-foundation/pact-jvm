@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
@@ -16,7 +17,6 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
-import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.HttpRequest
@@ -200,7 +200,7 @@ open class PactVerificationExtension(
     val pact = if (this.pact is FilteredPact) pact.pact else pact
     val updateTestResult = testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult,
       pactSource, propertyResolver)
-    if (updateTestResult is Err) {
+    if (updateTestResult is Result.Err) {
       throw AssertionError("Failed to update the test results: " + updateTestResult.error.joinToString("\n"))
     }
   }

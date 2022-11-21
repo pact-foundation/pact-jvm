@@ -2,10 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.generators.Generators
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 import org.apache.hc.core5.http.NameValuePair
@@ -36,7 +33,7 @@ class FormPostContentMatcher : ContentMatcher {
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
   ): Result<List<InteractionContents>, String> {
-    return Ok(listOf(InteractionContents("", OptionalBody.body(
+    return Result.Ok(listOf(InteractionContents("", OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("application/x-www-form-urlencoded")
       ))))

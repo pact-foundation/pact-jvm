@@ -7,8 +7,7 @@ import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
 @SuppressWarnings(['UnnecessaryGetter', 'LineLength', 'NestedBlockDepth', 'AbcMetric', 'MethodSize', 'ClassSize'])
@@ -75,7 +74,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A') instanceof Ok
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A') instanceof Result.Ok
     }
 
     then:
@@ -107,7 +106,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
       def result = pactBroker.runTest { server, context ->
-        assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Ok
+        assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Result.Ok
       }
 
     then:
@@ -139,7 +138,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Err<Exception>
+      assert pactBrokerClient.createVersionTag('Foo Consumer', '10.0.0', 'A') instanceof Result.Err
     }
 
     then:
@@ -173,7 +172,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Err
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Result.Err
     }
 
     then:
@@ -210,7 +209,7 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       def result = pactBrokerClient.uploadPactFile(pactFile, 'XXXX')
-      assert result instanceof Err
+      assert result instanceof Result.Err
       assert result.error.body == body
     }
 
@@ -254,7 +253,7 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       def result = pactBrokerClient.uploadPactFile(pactFile, '10.0.0')
-      assert result instanceof Err
+      assert result instanceof Result.Err
       assert result.error.body == body
     }
 
@@ -309,7 +308,7 @@ class PactBrokerClientPactSpec extends Specification {
 
       when:
       def result = pactBroker.runTest { server, context ->
-        assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A') instanceof Ok
+        assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A') instanceof Result.Ok
       }
 
       then:
@@ -368,7 +367,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A', ['A', 'B']) instanceof Ok
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0/A', ['A', 'B']) instanceof Result.Ok
     }
 
     then:
@@ -414,7 +413,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Err
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Result.Err
     }
 
     then:
@@ -464,7 +463,7 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       def result = pactBrokerClient.uploadPactFile(pactFile, 'XXXX')
-      assert result instanceof Err
+      assert result instanceof Result.Err
       assert result.error.body == body
     }
 
@@ -525,7 +524,7 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       def result = pactBrokerClient.uploadPactFile(pactFile, '10.0.0')
-      assert result instanceof Err
+      assert result instanceof Result.Err
     }
 
     then:
@@ -561,7 +560,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = imaginaryBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Err
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') instanceof Result.Err
     }
 
     then:
@@ -918,7 +917,7 @@ class PactBrokerClientPactSpec extends Specification {
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectorsV2('Activity Service', [
         new ConsumerVersionSelectors.Selector('test', true, null, null )
       ], [], '', false, '')
-      assert consumerPacts instanceof Ok
+      assert consumerPacts instanceof Result.Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
       assert !consumerPacts.value[1].pending
@@ -1031,7 +1030,7 @@ class PactBrokerClientPactSpec extends Specification {
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectorsV2('Activity Service', [
         new ConsumerVersionSelectors.Selector('test', true, null, null)
       ], ['master'], '', true, '')
-      assert consumerPacts instanceof Ok
+      assert consumerPacts instanceof Result.Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].pending
       assert consumerPacts.value[1].pending
@@ -1155,7 +1154,7 @@ class PactBrokerClientPactSpec extends Specification {
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectorsV2('Activity Service', [
         new ConsumerVersionSelectors.Selector('test', true, null, null)
       ], ['master'], '', true, '2020-06-24')
-      assert consumerPacts instanceof Ok
+      assert consumerPacts instanceof Result.Ok
       assert consumerPacts.value.size == 2
       assert !consumerPacts.value[0].wip
       assert consumerPacts.value[1].wip

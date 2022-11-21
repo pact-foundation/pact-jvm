@@ -13,6 +13,7 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.TestResultAccumulator
@@ -21,8 +22,6 @@ import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import junit.framework.AssertionFailedError
 import org.apache.commons.lang3.tuple.Pair
 import org.jetbrains.annotations.NotNull
@@ -299,7 +298,7 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon Interaction 1') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Result.Ok(true)
 
     then:
     1 * notifier.fireTestFinished({ it.displayName.startsWith('consumer - Upon Interaction 1') })
@@ -308,7 +307,7 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon Interaction 2') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Result.Ok(true)
 
     then:
     1 * notifier.fireTestFinished({ it.displayName.startsWith('consumer - Upon Interaction 2') })
@@ -334,13 +333,13 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestIgnored({ it.displayName.startsWith(' - Upon Interaction 1 <PENDING>') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Result.Ok(true)
 
     then:
     1 * notifier.fireTestIgnored({ it.displayName.startsWith(' - Upon Interaction 2 <PENDING>') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Result.Ok(true)
   }
 
   def 'if the test result is a failure, call the notifier that the test has failed'() {
@@ -361,7 +360,7 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon Interaction 1') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Result.Ok(true)
 
     then:
     1 * notifier.fireTestFinished({ it.displayName.startsWith('consumer - Upon Interaction 1') })
@@ -370,7 +369,7 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon Interaction 2') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Result.Ok(true)
 
     then:
     1 * notifier.fireTestFinished({ it.displayName.startsWith('consumer - Upon Interaction 2') })
@@ -396,13 +395,13 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestIgnored({ it.displayName.startsWith(' - Upon Interaction 1 <PENDING>') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Result.Ok(true)
 
     then:
     1 * notifier.fireTestIgnored({ it.displayName.startsWith(' - Upon Interaction 2 <PENDING>') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Result.Ok(true)
   }
 
   def 'if publishing a verification result fails, set the test result to a failure'() {
@@ -423,7 +422,7 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon Interaction 1') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Err(['Publish failed'])
+    1 * testResultAccumulator.updateTestResult(pact, interaction1, _, _, _) >> new Result.Err(['Publish failed'])
 
     then:
     1 * notifier.fireTestFailure({ it.description.displayName.startsWith('consumer - Upon Interaction 1') })
@@ -433,7 +432,7 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestStarted({ it.displayName.startsWith('consumer - Upon Interaction 2') })
 
     then:
-    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Ok(true)
+    1 * testResultAccumulator.updateTestResult(pact, interaction2, _, _, _) >> new Result.Ok(true)
 
     then:
     1 * notifier.fireTestFinished({ it.displayName.startsWith('consumer - Upon Interaction 2') })

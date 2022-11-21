@@ -4,7 +4,7 @@ import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.provider.BodyComparisonResult
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 
 sealed class Event {
   data class ErrorHasNoAnnotatedMethodsFoundForInteraction(val interaction: Interaction) : Event()

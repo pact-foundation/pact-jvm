@@ -1,9 +1,7 @@
 package au.com.dius.pact.core.model.generators
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.mapError
+import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.mapError
 import mu.KLogging
 import java.lang.Integer.parseInt
 import java.time.OffsetDateTime
@@ -14,19 +12,19 @@ object DateTimeExpression : KLogging() {
       val split = expression.split("@", limit = 2)
       if (split.size > 1) {
         val datePart = DateExpression.executeDateExpression(base, split[0])
-        val timePart = if (datePart is Ok<OffsetDateTime>)
+        val timePart = if (datePart is Result.Ok<OffsetDateTime>)
           TimeExpression.executeTimeExpression(datePart.value, split[1])
         else
           TimeExpression.executeTimeExpression(base, split[1])
         when {
-          datePart is Err<String> && timePart is Err<String> -> datePart.mapError { "$it, " +
+          datePart is Result.Err<String> && timePart is Result.Err<String> -> datePart.mapError { "$it, " +
             Regex("index (\\d+)").replace(timePart.error) { mr ->
               val pos = parseInt(mr.groupValues[1])
               "index ${pos + split[0].length + 1}"
             }
           }
-          datePart is Err<String> -> datePart
-          timePart is Err<String> -> timePart.mapError {
+          datePart is Result.Err<String> -> datePart
+          timePart is Result.Err<String> -> timePart.mapError {
             Regex("index (\\d+)").replace(timePart.error) { mr ->
               val pos = parseInt(mr.groupValues[1])
               "index ${pos + split[0].length + 1}"
@@ -38,7 +36,7 @@ object DateTimeExpression : KLogging() {
         DateExpression.executeDateExpression(base, split[0])
       }
     } else {
-      Ok(base)
+      Result.Ok(base)
     }
   }
 }

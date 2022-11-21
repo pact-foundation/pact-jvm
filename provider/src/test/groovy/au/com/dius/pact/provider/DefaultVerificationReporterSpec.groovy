@@ -9,8 +9,7 @@ import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
@@ -31,8 +30,8 @@ class DefaultVerificationReporterSpec extends Specification {
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
 
     then:
-    1 * brokerClient.publishVerificationResults(links, testResult, '0') >> new Ok(true)
-    result == new Ok(true)
+    1 * brokerClient.publishVerificationResults(links, testResult, '0') >> new Result.Ok(true)
+    result == new Result.Ok(true)
   }
 
   @RestoreSystemProperties
@@ -52,8 +51,8 @@ class DefaultVerificationReporterSpec extends Specification {
 
     then:
     1 * brokerClient.publishVerificationResults(links, testResult, '0', 'https://buildsystem.com/job/1234') >>
-            new Ok(true)
-    result == new Ok(true)
+            new Result.Ok(true)
+    result == new Result.Ok(true)
   }
 
   @RestoreSystemProperties
@@ -74,8 +73,8 @@ class DefaultVerificationReporterSpec extends Specification {
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
 
     then:
-    1 * brokerClient.publishVerificationResults(links, testResult, '0', buildUrl) >> new Ok(true)
-    result == new Ok(true)
+    1 * brokerClient.publishVerificationResults(links, testResult, '0', buildUrl) >> new Result.Ok(true)
+    result == new Result.Ok(true)
   }
 
   def 'for non-Pact broker sources, do not publish anything and return Ok'() {
@@ -92,7 +91,7 @@ class DefaultVerificationReporterSpec extends Specification {
 
     then:
     0 * brokerClient.publishVerificationResults(_, new TestResult.Ok(), '0')
-    result == new Ok(false)
+    result == new Result.Ok(false)
   }
 
   def 'return an error if publishing the test results fails'() {
@@ -108,8 +107,8 @@ class DefaultVerificationReporterSpec extends Specification {
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [], null)
 
     then:
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Err('failed')
-    result == new Err(['failed'])
+    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Err('failed')
+    result == new Result.Err(['failed'])
   }
 
   def 'return an error if publishing the provider tag fails'() {
@@ -127,9 +126,9 @@ class DefaultVerificationReporterSpec extends Specification {
 
     then:
     0 * brokerClient.publishProviderBranch(_, 'provider', _, '')
-    1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Err(['failed'])
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Ok(true)
-    result == new Err(['failed'])
+    1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Result.Err(['failed'])
+    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Ok(true)
+    result == new Result.Err(['failed'])
   }
 
   def 'return an error if publishing the provider branch fails'() {
@@ -147,9 +146,9 @@ class DefaultVerificationReporterSpec extends Specification {
 
     then:
     0 * brokerClient.publishProviderTags(_, 'provider', _, '')
-    1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Err('failed')
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Ok(true)
-    result == new Err(['failed'])
+    1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Result.Err('failed')
+    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Ok(true)
+    result == new Result.Err(['failed'])
   }
 
   def 'return list of errors if publishing the provider tags and branch fails'() {
@@ -167,9 +166,9 @@ class DefaultVerificationReporterSpec extends Specification {
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, tags, branch)
 
     then:
-    1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Err(['tags failed'])
-    1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Err('branch failed')
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Ok(true)
-    result == new Err(['tags failed', 'branch failed'])
+    1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Result.Err(['tags failed'])
+    1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Result.Err('branch failed')
+    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Ok(true)
+    result == new Result.Err(['tags failed', 'branch failed'])
   }
 }

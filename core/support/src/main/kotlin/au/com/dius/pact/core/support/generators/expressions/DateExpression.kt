@@ -1,9 +1,7 @@
 package au.com.dius.pact.core.support.generators.expressions
 
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.parsers.StringLexer
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 
 class DateExpressionLexer(expression: String): StringLexer(expression) {
   fun parseDateBase(): DateBase? {
@@ -64,46 +62,46 @@ class DateExpressionParser(private val lexer: DateExpressionLexer) {
     val baseResult = base()
     if (baseResult != null) {
       return when (val opResult = parseOp()) {
-        is Ok -> if (opResult.value != null) {
-          Ok(baseResult to opResult.value!!)
+        is Result.Ok -> if (opResult.value != null) {
+          Result.Ok(baseResult to opResult.value!!)
         } else {
-          Ok(baseResult to emptyList())
+          Result.Ok(baseResult to emptyList())
         }
-        is Err -> opResult
+        is Result.Err -> opResult
       }
     }
 
     when (val opResult = parseOp()) {
-      is Ok -> if (opResult.value != null) {
-        return Ok(dateBase to opResult.value!!)
+      is Result.Ok -> if (opResult.value != null) {
+        return Result.Ok(dateBase to opResult.value!!)
       }
-      is Err -> return opResult
+      is Result.Err -> return opResult
     }
 
     val nextOrLastResult = parseNextOrLast()
     if (nextOrLastResult != null) {
       return when (val offsetResult = offset()) {
-        is Ok -> {
+        is Result.Ok -> {
           val adj = mutableListOf<Adjustment<DateOffsetType>>()
           adj.add(Adjustment(offsetResult.value.first, offsetResult.value.second, nextOrLastResult))
           when (val opResult = parseOp()) {
-            is Ok -> if (opResult.value != null) {
-              adj.addAll(opResult.value!!)
-              Ok(dateBase to adj)
+            is Result.Ok -> if (opResult.value != null) {
+              adj.addAll(opResult.value)
+              Result.Ok(dateBase to adj)
             } else {
-              Ok(dateBase to adj)
+              Result.Ok(dateBase to adj)
             }
-            is Err -> opResult
+            is Result.Err -> opResult
           }
         }
-        is Err -> offsetResult
+        is Result.Err -> offsetResult
       }
     }
 
     return if (lexer.empty) {
-      Ok(dateBase to emptyList())
+      Result.Ok(dateBase to emptyList<Adjustment<DateOffsetType>>())
     } else {
-      Err("Error parsing expression: Unexpected characters '${lexer.remainder}' at ${lexer.index}")
+      Result.Err("Error parsing expression: Unexpected characters '${lexer.remainder}' at ${lexer.index}")
     }
   }
 
@@ -123,14 +121,14 @@ class DateExpressionParser(private val lexer: DateExpressionLexer) {
     if (opResult != null) {
       while (opResult != null) {
         when (val durationResult = duration()) {
-          is Ok -> adj.add(durationResult.value.withOperation(opResult))
-          is Err -> return durationResult
+          is Result.Ok -> adj.add(durationResult.value.withOperation(opResult))
+          is Result.Err -> return durationResult
         }
         opResult = op()
       }
-      return Ok(adj)
+      return Result.Ok(adj)
     }
-    return Ok(null)
+    return Result.Ok(null)
   }
 
   //base returns [ DateBase t ] : 'now' { $t = DateBase.NOW; }
@@ -148,15 +146,15 @@ class DateExpressionParser(private val lexer: DateExpressionLexer) {
     lexer.skipWhitespace()
 
     val intResult = when (val result = lexer.parseInt()) {
-      is Ok -> result.value
-      is Err -> return result
+      is Result.Ok -> result.value
+      is Result.Err -> return result
     }
 
     val durationTypeResult = durationType()
     return if (durationTypeResult != null) {
-      Ok(Adjustment(durationTypeResult, intResult))
+      Result.Ok(Adjustment(durationTypeResult, intResult))
     } else {
-      Err("Was expecting a duration type at index ${lexer.index}")
+      Result.Err("Was expecting a duration type at index ${lexer.index}")
     }
   }
 
@@ -228,49 +226,49 @@ class DateExpressionParser(private val lexer: DateExpressionLexer) {
   fun offset(): Result<Pair<DateOffsetType, Int>, String> {
     lexer.skipWhitespace()
     return when {
-      lexer.matchString("day") -> Ok(DateOffsetType.DAY to 1)
-      lexer.matchString("week") -> Ok(DateOffsetType.WEEK to 1)
-      lexer.matchString("month") -> Ok(DateOffsetType.MONTH to 1)
-      lexer.matchString("year") -> Ok(DateOffsetType.YEAR to 1)
-      lexer.matchString("fortnight") -> Ok(DateOffsetType.WEEK to 2)
-      lexer.matchString("monday") -> Ok(DateOffsetType.MONDAY to 1)
-      lexer.matchString("mon") -> Ok(DateOffsetType.MONDAY to 1)
-      lexer.matchString("tuesday") -> Ok(DateOffsetType.TUESDAY to 1)
-      lexer.matchString("tues") -> Ok(DateOffsetType.TUESDAY to 1)
-      lexer.matchString("wednesday") -> Ok(DateOffsetType.WEDNESDAY to 1)
-      lexer.matchString("wed") -> Ok(DateOffsetType.WEDNESDAY to 1)
-      lexer.matchString("thursday") -> Ok(DateOffsetType.THURSDAY to 1)
-      lexer.matchString("thurs") -> Ok(DateOffsetType.THURSDAY to 1)
-      lexer.matchString("friday") -> Ok(DateOffsetType.FRIDAY to 1)
-      lexer.matchString("fri") -> Ok(DateOffsetType.FRIDAY to 1)
-      lexer.matchString("saturday") -> Ok(DateOffsetType.SATURDAY to 1)
-      lexer.matchString("sat") -> Ok(DateOffsetType.SATURDAY to 1)
-      lexer.matchString("sunday") -> Ok(DateOffsetType.SUNDAY to 1)
-      lexer.matchString("sun") -> Ok(DateOffsetType.SUNDAY to 1)
-      lexer.matchString("january") -> Ok(DateOffsetType.JAN to 1)
-      lexer.matchString("jan") -> Ok(DateOffsetType.JAN to 1)
-      lexer.matchString("february") -> Ok(DateOffsetType.FEB to 1)
-      lexer.matchString("feb") -> Ok(DateOffsetType.FEB to 1)
-      lexer.matchString("march") -> Ok(DateOffsetType.MAR to 1)
-      lexer.matchString("mar") -> Ok(DateOffsetType.MAR to 1)
-      lexer.matchString("april") -> Ok(DateOffsetType.APR to 1)
-      lexer.matchString("apr") -> Ok(DateOffsetType.APR to 1)
-      lexer.matchString("may") -> Ok(DateOffsetType.MAY to 1)
-      lexer.matchString("june") -> Ok(DateOffsetType.JUNE to 1)
-      lexer.matchString("jun") -> Ok(DateOffsetType.JUNE to 1)
-      lexer.matchString("july") -> Ok(DateOffsetType.JULY to 1)
-      lexer.matchString("jul") -> Ok(DateOffsetType.JULY to 1)
-      lexer.matchString("august") -> Ok(DateOffsetType.AUG to 1)
-      lexer.matchString("aug") -> Ok(DateOffsetType.AUG to 1)
-      lexer.matchString("september") -> Ok(DateOffsetType.SEP to 1)
-      lexer.matchString("sep") -> Ok(DateOffsetType.SEP to 1)
-      lexer.matchString("october") -> Ok(DateOffsetType.OCT to 1)
-      lexer.matchString("oct") -> Ok(DateOffsetType.OCT to 1)
-      lexer.matchString("november") -> Ok(DateOffsetType.NOV to 1)
-      lexer.matchString("nov") -> Ok(DateOffsetType.NOV to 1)
-      lexer.matchString("december") -> Ok(DateOffsetType.DEC to 1)
-      lexer.matchString("dec") -> Ok(DateOffsetType.DEC to 1)
-      else -> Err("Was expecting an offset type at index ${lexer.index}")
+      lexer.matchString("day") -> Result.Ok(DateOffsetType.DAY to 1)
+      lexer.matchString("week") -> Result.Ok(DateOffsetType.WEEK to 1)
+      lexer.matchString("month") -> Result.Ok(DateOffsetType.MONTH to 1)
+      lexer.matchString("year") -> Result.Ok(DateOffsetType.YEAR to 1)
+      lexer.matchString("fortnight") -> Result.Ok(DateOffsetType.WEEK to 2)
+      lexer.matchString("monday") -> Result.Ok(DateOffsetType.MONDAY to 1)
+      lexer.matchString("mon") -> Result.Ok(DateOffsetType.MONDAY to 1)
+      lexer.matchString("tuesday") -> Result.Ok(DateOffsetType.TUESDAY to 1)
+      lexer.matchString("tues") -> Result.Ok(DateOffsetType.TUESDAY to 1)
+      lexer.matchString("wednesday") -> Result.Ok(DateOffsetType.WEDNESDAY to 1)
+      lexer.matchString("wed") -> Result.Ok(DateOffsetType.WEDNESDAY to 1)
+      lexer.matchString("thursday") -> Result.Ok(DateOffsetType.THURSDAY to 1)
+      lexer.matchString("thurs") -> Result.Ok(DateOffsetType.THURSDAY to 1)
+      lexer.matchString("friday") -> Result.Ok(DateOffsetType.FRIDAY to 1)
+      lexer.matchString("fri") -> Result.Ok(DateOffsetType.FRIDAY to 1)
+      lexer.matchString("saturday") -> Result.Ok(DateOffsetType.SATURDAY to 1)
+      lexer.matchString("sat") -> Result.Ok(DateOffsetType.SATURDAY to 1)
+      lexer.matchString("sunday") -> Result.Ok(DateOffsetType.SUNDAY to 1)
+      lexer.matchString("sun") -> Result.Ok(DateOffsetType.SUNDAY to 1)
+      lexer.matchString("january") -> Result.Ok(DateOffsetType.JAN to 1)
+      lexer.matchString("jan") -> Result.Ok(DateOffsetType.JAN to 1)
+      lexer.matchString("february") -> Result.Ok(DateOffsetType.FEB to 1)
+      lexer.matchString("feb") -> Result.Ok(DateOffsetType.FEB to 1)
+      lexer.matchString("march") -> Result.Ok(DateOffsetType.MAR to 1)
+      lexer.matchString("mar") -> Result.Ok(DateOffsetType.MAR to 1)
+      lexer.matchString("april") -> Result.Ok(DateOffsetType.APR to 1)
+      lexer.matchString("apr") -> Result.Ok(DateOffsetType.APR to 1)
+      lexer.matchString("may") -> Result.Ok(DateOffsetType.MAY to 1)
+      lexer.matchString("june") -> Result.Ok(DateOffsetType.JUNE to 1)
+      lexer.matchString("jun") -> Result.Ok(DateOffsetType.JUNE to 1)
+      lexer.matchString("july") -> Result.Ok(DateOffsetType.JULY to 1)
+      lexer.matchString("jul") -> Result.Ok(DateOffsetType.JULY to 1)
+      lexer.matchString("august") -> Result.Ok(DateOffsetType.AUG to 1)
+      lexer.matchString("aug") -> Result.Ok(DateOffsetType.AUG to 1)
+      lexer.matchString("september") -> Result.Ok(DateOffsetType.SEP to 1)
+      lexer.matchString("sep") -> Result.Ok(DateOffsetType.SEP to 1)
+      lexer.matchString("october") -> Result.Ok(DateOffsetType.OCT to 1)
+      lexer.matchString("oct") -> Result.Ok(DateOffsetType.OCT to 1)
+      lexer.matchString("november") -> Result.Ok(DateOffsetType.NOV to 1)
+      lexer.matchString("nov") -> Result.Ok(DateOffsetType.NOV to 1)
+      lexer.matchString("december") -> Result.Ok(DateOffsetType.DEC to 1)
+      lexer.matchString("dec") -> Result.Ok(DateOffsetType.DEC to 1)
+      else -> Result.Err("Was expecting an offset type at index ${lexer.index}")
     }
   }
 }

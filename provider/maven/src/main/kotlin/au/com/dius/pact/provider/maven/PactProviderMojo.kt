@@ -1,11 +1,11 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.model.FileSource
-import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
+import au.com.dius.pact.core.support.getOrElse
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.toUrl
@@ -19,7 +19,6 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.ProviderVersion
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.reporters.ReporterManager
-import com.github.michaelbull.result.getOrElse
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter

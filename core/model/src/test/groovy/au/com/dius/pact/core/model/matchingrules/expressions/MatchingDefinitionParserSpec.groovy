@@ -12,14 +12,14 @@ import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.Either
-import com.github.michaelbull.result.Err
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
 @SuppressWarnings('LineLength')
 class MatchingDefinitionParserSpec extends Specification {
   def 'if the string does not start with a valid matching definition'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Result.Err
 
     where:
 
@@ -32,7 +32,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse type matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition('Name', TypeMatcher.INSTANCE, null)
 
     where:
@@ -45,7 +45,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse number matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition(value, new NumberTypeMatcher(matcher), null)
 
     where:
@@ -60,7 +60,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'invalid number matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Result.Err
 
     where:
 
@@ -71,7 +71,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse datetime matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition(value, matcherClass.newInstance(format), null)
 
     where:
@@ -85,7 +85,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse regex matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition(value, new RegexMatcher(regex), null)
 
     where:
@@ -97,7 +97,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'invalid regex matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Result.Err
 
     where:
 
@@ -106,7 +106,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse include matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition(value, new IncludeMatcher(value), null)
 
     where:
@@ -118,7 +118,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse boolean matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition(value, BooleanMatcher.INSTANCE, null)
 
     where:
@@ -130,7 +130,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'each key and value'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition(null, ValueType.Unknown, value, null)
 
     where:
@@ -143,7 +143,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'invalid each key and value'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Result.Err
 
     where:
 
@@ -155,7 +155,7 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'parse notEmpty matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).component1() ==
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
       new MatchingRuleDefinition(value, type, [ Either.a(NotEmptyMatcher.INSTANCE) ], null)
 
     where:

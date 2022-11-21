@@ -7,23 +7,23 @@ class VersionParserSpec extends Specification {
 
   def 'parse full version'() {
     expect:
-    Version.parse('1.2.3').component1() == new Version(1, 2, 3)
+    Version.parse('1.2.3').get() == new Version(1, 2, 3)
   }
 
   def 'parse major.minor version'() {
     expect:
-    Version.parse('1.2').component1() == new Version(1, 2, null)
+    Version.parse('1.2').get() == new Version(1, 2, null)
   }
 
   def 'parse invalid version'() {
     expect:
-    Version.parse('lkzasdjskjdf').component2() == 'Was expecting an integer at index 0'
+    Version.parse('lkzasdjskjdf').errorValue() == 'Was expecting an integer at index 0'
   }
 
   @Unroll
   def 'parse errors'() {
     expect:
-    Version.parse(version).component2() == error
+    Version.parse(version).errorValue() == error
 
     where:
 

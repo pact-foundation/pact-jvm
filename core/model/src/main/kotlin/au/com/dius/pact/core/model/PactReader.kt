@@ -4,13 +4,15 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import au.com.dius.pact.core.support.Auth
+import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.HttpClientUtils
 import au.com.dius.pact.core.support.HttpClientUtils.isJsonResponse
-import au.com.dius.pact.core.support.Auth
-import au.com.dius.pact.core.support.Utils
-import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.Version
+import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
@@ -18,11 +20,6 @@ import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.unwrap
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.expect
-import com.github.michaelbull.result.runCatching
 import mu.KLogging
 import mu.KotlinLogging
 import org.apache.hc.client5.http.auth.AuthScope
@@ -45,7 +42,6 @@ import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
 import kotlin.collections.set
-import kotlin.text.isNotEmpty
 
 private val logger = KotlinLogging.logger {}
 
@@ -65,12 +61,12 @@ fun loadPactFromUrl(
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options, tag = source.tag)
     }
     else -> when (val jsonResource = fetchJsonResource(http, source)) {
-      is Ok -> if (jsonResource.value.first is JsonValue.Object) {
+      is Result.Ok -> if (jsonResource.value.first is JsonValue.Object) {
         jsonResource.value.first.asObject()!! to jsonResource.value.second
       } else {
         throw UnsupportedOperationException("Was expected a JSON document, got ${jsonResource.value}")
       }
-      is Err -> throw jsonResource.error
+      is Result.Err -> throw jsonResource.error
     }
   }
 }
@@ -79,7 +75,7 @@ fun loadPactFromUrl(
 fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
   Result<Pair<JsonValue, UrlPactSource>, Throwable> {
   val url = URL(source.url)
-  return runCatching {
+  return handleWith {
     when (url.protocol) {
       "file" -> JsonParser.parseString(URL(source.url).readText()) to source
       else -> {

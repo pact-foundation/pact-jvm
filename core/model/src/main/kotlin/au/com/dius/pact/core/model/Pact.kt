@@ -3,8 +3,8 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonValue
-import com.github.michaelbull.result.Result
 
 /**
  * Pact Provider

@@ -3,8 +3,7 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.InteractionContents
 import mu.KLogging
 
@@ -56,7 +55,7 @@ class PlainTextContentMatcher : ContentMatcher {
   override fun setupBodyFromConfig(
     bodyConfig: Map<String, Any?>
   ): Result<List<InteractionContents>, String> {
-    return Ok(listOf(InteractionContents("",
+    return Result.Ok(listOf(InteractionContents("",
       OptionalBody.body(
         bodyConfig["body"].toString().toByteArray(),
         ContentType("text/plain")

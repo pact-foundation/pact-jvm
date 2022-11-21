@@ -2,8 +2,7 @@ package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PublishConfiguration
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Result
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -35,7 +34,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
+    3 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -55,8 +54,8 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _) >> new Ok(null) >>
-            new Err(new RuntimeException('FAILED! Bang')) >> new Ok(null)
+    3 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null) >>
+            new Result.Err(new RuntimeException('FAILED! Bang')) >> new Result.Ok(null)
     thrown(MojoExecutionException)
 
     cleanup:
@@ -165,7 +164,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', tags)) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', tags)) >> new Result.Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -186,7 +185,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', ['1', '2', '3'])) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', ['1', '2', '3'])) >> new Result.Ok(null)
 
     cleanup:
     dir.deleteDir()
@@ -211,7 +210,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(file1, _) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(file1, _) >> new Result.Ok(null)
     0 * brokerClient.uploadPactFile(file2, _)
     0 * brokerClient.uploadPactFile(file3, _)
     0 * brokerClient.uploadPactFile(file4, _)
@@ -235,7 +234,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', [], 'feat/test', 'http:/1234')) >> new Ok(null)
+    1 * brokerClient.uploadPactFile(_, new PublishConfiguration('0.0.0', [], 'feat/test', 'http:/1234')) >> new Result.Ok(null)
 
     cleanup:
     dir.deleteDir()

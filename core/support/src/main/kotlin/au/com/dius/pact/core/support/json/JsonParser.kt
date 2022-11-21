@@ -1,8 +1,6 @@
 package au.com.dius.pact.core.support.json
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Result
 import java.io.InputStream
 import java.io.Reader
 import java.util.ArrayDeque
@@ -64,29 +62,29 @@ class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
       return when {
         next.isWhitespace() -> {
           skipWhitespace()
-          Ok(JsonToken.Whitespace)
+          Result.Ok(JsonToken.Whitespace)
         }
         next == '-' || next.isDigit() -> scanNumber(next)
         next == 't' -> scanTrue()
         next == 'f' -> scanFalse()
         next == 'n' -> scanNull()
         next == '"' -> scanString()
-        next == '[' -> Ok(JsonToken.ArrayStart)
-        next == ']' -> Ok(JsonToken.ArrayEnd)
-        next == '{' -> Ok(JsonToken.ObjectStart)
-        next == '}' -> Ok(JsonToken.ObjectEnd)
-        next == ',' -> Ok(JsonToken.Comma)
-        next == ':' -> Ok(JsonToken.Colon)
+        next == '[' -> Result.Ok(JsonToken.ArrayStart)
+        next == ']' -> Result.Ok(JsonToken.ArrayEnd)
+        next == '{' -> Result.Ok(JsonToken.ObjectStart)
+        next == '}' -> Result.Ok(JsonToken.ObjectEnd)
+        next == ',' -> Result.Ok(JsonToken.Comma)
+        next == ':' -> Result.Ok(JsonToken.Colon)
         else -> unexpectedCharacter(next)
       }
     }
-    return Ok(null)
+    return Result.Ok(null)
   }
 
   private fun unexpectedCharacter(next: Char?) = if (next == null)
-    Err(JsonException("Invalid JSON (${documentPointer()}), unexpected end of the JSON document"))
+    Result.Err(JsonException("Invalid JSON (${documentPointer()}), unexpected end of the JSON document"))
   else
-    Err(JsonException("Invalid JSON (${documentPointer()}), found unexpected character '$next'"))
+    Result.Err(JsonException("Invalid JSON (${documentPointer()}), found unexpected character '$next'"))
 
   private fun scanNull(): Result<JsonToken?, JsonException> {
     var next = json.nextChar()
@@ -95,7 +93,7 @@ class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
     if (next == null || next != 'l') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'l') return unexpectedCharacter(next)
-    return Ok(JsonToken.Null)
+    return Result.Ok(JsonToken.Null)
   }
 
   private fun scanFalse(): Result<JsonToken?, JsonException> {
@@ -107,7 +105,7 @@ class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
     if (next == null || next != 's') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'e') return unexpectedCharacter(next)
-    return Ok(JsonToken.False)
+    return Result.Ok(JsonToken.False)
   }
 
   private fun scanTrue(): Result<JsonToken?, JsonException> {
@@ -117,7 +115,7 @@ class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
     if (next == null || next != 'u') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'e') return unexpectedCharacter(next)
-    return Ok(JsonToken.True)
+    return Result.Ok(JsonToken.True)
   }
 
   fun documentPointer() = json.documentPointer()
@@ -279,8 +277,8 @@ object JsonParser {
     do {
       val next = lexer.nextToken()
       token = when (next) {
-        is Err -> throw next.error
-        is Ok -> next.value
+        is Result.Err -> throw next.error
+        is Result.Ok -> next.value
       }
     } while (token is JsonToken.Whitespace)
     return token

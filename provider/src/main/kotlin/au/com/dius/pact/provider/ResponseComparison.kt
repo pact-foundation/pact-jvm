@@ -22,14 +22,12 @@ import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.orEmpty
 import au.com.dius.pact.core.model.orEmptyBody
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils.sizeOf
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.jsonObject
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import io.pact.plugins.jvm.core.PluginConfiguration
 import mu.KLogging
 import java.lang.Integer.max
@@ -47,7 +45,7 @@ data class BodyComparisonResult(
 data class ComparisonResult(
   val statusMismatch: StatusMismatch? = null,
   val headerMismatches: Map<String, List<HeaderMismatch>> = emptyMap(),
-  val bodyMismatches: Result<BodyComparisonResult, BodyTypeMismatch> = Ok(BodyComparisonResult()),
+  val bodyMismatches: Result<BodyComparisonResult, BodyTypeMismatch> = Result.Ok(BodyComparisonResult()),
   val metadataMismatches: Map<String, List<MetadataMismatch>> = emptyMap()
 )
 
@@ -82,7 +80,7 @@ class ResponseComparison(
   ): Result<BodyComparisonResult, BodyTypeMismatch> {
     val bodyTypeMismatch = mismatches.filterIsInstance<BodyTypeMismatch>().firstOrNull()
     return if (bodyTypeMismatch != null) {
-      Err(bodyTypeMismatch)
+      Result.Err(bodyTypeMismatch)
     } else {
       val bodyMismatches = mismatches
         .filterIsInstance<BodyMismatch>()
@@ -92,17 +90,17 @@ class ResponseComparison(
       val expected = expectedBody.valueAsString()
       val actual = actualBody.orEmpty()
       val diff = when (val shouldIncludeDiff = shouldGenerateDiff(resolver, max(actual.size, expected.length))) {
-        is Ok -> if (shouldIncludeDiff.value) {
+        is Result.Ok -> if (shouldIncludeDiff.value) {
           generateFullDiff(actual.toString(contentType.asCharset()), contentType, expected, isJsonBody)
         } else {
           emptyList()
         }
-        is Err -> {
+        is Result.Err -> {
           logger.warn { "Invalid value for property 'pact.verifier.generateDiff' - ${shouldIncludeDiff.error}" }
           emptyList()
         }
       }
-      Ok(BodyComparisonResult(bodyMismatches, diff))
+      Result.Ok(BodyComparisonResult(bodyMismatches, diff))
     }
   }
 
@@ -137,16 +135,16 @@ class ResponseComparison(
     @JvmStatic
     fun shouldGenerateDiff(resolver: ValueResolver, length: Int): Result<Boolean, String> {
       val shouldIncludeDiff = resolver.resolveValue("pact.verifier.generateDiff", "NOT_SET")
-      return when (val v = shouldIncludeDiff?.toLowerCase()) {
-        "true", "not_set" -> Ok(true)
-        "false" -> Ok(false)
+      return when (val v = shouldIncludeDiff?.lowercase()) {
+        "true", "not_set" -> Result.Ok(true)
+        "false" -> Result.Ok(false)
         else -> if (v.isNotEmpty()) {
           when (val result = sizeOf(v!!)) {
-            is Ok -> Ok(length <= result.value)
-            is Err -> result
+            is Result.Ok -> Result.Ok(length <= result.value)
+            is Result.Err -> result
           }
         } else {
-          Ok(false)
+          Result.Ok(false)
         }
       }
     }
