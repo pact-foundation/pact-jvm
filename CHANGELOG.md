@@ -1,13 +1,5 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.4.1 - [?62;1;4c
-
-* 32852036f - fix: com.michael-bull.kotlin-result was causing dependency issues #1639 (Ronald Holshausen, Mon Nov 21 14:26:30 2022 +1100)
-* d9eff8f3f - fix: correct the kotlin-logging dependency (Ronald Holshausen, Mon Nov 21 10:04:25 2022 +1100)
-* 953681997 - Update README.md (Ronald Holshausen, Fri Nov 18 16:19:10 2022 +1100)
-* 66c9a1e45 - chore: fix changelog (Ronald Holshausen, Fri Nov 18 16:11:10 2022 +1100)
-* 51b73d287 - bump version to 4.4.1 (Ronald Holshausen, Fri Nov 18 15:25:01 2022 +1100)
-
 # 4.4.0 - 4.4.0 Release
 
 * e273b2ebc - fix: Upgrade plugin driver to 0.1.7 (fixes startMockServer doesn't set hostInterface, port, and tls) (Ronald Holshausen, Fri Nov 18 14:34:14 2022 +1100)
