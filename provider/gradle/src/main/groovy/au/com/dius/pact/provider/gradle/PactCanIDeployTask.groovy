@@ -4,70 +4,48 @@ import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import com.github.ajalt.mordant.TermColors
 import org.gradle.api.GradleScriptException
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to verify the deployment state using a pact broker
  */
 @SuppressWarnings(['Println', 'DuplicateStringLiteral'])
-abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
+class PactCanIDeployTask extends PactCanIDeployBaseTask {
 
-  static final String PACTICIPANT = 'pacticipant'
-  static final String PACTICIPANT_VERSION = 'pacticipantVersion'
-  static final String TO = 'toTag'
-  static final String LATEST = 'latest'
+  private static final String PACTICIPANT = 'pacticipant'
+  private static final String PACTICIPANT_VERSION = 'pacticipantVersion'
+  private static final String TO = 'toTag'
+  private static final String LATEST = 'latest'
 
   @Internal
-  abstract PactBrokerClient brokerClient
-
-  @Input
-  @Optional
-  abstract Property<Broker> getBroker()
-
-  @Input
-  @Optional
-  abstract Property<Object> getPacticipant()
-
-  @Input
-  @Optional
-  abstract Property<Object> getPacticipantVersion()
-
-  @Input
-  @Optional
-  abstract Property<Object> getToProp()
-
-  @Input
-  @Optional
-  abstract Property<Object> getLatestProp()
+  PactBrokerClient brokerClient
 
   @TaskAction
   void canIDeploy() {
-    if (!broker.present) {
+    if (!project.pact.broker) {
       throw new GradleScriptException('You must add a pact broker configuration to your build before you can ' +
         'use the CanIDeploy task', null)
     }
 
     if (brokerClient == null) {
-      Broker config = broker.get()
+      Broker config = project.pact.broker
       brokerClient = setupBrokerClient(config)
     }
-    if (!pacticipant.present) {
+
+    if (!project.hasProperty(PACTICIPANT)) {
       throw new GradleScriptException('The CanIDeploy task requires -Ppacticipant=...', null)
     }
-    String pacticipant = pacticipant.get()
+    String pacticipant = project.property(PACTICIPANT)
     Latest latest = setupLatestParam()
     if ((latest instanceof Latest.UseLatestTag || latest.latest == false) &&
-      !pacticipantVersion.present) {
+      !project.hasProperty(PACTICIPANT_VERSION)) {
       throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=... or -Platest=true', null)
     }
-    String pacticipantVersion = pacticipantVersion.orElse('').get()
+    String pacticipantVersion = project.hasProperty(PACTICIPANT_VERSION) ? project.property(PACTICIPANT_VERSION) : ''
     String to = null
-    if (toProp.present) {
-      to = toProp.get()
+    if (project.hasProperty(TO)) {
+      to = project.property(TO)
     }
     def t = new TermColors()
     logger.debug(
@@ -87,8 +65,8 @@ abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
 
   private Latest setupLatestParam() {
     Latest latest = new Latest.UseLatest(false)
-    if (latestProp.present) {
-      String latestProp = latestProp.get()
+    if (project.hasProperty(LATEST)) {
+      String latestProp = project.property(LATEST)
       if (latestProp == 'true') {
         latest = new Latest.UseLatest(true)
       } else if (latestProp == 'false') {
