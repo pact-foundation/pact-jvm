@@ -388,10 +388,12 @@ open class PactBrokerLoader(
           throw IllegalAccessException("Consumer version selector methods must be public and static. " +
             "Method ${method.name} is not accessible.")
         }
-        if (!method.trySetAccessible() && !method.canAccess(null)) {
+
+        // trySetAccessible is not available on JDK 8
+        /*if (!method.trySetAccessible() && !method.canAccess(null)) {
           throw IllegalAccessException("Consumer version selector methods must be public and static. " +
             "Method ${method.name} is not accessible (canAccess returned false).")
-        }
+        }*/
 
         if (!SelectorBuilder::class.java.isAssignableFrom(method.returnType)
           && !List::class.java.isAssignableFrom(method.returnType)) {

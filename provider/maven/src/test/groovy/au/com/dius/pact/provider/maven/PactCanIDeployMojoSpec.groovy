@@ -59,7 +59,7 @@ class PactCanIDeployMojoSpec extends Specification {
     mojo.pacticipantVersion = null
     mojo.latest = 'true'
     mojo.brokerClient = Mock(PactBrokerClient) {
-      canIDeploy(_, _, _, _, _) >> new CanIDeployResult(true, '', '', null)
+      canIDeploy(_, _, _, _, _) >> new CanIDeployResult(true, '', '', null, null)
     }
 
     when:
@@ -79,7 +79,7 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234', _, _, _) >>
-      new CanIDeployResult(true, '', '', null)
+      new CanIDeployResult(true, '', '', null, null)
   }
 
   def 'passes optional parameters to the pact broker client'() {
@@ -94,7 +94,7 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234',
-      new Latest.UseLatest(true), 'prod', _) >> new CanIDeployResult(true, '', '', null)
+      new Latest.UseLatest(true), 'prod', _) >> new CanIDeployResult(true, '', '', null, null)
   }
 
   def 'passes ignore parameters to the pact broker client'() {
@@ -110,7 +110,7 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234',
-      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null)
+      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null, null)
   }
 
   def 'throws an exception if the pact broker client says no'() {
@@ -122,7 +122,7 @@ class PactCanIDeployMojoSpec extends Specification {
 
     then:
     1 * mojo.brokerClient.canIDeploy('test', '1234', _, _, _) >>
-      new CanIDeployResult(false, 'Bad version', 'Bad version', null)
+      new CanIDeployResult(false, 'Bad version', 'Bad version', null, null)
     def ex = thrown(MojoExecutionException)
     ex.message == 'Can you deploy? Computer says no ¯\\_(ツ)_/¯ Bad version'
   }

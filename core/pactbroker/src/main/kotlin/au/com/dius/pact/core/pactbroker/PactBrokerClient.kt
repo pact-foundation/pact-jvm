@@ -104,7 +104,13 @@ sealed class Latest {
 /**
  * Model for a CanIDeploy result
  */
-data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String, val unknown: Int? = null)
+data class CanIDeployResult(
+  val ok: Boolean,
+  val message: String,
+  val reason: String,
+  val unknown: Int? = null,
+  val verificationResultUrl: String? = null
+)
 
 /**
  * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
@@ -993,8 +999,20 @@ open class PactBrokerClient(
       when (val result = halClient.getJson(path, false)) {
         is Ok<JsonValue> -> {
           val summary = result.value["summary"].asObject()
+          val matrix = result.value["matrix"]
+          val verificationResultUrl = if (matrix.isArray) {
+            matrix.asArray()
+              ?.get(0)?.asObject()
+              ?.get("verificationResult")?.asObject()
+              ?.get("_links")?.asObject()
+              ?.get("self")?.asObject()
+              ?.get("href")
+              ?.let{ url -> Json.toString(url) }
+          } else {
+            null
+          }
           CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
-            Json.toInteger(summary["unknown"]))
+            Json.toInteger(summary["unknown"]), verificationResultUrl)
         }
         is Err<Exception> -> {
           logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
