@@ -15,6 +15,7 @@ import java.nio.charset.Charset
 
 class PactPublishTaskSpec extends Specification {
 
+  private PactPublishTask task
   private PactPlugin plugin
   private Project project
   private PactBrokerClient brokerClient
@@ -24,6 +25,7 @@ class PactPublishTaskSpec extends Specification {
     project = ProjectBuilder.builder().build()
     plugin = new PactPlugin()
     plugin.apply(project)
+    task = project.tasks.pactPublish
 
     project.file("${project.buildDir}/pacts").mkdirs()
     pactFile = project.file("${project.buildDir}/pacts/test_pact.json")
@@ -36,7 +38,7 @@ class PactPublishTaskSpec extends Specification {
 
   def 'raises an exception if no pact publish configuration is found'() {
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     thrown(GradleScriptException)
@@ -52,7 +54,7 @@ class PactPublishTaskSpec extends Specification {
     project.evaluate()
 
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     1 * brokerClient.uploadPactFile(_, _) >> new Ok(null)
@@ -68,7 +70,7 @@ class PactPublishTaskSpec extends Specification {
     project.evaluate()
 
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     1 * brokerClient.uploadPactFile(_, _) >> new Err(new RuntimeException('Boom'))
@@ -86,7 +88,7 @@ class PactPublishTaskSpec extends Specification {
     project.evaluate()
 
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]], _) >> brokerClient
@@ -104,7 +106,7 @@ class PactPublishTaskSpec extends Specification {
     project.evaluate()
 
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']], _) >> brokerClient
@@ -123,7 +125,7 @@ class PactPublishTaskSpec extends Specification {
     project.evaluate()
 
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1', ['tag1'])) >> new Ok(null)
@@ -148,7 +150,7 @@ class PactPublishTaskSpec extends Specification {
     }
 
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     1 * brokerClient.uploadPactFile(pactFile, _) >> new Ok(null)
@@ -168,7 +170,7 @@ class PactPublishTaskSpec extends Specification {
     project.evaluate()
 
     when:
-    project.tasks.pactPublish.publishPacts()
+    task.publishPacts()
 
     then:
     1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1.2.3')) >> new Ok(null)
