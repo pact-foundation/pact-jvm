@@ -1,5 +1,39 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.40 - Fixes backported from v4.3.x
+
+* f449da53a - feat: protect json body generation against loop for cicly reference (Samuel, Fri Oct 21 16:56:16 2022 +0200)
+* e256c0cd8 - feat: support MessagePact with a string as a content #1619 (Ronald Holshausen, Wed Oct 26 13:22:28 2022 +1100)
+* 68dd07fa3 - feat: Support system properties or environment variables for consumer and provider annotation with JUnit4 provider tests #528 #1616 (Ronald Holshausen, Wed Oct 26 12:21:38 2022 +1100)
+* 28ff52287 - fix:  queryMatchingDatetime creates invalid genetator #1612 (Ronald Holshausen, Wed Oct 26 10:18:41 2022 +1100)
+* aece98db3 - fix: write empty bodies to the Pact file #1611 (Ronald Holshausen, Tue Oct 25 18:21:14 2022 +1100)
+* 7083f8c06 - feat: add capabilityi to build json body based on data class required constructor fields (Samuel, Fri Oct 21 16:02:57 2022 +0200)
+* 6bd3f24ca - Revert "Make PactPublishTask compatible with Gradle Configuration Cache" (Ronald Holshausen, Fri Nov 25 10:45:38 2022 +1100)
+* c33c01d56 - Revert "Make PactCanIDeployTask compatible with Gradle Configuration Cache" (Ronald Holshausen, Fri Nov 25 10:45:22 2022 +1100)
+* d1afb8e97 - bump actions/setup-java to v3 (Nikolas Grottendieck, Sun Oct 16 13:34:01 2022 +0200)
+* b937ccb79 - bump org.json:json version to latest (Nikolas Grottendieck, Sun Oct 16 13:17:02 2022 +0200)
+* 49a38b659 - Make PactCanIDeployTask compatible with Gradle Configuration Cache (Marco Gomiero, Mon Oct 10 23:19:53 2022 +0200)
+* e8bcf0876 - Make PactPublishTask compatible with Gradle Configuration Cache (Marco Gomiero, Mon Oct 10 21:50:52 2022 +0200)
+* c8698523a - chore: Update the HAL client to return the current navigated document (Ronald Holshausen, Fri Sep 30 15:16:18 2022 +1000)
+* 02ee59167 - chore: correct static code issues and failing tests from PR #1605 (Ronald Holshausen, Mon Sep 19 10:42:49 2022 +1000)
+* 6f3c42232 - Use Thread Context ClassLoader to find test resources (Holly Cummins, Sat Sep 17 12:36:48 2022 +0100)
+* 369033589 - Bump version of Kotlin Result to work around Unresolved reference build failures (Holly Cummins, Fri Sep 16 20:10:55 2022 +0100)
+* ba2cf791c - Fix issue with base classes (Stefano Lucka, Fri Sep 16 20:08:34 2022 +0200)
+* 92dca3b3a - feat: update docs on providing raw selector JSON (Ronald Holshausen, Thu Sep 1 12:10:14 2022 +1000)
+* 728ed95dc - feat: add capability to the selector builder DSL to add raw JSON snippets (Ronald Holshausen, Wed Aug 31 16:54:53 2022 +1000)
+* ce9b01f85 - chore: fixes after cherry picking commits (Ronald Holshausen, Thu Nov 24 16:56:50 2022 +1100)
+* bd4289975 - fix(Gradle): publishing pacts - default to the consumer version system property if it is set #1601 (Ronald Holshausen, Wed Aug 31 14:14:01 2022 +1000)
+* d0b4051e4 - chore: fix publishing Gradle plugin to Maven Central #1588 (Ronald Holshausen, Tue Aug 30 15:18:04 2022 +1000)
+* 041e69b14 - feat: add example JUnit4 Spring test using new consumer version selector method (Ronald Holshausen, Thu Aug 11 14:18:30 2022 +1000)
+* a601f18c8 - feat: Add docs for using consumer version selector methods with JUnit4 (Ronald Holshausen, Thu Aug 11 14:05:42 2022 +1000)
+* dcfdb6a8b - fix: raise an exception when the consumerVersionSelectors method has the wrong signature #1594 (Ronald Holshausen, Thu Aug 11 11:53:19 2022 +1000)
+* e924d807c - fix: allways apply the plugin-publish plugin to the Gradle plugin project #1588 (Ronald Holshausen, Wed Aug 10 16:17:49 2022 +1000)
+* 78a6dc867 - chore: move PactBrokerLoaderSpec to provider test source (Ronald Holshausen, Wed Aug 10 15:49:04 2022 +1000)
+* babb8808a - chore: Correct JUnit 5 readme (Ronald Holshausen, Wed Aug 10 09:43:52 2022 +1000)
+* fc9fb3b40 - Consumer version selector method must be public (Stefano Lucka, Tue Aug 9 19:30:32 2022 +0200)
+* 52df11566 - Replace diff-utils with the latest actively maintained version 4.12 (Bernard Fugas, Fri Aug 5 08:38:11 2022 +0200)
+* 52d094eb1 - bump version to 4.1.40 (Ronald Holshausen, Tue Aug 2 17:27:30 2022 +1000)
+
 # 4.1.39 - Back-ported fixes and consumer version selectors from v4.3.x
 
 * 03aaec2b1 - chore: fix code check after merging from master (Ronald Holshausen, Tue Aug 2 16:54:38 2022 +1000)
