@@ -2,10 +2,8 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.util.IndicesCombination
 import au.com.dius.pact.core.matchers.util.LargestKeyValue
-import au.com.dius.pact.core.matchers.util.corresponds
 import au.com.dius.pact.core.matchers.util.memoizeFixed
 import au.com.dius.pact.core.matchers.util.padTo
-import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
@@ -16,53 +14,47 @@ import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
-import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
 import java.math.BigInteger
 import java.util.Comparator
-import java.util.function.Predicate
 
 @Suppress("TooManyFunctions")
 object Matchers : KLogging() {
-
-  private val intRegex = Regex("\\d+")
 
   private fun matchesToken(pathElement: String, token: PathToken): Int {
     return when (token) {
       is PathToken.Root -> if (pathElement == "$") 2 else 0
       is PathToken.Field -> if (pathElement == token.name) 2 else 0
-      is PathToken.Index -> if (pathElement.matches(intRegex) && token.index == pathElement.toInt()) 2 else 0
-      is PathToken.StarIndex -> if (pathElement.matches(intRegex)) 1 else 0
+      is PathToken.Index -> if (pathElement.toIntOrNull() == token.index) 2 else 0
+      is PathToken.StarIndex -> if (pathElement.toIntOrNull() != null) 1 else 0
       is PathToken.Star -> 1
       else -> 0
     }
   }
 
   fun matchesPath(pathExp: String, path: List<String>): Int {
-    val parseResult = parsePath(pathExp)
-    val filter = tails(path.reversed()).filter { l ->
-      corresponds(l.reversed(), parseResult) { pathElement, pathToken ->
-        matchesToken(pathElement, pathToken) != 0
-      }
-    }
-    return if (filter.isNotEmpty()) {
-      filter.maxByOrNull { seq -> seq.size }?.size ?: 0
-    } else {
-      0
-    }
+    return matchesPath(parsePath(pathExp), path)
+  }
+
+  private fun matchesPath(pathTokens: List<PathToken>, path: List<String>): Int {
+    val matchesPath = pathTokens.size <= path.size && pathTokens.indices
+        .none { index -> matchesToken(path[index], pathTokens[index]) == 0 }
+    return if (matchesPath) pathTokens.size else 0
   }
 
   fun calculatePathWeight(pathExp: String, path: List<String>): Int {
-    val parseResult = parsePath(pathExp)
-    return path.zip(parseResult).asSequence().map {
-        matchesToken(it.first, it.second)
-    }.reduce { acc, i -> acc * i }
+    return calculatePathWeight(parsePath(pathExp), path)
+  }
+
+  fun calculatePathWeight(pathTokens: List<PathToken>, path: List<String>): Int {
+    return path
+      .zip(pathTokens) { pathElement, pathToken -> matchesToken(pathElement, pathToken) }
+      .reduce { acc, i -> acc * i }
   }
 
   @JvmStatic
