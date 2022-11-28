@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import kotlin.Triple
 import spock.lang.Issue
 import spock.lang.Specification
@@ -289,6 +290,20 @@ class MatchingContextSpec extends Specification {
     where:
 
     category << [ 'header', 'query', 'metadata' ]
+  }
+
+  @Issue('#1347')
+  def 'values matcher must not cascade'() {
+    given:
+    def matchingRules = new MatchingRuleCategory('body')
+    matchingRules.addRule('$', ValuesMatcher.INSTANCE)
+    def context = new MatchingContext(matchingRules, true)
+
+    when:
+    def rules = context.selectBestMatcher(['$', 'id'])
+
+    then:
+    rules.rules == []
   }
 
   @Issue('#1367')
