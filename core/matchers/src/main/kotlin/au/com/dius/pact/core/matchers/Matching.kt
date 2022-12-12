@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
@@ -25,13 +26,9 @@ data class MatchingContext @JvmOverloads constructor(
 ) {
   @JvmOverloads
   fun matcherDefined(path: List<String>, pathComparator: Comparator<String> = Comparator.naturalOrder()): Boolean {
-    return resolveMatchers(path, pathComparator).filter2 { (p, rule) ->
-      if (rule.rules.any { it is ValuesMatcher }) {
-        parsePath(p).size == path.size
-      } else {
-        true
-      }
-    }.isNotEmpty()
+    return resolveMatchers(path, pathComparator)
+        .filter2 { (p, ruleGroup) -> ruleGroup.rules.none { it is ValuesMatcher } || parsePath(p).size == path.size }
+        .isNotEmpty()
   }
 
   private fun resolveMatchers(path: List<String>, pathComparator: Comparator<String>): MatchingRuleCategory {
@@ -49,29 +46,21 @@ data class MatchingContext @JvmOverloads constructor(
   ): MatchingRuleGroup {
     val matcherCategory = resolveMatchers(path, pathComparator)
     return if (matchers.name == "body") {
-      val result = matcherCategory.filter2 { (p, rule) ->
-        if (rule.rules.any { it is ValuesMatcher }) {
-          parsePath(p).size == path.size
-        } else {
-          true
-        }
-      }.maxBy { a, b ->
-        val weightA = Matchers.calculatePathWeight(a, path)
-        val weightB = Matchers.calculatePathWeight(b, path)
-        when {
-          weightA == weightB -> when {
-            a.length > b.length -> 1
-            a.length < b.length -> -1
-            else -> 0
-          }
-          weightA > weightB -> 1
-          else -> -1
-        }
-      }
-      result?.second?.copy(cascaded = parsePath(result.first).size != path.size) ?: MatchingRuleGroup()
+      val result = matcherCategory.matchingRules
+          .map { BestMatcherResult(path = path, pathExp = it.key, ruleGroup = it.value) }
+          .filter { it.pathWeight > 0 }
+          .maxWithOrNull(compareBy<BestMatcherResult> { it.pathWeight }.thenBy { it.pathExp.length })
+      result?.ruleGroup?.copy(cascaded = result.pathTokens.size < path.size) ?: MatchingRuleGroup()
     } else {
       matcherCategory.matchingRules.values.first()
     }
+  }
+
+  private class BestMatcherResult(path: List<String>, val pathExp: String, val ruleGroup: MatchingRuleGroup) {
+    val pathTokens: List<PathToken> = parsePath(pathExp)
+    val pathWeight: Int = if (ruleGroup.rules.none { it is ValuesMatcher } || pathTokens.size == path.size)
+      Matchers.calculatePathWeight(pathTokens, path)
+    else 0
   }
 
   fun typeMatcherDefined(path: List<String>): Boolean {
