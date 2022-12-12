@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.support
 
+import au.com.dius.pact.core.support.Auth.Companion.DEFAULT_AUTH_HEADER
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.ValueResolver
@@ -111,8 +112,10 @@ object HttpClient : KLogging() {
             }
           }
           "bearer" -> {
-            if (authentication.size > 1) {
-              defaultHeaders["Authorization"] = "Bearer " + authentication[1].toString()
+            if (authentication.size > 2) {
+              defaultHeaders[authentication[2].toString()] = "Bearer " + authentication[1].toString()
+            } else if (authentication.size > 1) {
+              defaultHeaders[DEFAULT_AUTH_HEADER] = "Bearer " + authentication[1].toString()
             } else {
               logger.warn { "Bearer token authentication requires a token, ignoring." }
             }
