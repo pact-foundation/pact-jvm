@@ -12,7 +12,7 @@ repositories {
     mavenCentral()
 }
 
-version = '4.4.3'
+version = '4.5.0-beta.0'
 
 java {
     targetCompatibility = '11'
@@ -45,6 +45,7 @@ dependencies {
         implementation 'io.netty:netty-handler:4.1.84.Final'
         implementation 'org.apache.groovy:groovy:4.0.6'
         implementation 'org.apache.groovy:groovy-json:4.0.6'
+        implementation 'io.pact.plugin.driver:core:0.2.0'
 
         testImplementation 'org.apache.groovy:groovy:4.0.6'
         testImplementation 'org.apache.groovy:groovy-json:4.0.6'

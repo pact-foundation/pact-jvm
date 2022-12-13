@@ -9,8 +9,6 @@ import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderResponse
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
@@ -88,8 +86,8 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
     return when (val v4pact = pact.asV4Pact()) {
       is Result.Ok -> when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
         interaction.asV4Interaction(), config)) {
-        is Ok -> result.value to transportEntry
-        is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
+        is Result.Ok -> result.value to transportEntry
+        is Result.Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
       }
       is Result.Err -> throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")
     }
@@ -109,8 +107,8 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
         is Result.Ok -> {
           for (plugin in v4pact.value.pluginData()) {
             when (DefaultPluginManager.loadPlugin(plugin.name, plugin.version)) {
-              is Ok -> {}
-              is Err -> throw PactPluginNotFoundException(plugin.name, plugin.version)
+              is Result.Ok -> {}
+              is Result.Err -> throw PactPluginNotFoundException(plugin.name, plugin.version)
             }
           }
           val transport = config["transport"]

@@ -37,8 +37,6 @@ import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
@@ -969,7 +967,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       pact,
       interaction
     )) {
-      is Ok -> if (result.value.ok) {
+      is Result.Ok -> if (result.value.ok) {
         VerificationResult.Ok(interaction.interactionId, result.value.output)
       } else {
         VerificationResult.Failed("Verification via plugin failed", "Verification Failed",
@@ -984,7 +982,7 @@ open class ProviderVerifier @JvmOverloads constructor (
             }), output = result.value.output
         )
       }
-      is Err -> VerificationResult.Failed("Verification via plugin failed",
+      is Result.Err -> VerificationResult.Failed("Verification via plugin failed",
         "Verification Failed - ${result.error}")
     }
   }

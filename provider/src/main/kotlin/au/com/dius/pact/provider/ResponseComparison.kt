@@ -185,7 +185,7 @@ class ResponseComparison(
             null -> emptyList()
             else -> Matching.compareMessageMetadata(message.contents.metadata, metadata, metadataContext)
           }
-          val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
+          val messageContentType = message.contentType.or(ContentType.TEXT_PLAIN)
           val responseComparison = ResponseComparison(
             mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents.contents,
             messageContentType.isJson(), messageContentType, actual)
@@ -201,7 +201,7 @@ class ResponseComparison(
             null -> emptyList()
             else -> Matching.compareMessageMetadata(message.metadata, metadata, metadataContext)
           }
-          val messageContentType = message.getContentType().or(ContentType.TEXT_PLAIN)
+          val messageContentType = message.contentType.or(ContentType.TEXT_PLAIN)
           val responseComparison = ResponseComparison(
             mapOf("Content-Type" to listOf(messageContentType.toString())), message.contents,
             messageContentType.isJson(), messageContentType, actual)
@@ -222,7 +222,7 @@ class ResponseComparison(
     ): MutableList<BodyMismatch> {
       val (contents, contentType) = when (message) {
         is V4Interaction.AsynchronousMessage -> message.contents.contents to message.contents.getContentType()
-        is Message -> message.contents to message.getContentType()
+        is Message -> message.contents to message.contentType
         else -> TODO("Matching a ${message.javaClass.simpleName} is not implemented")
       }
       val result = MatchingConfig.lookupContentMatcher(contentType.getBaseType())

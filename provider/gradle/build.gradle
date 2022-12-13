@@ -51,7 +51,7 @@ gradlePlugin {
 
 compileGroovy {
   dependsOn compileKotlin
-  classpath = classpath.plus(files(compileKotlin.destinationDir))
+  classpath = classpath.plus(files(compileKotlin.destinationDirectory))
 }
 
 publishing {

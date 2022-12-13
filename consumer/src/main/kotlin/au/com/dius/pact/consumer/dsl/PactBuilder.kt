@@ -26,8 +26,6 @@ import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.deepMerge
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
@@ -95,8 +93,8 @@ open class PactBuilder(
     val plugin = findPlugin(name, version)
     if (plugin == null) {
       when (val result = DefaultPluginManager.loadPlugin(name, version)) {
-        is Ok -> plugins.add(result.value)
-        is Err -> {
+        is Result.Ok -> plugins.add(result.value)
+        is Result.Err -> {
           logger.error { result.error }
           throw PactPluginNotFoundException(name, version)
         }
@@ -241,7 +239,7 @@ open class PactBuilder(
                   if (rules != null) {
                     matchingRules.addCategory(rules)
                   }
-                  MessageContents(body, mapOf(), matchingRules, generators ?: Generators(), partName) to
+                  MessageContents(body, mutableMapOf(), matchingRules, generators ?: Generators(), partName) to
                     InteractionMarkup(interactionMarkup, interactionMarkupType)
                 }
               }
@@ -256,7 +254,7 @@ open class PactBuilder(
         } else {
           logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
           when (val result = matcher.configureContent(contentType, bodyConfig)) {
-            is Ok -> {
+            is Result.Ok -> {
               result.value.map {
                 val (partName, body, rules, generators, metadata, config, interactionMarkup, interactionMarkupType) = it
                 val matchingRules = MatchingRulesImpl()
@@ -269,11 +267,11 @@ open class PactBuilder(
                 if (config.pactConfiguration.isNotEmpty()) {
                   addPluginConfiguration(matcher, config.pactConfiguration)
                 }
-                MessageContents(body, metadata, matchingRules, generators ?: Generators(), partName) to
+                MessageContents(body, metadata.toMutableMap(), matchingRules, generators ?: Generators(), partName) to
                   InteractionMarkup(interactionMarkup, interactionMarkupType)
               }
             }
-            is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+            is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
           }
         }
       } else {
@@ -341,7 +339,7 @@ open class PactBuilder(
     interaction: V4Interaction
   ) {
     when (val result = matcher.configureContent(contentType, bodyConfig)) {
-      is Ok -> {
+      is Result.Ok -> {
         if (result.value.size > 1) {
           logger.warn { "Plugin returned multiple contents, will only use the first" }
         }
@@ -370,7 +368,7 @@ open class PactBuilder(
           interaction.interactionMarkup = InteractionMarkup(interactionMarkup, interactionMarkupType)
         }
       }
-      is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+      is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
     }
   }
 
