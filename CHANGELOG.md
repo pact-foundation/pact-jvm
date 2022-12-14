@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.5.0-beta.0 - [?62;1;4csupport for plugin GenerateContentRequest
+# 4.5.0-beta.0 - Support for plugin GenerateContentRequest
 
 * ccaf27ee9 - feat: Add support for plugin GenerateContentRequest (Ronald Holshausen, Wed Dec 14 15:26:28 2022 +1100)
 * 6acc512d1 - chore: Upgrade Kotlin to 1.7.22 and plugin driver to 0.2.0 (Ronald Holshausen, Tue Dec 13 14:21:24 2022 +1100)
