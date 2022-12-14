@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.0-beta.0 - [?62;1;4csupport for plugin GenerateContentRequest
+
+* ccaf27ee9 - feat: Add support for plugin GenerateContentRequest (Ronald Holshausen, Wed Dec 14 15:26:28 2022 +1100)
+* 6acc512d1 - chore: Upgrade Kotlin to 1.7.22 and plugin driver to 0.2.0 (Ronald Holshausen, Tue Dec 13 14:21:24 2022 +1100)
+* 1b1579ff2 - chore: Upgrade Gradle to 7.6 (Ronald Holshausen, Tue Dec 13 10:56:36 2022 +1100)
+* b9fe94e6b - Merge pull request #1647 from tlinkowski/matchers-performance-improvements (Ronald Holshausen, Tue Dec 13 08:55:32 2022 +1100)
+* c9a62cc8d - refactor: performance improvements in core/matchers module (Matchers, Matching, CollectionUtils) (Tomasz Linkowski, Mon Nov 28 13:11:32 2022 +0100)
+* 38f8769ab - Merge pull request #1645 from artemptushkin/bugfix/fix-custom-auth-header (Ronald Holshausen, Mon Dec 12 14:58:52 2022 +1100)
+* 21af9f54b - refactor: add missing test case for #1347 (Tomasz Linkowski, Mon Nov 28 15:12:54 2022 +0100)
+* 102e67362 - bugfix: fix custom header propagation in list case (Artem Ptushkin, Tue Dec 6 10:14:01 2022 +0100)
+* 70280c8b6 - bump version to 4.4.3 (Ronald Holshausen, Tue Nov 22 11:44:11 2022 +1100)
+
 # 4.4.2 - Fix transitive dependencies
 
 * 362924b38 - fix: httpclient5 and org.json need to be defined as api deps in the dependency constraints #1639 (Ronald Holshausen, Tue Nov 22 11:21:54 2022 +1100)
