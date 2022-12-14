@@ -45,12 +45,11 @@ class PactBuilder extends GroovyBuilder {
   List interactions = []
   List<ProviderState> providerStates = []
   boolean requestState
-  PactSpecVersion specVersion = PactSpecVersion.V3
 
-  PactBuilder(PactSpecVersion version = PactSpecVersion.V3) {
-    this.specVersion = version
+  PactBuilder(PactSpecVersion version = PactSpecVersion.V4) {
+    super(version)
 
-    if (specVersion == PactSpecVersion.V4) {
+    if (pactVersion == PactSpecVersion.V4) {
       pact = new V4Pact(new Consumer(), new Provider())
     }
   }
@@ -118,7 +117,7 @@ class PactBuilder extends GroovyBuilder {
    */
   PactBuilder uponReceiving(String requestDescription) {
     updateInteractions()
-    if (this.specVersion == PactSpecVersion.V4) {
+    if (this.pactVersion == PactSpecVersion.V4) {
       this.currentInteraction = new V4Interaction.SynchronousHttp('', requestDescription, providerStates)
     } else {
       this.currentInteraction = new RequestResponseInteraction(requestDescription, providerStates)
@@ -265,7 +264,7 @@ class PactBuilder extends GroovyBuilder {
     updateInteractions()
     this.pact.interactions.addAll(interactions)
 
-    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, specVersion,
+    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion,
       MockServerImplementation.Default)
 
     def runTest = closure

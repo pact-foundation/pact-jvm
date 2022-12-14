@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
@@ -35,6 +36,14 @@ class PactBodyBuilder extends GroovyBuilder {
   private bodyRepresentation = [:]
   private path = DOLLAR
   private final bodyStack = []
+
+  PactBodyBuilder() {
+    super(PactSpecVersion.V4)
+  }
+
+  PactBodyBuilder(PactSpecVersion pactVersion) {
+    super(pactVersion ?: PactSpecVersion.V4)
+  }
 
   String getBody() {
     if (shouldPrettyPrint()) {

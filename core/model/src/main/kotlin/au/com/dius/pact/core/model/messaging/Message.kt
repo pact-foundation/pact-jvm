@@ -20,9 +20,54 @@ import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 
+/**
+ * Interface to a synchronous message
+ */
 interface MessageInteraction {
+  /**
+   * Message description
+   */
   val description: String
+
+  /**
+   * Message interaction ID. This will only be set if fetched from a Pact Broker
+   */
   val interactionId: String?
+
+  /**
+   * Message contents
+   */
+  val messageContents: OptionalBody
+
+  /**
+   * Matching rules for the message
+   */
+  val matchingRules: MatchingRules
+
+  /**
+   * Generators for the message
+   */
+  val generators: Generators
+
+  /**
+   * Message Metadata
+   */
+  val metadata: MutableMap<String, Any?>
+
+  /**
+   * The content type of the message
+   */
+  val contentType: ContentType
+
+  /**
+   * Returns the bytes of the message content
+   */
+  fun contentsAsBytes(): ByteArray?
+
+  /**
+   * Returns the message content as a String. This will convert the contents if necessary.
+   */
+  fun contentsAsString(): String?
 }
 
 /**
@@ -33,23 +78,25 @@ class Message @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),
   var contents: OptionalBody = OptionalBody.missing(),
-  val matchingRules: MatchingRules = MatchingRulesImpl(),
-  var generators: Generators = Generators(),
-  var metadata: MutableMap<String, Any?> = mutableMapOf(),
+  override val matchingRules: MatchingRules = MatchingRulesImpl(),
+  override var generators: Generators = Generators(),
+  override var metadata: MutableMap<String, Any?> = mutableMapOf(),
   interactionId: String? = null
 ) : BaseInteraction(interactionId, description, providerStates), MessageInteraction {
+  override val messageContents: OptionalBody
+    get() = contents
+  override val contentType: ContentType
+    get() = contentType(metadata).or(contents.contentType)
 
-  fun contentsAsBytes() = when {
+  override fun contentsAsBytes() = when {
     isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryWireFormatter.addMagicBytes(contents.orEmpty())
     else -> contents.orEmpty()
   }
 
-  fun contentsAsString() = when {
+  override fun contentsAsString() = when {
     isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryWireFormatter.addMagicBytesToString(contents.valueAsString())
     else -> contents.valueAsString()
   }
-
-  fun getContentType() = contentType(metadata).or(contents.contentType)
 
   @Suppress("NestedBlockDepth")
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
@@ -90,18 +137,18 @@ class Message @JvmOverloads constructor(
   private fun isJsonCompatibleContent(): Boolean = isJsonContents() || isKafkaSchemaRegistryJson()
 
   private fun isJsonContents() = when {
-    contents.isPresent() ->  getContentType().isJson()
+    contents.isPresent() ->  contentType.isJson()
     else -> false
   }
 
   private fun isKafkaSchemaRegistryJson(): Boolean = when {
-    contents.isPresent() -> getContentType().isKafkaSchemaRegistryJson()
+    contents.isPresent() -> contentType.isKafkaSchemaRegistryJson()
     else -> false
   }
 
   fun formatContents(): String {
     return if (contents.isPresent()) {
-      val contentType = getContentType()
+      val contentType = contentType
 
       when {
         contentType.isKafkaSchemaRegistryJson() -> tryParseKafkaSchemaRegistryMagicBytes()
@@ -227,7 +274,7 @@ class Message @JvmOverloads constructor(
 
     fun contentType(metaData: Map<String, Any?>): ContentType {
       return ContentType.fromString(metaData.entries.find {
-        it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
+        it.key.lowercase() == "contenttype" || it.key.lowercase() == "content-type"
       }?.value?.toString())
     }
   }

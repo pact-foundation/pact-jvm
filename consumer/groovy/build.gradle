@@ -7,6 +7,9 @@ group = 'au.com.dius.pact.consumer'
 
 dependencies {
   api project(":consumer")
+  api('io.pact.plugin.driver:core') {
+    exclude group: 'au.com.dius.pact.core'
+  }
 
   implementation 'org.apache.groovy:groovy'
   implementation 'org.apache.groovy:groovy-json'
@@ -14,9 +17,6 @@ dependencies {
   implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'org.apache.commons:commons-collections4'
-  implementation('io.pact.plugin.driver:core') {
-    exclude group: 'au.com.dius.pact.core'
-  }
 
   testImplementation 'junit:junit'
   testImplementation 'ch.qos.logback:logback-classic'

@@ -3,6 +3,8 @@ package au.com.dius.pact.core.model.v4
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.bodyFromJson
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -15,7 +17,7 @@ import mu.KLogging
  */
 data class MessageContents @JvmOverloads constructor(
   val contents: OptionalBody = OptionalBody.missing(),
-  val metadata: Map<String, Any?> = mapOf(),
+  val metadata: MutableMap<String, Any?> = mutableMapOf(),
   val matchingRules: MatchingRules = MatchingRulesImpl(),
   val generators: Generators = Generators(),
   val partName: String = ""
@@ -42,6 +44,15 @@ data class MessageContents @JvmOverloads constructor(
     return "Message Contents ( contents: $contents, metadata: $metadata )"
   }
 
+  /**
+   * Configures any generators for the given category
+   */
+  fun setupGeneratorsFor(category: Category, context: MutableMap<String, Any>): Map<String, Generator> {
+    val generators = generators.categories[category] ?: emptyMap()
+    val matchingRuleGenerators = matchingRules.rulesForCategory(category.name.lowercase()).generators(context)
+    return generators + matchingRuleGenerators
+  }
+
   companion object : KLogging() {
     fun fromJson(json: JsonValue): MessageContents {
       val metadata = if (json.has("metadata")) {
@@ -62,7 +73,7 @@ data class MessageContents @JvmOverloads constructor(
       val generators = if (json.has("generators") && json["generators"] is JsonValue.Object)
         Generators.fromJson(json["generators"])
         else Generators()
-      return MessageContents(contents, metadata, matchingRules, generators)
+      return MessageContents(contents, metadata.toMutableMap(), matchingRules, generators)
     }
   }
 }

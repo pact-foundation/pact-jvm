@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.model.MockServerImplementation
-import au.com.dius.pact.core.matchers.DefaultResponseGenerator
+import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
 import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
@@ -203,7 +203,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
           mutableMapOf(
             "mockServer" to mapOf("href" to getUrl(), "port" to getPort()),
             "ArrayContainsJsonGenerator" to ArrayContainsJsonGenerator
-        ), GeneratorTestMode.Consumer)
+        ), GeneratorTestMode.Consumer, emptyList(), emptyMap()) // TODO: need to pass any plugin config here
       }
       is PartialRequestMatch -> {
         val interaction = matchResult.problems.keys.first().asSynchronousRequestResponse()!!

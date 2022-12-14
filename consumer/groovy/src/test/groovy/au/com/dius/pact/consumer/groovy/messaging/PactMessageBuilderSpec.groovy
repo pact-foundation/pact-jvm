@@ -1,15 +1,16 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessageInteraction
 import groovy.json.JsonSlurper
 import spock.lang.Issue
 import spock.lang.Specification
 
 class PactMessageBuilderSpec extends Specification {
 
-  def builder = new PactMessageBuilder()
+  def builder = new PactMessageBuilder(PactSpecVersion.V3)
 
   def setup() {
     builder {
@@ -33,7 +34,7 @@ class PactMessageBuilderSpec extends Specification {
     }
 
     when:
-    builder.run { Message message ->
+    builder.run { MessageInteraction message ->
       def content = new JsonSlurper().parse(message.contentsAsBytes())
       assert content.name == 'Bob'
       assert content.date == '2000-01-01'
@@ -106,7 +107,7 @@ class PactMessageBuilderSpec extends Specification {
     }
 
     when:
-    builder.run { Message message ->
+    builder.run { MessageInteraction message ->
       assert message.metadata == [contentType: 'application/json', destination: 'X01']
       assert message.matchingRules.rules.metadata.matchingRules == [
         destination: new MatchingRuleGroup([new RegexMatcher('X\\d+', 'X01')])
@@ -136,7 +137,7 @@ class PactMessageBuilderSpec extends Specification {
     }
 
     expect:
-    pactMessageBuilder.run { Message message ->
+    pactMessageBuilder.run { MessageInteraction message ->
       def feedEntry = message.contentsAsString()
       assert feedEntry == '''{
         |    "type": "foo",
@@ -146,7 +147,7 @@ class PactMessageBuilderSpec extends Specification {
         |        }
         |    }
         |}'''.stripMargin()
-      assert message.jsonContents
+      assert message.contentType.json
     }
   }
 }

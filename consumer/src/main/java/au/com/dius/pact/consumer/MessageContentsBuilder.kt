@@ -21,7 +21,7 @@ class MessageContentsBuilder(var contents: MessageContents) {
       if (value is Matcher) {
         contents.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
         if (value.generator != null) {
-          contents.generators.addGenerator(category = Category.METADATA, generator = value.generator!!)
+          contents.generators.addGenerator(Category.METADATA, key, value.generator!!)
         }
         value.value
       } else {

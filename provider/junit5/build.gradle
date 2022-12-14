@@ -11,11 +11,11 @@ dependencies {
   api project(':core:pactbroker')
   api project(':core:model')
   api 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-
-  implementation 'org.slf4j:slf4j-api'
-  implementation('io.pact.plugin.driver:core') {
+  api('io.pact.plugin.driver:core') {
     exclude group: 'au.com.dius.pact.core'
   }
+
+  implementation 'org.slf4j:slf4j-api'
   implementation 'com.michael-bull.kotlin-result:kotlin-result:1.1.14'
 
   testRuntimeOnly 'ch.qos.logback:logback-classic'

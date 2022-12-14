@@ -10,20 +10,26 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.model.V4Interaction
+import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.model.messaging.MessageInteraction
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.BuiltToolConfig
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 
 /**
- * Pact builder for consumer tests for messaging
+ * Pact builder for consumer tests for asynchronous messaging
  */
 class PactMessageBuilder extends GroovyBuilder {
   Consumer consumer
   Provider provider
   List<ProviderState> providerStates = []
-  List messages = []
+  List<V4Interaction.AsynchronousMessage> messages = []
+
+  PactMessageBuilder(PactSpecVersion pactVersion) {
+    super(pactVersion ?: PactSpecVersion.V4)
+  }
 
   /**
    * Service consumer
@@ -53,11 +59,32 @@ class PactMessageBuilder extends GroovyBuilder {
   }
 
   /**
+   * Enable the plugin
+   * @param name Plugin Name
+   * @param version Plugin Version
+   */
+  @Override
+  PactMessageBuilder usingPlugin(String name, String version) {
+    super.usingPlugin(name, version) as PactMessageBuilder
+  }
+
+  /**
+   * Enable the plugin
+   * @param name Plugin Name
+   * @return
+   */
+  @Override
+  PactMessageBuilder usingPlugin(String name) {
+    super.usingPlugin(name) as PactMessageBuilder
+  }
+
+  /**
    * Description of the message to be received
    * @param description
    */
-  PactMessageBuilder expectsToReceive(String description) {
-    messages << new Message(description, providerStates)
+  PactMessageBuilder expectsToReceive(String description, String key = '') {
+    def message = new V4Interaction.AsynchronousMessage(key, description, new MessageContents(), null, providerStates)
+    messages << message
     this
   }
 
@@ -69,18 +96,20 @@ class PactMessageBuilder extends GroovyBuilder {
     if (messages.empty) {
       throw new InvalidPactException('expectsToReceive is required before withMetaData')
     }
-    Message message = messages.last()
-    message.metadata = metadata.collectEntries {
+    V4Interaction.AsynchronousMessage message = messages.last()
+    message.withMetadata(metadata.collectEntries {
       if (it.value instanceof Matcher) {
-        message.matchingRules.addCategory('metadata').addRule(it.key, it.value.matcher)
+        message.contents.matchingRules.addCategory('metadata').addRule(it.key, it.value.matcher)
         if (it.value.generator) {
-          message.generators.addGenerator(au.com.dius.pact.model.generators.Category.METADATA, it.value.generator)
+          message.contents.generators.addGenerator(
+            au.com.dius.pact.model.generators.Category.METADATA, it.key, it.value.generator
+          )
         }
         [it.key, it.value.value]
       } else {
         [it.key, it.value]
       }
-    }
+    })
     this
   }
 
@@ -95,19 +124,23 @@ class PactMessageBuilder extends GroovyBuilder {
       throw new InvalidPactException('expectsToReceive is required before withContent')
     }
 
+    V4Interaction.AsynchronousMessage message = messages.last()
     def contentType = ContentType.JSON.contentType
+
+    def messageContents = message.contents
     if (options.contentType) {
       contentType = options.contentType
-      messages.last().metadata.contentType = options.contentType
-    } else if (messages.last().metadata.contentType) {
-      contentType = messages.last().metadata.contentType
+      messageContents.metadata.contentType = options.contentType
+    } else if (messageContents.metadata.contentType) {
+      contentType = messageContents.metadata.contentType
     }
 
     def body = new PactBodyBuilder(mimetype: contentType, prettyPrintBody: options.prettyPrint)
     closure.delegate = body
     closure.call()
-    messages.last().contents = OptionalBody.body(body.body.bytes, new ContentType(contentType))
-    messages.last().matchingRules.addCategory(body.matchers)
+    messageContents.matchingRules.addCategory(body.matchers)
+    message.contents = new MessageContents(OptionalBody.body(body.body.bytes, new ContentType(contentType)),
+      messageContents.metadata, messageContents.matchingRules, messageContents.generators, messageContents.partName)
 
     this
   }
@@ -117,10 +150,10 @@ class PactMessageBuilder extends GroovyBuilder {
    * @param closure
    */
   void run(Closure closure) {
-    def pact = new MessagePact(provider, consumer, messages)
+    def pact = new V4Pact(consumer, provider, messages)
     def results = messages.collect {
       try {
-        closure.call(it)
+        closure.call(it as MessageInteraction)
       } catch (ex) {
         ex
       }
@@ -131,7 +164,13 @@ class PactMessageBuilder extends GroovyBuilder {
     if (results.any { it instanceof Throwable }) {
       throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
     } else {
-      pact.write(BuiltToolConfig.pactDirectory, PactSpecVersion.V3)
+      if (pactVersion >= PactSpecVersion.V4) {
+        pact.write(BuiltToolConfig.INSTANCE.pactDirectory, pactVersion)
+      } else {
+        pact.asMessagePact()
+          .expect { "Error converting Pact to V3 format - $it" }
+          .write(BuiltToolConfig.INSTANCE.pactDirectory, pactVersion)
+      }
     }
   }
 

@@ -37,15 +37,16 @@ import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryNotFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
 import mu.KLogging
-import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.exists
+
+interface DslBuilder {
+  fun addPluginConfiguration(matcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>)
+}
 
 open class PactBuilder(
   var consumer: String = "consumer",
   var provider: String = "provider",
   var pactVersion: PactSpecVersion = PactSpecVersion.V4
-) {
+): DslBuilder {
   private val plugins: MutableList<PactPlugin> = mutableListOf()
   private val interactions: MutableList<V4Interaction> = mutableListOf()
   private var currentInteraction: V4Interaction? = null
@@ -177,7 +178,7 @@ open class PactBuilder(
       is V4Interaction.AsynchronousMessage -> {
         logger.debug { "Configuring AsynchronousMessage interaction from $values" }
         if (values.containsKey("message.contents")) {
-          val messageContents = setupMessageContents(values["message.contents"], interaction)
+          val messageContents = setupMessageContents(this, values["message.contents"], interaction)
           if (messageContents.size > 1) {
             logger.warn { "Received multiple values for the interaction contents, will only use the first" }
           }
@@ -192,7 +193,7 @@ open class PactBuilder(
 
       is V4Interaction.SynchronousMessages -> {
         logger.debug { "Configuring SynchronousMessages interaction from $values" }
-        val result = setupMessageContents(values, interaction)
+        val result = setupMessageContents(this, values, interaction)
         val requestContents = result.find { it.first.partName == "request" }
         if (requestContents != null) {
           interaction.request = requestContents.first
@@ -216,76 +217,11 @@ open class PactBuilder(
     return this
   }
 
-  private fun setupMessageContents(
-    contents: Any?,
-    interaction: V4Interaction
-  ): List<Pair<MessageContents, InteractionMarkup>> {
-    logger.debug { "Explicit contents, will look for a content matcher" }
-    return when (contents) {
-      is Map<*, *> -> if (contents.containsKey("pact:content-type")) {
-        val contentType = contents["pact:content-type"].toString()
-        val bodyConfig = contents.filter { it.key != "pact:content-type" } as Map<String, Any?>
-        val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
-        logger.debug { "Found a matcher for '$contentType': $matcher" }
-        if (matcher == null || matcher.isCore) {
-          logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
-          val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
-          if (contentMatcher != null) {
-            when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
-              is Result.Ok -> {
-                result.value.map {
-                  val (partName, body, rules, generators, _, _, interactionMarkup, interactionMarkupType) = it
-                  val matchingRules = MatchingRulesImpl()
-                  if (rules != null) {
-                    matchingRules.addCategory(rules)
-                  }
-                  MessageContents(body, mutableMapOf(), matchingRules, generators ?: Generators(), partName) to
-                    InteractionMarkup(interactionMarkup, interactionMarkupType)
-                }
-              }
-              is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
-            }
-          } else {
-            listOf(
-              MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType)))
-                to InteractionMarkup()
-            )
-          }
-        } else {
-          logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
-          when (val result = matcher.configureContent(contentType, bodyConfig)) {
-            is Result.Ok -> {
-              result.value.map {
-                val (partName, body, rules, generators, metadata, config, interactionMarkup, interactionMarkupType) = it
-                val matchingRules = MatchingRulesImpl()
-                if (rules != null) {
-                  matchingRules.addCategory(rules)
-                }
-                if (config.interactionConfiguration.isNotEmpty()) {
-                  interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
-                }
-                if (config.pactConfiguration.isNotEmpty()) {
-                  addPluginConfiguration(matcher, config.pactConfiguration)
-                }
-                MessageContents(body, metadata.toMutableMap(), matchingRules, generators ?: Generators(), partName) to
-                  InteractionMarkup(interactionMarkup, interactionMarkupType)
-              }
-            }
-            is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
-          }
-        }
-      } else {
-        listOf(MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray())) to InteractionMarkup())
-      }
-      else -> listOf(MessageContents(OptionalBody.body(contents.toString().toByteArray())) to InteractionMarkup())
-    }
-  }
-
-  private fun addPluginConfiguration(contentMatcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>) {
-    if (pluginConfiguration.containsKey(contentMatcher.pluginName)) {
-      pluginConfiguration[contentMatcher.pluginName].deepMerge(pactConfiguration)
+  override fun addPluginConfiguration(matcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>) {
+    if (pluginConfiguration.containsKey(matcher.pluginName)) {
+      pluginConfiguration[matcher.pluginName].deepMerge(pactConfiguration)
     } else {
-      pluginConfiguration[contentMatcher.pluginName] = pactConfiguration.toMutableMap()
+      pluginConfiguration[matcher.pluginName] = pactConfiguration.toMutableMap()
     }
   }
 
@@ -414,24 +350,70 @@ open class PactBuilder(
   }
 
   companion object : KLogging() {
-    @JvmStatic
-    fun textFile(filePath: String): String {
-      var path = Paths.get(filePath)
-      if (!path.exists()) {
-        val cwd = Path.of("").toAbsolutePath()
-        path = cwd.resolve(filePath).toAbsolutePath()
+    fun setupMessageContents(
+      pactBuilder: DslBuilder,
+      contents: Any?,
+      interaction: V4Interaction
+    ): List<Pair<MessageContents, InteractionMarkup>> {
+      logger.debug { "Explicit contents, will look for a content matcher" }
+      return when (contents) {
+        is Map<*, *> -> if (contents.containsKey("pact:content-type")) {
+          val contentType = contents["pact:content-type"].toString()
+          val bodyConfig = contents.filter { it.key != "pact:content-type" } as Map<String, Any?>
+          val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
+          logger.debug { "Found a matcher for '$contentType': $matcher" }
+          if (matcher == null || matcher.isCore) {
+            logger.debug { "Either no matcher was found, or a core matcher, will use the internal implementation" }
+            val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
+            if (contentMatcher != null) {
+              when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
+                is Result.Ok -> {
+                  result.value.map {
+                    val (partName, body, rules, generators, _, _, interactionMarkup, interactionMarkupType) = it
+                    val matchingRules = MatchingRulesImpl()
+                    if (rules != null) {
+                      matchingRules.addCategory(rules)
+                    }
+                    MessageContents(body, mutableMapOf(), matchingRules, generators ?: Generators(), partName) to
+                      InteractionMarkup(interactionMarkup, interactionMarkupType)
+                  }
+                }
+                is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+              }
+            } else {
+              listOf(
+                MessageContents(OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(),
+                  ContentType(contentType))) to InteractionMarkup()
+              )
+            }
+          } else {
+            logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
+            when (val result = matcher.configureContent(contentType, bodyConfig)) {
+              is Result.Ok -> {
+                result.value.map {
+                  val (partName, body, rules, generators, metadata, config, interactionMarkup, markupType) = it
+                  val matchingRules = MatchingRulesImpl()
+                  if (rules != null) {
+                    matchingRules.addCategory(rules)
+                  }
+                  if (config.interactionConfiguration.isNotEmpty()) {
+                    interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
+                  }
+                  if (config.pactConfiguration.isNotEmpty()) {
+                    pactBuilder.addPluginConfiguration(matcher, config.pactConfiguration)
+                  }
+                  MessageContents(body, metadata.toMutableMap(), matchingRules, generators ?: Generators(), partName) to
+                    InteractionMarkup(interactionMarkup, markupType)
+                }
+              }
+              is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+            }
+          }
+        } else {
+          listOf(MessageContents(OptionalBody.body(toJson(contents).serialise().toByteArray())) to InteractionMarkup())
+        }
+        else -> listOf(MessageContents(OptionalBody.body(contents.toString().toByteArray())) to InteractionMarkup())
       }
-      return path.toFile().bufferedReader().readText()
-    }
-
-    @JvmStatic
-    fun filePath(filePath: String): String {
-      var path = Paths.get(filePath).toAbsolutePath()
-      if (!path.exists()) {
-        val cwd = Path.of("").toAbsolutePath()
-        path = cwd.resolve(filePath).toAbsolutePath()
-      }
-      return path.normalize().toString()
     }
   }
 }

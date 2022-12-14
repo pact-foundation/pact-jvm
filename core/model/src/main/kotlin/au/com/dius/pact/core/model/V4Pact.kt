@@ -10,6 +10,7 @@ import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.deepMerge
+import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
@@ -129,12 +130,12 @@ data class InteractionMarkup(
 
 @Suppress("LongParameterList")
 sealed class V4Interaction(
-  val key: String,
+  val key: String?,
   description: String,
   interactionId: String? = null,
   providerStates: List<ProviderState> = listOf(),
   comments: MutableMap<String, JsonValue> = mutableMapOf(),
-  val pending: Boolean = false,
+  var pending: Boolean = false,
   val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
   var interactionMarkup: InteractionMarkup = InteractionMarkup(),
   var transport: String? = null
@@ -143,7 +144,7 @@ sealed class V4Interaction(
     return false
   }
 
-  override fun uniqueKey() = key.ifEmpty { generateKey() }
+  override fun uniqueKey() = key.orEmpty().ifEmpty { generateKey() }
 
   /** Created a copy of the interaction with the key calculated from contents */
   abstract fun withGeneratedKey(): V4Interaction
@@ -167,7 +168,7 @@ sealed class V4Interaction(
   }
 
   open class SynchronousHttp @JvmOverloads constructor(
-    key: String,
+    key: String?,
     description: String,
     providerStates: List<ProviderState> = listOf(),
     override val request: HttpRequest = HttpRequest(),
@@ -275,7 +276,7 @@ sealed class V4Interaction(
   }
 
   open class AsynchronousMessage @Suppress("LongParameterList") @JvmOverloads constructor(
-    key: String,
+    key: String?,
     description: String,
     var contents: MessageContents = MessageContents(),
     interactionId: String? = null,
@@ -288,6 +289,20 @@ sealed class V4Interaction(
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup, transport),
     MessageInteraction {
+    override val matchingRules: MatchingRules
+      get() = contents.matchingRules
+    override val generators: Generators
+      get() = contents.generators
+    override val metadata: MutableMap<String, Any?>
+      get() = contents.metadata
+    override val messageContents: OptionalBody
+      get() = contents.contents
+    override val contentType: ContentType
+      get() = contents.getContentType()
+
+    override fun contentsAsBytes() = contents.contents.orEmpty()
+
+    override fun contentsAsString() = contents.contents.valueAsString()
 
     override fun toString(): String {
       val pending = if (pending) " [PENDING]" else ""
@@ -370,11 +385,17 @@ sealed class V4Interaction(
 
     override fun asAsynchronousMessage() = this
 
-    fun getContentType() = contents.getContentType()
+    /**
+     * Sets the message metadata
+     */
+    fun withMetadata(metadata: Map<String, Any?>): AsynchronousMessage {
+      contents = contents.copy(metadata = metadata.toMutableMap())
+      return this
+    }
   }
 
   open class SynchronousMessages @Suppress("LongParameterList") @JvmOverloads constructor(
-    key: String,
+    key: String?,
     description: String,
     interactionId: String? = null,
     providerStates: List<ProviderState> = listOf(),
@@ -386,7 +407,7 @@ sealed class V4Interaction(
     interactionMarkup: InteractionMarkup = InteractionMarkup(),
     transport: String? = null
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
-      interactionMarkup, transport), MessageInteraction {
+      interactionMarkup, transport) {
     override fun withGeneratedKey(): V4Interaction {
       return SynchronousMessages(
         generateKey(),

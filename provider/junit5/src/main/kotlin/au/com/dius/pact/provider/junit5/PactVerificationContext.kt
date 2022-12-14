@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.junit5
 
-import au.com.dius.pact.core.matchers.DefaultResponseGenerator
+import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
@@ -97,7 +97,8 @@ data class PactVerificationContext @JvmOverloads constructor(
           } else {
             interaction as RequestResponseInteraction
           }
-          val expectedResponse = DefaultResponseGenerator.generateResponse(reqResInteraction.response, context, GeneratorTestMode.Provider)
+          val expectedResponse = DefaultResponseGenerator.generateResponse(reqResInteraction.response, context,
+            GeneratorTestMode.Provider, emptyList(), emptyMap()) // TODO: need to pass any plugin config here
           val actualResponse = target.executeInteraction(client, request)
 
           listOf(

@@ -1,7 +1,11 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.consumer.interactionCatalogueEntries
+import au.com.dius.pact.core.matchers.MatchingConfig
+import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
@@ -9,11 +13,27 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.property
+import au.com.dius.pact.core.support.Result
 import groovy.json.JsonBuilder
+import io.pact.plugins.jvm.core.CatalogueManager
+import io.pact.plugins.jvm.core.DefaultPluginManager
+import io.pact.plugins.jvm.core.PactPlugin
+import io.pact.plugins.jvm.core.PactPluginNotFoundException
 import mu.KLogging
 import java.util.regex.Pattern
 
-open class BaseBuilder : Matchers() {
+open class BaseBuilder(
+  var pactVersion: PactSpecVersion = PactSpecVersion.V4,
+  val plugins: MutableList<PactPlugin> = mutableListOf()
+) : Matchers() {
+
+  init {
+    CatalogueManager.registerCoreEntries(
+      MatchingConfig.contentMatcherCatalogueEntries() +
+      matcherCatalogueEntries() + interactionCatalogueEntries() + MatchingConfig.contentHandlerCatalogueEntries()
+    )
+  }
+
   protected fun setupBody(data: Map<String, Any>, httpPart: IHttpPart): OptionalBody {
     return if (data.containsKey(BODY)) {
       val body = data[BODY]
@@ -125,6 +145,36 @@ open class BaseBuilder : Matchers() {
       }
     } else {
       queryStringToMap(query.toString())
+    }
+  }
+
+  /**
+   * Enable a plugin
+   */
+  open fun usingPlugin(name: String, version: String? = null): BaseBuilder {
+    val plugin = findPlugin(name, version)
+    if (plugin == null) {
+      when (val result = DefaultPluginManager.loadPlugin(name, version)) {
+        is Result.Ok -> plugins.add(result.value)
+        is Result.Err -> {
+          logger.error { result.error }
+          throw PactPluginNotFoundException(name, version)
+        }
+      }
+    }
+    return this
+  }
+
+  /**
+   * Enable a plugin
+   */
+  open fun usingPlugin(name: String) = usingPlugin(name, null)
+
+  private fun findPlugin(name: String, version: String?): PactPlugin? {
+    return if (version == null) {
+      plugins.filter { it.manifest.name == name }.maxByOrNull { it.manifest.version }
+    } else {
+      plugins.find { it.manifest.name == name && it.manifest.version == version }
     }
   }
 
