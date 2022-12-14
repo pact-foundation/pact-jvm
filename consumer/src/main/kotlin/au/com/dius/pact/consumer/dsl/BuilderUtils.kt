@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer.groovy
+package au.com.dius.pact.consumer.dsl
 
 import java.nio.file.Path
 import java.nio.file.Paths
