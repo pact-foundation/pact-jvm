@@ -25,7 +25,7 @@ jobs:
         with:
           project: ${{ secrets.JIRA_PROJECT }}
           issuetype: Task
-          summary: ${{ github.event.issue.title }}
+          summary: "Pact-JVM: ${{ github.event.issue.title }}"
           description: ${{ github.event.issue.body }}
           fields: '{"customfield_10006": ${{ toJSON(secrets.JIRA_EPIC_TICKET) }}, "customfield_17401":{"value":${{ toJSON( secrets.JIRA_LAYER_CAKE )}}}}'
 
