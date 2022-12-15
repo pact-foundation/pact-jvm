@@ -5,6 +5,10 @@ import java.nio.file.Paths
 import kotlin.io.path.exists
 
 object BuilderUtils {
+  /**
+   * Loads the file given by the file path and returns the contents. Relative paths will be resolved against the
+   * current working directory.
+   */
   @JvmStatic
   fun textFile(filePath: String): String {
     var path = Paths.get(filePath)
@@ -15,6 +19,9 @@ object BuilderUtils {
     return path.toFile().bufferedReader().readText()
   }
 
+  /**
+   * Resolves the given file path. Relative paths will be resolved against the current working directory.
+   */
   @JvmStatic
   fun filePath(filePath: String): String {
     var path = Paths.get(filePath).toAbsolutePath()
