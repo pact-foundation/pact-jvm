@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.Utils.toInt
 import mu.KLogging
 import java.lang.IllegalArgumentException
 
@@ -16,8 +17,94 @@ enum class RuleLogic {
  * Matching rule
  */
 interface MatchingRule {
+  /**
+   * Converts this rule into a Map that can be serialised to JSON
+   */
   fun toMap(spec: PactSpecVersion): Map<String, Any?>
+
+  /**
+   * If this rule can be applied to the content type
+   */
   fun canMatch(contentType: ContentType): Boolean = false
+
+
+  companion object : KLogging() {
+    private const val MATCH = "match"
+    private const val MIN = "min"
+    private const val MAX = "max"
+    private const val REGEX = "regex"
+    private const val TIMESTAMP = "timestamp"
+    private const val TIME = "time"
+    private const val DATE = "date"
+
+    @JvmStatic
+    fun ruleFromMap(map: Map<String, Any?>): MatchingRule {
+      return when {
+          map.containsKey(MATCH) -> create(map[MATCH].toString(), map)
+          map.containsKey(REGEX) -> RegexMatcher(map[REGEX].toString())
+          map.containsKey(MIN) -> MinTypeMatcher(toInt(map[MIN]))
+          map.containsKey(MAX) -> MaxTypeMatcher(toInt(map[MAX]))
+          map.containsKey(TIMESTAMP) -> TimestampMatcher(map[TIMESTAMP].toString())
+          map.containsKey(TIME) -> TimeMatcher(map[TIME].toString())
+          map.containsKey(DATE) -> DateMatcher(map[DATE].toString())
+          else -> {
+            MatchingRuleGroup.logger.warn { "Unrecognised matcher definition $map, defaulting to equality matching" }
+            EqualsMatcher
+          }
+      }
+    }
+
+    @Suppress("LongMethod", "ComplexMethod")
+    fun create(type: String, values: Map<String, Any?>): MatchingRule {
+      logger.trace { "MatchingRule.create($type, $values)" }
+      return when (type) {
+        REGEX -> RegexMatcher(values[REGEX].toString())
+        "equality" -> EqualsMatcher
+        "null" -> NullMatcher
+        "include" -> IncludeMatcher(values["value"].toString())
+        "type" -> ruleForType(values)
+        "number" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
+        "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
+        "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+        "real" -> {
+          MatchingRuleGroup.logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
+          NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+        }
+        MIN -> MinTypeMatcher(toInt(values[MIN]))
+        MAX -> MaxTypeMatcher(toInt(values[MAX]))
+        TIMESTAMP, "datetime" ->
+          if (values.containsKey("format")) TimestampMatcher(values["format"].toString())
+          else if (values.containsKey("timestamp")) TimestampMatcher(values["timestamp"].toString())
+          else TimestampMatcher()
+        TIME ->
+          if (values.containsKey("format")) TimeMatcher(values["format"].toString())
+          else if (values.containsKey("time")) TimeMatcher(values["time"].toString())
+          else TimeMatcher()
+        DATE ->
+          if (values.containsKey("format")) DateMatcher(values["format"].toString())
+          else if (values.containsKey("date")) DateMatcher(values["date"].toString())
+          else DateMatcher()
+        "values" -> ValuesMatcher
+        "contentType", "content-type" -> ContentTypeMatcher(values["value"].toString())
+        else -> {
+          MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
+          EqualsMatcher
+        }
+      }
+    }
+
+    private fun ruleForType(map: Map<String, Any?>): MatchingRule {
+      return if (map.containsKey(MIN) && map.containsKey(MAX)) {
+        MinMaxTypeMatcher(toInt(map[MIN]), toInt(map[MAX]))
+      } else if (map.containsKey(MIN)) {
+        MinTypeMatcher(toInt(map[MIN]))
+      } else if (map.containsKey(MAX)) {
+        MaxTypeMatcher(toInt(map[MAX]))
+      } else {
+        TypeMatcher
+      }
+    }
+  }
 }
 
 /**
@@ -126,7 +213,7 @@ object ValuesMatcher : MatchingRule {
 /**
  * Content type matcher. Matches the content type of binary data
  */
-data class ContentTypeMatcher @JvmOverloads constructor (val contentType: String) : MatchingRule {
+data class ContentTypeMatcher(val contentType: String) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "contentType", "value" to contentType)
   override fun canMatch(contentType: ContentType) = true
 }
@@ -174,74 +261,12 @@ data class MatchingRuleGroup @JvmOverloads constructor(
       return MatchingRuleGroup(rules, ruleLogic)
     }
 
-    private const val MATCH = "match"
-    private const val MIN = "min"
-    private const val MAX = "max"
-    private const val REGEX = "regex"
-    private const val TIMESTAMP = "timestamp"
-    private const val TIME = "time"
-    private const val DATE = "date"
-
     private fun mapEntryToInt(map: Map<String, Any?>, field: String) =
       if (map[field] is Int) map[field] as Int
       else Integer.parseInt(map[field]!!.toString())
 
     @JvmStatic
-    fun ruleFromMap(map: Map<String, Any?>): MatchingRule {
-      return when {
-        map.containsKey(MATCH) -> when (map[MATCH]) {
-          REGEX -> RegexMatcher(map[REGEX] as String)
-          "equality" -> EqualsMatcher
-          "null" -> NullMatcher
-          "include" -> IncludeMatcher(map["value"].toString())
-          "type" -> {
-            if (map.containsKey(MIN) && map.containsKey(MAX)) {
-              MinMaxTypeMatcher(mapEntryToInt(map, MIN), mapEntryToInt(map, MAX))
-            } else if (map.containsKey(MIN)) {
-              MinTypeMatcher(mapEntryToInt(map, MIN))
-            } else if (map.containsKey(MAX)) {
-              MaxTypeMatcher(mapEntryToInt(map, MAX))
-            } else {
-              TypeMatcher
-            }
-          }
-          "number" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
-          "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
-          "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
-          "real" -> {
-            logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
-            NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
-          }
-          MIN -> MinTypeMatcher(mapEntryToInt(map, MIN))
-          MAX -> MaxTypeMatcher(mapEntryToInt(map, MAX))
-          TIMESTAMP ->
-            if (map.containsKey(TIMESTAMP)) TimestampMatcher(map[TIMESTAMP].toString())
-            else TimestampMatcher()
-          TIME ->
-            if (map.containsKey(TIME)) TimeMatcher(map[TIME].toString())
-            else TimeMatcher()
-          DATE ->
-            if (map.containsKey(DATE)) DateMatcher(map[DATE].toString())
-            else DateMatcher()
-          "values" -> ValuesMatcher
-          "contentType" -> ContentTypeMatcher(map["value"].toString())
-          else -> {
-            logger.warn { "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
-            EqualsMatcher
-          }
-        }
-        map.containsKey(REGEX) -> RegexMatcher(map[REGEX] as String)
-        map.containsKey(MIN) -> MinTypeMatcher(mapEntryToInt(map, MIN))
-        map.containsKey(MAX) -> MaxTypeMatcher(mapEntryToInt(map, MAX))
-        map.containsKey(TIMESTAMP) -> TimestampMatcher(map[TIMESTAMP] as String)
-        map.containsKey(TIME) -> TimeMatcher(map[TIME] as String)
-        map.containsKey(DATE) -> DateMatcher(map[DATE] as String)
-        else -> {
-          logger.warn { "Unrecognised matcher definition $map, defaulting to equality matching" }
-          EqualsMatcher
-        }
-      }
-    }
+    fun ruleFromMap(map: Map<String, Any?>) = MatchingRule.ruleFromMap(map)
   }
 }
 

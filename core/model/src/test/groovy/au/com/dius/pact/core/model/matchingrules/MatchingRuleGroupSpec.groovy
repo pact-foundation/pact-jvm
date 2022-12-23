@@ -42,6 +42,22 @@ class MatchingRuleGroupSpec extends Specification {
     [match: 'values']                | ValuesMatcher     | 'if the matcher type is values'
   }
 
+  @Unroll
+  def 'from JSON'() {
+    expect:
+    MatchingRuleGroup.Companion.newInstance().fromMap(json) == value
+
+    where:
+
+    json                                              | value
+    [:]                                               | new MatchingRuleGroup()
+    [other: 'value']                                  | new MatchingRuleGroup()
+    [matchers: [[match: 'equality']]]                 | new MatchingRuleGroup([EqualsMatcher.INSTANCE])
+    [matchers: [[match: 'equality']], combine: 'AND'] | new MatchingRuleGroup([EqualsMatcher.INSTANCE])
+    [matchers: [[match: 'equality']], combine: 'OR']  | new MatchingRuleGroup([EqualsMatcher.INSTANCE], RuleLogic.OR)
+    [matchers: [[match: 'equality']], combine: 'BAD'] | new MatchingRuleGroup([EqualsMatcher.INSTANCE])
+  }
+
   def 'defaults to AND for combining rules'() {
     expect:
     new MatchingRuleGroup().ruleLogic == RuleLogic.AND
