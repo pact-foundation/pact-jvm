@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.1.41 - sfix: write date/time matchers in the correct format as per the spec
+# 4.1.41 - fix: write date/time matchers in the correct format as per the spec
 
 * 57d676c6f - chore: remove JDK 10 (Ronald Holshausen, Fri Dec 23 11:56:17 2022 +1100)
 * 00ce37524 - fix: write date/time matchers in the correct format as per the spec #1617 (Ronald Holshausen, Fri Dec 23 11:49:18 2022 +1100)
