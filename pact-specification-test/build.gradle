@@ -13,5 +13,7 @@ dependencies {
       exclude group: 'org.codehaus.groovy'
   }
   testImplementation "org.apache.tika:tika-core:${project.tika}"
-  testImplementation "io.pact.plugin.driver:core:${project.pluginDriverVersion}"
+  testImplementation("io.pact.plugin.driver:core:${project.pluginDriverVersion}")  {
+    exclude group: 'au.com.dius.pact.core'
+  }
 }
