@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.3.18 - [?62;1;4cfix: write date/time matchers in the correct format as per the spec
+# 4.3.18 - fix: write date/time matchers in the correct format as per the spec
 
 * b1d6c01c0 - fix: write date/time matchers in the correct format as per the spec #1617 (Ronald Holshausen, Fri Dec 23 11:49:18 2022 +1100)
 * aa117914c - fix: Update matching rule loading code to support correct + incorrect formatted date/time matchers #1617 (Ronald Holshausen, Fri Dec 23 11:13:54 2022 +1100)
