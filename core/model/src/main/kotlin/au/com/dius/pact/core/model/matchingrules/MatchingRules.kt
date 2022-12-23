@@ -116,11 +116,11 @@ interface MatchingRule {
           else TimestampMatcher()
         TIME ->
           if (values.has("format")) TimeMatcher(values["format"].toString())
-          else if (values.has("time")) TimestampMatcher(values["time"].toString())
+          else if (values.has("time")) TimeMatcher(values["time"].toString())
           else TimeMatcher()
         DATE ->
           if (values.has("format")) DateMatcher(values["format"].toString())
-          else if (values.has("date")) TimestampMatcher(values["date"].toString())
+          else if (values.has("date")) DateMatcher(values["date"].toString())
           else DateMatcher()
         "values" -> ValuesMatcher
         "ignore-order" -> ruleForIgnoreOrder(values)
