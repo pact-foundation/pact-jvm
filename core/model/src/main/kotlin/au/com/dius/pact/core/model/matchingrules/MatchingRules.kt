@@ -111,7 +111,7 @@ interface MatchingRule {
  * Matching Rule for dates
  */
 data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "date", "date" to format)
+  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "date", "format" to format)
 }
 
 /**
@@ -179,14 +179,14 @@ data class RegexMatcher @JvmOverloads constructor (val regex: String, val exampl
  * Matcher for time values
  */
 data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "time", "time" to format)
+  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "time", "format" to format)
 }
 
 /**
  * Matcher for time values
  */
 data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZZZ") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "timestamp", "timestamp" to format)
+  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "timestamp", "format" to format)
 }
 
 /**

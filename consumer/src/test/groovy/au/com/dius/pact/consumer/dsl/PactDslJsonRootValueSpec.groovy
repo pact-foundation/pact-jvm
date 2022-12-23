@@ -40,16 +40,16 @@ class PactDslJsonRootValueSpec extends Specification {
     def datetime = PactDslJsonRootValue.datetimeExpression('today + 1 hour')
 
     expect:
-    date.matchers.toMap(PactSpecVersion.V3) == [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND']
+    date.matchers.toMap(PactSpecVersion.V3) == [matchers: [[match: 'date', format: 'yyyy-MM-dd']], combine: 'AND']
     date.generators.toMap(PactSpecVersion.V3) == [body: [
       '': [type: 'Date', format: 'yyyy-MM-dd', expression: 'today + 1 day']]]
 
-    time.matchers.toMap(PactSpecVersion.V3) == [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND']
+    time.matchers.toMap(PactSpecVersion.V3) == [matchers: [[match: 'time', format: 'HH:mm:ss']], combine: 'AND']
     time.generators.toMap(PactSpecVersion.V3) == [body: [
       '': [type: 'Time', format: 'HH:mm:ss', expression: 'now + 1 hour']]]
 
     datetime.matchers.toMap(PactSpecVersion.V3) == [matchers: [[
-      match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
+      match: 'timestamp', format: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
     datetime.generators.toMap(PactSpecVersion.V3) == [body: [
       '': [type: 'DateTime', format: 'yyyy-MM-dd\'T\'HH:mm:ss', expression: 'today + 1 hour']]]
   }
