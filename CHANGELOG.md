@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.41 - sfix: write date/time matchers in the correct format as per the spec
+
+* 57d676c6f - chore: remove JDK 10 (Ronald Holshausen, Fri Dec 23 11:56:17 2022 +1100)
+* 00ce37524 - fix: write date/time matchers in the correct format as per the spec #1617 (Ronald Holshausen, Fri Dec 23 11:49:18 2022 +1100)
+* f825173f7 - chore: Upgrade Gradle to 6.4.1 (Ronald Holshausen, Fri Dec 23 11:48:17 2022 +1100)
+* 40272903d - chore: update CI build (Ronald Holshausen, Fri Dec 23 11:33:50 2022 +1100)
+* aba556c35 - fix: Update matching rule loading code to support correct + incorrect formatted date/time matchers #1617 (Ronald Holshausen, Fri Dec 23 11:13:54 2022 +1100)
+* 45c4cb449 - chore: correct release script (Ronald Holshausen, Wed Dec 7 10:09:19 2022 +1100)
+* 41bf2ceef - bump version to 4.1.41 (Ronald Holshausen, Fri Nov 25 13:26:05 2022 +1100)
+
 # 4.1.40 - Fixes backported from v4.3.x
 
 * f449da53a - feat: protect json body generation against loop for cicly reference (Samuel, Fri Oct 21 16:56:16 2022 +0200)
