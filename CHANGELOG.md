@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.3 - [?62;1;4cBugfixes + write date/time matchers in the correct format as per the spec
+
+* dc4fad395 - Merge branch 'v4.3.x' into v4.4.x (Ronald Holshausen, Fri Dec 23 14:51:12 2022 +1100)
+* 5184f5b99 - chore: correct changelog (Ronald Holshausen, Fri Dec 23 14:19:07 2022 +1100)
+* 957183037 - bump version to 4.3.19 (Ronald Holshausen, Fri Dec 23 14:18:36 2022 +1100)
+* 8aae4d414 - update changelog for release 4.3.18 (Ronald Holshausen, Fri Dec 23 14:06:59 2022 +1100)
+* b1d6c01c0 - fix: write date/time matchers in the correct format as per the spec #1617 (Ronald Holshausen, Fri Dec 23 11:49:18 2022 +1100)
+* aa117914c - fix: Update matching rule loading code to support correct + incorrect formatted date/time matchers #1617 (Ronald Holshausen, Fri Dec 23 11:13:54 2022 +1100)
+* d079d452a - chore: correct build on JDK 16+ (Ronald Holshausen, Fri Dec 23 13:41:17 2022 +1100)
+* a12752586 - chore: correct build dependencies (Ronald Holshausen, Fri Dec 23 13:21:09 2022 +1100)
+* 1488826aa - chore: Upgrade Gradle to 7.5.1 (Ronald Holshausen, Fri Dec 23 13:20:31 2022 +1100)
+* 6ed527759 - chore: add project name to Jira title (Ronald Holshausen, Fri Dec 16 09:27:27 2022 +1100)
+* d6397c15d - chore: correct jira action workflow (Ronald Holshausen, Thu Dec 15 11:01:31 2022 +1100)
+* 09f405497 - chore: add Jira comment action (Ronald Holshausen, Thu Dec 15 10:52:41 2022 +1100)
+* b9fe94e6b - Merge pull request #1647 from tlinkowski/matchers-performance-improvements (Ronald Holshausen, Tue Dec 13 08:55:32 2022 +1100)
+* c9a62cc8d - refactor: performance improvements in core/matchers module (Matchers, Matching, CollectionUtils) (Tomasz Linkowski, Mon Nov 28 13:11:32 2022 +0100)
+* 38f8769ab - Merge pull request #1645 from artemptushkin/bugfix/fix-custom-auth-header (Ronald Holshausen, Mon Dec 12 14:58:52 2022 +1100)
+* 21af9f54b - refactor: add missing test case for #1347 (Tomasz Linkowski, Mon Nov 28 15:12:54 2022 +0100)
+* 102e67362 - bugfix: fix custom header propagation in list case (Artem Ptushkin, Tue Dec 6 10:14:01 2022 +0100)
+* 70280c8b6 - bump version to 4.4.3 (Ronald Holshausen, Tue Nov 22 11:44:11 2022 +1100)
+
 # 4.4.2 - Fix transitive dependencies
 
 * 362924b38 - fix: httpclient5 and org.json need to be defined as api deps in the dependency constraints #1639 (Ronald Holshausen, Tue Nov 22 11:21:54 2022 +1100)
