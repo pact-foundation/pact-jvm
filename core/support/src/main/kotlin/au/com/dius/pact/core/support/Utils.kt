@@ -13,6 +13,7 @@ import kotlin.reflect.full.declaredMemberProperties
 /**
  * Common utility functions
  */
+@Suppress("TooManyFunctions")
 object Utils : KLogging() {
   /**
    * Recursively extracts a sequence of keys from a recursive Map structure
@@ -68,7 +69,8 @@ object Utils : KLogging() {
   }
 
   /**
-   * Determines if the given port number is available. Does this by trying to open a socket and then immediately
+   * Determines if the given port number is available. Does this by trying to open a socket and then
+   * immediately
    * closing it.
    */
   fun portAvailable(p: Int): Boolean {
@@ -208,4 +210,20 @@ object Utils : KLogging() {
    * Convert a value to snake-case form (a.b.c -> A_B_C)
    */
   private fun snakeCase(key: String) = key.split('.').joinToString("_") { it.uppercase(Locale.getDefault()) }
+
+  /**
+   * Try to convert an any to an Int, throwing an exception if the conversion can't happen
+   */
+  @Suppress("TooGenericExceptionThrown")
+  fun toInt(any: Any?): Int {
+    if (any == null) {
+      throw RuntimeException("Required an integer value, but got a NULL")
+    } else {
+      return when (any) {
+        is Number -> any.toInt()
+        is String -> any.toInt()
+        else -> throw RuntimeException("Required an integer value, but got a $any")
+      }
+    }
+  }
 }

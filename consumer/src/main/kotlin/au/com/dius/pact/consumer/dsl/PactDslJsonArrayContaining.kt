@@ -27,14 +27,15 @@ class PactDslJsonArrayContaining(
       }
     }
 
-    this.matchers = MatchingRuleCategory("", mutableMapOf(root + rootName to MatchingRuleGroup(mutableListOf(ArrayContainsMatcher(
-      (0 until body.size()).map { index ->
-        Triple(
-          index,
-          matchingRules.find { it.first == index }?.second ?: MatchingRuleCategory("body"),
-          generators?.find { it.first == index }?.second ?: emptyMap()
-        )
-      }
+    this.matchers = MatchingRuleCategory("", mutableMapOf(root + rootName to
+      MatchingRuleGroup(mutableListOf(ArrayContainsMatcher(
+        (0 until body.size()).map { index ->
+          Triple(
+            index,
+            matchingRules.find { it.first == index }?.second ?: MatchingRuleCategory("body"),
+            generators?.find { it.first == index }?.second ?: emptyMap()
+          )
+        }
     )))))
 
     this.generators.categoryFor(Category.BODY)?.clear()

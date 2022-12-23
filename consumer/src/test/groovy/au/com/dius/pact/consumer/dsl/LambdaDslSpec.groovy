@@ -161,9 +161,9 @@ class LambdaDslSpec extends Specification {
 
     then:
     result.matchers.toMap(PactSpecVersion.V3) == [
-      '$.dateExp': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
-      '$.timeExp': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
-      '$.datetimeExp': [matchers: [[match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
+      '$.dateExp': [matchers: [[match: 'date', format: 'yyyy-MM-dd']], combine: 'AND'],
+      '$.timeExp': [matchers: [[match: 'time', format: 'HH:mm:ss']], combine: 'AND'],
+      '$.datetimeExp': [matchers: [[match: 'timestamp', format: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
     ]
     result.generators.toMap(PactSpecVersion.V3) == [
       body: [
@@ -187,9 +187,9 @@ class LambdaDslSpec extends Specification {
 
     then:
     result.matchers.toMap(PactSpecVersion.V3) == [
-      '[0]': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
-      '[1]': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
-      '[2]': [matchers: [[match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
+      '[0]': [matchers: [[match: 'date', format: 'yyyy-MM-dd']], combine: 'AND'],
+      '[1]': [matchers: [[match: 'time', format: 'HH:mm:ss']], combine: 'AND'],
+      '[2]': [matchers: [[match: 'timestamp', format: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']
     ]
 
     result.generators.toMap(PactSpecVersion.V3) == [
@@ -314,7 +314,7 @@ class LambdaDslSpec extends Specification {
             variants: [
               [
                 index: 0,
-                rules: ['$': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND']],
+                rules: ['$': [matchers: [[match: 'date', format: 'yyyy-MM-dd']], combine: 'AND']],
                 generators: ['$': [type: 'DateTime', format: 'yyyy-MM-dd']]
               ],
               [index: 1, rules: [:], generators: [:]],

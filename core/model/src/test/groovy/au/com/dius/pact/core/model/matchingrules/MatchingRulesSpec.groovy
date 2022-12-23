@@ -344,4 +344,31 @@ class MatchingRulesSpec extends Specification {
       new StatusCodeMatcher(HttpStatus.StatusCodes, [100, 200])
     ])
   }
+  @Unroll
+  def 'Loading Date/Time matchers'() {
+    expect:
+    MatchingRule.fromJson(Json.INSTANCE.toJson(map)) == matcher
+
+    where:
+    map                                           | matcher
+    [match: 'timestamp']                          | new TimestampMatcher()
+    [match: 'timestamp', timestamp: 'yyyy-MM-dd'] | new TimestampMatcher('yyyy-MM-dd')
+    [match: 'timestamp', format: 'yyyy-MM-dd']    | new TimestampMatcher('yyyy-MM-dd')
+    [match: 'date']                               | new DateMatcher()
+    [match: 'date', date: 'yyyy-MM-dd']           | new DateMatcher('yyyy-MM-dd')
+    [match: 'date', format: 'yyyy-MM-dd']         | new DateMatcher('yyyy-MM-dd')
+    [match: 'time']                               | new TimeMatcher()
+    [match: 'time', time: 'HH:mm']                | new TimeMatcher('HH:mm')
+    [match: 'time', format: 'HH:mm']              | new TimeMatcher('HH:mm')
+  }
+
+  def 'date/time matcher to json'() {
+    expect:
+    new TimestampMatcher().toMap(PactSpecVersion.V3) == [match: 'timestamp', format: 'yyyy-MM-dd HH:mm:ssZZZZZ']
+    new TimestampMatcher('yyyy').toMap(PactSpecVersion.V3) == [match: 'timestamp', format: 'yyyy']
+    new DateMatcher().toMap(PactSpecVersion.V3) == [match: 'date', format: 'yyyy-MM-dd']
+    new DateMatcher('yyyy').toMap(PactSpecVersion.V3) == [match: 'date', format: 'yyyy']
+    new TimeMatcher().toMap(PactSpecVersion.V3) == [match: 'time', format: 'HH:mm:ss']
+    new TimeMatcher('hh').toMap(PactSpecVersion.V3) == [match: 'time', format: 'hh']
+  }
 }

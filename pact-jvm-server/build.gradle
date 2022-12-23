@@ -17,7 +17,7 @@ dependencies {
   implementation('com.typesafe.scala-logging:scala-logging_2.12:3.7.2') {
       exclude group: 'org.scala-lang'
   }
-  implementation('ws.unfiltered:unfiltered-netty-server_2.12:0.10.4') {
+  implementation( 'ws.unfiltered:unfiltered-netty-server_2.12:0.10.4') {
     exclude module: 'netty-transport-native-kqueue'
     exclude module: 'netty-transport-native-epoll'
   }

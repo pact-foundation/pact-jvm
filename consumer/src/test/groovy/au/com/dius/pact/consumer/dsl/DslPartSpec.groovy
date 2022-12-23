@@ -269,9 +269,9 @@ class DslPartSpec extends Specification {
 
     matcherMethod         | param        | matcherDefinition
     'regexp'              | '[0-9]+'     | [match: 'regex', regex: '[0-9]+']
-    'matchTimestamp'      | 'yyyy-mm-dd' | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
-    'matchDate'           | 'yyyy-mm-dd' | [match: 'date', date: 'yyyy-mm-dd']
-    'matchTime'           | 'yyyy-mm-dd' | [match: 'time', time: 'yyyy-mm-dd']
+    'matchTimestamp'      | 'yyyy-mm-dd' | [match: 'timestamp', format: 'yyyy-mm-dd']
+    'matchDate'           | 'yyyy-mm-dd' | [match: 'date', format: 'yyyy-mm-dd']
+    'matchTime'           | 'yyyy-mm-dd' | [match: 'time', format: 'yyyy-mm-dd']
     'matchMin'            | 1            | [match: 'type', min: 1]
     'matchMax'            | 1            | [match: 'type', max: 1]
     'includesMatcher'     | 1            | [match: 'include', value: '1']

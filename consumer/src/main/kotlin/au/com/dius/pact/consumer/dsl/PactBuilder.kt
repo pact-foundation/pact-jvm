@@ -23,10 +23,11 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.Result.*
 import au.com.dius.pact.core.support.deepMerge
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
-import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
@@ -97,8 +98,8 @@ open class PactBuilder(
     val plugin = findPlugin(name, version)
     if (plugin == null) {
       when (val result = DefaultPluginManager.loadPlugin(name, version)) {
-        is Result.Ok -> plugins.add(result.value)
-        is Result.Err -> {
+        is Ok -> plugins.add(result.value)
+        is Err -> {
           logger.error { result.error }
           throw PactPluginNotFoundException(name, version)
         }
@@ -241,7 +242,7 @@ open class PactBuilder(
           val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
           if (contentMatcher != null) {
             when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
-              is Result.Ok -> {
+              is Ok -> {
                 if (result.value.size > 1) {
                   logger.warn { "Plugin returned multiple contents, will only use the first" }
                 }
@@ -254,7 +255,7 @@ open class PactBuilder(
                   part.generators.addGenerators(generators)
                 }
               }
-              is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+              is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
             }
           } else {
             part.body = OptionalBody.body(toJson(bodyConfig).serialise().toByteArray(), ContentType(contentType))
@@ -278,7 +279,7 @@ open class PactBuilder(
     interaction: V4Interaction
   ) {
     when (val result = matcher.configureContent(contentType, bodyConfig)) {
-      is Result.Ok -> {
+      is Ok -> {
         if (result.value.size > 1) {
           logger.warn { "Plugin returned multiple contents, will only use the first" }
         }
@@ -307,7 +308,7 @@ open class PactBuilder(
           interaction.interactionMarkup = InteractionMarkup(interactionMarkup, interactionMarkupType)
         }
       }
-      is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+      is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
     }
   }
 
