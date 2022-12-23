@@ -117,11 +117,11 @@ interface MatchingRule {
           else TimestampMatcher()
         TIME ->
           if (values.has("format")) TimeMatcher(values["format"].toString())
-          else if (values.has("time")) TimestampMatcher(values["time"].toString())
+          else if (values.has("time")) TimeMatcher(values["time"].toString())
           else TimeMatcher()
         DATE ->
           if (values.has("format")) DateMatcher(values["format"].toString())
-          else if (values.has("date")) TimestampMatcher(values["date"].toString())
+          else if (values.has("date")) DateMatcher(values["date"].toString())
           else DateMatcher()
         "values" -> ValuesMatcher
         "ignore-order" -> ruleForIgnoreOrder(values)
@@ -236,7 +236,7 @@ interface MatchingRule {
  * Matching Rule for dates
  */
 data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "date", "date" to format)
+  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "date", "format" to format)
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return if (pactVersion < PactSpecVersion.V3) {
       listOf("Date matchers can only be used with Pact specification versions >= V3")
@@ -388,7 +388,7 @@ data class RegexMatcher @JvmOverloads constructor (val regex: String, val exampl
  * Matcher for time values
  */
 data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "time", "time" to format)
+  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "time", "format" to format)
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return if (pactVersion < PactSpecVersion.V3) {
       listOf("Time matchers can only be used with Pact specification versions >= V3")
@@ -407,7 +407,7 @@ data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"
  * Matcher for time values
  */
 data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZZZ") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "timestamp", "timestamp" to format)
+  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "timestamp", "format" to format)
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return if (pactVersion < PactSpecVersion.V3) {
       listOf("DateTime matchers can only be used with Pact specification versions >= V3")

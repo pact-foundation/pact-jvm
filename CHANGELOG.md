@@ -94,6 +94,17 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 0a23caba1 - Make PactCanIDeployTask compatible with Gradle Configuration Cache (Marco Gomiero, Mon Oct 10 23:19:53 2022 +0200)
 * e3dd8bf5d - Make PactPublishTask compatible with Gradle Configuration Cache (Marco Gomiero, Mon Oct 10 21:50:52 2022 +0200)
 
+# 4.3.18 - fix: write date/time matchers in the correct format as per the spec
+
+* b1d6c01c0 - fix: write date/time matchers in the correct format as per the spec #1617 (Ronald Holshausen, Fri Dec 23 11:49:18 2022 +1100)
+* aa117914c - fix: Update matching rule loading code to support correct + incorrect formatted date/time matchers #1617 (Ronald Holshausen, Fri Dec 23 11:13:54 2022 +1100)
+* d079d452a - chore: correct build on JDK 16+ (Ronald Holshausen, Fri Dec 23 13:41:17 2022 +1100)
+* a12752586 - chore: correct build dependencies (Ronald Holshausen, Fri Dec 23 13:21:09 2022 +1100)
+* 1488826aa - chore: Upgrade Gradle to 7.5.1 (Ronald Holshausen, Fri Dec 23 13:20:31 2022 +1100)
+* 9efae6216 - Update README.md (Ronald Holshausen, Thu Nov 17 08:58:47 2022 +1100)
+* d9130510a - chore: correct changelog (Ronald Holshausen, Mon Nov 14 16:14:47 2022 +1100)
+* 55f0162ce - bump version to 4.3.18 (Ronald Holshausen, Mon Nov 14 16:10:56 2022 +1100)
+
 # 4.3.17 - Maintenance Release
 
 * cb64ea090 - Merge pull request #1633 from artemptushkin/feature/GH-1632-default-headers (Ronald Holshausen, Wed Nov 9 16:58:46 2022 +1100)

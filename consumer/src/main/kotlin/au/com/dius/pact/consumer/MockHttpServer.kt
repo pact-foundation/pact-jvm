@@ -17,13 +17,9 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
-import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.Result
-import au.com.dius.pact.core.support.unwrap
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler

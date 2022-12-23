@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.support.Json.toJson
 import io.pact.plugins.jvm.core.CatalogueManager
 import mu.KLogging
 
@@ -40,7 +41,8 @@ object DefaultResponseGenerator: ResponseGenerator, KLogging() {
           r.body = Generators.applyBodyGenerators(bodyGenerators, r.body, contentType, context, testMode)
         } else {
           logger.debug { "Plugin content generator, will get the plugin to generate the content" }
-          r.body = contentHandler.generateContent(contentType, bodyGenerators, r.body)
+          r.body = contentHandler.generateContent(contentType, bodyGenerators, r.body, testMode, emptyList(),
+            emptyMap(), context.mapValues { toJson(it) }, false)
         }
       }
     }

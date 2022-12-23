@@ -12,7 +12,7 @@ dependencies {
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.apache.groovy:groovy-json'
   testImplementation 'org.apache.tika:tika-core'
-  testImplementation('io.pact.plugin.driver:core:0.1.8') {
+  testImplementation('io.pact.plugin.driver:core:0.2.1') {
     exclude group: 'au.com.dius.pact.core'
   }
   testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'

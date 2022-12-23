@@ -30,6 +30,7 @@ import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.Result.*
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.ifNullOrEmpty
@@ -37,8 +38,6 @@ import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
@@ -515,19 +514,19 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionId: String,
     pending: Boolean
   ): VerificationResult {
-    return if (comparison is Result.Ok && comparison.value.mismatches.isEmpty()) {
+    return if (comparison is Ok && comparison.value.mismatches.isEmpty()) {
       emitEvent(Event.BodyComparisonOk)
       VerificationResult.Ok(interactionId, emptyList())
     } else {
       emitEvent(Event.BodyComparisonFailed(comparison))
       val description = "$comparisonDescription has a matching body"
       when (comparison) {
-        is Result.Err -> {
+        is Err -> {
           failures[description] = comparison.error.description()
           VerificationResult.Failed("Body had differences", description,
             mapOf(interactionId to listOf(VerificationFailureType.MismatchFailure(comparison.error))), pending)
         }
-        is Result.Ok -> {
+        is Ok -> {
           failures[description] = comparison.value
           VerificationResult.Failed("Body had differences", description,
             mapOf(interactionId to comparison.value.mismatches.values.flatten()
@@ -678,7 +677,7 @@ open class ProviderVerifier @JvmOverloads constructor (
 
     val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer,
       interaction, interactionMessage, failures, providerClient)
-    if (stateChangeResult.stateChangeResult is Result.Ok) {
+    if (stateChangeResult.stateChangeResult is Ok) {
       interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
 
@@ -915,8 +914,8 @@ open class ProviderVerifier @JvmOverloads constructor (
             providerTags?.get().orEmpty(),
             providerBranch?.get().orEmpty())
           when (reportResults) {
-            is Result.Ok -> VerificationResult.Ok()
-            is Result.Err -> VerificationResult.Failed("Failed to publish results to the Pact broker", "",
+            is Ok -> VerificationResult.Ok()
+            is Err -> VerificationResult.Failed("Failed to publish results to the Pact broker", "",
               mapOf("" to listOf(VerificationFailureType.PublishResultsFailure(reportResults.error))))
           }
         }
