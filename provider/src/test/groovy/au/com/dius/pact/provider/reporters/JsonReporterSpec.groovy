@@ -67,7 +67,7 @@ class JsonReporterSpec extends Specification {
     then:
     reportDir.list().sort() as List == ['provider1.json']
     reportJson.provider.name == 'provider1'
-    reportJson.execution.size == 2
+    reportJson.execution.size() == 2
     reportJson.execution*.interactions*.interaction.description == [['Interaction 1'], ['Interaction 2']]
   }
 
@@ -106,7 +106,7 @@ class JsonReporterSpec extends Specification {
     then:
     reportDir.list().sort() as List == ['provider1.json']
     reportJson.provider.name == 'provider1'
-    reportJson.execution.size == 1
+    reportJson.execution.size() == 1
     reportJson.execution.first().interactions.first().interaction.description == 'Interaction 1'
   }
 
@@ -177,8 +177,8 @@ class JsonReporterSpec extends Specification {
 
     then:
     reportJson.provider.name == 'provider1'
-    reportJson.execution.size == 1
-    reportJson.execution[0].interactions.size == 1
+    reportJson.execution.size() == 1
+    reportJson.execution[0].interactions.size() == 1
     reportJson.execution[0].interactions[0].verification.result == 'failed'
     reportJson.execution[0].interactions[0].verification.status == ['expected status of 201 but was 200']
     reportJson.execution[0].interactions[0].verification.header == ['HEADER-X': ["Expected a header 'HEADER-X' but was missing"]]
@@ -205,11 +205,11 @@ class JsonReporterSpec extends Specification {
     def reportJson = new JsonSlurper().parse(new File(reportDir, 'provider1.json'))
 
     then:
-    reportJson.execution.size == 1
-    reportJson.execution[0].interactions.size == 1
+    reportJson.execution.size() == 1
+    reportJson.execution[0].interactions.size() == 1
     reportJson.execution[0].interactions[0].verification.result == 'failed'
     reportJson.execution[0].interactions[0].verification.exception.message == 'xxxx'
-    reportJson.execution[0].interactions[0].verification.exception.stackTrace.size > 1
+    reportJson.execution[0].interactions[0].verification.exception.stackTrace.size() > 1
     reportJson.execution[0].interactions[0].verification.exception.stackTrace[0] == 'java.lang.Exception: xxxx'
   }
 }

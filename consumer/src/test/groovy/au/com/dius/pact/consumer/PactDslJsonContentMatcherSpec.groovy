@@ -60,7 +60,7 @@ class PactDslJsonContentMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.data.size == 2
+    result.data.size() == 2
     result.data.every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
@@ -77,7 +77,7 @@ class PactDslJsonContentMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.data.size == 2
+    result.data.size() == 2
     result.data.every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
@@ -94,7 +94,7 @@ class PactDslJsonContentMatcherSpec extends Specification {
     def result = new JsonSlurper().parseText(subject.body.toString())
 
     then:
-    result.data.size == 2
+    result.data.size() == 2
     result.data.every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 

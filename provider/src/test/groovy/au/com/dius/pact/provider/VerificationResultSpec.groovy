@@ -52,7 +52,7 @@ class VerificationResultSpec extends Specification {
 
     then:
     result instanceof TestResult.Failed
-    result.results.size == 1
+    result.results.size() == 1
     result.results[0].interactionId == '1234ABCD'
     result.results[0].exception.message == 'Boom'
     result.results[0].description == 'Request to provider method failed with an exception'
@@ -71,7 +71,7 @@ class VerificationResultSpec extends Specification {
 
     then:
     result instanceof TestResult.Failed
-    result.results.size == 1
+    result.results.size() == 1
     result.results[0].interactionId == '1234ABCD'
     result.results[0].exception instanceof RuntimeException
     result.results[0].exception.message == 'Boom'
@@ -107,7 +107,7 @@ class VerificationResultSpec extends Specification {
 
     then:
     result instanceof TestResult.Failed
-    result.results.size == 3
+    result.results.size() == 3
     result.results[0].interactionId == '1234ABCD'
     result.results[0].attribute == 'status'
     result.results[0].description == 'expected status of 200 but was 404'

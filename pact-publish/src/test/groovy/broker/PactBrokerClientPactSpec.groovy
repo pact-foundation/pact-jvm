@@ -919,7 +919,7 @@ class PactBrokerClientPactSpec extends Specification {
           new ConsumerVersionSelector('test', true, null, null)
       ], [], '', false, '')
       assert consumerPacts instanceof Ok
-      assert consumerPacts.value.size == 2
+      assert consumerPacts.value.size() == 2
       assert !consumerPacts.value[0].pending
       assert !consumerPacts.value[1].pending
     }
@@ -1033,7 +1033,7 @@ class PactBrokerClientPactSpec extends Specification {
         new ConsumerVersionSelector('test', true, null, null)
       ], ['tag'], 'master', true, '')
       assert consumerPacts instanceof Ok
-      assert consumerPacts.value.size == 2
+      assert consumerPacts.value.size() == 2
       assert !consumerPacts.value[0].pending
       assert consumerPacts.value[1].pending
     }
@@ -1158,7 +1158,7 @@ class PactBrokerClientPactSpec extends Specification {
         new ConsumerVersionSelector('test', true, null, null)
       ], ['tag'], 'master', true, '2020-06-24')
       assert consumerPacts instanceof Ok
-      assert consumerPacts.value.size == 2
+      assert consumerPacts.value.size() == 2
       assert !consumerPacts.value[0].wip
       assert consumerPacts.value[1].wip
     }

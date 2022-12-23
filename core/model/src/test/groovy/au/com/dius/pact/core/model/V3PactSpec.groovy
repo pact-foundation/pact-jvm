@@ -42,7 +42,7 @@ class V3PactSpec extends Specification {
         def json = pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
 
         then:
-        json.messages.size == 2
+        json.messages.size() == 2
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
     }
 
@@ -76,7 +76,7 @@ class V3PactSpec extends Specification {
         def json = pactFile.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
 
         then:
-        json.messages.size == 3
+        json.messages.size() == 3
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
         json.messages.find { it.description == 'a hello message' && !it.providerStates } ==
           [contents: 'Hello', description: 'a hello message', metaData: [ contentType: 'application/json' ]]
