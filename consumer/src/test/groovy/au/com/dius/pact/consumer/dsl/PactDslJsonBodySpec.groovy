@@ -327,9 +327,9 @@ class PactDslJsonBodySpec extends Specification {
 
     expect:
     body.matchers.toMap(PactSpecVersion.V3) == [
-      '$.dateExp': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
-      '$.timeExp': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
-      '$.datetimeExp': [matchers: [[match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']]
+      '$.dateExp': [matchers: [[match: 'date', format: 'yyyy-MM-dd']], combine: 'AND'],
+      '$.timeExp': [matchers: [[match: 'time', format: 'HH:mm:ss']], combine: 'AND'],
+      '$.datetimeExp': [matchers: [[match: 'timestamp', format: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']]
 
     body.generators.toMap(PactSpecVersion.V3) == [body: [
       '$.dateExp': [type: 'Date', format: 'yyyy-MM-dd', expression: 'today + 1 day'],

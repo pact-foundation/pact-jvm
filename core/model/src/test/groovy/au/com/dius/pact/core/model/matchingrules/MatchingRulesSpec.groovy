@@ -361,4 +361,14 @@ class MatchingRulesSpec extends Specification {
     [match: 'time', time: 'HH:mm']                | new TimeMatcher('HH:mm')
     [match: 'time', format: 'HH:mm']              | new TimeMatcher('HH:mm')
   }
+
+  def 'date/time matcher to json'() {
+    expect:
+    new TimestampMatcher().toMap(PactSpecVersion.V3) == [match: 'timestamp', format: 'yyyy-MM-dd HH:mm:ssZZZZZ']
+    new TimestampMatcher('yyyy').toMap(PactSpecVersion.V3) == [match: 'timestamp', format: 'yyyy']
+    new DateMatcher().toMap(PactSpecVersion.V3) == [match: 'date', format: 'yyyy-MM-dd']
+    new DateMatcher('yyyy').toMap(PactSpecVersion.V3) == [match: 'date', format: 'yyyy']
+    new TimeMatcher().toMap(PactSpecVersion.V3) == [match: 'time', format: 'HH:mm:ss']
+    new TimeMatcher('hh').toMap(PactSpecVersion.V3) == [match: 'time', format: 'hh']
+  }
 }
