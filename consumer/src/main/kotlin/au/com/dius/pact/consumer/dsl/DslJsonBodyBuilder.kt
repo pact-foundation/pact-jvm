@@ -31,18 +31,25 @@ class DslJsonBodyBuilder {
     ) {
         constructor?.parameters?.filterNot { it.isOptional }?.forEach {
             when (val baseField = it.type.jvmErasure) {
-                String::class -> root.stringType(it.name)
-                Boolean::class -> root.booleanType(it.name)
                 Byte::class,
                 Short::class,
                 Int::class,
                 Long::class,
                 Float::class,
                 Number::class,
-                Double::class ->
-                    root.numberType(it.name)
-                List::class -> root.array(it.name) {}
+                Double::class -> root.numberType(it.name)
+                String::class -> root.stringType(it.name)
+                Boolean::class -> root.booleanType(it.name)
                 ZonedDateTime::class -> root.datetime(it.name, ISO_PATTERN)
+                List::class -> root.array(it.name) { arr ->
+                    arr.run {
+                        fillBasedOnConstructorFields(
+                            it.type.arguments.first().type?.jvmErasure,
+                            arr,
+                            alreadyProcessedObject + baseField
+                        )
+                    }
+                }
                 else ->
                     root.`object`(it.name) { objDsl ->
                         objDsl.run {
@@ -55,6 +62,38 @@ class DslJsonBodyBuilder {
                             }
                         }
                     }
+            }
+        }
+    }
+
+    private fun fillBasedOnConstructorFields(
+        listTypeCLass:  KClass<*>?,
+        rootArray: LambdaDslJsonArray,
+        alreadyProcessedObject: Set<KClass<*>> = setOf()
+    ) {
+        when(listTypeCLass) {
+            Byte::class,
+            Short::class,
+            Int::class,
+            Long::class,
+            Float::class,
+            Number::class,
+            Double::class -> rootArray.numberType(1)
+            String::class -> rootArray.stringType(listTypeCLass.simpleName)
+            Boolean::class -> rootArray.booleanType(true)
+            ZonedDateTime::class -> rootArray.datetimeExpression("now", ISO_PATTERN)
+            else -> {
+                rootArray.`object` { objDsl ->
+                    objDsl.run {
+                        if (!alreadyProcessedObject.contains(listTypeCLass)) {
+                            fillBasedOnConstructorFields(
+                                listTypeCLass?.primaryConstructor,
+                                objDsl,
+                                alreadyProcessedObject
+                            )
+                        }
+                    }
+                }
             }
         }
     }
