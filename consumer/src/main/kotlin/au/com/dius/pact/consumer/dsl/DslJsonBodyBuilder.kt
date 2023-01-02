@@ -11,6 +11,9 @@ import kotlin.reflect.jvm.jvmErasure
 class DslJsonBodyBuilder {
     companion object {
         private val ISO_PATTERN = ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.pattern
+        private const val NUMBER_EXAMPLE = 1
+        private const val DATETIME_EXPRESSION_EXAMPLE = "now"
+        private const val BOOLEAN_EXAMPLE = true
     }
 
     /**
@@ -78,10 +81,10 @@ class DslJsonBodyBuilder {
             Long::class,
             Float::class,
             Number::class,
-            Double::class -> rootArray.numberType(1)
+            Double::class -> rootArray.numberType(NUMBER_EXAMPLE)
             String::class -> rootArray.stringType(listTypeCLass.simpleName)
-            Boolean::class -> rootArray.booleanType(true)
-            ZonedDateTime::class -> rootArray.datetimeExpression("now", ISO_PATTERN)
+            Boolean::class -> rootArray.booleanType(BOOLEAN_EXAMPLE)
+            ZonedDateTime::class -> rootArray.datetimeExpression(DATETIME_EXPRESSION_EXAMPLE, ISO_PATTERN)
             else -> {
                 rootArray.`object` { objDsl ->
                     objDsl.run {
