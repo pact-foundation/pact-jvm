@@ -53,20 +53,14 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
 
   private fun resolvePactSources(context: ExtensionContext): Pair<List<PactVerificationExtension>, String> {
     var description = ""
-    val providerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Provider::class.java)
-    val serviceName = if (providerInfo.isPresent && providerInfo.get().value.isNotEmpty()) {
-      ep.parseExpression(providerInfo.get().value, DataType.STRING)?.toString()
-    } else {
-      Utils.lookupEnvironmentValue("pact.provider.name")
-    }
+    val serviceName = lookupProviderName(context, ep)
     if (serviceName.isNullOrEmpty()) {
       throw UnsupportedOperationException("Provider name should be specified by using either " +
         "@${Provider::class.java.name} annotation or the 'pact.provider.name' system property")
     }
     description += "Provider: $serviceName"
 
-    val consumerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Consumer::class.java)
-    val consumerName = ep.parseExpression(consumerInfo.orElse(null)?.value, DataType.STRING)?.toString()
+    val consumerName = lookupConsumerName(context, ep)
     if (consumerName.isNotEmpty()) {
       description += "\nConsumer: $consumerName"
     }
@@ -158,5 +152,19 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     return AnnotationSupport.isAnnotated(context.requiredTestClass, Provider::class.java)
   }
 
-  companion object : KLogging()
+  companion object : KLogging() {
+    fun lookupConsumerName(context: ExtensionContext, ep: ExpressionParser): String? {
+      val consumerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Consumer::class.java)
+      return ep.parseExpression(consumerInfo.orElse(null)?.value, DataType.STRING)?.toString()
+    }
+
+    fun lookupProviderName(context: ExtensionContext, ep: ExpressionParser): String? {
+      val providerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Provider::class.java)
+      return if (providerInfo.isPresent && providerInfo.get().value.isNotEmpty()) {
+        ep.parseExpression(providerInfo.get().value, DataType.STRING)?.toString()
+      } else {
+        Utils.lookupEnvironmentValue("pact.provider.name")
+      }
+    }
+  }
 }
