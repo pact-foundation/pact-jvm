@@ -14,5 +14,5 @@ annotation class Provider(
   /**
    * @return provider name for pact test running
    */
-  val value: String
+  val value: String = ""
 )
