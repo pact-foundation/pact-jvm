@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.4.3 - [?62;1;4cBugfixes + write date/time matchers in the correct format as per the spec
+# 4.4.3 - Bugfixes + write date/time matchers in the correct format as per the spec
 
 * dc4fad395 - Merge branch 'v4.3.x' into v4.4.x (Ronald Holshausen, Fri Dec 23 14:51:12 2022 +1100)
 * 5184f5b99 - chore: correct changelog (Ronald Holshausen, Fri Dec 23 14:19:07 2022 +1100)

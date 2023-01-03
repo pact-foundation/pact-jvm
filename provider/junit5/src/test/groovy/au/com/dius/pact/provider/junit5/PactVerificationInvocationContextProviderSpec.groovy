@@ -17,11 +17,8 @@ import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.junitsupport.loader.PactUrl
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import org.apache.commons.lang3.JavaVersion
-import org.apache.commons.lang3.SystemUtils
 import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Issue
-import spock.lang.Requires
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
