@@ -14,5 +14,5 @@ annotation class Consumer(
   /**
    * @return consumer name for pact test running
    */
-  val value: String
+  val value: String = ""
 )

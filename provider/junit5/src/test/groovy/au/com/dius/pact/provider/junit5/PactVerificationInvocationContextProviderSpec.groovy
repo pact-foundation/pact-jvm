@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
@@ -17,7 +18,6 @@ import au.com.dius.pact.provider.junitsupport.loader.PactUrl
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import org.junit.jupiter.api.extension.ExtensionContext
-import spock.lang.Ignore
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -25,8 +25,6 @@ import spock.util.environment.RestoreSystemProperties
 
 import java.util.stream.Collectors
 
-// TODO: Groovy mocks don't work on JDK 16
-@Ignore
 @SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter', 'LineLength'])
 class PactVerificationInvocationContextProviderSpec extends Specification {
 
@@ -158,11 +156,15 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   def 'findPactSources returns a pact loader for each discovered pact source annotation'() {
     when:
     def sources = provider.findPactSources([
-      'getTestClass': { Optional.of(TestClassWithAnnotation) } ] as ExtensionContext
-    )
+      'getTestClass': { Optional.of(TestClassWithAnnotation) },
+      'getRequiredTestClass': { TestClassWithAnnotation },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
     def childSources = provider.findPactSources([
-      'getTestClass': { Optional.of(ChildClass) } ] as ExtensionContext
-    )
+      'getTestClass': { Optional.of(ChildClass) },
+      'getRequiredTestClass': { ChildClass },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
 
     then:
     sources.size() == 1
@@ -178,8 +180,10 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   def 'findPactSources returns a pact loader for each discovered pact source on any annotations'() {
     when:
     def sources = provider.findPactSources([
-      'getTestClass': { Optional.of(TestClassWithPactSourceOnAnnotation) } ] as ExtensionContext
-    )
+      'getTestClass': { Optional.of(TestClassWithPactSourceOnAnnotation) },
+      'getRequiredTestClass': { TestClassWithPactSourceOnAnnotation },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
     then:
     sources.size() == 1
     sources.first() instanceof PactFolderLoader
@@ -189,8 +193,10 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   def 'returns a junit extension for each interaction in all the discovered pact files'() {
     when:
     def extensions = provider.provideTestTemplateInvocationContexts([
-      'getTestClass': { Optional.of(TestClassWithAnnotation) } ] as ExtensionContext
-    )
+      'getTestClass': { Optional.of(TestClassWithAnnotation) },
+      'getRequiredTestClass': { TestClassWithAnnotation },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
 
     then:
     extensions.count() == 3
@@ -199,8 +205,10 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   def 'supports filtering the discovered pact files'() {
     when:
     def extensions = provider.provideTestTemplateInvocationContexts([
-      'getTestClass': { Optional.of(ChildClass) } ] as ExtensionContext
-    )
+      'getTestClass': { Optional.of(ChildClass) },
+      'getRequiredTestClass': { ChildClass },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
 
     then:
     extensions.count() == 1
@@ -214,8 +222,10 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
 
     when:
     def extensions = provider.provideTestTemplateInvocationContexts([
-      'getTestClass': { Optional.of(TestClassWithAnnotation) } ] as ExtensionContext
-    )
+      'getTestClass': { Optional.of(TestClassWithAnnotation) },
+      'getRequiredTestClass': { TestClassWithAnnotation },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
 
     then:
     extensions.count() == 1
@@ -224,9 +234,11 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @Issue('#1007')
   def 'provideTestTemplateInvocationContexts throws an exception if there are no pacts to verify'() {
     when:
-    provider.provideTestTemplateInvocationContexts(['getTestClass': {
-      Optional.of(TestClassWithNoPacts)
-    } ] as ExtensionContext)
+    provider.provideTestTemplateInvocationContexts([
+      'getTestClass': { Optional.of(TestClassWithNoPacts) },
+      'getRequiredTestClass': { TestClassWithNoPacts },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
 
     then:
     def exp = thrown(NoPactsFoundException)
@@ -236,9 +248,11 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @Issue('#768')
   def 'returns a dummy test if there are no pacts to verify and IgnoreNoPactsToVerify is present'() {
     when:
-    def result = provider.provideTestTemplateInvocationContexts(['getTestClass': {
-      Optional.of(TestClassWithNoPactsWithIgnore)
-    } ] as ExtensionContext).iterator().toList()
+    def result = provider.provideTestTemplateInvocationContexts([
+      'getTestClass': { Optional.of(TestClassWithNoPactsWithIgnore) },
+      'getRequiredTestClass': { TestClassWithNoPactsWithIgnore },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext).iterator().toList()
 
     then:
     result.size() == 1
@@ -274,8 +288,10 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
 
     when:
     def extensions = provider.provideTestTemplateInvocationContexts([
-      'getTestClass': { Optional.of(TestClassWithEmptyProvider) } ] as ExtensionContext
-    ).collect(Collectors.toList())
+      'getTestClass': { Optional.of(TestClassWithEmptyProvider) },
+      'getRequiredTestClass': { TestClassWithEmptyProvider },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext).collect(Collectors.toList())
 
     then:
     !extensions.empty
@@ -285,9 +301,11 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @Issue('#1225')
   def 'provideTestTemplateInvocationContexts throws an exception if load request fails with an exception'() {
     when:
-    provider.provideTestTemplateInvocationContexts(['getTestClass': {
-      Optional.of(TestClassWithInvalidUrl)
-    } ] as ExtensionContext)
+    provider.provideTestTemplateInvocationContexts([
+      'getTestClass': { Optional.of(TestClassWithInvalidUrl) },
+      'getRequiredTestClass': { TestClassWithInvalidUrl },
+      'getTestInstance': { Optional.empty() }
+    ] as ExtensionContext)
 
     then:
     thrown(UnknownHostException)
@@ -371,5 +389,63 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     then:
     noExceptionThrown()
     result.empty
+  }
+
+  @Provider('ExpectedName')
+  static class ProviderWithName { }
+
+  @Provider('${provider.name}')
+  static class ProviderWithExpression { }
+
+  @Provider
+  static class ProviderWithNoName { }
+
+  @Issue('#1630')
+  @RestoreSystemProperties
+  def 'lookup provider info - #clazz.simpleName'() {
+    given:
+    System.setProperty('provider.name', 'ExpectedName')
+    System.setProperty('pact.provider.name', 'ExpectedName')
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> clazz
+    }
+    def ep = new ExpressionParser()
+
+    expect:
+    PactVerificationInvocationContextProvider.Companion.newInstance().lookupProviderName(context, ep) == 'ExpectedName'
+
+    where:
+    clazz << [ ProviderWithName, ProviderWithExpression, ProviderWithNoName ]
+  }
+
+  @Consumer('ExpectedName')
+  static class ConsumerWithName { }
+
+  @Consumer('${consumer.name}')
+  static class ConsumerWithExpression { }
+
+  @Consumer
+  static class ConsumerWithNoName { }
+
+  @Issue('#1630')
+  @RestoreSystemProperties
+  def 'lookup consumer info - #clazz.simpleName'() {
+    given:
+    System.setProperty('consumer.name', 'ExpectedName')
+    System.setProperty('pact.consumer.name', 'ExpectedName')
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> clazz
+    }
+    def ep = new ExpressionParser()
+
+    expect:
+    PactVerificationInvocationContextProvider.Companion.newInstance().lookupConsumerName(context, ep) == name
+
+    where:
+
+    clazz                  | name
+    ConsumerWithName       | 'ExpectedName'
+    ConsumerWithExpression | 'ExpectedName'
+    ConsumerWithNoName     | ''
   }
 }
