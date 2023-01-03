@@ -28,11 +28,12 @@ class LeinVerifierProxy {
 
   List<VerificationResult.Failed> verifyProvider(ProviderInfo provider) {
     verifier.verificationSource = 'lein'
-    verifier.projectHasProperty = { property ->
-      this.hasProperty.invoke(Clojure.read(":$property"), args)
+    verifier.projectHasProperty = { String property ->
+      def value = this.hasProperty.invoke(Clojure.read(":$property"), args)
+      value instanceof Boolean ? value : false
     }
-    verifier.projectGetProperty =  { property ->
-      this.getProperty.invoke(Clojure.read(":$property"), args)
+    verifier.projectGetProperty =  { String property ->
+      this.getProperty.invoke(Clojure.read(":$property"), args)?.toString()
     }
     verifier.pactLoadFailureMessage = { ConsumerInfo consumer ->
       "You must specify the pact file to execute for consumer '${consumer.name}' (use :pact-file or :pact-source)"
