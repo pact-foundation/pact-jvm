@@ -134,7 +134,11 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
       "Provider name should be specified by using ${Provider::class.java.simpleName} annotation"
     )
     logger.debug { "Found annotation $providerInfo" }
-    val serviceName = ep.parseExpression(providerInfo.value, DataType.STRING, valueResolver)?.toString()
+    val serviceName = if (providerInfo.value.isEmpty()) {
+      Utils.lookupEnvironmentValue("pact.provider.name")
+    } else  {
+      ep.parseExpression(providerInfo.value, DataType.STRING, valueResolver)?.toString()
+    }
     if (serviceName.isNullOrEmpty()) {
       throw InitializationError(
         "Provider name specified by ${Provider::class.java.simpleName} annotation is null or empty"

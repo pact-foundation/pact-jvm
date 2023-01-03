@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
@@ -395,5 +396,63 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     then:
     noExceptionThrown()
     result.empty
+  }
+
+  @Provider('ExpectedName')
+  static class ProviderWithName { }
+
+  @Provider('${provider.name}')
+  static class ProviderWithExpression { }
+
+  @Provider
+  static class ProviderWithNoName { }
+
+  @Issue('#1630')
+  @RestoreSystemProperties
+  def 'lookup provider info - #clazz.simpleName'() {
+    given:
+    System.setProperty('provider.name', 'ExpectedName')
+    System.setProperty('pact.provider.name', 'ExpectedName')
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> clazz
+    }
+    def ep = new ExpressionParser()
+
+    expect:
+    PactVerificationInvocationContextProvider.Companion.newInstance().lookupProviderName(context, ep) == 'ExpectedName'
+
+    where:
+    clazz << [ ProviderWithName, ProviderWithExpression, ProviderWithNoName ]
+  }
+
+  @Consumer('ExpectedName')
+  static class ConsumerWithName { }
+
+  @Consumer('${consumer.name}')
+  static class ConsumerWithExpression { }
+
+  @Consumer
+  static class ConsumerWithNoName { }
+
+  @Issue('#1630')
+  @RestoreSystemProperties
+  def 'lookup consumer info - #clazz.simpleName'() {
+    given:
+    System.setProperty('consumer.name', 'ExpectedName')
+    System.setProperty('pact.consumer.name', 'ExpectedName')
+    def context = Mock(ExtensionContext) {
+      getRequiredTestClass() >> clazz
+    }
+    def ep = new ExpressionParser()
+
+    expect:
+    PactVerificationInvocationContextProvider.Companion.newInstance().lookupConsumerName(context, ep) == name
+
+    where:
+
+    clazz                  | name
+    ConsumerWithName       | 'ExpectedName'
+    ConsumerWithExpression | 'ExpectedName'
+    ConsumerWithNoName     | ''
   }
 }

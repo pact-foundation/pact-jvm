@@ -264,4 +264,54 @@ class PactRunnerSpec extends Specification {
     then:
     !runner.children.empty
   }
+
+  @Provider('ExpectedName')
+  static class ProviderWithName { }
+
+  @Provider('${provider.name}')
+  static class ProviderWithExpression { }
+
+  @Provider
+  static class ProviderWithNoName { }
+
+  @Issue('#1630')
+  @RestoreSystemProperties
+  def 'lookup provider info - #clazz.simpleName'() {
+    given:
+    System.setProperty('provider.name', 'ExpectedName')
+    System.setProperty('pact.provider.name', 'ExpectedName')
+
+    expect:
+    new PactRunner(clazz).lookupProviderInfo().second == 'ExpectedName'
+
+    where:
+    clazz << [ ProviderWithName, ProviderWithExpression, ProviderWithNoName ]
+  }
+
+  @Consumer('ExpectedName')
+  static class ConsumerWithName { }
+
+  @Consumer('${consumer.name}')
+  static class ConsumerWithExpression { }
+
+  @Consumer
+  static class ConsumerWithNoName { }
+
+  @Issue('#1630')
+  @RestoreSystemProperties
+  def 'lookup consumer info - #clazz.simpleName'() {
+    given:
+    System.setProperty('consumer.name', 'ExpectedName')
+    System.setProperty('pact.consumer.name', 'ExpectedName')
+
+    expect:
+    new PactRunner(clazz).lookupConsumerInfo().second == name
+
+    where:
+
+    clazz                  | name
+    ConsumerWithName       | 'ExpectedName'
+    ConsumerWithExpression | 'ExpectedName'
+    ConsumerWithNoName     | ''
+  }
 }
