@@ -13,9 +13,9 @@ import org.junit.jupiter.api.extension.*;
 import java.util.List;
 import java.util.Objects;
 
-@ExtendWith({PactConsumerTestExt.class, SamplePactTest.MyStringResolverExtension.class})
+@ExtendWith({PactConsumerTestExt.class, SimplePactTest.MyStringResolverExtension.class})
 @PactTestFor(providerName = "some-provider", providerType = ProviderType.ASYNCH, pactVersion = PactSpecVersion.V3)
-class SamplePactTest {
+class SimplePactTest {
 
   @BeforeAll
   static void setup(String injectedString) {
