@@ -73,6 +73,7 @@ class PactMessageBuilder extends GroovyBuilder {
    * Metadata attached to the message
    * @param metaData
    */
+  @SuppressWarnings('ConfusingMethodName')
   PactMessageBuilder withMetadata(Map metadata) {
     if (messages.empty) {
       throw new InvalidPactException('expectsToReceive is required before withMetaData')
