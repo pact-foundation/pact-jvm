@@ -18,6 +18,14 @@ enum class PactSpecVersion {
     }
   }
 
+  fun or(other: PactSpecVersion?): PactSpecVersion {
+    return if (this == UNSPECIFIED) {
+      other ?: UNSPECIFIED
+    } else {
+      this
+    }
+  }
+
   companion object {
     @JvmStatic
     fun fromInt(version: Int): PactSpecVersion {

@@ -228,7 +228,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     return when {
       store[key] != null -> store[key] as AbstractBaseMockServer
       else -> {
-        val config = mockServerConfigFromAnnotation(context) ?: providerInfo.mockServerConfig()
+        val config = providerInfo.mockServerConfig()
         store.put("mockServerConfig:${providerInfo.providerName}", config)
         val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context), config)
         store.put(key, JUnit5MockServerSupport(mockServer))
@@ -247,14 +247,15 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   private fun mockServerConfigFromAnnotation(context: ExtensionContext): MockProviderConfig? {
-    val mockServerConfigMethod = AnnotationSupport.findAnnotation(context.requiredTestMethod,
-      MockServerConfig::class.java)
-    return if (mockServerConfigMethod != null) {
+    val mockServerConfigMethod = if (context.testMethod.isPresent)
+      AnnotationSupport.findAnnotation(context.testMethod.get(), MockServerConfig::class.java)
+    else null
+    return if (mockServerConfigMethod != null && mockServerConfigMethod.isPresent) {
       MockProviderConfig.fromMockServerAnnotation(mockServerConfigMethod)
     } else {
       val mockServerConfig = AnnotationSupport.findAnnotation(context.requiredTestClass,
         MockServerConfig::class.java)
-      if (mockServerConfig != null) {
+      if (mockServerConfig != null && mockServerConfig.isPresent) {
         MockProviderConfig.fromMockServerAnnotation(mockServerConfig)
       } else {
         null
@@ -291,10 +292,13 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           null
         }
 
+        val mockServerConfig = mockServerConfigFromAnnotation(context)
+
         val providers = when {
           classAnnotation != null && methodAnnotation != null -> {
             val provider = ProviderInfo.fromAnnotation(methodAnnotation)
               .merge(ProviderInfo.fromAnnotation(classAnnotation))
+              .withMockServerConfig(mockServerConfig)
             when {
               methodAnnotation.pactMethods.isNotEmpty() -> {
                 methodAnnotation.pactMethods.map {
@@ -311,23 +315,31 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
               else -> listOf(provider to methodAnnotation.pactMethod.ifEmpty { classAnnotation.pactMethod })
             }
           }
-          classAnnotation != null -> if (classAnnotation.pactMethods.isNotEmpty()) {
+
+          classAnnotation != null -> {
             val annotation = ProviderInfo.fromAnnotation(classAnnotation)
-            classAnnotation.pactMethods.map {
-              val providerName = providerNameFromPactMethod(it, context)
-              annotation.copy(providerName = providerName) to it
+              .withMockServerConfig(mockServerConfig)
+            if (classAnnotation.pactMethods.isNotEmpty()) {
+              classAnnotation.pactMethods.map {
+                val providerName = providerNameFromPactMethod(it, context)
+                annotation.copy(providerName = providerName) to it
+              }
+            } else {
+              listOf(annotation to classAnnotation.pactMethod)
             }
-          } else {
-            listOf(ProviderInfo.fromAnnotation(classAnnotation) to classAnnotation.pactMethod)
           }
-          methodAnnotation != null -> if (methodAnnotation.pactMethods.isNotEmpty()) {
+
+          methodAnnotation != null -> {
             val annotation = ProviderInfo.fromAnnotation(methodAnnotation)
-            methodAnnotation.pactMethods.map {
-              val providerName = providerNameFromPactMethod(it, context)
-              annotation.copy(providerName = providerName) to it
+              .withMockServerConfig(mockServerConfig)
+            if (methodAnnotation.pactMethods.isNotEmpty()) {
+              methodAnnotation.pactMethods.map {
+                val providerName = providerNameFromPactMethod(it, context)
+                annotation.copy(providerName = providerName) to it
+              }
+            } else {
+              listOf(annotation to methodAnnotation.pactMethod)
             }
-          } else {
-            listOf(ProviderInfo.fromAnnotation(methodAnnotation) to methodAnnotation.pactMethod)
           }
           else -> {
             logger.warn { "No @PactTestFor annotation found on test class, using defaults" }
