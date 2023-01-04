@@ -269,9 +269,10 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val providerInfo = when {
       store["providers"] != null -> store["providers"] as List<Pair<ProviderInfo, String>>
       else -> {
-        val methodAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestMethod, PactTestFor::class.java)) {
-          logger.debug { "Found @PactTestFor annotation on test method ${context.requiredTestMethod}" }
-          AnnotationSupport.findAnnotation(context.requiredTestMethod, PactTestFor::class.java).get()
+        val methodAnnotation = if (context.testMethod.isPresent && AnnotationSupport.isAnnotated(context.testMethod.get(), PactTestFor::class.java)) {
+          val testMethod = context.testMethod.get()
+          logger.debug { "Found @PactTestFor annotation on test method $testMethod" }
+          AnnotationSupport.findAnnotation(testMethod, PactTestFor::class.java).get()
         } else {
           null
         }
