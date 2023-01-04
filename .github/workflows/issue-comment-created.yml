@@ -47,7 +47,7 @@ jobs:
 
       - name: Add Comment
         if: steps.search.outputs.issue == '' && steps.create.outputs.issue != ''
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
