@@ -500,7 +500,6 @@ data class ContentTypeMatcher(val contentType: String) : MatchingRule {
  */
 object EqualsIgnoreOrderMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order")
-  override fun canMatch(contentType: ContentType) = true
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return if (pactVersion < PactSpecVersion.V4) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
@@ -522,7 +521,6 @@ object EqualsIgnoreOrderMatcher : MatchingRule {
  */
 data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order", "min" to min)
-  override fun canMatch(contentType: ContentType) = true
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return if (pactVersion < PactSpecVersion.V4) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
@@ -544,7 +542,6 @@ data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
  */
 data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order", "max" to max)
-  override fun canMatch(contentType: ContentType) = true
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return if (pactVersion < PactSpecVersion.V4) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
@@ -566,7 +563,6 @@ data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
  */
 data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order", "min" to min, "max" to max)
-  override fun canMatch(contentType: ContentType) = true
   override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
     return if (pactVersion < PactSpecVersion.V4) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
