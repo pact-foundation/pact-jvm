@@ -24,7 +24,7 @@ jobs:
 
       - name: Search
         id: search
-        uses: tomhjp/gh-action-jira-search@v0.1.0
+        uses: tomhjp/gh-action-jira-search@v0.2.1
         with:
           jql: 'summary ~ ${{ toJSON(github.event.issue.title)}} AND project=${{ secrets.JIRA_PROJECT }}'
 
