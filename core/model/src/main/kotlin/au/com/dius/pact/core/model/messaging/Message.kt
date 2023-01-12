@@ -37,7 +37,7 @@ class Message @JvmOverloads constructor(
   var generators: Generators = Generators(),
   var metadata: MutableMap<String, Any?> = mutableMapOf(),
   interactionId: String? = null
-) : BaseInteraction(interactionId, description, providerStates), MessageInteraction {
+) : BaseInteraction(interactionId, description, providerStates.toMutableList()), MessageInteraction {
 
   fun contentsAsBytes() = when {
     isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryWireFormatter.addMagicBytes(contents.orEmpty())

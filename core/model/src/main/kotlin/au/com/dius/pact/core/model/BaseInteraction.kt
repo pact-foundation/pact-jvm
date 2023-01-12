@@ -5,7 +5,7 @@ import au.com.dius.pact.core.support.json.JsonValue
 abstract class BaseInteraction(
   override val interactionId: String? = null,
   override val description: String,
-  override val providerStates: List<ProviderState> = listOf(),
+  override val providerStates: MutableList<ProviderState> = mutableListOf(),
   override val comments: MutableMap<String, JsonValue> = mutableMapOf()
 ) : Interaction {
   fun displayState(): String {

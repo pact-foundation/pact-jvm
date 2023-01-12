@@ -136,7 +136,7 @@ sealed class V4Interaction(
   val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
   var interactionMarkup: InteractionMarkup = InteractionMarkup(),
   var transport: String? = null
-) : BaseInteraction(interactionId, description, providerStates, comments) {
+) : BaseInteraction(interactionId, description, providerStates.toMutableList(), comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
   }

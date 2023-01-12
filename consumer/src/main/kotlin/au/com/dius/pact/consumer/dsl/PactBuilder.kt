@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.InteractionMarkup
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
@@ -41,6 +42,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists
 
+@Suppress("TooManyFunctions")
 open class PactBuilder(
   var consumer: String = "consumer",
   var provider: String = "provider",
@@ -49,6 +51,7 @@ open class PactBuilder(
   private val plugins: MutableList<PactPlugin> = mutableListOf()
   private val interactions: MutableList<V4Interaction> = mutableListOf()
   private var currentInteraction: V4Interaction? = null
+  private val providerStates: MutableList<ProviderState> = mutableListOf()
   private val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
   private val additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
 
@@ -65,7 +68,7 @@ open class PactBuilder(
   }
 
   /**
-   * Use the old HTTP Pact DSL
+   * Use the old Message Pact DSL
    */
   fun usingLegacyMessageDsl(): MessagePactBuilder {
     return MessagePactBuilder(pactVersion).consumer(consumer).hasPactWith(provider)
@@ -112,6 +115,59 @@ open class PactBuilder(
   }
 
   /**
+   * Describe the state the provider needs to be in for the pact test to be verified. Any parameters for the provider
+   * state can be provided in the second parameter.
+   */
+  @JvmOverloads
+  fun given(state: String, params: Map<String, Any?> = emptyMap()): PactBuilder {
+    if (currentInteraction != null) {
+      currentInteraction!!.providerStates.add(ProviderState(state, params))
+    } else {
+      providerStates.add(ProviderState(state, params))
+    }
+    return this
+  }
+
+  /**
+   * Describe the state the provider needs to be in for the pact test to be verified.
+   *
+   * @param firstKey Key of first parameter element
+   * @param firstValue Value of first parameter element
+   * @param paramsKeyValuePair Additional parameters in key-value pairs
+   */
+  fun given(state: String, firstKey: String, firstValue: Any?, vararg paramsKeyValuePair: Any): PactBuilder {
+    require(paramsKeyValuePair.size % 2 == 0) {
+      "Pairs of key value should be provided, but there is one key without value."
+    }
+    val params = mutableMapOf(firstKey to firstValue)
+    var i = 0
+    while (i < paramsKeyValuePair.size) {
+      params[paramsKeyValuePair[i].toString()] = paramsKeyValuePair[i + 1]
+      i += 2
+    }
+    if (currentInteraction != null) {
+      currentInteraction!!.providerStates.add(ProviderState(state, params))
+    } else {
+      providerStates.add(ProviderState(state, params))
+    }
+    return this
+  }
+
+  /**
+   * Describe the state the provider needs to be in for the pact test to be verified.
+   *
+   * @param params Additional parameters in key-value pairs
+   */
+  fun given(state: String, vararg params: Pair<String, Any>): PactBuilder {
+    if (currentInteraction != null) {
+      currentInteraction!!.providerStates.add(ProviderState(state, params.toMap()))
+    } else {
+      providerStates.add(ProviderState(state, params.toMap()))
+    }
+    return this
+  }
+
+  /**
    * Adds an interaction with the given description and type. If interactionType is not specified (is the empty string)
    * will default to an HTTP interaction
    *
@@ -139,6 +195,12 @@ open class PactBuilder(
         TODO("Interactions of type '$interactionType' are not currently supported")
       }
     }
+
+    if (providerStates.isNotEmpty()) {
+      currentInteraction!!.providerStates.addAll(providerStates)
+      providerStates.clear()
+    }
+
     return this
   }
 
@@ -155,7 +217,8 @@ open class PactBuilder(
   }
 
   /**
-   * Values to configure the interaction
+   * Values to configure the interaction. In the case of an interaction configured by a plugin, you need to follow
+   * the plugin documentation of what values must be specified here.
    */
   fun with(values: Map<String, Any?>): PactBuilder {
     require(currentInteraction != null) {
@@ -216,6 +279,7 @@ open class PactBuilder(
     return this
   }
 
+  @Suppress("LongMethod")
   private fun setupMessageContents(
     contents: Any?,
     interaction: V4Interaction
