@@ -22,7 +22,6 @@ import org.gradle.api.tasks.TaskAction
 abstract class PactPublishTask extends DefaultTask {
 
     @Input
-    @Optional
     abstract Property<PactPublish> getPactPublish()
 
     @Input
