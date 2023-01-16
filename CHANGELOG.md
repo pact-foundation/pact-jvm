@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.3.19 - [?62;1;4cMaintenance Release
+# 4.3.19 - Maintenance Release
 
 * 5462deaec - fix: remove the optional annotation from PactPublish attribute in PactPublishTask #1634 (Ronald Holshausen, Thu Jan 12 11:23:44 2023 +1100)
 * 639f7f893 - fix(regression): HTTP Pact with root json array fails when using unordered array matching #1631 (Ronald Holshausen, Wed Jan 4 16:19:42 2023 +1100)
