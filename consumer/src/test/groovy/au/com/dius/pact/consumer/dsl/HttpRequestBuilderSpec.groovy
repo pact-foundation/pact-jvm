@@ -2,14 +2,17 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import kotlin.Pair
 import spock.lang.Specification
 
+import static au.com.dius.pact.consumer.dsl.Matchers.date
 import static au.com.dius.pact.consumer.dsl.Matchers.fromProviderState
 import static au.com.dius.pact.consumer.dsl.Matchers.numeric
 import static au.com.dius.pact.consumer.dsl.Matchers.regexp
@@ -45,7 +48,7 @@ class HttpRequestBuilderSpec extends Specification {
 
   def 'allows using a matcher with the request path'() {
     when:
-    def request = builder.path(regexp('\\/path\\/\\d+', "/path/1000")).build()
+    def request = builder.path(regexp('\\/path\\/\\d+', '/path/1000')).build()
 
     then:
     request.path == '/path/1000'
@@ -188,90 +191,76 @@ class HttpRequestBuilderSpec extends Specification {
     request.headers['content-type'] == ['application/json']
   }
 
-  //  /**
-  //   * The query string for the request
-  //   *
-  //   * @param query query string
-  //   */
-  //  fun query(query: String): PactDslRequestWithoutPath {
-  //    this.query = queryStringToMap(query, false).toMutableMap()
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body Request body in string form
-  //   */
-  //  fun body(body: String, contentType: ContentType): PactDslRequestWithoutPath {
-  //    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
-  //    requestBody = body(body.toByteArray(charset), au.com.dius.pact.core.model.ContentType(contentType.toString()))
-  //    requestHeaders[CONTENT_TYPE] = listOf(contentType.toString())
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body Request body in Java Functional Interface Supplier that must return a string
-  //   */
-  //  fun body(body: Supplier<String>): PactDslRequestWithoutPath {
-  //    requestBody = body(body.get().toByteArray())
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body Request body in Java Functional Interface Supplier that must return a string
-  //   */
-  //  fun body(body: Supplier<String>, contentType: String): PactDslRequestWithoutPath {
-  //    return this.body(body, ContentType.parse(contentType))
-  //  }
-  //
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body Request body in Java Functional Interface Supplier that must return a string
-  //   */
-  //  fun body(body: Supplier<String>, contentType: ContentType): PactDslRequestWithoutPath {
-  //    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
-  //    requestBody = body(body.get().toByteArray(charset), au.com.dius.pact.core.model.ContentType(
-  //    contentType.toString()))
-  //    requestHeaders[CONTENT_TYPE] = listOf(contentType.toString())
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * The body of the request with possible single quotes as delimiters
-  //   * and using [QuoteUtil] to convert single quotes to double quotes if required.
-  //   *
-  //   * @param body Request body in string form
-  //   */
-  //  fun bodyWithSingleQuotes(body: String): PactDslRequestWithoutPath {
-  //    return body(QuoteUtil.convert(body))
-  //  }
-  //
-  //  /**
-  //   * The body of the request with possible single quotes as delimiters
-  //   * and using [QuoteUtil] to convert single quotes to double quotes if required.
-  //   *
-  //   * @param body Request body in string form
-  //   */
-  //  fun bodyWithSingleQuotes(body: String, contentType: String): PactDslRequestWithoutPath {
-  //    return body(QuoteUtil.convert(body), contentType)
-  //  }
-  //
-  //  /**
-  //   * The body of the request with possible single quotes as delimiters
-  //   * and using [QuoteUtil] to convert single quotes to double quotes if required.
-  //   *
-  //   * @param body Request body in string form
-  //   */
-  //  fun bodyWithSingleQuotes(body: String, contentType: ContentType): PactDslRequestWithoutPath {
-  //    return body(QuoteUtil.convert(body), contentType)
-  //  }
-  //
+  def 'allows adding query parameters to the request'() {
+    when:
+    def request = builder
+      .queryParameter('A', 'B')
+      .queryParameter('B', ['B', 'C', 'D'])
+      .queryParameters('sx=y&sy=a&sy=b&sy=c')
+      .queryParameters([x: 'y', y: ['a', 'b', 'c']])
+      .queryParameters('x1', 'y', 'y1', 'a', 'y1', 'b', 'y1', 'c')
+      .queryParameters(new Pair('x2', 'y'), new Pair('y2', 'a'), new Pair('y2', 'b'), new Pair('y2', 'c'))
+      .build()
+
+    then:
+    request.query == [
+      'A': ['B'],
+      'B': ['B', 'C', 'D'],
+      'x': ['y'],
+      'y': ['a', 'b', 'c'],
+      'sx': ['y'],
+      'sy': ['a', 'b', 'c'],
+      'x1': ['y'],
+      'y1': ['a', 'b', 'c'],
+      x2: ['y'],
+      y2: ['a', 'b', 'c']
+    ]
+  }
+
+  def 'allows using matching rules with query parameters'() {
+    when:
+    def request = builder
+      .queryParameter('A', regexp('\\d+', '111'))
+      .queryParameter('B', ['B', numeric(100), 'D'])
+      .queryParameters([x: date('yyyy', '1111'), y: ['a', date('yyyy'), 'c']])
+      .queryParameters(new Pair('x2', regexp('\\d+', '111')), new Pair('y2', 'a'))
+      .build()
+
+    then:
+    request.query == [
+      'A': ['111'],
+      'B': ['B', '100', 'D'],
+      'x': ['1111'],
+      'y': ['a', '2000', 'c'],
+      x2: ['111'],
+      y2: ['a']
+    ]
+    request.matchingRules.rulesForCategory('query') == new MatchingRuleCategory('query',
+      [
+        A: new MatchingRuleGroup([new RegexMatcher('\\d+', '111')]),
+        'B[1]': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)]),
+        x: new MatchingRuleGroup([new DateMatcher('yyyy')]),
+        'y[1]': new MatchingRuleGroup([new DateMatcher('yyyy')]),
+        x2: new MatchingRuleGroup([new RegexMatcher('\\d+', '111')])
+      ]
+    )
+    request.generators.categoryFor(Category.QUERY) == ['y[1]': new DateGenerator('yyyy')]
+  }
+
+  def 'supports setting query parameters from provider states'() {
+    when:
+    def request = builder
+      .queryParameter('A', fromProviderState('$a', '111'))
+      .build()
+
+    then:
+    request.query == [
+      'A': ['111']
+    ]
+    request.matchingRules.rulesForCategory('query') == new MatchingRuleCategory('query', [:])
+    request.generators.categoryFor(Category.QUERY) == [A: new ProviderStateGenerator('$a')]
+  }
+
   //  /**
   //   * The body of the request
   //   *
@@ -390,103 +379,4 @@ class HttpRequestBuilderSpec extends Specification {
   //    return this
   //  }
   //
-  //  /**
-  //   * Matches a date field using the provided date pattern
-  //   * @param field field name
-  //   * @param pattern pattern to match
-  //   * @param example Example value
-  //   */
-  //  fun queryMatchingDate(field: String, pattern: String, example: String): PactDslRequestWithoutPath {
-  //    return queryMatchingDateBase(field, pattern, example) as PactDslRequestWithoutPath
-  //  }
-  //
-  //  /**
-  //   * Matches a date field using the provided date pattern. The current system date will be used for the
-  //   example value.
-  //   * @param field field name
-  //   * @param pattern pattern to match
-  //   */
-  //  fun queryMatchingDate(field: String, pattern: String): PactDslRequestWithoutPath {
-  //    return queryMatchingDateBase(field, pattern, null) as PactDslRequestWithoutPath
-  //  }
-  //
-  //  /**
-  //   * Matches a time field using the provided time pattern
-  //   * @param field field name
-  //   * @param pattern pattern to match
-  //   * @param example Example value
-  //   */
-  //  fun queryMatchingTime(field: String, pattern: String, example: String): PactDslRequestWithoutPath {
-  //    return queryMatchingTimeBase(field, pattern, example) as PactDslRequestWithoutPath
-  //  }
-  //
-  //  /**
-  //   * Matches a time field using the provided time pattern. The current system time will be used for the
-  //   example value.
-  //   * @param field field name
-  //   * @param pattern pattern to match
-  //   */
-  //  fun queryMatchingTime(field: String, pattern: String): PactDslRequestWithoutPath {
-  //    return queryMatchingTimeBase(field, pattern, null) as PactDslRequestWithoutPath
-  //  }
-  //
-  //  /**
-  //   * Matches a datetime field using the provided pattern
-  //   * @param field field name
-  //   * @param pattern pattern to match
-  //   * @param example Example value
-  //   */
-  //  fun queryMatchingDatetime(field: String, pattern: String, example: String): PactDslRequestWithoutPath {
-  //    return queryMatchingDatetimeBase(field, pattern, example) as PactDslRequestWithoutPath
-  //  }
-  //
-  //  /**
-  //   * Matches a datetime field using the provided pattern. The current system date and time will be used for the
-  //   * example value.
-  //   * @param field field name
-  //   * @param pattern pattern to match
-  //   */
-  //  fun queryMatchingDatetime(field: String, pattern: String): PactDslRequestWithoutPath {
-  //    return queryMatchingDatetimeBase(field, pattern, null) as PactDslRequestWithoutPath
-  //  }
-  //
-  //  /**
-  //   * Matches a date field using the ISO date pattern.  The current system date will be used for the example value
-  //   * if not provided.
-  //   * @param field field name
-  //   * @param example Example value
-  //   */
-  //  @JvmOverloads
-  //  fun queryMatchingISODate(field: String, example: String? = null): PactDslRequestWithoutPath {
-  //    return queryMatchingDateBase(field, DateFormatUtils.ISO_DATE_FORMAT.pattern, example)
-  //  }
-  //
-  //  /**
-  //   * Matches a time field using the ISO time pattern
-  //   * @param field field name
-  //   * @param example Example value
-  //   */
-  //  fun queryMatchingISOTime(field: String, example: String?): PactDslRequestWithoutPath {
-  //    return queryMatchingTimeBase(field, DateFormatUtils.ISO_TIME_FORMAT.pattern, example)
-  //  }
-  //
-  //  /**
-  //   * Matches a time field using the ISO time pattern. The current system time will be used for the example value.
-  //   * @param field field name
-  //   */
-  //  fun queryMatchingTime(field: String): PactDslRequestWithoutPath {
-  //    return queryMatchingISOTime(field, null)
-  //  }
-  //
-  //  /**
-  //   * Matches a datetime field using the ISO pattern. The current system date and time will be used for the example
-  //   * value if not provided.
-  //   * @param field field name
-  //   * @param example Example value
-  //   */
-  //  @JvmOverloads
-  //  fun queryMatchingISODatetime(field: String, example: String? = null): PactDslRequestWithoutPath {
-  //    return queryMatchingDatetimeBase(field, DateFormatUtils.ISO_DATETIME_FORMAT.pattern,
-  //      example) as PactDslRequestWithoutPath
-  //  }
 }

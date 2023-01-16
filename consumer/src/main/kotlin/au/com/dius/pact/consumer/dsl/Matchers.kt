@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.consumer.dsl.DslPart.Companion.DATE_2000
 import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.generators.Generator
@@ -18,6 +19,10 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.DateUtils
 import java.text.ParseException
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.regex.Pattern
 
 sealed class Matcher(
@@ -44,29 +49,29 @@ data class TypeMatcher(
 
 data class TimestampMatcher(
   val pattern: String = DateFormatUtils.ISO_DATETIME_FORMAT.pattern,
-  override val value: String?
+  val dateTimeValue: String?
 ) : Matcher(
-  value,
+  dateTimeValue ?: DateTimeFormatter.ofPattern(pattern).format(Instant.ofEpochMilli(DATE_2000).atOffset(ZoneOffset.UTC)),
   au.com.dius.pact.core.model.matchingrules.TimestampMatcher(pattern),
-  if (value == null) DateTimeGenerator(pattern) else null
+  if (dateTimeValue == null) DateTimeGenerator(pattern) else null
 )
 
 data class TimeMatcher(
   val pattern: String = DateFormatUtils.ISO_TIME_FORMAT.pattern,
-  override val value: String?
+  val timeValue: String?
 ) : Matcher(
-  value,
+  timeValue ?: DateTimeFormatter.ofPattern(pattern).format(Instant.ofEpochMilli(DATE_2000).atOffset(ZoneOffset.UTC)),
   au.com.dius.pact.core.model.matchingrules.TimeMatcher(pattern),
-  if (value == null) TimeGenerator(pattern) else null
+  if (timeValue == null) TimeGenerator(pattern) else null
 )
 
 data class DateMatcher(
   val pattern: String = DateFormatUtils.ISO_DATE_FORMAT.pattern,
-  override val value: String?
+  val dateValue: String?
 ) : Matcher(
-  value,
+  dateValue ?: DateTimeFormatter.ofPattern(pattern).format(Instant.ofEpochMilli(DATE_2000).atOffset(ZoneOffset.UTC)),
   au.com.dius.pact.core.model.matchingrules.DateMatcher(pattern),
-  if (value == null) DateGenerator(pattern) else null
+  if (dateValue == null) DateGenerator(pattern) else null
 )
 
 data class UuidMatcher(override val value: String?) :
