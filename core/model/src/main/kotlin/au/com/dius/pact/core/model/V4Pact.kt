@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.deepMerge
+import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
@@ -127,12 +128,12 @@ data class InteractionMarkup(
 
 @Suppress("LongParameterList")
 sealed class V4Interaction(
-  val key: String,
+  var key: String?,
   description: String,
   interactionId: String? = null,
   providerStates: List<ProviderState> = listOf(),
   comments: MutableMap<String, JsonValue> = mutableMapOf(),
-  val pending: Boolean = false,
+  var pending: Boolean = false,
   val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
   var interactionMarkup: InteractionMarkup = InteractionMarkup(),
   var transport: String? = null
@@ -141,7 +142,7 @@ sealed class V4Interaction(
     return false
   }
 
-  override fun uniqueKey() = key.ifEmpty { generateKey() }
+  override fun uniqueKey() = key.ifNullOrEmpty { generateKey() }.orEmpty()
 
   /** Created a copy of the interaction with the key calculated from contents */
   abstract fun withGeneratedKey(): V4Interaction
@@ -168,8 +169,8 @@ sealed class V4Interaction(
     key: String,
     description: String,
     providerStates: List<ProviderState> = listOf(),
-    override val request: HttpRequest = HttpRequest(),
-    override val response: HttpResponse = HttpResponse(),
+    override var request: HttpRequest = HttpRequest(),
+    override var response: HttpResponse = HttpResponse(),
     interactionId: String? = null,
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,

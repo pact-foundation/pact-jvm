@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.support.json.JsonValue
 import kotlin.Pair
 import spock.lang.Issue
 import au.com.dius.pact.core.model.V4Interaction
@@ -116,5 +117,27 @@ class PactBuilderSpec extends Specification {
       new ProviderState('test3', [a: 100]),
       new ProviderState('test4', [a: 100, b: 1000])
     ]
+  }
+
+  def 'supports adding comments'() {
+    given:
+    def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
+
+    when:
+    def pact = builder
+      .comment('test1')
+      .comment('test2')
+      .expectsToReceive('test interaction', '')
+      .comment('test3')
+      .comment('test4')
+      .toPact()
+
+    then:
+    pact.interactions.first().comments['text'] == new JsonValue.Array([
+      new JsonValue.StringValue('test1'),
+      new JsonValue.StringValue('test2'),
+      new JsonValue.StringValue('test3'),
+      new JsonValue.StringValue('test4')
+    ])
   }
 }

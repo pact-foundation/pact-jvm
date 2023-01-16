@@ -1,8 +1,5 @@
-package au.com.dius.pact.consumer
+package au.com.dius.pact.consumer.dsl
 
-import au.com.dius.pact.consumer.dsl.DslPart
-import au.com.dius.pact.consumer.dsl.Matcher
-import au.com.dius.pact.consumer.dsl.MetadataBuilder
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
