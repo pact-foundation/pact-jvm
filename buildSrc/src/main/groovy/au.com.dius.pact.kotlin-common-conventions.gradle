@@ -84,6 +84,24 @@ test {
     systemProperty 'pact_do_not_track', 'true'
 }
 
+tasks.withType(CodeNarc) { codeNarcTask ->
+    reports {
+        console {
+            enabled = true
+        }
+    }
+    codeNarcTask.finalizedBy(project.task("print${codeNarcTask.name.capitalize()}") {
+        onlyIf {
+            codeNarcTask.state.failure != null
+        }
+        doLast {
+            logger.warn("\n****************************** CODE NARC ******************************")
+            logger.warn(codeNarcTask.reports.text.destination.text.trim())
+            logger.warn("****************************** CODE NARC ******************************\n")
+        }
+    })
+}
+
 codenarcMain {
     configFile = rootProject.file('config/codenarc/ruleset.groovy')
 }
