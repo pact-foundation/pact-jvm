@@ -13,9 +13,6 @@ import spock.lang.Specification
 import static au.com.dius.pact.consumer.dsl.Matchers.fromProviderState
 import static au.com.dius.pact.consumer.dsl.Matchers.numeric
 import static au.com.dius.pact.consumer.dsl.Matchers.regexp
-import static au.com.dius.pact.consumer.dsl.Matchers.regexp
-import static au.com.dius.pact.consumer.dsl.Matchers.regexp
-import static au.com.dius.pact.consumer.dsl.Matchers.regexp
 
 class HttpResponseBuilderSpec extends Specification {
 

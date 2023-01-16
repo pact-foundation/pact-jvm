@@ -45,7 +45,7 @@ class HttpRequestBuilderSpec extends Specification {
 
   def 'allows using a matcher with the request path'() {
     when:
-    def request = builder.path(regexp("\\/path\\/\\d+", "/path/1000")).build()
+    def request = builder.path(regexp('\\/path\\/\\d+', "/path/1000")).build()
 
     then:
     request.path == '/path/1000'
@@ -389,43 +389,6 @@ class HttpRequestBuilderSpec extends Specification {
   //    setupFileUpload(partName, fileName, fileContentType, data)
   //    return this
   //  }
-  //
-  //  /**
-  //   * Adds a query parameter that will have it's value injected from the provider state
-  //   * @param name Name
-  //   * @param expression Expression to be evaluated from the provider state
-  //   * @param example Example value to use in the consumer test
-  //   */
-  //  fun queryParameterFromProviderState(name: String, expression: String, example: String)
-  //    requestGenerators.addGenerator(Category.QUERY, name, ProviderStateGenerator(expression, DataType.STRING))
-  //    query[name] = listOf(example)
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Sets the path to have it's value injected from the provider state
-  //   * @param expression Expression to be evaluated from the provider state
-  //   * @param example Example value to use in the consumer test
-  //   */
-  //  fun pathFromProviderState(expression: String, example: String): PactDslRequestWithPath {
-  //    requestGenerators.addGenerator(Category.PATH, "", ProviderStateGenerator(expression, DataType.STRING))
-  //    return PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
-  //      description, example, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
-  //      defaultRequestValues, defaultResponseValues, comments, version, additionalMetadata)
-  //  }
-  //
-  //  /**
-  //   * Variant of [PactDslRequestWithoutPath.pathFromProviderState] that introduces a Lambda DSL syntax to better
-  //   * visually separate request and response in a pact.
-  //   *
-  //   * @see PactDslRequestWithoutPath.pathFromProviderState
-  //   * @sample au.com.dius.pact.consumer.dsl.samples.PactLambdaDslSamples.requestResponse
-  //   */
-  //  inline fun pathFromProviderState(
-  //    expression: String,
-  //    example: String,
-  //    addRequestMatchers: PactDslRequestWithPath.() -> PactDslRequestWithPath
-  //  ): PactDslRequestWithPath = addRequestMatchers(pathFromProviderState(expression, example))
   //
   //  /**
   //   * Matches a date field using the provided date pattern
