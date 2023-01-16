@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.HttpRequest
+import au.com.dius.pact.core.model.generators.Category
 
 /**
  * Pact HTTP Request builder DSL that supports V4 formatted Pact files
@@ -29,6 +30,24 @@ open class HttpRequestBuilder(private val request: HttpRequest): HttpPartBuilder
     return this
   }
 
+  /**
+   * Sets the path of the request using a matching rule. For example:
+   *
+   * ```
+   * path(regexp("\\/path\\/\\d+", "/path/1000"))
+   * ```
+   */
+  fun path(matcher: Matcher): HttpRequestBuilder {
+    if (matcher.matcher != null) {
+      request.matchingRules.addCategory("path").addRule(matcher.matcher!!)
+    }
+    if (matcher.generator != null) {
+      request.generators.addGenerator(Category.PATH, "", matcher.generator!!)
+    }
+    request.path = matcher.value.toString()
+    return this
+  }
+
   override fun header(key: String, value: Any): HttpRequestBuilder {
     return super.header(key, value) as HttpRequestBuilder
   }
@@ -37,7 +56,7 @@ open class HttpRequestBuilder(private val request: HttpRequest): HttpPartBuilder
     return super.headers(key, value, nameValuePairs) as HttpRequestBuilder
   }
 
-  override fun headers(vararg nameValuePairs: Pair<String, String>): HttpRequestBuilder {
+  override fun headers(vararg nameValuePairs: Pair<String, Any>): HttpRequestBuilder {
     return super.headers(nameValuePairs) as HttpRequestBuilder
   }
 

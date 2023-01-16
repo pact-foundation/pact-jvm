@@ -21,7 +21,7 @@ open class HttpResponseBuilder(private val response: HttpResponse): HttpPartBuil
     return super.headers(key, value, nameValuePairs) as HttpResponseBuilder
   }
 
-  override fun headers(vararg nameValuePairs: Pair<String, String>): HttpResponseBuilder {
+  override fun headers(vararg nameValuePairs: Pair<String, Any>): HttpResponseBuilder {
     return super.headers(nameValuePairs) as HttpResponseBuilder
   }
 

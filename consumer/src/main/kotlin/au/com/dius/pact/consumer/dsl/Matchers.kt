@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.dsl
 import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.generators.RandomBooleanGenerator
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator
 import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator
@@ -79,6 +80,9 @@ data class IncludeMatcher(override val value: String) : Matcher(value,
   au.com.dius.pact.core.model.matchingrules.IncludeMatcher(value))
 
 object NullMatcher : Matcher(null, au.com.dius.pact.core.model.matchingrules.NullMatcher)
+
+data class ProviderStateMatcher(val expression: String, override val value: String) : Matcher(value,
+  null, ProviderStateGenerator(expression))
 
 /**
  * Exception for handling invalid matchers
@@ -297,5 +301,15 @@ object Matchers {
   @JvmStatic
   fun nullValue(): Matcher {
     return NullMatcher
+  }
+
+  /**
+   * Value injected from a provider state
+   * @param expression Expression to use to match a value in the provider state.
+   * @param value Example value, if not provided the current date will be used
+   */
+  @JvmStatic
+  fun fromProviderState(expression: String, value: String): Matcher {
+    return ProviderStateMatcher(expression, value)
   }
 }
