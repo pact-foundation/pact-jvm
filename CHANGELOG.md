@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.3.19 - [?62;1;4cMaintenance Release
+
+* 5462deaec - fix: remove the optional annotation from PactPublish attribute in PactPublishTask #1634 (Ronald Holshausen, Thu Jan 12 11:23:44 2023 +1100)
+* 639f7f893 - fix(regression): HTTP Pact with root json array fails when using unordered array matching #1631 (Ronald Holshausen, Wed Jan 4 16:19:42 2023 +1100)
+* be8d57dcf - fix(regression): Upgrading au.com.dius.pact.provider:junit5 from 4.3.15 to 4.3.16 results in compilation failure #1630 (Ronald Holshausen, Tue Jan 3 16:42:02 2023 +1100)
+* 51c076fdf - chore: Upgrade Groovy to 3.0.14 (Ronald Holshausen, Tue Jan 3 16:41:14 2023 +1100)
+* 5184f5b99 - chore: correct changelog (Ronald Holshausen, Fri Dec 23 14:19:07 2022 +1100)
+* 957183037 - bump version to 4.3.19 (Ronald Holshausen, Fri Dec 23 14:18:36 2022 +1100)
+
 # 4.3.18 - fix: write date/time matchers in the correct format as per the spec
 
 * b1d6c01c0 - fix: write date/time matchers in the correct format as per the spec #1617 (Ronald Holshausen, Fri Dec 23 11:49:18 2022 +1100)
