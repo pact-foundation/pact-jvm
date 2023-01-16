@@ -19,7 +19,7 @@ java {
     sourceCompatibility = '11'
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -84,22 +84,12 @@ test {
     systemProperty 'pact_do_not_track', 'true'
 }
 
-tasks.withType(CodeNarc) { codeNarcTask ->
+tasks.withType(CodeNarc).configureEach { codeNarcTask ->
     reports {
         console {
             enabled = true
         }
     }
-    codeNarcTask.finalizedBy(project.task("print${codeNarcTask.name.capitalize()}") {
-        onlyIf {
-            codeNarcTask.state.failure != null
-        }
-        doLast {
-            logger.warn("\n****************************** CODE NARC ******************************")
-            logger.warn(codeNarcTask.reports.text.destination.text.trim())
-            logger.warn("****************************** CODE NARC ******************************\n")
-        }
-    })
 }
 
 codenarcMain {

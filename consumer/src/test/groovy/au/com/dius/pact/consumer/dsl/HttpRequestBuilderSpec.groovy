@@ -123,6 +123,4 @@ class HttpRequestBuilderSpec extends Specification {
     request.body.contentType.toString() == 'application/json'
     request.headers['content-type'] == ['application/json']
   }
-
-
 }

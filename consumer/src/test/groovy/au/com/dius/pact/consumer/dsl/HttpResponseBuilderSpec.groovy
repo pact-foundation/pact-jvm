@@ -113,6 +113,4 @@ class HttpResponseBuilderSpec extends Specification {
     response.body.contentType.toString() == 'application/json'
     response.headers['content-type'] == ['application/json']
   }
-
-
 }
