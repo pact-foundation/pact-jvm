@@ -5,10 +5,13 @@ import au.com.dius.pact.core.model.HttpResponse
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.HttpStatus
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import kotlin.Pair
 import spock.lang.Specification
 
@@ -97,6 +100,21 @@ class HttpResponseBuilderSpec extends Specification {
     response.generators.categoryFor(Category.HEADER) == [A: new ProviderStateGenerator('$a')]
   }
 
+  def 'supports matching set-cookie response headers'() {
+    when:
+    def response = builder
+      .matchSetCookie('A', '\\d+', '100')
+      .build()
+
+    then:
+    response.headers == [
+      'set-cookie': ['A=100']
+    ]
+    response.matchingRules.rulesForCategory('header') == new MatchingRuleCategory('header', [
+      'set-cookie': new MatchingRuleGroup([new RegexMatcher('\\QA=\\E\\d+')], RuleLogic.OR)
+    ])
+  }
+
   def 'allows setting the response status'() {
     when:
     def response = builder
@@ -105,6 +123,36 @@ class HttpResponseBuilderSpec extends Specification {
 
     then:
     response.status == 204
+  }
+
+  def 'allows setting the response status using common status groups'() {
+    when:
+    def response
+    if (args.empty) {
+      response = builder."$method"().build()
+    } else {
+      response = builder."$method"(args).build()
+    }
+
+    then:
+    response.status == status
+    response.matchingRules.rulesForCategory('status') == new MatchingRuleCategory('status',
+      [
+        '': new MatchingRuleGroup([matchingRule])
+      ]
+    )
+
+    where:
+
+    method              | args            | status | matchingRule
+    'informationStatus' | []              | 100    | new StatusCodeMatcher(HttpStatus.Information, [])
+    'successStatus'     | []              | 200    | new StatusCodeMatcher(HttpStatus.Success, [])
+    'redirectStatus'    | []              | 300    | new StatusCodeMatcher(HttpStatus.Redirect, [])
+    'clientErrorStatus' | []              | 400    | new StatusCodeMatcher(HttpStatus.ClientError, [])
+    'serverErrorStatus' | []              | 500    | new StatusCodeMatcher(HttpStatus.ServerError, [])
+    'nonErrorStatus'    | []              | 200    | new StatusCodeMatcher(HttpStatus.NonError, [])
+    'errorStatus'       | []              | 400    | new StatusCodeMatcher(HttpStatus.Error, [])
+    'statusCodes'       | [200, 201, 204] | 200    | new StatusCodeMatcher(HttpStatus.StatusCodes, [200, 201, 204])
   }
 
   def 'allows setting the body of the response as a string value'() {
@@ -195,7 +243,8 @@ class HttpResponseBuilderSpec extends Specification {
       .build()
 
     then:
-    response.body.valueAsString() == '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<test id="100"/>\n'
+    response.body.valueAsString() == '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' +
+      System.lineSeparator() + '<test id="100"/>' + System.lineSeparator()
     response.body.contentType.toString() == 'application/xml'
     response.headers['content-type'] == ['application/xml']
     response.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
@@ -226,105 +275,4 @@ class HttpResponseBuilderSpec extends Specification {
       ]
     )
   }
-
-  // /**
-  //   * Match a set cookie header
-  //   * @param cookie Cookie name to match
-  //   * @param regex Regex to match the cookie value with
-  //   * @param example Example value
-  //   */
-  //  fun matchSetCookie(cookie: String, regex: String, example: String): PactDslResponse {
-  //    val header = responseMatchers.addCategory("header")
-  //    if (header.numRules("set-cookie") > 0) {
-  //      header.addRule("set-cookie", RegexMatcher(Pattern.quote("$cookie=") + regex))
-  //    } else {
-  //      header.setRule("set-cookie", RegexMatcher(Pattern.quote("$cookie=") + regex), RuleLogic.OR)
-  //    }
-  //    if (responseHeaders.containsKey("set-cookie")) {
-  //      responseHeaders["set-cookie"] = responseHeaders["set-cookie"]!!.plus("$cookie=$example")
-  //    } else {
-  //      responseHeaders["set-cookie"] = listOf("$cookie=$example")
-  //    }
-  //    return this
-  //  }
-
-  // /**
-  //   * Match any HTTP Information response status (100-199)
-  //   */
-  //  fun informationStatus(): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.Information)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = 100
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Match any HTTP success response status (200-299)
-  //   */
-  //  fun successStatus(): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.Success)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = 200
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Match any HTTP redirect response status (300-399)
-  //   */
-  //  fun redirectStatus(): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.Redirect)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = 300
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Match any HTTP client error response status (400-499)
-  //   */
-  //  fun clientErrorStatus(): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.ClientError)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = 400
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Match any HTTP server error response status (500-599)
-  //   */
-  //  fun serverErrorStatus(): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.ServerError)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = 500
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Match any HTTP non-error response status (< 400)
-  //   */
-  //  fun nonErrorStatus(): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.NonError)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = 200
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Match any HTTP error response status (>= 400)
-  //   */
-  //  fun errorStatus(): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.Error)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = 400
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Match any HTTP status code in the provided list
-  //   */
-  //  fun statusCodes(statusCodes: List<Int>): PactDslResponse {
-  //    val matcher = StatusCodeMatcher(HttpStatus.StatusCodes, statusCodes)
-  //    responseMatchers.addCategory("status").addRule(matcher)
-  //    responseStatus = statusCodes.first()
-  //    return this
-  //  }
 }

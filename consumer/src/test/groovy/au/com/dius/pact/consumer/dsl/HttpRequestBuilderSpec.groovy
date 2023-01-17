@@ -220,7 +220,8 @@ class HttpRequestBuilderSpec extends Specification {
       .build()
 
     then:
-    request.body.valueAsString() == '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<test id="100"/>\n'
+    request.body.valueAsString() == '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' +
+      System.lineSeparator() + '<test id="100"/>' + System.lineSeparator()
     request.body.contentType.toString() == 'application/xml'
     request.headers['content-type'] == ['application/xml']
     request.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
