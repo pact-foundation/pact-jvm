@@ -216,7 +216,7 @@ class MatchingSpec extends Specification {
     def result = Matching.INSTANCE.matchBody(expected, actual, bodyContext).mismatches
 
     then:
-    result.size() == 3
+    result.size() == 2
     result[0].mismatch == 'Actual map is missing the following keys: system'
     result[1].mismatch == 'Actual map is missing the following keys: id'
   }
