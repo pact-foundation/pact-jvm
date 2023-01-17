@@ -1,14 +1,17 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import kotlin.Pair
 import spock.lang.Specification
 
@@ -191,6 +194,64 @@ class HttpRequestBuilderSpec extends Specification {
     request.headers['content-type'] == ['application/json']
   }
 
+  def 'supports setting the body from a DSLPart object'() {
+    when:
+    def request = builder
+      .body(new PactDslJsonBody().stringType('value', 'This is some text'))
+      .build()
+
+    then:
+    request.body.valueAsString() == '{"value":"This is some text"}'
+    request.body.contentType.toString() == 'application/json'
+    request.headers['content-type'] == ['application/json']
+    request.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
+      [
+        '$.value': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+      ]
+    )
+  }
+
+  def 'supports setting the body using a body builder'() {
+    when:
+    def request = builder
+      .body(new PactXmlBuilder('test').build {
+        it.attributes = [id: regexp('\\d+', '100')]
+      })
+      .build()
+
+    then:
+    request.body.valueAsString() == '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<test id="100"/>\n'
+    request.body.contentType.toString() == 'application/xml'
+    request.headers['content-type'] == ['application/xml']
+    request.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
+      [
+        '$.test[\'@id\']': new MatchingRuleGroup([new RegexMatcher('\\d+', '100')])
+      ]
+    )
+  }
+
+  def 'supports setting up a content type matcher on the body'() {
+    when:
+    def gif1px = [
+      0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
+      0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
+      0001, 0000, 0073
+    ] as byte[]
+    def request = builder
+      .bodyMatchingContentType('image/gif', gif1px)
+      .build()
+
+    then:
+    request.body.value == gif1px
+    request.body.contentType.toString() == 'image/gif'
+    request.headers['content-type'] == ['image/gif']
+    request.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
+      [
+        '$': new MatchingRuleGroup([new ContentTypeMatcher('image/gif')])
+      ]
+    )
+  }
+
   def 'allows adding query parameters to the request'() {
     when:
     def request = builder
@@ -260,123 +321,4 @@ class HttpRequestBuilderSpec extends Specification {
     request.matchingRules.rulesForCategory('query') == new MatchingRuleCategory('query', [:])
     request.generators.categoryFor(Category.QUERY) == [A: new ProviderStateGenerator('$a')]
   }
-
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body Request body in JSON form
-  //   */
-  //  fun body(body: JSONObject): PactDslRequestWithoutPath {
-  //    if (isContentTypeHeaderNotSet) {
-  //      requestHeaders[CONTENT_TYPE] = listOf(ContentType.APPLICATION_JSON.toString())
-  //      requestBody = body(body.toString().toByteArray())
-  //    } else {
-  //      val contentType = contentTypeHeader
-  //      val ct = ContentType.parse(contentType)
-  //      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
-  //      requestBody = body(body.toString().toByteArray(charset),
-  //        au.com.dius.pact.core.model.ContentType(contentType))
-  //    }
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body Built using the Pact body DSL
-  //   */
-  //  fun body(body: DslPart): PactDslRequestWithoutPath {
-  //    val parent = body.close()
-  //
-  //    requestMatchers.addCategory(parent!!.matchers)
-  //    requestGenerators.addGenerators(parent.generators)
-  //
-  //    if (isContentTypeHeaderNotSet) {
-  //      requestHeaders[CONTENT_TYPE] = listOf(ContentType.APPLICATION_JSON.toString())
-  //      requestBody = body(parent.toString().toByteArray())
-  //    } else {
-  //      val contentType = contentTypeHeader
-  //      val ct = ContentType.parse(contentType)
-  //      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
-  //      requestBody = body(parent.toString().toByteArray(charset),
-  //        au.com.dius.pact.core.model.ContentType(contentType))
-  //    }
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body XML Document
-  //   */
-  //  @Throws(TransformerException::class)
-  //  fun body(body: Document): PactDslRequestWithoutPath {
-  //    if (isContentTypeHeaderNotSet) {
-  //      requestHeaders[CONTENT_TYPE] = listOf(ContentType.APPLICATION_XML.toString())
-  //      requestBody = body(ConsumerPactBuilder.xmlToString(body).toByteArray())
-  //    } else {
-  //      val contentType = contentTypeHeader
-  //      val ct = ContentType.parse(contentType)
-  //      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
-  //      requestBody = body(ConsumerPactBuilder.xmlToString(body).toByteArray(charset),
-  //        au.com.dius.pact.core.model.ContentType(contentType))
-  //    }
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * XML Response body to return
-  //   *
-  //   * @param xmlBuilder XML Builder used to construct the XML document
-  //   */
-  //  fun body(xmlBuilder: PactXmlBuilder): PactDslRequestWithoutPath {
-  //    requestMatchers.addCategory(xmlBuilder.matchingRules)
-  //    requestGenerators.addGenerators(xmlBuilder.generators)
-  //    if (isContentTypeHeaderNotSet) {
-  //      requestHeaders[CONTENT_TYPE] = listOf(ContentType.APPLICATION_XML.toString())
-  //      requestBody = body(xmlBuilder.asBytes())
-  //    } else {
-  //      val contentType = contentTypeHeader
-  //      val ct = ContentType.parse(contentType)
-  //      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
-  //      requestBody = body(xmlBuilder.asBytes(charset),
-  //        au.com.dius.pact.core.model.ContentType(contentType))
-  //    }
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * The body of the request
-  //   *
-  //   * @param body Built using MultipartEntityBuilder
-  //   */
-  //  open fun body(body: MultipartEntityBuilder): PactDslRequestWithoutPath {
-  //    setupMultipart(body)
-  //    return this
-  //  }
-  //
-  //  /**
-  //   * Sets up a content type matcher to match any body of the given content type
-  //   */
-  //  public override fun bodyMatchingContentType(contentType: String, exampleContents: String)
-  //    return super.bodyMatchingContentType(contentType, exampleContents) as PactDslRequestWithoutPath
-  //  }
-  //  /**
-  //   * Sets up a file upload request. This will add the correct content type header to the request
-  //   * @param partName This is the name of the part in the multipart body.
-  //   * @param fileName This is the name of the file that was uploaded
-  //   * @param fileContentType This is the content type of the uploaded file
-  //   * @param data This is the actual file contents
-  //   */
-  //  @Throws(IOException::class)
-  //  fun withFileUpload(
-  //    partName: String,
-  //    fileName: String,
-  //    fileContentType: String?,
-  //    data: ByteArray
-  //  ): PactDslRequestWithoutPath {
-  //    setupFileUpload(partName, fileName, fileContentType, data)
-  //    return this
-  //  }
-  //
 }

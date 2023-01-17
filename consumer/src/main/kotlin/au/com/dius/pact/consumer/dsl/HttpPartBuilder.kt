@@ -2,8 +2,10 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.ContentType.Companion.JSON
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.support.isNotEmpty
 import io.ktor.http.HeaderValue
 import io.ktor.http.parseHeaderValue
@@ -201,6 +203,66 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
     }
 
     return this
+  }
+
+  /**
+   * Sets the body, content type and matching rules from a DslPart
+   */
+  open fun body(dslPart: DslPart): HttpPartBuilder {
+    val parent = dslPart.close()!!
+
+    part.matchingRules.addCategory(parent.matchers)
+    part.generators.addGenerators(parent.generators)
+
+    val contentTypeHeader = part.contentTypeHeader()
+    if (contentTypeHeader.isNullOrEmpty()) {
+      part.headers["content-type"] = listOf(JSON.toString())
+      part.body = OptionalBody.body(parent.toString().toByteArray())
+    } else {
+      val ct = ContentType(contentTypeHeader)
+      val charset = ct.asCharset()
+      part.body = OptionalBody.body(parent.toString().toByteArray(charset), ct)
+    }
+
+    return this
+  }
+
+  /**
+   * Sets the body, content type and matching rules from a BodyBuilder
+   */
+  open fun body(builder: BodyBuilder): HttpPartBuilder {
+    part.matchingRules.addCategory(builder.matchers)
+    part.generators.addGenerators(builder.generators)
+
+    val contentTypeHeader = part.contentTypeHeader()
+    val contentType = builder.contentType
+    if (contentTypeHeader.isNullOrEmpty()) {
+      part.headers["content-type"] = listOf(contentType.toString())
+      part.body = OptionalBody.body(builder.buildBody(), contentType)
+    } else {
+      part.body = OptionalBody.body(builder.buildBody())
+    }
+
+    return this
+  }
+
+  /**
+   * Sets up a content type matcher to match any body of the given content type
+   */
+  open fun bodyMatchingContentType(contentType: String, exampleContents: ByteArray): HttpPartBuilder {
+    val ct = ContentType(contentType)
+    part.body = OptionalBody.body(exampleContents, ct)
+    part.headers["content-type"] = listOf(contentType)
+    part.matchingRules.addCategory("body").addRule("$", ContentTypeMatcher(contentType))
+    return this
+  }
+
+  /**
+   * Sets up a content type matcher to match any body of the given content type
+   */
+  open fun bodyMatchingContentType(contentType: String, exampleContents: String): HttpPartBuilder {
+    val ct = ContentType(contentType)
+    return bodyMatchingContentType(contentType, exampleContents.toByteArray(ct.asCharset()))
   }
 
   private fun isKnowSingleValueHeader(key: String): Boolean {

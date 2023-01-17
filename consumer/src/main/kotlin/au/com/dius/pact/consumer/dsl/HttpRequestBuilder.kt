@@ -73,6 +73,22 @@ open class HttpRequestBuilder(private val request: HttpRequest): HttpPartBuilder
     return super.body(body, contentTypeString) as HttpRequestBuilder
   }
 
+  override fun body(dslPart: DslPart): HttpRequestBuilder {
+    return super.body(dslPart) as HttpRequestBuilder
+  }
+
+  override fun body(builder: BodyBuilder): HttpRequestBuilder {
+    return super.body(builder) as HttpRequestBuilder
+  }
+
+  override fun bodyMatchingContentType(contentType: String, exampleContents: ByteArray): HttpRequestBuilder {
+    return super.bodyMatchingContentType(contentType, exampleContents) as HttpRequestBuilder
+  }
+
+  override fun bodyMatchingContentType(contentType: String, exampleContents: String): HttpRequestBuilder {
+    return super.bodyMatchingContentType(contentType, exampleContents) as HttpRequestBuilder
+  }
+
   /**
    * Adds a query parameter to the request. You can setup a multiple value query parameter by passing a List as the
    * value.

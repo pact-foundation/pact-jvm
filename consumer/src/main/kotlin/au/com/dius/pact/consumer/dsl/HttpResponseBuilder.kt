@@ -44,4 +44,20 @@ open class HttpResponseBuilder(private val response: HttpResponse): HttpPartBuil
   override fun body(body: String, contentTypeString: String?): HttpResponseBuilder {
     return super.body(body, contentTypeString) as HttpResponseBuilder
   }
+
+  override fun body(dslPart: DslPart): HttpResponseBuilder {
+    return super.body(dslPart) as HttpResponseBuilder
+  }
+
+  override fun body(builder: BodyBuilder): HttpResponseBuilder {
+    return super.body(builder) as HttpResponseBuilder
+  }
+
+  override fun bodyMatchingContentType(contentType: String, exampleContents: ByteArray): HttpResponseBuilder {
+    return super.bodyMatchingContentType(contentType, exampleContents) as HttpResponseBuilder
+  }
+
+  override fun bodyMatchingContentType(contentType: String, exampleContents: String): HttpResponseBuilder {
+    return super.bodyMatchingContentType(contentType, exampleContents) as HttpResponseBuilder
+  }
 }

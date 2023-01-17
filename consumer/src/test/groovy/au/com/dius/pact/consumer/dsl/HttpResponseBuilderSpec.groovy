@@ -1,8 +1,10 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.HttpResponse
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
@@ -165,6 +167,64 @@ class HttpResponseBuilderSpec extends Specification {
     response.body.valueAsString() == '{"value": "This is some text"}'
     response.body.contentType.toString() == 'application/json'
     response.headers['content-type'] == ['application/json']
+  }
+
+  def 'supports setting the body from a DSLPart object'() {
+    when:
+    def response = builder
+      .body(new PactDslJsonBody().stringType('value', 'This is some text'))
+      .build()
+
+    then:
+    response.body.valueAsString() == '{"value":"This is some text"}'
+    response.body.contentType.toString() == 'application/json'
+    response.headers['content-type'] == ['application/json']
+    response.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
+      [
+        '$.value': new MatchingRuleGroup([au.com.dius.pact.core.model.matchingrules.TypeMatcher.INSTANCE])
+      ]
+    )
+  }
+
+  def 'supports setting the body using a body builder'() {
+    when:
+    def response = builder
+      .body(new PactXmlBuilder('test').build {
+        it.attributes = [id: regexp('\\d+', '100')]
+      })
+      .build()
+
+    then:
+    response.body.valueAsString() == '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<test id="100"/>\n'
+    response.body.contentType.toString() == 'application/xml'
+    response.headers['content-type'] == ['application/xml']
+    response.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
+      [
+        '$.test[\'@id\']': new MatchingRuleGroup([new RegexMatcher('\\d+', '100')])
+      ]
+    )
+  }
+
+  def 'supports setting up a content type matcher on the body'() {
+    when:
+    def gif1px = [
+      0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
+      0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
+      0001, 0000, 0073
+    ] as byte[]
+    def response = builder
+      .bodyMatchingContentType('image/gif', gif1px)
+      .build()
+
+    then:
+    response.body.value == gif1px
+    response.body.contentType.toString() == 'image/gif'
+    response.headers['content-type'] == ['image/gif']
+    response.matchingRules.rulesForCategory('body') == new MatchingRuleCategory('body',
+      [
+        '$': new MatchingRuleGroup([new ContentTypeMatcher('image/gif')])
+      ]
+    )
   }
 
   // /**
