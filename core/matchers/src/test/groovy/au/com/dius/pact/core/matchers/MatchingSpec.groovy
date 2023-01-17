@@ -8,7 +8,6 @@ import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
@@ -177,12 +176,12 @@ class MatchingSpec extends Specification {
     result.mismatches.empty
   }
 
-  @Issue("401")
+  @Issue('#401')
   def 'Body Matching - eachKeyMappedToAnArrayLike does not work on "nested" property'() {
     given:
     bodyContext.matchers
       .addRule('$.date', new DateMatcher("yyyyMMdd'T'HHmmss"))
-      .addRule('$.system', new RegexMatcher(".+"))
+      .addRule('$.system', new RegexMatcher('.+'))
       .addRule('$.data', ValuesMatcher.INSTANCE)
       .addRule('$.data.*[*].id', TypeMatcher.INSTANCE)
 

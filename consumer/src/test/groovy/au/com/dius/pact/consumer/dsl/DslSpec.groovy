@@ -35,11 +35,11 @@ class DslSpec extends Specification {
   def 'eachKeyMappedToAnArrayLike does not work on "nested" property'() {
     given:
     def body = new PactDslJsonBody()
-      .date("date", "yyyyMMdd'T'HHmmss")
-      .stringMatcher("system", ".+", "systemname")
-      .object("data")
-        .eachKeyMappedToAnArrayLike("subsystem_name")
-          .stringType("id","1234567")
+      .date('date', "yyyyMMdd'T'HHmmss")
+      .stringMatcher('system', '.+', 'systemname')
+      .object('data')
+        .eachKeyMappedToAnArrayLike('subsystem_name')
+          .stringType('id', '1234567')
         .closeArray()
       .closeObject()
 
