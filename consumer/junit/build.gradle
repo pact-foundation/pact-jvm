@@ -31,8 +31,7 @@ dependencies {
   testImplementation 'ch.qos.logback:logback-core'
   testImplementation 'ch.qos.logback:logback-classic'
   testImplementation 'org.apache.commons:commons-collections4'
-
-  testImplementation 'org.apache.commons:commons-collections4'
+  testImplementation 'org.junit.vintage:junit-vintage-engine'
   testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
   testImplementation('io.rest-assured:rest-assured:5.2.0') {
     exclude group: 'org.apache.groovy'
