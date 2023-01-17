@@ -5,9 +5,14 @@ import au.com.dius.pact.core.model.PactReaderKt
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
+import spock.lang.Issue
 import spock.lang.Specification
 
 class MatchingSpec extends Specification {
@@ -170,5 +175,49 @@ class MatchingSpec extends Specification {
 
     then:
     result.mismatches.empty
+  }
+
+  @Issue("401")
+  def 'Body Matching - eachKeyMappedToAnArrayLike does not work on "nested" property'() {
+    given:
+    bodyContext.matchers
+      .addRule('$.date', new DateMatcher("yyyyMMdd'T'HHmmss"))
+      .addRule('$.system', new RegexMatcher(".+"))
+      .addRule('$.data', ValuesMatcher.INSTANCE)
+      .addRule('$.data.*[*].id', TypeMatcher.INSTANCE)
+
+    def body =
+      '{\n' +
+      '  "date": "20000131T140000",\n' +
+      '  "system": "systemname",\n' +
+      '  "data": {\n' +
+      '    "subsystem_name": [\n' +
+      '      {\n' +
+      '        "id": "1234567"\n' +
+      '      }\n' +
+      '    ]\n' +
+      '  }\n' +
+      '}'
+    def actualBody = '{\n' +
+    '  "date": "19880101T120101",\n' +
+    '  "system_name": "s1",\n' +
+    '  "data": {\n' +
+    '    "sub": [\n' +
+    '      {\n' +
+    '        "hop":"san"\n' +
+    '      }\n' +
+    '    ]\n' +
+    '  }\n' +
+    '}'
+    def expected = new Response(200, ['content-type': ['application/json']], OptionalBody.body(body.bytes))
+    def actual = new Response(200, ['content-type': ['application/json']], OptionalBody.body(actualBody.bytes))
+
+    when:
+    def result = Matching.INSTANCE.matchBody(expected, actual, bodyContext).mismatches
+
+    then:
+    result.size() == 3
+    result[0].mismatch == 'Actual map is missing the following keys: system'
+    result[1].mismatch == 'Actual map is missing the following keys: id'
   }
 }
