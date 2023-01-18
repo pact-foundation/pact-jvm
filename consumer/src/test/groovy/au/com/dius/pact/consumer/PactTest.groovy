@@ -63,7 +63,7 @@ class PactTest {
 
   @Test
   void testPactHttps() {
-    assumeThat(System.getProperty("os.name"), is("Linux"))
+    assumeThat(System.getProperty('os.name'), is('Linux'))
     RequestResponsePact pact = ConsumerPactBuilder
       .consumer('Some Consumer')
       .hasPactWith('Some Provider')
