@@ -35,7 +35,7 @@ public class IP6Test {
   @Test
   @PactVerification("ip6_provider")
   public void runTest() throws IOException {
-    assumeThat(System.getProperty("os.name"), CoreMatchers.is("Linux"))
+    assumeThat(System.getProperty("os.name"), CoreMatchers.is("Linux"));
     assertThat(Request.get(provider.getUrl() + "/path").execute().returnContent().asString(), is(equalTo("{}")));
   }
 }
