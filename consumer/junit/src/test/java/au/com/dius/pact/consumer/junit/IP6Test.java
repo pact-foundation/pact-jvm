@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.hc.client5.http.fluent.Request;
+import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assume.assumeThat;
 
 public class IP6Test {
 
@@ -33,6 +35,7 @@ public class IP6Test {
   @Test
   @PactVerification("ip6_provider")
   public void runTest() throws IOException {
+    assumeThat(System.getProperty("os.name"), CoreMatchers.is("Linux"))
     assertThat(Request.get(provider.getUrl() + "/path").execute().returnContent().asString(), is(equalTo("{}")));
   }
 }
