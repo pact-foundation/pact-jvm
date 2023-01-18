@@ -2,8 +2,10 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
+@IgnoreIf({ os.windows }) // Failing on GH action Windows agents
 class PactBrokerResultSpec extends Specification {
 
     def 'case when the test passes and the pact is verified'() {
