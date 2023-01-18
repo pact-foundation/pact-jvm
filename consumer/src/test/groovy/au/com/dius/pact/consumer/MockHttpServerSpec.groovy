@@ -81,4 +81,42 @@ class MockHttpServerSpec extends Specification {
     then:
     request.path == '/endpoint/Some%2FValue'
   }
+
+  def 'IP6 test'() {
+    given:
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [])
+    def config = new MockProviderConfig(hostname, port)
+
+    when:
+    def mockServer = mockServerClass.newInstance(pact, config)
+    mockServer.start()
+
+    then:
+    mockServer.url ==~ url
+
+    cleanup:
+    mockServer.stop()
+
+    where:
+
+    mockServerClass | hostname        | port | url
+    MockHttpServer  | '[::1]'         | 0    | /http:\/\/ip6-localhost:\d+/
+    MockHttpServer  | '[::1]'         | 1234 | 'http://ip6-localhost:1234'
+    MockHttpServer  | '::1'           | 0    | /http:\/\/ip6-localhost:\d+/
+    MockHttpServer  | '::1'           | 1235 | 'http://ip6-localhost:1235'
+    MockHttpServer  | 'ip6-localhost' | 0    | /http:\/\/ip6-localhost:\d+/
+    MockHttpServer  | 'ip6-localhost' | 1236 | 'http://ip6-localhost:1236'
+    MockHttpsServer | '[::1]'         | 0    | /http:\/\/ip6-localhost:\d+/
+    MockHttpsServer | '[::1]'         | 1237 | 'http://ip6-localhost:1237'
+    MockHttpsServer | '::1'           | 0    | /http:\/\/ip6-localhost:\d+/
+    MockHttpsServer | '::1'           | 1238 | 'http://ip6-localhost:1238'
+    MockHttpsServer | 'ip6-localhost' | 0    | /http:\/\/ip6-localhost:\d+/
+    MockHttpsServer | 'ip6-localhost' | 1239 | 'http://ip6-localhost:1239'
+    KTorMockServer  | '[::1]'         | 0    | /http:\/\/ip6-localhost:\d+/
+    KTorMockServer  | '[::1]'         | 2234 | 'http://ip6-localhost:2234'
+    KTorMockServer  | '::1'           | 0    | /http:\/\/ip6-localhost:\d+/
+    KTorMockServer  | '::1'           | 2235 | 'http://ip6-localhost:2235'
+    KTorMockServer  | 'ip6-localhost' | 0    | /http:\/\/ip6-localhost:\d+/
+    KTorMockServer  | 'ip6-localhost' | 2236 | 'http://ip6-localhost:2236'
+  }
 }

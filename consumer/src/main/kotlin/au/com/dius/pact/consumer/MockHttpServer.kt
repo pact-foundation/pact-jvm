@@ -334,13 +334,7 @@ abstract class BaseJdkMockServer(
     initServer()
   }
 
-  override fun getUrl(): String {
-    return if (config.port == 0) {
-      "${config.scheme}://${server.address.hostName}:${server.address.port}"
-    } else {
-      config.url()
-    }
-  }
+  override fun getUrl() = "${config.scheme}://${server.address.hostName}:${server.address.port}"
 
   override fun getPort(): Int = server.address.port
 

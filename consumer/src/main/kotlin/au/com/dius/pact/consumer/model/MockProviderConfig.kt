@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.model
 
 import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.core.model.PactSpecVersion
+import io.ktor.util.network.hostname
 import java.net.InetSocketAddress
 import java.util.Optional
 
@@ -52,7 +53,10 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val transportRegistryEntry: String = ""
 ) {
 
-  fun url() = "$scheme://$hostname:$port"
+  fun url(): String {
+    val address = address()
+    return "$scheme://${address.hostname}:${address.port}"
+  }
 
   fun address() = InetSocketAddress(hostname, port)
 
