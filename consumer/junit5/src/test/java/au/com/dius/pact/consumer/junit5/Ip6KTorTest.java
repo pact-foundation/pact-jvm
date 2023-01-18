@@ -10,6 +10,8 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -21,6 +23,7 @@ import static org.hamcrest.Matchers.is;
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "ip6_provider", pactVersion = PactSpecVersion.V3)
 @MockServerConfig(hostInterface = "::1", port = "1234", implementation = MockServerImplementation.KTorServer)
+@DisabledOnOs(OS.WINDOWS)
 public class Ip6KTorTest {
   @Pact(consumer = "ApiConsumer")
   public RequestResponsePact articles(PactDslWithProvider builder) {
