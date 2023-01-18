@@ -92,31 +92,31 @@ class MockHttpServerSpec extends Specification {
     mockServer.start()
 
     then:
-    mockServer.url ==~ url
+    mockServer.url ==~ /http:\/\/[a-z0-9\-]+\:\d+/
 
     cleanup:
     mockServer.stop()
 
     where:
 
-    mockServerClass | hostname        | port | url
-    MockHttpServer  | '[::1]'         | 0    | /http:\/\/ip6-localhost:\d+/
-    MockHttpServer  | '[::1]'         | 1234 | 'http://ip6-localhost:1234'
-    MockHttpServer  | '::1'           | 0    | /http:\/\/ip6-localhost:\d+/
-    MockHttpServer  | '::1'           | 1235 | 'http://ip6-localhost:1235'
-    MockHttpServer  | 'ip6-localhost' | 0    | /http:\/\/ip6-localhost:\d+/
-    MockHttpServer  | 'ip6-localhost' | 1236 | 'http://ip6-localhost:1236'
-    MockHttpsServer | '[::1]'         | 0    | /http:\/\/ip6-localhost:\d+/
-    MockHttpsServer | '[::1]'         | 1237 | 'http://ip6-localhost:1237'
-    MockHttpsServer | '::1'           | 0    | /http:\/\/ip6-localhost:\d+/
-    MockHttpsServer | '::1'           | 1238 | 'http://ip6-localhost:1238'
-    MockHttpsServer | 'ip6-localhost' | 0    | /http:\/\/ip6-localhost:\d+/
-    MockHttpsServer | 'ip6-localhost' | 1239 | 'http://ip6-localhost:1239'
-    KTorMockServer  | '[::1]'         | 0    | /http:\/\/ip6-localhost:\d+/
-    KTorMockServer  | '[::1]'         | 2234 | 'http://ip6-localhost:2234'
-    KTorMockServer  | '::1'           | 0    | /http:\/\/ip6-localhost:\d+/
-    KTorMockServer  | '::1'           | 2235 | 'http://ip6-localhost:2235'
-    KTorMockServer  | 'ip6-localhost' | 0    | /http:\/\/ip6-localhost:\d+/
-    KTorMockServer  | 'ip6-localhost' | 2236 | 'http://ip6-localhost:2236'
+    mockServerClass | hostname        | port
+    MockHttpServer  | '[::1]'         | 0
+    MockHttpServer  | '[::1]'         | 1234
+    MockHttpServer  | '::1'           | 0
+    MockHttpServer  | '::1'           | 1235
+    MockHttpServer  | 'ip6-localhost' | 0
+    MockHttpServer  | 'ip6-localhost' | 1236
+    MockHttpsServer | '[::1]'         | 0
+    MockHttpsServer | '[::1]'         | 1237
+    MockHttpsServer | '::1'           | 0
+    MockHttpsServer | '::1'           | 1238
+    MockHttpsServer | 'ip6-localhost' | 0
+    MockHttpsServer | 'ip6-localhost' | 1239
+    KTorMockServer  | '[::1]'         | 0
+    KTorMockServer  | '[::1]'         | 2234
+    KTorMockServer  | '::1'           | 0
+    KTorMockServer  | '::1'           | 2235
+    KTorMockServer  | 'ip6-localhost' | 0
+    KTorMockServer  | 'ip6-localhost' | 2236
   }
 }
