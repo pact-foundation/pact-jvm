@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.instanceOf
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.Assert.assertEquals
+import static org.junit.Assume.assumeThat
 
 @SuppressWarnings('ThrowRuntimeException')
 class PactTest {
@@ -62,6 +63,7 @@ class PactTest {
 
   @Test
   void testPactHttps() {
+    assumeThat(System.getProperty("os.name"), is("Linux"))
     RequestResponsePact pact = ConsumerPactBuilder
       .consumer('Some Consumer')
       .hasPactWith('Some Provider')
@@ -77,7 +79,7 @@ class PactTest {
     def jksFile = File.createTempFile('PactTest', '.jks')
     def keystore = generateCertificate(jksFile, 'SHA1withRSA', 'PactTest', 'changeit', 'changeit', 1024)
 
-    MockProviderConfig config = new MockHttpsProviderConfig('127.0.0.1', 8443, PactSpecVersion.V3,
+    MockProviderConfig config = new MockHttpsProviderConfig('localhost', 8443, PactSpecVersion.V3,
       keystore, 'PactTest', 'changeit', 'changeit')
     PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun<Boolean>() {
       @Override
