@@ -82,6 +82,7 @@ class MockHttpServerSpec extends Specification {
     request.path == '/endpoint/Some%2FValue'
   }
 
+  @IgnoreIf({ os.windows || os.macOs })
   def 'IP6 test'() {
     given:
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [])

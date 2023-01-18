@@ -1,8 +1,10 @@
 package au.com.dius.pact.consumer.model
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 class MockProviderConfigSpec extends Specification {
+  @IgnoreIf({ os.windows || os.macOs })
   def 'url test'() {
     expect:
     new MockProviderConfig(hostname, port).url() ==~ /http:\/\/[a-z0-9\-]+\:\d+/
