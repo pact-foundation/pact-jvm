@@ -53,10 +53,7 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val transportRegistryEntry: String = ""
 ) {
 
-  fun url(): String {
-    val address = address()
-    return "$scheme://${address.hostname}:${address.port}"
-  }
+  fun url() = "$scheme://$hostname:$port"
 
   fun address() = InetSocketAddress(hostname, port)
 

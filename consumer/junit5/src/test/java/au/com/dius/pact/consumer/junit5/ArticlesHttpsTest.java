@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.startsWith;
 
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "ArticlesProvider", pactVersion = PactSpecVersion.V3)
-@MockServerConfig(tls = true)
+@MockServerConfig(tls = true, hostInterface = "localhost")
 public class ArticlesHttpsTest {
   private Map<String, String> headers = MapUtils.putAll(new HashMap<>(), new String[] {
     "Content-Type", "application/json"

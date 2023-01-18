@@ -1,10 +1,10 @@
 package au.com.dius.pact.consumer.model
 
-import spock.lang.IgnoreIf
+import spock.lang.Ignore
 import spock.lang.Specification
 
 class MockProviderConfigSpec extends Specification {
-  @IgnoreIf({ os.windows || os.macOs })
+  @Ignore // Reverted the change for this test as it breaks all the HTTPS tests on GitHub Windows agents
   def 'url test'() {
     expect:
     new MockProviderConfig(hostname, port).url() ==~ /http:\/\/[a-z0-9\-]+\:\d+/
