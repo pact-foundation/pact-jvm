@@ -124,7 +124,13 @@ class KTorMockServer @JvmOverloads constructor(
   override fun getUrl(): String {
     val address = socketAddress()
     return if (address != null) {
-      "${config.scheme}://${address.hostname}:${address.port}"
+      // Stupid GitHub Windows agents
+      val host = if (address.hostname.lowercase() == "miningmadness.com") {
+        config.hostname
+      } else {
+        address.hostname
+      }
+      "${config.scheme}://$host:${address.port}"
     } else {
       val connectorConfig = server.environment.connectors.first()
       "${config.scheme}://${connectorConfig.host}:${connectorConfig.port}"

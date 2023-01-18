@@ -25,6 +25,7 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
+import io.ktor.util.network.hostname
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
@@ -334,7 +335,15 @@ abstract class BaseJdkMockServer(
     initServer()
   }
 
-  override fun getUrl() = "${config.scheme}://${server.address.hostName}:${server.address.port}"
+  override fun getUrl(): String {
+    // Stupid GitHub Windows agents
+    val host = if (server.address.hostName.lowercase() == "miningmadness.com") {
+      config.hostname
+    } else {
+      server.address.hostName
+    }
+    return "${config.scheme}://$host:${server.address.port}"
+  }
 
   override fun getPort(): Int = server.address.port
 

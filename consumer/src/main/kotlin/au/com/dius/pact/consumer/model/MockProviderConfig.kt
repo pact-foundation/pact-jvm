@@ -53,7 +53,16 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val transportRegistryEntry: String = ""
 ) {
 
-  fun url() = "$scheme://$hostname:$port"
+  fun url(): String {
+    val address = address()
+    // Stupid GitHub Windows agents
+    val host = if (address.hostname.lowercase() == "miningmadness.com") {
+      hostname
+    } else {
+      address.hostname
+    }
+    return "$scheme://$host:${address.port}"
+  }
 
   fun address() = InetSocketAddress(hostname, port)
 
