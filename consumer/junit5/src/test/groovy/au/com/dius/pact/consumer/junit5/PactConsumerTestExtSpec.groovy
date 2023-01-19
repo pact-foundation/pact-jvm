@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -20,7 +21,9 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
-@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter', 'UnnecessaryGetter',
+  'UnnecessaryParenthesesForMethodCallWithClosure'])
+@PactTestFor(providerName = 'PactConsumerTestExtSpecProvider', pactVersion = PactSpecVersion.V3)
 class PactConsumerTestExtSpec extends Specification {
 
   private PactConsumerTestExt testExt
@@ -117,5 +120,157 @@ class PactConsumerTestExtSpec extends Specification {
     json.metadata.pactSpecification.version == '4.0'
     json.interactions[0].description == 'first'
     json.interactions[1].description == 'second'
+  }
+
+  def 'lookupProviderInfo - returns data from the class level PactTestFor annotation'() {
+    given:
+    def mockStoreData = [:]
+    def mockStore = Mock(ExtensionContext.Store) {
+      get(_) >> { p -> mockStoreData.get(p[0]) }
+      put(_, _) >> { k, v -> mockStoreData.put(k, v) }
+    }
+    ExtensionContext mockContext = Mock() {
+      getRequiredTestClass() >> PactConsumerTestExtSpec
+      getTestClass() >> Optional.of(PactConsumerTestExtSpec)
+      getTestMethod() >> Optional.empty()
+      getStore(_) >> mockStore
+    }
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName == 'PactConsumerTestExtSpecProvider'
+    providerInfo.first().first.pactVersion == PactSpecVersion.V3
+    providerInfo.first().second == ''
+  }
+
+  static class TestClass {
+    @PactTestFor(providerName = 'PactConsumerTestExtSpecMethodProvider', pactVersion = PactSpecVersion.V1)
+    def pactTestForMethod() { }
+  }
+
+  def 'lookupProviderInfo - returns data from the method level PactTestFor annotation'() {
+    given:
+    def mockStoreData = [:]
+    def mockStore = Mock(ExtensionContext.Store) {
+      get(_) >> { p -> mockStoreData.get(p[0]) }
+      put(_, _) >> { k, v -> mockStoreData.put(k, v) }
+    }
+    def method = TestClass.getMethod('pactTestForMethod')
+    ExtensionContext mockContext = Mock() {
+      getRequiredTestClass() >> TestClass
+      getTestClass() >> Optional.of(TestClass)
+      getRequiredTestMethod() >> method
+      getTestMethod() >> Optional.of(method)
+      getStore(_) >> mockStore
+    }
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName ==  'PactConsumerTestExtSpecMethodProvider'
+    providerInfo.first().first.pactVersion == PactSpecVersion.V1
+    providerInfo.first().second == ''
+  }
+
+  @PactTestFor(providerName = 'PactConsumerTestExtSpecClassProvider', pactVersion = PactSpecVersion.V3)
+  static class TestClass2 {
+    @PactTestFor(providerName = 'PactConsumerTestExtSpecMethodProvider')
+    def pactTestForMethod() { }
+  }
+
+  def 'lookupProviderInfo - returns data from both the method and class level PactTestFor annotation'() {
+    given:
+    def mockStoreData = [:]
+    def mockStore = Mock(ExtensionContext.Store) {
+      get(_) >> { p -> mockStoreData.get(p[0]) }
+      put(_, _) >> { k, v -> mockStoreData.put(k, v) }
+    }
+    def method = TestClass2.getMethod('pactTestForMethod')
+    ExtensionContext mockContext = Mock() {
+      getRequiredTestClass() >> TestClass2
+      getTestClass() >> Optional.of(TestClass2)
+      getRequiredTestMethod() >> method
+      getTestMethod() >> Optional.of(method)
+      getStore(_) >> mockStore
+    }
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName ==  'PactConsumerTestExtSpecMethodProvider'
+    providerInfo.first().first.pactVersion == PactSpecVersion.V3
+    providerInfo.first().second == ''
+  }
+
+  @PactTestFor(providerName = 'PactConsumerTestExtSpecClassProvider', pactVersion = PactSpecVersion.V3)
+  @MockServerConfig(port = '1234', tls = true)
+  static class TestClass3 { }
+
+  def 'lookupProviderInfo - merges data from the class level MockServerConfig annotation'() {
+    given:
+    def mockStoreData = [:]
+    def mockStore = Mock(ExtensionContext.Store) {
+      get(_) >> { p -> mockStoreData.get(p[0]) }
+      put(_, _) >> { k, v -> mockStoreData.put(k, v) }
+    }
+    ExtensionContext mockContext = Mock() {
+      getRequiredTestClass() >> TestClass3
+      getTestClass() >> Optional.of(TestClass3)
+      getTestMethod() >> Optional.empty()
+      getStore(_) >> mockStore
+    }
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName == 'PactConsumerTestExtSpecClassProvider'
+    providerInfo.first().first.pactVersion == PactSpecVersion.V3
+    providerInfo.first().first.https
+    providerInfo.first().first.port == '1234'
+    providerInfo.first().second == ''
+  }
+
+  @PactTestFor(providerName = 'PactConsumerTestExtSpecClassProvider', pactVersion = PactSpecVersion.V3)
+  static class TestClass4 {
+    @PactTestFor(providerName = 'PactConsumerTestExtSpecMethodProvider')
+    @MockServerConfig(port = '1234', tls = true)
+    def pactTestForMethod() { }
+  }
+
+  def 'lookupProviderInfo - merges data from the method level MockServerConfig annotation'() {
+    given:
+    def mockStoreData = [:]
+    def mockStore = Mock(ExtensionContext.Store) {
+      get(_) >> { p -> mockStoreData.get(p[0]) }
+      put(_, _) >> { k, v -> mockStoreData.put(k, v) }
+    }
+    def method = TestClass4.getMethod('pactTestForMethod')
+    ExtensionContext mockContext = Mock() {
+      getRequiredTestClass() >> TestClass4
+      getTestClass() >> Optional.of(TestClass4)
+      getRequiredTestMethod() >> method
+      getTestMethod() >> Optional.of(method)
+      getStore(_) >> mockStore
+    }
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName == 'PactConsumerTestExtSpecMethodProvider'
+    providerInfo.first().first.pactVersion == PactSpecVersion.V3
+    providerInfo.first().first.https
+    providerInfo.first().first.port == '1234'
+    providerInfo.first().second == ''
   }
 }

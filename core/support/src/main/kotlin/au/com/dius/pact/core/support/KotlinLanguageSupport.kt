@@ -116,6 +116,20 @@ sealed class Either<out A, out B> {
     }
   }
 
+  fun isA(): Boolean {
+    return when (this) {
+      is Either.A -> true
+      is Either.B -> false
+    }
+  }
+
+  fun isB(): Boolean {
+    return when (this) {
+      is Either.A -> false
+      is Either.B -> true
+    }
+  }
+
   companion object {
     @JvmStatic
     fun <A, B> a(value: A): Either<A, B> {

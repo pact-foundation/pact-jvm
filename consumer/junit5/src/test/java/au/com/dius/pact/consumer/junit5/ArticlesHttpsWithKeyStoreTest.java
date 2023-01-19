@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit5;
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.junit.MockServerConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
@@ -30,12 +31,12 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "ArticlesProvider", https = true,
-        keyStorePath = "src/test/resources/keystore/pact-jvm-2048.jks",
-        keyStoreAlias = "localhost",
-        keyStorePassword = "coderswerehere",
-        privateKeyPassword = "coderswerehere",
-  pactVersion = PactSpecVersion.V3)
+@PactTestFor(providerName = "ArticlesProvider", pactVersion = PactSpecVersion.V3)
+@MockServerConfig(tls = true,
+  keyStorePath = "src/test/resources/keystore/pact-jvm-2048.jks",
+  keyStoreAlias = "localhost",
+  keyStorePassword = "coderswerehere",
+  privateKeyPassword = "coderswerehere")
 public class ArticlesHttpsWithKeyStoreTest {
   private Map<String, String> headers = MapUtils.putAll(new HashMap<>(), new String[] {
     "Content-Type", "application/json"

@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
+import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
@@ -11,7 +12,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
-@PactTestFor(providerName = 'PathWithValueWithSlashTest', port = '1234', pactVersion = PactSpecVersion.V3)
+@PactTestFor(providerName = 'PathWithValueWithSlashTest', pactVersion = PactSpecVersion.V3)
+@MockServerConfig(port = '1234')
 class PathWithValueWithSlashTest {
   @Pact(consumer = 'Consumer')
   RequestResponsePact filesPact(PactDslWithProvider builder) {

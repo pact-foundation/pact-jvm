@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.model
 
 import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.core.model.PactSpecVersion
+import io.ktor.util.network.hostname
 import java.net.InetSocketAddress
 import java.util.Optional
 
@@ -47,12 +48,21 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val port: Int = 0,
   open val pactVersion: PactSpecVersion = PactSpecVersion.V3,
   open val scheme: String = HTTP,
-  open val mockServerImplementation: MockServerImplementation = MockServerImplementation.JavaHttpServer,
+  open val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default,
   open val addCloseHeader: Boolean = false,
   open val transportRegistryEntry: String = ""
 ) {
 
-  fun url() = "$scheme://$hostname:$port"
+  fun url(): String {
+    val address = address()
+    // Stupid GitHub Windows agents
+    val host = if (address.hostname.lowercase() == "miningmadness.com") {
+      hostname
+    } else {
+      address.hostname
+    }
+    return "$scheme://$host:${address.port}"
+  }
 
   fun address() = InetSocketAddress(hostname, port)
 
@@ -97,8 +107,8 @@ open class MockProviderConfig @JvmOverloads constructor (
         MockProviderConfig(
           annotation.hostInterface.ifEmpty { LOCALHOST },
           if (annotation.port.isEmpty()) 0 else annotation.port.toInt(),
-          PactSpecVersion.V4,
-          if (annotation.tls) "tls" else HTTP,
+          PactSpecVersion.UNSPECIFIED,
+          if (annotation.tls) "https" else HTTP,
           annotation.implementation,
           System.getProperty("pact.mockserver.addCloseHeader") == "true",
           annotation.registryEntry

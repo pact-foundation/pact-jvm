@@ -14,7 +14,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   override val request: Request = Request(),
   override val response: Response = Response(),
   interactionId: String? = null
-) : BaseInteraction(interactionId, description, providerStates), SynchronousRequestResponse {
+) : BaseInteraction(interactionId, description, providerStates.toMutableList()), SynchronousRequestResponse {
 
   override fun toString() =
     "Interaction: $description\n\tin states ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"

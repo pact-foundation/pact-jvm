@@ -67,6 +67,10 @@ sealed class JsonValue {
     fun appendAll(list: List<JsonValue>) {
       values.addAll(list)
     }
+
+    companion object {
+      fun of(vararg value: JsonValue) = JsonValue.Array(value.toMutableList())
+    }
   }
 
   class Object @JvmOverloads constructor (val entries: MutableMap<String, JsonValue> = mutableMapOf()) : JsonValue() {

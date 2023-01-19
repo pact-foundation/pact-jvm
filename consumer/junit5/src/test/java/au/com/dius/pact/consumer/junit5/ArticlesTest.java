@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit5;
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.junit.MockServerConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
@@ -24,7 +25,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "ArticlesProvider", port = "1234", pactVersion = PactSpecVersion.V3)
+@PactTestFor(providerName = "ArticlesProvider", pactVersion = PactSpecVersion.V3)
+@MockServerConfig(hostInterface = "localhost", port = "1234")
 public class ArticlesTest {
   private Map<String, String> headers = MapUtils.putAll(new HashMap<>(), new String[] {
     "Content-Type", "application/json"

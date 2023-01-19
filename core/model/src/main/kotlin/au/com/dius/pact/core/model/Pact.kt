@@ -45,7 +45,7 @@ interface Interaction {
   /**
    * Interaction description
    */
-  val description: String
+  var description: String
 
   /**
    * Returns the provider states for this interaction

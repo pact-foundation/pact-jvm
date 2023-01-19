@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.InteractionMarkup
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
@@ -41,6 +42,10 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists
 
+/**
+ * Pact builder DSL that supports V4 formatted Pact files
+ */
+@Suppress("TooManyFunctions")
 open class PactBuilder(
   var consumer: String = "consumer",
   var provider: String = "provider",
@@ -49,8 +54,10 @@ open class PactBuilder(
   private val plugins: MutableList<PactPlugin> = mutableListOf()
   private val interactions: MutableList<V4Interaction> = mutableListOf()
   private var currentInteraction: V4Interaction? = null
+  private val providerStates: MutableList<ProviderState> = mutableListOf()
   private val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf()
   private val additionalMetadata: MutableMap<String, JsonValue> = mutableMapOf()
+  private val comments: MutableList<JsonValue.StringValue> = mutableListOf()
 
   init {
     CatalogueManager.registerCoreEntries(contentMatcherCatalogueEntries() +
@@ -65,7 +72,7 @@ open class PactBuilder(
   }
 
   /**
-   * Use the old HTTP Pact DSL
+   * Use the old Message Pact DSL
    */
   fun usingLegacyMessageDsl(): MessagePactBuilder {
     return MessagePactBuilder(pactVersion).consumer(consumer).hasPactWith(provider)
@@ -112,6 +119,59 @@ open class PactBuilder(
   }
 
   /**
+   * Describe the state the provider needs to be in for the pact test to be verified. Any parameters for the provider
+   * state can be provided in the second parameter.
+   */
+  @JvmOverloads
+  fun given(state: String, params: Map<String, Any?> = emptyMap()): PactBuilder {
+    if (currentInteraction != null) {
+      currentInteraction!!.providerStates.add(ProviderState(state, params))
+    } else {
+      providerStates.add(ProviderState(state, params))
+    }
+    return this
+  }
+
+  /**
+   * Describe the state the provider needs to be in for the pact test to be verified.
+   *
+   * @param firstKey Key of first parameter element
+   * @param firstValue Value of first parameter element
+   * @param paramsKeyValuePair Additional parameters in key-value pairs
+   */
+  fun given(state: String, firstKey: String, firstValue: Any?, vararg paramsKeyValuePair: Any): PactBuilder {
+    require(paramsKeyValuePair.size % 2 == 0) {
+      "Pairs of key value should be provided, but there is one key without value."
+    }
+    val params = mutableMapOf(firstKey to firstValue)
+    var i = 0
+    while (i < paramsKeyValuePair.size) {
+      params[paramsKeyValuePair[i].toString()] = paramsKeyValuePair[i + 1]
+      i += 2
+    }
+    if (currentInteraction != null) {
+      currentInteraction!!.providerStates.add(ProviderState(state, params))
+    } else {
+      providerStates.add(ProviderState(state, params))
+    }
+    return this
+  }
+
+  /**
+   * Describe the state the provider needs to be in for the pact test to be verified.
+   *
+   * @param params Additional parameters in key-value pairs
+   */
+  fun given(state: String, vararg params: Pair<String, Any>): PactBuilder {
+    if (currentInteraction != null) {
+      currentInteraction!!.providerStates.add(ProviderState(state, params.toMap()))
+    } else {
+      providerStates.add(ProviderState(state, params.toMap()))
+    }
+    return this
+  }
+
+  /**
    * Adds an interaction with the given description and type. If interactionType is not specified (is the empty string)
    * will default to an HTTP interaction
    *
@@ -139,6 +199,20 @@ open class PactBuilder(
         TODO("Interactions of type '$interactionType' are not currently supported")
       }
     }
+
+    if (providerStates.isNotEmpty()) {
+      currentInteraction!!.providerStates.addAll(providerStates)
+      providerStates.clear()
+    }
+
+    if (comments.isNotEmpty()) {
+      currentInteraction!!.comments.merge("text", JsonValue.Array(comments.toMutableList())) { a, b ->
+        a.asArray()!!.addAll(b)
+        a
+      }
+      comments.clear()
+    }
+
     return this
   }
 
@@ -155,8 +229,10 @@ open class PactBuilder(
   }
 
   /**
-   * Values to configure the interaction
+   * Values to configure the interaction. In the case of an interaction configured by a plugin, you need to follow
+   * the plugin documentation of what values must be specified here.
    */
+  @Suppress("ComplexMethod")
   fun with(values: Map<String, Any?>): PactBuilder {
     require(currentInteraction != null) {
       "'with' must be preceded by 'expectsToReceive'"
@@ -216,6 +292,7 @@ open class PactBuilder(
     return this
   }
 
+  @Suppress("LongMethod", "ComplexMethod")
   private fun setupMessageContents(
     contents: Any?,
     interaction: V4Interaction
@@ -289,6 +366,7 @@ open class PactBuilder(
     }
   }
 
+  @Suppress("NestedBlockDepth")
   private fun setupContents(contents: Any?, part: IHttpPart, interaction: V4Interaction.SynchronousHttp) {
     logger.debug { "Explicit contents, will look for a content matcher" }
     when (contents) {
@@ -388,6 +466,9 @@ open class PactBuilder(
     return this
   }
 
+  /**
+   * Terminates this builder and returns the created Pact object
+   */
   fun toPact(): V4Pact {
     if (currentInteraction != null) {
       interactions.add(currentInteraction!!)
@@ -413,7 +494,49 @@ open class PactBuilder(
     })
   }
 
+  /**
+   * Adds a text comment to the Pact interaction
+   */
+  fun comment(comment: String): PactBuilder {
+    if (currentInteraction != null) {
+      currentInteraction!!.comments.merge("text", JsonValue.Array.of(JsonValue.StringValue(comment))) { a, b ->
+        a.asArray()!!.addAll(b)
+        a
+      }
+    } else {
+      this.comments.add(JsonValue.StringValue(comment))
+    }
+    return this
+  }
+
+  /**
+   * Creates a new HTTP interaction with the given description, and passes a builder to the builder function to
+   * construct it.
+   */
+  fun expectsToReceiveHttpInteraction(description: String, builderFn: (HttpInteractionBuilder) -> HttpInteractionBuilder?): PactBuilder {
+    if (currentInteraction != null) {
+      interactions.add(currentInteraction!!)
+      currentInteraction = null
+    }
+
+    val builder = HttpInteractionBuilder(description, providerStates, comments)
+    val result = builderFn(builder)
+    if (result != null) {
+      interactions.add(result.build())
+    } else {
+      interactions.add(builder.build())
+    }
+
+    providerStates.clear()
+    comments.clear()
+
+    return this
+  }
+
   companion object : KLogging() {
+    /**
+     * Convenience function to load the file contents as plain text.
+     */
     @JvmStatic
     fun textFile(filePath: String): String {
       var path = Paths.get(filePath)
@@ -424,6 +547,9 @@ open class PactBuilder(
       return path.toFile().bufferedReader().readText()
     }
 
+    /**
+     * Convenience function to resolve a file path against the current working directory.
+     */
     @JvmStatic
     fun filePath(filePath: String): String {
       var path = Paths.get(filePath).toAbsolutePath()
