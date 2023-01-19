@@ -150,4 +150,57 @@ class PactMessageBuilderSpec extends Specification {
       assert message.contentType.json
     }
   }
+
+  def 'receiving a message with a NULL body'() {
+    given:
+    builder {
+      expectsToReceive 'a confirmation delete message'
+      withMetadata(contentType: 'application/json', messageId: '12345678')
+      withContent(null)
+    }
+
+    when:
+    builder.run { MessageInteraction message ->
+      def content = new JsonSlurper().parse(message.contentsAsBytes())
+      assert content == null
+    }
+
+    then:
+    true
+  }
+
+  def 'receiving a message with an empty body'() {
+    given:
+    builder {
+      expectsToReceive 'a confirmation delete message'
+      withMetadata(contentType: 'application/json', messageId: '12345678')
+      withContent { }
+    }
+
+    when:
+    builder.run { MessageInteraction message ->
+      def content = new JsonSlurper().parse(message.contentsAsBytes())
+      assert content.size() == 0
+    }
+
+    then:
+    true
+  }
+
+  def 'receiving a message with a missing body'() {
+    given:
+    builder {
+      expectsToReceive 'a confirmation delete message'
+      withMetadata(messageId: '12345678')
+    }
+
+    when:
+    builder.run { MessageInteraction message ->
+      assert message.contentsAsBytes().size() == 0
+      assert message.metadata.messageId == '12345678'
+    }
+
+    then:
+    true
+  }
 }

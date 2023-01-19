@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer.dsl
 
-import au.com.dius.pact.consumer.MessageContentsBuilder
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.Pact

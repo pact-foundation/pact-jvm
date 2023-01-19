@@ -142,20 +142,7 @@ data class OptionalBody @JvmOverloads constructor(
   }
 
   fun detectStandardTextContentType(): ContentType? = when {
-    isPresent() -> {
-      val newLine = '\n'.code.toByte()
-      val cReturn = '\r'.code.toByte()
-      val s = value!!.take(32).map {
-        if (it == newLine || it == cReturn) ' ' else it.toInt().toChar()
-      }.joinToString("")
-      when {
-        s.matches(XMLREGEXP) -> ContentType.XML
-        s.uppercase().matches(HTMLREGEXP) -> ContentType.HTML
-        s.matches(JSONREGEXP) -> ContentType.JSON
-        s.matches(XMLREGEXP2) -> ContentType.XML
-        else -> null
-      }
-    }
+    isPresent() -> detectContentTypeInByteArray(value!!)
     else -> null
   }
 
@@ -253,6 +240,21 @@ data class OptionalBody @JvmOverloads constructor(
     private val tika = try { TikaConfig() } catch (e: RuntimeException) {
       logger.warn(e) { "Could not initialise Tika, detecting content types will be disabled" }
       null
+    }
+
+    fun detectContentTypeInByteArray(value: ByteArray): ContentType? {
+      val newLine = '\n'.code.toByte()
+      val cReturn = '\r'.code.toByte()
+      val s = value.take(32).map {
+        if (it == newLine || it == cReturn) ' ' else it.toInt().toChar()
+      }.joinToString("")
+      return when {
+        s.matches(XMLREGEXP) -> ContentType.XML
+        s.uppercase().matches(HTMLREGEXP) -> ContentType.HTML
+        s.matches(JSONREGEXP) -> ContentType.JSON
+        s.matches(XMLREGEXP2) -> ContentType.XML
+        else -> null
+      }
     }
   }
 }

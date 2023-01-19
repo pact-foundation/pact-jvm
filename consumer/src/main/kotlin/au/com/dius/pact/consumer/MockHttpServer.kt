@@ -25,6 +25,7 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
+import io.ktor.util.network.hostname
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
@@ -206,6 +207,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
         ), GeneratorTestMode.Consumer, emptyList(), emptyMap()) // TODO: need to pass any plugin config here
       }
       is PartialRequestMatch -> {
+        logger.error { "PartialRequestMatch: ${matchResult.description()}" }
         val interaction = matchResult.problems.keys.first().asSynchronousRequestResponse()!!
         mismatchedRequests.putIfAbsent(interaction.request, mutableListOf())
         mismatchedRequests[interaction.request]?.add(PactVerificationResult.PartialMismatch(
@@ -334,11 +336,13 @@ abstract class BaseJdkMockServer(
   }
 
   override fun getUrl(): String {
-    return if (config.port == 0) {
-      "${config.scheme}://${server.address.hostName}:${server.address.port}"
+    // Stupid GitHub Windows agents
+    val host = if (server.address.hostName.lowercase() == "miningmadness.com") {
+      config.hostname
     } else {
-      config.url()
+      server.address.hostName
     }
+    return "${config.scheme}://$host:${server.address.port}"
   }
 
   override fun getPort(): Int = server.address.port

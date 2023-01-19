@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
-import au.com.dius.pact.consumer.MessageContentsBuilder
 import au.com.dius.pact.consumer.dsl.DslBuilder
+import au.com.dius.pact.consumer.dsl.MessageContentsBuilder
 import au.com.dius.pact.consumer.dsl.PactBuilder
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.V4Interaction

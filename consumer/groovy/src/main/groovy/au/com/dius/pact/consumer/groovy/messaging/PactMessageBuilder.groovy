@@ -93,6 +93,15 @@ class PactMessageBuilder extends GroovyBuilder {
    * @param metaData
    */
   PactMessageBuilder withMetaData(Map metadata) {
+    this.withMetadata(metadata)
+  }
+
+  /**
+   * Metadata attached to the message
+   * @param metaData
+   */
+  @SuppressWarnings('ConfusingMethodName')
+  PactMessageBuilder withMetadata(Map metadata) {
     if (messages.empty) {
       throw new InvalidPactException('expectsToReceive is required before withMetaData')
     }
@@ -119,7 +128,7 @@ class PactMessageBuilder extends GroovyBuilder {
    *  - contentType: optional content type of the message
    *  - prettyPrint: if the message content should be pretty printed
    */
-  PactMessageBuilder withContent(Map options = [:], Closure closure) {
+  PactMessageBuilder withContent(Map options = [:], def value) {
     if (messages.empty) {
       throw new InvalidPactException('expectsToReceive is required before withContent')
     }
@@ -135,12 +144,20 @@ class PactMessageBuilder extends GroovyBuilder {
       contentType = messageContents.metadata.contentType
     }
 
-    def body = new PactBodyBuilder(mimetype: contentType, prettyPrintBody: options.prettyPrint)
-    closure.delegate = body
-    closure.call()
-    messageContents.matchingRules.addCategory(body.matchers)
-    message.contents = new MessageContents(OptionalBody.body(body.body.bytes, new ContentType(contentType)),
-      messageContents.metadata, messageContents.matchingRules, messageContents.generators, messageContents.partName)
+    if (value instanceof Closure) {
+      Closure closure = value as Closure
+      def body = new PactBodyBuilder(mimetype: contentType, prettyPrintBody: options.prettyPrint)
+      closure.delegate = body
+      closure.call()
+      messageContents.matchingRules.addCategory(body.matchers)
+      message.contents = new MessageContents(OptionalBody.body(body.body.bytes, new ContentType(contentType)),
+        messageContents.metadata, messageContents.matchingRules, messageContents.generators, messageContents.partName)
+    } else {
+      messages.last().contents =  new MessageContents(
+        OptionalBody.body(value.toString().bytes, new ContentType(contentType)),
+        messageContents.metadata, messageContents.matchingRules, messageContents.generators, messageContents.partName
+      )
+    }
 
     this
   }

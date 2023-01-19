@@ -86,13 +86,107 @@ internal class DslJsonBodyBuilderTest {
     }
 
     @Test
-    internal fun `should map array field`() {
-        data class ListObjectRequiredProperty(val property: List<String>)
+    internal fun `should map array field with non empty set for string type`() {
+        data class ListObjectRequiredProperty(val properties: List<String>)
 
         val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(ListObjectRequiredProperty::class))
 
         val expectedBody =
-            LambdaDsl.newJsonBody { it.array("property") {} }
+            LambdaDsl.newJsonBody { it.array("properties") { arr ->
+                arr.stringType("String")
+            } }
+
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
+    }
+
+    @Test
+    internal fun `should map array field with non empty set for boolean type`() {
+        data class ListObjectRequiredProperty(val properties: List<Boolean>)
+
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(ListObjectRequiredProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { it.array("properties") { arr ->
+                arr.booleanType(true)
+            } }
+
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
+    }
+
+    @Test
+    internal fun `should map array field with non empty set for datetime type`() {
+        data class ListObjectRequiredProperty(val properties: List<ZonedDateTime>)
+
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(ListObjectRequiredProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { it.array("properties") { arr ->
+                arr.datetimeExpression("now", "yyyy-MM-dd'T'HH:mm:ssZZ")
+            } }
+
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
+    }
+
+    @ParameterizedTest
+    @MethodSource(value = ["listWithNumberProperties"])
+    internal fun `should map array field with non empty set for number type`(classTest: KClass<*>) {
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(classTest))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { it.array("properties") { arr ->
+                arr.numberType(1)
+            } }
+
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
+    }
+
+    @Test
+    internal fun `should map array field with list of object`() {
+        data class InnerObject(val property: String)
+        data class ListObjectRequiredProperty(val properties: List<InnerObject>)
+
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(ListObjectRequiredProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { it.array("properties") { arr ->
+                arr.`object` { obj ->
+                    obj.stringType("property")
+                }
+            } }
+
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
+    }
+
+    @Test
+    internal fun `should map array field with inner object without optional property`() {
+        data class InnerObject(val property: String = "")
+        data class ListObjectRequiredProperty(val properties: List<InnerObject>)
+
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(ListObjectRequiredProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { it.array("properties") { arr ->
+                arr.`object` { }
+            } }
+
+        assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
+    }
+
+    data class SecondListProperty(val third: List<FirstListProperty>, val property: String)
+    data class FirstListProperty(val second: List<SecondListProperty>)
+    @Test
+    internal fun `should map array inner object with loop reference keeping other fields`() {
+        val actualJsonBody = LambdaDsl.newJsonBody(basedOnConstructor(FirstListProperty::class))
+
+        val expectedBody =
+            LambdaDsl.newJsonBody { root ->
+                root.array("second") {
+                    it.`object` { sec ->
+                        sec.array("third") { loop -> loop.`object`{ } }
+                        sec.stringType("property")
+                    }
+                }
+            }
 
         assertThat(actualJsonBody.pactDslObject.toString(), `is`(equalTo(expectedBody.pactDslObject.toString())))
     }
@@ -235,6 +329,28 @@ internal class DslJsonBodyBuilderTest {
             return Stream.of(
                 StringObjectRequiredPropertyImmutable::class,
                 StringObjectRequiredPropertyMutable::class,
+            )
+        }
+
+        @JvmStatic
+        @Suppress("UnusedPrivateMember")
+        private fun listWithNumberProperties(): Stream<KClass<*>> {
+            data class ByteObjectNonRequiredProperty(val properties: List<Byte>)
+            data class ShortObjectNonRequiredProperty(val properties: List<Short>)
+            data class IntObjectNonRequiredProperty(val properties: List<Int>)
+            data class LongObjectNonRequiredProperty(val properties: List<Long>)
+            data class FloatObjectNonRequiredProperty(val properties: List<Float>)
+            data class DoubleObjectNonRequiredProperty(val properties: List<Double>)
+            data class NumberObjectNonRequiredProperty(val properties: List<Number>)
+
+            return Stream.of(
+                ByteObjectNonRequiredProperty::class,
+                ShortObjectNonRequiredProperty::class,
+                IntObjectNonRequiredProperty::class,
+                LongObjectNonRequiredProperty::class,
+                FloatObjectNonRequiredProperty::class,
+                DoubleObjectNonRequiredProperty::class,
+                NumberObjectNonRequiredProperty::class,
             )
         }
     }

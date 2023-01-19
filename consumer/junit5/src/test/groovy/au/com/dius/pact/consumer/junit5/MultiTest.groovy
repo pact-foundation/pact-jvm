@@ -65,7 +65,7 @@ class MultiTest {
 
     def response = http.post('/some-service/users', JsonOutput.toJson(user()), 'application/json')
     assert response.statusCode == 201
-    assert response.headers['Location'].first().contains(SOME_SERVICE_USER)
+    assert response.headers['location'].first().contains(SOME_SERVICE_USER)
 
     response = http.get(SOME_SERVICE_USER + EXPECTED_USER_ID)
     assert response.statusCode == 200

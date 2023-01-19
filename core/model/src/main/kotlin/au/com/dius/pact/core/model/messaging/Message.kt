@@ -82,7 +82,7 @@ class Message @JvmOverloads constructor(
   override var generators: Generators = Generators(),
   override var metadata: MutableMap<String, Any?> = mutableMapOf(),
   interactionId: String? = null
-) : BaseInteraction(interactionId, description, providerStates), MessageInteraction {
+) : BaseInteraction(interactionId, description, providerStates.toMutableList()), MessageInteraction {
   override val messageContents: OptionalBody
     get() = contents
   override val contentType: ContentType

@@ -92,6 +92,17 @@ data class ProviderInfo @JvmOverloads constructor(
     )
   }
 
+  fun withMockServerConfig(mockServerConfig: MockProviderConfig?): ProviderInfo {
+    return if (mockServerConfig != null) {
+      this.copy(hostInterface = mockServerConfig.hostname,
+        port = if (mockServerConfig.port > 0) mockServerConfig.port.toString() else "",
+        pactVersion = mockServerConfig.pactVersion.or(pactVersion), https = mockServerConfig.scheme == "https",
+        mockServerImplementation = mockServerConfig.mockServerImplementation.merge(mockServerImplementation))
+    } else {
+      this
+    }
+  }
+
   companion object {
     fun fromAnnotation(annotation: PactTestFor): ProviderInfo {
       val providerName = ExpressionParser().parseExpression(annotation.providerName, DataType.STRING)?.toString()

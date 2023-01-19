@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.not;
 
 public class TodoXmlTest {
   @Rule
-  public PactProviderRule provider = new PactProviderRule("TodoProvider", "localhost", 1234, this);
+  public PactProviderRule provider = new PactProviderRule("TodoProvider", "localhost", 7788, this);
 
   // body: <?xml version="1.0" encoding="UTF-8"?>
   //     <projects foo="bar">
@@ -80,7 +80,7 @@ public class TodoXmlTest {
   @Test
   public void testGeneratesAListOfTODOsForTheMainScreen() throws IOException {
     Projects projects = new TodoApp()
-      .setUrl(provider.getMockServer().getUrl())
+      .setUrl(provider.getConfig().url())
       .getProjects("xml");
     assertThat(projects.getId(), is("1234"));
     assertThat(projects.getProjects(), hasSize(2));

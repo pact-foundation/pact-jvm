@@ -99,10 +99,11 @@ class Response(val response: CloseableHttpResponse) {
   fun getHeaders(): Map<String, List<String>> {
     val headers = mutableMapOf<String, MutableList<String>>()
     for (header in response.headers) {
-      if (headers.containsKey(header.name)) {
-        headers[header.name]!!.add(header.value)
+      val key = header.name.lowercase()
+      if (headers.containsKey(key)) {
+        headers[key]!!.add(header.value)
       } else {
-        headers[header.name] = mutableListOf(header.value)
+        headers[key] = mutableListOf(header.value)
       }
     }
     return headers

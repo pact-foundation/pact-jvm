@@ -31,18 +31,21 @@ public class V4PactBuilderTest {
   @Pact(provider="v4_test_provider", consumer="v4_test_consumer")
   public V4Pact httpInteraction(PactBuilder builder) {
     return builder
-      .usingLegacyDsl()
-      .given("good state")
       .comment("This is a comment")
-      .uponReceiving("V4 PactProviderTest test interaction")
-      .path("/")
-      .method("GET")
+      .given("good state")
       .comment("Another comment")
-      .willRespondWith()
-      .status(200)
-      .body("{\"responsetest\": true, \"version\": \"v3\"}")
+      .expectsToReceiveHttpInteraction("V4 PactProviderTest test interaction", httpBuilder -> {
+        return httpBuilder
+          .withRequest(requestBuilder -> requestBuilder
+            .path("/")
+            .method("GET"))
+          .willRespondWith(responseBuilder -> responseBuilder
+            .status(200)
+            .body("{\"responsetest\": true, \"version\": \"v3\"}"))
+          .comment("This is also a comment");
+      })
       .comment("This is also a comment")
-      .toPact(V4Pact.class);
+      .toPact();
   }
 
   @Test

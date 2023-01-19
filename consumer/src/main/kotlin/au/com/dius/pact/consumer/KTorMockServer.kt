@@ -22,19 +22,24 @@ import io.ktor.request.receiveStream
 import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.response.respondBytes
+import io.ktor.server.engine.ApplicationEngineEnvironment
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
+import io.ktor.util.network.hostname
+import io.ktor.util.network.port
+import io.netty.channel.Channel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KLogging
+import java.net.SocketAddress
 import java.util.zip.DeflaterInputStream
 import java.util.zip.GZIPInputStream
 
-class KTorMockServer(
+class KTorMockServer @JvmOverloads constructor(
   pact: BasePact,
   config: MockProviderConfig,
   private val stopTimeout: Long = 20000
@@ -117,10 +122,29 @@ class KTorMockServer(
   }
 
   override fun getUrl(): String {
-    return "${config.scheme}://${server.environment.connectors.first().host}:${this.getPort()}"
+    val address = socketAddress()
+    return if (address != null) {
+      // Stupid GitHub Windows agents
+      val host = if (address.hostname.lowercase() == "miningmadness.com") {
+        config.hostname
+      } else {
+        address.hostname
+      }
+      "${config.scheme}://$host:${address.port}"
+    } else {
+      val connectorConfig = server.environment.connectors.first()
+      "${config.scheme}://${connectorConfig.host}:${connectorConfig.port}"
+    }
   }
 
-  override fun getPort() = server.environment.connectors.first().port
+  private fun socketAddress(): SocketAddress? {
+    val field = server.javaClass.getDeclaredField("channels")
+    field.isAccessible = true
+    val channels = field.get(server) as List<Channel>?
+    return channels?.first()?.localAddress()
+  }
+
+  override fun getPort() = socketAddress()?.port ?: server.environment.connectors.first().port
 
   override fun updatePact(pact: Pact): Pact {
     return if (pact.isV4Pact()) {

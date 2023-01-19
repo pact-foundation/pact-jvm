@@ -130,7 +130,7 @@ data class InteractionMarkup(
 
 @Suppress("LongParameterList")
 sealed class V4Interaction(
-  val key: String?,
+  var key: String?,
   description: String,
   interactionId: String? = null,
   providerStates: List<ProviderState> = listOf(),
@@ -139,7 +139,7 @@ sealed class V4Interaction(
   val pluginConfiguration: MutableMap<String, MutableMap<String, JsonValue>> = mutableMapOf(),
   var interactionMarkup: InteractionMarkup = InteractionMarkup(),
   var transport: String? = null
-) : BaseInteraction(interactionId, description, providerStates, comments) {
+) : BaseInteraction(interactionId, description, providerStates.toMutableList(), comments) {
   override fun conflictsWith(other: Interaction): Boolean {
     return false
   }
@@ -171,8 +171,8 @@ sealed class V4Interaction(
     key: String?,
     description: String,
     providerStates: List<ProviderState> = listOf(),
-    override val request: HttpRequest = HttpRequest(),
-    override val response: HttpResponse = HttpResponse(),
+    override var request: HttpRequest = HttpRequest(),
+    override var response: HttpResponse = HttpResponse(),
     interactionId: String? = null,
     override val comments: MutableMap<String, JsonValue> = mutableMapOf(),
     pending: Boolean = false,

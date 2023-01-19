@@ -27,7 +27,7 @@ public class ArticlesHttpsTest {
         new String[]{"Content-Type", "application/json"});
 
     @Rule
-    public PactHttpsProviderRule provider = new PactHttpsProviderRule("ArticlesProvider", "localhost", 1234, true, PactSpecVersion.V3, this);
+    public PactHttpsProviderRule provider = new PactHttpsProviderRule("ArticlesProvider", "localhost", 6631, true, PactSpecVersion.V3, this);
 
     @Pact(provider = "ArticlesProvider", consumer = "ArticlesConsumer")
     public RequestResponsePact articlesFragment(PactDslWithProvider builder) {
@@ -57,6 +57,6 @@ public class ArticlesHttpsTest {
     @Test
     public void testArticles() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         ArticlesRestClient providerRestClient = new ArticlesRestClient();
-        providerRestClient.getArticles("https://localhost:1234");
+        providerRestClient.getArticles("https://localhost:6631");
     }
 }

@@ -5,10 +5,12 @@ import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.HttpResponse
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.support.json.JsonValue
+import kotlin.Pair
 import spock.lang.Issue
 import au.com.dius.pact.core.model.V4Interaction
-import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -64,8 +66,6 @@ class PactBuilderSpec extends Specification {
     builder.currentInteraction instanceof V4Interaction.SynchronousHttp
   }
 
-  @Ignore
-  // This test is currently failing due to dependency linking issues
   def 'supports configuring the HTTP interaction attributes'() {
     given:
     def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
@@ -93,6 +93,51 @@ class PactBuilderSpec extends Specification {
     then:
     http.request == new HttpRequest('PUT', '/reports/report002.csv', [a: ['b']], ['x-a': ['b']],
       OptionalBody.body('"a"', ContentType.JSON))
-    http.response == new HttpResponse(205, ['x-b': ['a']], OptionalBody.body('"b"', ContentType.JSON))
+    http.response == new HttpResponse(200, ['x-b': ['b']], OptionalBody.body('"b"', ContentType.JSON))
+  }
+
+  @Issue('#1646')
+  def 'supports setting up provider states'() {
+    given:
+    def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
+
+    when:
+    def pact = builder
+      .given('test1')
+      .given('test2', [a: 'b', c: 'd'])
+      .expectsToReceive('test interaction', '')
+      .given('test3', 'a', 100)
+      .given('test4', new Pair('a', 100), new Pair('b', 1000))
+      .toPact()
+
+    then:
+    pact.interactions.first().providerStates == [
+      new ProviderState('test1'),
+      new ProviderState('test2', [a: 'b', c: 'd']),
+      new ProviderState('test3', [a: 100]),
+      new ProviderState('test4', [a: 100, b: 1000])
+    ]
+  }
+
+  def 'supports adding comments'() {
+    given:
+    def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
+
+    when:
+    def pact = builder
+      .comment('test1')
+      .comment('test2')
+      .expectsToReceive('test interaction', '')
+      .comment('test3')
+      .comment('test4')
+      .toPact()
+
+    then:
+    pact.interactions.first().comments['text'] == new JsonValue.Array([
+      new JsonValue.StringValue('test1'),
+      new JsonValue.StringValue('test2'),
+      new JsonValue.StringValue('test3'),
+      new JsonValue.StringValue('test4')
+    ])
   }
 }

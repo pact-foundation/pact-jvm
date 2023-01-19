@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer.xml
 
+import au.com.dius.pact.consumer.dsl.BodyBuilder
 import au.com.dius.pact.consumer.dsl.Matcher
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.generators.Category.BODY
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
@@ -35,8 +37,8 @@ class PactXmlBuilder @JvmOverloads constructor (
   var version: String? = null,
   var charset: String? = null,
   var standalone: Boolean = false
-) {
-  val generators: Generators = Generators()
+): BodyBuilder {
+  private val generators: Generators = Generators()
   val matchingRules: MatchingRuleCategory = MatchingRuleCategory("body")
 
   lateinit var doc: Document
@@ -93,6 +95,20 @@ class PactXmlBuilder @JvmOverloads constructor (
   }
 
   override fun toString() = String(asBytes())
+
+  override fun getMatchers() = matchingRules
+
+  override fun getGenerators() = generators
+
+  override fun getContentType(): ContentType {
+    return if (charset.isNullOrEmpty()) {
+      ContentType.XML
+    } else {
+      ContentType(org.apache.tika.mime.MediaType("application", "xml", mutableMapOf("charset" to charset)))
+    }
+  }
+
+  override fun buildBody() = asBytes(contentType.asCharset())
 
   /**
    * Sets the name of the root name

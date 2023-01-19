@@ -81,4 +81,43 @@ class MockHttpServerSpec extends Specification {
     then:
     request.path == '/endpoint/Some%2FValue'
   }
+
+  @IgnoreIf({ os.windows || os.macOs })
+  def 'IP6 test'() {
+    given:
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [])
+    def config = new MockProviderConfig(hostname, port)
+
+    when:
+    def mockServer = mockServerClass.newInstance(pact, config)
+    mockServer.start()
+
+    then:
+    mockServer.url ==~ /http:\/\/[a-z0-9\-]+\:\d+/
+
+    cleanup:
+    mockServer.stop()
+
+    where:
+
+    mockServerClass | hostname        | port
+    MockHttpServer  | '[::1]'         | 0
+    MockHttpServer  | '[::1]'         | 1234
+    MockHttpServer  | '::1'           | 0
+    MockHttpServer  | '::1'           | 1235
+    MockHttpServer  | 'ip6-localhost' | 0
+    MockHttpServer  | 'ip6-localhost' | 1236
+    MockHttpsServer | '[::1]'         | 0
+    MockHttpsServer | '[::1]'         | 1237
+    MockHttpsServer | '::1'           | 0
+    MockHttpsServer | '::1'           | 1238
+    MockHttpsServer | 'ip6-localhost' | 0
+    MockHttpsServer | 'ip6-localhost' | 1239
+    KTorMockServer  | '[::1]'         | 0
+    KTorMockServer  | '[::1]'         | 2234
+    KTorMockServer  | '::1'           | 0
+    KTorMockServer  | '::1'           | 2235
+    KTorMockServer  | 'ip6-localhost' | 0
+    KTorMockServer  | 'ip6-localhost' | 2236
+  }
 }

@@ -53,7 +53,7 @@ class MultiProviderTest {
     def response = http.post('/users', JsonOutput.toJson([name: 'Fred']),
       'application/json; charset=UTF-8')
     assert response.statusCode == 201
-    def value = response.headers['Location'].first()
+    def value = response.headers['location'].first()
     assert value
     def id = value.split('/').last() as BigInteger
 
