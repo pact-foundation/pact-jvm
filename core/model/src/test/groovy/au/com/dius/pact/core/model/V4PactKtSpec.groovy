@@ -36,8 +36,11 @@ class V4PactKtSpec extends Specification {
     new JsonValue.Object([:])              | JsonValue.False.INSTANCE            | 'application/json' | OptionalBody.body('{}'.bytes, ContentType.JSON)
     new JsonValue.Object([:])              | JsonValue.False.INSTANCE            | ''                 | OptionalBody.body('{}'.bytes, ContentType.JSON)
     new JsonValue.StringValue('ABC')       | JsonValue.False.INSTANCE            | 'application/json' | OptionalBody.body('"ABC"'.bytes, ContentType.JSON)
-    new JsonValue.StringValue('ABC')       | new JsonValue.StringValue('json')   | 'application/json' | OptionalBody.body('"ABC"'.bytes, ContentType.JSON)
+    new JsonValue.StringValue('\"ABC\"')   | JsonValue.False.INSTANCE            | 'application/json' | OptionalBody.body('"\\"ABC\\""'.bytes, ContentType.JSON)
+    new JsonValue.StringValue('\"ABC\"')   | new JsonValue.StringValue('json')   | 'application/json' | OptionalBody.body('"ABC"'.bytes, ContentType.JSON)
+    new JsonValue.StringValue('\"ABC\"')   | new JsonValue.StringValue('JSON')   | 'application/json' | OptionalBody.body('"ABC"'.bytes, ContentType.JSON)
     new JsonValue.StringValue('IkFCQyI=')  | JsonValue.True.INSTANCE             | 'application/json' | OptionalBody.body('"ABC"'.bytes, ContentType.JSON)
     new JsonValue.StringValue('IkFCQyI=')  | new JsonValue.StringValue('base64') | 'application/json' | OptionalBody.body('"ABC"'.bytes, ContentType.JSON)
+    new JsonValue.StringValue('IkFCQyI=')  | new JsonValue.StringValue('BASE64') | 'application/json' | OptionalBody.body('"ABC"'.bytes, ContentType.JSON)
   }
 }
