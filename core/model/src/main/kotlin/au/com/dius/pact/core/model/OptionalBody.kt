@@ -179,7 +179,7 @@ data class OptionalBody @JvmOverloads constructor(
             mapOf(
               "content" to JsonParser.parseString(valueAsString()),
               "contentType" to contentType.toString(),
-              "encoded" to false
+              "encoded" to "json"
             )
           } else {
             mapOf(

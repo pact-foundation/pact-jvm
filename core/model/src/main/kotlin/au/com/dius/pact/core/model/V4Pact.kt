@@ -59,12 +59,14 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
         val bodyBytes = if (encoded) {
           when (encoding) {
             "base64" -> Base64.getDecoder().decode(Json.toString(jsonBody["content"]))
-            "json" -> Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
+            "json" -> jsonBody["content"].serialise().toByteArray(contentType.asCharset())
             else -> {
               logger.warn { "Unrecognised body encoding scheme '$encoding', will use the raw body" }
               Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
             }
           }
+        } else if (contentType.isJson()) {
+          jsonBody["content"].serialise().toByteArray(contentType.asCharset())
         } else {
           Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
         }

@@ -83,4 +83,22 @@ class JsonSpec extends Specification {
     '{"a": "A", "b": 1, "c": [100], "d": {"href": "blah"}}' | '{\n  "a": "A",\n  "b": 1,\n  "c": [\n    100\n  ],\n  "d": {\n    "href": "blah"\n  }\n}'
   }
 
+  @Unroll
+  def 'toString - #desc'() {
+    expect:
+    Json.INSTANCE.toString(json == null ? json : JsonParser.parseString(json)) == value
+
+    where:
+
+    desc            | json                                    | value
+    'Null'          | null                                    | 'null'
+    'Json Null'     | 'null'                                  | 'null'
+    'Boolean True'  | 'true'                                  | 'true'
+    'Boolean False' | 'false'                                 | 'false'
+    'integer'       | '112'                                   | '112'
+    'float'         | '112.66'                                | '112.66'
+    'string'        | '"hello"'                               | 'hello'
+    'list'          | '["hello", 1, true, {"a": "A"}]'        | '["hello",1,true,{"a":"A"}]'
+    'object'        | '{"hello": "world", "list": [1, 2, 3]}' | '{"hello":"world","list":[1,2,3]}'
+  }
 }

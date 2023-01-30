@@ -56,7 +56,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
    * @param pactSpecVersion Pact version to use to control writing
    */
   override fun writePact(pact: Pact, writer: PrintWriter, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable> {
-    val json = if (pactSpecVersion == PactSpecVersion.V4) {
+    val json = if (pactSpecVersion >= PactSpecVersion.V4) {
       Json.prettyPrint(pact.sortInteractions().asV4Pact()
         .expect { "Failed to upcast to a V4 pact" }.toMap(pactSpecVersion))
     } else {

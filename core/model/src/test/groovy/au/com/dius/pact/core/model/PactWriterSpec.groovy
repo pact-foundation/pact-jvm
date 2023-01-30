@@ -345,7 +345,7 @@ class PactWriterSpec extends Specification {
     |        "contents": {
     |          "content": "this is a message",
     |          "contentType": "application/json",
-    |          "encoded": false
+    |          "encoded": "json"
     |        }
     |      },
     |      "response": [
@@ -353,7 +353,7 @@ class PactWriterSpec extends Specification {
     |          "contents": {
     |            "content": "this is a response",
     |            "contentType": "application/json",
-    |            "encoded": false
+    |            "encoded": "json"
     |          }
     |        }
     |      ],
