@@ -160,13 +160,14 @@ class OptionalBodySpec extends Specification {
     body.toV4Format() == v4Format
 
     where:
-    body                                                                                                    | v4Format
-    OptionalBody.missing()                                                                                  | [:]
-    OptionalBody.body(''.bytes, ContentType.UNKNOWN)                                                        | [content: '']
-    OptionalBody.body('{}'.bytes, ContentType.UNKNOWN)                                                      | [content: new JsonValue.Object(), contentType: 'application/json', encoded: false]
-    OptionalBody.body('{}'.bytes, ContentType.JSON)                                                         | [content: new JsonValue.Object(), contentType: 'application/json', encoded: false]
-    OptionalBody.body([0xff, 0xd8, 0xff, 0xe0] as byte[], new ContentType('image/jpeg'))                    | [content: '/9j/4A==', contentType: 'image/jpeg', encoded: 'base64', contentTypeHint: 'DEFAULT']
+    body                                                                                                | v4Format
+    OptionalBody.missing()                                                                              | [:]
+    OptionalBody.body(''.bytes, ContentType.UNKNOWN)                                                    | [content: '']
+    OptionalBody.body('{}'.bytes, ContentType.UNKNOWN)                                                  | [content: new JsonValue.Object(), contentType: 'application/json', encoded: false]
+    OptionalBody.body('{}'.bytes, ContentType.JSON)                                                     | [content: new JsonValue.Object(), contentType: 'application/json', encoded: false]
+    OptionalBody.body([0xff, 0xd8, 0xff, 0xe0] as byte[], new ContentType('image/jpeg'))                | [content: '/9j/4A==', contentType: 'image/jpeg', encoded: 'base64', contentTypeHint: 'DEFAULT']
     OptionalBody.body('kjlkjlkjkl'.bytes, new ContentType('application/other'), ContentTypeHint.BINARY) | [content: 'a2psa2psa2prbA==', contentType: 'application/other', encoded: 'base64', contentTypeHint: 'BINARY']
+    OptionalBody.body('{}'.bytes, ContentType.JSON, ContentTypeHint.BINARY)                             | [content: '{}', contentType: 'application/json', encoded: 'JSON']
   }
 
   private static OptionalBody bodyFromFile(String file) {
