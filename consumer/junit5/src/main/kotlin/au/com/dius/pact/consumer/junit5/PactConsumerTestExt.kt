@@ -228,7 +228,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     return when {
       store[key] != null -> store[key] as AbstractBaseMockServer
       else -> {
-        val config = providerInfo.mockServerConfig()
+        val config = mockServerConfigFromAnnotation(context).merge(providerInfo.mockServerConfig())
         store.put("mockServerConfig:${providerInfo.providerName}", config)
         val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context), config)
         store.put(key, JUnit5MockServerSupport(mockServer))
@@ -604,4 +604,8 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   companion object : KLogging() {
     val NAMESPACE: ExtensionContext.Namespace = ExtensionContext.Namespace.create("pact-jvm")
   }
+}
+
+fun MockProviderConfig?.merge(config: MockProviderConfig): MockProviderConfig {
+  return this?.mergeWith(config) ?: config
 }
