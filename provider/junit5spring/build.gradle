@@ -12,12 +12,13 @@ dependencies {
   implementation 'org.springframework:spring-test:6.0.4'
   implementation 'org.springframework:spring-web:6.0.4'
   implementation 'org.springframework:spring-webflux:6.0.4'
+  compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
   implementation 'javax.servlet:javax.servlet-api:3.1.0'
   implementation 'org.hamcrest:hamcrest:2.2'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'javax.mail:mail:1.5.0-b01'
 
-  testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.0'
-  testImplementation 'org.springframework.boot:spring-boot-starter-web:3.0.0'
+  testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.2'
+  testImplementation 'org.springframework.boot:spring-boot-starter-web:3.0.2'
   testImplementation 'org.apache.groovy:groovy'
 }

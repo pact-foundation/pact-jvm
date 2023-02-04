@@ -12,6 +12,7 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
 import au.com.dius.pact.provider.junit5.TestTarget
+import jakarta.servlet.http.Cookie
 import mu.KLogging
 import org.apache.commons.lang3.StringUtils
 import org.hamcrest.core.IsAnything
@@ -37,7 +38,6 @@ import java.net.URI
 import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
-import javax.servlet.http.Cookie
 
 /**
  * Test target for tests using Spring MockMvc.
