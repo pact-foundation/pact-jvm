@@ -75,6 +75,24 @@ open class MockProviderConfig @JvmOverloads constructor (
     )
   }
 
+  open fun mergeWith(config: MockProviderConfig): MockProviderConfig {
+    return if (config is MockHttpsProviderConfig) {
+      config.mergeWith(this)
+    } else {
+      MockProviderConfig(
+        if (hostname.isEmpty() || hostname == LOCALHOST) config.hostname else hostname,
+        if (port == 0) config.port else port,
+        if (pactVersion == PactSpecVersion.UNSPECIFIED) config.pactVersion else pactVersion,
+        if (scheme.isEmpty() || scheme == HTTP && config.scheme != HTTP) config.scheme else scheme,
+        if (mockServerImplementation == MockServerImplementation.Default)
+          config.mockServerImplementation
+        else mockServerImplementation,
+        addCloseHeader,
+        transportRegistryEntry.ifEmpty { config.transportRegistryEntry }
+      )
+    }
+  }
+
   companion object {
     const val LOCALHOST = "127.0.0.1"
     const val HTTP = "http"
