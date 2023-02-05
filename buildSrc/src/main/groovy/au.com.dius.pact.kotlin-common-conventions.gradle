@@ -12,16 +12,16 @@ repositories {
     mavenCentral()
 }
 
-version = '4.4.5'
+version = '5.0.0'
 
 java {
-    targetCompatibility = '11'
-    sourceCompatibility = '11'
+    targetCompatibility = '17'
+    sourceCompatibility = '17'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 

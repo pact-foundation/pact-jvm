@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.spring;
 
-import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junit.RestPactRunner;
+import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(RestPactRunner.class)

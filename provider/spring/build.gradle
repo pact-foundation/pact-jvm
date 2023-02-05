@@ -15,6 +15,7 @@ dependencies {
   implementation group: 'org.springframework', name: 'spring-test', version: '6.0.4'
   implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.13.4'
+  compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
   runtimeOnly group: 'org.synchronoss.cloud', name: 'nio-multipart-parser', version: '1.1.0'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'javax.mail:mail:1.5.0-b01'

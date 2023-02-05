@@ -10,7 +10,7 @@
 
 Most of Pact-JVM is written in Kotlin and is built with Gradle. Tests are written using [Spock](https://spockframework.org/).
 
-Before you build, install java 11, `Gradle` and `Maven` (Maven is required to build the Maven plugin).
+Before you build, install java 17, `Gradle` and `Maven` (Maven is required to build the Maven plugin).
 
 #### To build the libraries:
 
@@ -21,7 +21,7 @@ You can publish pact-jvm to your local maven repo using:
     $ ./gradlew publishToMavenLocal
 
 If the build fails due to JVM memory issues, these are the settings reported to work:
->  set `org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8` in ~/.gradle/gradle.properties to fix metaspace problems with JDK 11
+>  set `org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8` in ~/.gradle/gradle.properties to fix metaspace problems with JDK 17
 
 To publish to a nexus repo:
 

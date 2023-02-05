@@ -11,7 +11,7 @@ dependencies {
   api project(':core:matchers')
   api project(':core:pactbroker')
   api 'org.apache.httpcomponents.client5:httpclient5'
-  api 'io.github.classgraph:classgraph:4.8.129'
+  api 'io.github.classgraph:classgraph:4.8.149'
 
   implementation 'commons-io:commons-io:2.11.0'
   implementation 'org.slf4j:slf4j-api'
@@ -30,7 +30,7 @@ dependencies {
   testImplementation 'org.spockframework:spock-core'
   testImplementation 'ch.qos.logback:logback-classic'
   testImplementation 'org.apache.groovy:groovy-json'
-  testImplementation 'org.mockito:mockito-core:2.28.2'
+  testImplementation 'org.mockito:mockito-core:4.8.1'
   testImplementation 'javax.xml.bind:jaxb-api:2.3.1'
   testImplementation 'junit:junit'
   testImplementation 'io.dropwizard:dropwizard-testing:2.1.3'
