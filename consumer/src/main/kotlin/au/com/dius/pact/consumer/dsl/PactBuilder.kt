@@ -311,10 +311,22 @@ open class PactBuilder(
             when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
               is Ok -> {
                 result.value.map {
-                  val (partName, body, rules, generators, _, _, interactionMarkup, interactionMarkupType) = it
+                  val (
+                    partName,
+                    body,
+                    rules,
+                    generators,
+                    _, _,
+                    interactionMarkup,
+                    interactionMarkupType,
+                    metadataRules
+                  ) = it
                   val matchingRules = MatchingRulesImpl()
                   if (rules != null) {
                     matchingRules.addCategory(rules)
+                  }
+                  if (metadataRules != null) {
+                    matchingRules.addCategory(metadataRules)
                   }
                   MessageContents(body, mapOf(), matchingRules, generators ?: Generators(), partName) to
                     InteractionMarkup(interactionMarkup, interactionMarkupType)
@@ -333,10 +345,23 @@ open class PactBuilder(
           when (val result = matcher.configureContent(contentType, bodyConfig)) {
             is Ok -> {
               result.value.map {
-                val (partName, body, rules, generators, metadata, config, interactionMarkup, interactionMarkupType) = it
+                val (
+                  partName,
+                  body,
+                  rules,
+                  generators,
+                  metadata,
+                  config,
+                  interactionMarkup,
+                  interactionMarkupType,
+                  metadataRules
+                ) = it
                 val matchingRules = MatchingRulesImpl()
                 if (rules != null) {
                   matchingRules.addCategory(rules)
+                }
+                if (metadataRules != null) {
+                  matchingRules.addCategory(metadataRules)
                 }
                 if (config.interactionConfiguration.isNotEmpty()) {
                   interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
@@ -384,7 +409,7 @@ open class PactBuilder(
                 if (result.value.size > 1) {
                   logger.warn { "Plugin returned multiple contents, will only use the first" }
                 }
-                val (_, body, rules, generators, _, _, _, _) = result.value.first()
+                val (_, body, rules, generators, _, _, _, _, _) = result.value.first()
                 part.body = body
                 if (rules != null) {
                   part.matchingRules.addCategory(rules)
@@ -421,7 +446,7 @@ open class PactBuilder(
         if (result.value.size > 1) {
           logger.warn { "Plugin returned multiple contents, will only use the first" }
         }
-        val (_, body, rules, generators, _, config, interactionMarkup, interactionMarkupType) = result.value.first()
+        val (_, body, rules, generators, _, config, interactionMarkup, interactionMarkupType, _) = result.value.first()
         part.body = body
         if (!part.hasHeader("content-type")) {
           part.headers["content-type"] = listOf(body.contentType.toString())

@@ -13,7 +13,7 @@ dependencies {
   api 'org.junit.jupiter:junit-jupiter-api:5.9.2'
 
   implementation 'org.slf4j:slf4j-api'
-  implementation('io.pact.plugin.driver:core:0.2.1') {
+  implementation('io.pact.plugin.driver:core') {
     exclude group: 'au.com.dius.pact.core'
   }
   implementation 'com.michael-bull.kotlin-result:kotlin-result:1.1.14'
