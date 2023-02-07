@@ -1,6 +1,16 @@
 plugins {
   id 'au.com.dius.pact.kotlin-library-conventions'
 }
+java {
+  targetCompatibility = '17'
+  sourceCompatibility = '17'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+  kotlinOptions {
+    jvmTarget = "17"
+  }
+}
 
 description = 'Pact-JVM - Pact Provider Spring/JUnit runner'
 group = 'au.com.dius.pact.provider'
