@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.matchers.BodyMismatch
+import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.contains
@@ -88,7 +89,11 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
           PactVerificationResult.Error(RuntimeException(results.error), PactVerificationResult.Ok(testResult))
         } else {
           PactVerificationResult.PartialMismatch(results.mismatches.map {
-            BodyMismatch(it.expected, it.actual, it.mismatch, it.path, it.diff)
+            if (it.mismatchType == "metadata") {
+              MetadataMismatch(it.path, it.expected, it.actual, it.mismatch)
+            } else {
+              BodyMismatch(it.expected, it.actual, it.mismatch, it.path, it.diff)
+            }
           })
         }
       })

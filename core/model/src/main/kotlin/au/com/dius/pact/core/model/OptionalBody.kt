@@ -168,18 +168,26 @@ data class OptionalBody @JvmOverloads constructor(
     return when (state) {
       State.PRESENT -> {
         if (value!!.isNotEmpty()) {
-          if (contentTypeHint == ContentTypeHint.BINARY || contentType.isBinaryType()) {
+          if (contentType.isJson()) {
+            if (contentTypeHint == ContentTypeHint.BINARY) {
+              mapOf(
+                "content" to valueAsString(),
+                "contentType" to contentType.toString(),
+                "encoded" to "JSON"
+              )
+            } else {
+              mapOf(
+                "content" to JsonParser.parseString(valueAsString()),
+                "contentType" to contentType.toString(),
+                "encoded" to false
+              )
+            }
+          } else if (contentTypeHint == ContentTypeHint.BINARY || contentType.isBinaryType()) {
             mapOf(
               "content" to valueAsBase64(),
               "contentType" to contentType.toString(),
               "encoded" to "base64",
               "contentTypeHint" to contentTypeHint.name
-            )
-          } else if (contentType.isJson()) {
-            mapOf(
-              "content" to JsonParser.parseString(valueAsString()),
-              "contentType" to contentType.toString(),
-              "encoded" to false
             )
           } else {
             mapOf(

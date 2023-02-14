@@ -7,7 +7,7 @@ The combined library (JUnit5 + Spring) is available on maven central using:
 
 group-id = au.com.dius.pact.provider
 artifact-id = junit5spring
-version-id = 4.2.x
+version-id = 4.4.x
 
 ## Usage
 For writing Spring Pact verification tests with JUnit 5, there is an JUnit 5 Invocation Context Provider that you can use with 

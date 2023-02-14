@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.5 - Bugfix Release
+
+* 8c965dca6 - fix(regression): Changes for #1641 broke the use of plugin mock servers (Ronald Holshausen, Thu Feb 2 16:17:10 2023 +1100)
+* f4d017152 - feat: support JSON encoded bodies with V4 Pact files (Ronald Holshausen, Tue Jan 31 16:31:55 2023 +1100)
+* 3e63af682 - fix: correct how the bodies are presisted as per the spec #1658 (Ronald Holshausen, Mon Jan 30 14:32:29 2023 +1100)
+* 4c74ef9ea - fix: correctly decode Pact files with JSON string contents #1658 (Ronald Holshausen, Mon Jan 30 14:03:20 2023 +1100)
+* b3b159dbe - Merge pull request #1659 from pact-foundation/pactflow_camelcase (Yousaf Nabi, Fri Jan 27 12:28:12 2023 +0000)
+* e8727f85c - chore: /s/Pactflow/PactFlow (Yousaf Nabi, Thu Jan 26 16:17:30 2023 +0000)
+* 1cf0fa688 - bump version to 4.4.5 (Ronald Holshausen, Thu Jan 19 13:13:11 2023 +1100)
+
 # 4.4.4 - Maintenance Release
 
 * a5eb417c2 - fix: restrict tests with reverse lookups to Linux agents #405 (Ronald Holshausen, Wed Jan 18 16:26:19 2023 +1100)

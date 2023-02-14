@@ -51,7 +51,8 @@ data class TimestampMatcher(
   val pattern: String = DateFormatUtils.ISO_DATETIME_FORMAT.pattern,
   val dateTimeValue: String?
 ) : Matcher(dateTimeValue ?: DateTimeFormatter
-    .ofPattern(pattern).format(Instant.ofEpochMilli(DATE_2000).atOffset(ZoneOffset.UTC)),
+    .ofPattern(pattern)
+    .format(Instant.ofEpochMilli(DATE_2000).atOffset(ZoneOffset.UTC)),
   au.com.dius.pact.core.model.matchingrules.TimestampMatcher(pattern),
   if (dateTimeValue == null) DateTimeGenerator(pattern) else null
 )
@@ -88,6 +89,9 @@ object NullMatcher : Matcher(null, au.com.dius.pact.core.model.matchingrules.Nul
 
 data class ProviderStateMatcher(val expression: String, override val value: String) : Matcher(value,
   null, ProviderStateGenerator(expression))
+
+data class NotEmptyMatcher(override val value: Any?) : Matcher(value,
+  au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher)
 
 /**
  * Exception for handling invalid matchers
@@ -316,5 +320,14 @@ object Matchers {
   @JvmStatic
   fun fromProviderState(expression: String, value: String): Matcher {
     return ProviderStateMatcher(expression, value)
+  }
+
+  /**
+   * Matches if the value is not empty (empty string, null, or missing)
+   * @param value Example value
+   */
+  @JvmStatic
+  fun notEmpty(example: String): Matcher {
+    return NotEmptyMatcher(example)
   }
 }

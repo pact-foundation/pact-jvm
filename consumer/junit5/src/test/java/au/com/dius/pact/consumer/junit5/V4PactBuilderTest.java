@@ -7,7 +7,6 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.core.model.V4Interaction;
 import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.messaging.Message;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.hamcrest.core.Is;
@@ -16,13 +15,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.dsl.Matchers.notEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "v4_test_provider")
@@ -41,7 +38,9 @@ public class V4PactBuilderTest {
             .method("GET"))
           .willRespondWith(responseBuilder -> responseBuilder
             .status(200)
-            .body("{\"responsetest\": true, \"version\": \"v3\"}"))
+            .body("{\"responsetest\": true, \"version\": \"v3\"}")
+            .header("test", notEmpty("Example"))
+          )
           .comment("This is also a comment");
       })
       .comment("This is also a comment")
@@ -55,6 +54,7 @@ public class V4PactBuilderTest {
     assertThat(httpResponse.getCode(), is(200));
     assertThat(new String(httpResponse.getEntity().getContent().readAllBytes()),
       is(equalTo("{\"responsetest\": true, \"version\": \"v3\"}")));
+    assertThat(httpResponse.containsHeader("test"), is(true));
   }
 
   @Pact(consumer = "v4_test_consumer")

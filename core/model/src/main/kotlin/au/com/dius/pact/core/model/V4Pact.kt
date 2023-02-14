@@ -50,7 +50,7 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
 
         val (encoded, encoding) = if (jsonBody.has("encoded")) {
           when (val encodedValue = jsonBody["encoded"]) {
-            is JsonValue.StringValue -> true to encodedValue.toString()
+            is JsonValue.StringValue -> true to encodedValue.toString().lowercase()
             JsonValue.True -> true to "base64"
             else -> false to ""
           }
@@ -67,6 +67,8 @@ fun bodyFromJson(field: String, json: JsonValue, headers: Map<String, Any>): Opt
               Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
             }
           }
+        } else if (contentType.isJson()) {
+          jsonBody["content"].serialise().toByteArray(contentType.asCharset())
         } else {
           Json.toString(jsonBody["content"]).toByteArray(contentType.asCharset())
         }

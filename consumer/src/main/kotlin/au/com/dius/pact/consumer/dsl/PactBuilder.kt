@@ -323,7 +323,7 @@ open class PactBuilder(
                 if (result.value.size > 1) {
                   logger.warn { "Plugin returned multiple contents, will only use the first" }
                 }
-                val (_, body, rules, generators, _, _, _, _) = result.value.first()
+                val (_, body, rules, generators, _, _, _, _, _) = result.value.first()
                 part.body = body
                 if (rules != null) {
                   part.matchingRules.addCategory(rules)
@@ -360,7 +360,7 @@ open class PactBuilder(
         if (result.value.size > 1) {
           logger.warn { "Plugin returned multiple contents, will only use the first" }
         }
-        val (_, body, rules, generators, _, config, interactionMarkup, interactionMarkupType) = result.value.first()
+        val (_, body, rules, generators, _, config, interactionMarkup, interactionMarkupType, _) = result.value.first()
         part.body = body
         if (!part.hasHeader("content-type")) {
           part.headers["content-type"] = listOf(body.contentType.toString())
@@ -476,6 +476,7 @@ open class PactBuilder(
   }
 
   companion object : KLogging() {
+    @Suppress("LongMethod", "ComplexMethod")
     fun setupMessageContents(
       pactBuilder: DslBuilder,
       contents: Any?,
@@ -493,18 +494,30 @@ open class PactBuilder(
             val contentMatcher = MatchingConfig.lookupContentMatcher(contentType)
             if (contentMatcher != null) {
               when (val result = contentMatcher.setupBodyFromConfig(bodyConfig)) {
-                is Result.Ok -> {
+                is Ok -> {
                   result.value.map {
-                    val (partName, body, rules, generators, _, _, interactionMarkup, interactionMarkupType) = it
+                    val (
+                      partName,
+                      body,
+                      rules,
+                      generators,
+                      _, _,
+                      interactionMarkup,
+                      interactionMarkupType,
+                      metadataRules
+                    ) = it
                     val matchingRules = MatchingRulesImpl()
                     if (rules != null) {
                       matchingRules.addCategory(rules)
+                    }
+                    if (metadataRules != null) {
+                      matchingRules.addCategory(metadataRules)
                     }
                     MessageContents(body, mutableMapOf(), matchingRules, generators ?: Generators(), partName) to
                       InteractionMarkup(interactionMarkup, interactionMarkupType)
                   }
                 }
-                is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+                is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
               }
             } else {
               listOf(
@@ -515,12 +528,25 @@ open class PactBuilder(
           } else {
             logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
             when (val result = matcher.configureContent(contentType, bodyConfig)) {
-              is Result.Ok -> {
+              is Ok -> {
                 result.value.map {
-                  val (partName, body, rules, generators, metadata, config, interactionMarkup, markupType) = it
+                  val (
+                    partName,
+                    body,
+                    rules,
+                    generators,
+                    metadata,
+                    config,
+                    interactionMarkup,
+                    interactionMarkupType,
+                    metadataRules
+                  ) = it
                   val matchingRules = MatchingRulesImpl()
                   if (rules != null) {
                     matchingRules.addCategory(rules)
+                  }
+                  if (metadataRules != null) {
+                    matchingRules.addCategory(metadataRules)
                   }
                   if (config.interactionConfiguration.isNotEmpty()) {
                     interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
@@ -529,10 +555,10 @@ open class PactBuilder(
                     pactBuilder.addPluginConfiguration(matcher, config.pactConfiguration)
                   }
                   MessageContents(body, metadata.toMutableMap(), matchingRules, generators ?: Generators(), partName) to
-                    InteractionMarkup(interactionMarkup, markupType)
+                    InteractionMarkup(interactionMarkup, interactionMarkupType)
                 }
               }
-              is Result.Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
+              is Err -> throw InteractionConfigurationError("Failed to set the interaction: " + result.error)
             }
           }
         } else {
@@ -545,9 +571,6 @@ open class PactBuilder(
     /**
      * Loads the file given by the file path and returns the contents. Relative paths will be resolved against the
      * current working directory.
-     */
-    /**
-     * Convenience function to load the file contents as plain text.
      */
     @JvmStatic
     fun textFile(filePath: String) = BuilderUtils.textFile(filePath)
