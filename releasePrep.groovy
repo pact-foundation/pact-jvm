@@ -45,8 +45,8 @@ executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") 
   javaVersion = new Semver(it.trim().replace('_', '+b'), Semver.SemverType.NPM)
 }
 
-if (!javaVersion?.satisfies('^11.0.0')) {
-  ask("You are building against Java $javaVersion. Do you want to exit?: [Y]") {
+if (!javaVersion?.satisfies('^17.0.0')) {
+  ask("You are building against Java $javaVersion and this build requires JDK 17+. Do you want to exit?: [Y]") {
     System.exit(1)
   }
 }
