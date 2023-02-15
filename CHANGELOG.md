@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.0-beta.1 - Maintenance Release
+
+* 63559b887 - Merge branch 'master' into v4.5.x (Ronald Holshausen, Wed Feb 15 17:16:53 2023 +1100)
+* 8e125575f - chore: Update JUnit5 readme (Ronald Holshausen, Wed Feb 15 17:02:12 2023 +1100)
+* 0ca80c4b6 - bump version to 4.4.7 (Ronald Holshausen, Wed Feb 15 17:01:23 2023 +1100)
+* cd8e06013 - chore: fix build on JDK < 16 (Ronald Holshausen, Tue Feb 14 16:46:12 2023 +1100)
+* bffd26aba - feat: add support for Spring 6 and Springboot 3 #1660 (Ronald Holshausen, Tue Feb 14 16:45:02 2023 +1100)
+* 6e1ff7f84 - Merge branch 'master' into v4.5.x (Ronald Holshausen, Tue Feb 14 14:16:09 2023 +1100)
+* e51aaf905 - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Thu Jan 19 13:51:41 2023 +1100)
+* ee8cbfa32 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Thu Jan 19 13:27:28 2023 +1100)
+* e6b0a242e - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Tue Jan 3 16:59:20 2023 +1100)
+* 17cf4ebcb - Merge branch 'master' into v4.4.x (Ronald Holshausen, Tue Jan 3 16:58:58 2023 +1100)
+* c9df7e035 - Merge branch 'v4.3.x' into v4.4.x (Ronald Holshausen, Tue Jan 3 16:51:32 2023 +1100)
+* 56279cfa9 - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Fri Dec 23 15:28:14 2022 +1100)
+* a21d7cda5 - fix: alias the BuilderUtils functions on PactBuilder (Ronald Holshausen, Fri Dec 16 09:22:35 2022 +1100)
+* 042c3ffe5 - refactor: Move BuilderUtils to consumer project (Ronald Holshausen, Wed Dec 14 16:11:23 2022 +1100)
+* c257878be - chore: correct version and release script (Ronald Holshausen, Wed Dec 14 15:51:58 2022 +1100)
+* f330d9e65 - bump version to 4.5.1 (Ronald Holshausen, Wed Dec 14 15:50:27 2022 +1100)
+* 2d7ea20ac - update changelog for release 4.5.0-beta.0 (Ronald Holshausen, Wed Dec 14 15:40:24 2022 +1100)
+* ccaf27ee9 - feat: Add support for plugin GenerateContentRequest (Ronald Holshausen, Wed Dec 14 15:26:28 2022 +1100)
+* 6acc512d1 - chore: Upgrade Kotlin to 1.7.22 and plugin driver to 0.2.0 (Ronald Holshausen, Tue Dec 13 14:21:24 2022 +1100)
+* 1b1579ff2 - chore: Upgrade Gradle to 7.6 (Ronald Holshausen, Tue Dec 13 10:56:36 2022 +1100)
+
 # 4.4.6 - Maintenance Release: Supports injecting request metadata from plugins into provider tests
 
 * 461b9e348 - feat: RequestData metadata needs to be a mutable Map (Ronald Holshausen, Wed Feb 15 16:32:48 2023 +1100)
