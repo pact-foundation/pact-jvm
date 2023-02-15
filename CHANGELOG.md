@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.6 - Maintenance Release: Supports injecting request metadata from plugins into provider tests
+
+* 461b9e348 - feat: RequestData metadata needs to be a mutable Map (Ronald Holshausen, Wed Feb 15 16:32:48 2023 +1100)
+* 49f4d908e - feat: Support modifying the request metadata in the provider test before being sent to the plugin (Ronald Holshausen, Wed Feb 15 16:29:06 2023 +1100)
+* a43c2ea04 - chore: check for both cases when looking for pact do not track value (Ronald Holshausen, Tue Feb 14 12:42:52 2023 +1100)
+* 21ada1b2e - fix: support metadata mismatches from results from plugins (Ronald Holshausen, Wed Feb 8 13:44:49 2023 +1100)
+* 1bee97d14 - feat: add support for NotEmpty matcher in V4 DSL (Ronald Holshausen, Wed Feb 8 13:41:20 2023 +1100)
+* 4ac9dcd0f - chore: Upgrade plugin driver to 0.3.1 (Ronald Holshausen, Wed Feb 8 13:40:07 2023 +1100)
+* e71eb4d39 - feat: Upgrade plugin driver to 0.3.0 (supports message metadata) (Ronald Holshausen, Mon Feb 6 15:12:13 2023 +1100)
+* 1a7ae6822 - bump version to 4.4.6 (Ronald Holshausen, Fri Feb 3 09:17:00 2023 +1100)
+
 # 4.4.5 - Bugfix Release
 
 * 8c965dca6 - fix(regression): Changes for #1641 broke the use of plugin mock servers (Ronald Holshausen, Thu Feb 2 16:17:10 2023 +1100)
