@@ -14,9 +14,12 @@ import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.RequestData
+import au.com.dius.pact.provider.RequestDataToBeVerified
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
+import io.pact.plugins.jvm.core.InteractionVerificationData
 import mu.KLogging
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.HttpRequest
@@ -74,9 +77,10 @@ open class PactVerificationExtension(
     return when (parameterContext.parameter.type) {
       Pact::class.java -> true
       Interaction::class.java -> true
-      ClassicHttpRequest::class.java, HttpRequest::class.java -> testContext.target is HttpTestTarget || testContext.target is HttpsTestTarget
+      ClassicHttpRequest::class.java, HttpRequest::class.java -> testContext.target is HttpTestTarget
       PactVerificationContext::class.java -> true
       ProviderVerifier::class.java -> true
+      RequestData::class.java -> testContext.target is PluginTestTarget
       else -> false
     }
   }
@@ -89,6 +93,14 @@ open class PactVerificationExtension(
       ClassicHttpRequest::class.java, HttpRequest::class.java -> store.get("httpRequest")
       PactVerificationContext::class.java -> store.get("interactionContext")
       ProviderVerifier::class.java -> store.get("verifier")
+      RequestData::class.java -> {
+        val request = store.get("request")
+        if (request is RequestDataToBeVerified) {
+          request
+        } else {
+          null
+        }
+      }
       else -> null
     }
   }

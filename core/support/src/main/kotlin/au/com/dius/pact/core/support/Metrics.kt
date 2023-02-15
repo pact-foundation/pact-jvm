@@ -80,9 +80,10 @@ object Metrics : KLogging() {
 
   fun sendMetrics(event: MetricEvent) {
     Thread {
-      val doNotTrack = lookupProperty("pact_do_not_track").ifNullOrEmpty {
-        System.getenv("pact_do_not_track")
-      }
+      val doNotTrack = lookupProperty("pact_do_not_track")
+        .ifNullOrEmpty { lookupProperty("PACT_DO_NOT_TRACK") }
+        .ifNullOrEmpty { System.getenv("pact_do_not_track") }
+        .ifNullOrEmpty { System.getenv("PACT_DO_NOT_TRACK") }
       if (doNotTrack != "true") {
         if (!warningLogged) {
           logger.warn {

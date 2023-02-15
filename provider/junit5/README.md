@@ -40,7 +40,8 @@ For details on the provider and pact source annotations, refer to the [Pact juni
 
 You can set the test target (the object that defines the target of the test, which should point to your provider) on the
 `PactVerificationContext`, but you need to do this in a before test method (annotated with `@BeforeEach`). There are three
-different test targets you can use: `HttpTestTarget`, `HttpsTestTarget` and `MessageTestTarget`.
+main test targets you can use: `HttpTestTarget`, `HttpsTestTarget` and `MessageTestTarget`. There is also a `PluginTestTarget`
+for use when the interactions are provided by a plugin. 
 
 For example:
 
@@ -201,7 +202,8 @@ or `setStateHandlers` methods. See [StateAnnotationsOnAdditionalClassTest](https
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would be
 authentication tokens, which have a small life span. The Http and Https test targets support injecting the request that
 will executed into the test template method (of type `org.apache.http.HttpRequest` for versions 4.2.x and before,
-`org.apache.hc.core5.http.HttpRequest` for versions 4.3.0+).
+`org.apache.hc.core5.http.HttpRequest` for versions 4.3.0+), while the plugin test target supports injecting the data
+that will be used to make the request into the test template method (as an instance of `au.com.dius.pact.provider.RequestData`).
 You can then add things to the request before calling the `verifyInteraction()` method.
 
 For example to add a header:
@@ -218,16 +220,17 @@ For example to add a header:
 
 ## Objects that can be injected into the test methods
 
-You can inject the following objects into your test methods (just like the `PactVerificationContext`). They will be null if injected before the
-supported phase.
+You can inject the following objects into your test methods (just like the `PactVerificationContext`). They will be 
+null if injected before the supported phase.
 
-| Object | Can be injected from phase | Description |
-| ------ | --------------- | ----------- |
-| PactVerificationContext | @BeforeEach | The context to use to execute the interaction test |
-| Pact | any | The Pact model for the test |
-| Interaction | any | The Interaction model for the test |
-| HttpRequest | @TestTemplate | The request that is going to be executed (only for HTTP and HTTPS targets) |
-| ProviderVerifier | @TestTemplate | The verifier instance that is used to verify the interaction |
+| Object                  | Can be injected from phase | Description                                                                |
+|-------------------------|----------------------------|----------------------------------------------------------------------------|
+| PactVerificationContext | @BeforeEach                | The context to use to execute the interaction test                         |
+| Pact                    | any                        | The Pact model for the test                                                |
+| Interaction             | any                        | The Interaction model for the test                                         |
+| HttpRequest             | @TestTemplate              | The request that is going to be executed (only for HTTP and HTTPS targets) |
+| RequestData             | @TestTemplate              | The request data that is going to be executed (only for the Plugin target) |
+| ProviderVerifier        | @TestTemplate              | The verifier instance that is used to verify the interaction               |
 
 ## Allowing the test to pass when no pacts are found to verify (version 4.0.7+)
 
@@ -326,6 +329,9 @@ variable. Each plugin required by the Pact file must be installed there. You wil
 instructions for each plugin, but the default is to unpack the plugin into a sub-directory `<plugin-name>-<plugin-version>`
 (i.e., for the Protobuf plugin 0.0.0 it will be `protobuf-0.0.0`). The plugin manifest file must be present for the
 plugin to be able to be loaded.
+
+Note that the request data used to generate the request for verification can be injected into the test template method
+using the `au.com.dius.pact.provider.RequestData` type. This can be used to add any required metadata to the request.
 
 # Test Analytics
 

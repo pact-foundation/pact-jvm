@@ -179,7 +179,7 @@ plugin portal. This will take a little while (15 minutes for me), depending on y
 Publish pacts to pact-foundation.pact.dius.com.au?: [Y] 
 ```
 
-You can skip this if you don't have a Pactflow API token setup.
+You can skip this if you don't have a PactFlow API token setup.
 
 ```console
 Bump version to 4.2.15?: [Y] 

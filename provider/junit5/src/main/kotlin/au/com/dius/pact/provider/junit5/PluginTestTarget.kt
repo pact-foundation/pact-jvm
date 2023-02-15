@@ -10,6 +10,7 @@ import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderResponse
+import au.com.dius.pact.provider.RequestDataToBeVerified
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
@@ -87,7 +88,7 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
     return when (val v4pact = pact.asV4Pact()) {
       is Ok -> when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
         interaction.asV4Interaction(), config)) {
-        is Ok -> result.value to transportEntry
+        is Ok -> RequestDataToBeVerified(result.value) to transportEntry
         is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
       }
       is Err -> throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")

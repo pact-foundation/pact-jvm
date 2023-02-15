@@ -963,7 +963,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     logger.debug { "Verifying interaction => $request" }
     return when (val result = DefaultPluginManager.verifyInteraction(
       client as CatalogueEntry,
-      request as InteractionVerificationData,
+      (request as RequestDataToBeVerified).asInteractionVerificationData(),
       userConfig,
       pact,
       interaction

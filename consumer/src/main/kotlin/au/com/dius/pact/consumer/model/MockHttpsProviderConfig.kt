@@ -19,6 +19,37 @@ class MockHttpsProviderConfig @JvmOverloads constructor(
   override val mockServerImplementation: MockServerImplementation = MockServerImplementation.KTorServer
 ) : MockProviderConfig(hostname, port, pactVersion, "https", mockServerImplementation) {
 
+  @Suppress("ComplexMethod")
+  override fun mergeWith(config: MockProviderConfig): MockProviderConfig {
+    return if (config is MockHttpsProviderConfig) {
+      MockHttpsProviderConfig(
+        if (hostname.isEmpty() || hostname == LOCALHOST) config.hostname else hostname,
+        if (port == 0) config.port else port,
+        if (pactVersion == PactSpecVersion.UNSPECIFIED) config.pactVersion else pactVersion,
+        keyStore ?: config.keyStore,
+        if (keyStoreAlias.isEmpty() || keyStoreAlias == "alias") config.keyStoreAlias else keyStoreAlias,
+        if (keystorePassword.isEmpty() || keystorePassword == "changeme")
+          config.keystorePassword
+        else keystorePassword,
+        if (privateKeyPassword.isEmpty() || privateKeyPassword == "changeme")
+          config.privateKeyPassword
+        else privateKeyPassword,
+        mockServerImplementation
+      )
+    } else {
+      MockHttpsProviderConfig(
+        if (hostname.isEmpty() || hostname == LOCALHOST) config.hostname else hostname,
+        if (port == 0) config.port else port,
+        if (pactVersion == PactSpecVersion.UNSPECIFIED) config.pactVersion else pactVersion,
+        keyStore,
+        keyStoreAlias,
+        keystorePassword,
+        privateKeyPassword,
+        mockServerImplementation
+      )
+    }
+  }
+
   companion object {
     @JvmStatic
     @JvmOverloads
