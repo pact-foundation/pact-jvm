@@ -15,7 +15,7 @@ interface RequestData {
   /**
    * Metadata associated with the request
    */
-  val metadata: Map<String, Any?>
+  val metadata: MutableMap<String, Any?>
 }
 
 /**
@@ -30,9 +30,11 @@ data class RequestDataToBeVerified(
   /**
    * Metadata associated with the request
    */
-  override val metadata: Map<String, Any?>
+  override val metadata: MutableMap<String, Any?>
 ): RequestData {
-  constructor(requestData: InteractionVerificationData) : this(requestData.requestData, requestData.metadata)
+  constructor(requestData: InteractionVerificationData) : this(
+    requestData.requestData, requestData.metadata.toMutableMap()
+  )
 
   fun asInteractionVerificationData() = InteractionVerificationData(requestData, metadata)
 }
