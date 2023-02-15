@@ -28,4 +28,6 @@ dependencies {
     exclude group: 'org.yaml'
   }
   testImplementation 'org.yaml:snakeyaml:1.33'
+  testImplementation 'org.mockito:mockito-core:2.28.2'
+  testImplementation 'org.mockito:mockito-inline:2.28.2'
 }
