@@ -1,5 +1,34 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.0 - General Release
+
+* bd2f1085f - chore: prep for general release (Ronald Holshausen, Fri Feb 24 16:57:40 2023 +1100)
+* 68c31d0d7 - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Fri Feb 24 16:46:38 2023 +1100)
+* 7c07d6a6d - Merge branch 'master' into v4.4.x (Ronald Holshausen, Fri Feb 24 16:42:18 2023 +1100)
+* 26ea6bc11 - bump version to 4.4.8 (Ronald Holshausen, Fri Feb 24 16:42:04 2023 +1100)
+* f58634072 - feat: Add support for gradle/maven plugin canideploy on specific env #1668 (Ronald Holshausen, Fri Feb 24 15:47:43 2023 +1100)
+* 06cfc8f01 - bump version to 4.5.0-beta.2 (Ronald Holshausen, Wed Feb 15 17:40:41 2023 +1100)
+* 0af645954 - update changelog for release 4.5.0-beta.1 (Ronald Holshausen, Wed Feb 15 17:27:49 2023 +1100)
+* 6cb9dde79 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Wed Feb 15 17:18:33 2023 +1100)
+* 63559b887 - Merge branch 'master' into v4.5.x (Ronald Holshausen, Wed Feb 15 17:16:53 2023 +1100)
+* cd8e06013 - chore: fix build on JDK < 16 (Ronald Holshausen, Tue Feb 14 16:46:12 2023 +1100)
+* bffd26aba - feat: add support for Spring 6 and Springboot 3 #1660 (Ronald Holshausen, Tue Feb 14 16:45:02 2023 +1100)
+* 6e1ff7f84 - Merge branch 'master' into v4.5.x (Ronald Holshausen, Tue Feb 14 14:16:09 2023 +1100)
+* e51aaf905 - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Thu Jan 19 13:51:41 2023 +1100)
+* ee8cbfa32 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Thu Jan 19 13:27:28 2023 +1100)
+* e6b0a242e - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Tue Jan 3 16:59:20 2023 +1100)
+* 17cf4ebcb - Merge branch 'master' into v4.4.x (Ronald Holshausen, Tue Jan 3 16:58:58 2023 +1100)
+* c9df7e035 - Merge branch 'v4.3.x' into v4.4.x (Ronald Holshausen, Tue Jan 3 16:51:32 2023 +1100)
+* 56279cfa9 - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Fri Dec 23 15:28:14 2022 +1100)
+* a21d7cda5 - fix: alias the BuilderUtils functions on PactBuilder (Ronald Holshausen, Fri Dec 16 09:22:35 2022 +1100)
+* 042c3ffe5 - refactor: Move BuilderUtils to consumer project (Ronald Holshausen, Wed Dec 14 16:11:23 2022 +1100)
+* c257878be - chore: correct version and release script (Ronald Holshausen, Wed Dec 14 15:51:58 2022 +1100)
+* f330d9e65 - bump version to 4.5.1 (Ronald Holshausen, Wed Dec 14 15:50:27 2022 +1100)
+* 2d7ea20ac - update changelog for release 4.5.0-beta.0 (Ronald Holshausen, Wed Dec 14 15:40:24 2022 +1100)
+* ccaf27ee9 - feat: Add support for plugin GenerateContentRequest (Ronald Holshausen, Wed Dec 14 15:26:28 2022 +1100)
+* 6acc512d1 - chore: Upgrade Kotlin to 1.7.22 and plugin driver to 0.2.0 (Ronald Holshausen, Tue Dec 13 14:21:24 2022 +1100)
+* 1b1579ff2 - chore: Upgrade Gradle to 7.6 (Ronald Holshausen, Tue Dec 13 10:56:36 2022 +1100)
+
 # 4.4.7 - Maintenance Release
 
 * 5bc8bc683 - fix: PactVerificationExtension will fail when used with other extensions in a static context #1666 (Ronald Holshausen, Fri Feb 24 12:41:00 2023 +1100)
