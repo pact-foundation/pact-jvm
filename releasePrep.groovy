@@ -125,7 +125,7 @@ ask('Publish pacts to pact-foundation.pactflow.io?: [Y]') {
   executeOnShell 'PACT_PUBLISH=true ./gradlew :pact-publish:test :pact-publish:pactPublish'
 }
 
-def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()
+def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle"
   executeOnShell("git add buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle")
