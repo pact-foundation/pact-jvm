@@ -18,6 +18,7 @@ import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.model.v4.MessageContents
+import org.json.JSONObject
 import java.util.Locale
 
 /**
@@ -163,7 +164,7 @@ class MessagePactBuilder @JvmOverloads constructor(
    */
   fun withContent(body: DslPart): MessagePactBuilder {
     if (messages.isEmpty()) {
-      throw InvalidPactException("expectsToReceive is required before withMetaData")
+      throw InvalidPactException("expectsToReceive is required before withContent")
     }
 
     val message = messages.last()
@@ -197,7 +198,7 @@ class MessagePactBuilder @JvmOverloads constructor(
    */
   fun withContent(xmlBuilder: PactXmlBuilder): MessagePactBuilder {
     if (messages.isEmpty()) {
-      throw InvalidPactException("expectsToReceive is required before withMetaData")
+      throw InvalidPactException("expectsToReceive is required before withContent")
     }
 
     val message = messages.last()
@@ -231,7 +232,7 @@ class MessagePactBuilder @JvmOverloads constructor(
   @JvmOverloads
   fun withContent(contents: String, contentType: String = "text/plain"): MessagePactBuilder {
     if (messages.isEmpty()) {
-      throw InvalidPactException("expectsToReceive is required before withMetaData")
+      throw InvalidPactException("expectsToReceive is required before withContent")
     }
 
     val message = messages.last()
@@ -241,6 +242,35 @@ class MessagePactBuilder @JvmOverloads constructor(
     val ct = ContentType(contentType)
     message.contents = message.contents.copy(
       contents = OptionalBody.body(contents.toByteArray(ct.asCharset()), ct),
+      metadata = metadata
+    )
+
+    return this
+  }
+
+  /**
+   * Adds the JSON body as the message content
+   */
+  fun withContent(json: JSONObject): MessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before withContent")
+    }
+
+    val message = messages.last()
+    val metadata = message.contents.metadata.toMutableMap()
+    val contentTypeEntry = metadata.entries.find {
+      it.key.lowercase() == "contenttype" || it.key.lowercase() == "content-type"
+    }
+
+    var contentType = ContentType.JSON
+    if (contentTypeEntry == null) {
+      metadata["contentType"] = contentType.toString()
+    } else {
+      contentType = ContentType(contentTypeEntry.value.toString())
+    }
+
+    message.contents = message.contents.copy(
+      contents = OptionalBody.body(json.toString().toByteArray(contentType.asCharset()), contentType),
       metadata = metadata
     )
 

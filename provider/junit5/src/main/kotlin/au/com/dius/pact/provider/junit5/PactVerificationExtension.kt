@@ -73,14 +73,14 @@ open class PactVerificationExtension(
 
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val testContext = store.get("interactionContext") as PactVerificationContext
+    val testContext = store.get("interactionContext") as PactVerificationContext?
     return when (parameterContext.parameter.type) {
       Pact::class.java -> true
       Interaction::class.java -> true
-      ClassicHttpRequest::class.java, HttpRequest::class.java -> testContext.target is HttpTestTarget
+      ClassicHttpRequest::class.java, HttpRequest::class.java -> testContext?.target is HttpTestTarget
       PactVerificationContext::class.java -> true
       ProviderVerifier::class.java -> true
-      RequestData::class.java -> testContext.target is PluginTestTarget
+      RequestData::class.java -> testContext?.target is PluginTestTarget
       else -> false
     }
   }

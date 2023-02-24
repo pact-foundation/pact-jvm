@@ -12,7 +12,7 @@ repositories {
     mavenCentral()
 }
 
-version = '4.4.7'
+version = '4.4.8'
 
 java {
     targetCompatibility = '11'
