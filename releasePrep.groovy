@@ -45,7 +45,7 @@ executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") 
   javaVersion = new Semver(it.trim().replace('_', '+b'), Semver.SemverType.NPM)
 }
 
-if (!javaVersion?.satisfies('^17.0.0')) {
+if (!javaVersion?.satisfies('>=17.0.0')) {
   ask("You are building against Java $javaVersion and this build requires JDK 17+. Do you want to exit?: [Y]") {
     System.exit(1)
   }
@@ -65,7 +65,7 @@ def projectProps = './gradlew :core:model:properties'.execute().text.split('\n')
 
 def version = projectProps.version
 
-def prevTag = 'git tag --sort=-creatordate --merged'.execute().text.split('\n').find { it.startsWith('4_4_') }
+def prevTag = 'git tag --sort=-creatordate --merged'.execute().text.split('\n').find { it.startsWith('4_5_') }
 def changelog = []
 executeOnShell("git log --pretty='* %h - %s (%an, %ad)' ${prevTag}..HEAD".toString()) {
   println it
