@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.messaging.Message
 import groovy.json.JsonSlurper
 import groovy.xml.XmlParser
+import org.json.JSONObject
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -217,5 +218,23 @@ class MessagePactBuilderSpec extends Specification {
     then:
     message.contents.valueAsString() == 'a=b&c=d'
     message.contents.contentType.toString() == 'application/x-www-form-urlencoded'
+  }
+
+  @Issue('#1669')
+  def 'support content with JSONObject'() {
+    given:
+    JSONObject jsonObject = new JSONObject().put('JSON', 'Hello, World!')
+
+    when:
+    def pact = new MessagePactBuilder()
+      .consumer('MessagePactBuilderSpec')
+      .expectsToReceive('a message with text contents')
+      .withContent(jsonObject)
+      .toPact()
+    Message message = pact.interactions.first()
+
+    then:
+    message.contents.valueAsString() == '{"JSON":"Hello, World!"}'
+    message.contents.contentType.toString() == 'application/json'
   }
 }

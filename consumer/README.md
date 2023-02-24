@@ -14,7 +14,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact`
 * artifact-id = `consumer`
-* version-id = `4.2.x`
+* version-id = `4.4.x`
 
 ## DSL Usage
 
@@ -506,14 +506,14 @@ When you come accross the `body()` method of `PactDslWithProvider` builder start
 The call to `LambdaDsl` replaces the call to instance `new PactDslJsonArray()` and `new PactDslJsonBody()` of the pact library.
 
 ```java
-io.pactfoundation.consumer.dsl.LambdaDsl.*
+au.com.dius.pact.consumer.dsl.LambdaDsl.*
 ```
 
 ### Response body as json array
 
 ```java
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonArray;
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
 
 ...
 
@@ -534,7 +534,7 @@ builder.given("some state")
 
 ```java
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 
 ...
 
