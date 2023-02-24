@@ -1138,6 +1138,9 @@ There is a `can-i-deploy` goal that you can use to preform a deployment safety c
 parameters: `pacticipant` and either `pacticipantVersion` or `latest=true`. It will use the broker configuration values 
 from the your POM. 
 
+**NOTE:** It is recommended to use the [Pact CLI](https://docs.pact.io/implementation_guides/cli) to execute the
+Can I Deploy check, as it will always be up to date with features in the Pact broker.
+
 ```console
 $ mvn pact:can-i-deploy -Dpacticipant='Activity Service' -Dlatest=true
 [INFO] Scanning for projects...
@@ -1165,10 +1168,10 @@ It can happen that there are still unknown results in the Pact broker because th
 You can enable a retry with a wait interval to poll for the results to become available. There are two settings that can
 be added to the configuration in the POM to enable this: `retriesWhenUnknown` and `retryInterval`.
 
-|Field|Description|Default|
-|-----|-----------|-------|
-|retriesWhenUnknown|The amount of times to retry while there are unknown results|0|
-|retryInterval|The number of seconds to wait between retries|10|
+| Field              | Description                                                  | Default |
+|--------------------|--------------------------------------------------------------|---------|
+| retriesWhenUnknown | The amount of times to retry while there are unknown results | 0       |
+| retryInterval      | The number of seconds to wait between retries                | 10      |
 
 ## Ignoring pacticipant by name and version (4.1.28+, 4.2.13+)
 
@@ -1201,6 +1204,10 @@ To configure it in the POM file, add an ignore section to the `configuration` el
 
 Or add it to the command line using the format `-Dignore=<pacticipant>:<version>?,<pacticipant>:<version>?,...`. 
 For example, `-Dignore=bob,fred:1.2.3` to ignore pacticipant named Bob and pacticipant name Fred with version 1.2.3.
+
+## Support for environments (4.5.0+)
+
+You can specify the environment into which the pacticipant(s) are to be deployed with the `toEnvironment` property.
 
 # Verifying V4 Pact files that require plugins (version 4.3.0+)
 

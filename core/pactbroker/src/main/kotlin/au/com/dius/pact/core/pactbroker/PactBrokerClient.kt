@@ -99,6 +99,11 @@ sealed class Latest {
 }
 
 /**
+ * Specifies the target for the can-i-deploy check (tag or environment)
+ */
+data class To @JvmOverloads constructor(val tag: String? = null, val environment: String? = null)
+
+/**
  * Model for a CanIDeploy result
  */
 data class CanIDeployResult(
@@ -992,7 +997,7 @@ open class PactBrokerClient(
     pacticipant: String,
     pacticipantVersion: String,
     latest: Latest,
-    to: String?,
+    to: To?,
     ignore: List<IgnoreSelector> = emptyList()
   ): CanIDeployResult {
     val halClient = newHalClient()
@@ -1109,7 +1114,7 @@ open class PactBrokerClient(
       pacticipant: String,
       pacticipantVersion: String,
       latest: Latest,
-      to: String?,
+      to: To?,
       ignore: List<IgnoreSelector>
     ): String {
       val escaper = urlFormParameterEscaper()
@@ -1124,9 +1129,17 @@ open class PactBrokerClient(
         is Latest.UseLatestTag -> params.add("q[][tag]" to escaper.escape(latest.latestTag))
       }
 
-      if (to.isNotEmpty()) {
-        params.add("latest" to "true")
-        params.add("tag" to escaper.escape(to))
+      if (to != null) {
+        if (to.environment.isNotEmpty()) {
+          params.add("environment" to escaper.escape(to.environment))
+        }
+
+        if (to.tag.isNotEmpty()) {
+          params.add("latest" to "true")
+          params.add("tag" to escaper.escape(to.tag))
+        } else if (to.environment.isNullOrEmpty()) {
+          params.add("latest" to "true")
+        }
       } else {
         params.add("latest" to "true")
       }

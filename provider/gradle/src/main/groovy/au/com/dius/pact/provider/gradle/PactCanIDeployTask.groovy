@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.To
 import com.github.ajalt.mordant.TermColors
 import org.gradle.api.GradleScriptException
 import org.gradle.api.provider.Property
@@ -19,6 +20,7 @@ abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
   static final String PACTICIPANT = 'pacticipant'
   static final String PACTICIPANT_VERSION = 'pacticipantVersion'
   static final String TO = 'toTag'
+  static final String TO_ENVIRONMENT = 'toEnvironment'
   static final String LATEST = 'latest'
 
   @Internal
@@ -39,6 +41,10 @@ abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
   @Input
   @Optional
   abstract Property<Object> getToProp()
+
+  @Input
+  @Optional
+  abstract Property<Object> getToEnvironment()
 
   @Input
   @Optional
@@ -65,10 +71,15 @@ abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
       throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=... or -Platest=true', null)
     }
     String pacticipantVersion = pacticipantVersion.orElse('').get()
-    String to = null
+    String toTag = null
     if (toProp.present) {
-      to = toProp.get()
+      toTag = toProp.get()
     }
+    String environment = null
+    if (toEnvironment.present) {
+      environment = toEnvironment.get()
+    }
+    def to = new To(toTag, environment)
     def t = new TermColors()
     logger.debug(
       "Calling canIDeploy(pacticipant=$pacticipant, pacticipantVersion=$pacticipantVersion, latest=$latest, to=$to)"

@@ -7,6 +7,7 @@ import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.pactbroker.To
 import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
@@ -820,7 +821,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      pactBrokerClient.canIDeploy('Foo', '1.2.3', new Latest.UseLatest(false), 'prod')
+      pactBrokerClient.canIDeploy('Foo', '1.2.3', new Latest.UseLatest(false), new To('prod'))
     }
 
     then:

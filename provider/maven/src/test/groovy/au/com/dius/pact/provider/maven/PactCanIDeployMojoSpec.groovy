@@ -4,6 +4,7 @@ import au.com.dius.pact.core.pactbroker.CanIDeployResult
 import au.com.dius.pact.core.pactbroker.IgnoreSelector
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.To
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
 
@@ -85,7 +86,7 @@ class PactCanIDeployMojoSpec extends Specification {
   def 'passes optional parameters to the pact broker client'() {
     given:
     mojo.latest = 'true'
-    mojo.to = 'prod'
+    mojo.toTag = 'prod'
     mojo.brokerClient = Mock(PactBrokerClient)
 
     when:
@@ -94,7 +95,22 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234',
-      new Latest.UseLatest(true), 'prod', _) >> new CanIDeployResult(true, '', '', null, null)
+      new Latest.UseLatest(true), new To('prod', ''), _) >> new CanIDeployResult(true, '', '', null, null)
+  }
+
+  def 'passes toEnvironment parameter to the pact broker client'() {
+    given:
+    mojo.latest = 'true'
+    mojo.toEnvironment = 'prod'
+    mojo.brokerClient = Mock(PactBrokerClient)
+
+    when:
+    mojo.execute()
+
+    then:
+    notThrown(MojoExecutionException)
+    1 * mojo.brokerClient.canIDeploy('test', '1234',
+      new Latest.UseLatest(true), new To('', 'prod'), _) >> new CanIDeployResult(true, '', '', null, null)
   }
 
   def 'passes ignore parameters to the pact broker client'() {
@@ -110,7 +126,7 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234',
-      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null, null)
+      new Latest.UseLatest(true), new To('', ''), selectors) >> new CanIDeployResult(true, '', '', null, null)
   }
 
   def 'prints verification results url when pact broker client returns one'() {
@@ -119,6 +135,7 @@ class PactCanIDeployMojoSpec extends Specification {
     mojo.latest = 'true'
     mojo.ignore = selectors
     mojo.brokerClient = Mock(PactBrokerClient)
+    def to = new To('', '')
 
     when:
     mojo.execute()
@@ -126,7 +143,7 @@ class PactCanIDeployMojoSpec extends Specification {
     then:
     notThrown(MojoExecutionException)
     1 * mojo.brokerClient.canIDeploy('test', '1234',
-      new Latest.UseLatest(true), '', selectors) >> new CanIDeployResult(true, '', '', null, 'verificationResultUrl')
+      new Latest.UseLatest(true), to, selectors) >> new CanIDeployResult(true, '', '', null, 'verificationResultUrl')
   }
 
   def 'throws an exception if the pact broker client says no'() {

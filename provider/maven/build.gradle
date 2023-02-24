@@ -19,6 +19,7 @@ dependencies {
 
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
   testRuntimeOnly 'org.objenesis:objenesis:3.1'
+  testRuntimeOnly 'ch.qos.logback:logback-classic'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -47,29 +48,29 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:publishToMavenLo
     }
 }
 
-if (System.env.CI != 'true') {
-  task pluginDescriptor(type: Exec, dependsOn: generatePom) {
-    if (isWindows()) {
-      try {
-        // check if mvn.bat exists
-        def proc = new ProcessBuilder('mvn.bat', '-v')
-        proc.start().waitFor()
-
-        commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
-      } catch(Exception e) {
-        commandLine 'mvn.cmd', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
-      }
-    } else {
-      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
-    }
-
-      doLast {
-        final dir = project.compileKotlin.destinationDirectory.dir('META-INF/maven').get()
-        final pluginDescriptor = dir.file('plugin.xml').getAsFile()
-        assert pluginDescriptor.exists(), "[$pluginDescriptor.canonicalPath] was not created"
-      }
-  }
-
-  pluginDescriptor.shouldRunAfter project.jar
-  project.jar.dependsOn pluginDescriptor
-}
+//if (System.env.CI != 'true') {
+//  task pluginDescriptor(type: Exec, dependsOn: generatePom) {
+//    if (isWindows()) {
+//      try {
+//        // check if mvn.bat exists
+//        def proc = new ProcessBuilder('mvn.bat', '-v')
+//        proc.start().waitFor()
+//
+//        commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+//      } catch(Exception e) {
+//        commandLine 'mvn.cmd', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+//      }
+//    } else {
+//      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
+//    }
+//
+//      doLast {
+//        final dir = project.compileKotlin.destinationDirectory.dir('META-INF/maven').get()
+//        final pluginDescriptor = dir.file('plugin.xml').getAsFile()
+//        assert pluginDescriptor.exists(), "[$pluginDescriptor.canonicalPath] was not created"
+//      }
+//  }
+//
+//  pluginDescriptor.shouldRunAfter project.jar
+//  project.jar.dependsOn pluginDescriptor
+//}

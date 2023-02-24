@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.maven
 import au.com.dius.pact.core.pactbroker.IgnoreSelector
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.To
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.ajalt.mordant.TermColors
 import org.apache.maven.plugin.MojoExecutionException
@@ -27,7 +28,10 @@ open class PactCanIDeployMojo : PactBaseMojo() {
   private var latest: String? = ""
 
   @Parameter(property = "toTag", defaultValue = "")
-  private var to: String? = ""
+  private var toTag: String? = ""
+
+  @Parameter(property = "toEnvironment", defaultValue = "")
+  private var toEnvironment: String? = ""
 
   @Parameter(property = "ignore")
   private var ignore: Array<IgnoreSelector> = emptyArray()
@@ -52,6 +56,7 @@ open class PactCanIDeployMojo : PactBaseMojo() {
       throw MojoExecutionException("The can-i-deploy task requires -DpacticipantVersion=... or -Dlatest=true", null)
     }
 
+    val to = To(toTag, toEnvironment)
     val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion.orEmpty(), latest, to, ignore.asList())
     if (result.ok) {
       println("Computer says yes \\o/ ${result.message}\n\n${t.green(result.reason)}")

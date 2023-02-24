@@ -1143,6 +1143,9 @@ There is a `canIDeploy` Gradle task that you can use to preform a deployment saf
 parameters: `pacticipant` and either `pacticipantVersion` or `latest=true`. It will use the configuration from the 
 `broker` section of your Gradle build. 
 
+**NOTE:** It is recommended to use the [Pact CLI](https://docs.pact.io/implementation_guides/cli) to execute the 
+Can I Deploy check, as it will always be up to date with features in the Pact broker.
+
 ```console
 $ ./gradlew canideploy -Ppacticipant='Activity Service' -Platest=true
 
@@ -1171,10 +1174,10 @@ It can happen that there are still unknown results in the Pact broker because th
 You can enable a retry with a wait interval to poll for the results to become available. There are two settings that can
 be added to the `broker` configuration to enable this: `retryCountWhileUnknown` and `retryWhileUnknownInterval`.
 
-|Field|Description|Default|
-|-----|-----------|-------|
-|retryCountWhileUnknown|The amount of times to retry while there are unknown results|0|
-|retryWhileUnknownInterval|The number of seconds to wait between retries|10|
+| Field                     | Description                                                  | Default |
+|---------------------------|--------------------------------------------------------------|---------|
+| retryCountWhileUnknown    | The amount of times to retry while there are unknown results | 0       |
+| retryWhileUnknownInterval | The number of seconds to wait between retries                | 10      |
 
 Example use:
 
@@ -1187,6 +1190,10 @@ pact {
   }
 }
 ```
+
+## Support for environments (4.5.0+)
+
+You can specify the environment into which the pacticipant(s) are to be deployed with the `toEnvironment` property.
 
 # Verifying V4 Pact files that require plugins (version 4.3.0+)
 
