@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.7 - [?62;1;4cMaintenance Release
+
+* 5bc8bc683 - fix: PactVerificationExtension will fail when used with other extensions in a static context #1666 (Ronald Holshausen, Fri Feb 24 12:41:00 2023 +1100)
+* 3010a102b - feat: Add support for JSONObject with MessagePactBuilder #1669 (Ronald Holshausen, Fri Feb 24 11:59:17 2023 +1100)
+* 2a9ac69db - doc: add example using MessagePactBuilder with string content #1669 (Ronald Holshausen, Fri Feb 24 11:31:08 2023 +1100)
+* e297ef757 - chore: update versions in readme (Ronald Holshausen, Wed Feb 15 17:52:32 2023 +1100)
+* 8e125575f - chore: Update JUnit5 readme (Ronald Holshausen, Wed Feb 15 17:02:12 2023 +1100)
+* 0ca80c4b6 - bump version to 4.4.7 (Ronald Holshausen, Wed Feb 15 17:01:23 2023 +1100)
+
 # 4.4.6 - Maintenance Release: Supports injecting request metadata from plugins into provider tests
 
 * 461b9e348 - feat: RequestData metadata needs to be a mutable Map (Ronald Holshausen, Wed Feb 15 16:32:48 2023 +1100)
