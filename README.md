@@ -48,9 +48,8 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch                                                                 | Specification | JDK        | Kotlin Version | Latest Version | Notes                                  |
 |------------------------------------------------------------------------|---------------|------------|----------------|----------------|----------------------------------------|
-| [4.5.x](https://github.com/DiUS/pact-jvm/blob/v4.5.x/README.md)        | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.0-beta.1   |                                        |
-| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md) master | V4 + plugins  | 11+        | 1.6.21         | 4.4.6          |                                        |
-| [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md)        | V4            | 11+        | 1.6.21         | 4.3.19         | [Upgrade notes](./upgrade-to-4.3.x.md) |
+| [4.5.x](https://github.com/DiUS/pact-jvm/blob/v4.5.x/README.md)        | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.0   |                                        |
+| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md) master | V4 + plugins  | 11+        | 1.6.21         | 4.4.7          |                                        |
 | [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12       | 1.3.72         | 4.1.41         |                                        |
 
 **Notes:**
@@ -60,6 +59,7 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch                                                                    | Specification | JDK       | Kotlin Version | Scala Versions | Latest Version |
 |---------------------------------------------------------------------------|---------------|-----------|----------------|----------------|----------------|
+| [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md)        | V4            | 11+        | 1.6.21         | N/A | 4.3.19         |
 | [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md)           | V4 (1)        | 11-15 (2) | 1.4.32         | N/A            | 4.2.21         |
 | [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md)             | V3            | 8-12      | 1.3.71         | N/A            | 4.0.10         |
 | [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md)           | V3            | 8         | 1.3.71         | 2.12           | 3.6.15         |
