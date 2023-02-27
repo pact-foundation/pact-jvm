@@ -99,7 +99,6 @@ class MessagePactSpec extends Specification {
     pact2 = new MessagePact(provider, consumer, [ newMessage1, message2 ])
   }
 
-
   def 'merge message pact - same'() {
     when:
     pact.mergeInteractions(pact2.interactions)
