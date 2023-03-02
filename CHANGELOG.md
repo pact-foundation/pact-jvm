@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.1 - [?62;1;4cFix Maven plugin
+
+* bf08170dc - fix: task to generate Maven plugin descriptor was accidentally commented out #1672 (Ronald Holshausen, Thu Mar 2 14:41:44 2023 +1100)
+* 7356aaf55 - chore: fix release script (Ronald Holshausen, Fri Feb 24 17:24:46 2023 +1100)
+* a1e68c42f - bump version to 4.5.1 (Ronald Holshausen, Fri Feb 24 17:24:20 2023 +1100)
+
 # 4.5.0 - General Release
 
 * bd2f1085f - chore: prep for general release (Ronald Holshausen, Fri Feb 24 16:57:40 2023 +1100)
