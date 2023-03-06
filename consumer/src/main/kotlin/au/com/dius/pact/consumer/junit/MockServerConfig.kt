@@ -10,6 +10,7 @@ import java.lang.annotation.Inherited
 @Retention(AnnotationRetention.RUNTIME)
 @Inherited
 @Suppress("LongParameterList")
+@JvmRepeatable(MockServers::class)
 annotation class MockServerConfig(
   /**
    * The type of mock server implementation to use. The default is to use the Java server for HTTP and the KTor
@@ -56,5 +57,15 @@ annotation class MockServerConfig(
   /**
    * The password for the private key entry in the keystore (for TLS).
    */
-  val privateKeyPassword: String = ""
+  val privateKeyPassword: String = "",
+
+  /**
+   * Provider name this mock server is associated with. This is only needed when there are multiple for the same test
+   */
+  val providerName: String = ""
 )
+
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@Inherited
+annotation class MockServers(val value: Array<MockServerConfig>)
