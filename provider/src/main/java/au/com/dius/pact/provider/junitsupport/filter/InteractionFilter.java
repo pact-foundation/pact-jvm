@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junitsupport.filter;
 
 import au.com.dius.pact.core.model.Interaction;
 import au.com.dius.pact.core.model.RequestResponseInteraction;
+import au.com.dius.pact.core.model.SynchronousRequestResponse;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -34,9 +35,9 @@ public interface InteractionFilter<I extends Interaction> {
         @Override
         public Predicate<I> buildPredicate(String[] values) {
             return interaction -> {
-                if (interaction instanceof RequestResponseInteraction) {
+                if (interaction instanceof SynchronousRequestResponse) {
                     return Arrays.stream(values).anyMatch(value ->
-                        ((RequestResponseInteraction) interaction).getRequest().getPath().matches(value)
+                        ((SynchronousRequestResponse) interaction).getRequest().getPath().matches(value)
                     );
                 } else {
                     return false;
