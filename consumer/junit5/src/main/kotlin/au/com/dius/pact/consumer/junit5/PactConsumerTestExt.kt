@@ -210,18 +210,26 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   override fun beforeTestExecution(context: ExtensionContext) {
-    for ((providerInfo, pactMethod) in lookupProviderInfo(context)) {
-      logger.debug { "providerInfo = $providerInfo" }
+    if (!ignoredTest(context)) {
+      for ((providerInfo, pactMethod) in lookupProviderInfo(context)) {
+        logger.debug { "providerInfo = $providerInfo" }
 
-      if (mockServerConfigured(context) ||
-        providerInfo.providerType == null ||
-        providerInfo.providerType == ProviderType.SYNCH ||
-        providerInfo.providerType == ProviderType.UNSPECIFIED) {
-        val mockServer = setupMockServerForProvider(providerInfo, pactMethod, context)
-        mockServer.start()
-        mockServer.waitForServer()
+        if (mockServerConfigured(context) ||
+          providerInfo.providerType == null ||
+          providerInfo.providerType == ProviderType.SYNCH ||
+          providerInfo.providerType == ProviderType.UNSPECIFIED
+        ) {
+          val mockServer = setupMockServerForProvider(providerInfo, pactMethod, context)
+          mockServer.start()
+          mockServer.waitForServer()
+        }
       }
     }
+  }
+
+  private fun ignoredTest(context: ExtensionContext): Boolean {
+    return context.testMethod.isPresent &&
+      AnnotationSupport.isAnnotated(context.testMethod.get(), PactIgnore::class.java)
   }
 
   private fun setupMockServerForProvider(
@@ -527,30 +535,32 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   }
 
   override fun afterTestExecution(context: ExtensionContext) {
-    val store = context.getStore(NAMESPACE)
+    if (!ignoredTest(context)) {
+      val store = context.getStore(NAMESPACE)
 
-    val providers = store["providers"] as List<Pair<ProviderInfo, String>>
-    for ((provider, _) in providers) {
-      val pact = store["pact:${provider.providerName}"] as BasePact?
-      Metrics.sendMetrics(MetricEvent.ConsumerTestRun(pact?.interactions?.size ?: 0, "junit5"))
-    }
+      val providers = store["providers"] as List<Pair<ProviderInfo, String>>
+      for ((provider, _) in providers) {
+        val pact = store["pact:${provider.providerName}"] as BasePact?
+        Metrics.sendMetrics(MetricEvent.ConsumerTestRun(pact?.interactions?.size ?: 0, "junit5"))
+      }
 
-    for ((provider, _) in providers) {
-      if (store["mockServer:${provider.providerName}"] != null) {
-        val mockServer = store["mockServer:${provider.providerName}"] as JUnit5MockServerSupport
-        Thread.sleep(100) // give the mock server some time to have consistent state
-        mockServer.close()
-        val result = mockServer.validateMockServerState(null)
-        if (result is PactVerificationResult.Ok) {
-          if (!context.executionException.isPresent) {
-            storePactForWrite(store, provider, mockServer)
+      for ((provider, _) in providers) {
+        if (store["mockServer:${provider.providerName}"] != null) {
+          val mockServer = store["mockServer:${provider.providerName}"] as JUnit5MockServerSupport
+          Thread.sleep(100) // give the mock server some time to have consistent state
+          mockServer.close()
+          val result = mockServer.validateMockServerState(null)
+          if (result is PactVerificationResult.Ok) {
+            if (!context.executionException.isPresent) {
+              storePactForWrite(store, provider, mockServer)
+            }
+          } else {
+            JUnitTestSupport.validateMockServerResult(result)
           }
-        } else {
-          JUnitTestSupport.validateMockServerResult(result)
-        }
-      } else if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
-        if (!context.executionException.isPresent) {
-          storePactForWrite(store, provider, null)
+        } else if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
+          if (!context.executionException.isPresent) {
+            storePactForWrite(store, provider, null)
+          }
         }
       }
     }

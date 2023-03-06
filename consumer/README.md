@@ -653,3 +653,9 @@ and [#1383](https://github.com/pact-foundation/pact-jvm/issues/1383).
 One option (if the HTTP client supports it, Apache HTTP Client does) is to set the system property `http.keepAlive` to `false` in 
 the test JVM. The other option is to set `pact.mockserver.addCloseHeader` to `true` to force the mock server to
 send a `Connection: close` header with every response (supported with Pact-JVM 4.2.7+).
+
+# Mixing Pact and non-Pact test methods in the same test class
+
+By default, the Pact lifecycle will be invoked for every test method and will expect there to be a method annotated
+with `@Pact` for each test method invoked. To add non-Pact tests, just annotate the non-Pact test method with the
+`@PactIgnore` annotation.

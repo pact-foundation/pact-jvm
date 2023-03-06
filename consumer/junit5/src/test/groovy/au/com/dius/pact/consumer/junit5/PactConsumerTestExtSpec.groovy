@@ -258,6 +258,9 @@ class PactConsumerTestExtSpec extends Specification {
     @MockServerConfig(providerName = 'a', port = '1238')
     @MockServerConfig(providerName = 'b', port = '1239')
     def pactTestForMethod() { }
+
+    @PactIgnore
+    def nonPactTestMethod() { }
   }
 
   def 'mockServerConfigured - returns true when there are multiple MockServerConfig annotations on the test class'() {
@@ -351,5 +354,23 @@ class PactConsumerTestExtSpec extends Specification {
 
     then:
     config.port == 1239
+  }
+
+  def 'ignoredTest - returns false for a normal test method'() {
+    given:
+    requiredTestClass = TestClass6
+    testMethod = TestClass6.getMethod('pactTestForMethod')
+
+    expect:
+    !testExt.ignoredTest(mockContext)
+  }
+
+  def 'ignoredTest - returns true for a test method annotated with PactIgnore'() {
+    given:
+    requiredTestClass = TestClass6
+    testMethod = TestClass6.getMethod('nonPactTestMethod')
+
+    expect:
+    testExt.ignoredTest(mockContext)
   }
 }
