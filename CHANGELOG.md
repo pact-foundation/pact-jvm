@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.2 - Bugfix Release
+
+* a7b26907e - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Tue Mar 7 12:13:34 2023 +1100)
+* eea297b40 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Tue Mar 7 12:03:28 2023 +1100)
+* 479007606 - chore: correct changelog (Ronald Holshausen, Tue Mar 7 12:03:10 2023 +1100)
+* 7f0c1b28a - bump version to 4.4.9 (Ronald Holshausen, Tue Mar 7 11:57:42 2023 +1100)
+* f970f249e - update changelog for release 4.4.8 (Ronald Holshausen, Tue Mar 7 11:47:02 2023 +1100)
+* 8ab6b7ac8 - feat: Update readme with support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:57:09 2023 +1100)
+* 3bb4a08fa - feat: Support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:50:34 2023 +1100)
+* 92018c0f1 - fix: InteractionFilter ByRequestPath was using concrete class and did not work with V4 interactions #1673 (Ronald Holshausen, Mon Mar 6 17:13:37 2023 +1100)
+* 67a667024 - feat(JUnit5): Support multiple @MockServerConfig annotations on a provider test #1675 (Ronald Holshausen, Mon Mar 6 14:44:56 2023 +1100)
+* 711938ba1 - chore: correct changelog (Ronald Holshausen, Fri Mar 3 08:48:16 2023 +1100)
+* 49ba7369d - bump version to 4.5.2 (Ronald Holshausen, Thu Mar 2 15:17:45 2023 +1100)
+* 89d531315 - Merge branch 'IlyaNerd-fix_message_merge' (Ronald Holshausen, Mon Feb 27 11:31:29 2023 +1100)
+* e296deb6e - chore: stupid codenarc (Ronald Holshausen, Mon Feb 27 11:29:52 2023 +1100)
+* 0da32ec3a - fix merging message pacts - old messages taking precedence (ilya.aliaksandrovich, Fri Feb 24 17:32:22 2023 +0100)
+* 97aa67398 - Update README.md (Ronald Holshausen, Fri Feb 24 17:31:24 2023 +1100)
+
 # 4.4.8 - Bugfix Release
 
 * 8ab6b7ac8 - feat: Update readme with support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:57:09 2023 +1100)
