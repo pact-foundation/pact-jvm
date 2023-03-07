@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.4.8 - [?62;1;4c
+# 4.4.8 - Bugfix Release
 
 * 8ab6b7ac8 - feat: Update readme with support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:57:09 2023 +1100)
 * 3bb4a08fa - feat: Support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:50:34 2023 +1100)
@@ -12,7 +12,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 97aa67398 - Update README.md (Ronald Holshausen, Fri Feb 24 17:31:24 2023 +1100)
 * 26ea6bc11 - bump version to 4.4.8 (Ronald Holshausen, Fri Feb 24 16:42:04 2023 +1100)
 
-# 4.4.7 - [?62;1;4cMaintenance Release
+# 4.4.7 - Maintenance Release
 
 * 5bc8bc683 - fix: PactVerificationExtension will fail when used with other extensions in a static context #1666 (Ronald Holshausen, Fri Feb 24 12:41:00 2023 +1100)
 * 3010a102b - feat: Add support for JSONObject with MessagePactBuilder #1669 (Ronald Holshausen, Fri Feb 24 11:59:17 2023 +1100)
