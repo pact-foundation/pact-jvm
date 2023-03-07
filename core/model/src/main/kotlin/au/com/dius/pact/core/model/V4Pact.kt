@@ -183,6 +183,15 @@ sealed class V4Interaction(
       interactionMarkup, transport),
     SynchronousRequestResponse {
 
+    @JvmOverloads
+    constructor(
+      description: String,
+      providerStates: List<ProviderState> = listOf(),
+      request: HttpRequest = HttpRequest(),
+      response: HttpResponse = HttpResponse(),
+      interactionId: String? = null
+    ): this("", description, providerStates, request, response, interactionId)
+
     override fun toString(): String {
       val pending = if (pending) " [PENDING]" else ""
       return "Interaction: $description$pending\n\tin states ${displayState()}\n" +
@@ -290,6 +299,14 @@ sealed class V4Interaction(
       interactionMarkup, transport),
     MessageInteraction {
 
+    @JvmOverloads
+    constructor(
+      description: String,
+      providerStates: List<ProviderState> = listOf(),
+      contents: MessageContents = MessageContents(),
+      interactionId: String? = null
+    ): this("", description, contents, interactionId, providerStates)
+
     override fun toString(): String {
       val pending = if (pending) " [PENDING]" else ""
       return "Interaction: $description$pending\n\tin states ${displayState()}\n" +
@@ -388,6 +405,16 @@ sealed class V4Interaction(
     transport: String? = null
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup, transport), MessageInteraction {
+
+    @JvmOverloads
+    constructor(
+      description: String,
+      providerStates: List<ProviderState> = listOf(),
+      request: MessageContents = MessageContents(),
+      response: MutableList<MessageContents> = mutableListOf(),
+      interactionId: String? = null
+    ): this("", description, interactionId, providerStates, mutableMapOf(), false, request, response)
+
     override fun withGeneratedKey(): V4Interaction {
       return SynchronousMessages(
         generateKey(),

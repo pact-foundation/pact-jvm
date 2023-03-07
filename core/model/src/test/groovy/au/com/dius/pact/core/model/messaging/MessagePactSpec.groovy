@@ -85,4 +85,30 @@ class MessagePactSpec extends Specification {
     pact2 = new MessagePact(provider, consumer, [ message, message2 ])
   }
 
+  def 'merge message pact'() {
+    when:
+    pact.mergeInteractions(pact2.interactions)
+
+    then:
+    pact.interactions == [ newMessage1, message2 ]
+
+    where:
+    newMessage1 = new Message('message', [], OptionalBody.body('0 9 8 7'.bytes))
+    message2 = new Message('message2', [], OptionalBody.body('A B C'.bytes))
+    pact = new MessagePact(provider, consumer, [ message ])
+    pact2 = new MessagePact(provider, consumer, [ newMessage1, message2 ])
+  }
+
+  def 'merge message pact - same'() {
+    when:
+    pact.mergeInteractions(pact2.interactions)
+
+    then:
+    pact.interactions == [ message ]
+
+    where:
+    pact = new MessagePact(provider, consumer, [ message ])
+    pact2 = new MessagePact(provider, consumer, [ message ])
+  }
+
 }
