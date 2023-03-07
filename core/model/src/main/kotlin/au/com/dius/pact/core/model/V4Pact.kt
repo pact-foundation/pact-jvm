@@ -10,7 +10,6 @@ import au.com.dius.pact.core.model.v4.V4InteractionType
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.deepMerge
-import au.com.dius.pact.core.support.ifNullOrEmpty
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
@@ -185,6 +184,15 @@ sealed class V4Interaction(
       interactionMarkup, transport),
     SynchronousRequestResponse {
 
+    @JvmOverloads
+    constructor(
+      description: String,
+      providerStates: List<ProviderState> = listOf(),
+      request: HttpRequest = HttpRequest(),
+      response: HttpResponse = HttpResponse(),
+      interactionId: String? = null
+    ): this(null, description, providerStates, request, response, interactionId)
+
     override fun toString(): String {
       val pending = if (pending) " [PENDING]" else ""
       return "Interaction: $description$pending\n\tin states ${displayState()}\n" +
@@ -291,6 +299,15 @@ sealed class V4Interaction(
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup, transport),
     MessageInteraction {
+
+    @JvmOverloads
+    constructor(
+      description: String,
+      providerStates: List<ProviderState> = listOf(),
+      contents: MessageContents = MessageContents(),
+      interactionId: String? = null
+    ): this(null, description, contents, interactionId, providerStates)
+
     override val matchingRules: MatchingRules
       get() = contents.matchingRules
     override val generators: Generators
@@ -410,6 +427,16 @@ sealed class V4Interaction(
     transport: String? = null
   ) : V4Interaction(key, description, interactionId, providerStates, comments, pending, pluginConfiguration,
       interactionMarkup, transport) {
+
+    @JvmOverloads
+    constructor(
+      description: String,
+      providerStates: List<ProviderState> = listOf(),
+      request: MessageContents = MessageContents(),
+      response: MutableList<MessageContents> = mutableListOf(),
+      interactionId: String? = null
+    ): this(null, description, interactionId, providerStates, mutableMapOf(), false, request, response)
+
     override fun withGeneratedKey(): V4Interaction {
       return SynchronousMessages(
         generateKey(),

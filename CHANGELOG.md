@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.8 - Bugfix Release
+
+* 8ab6b7ac8 - feat: Update readme with support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:57:09 2023 +1100)
+* 3bb4a08fa - feat: Support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:50:34 2023 +1100)
+* 92018c0f1 - fix: InteractionFilter ByRequestPath was using concrete class and did not work with V4 interactions #1673 (Ronald Holshausen, Mon Mar 6 17:13:37 2023 +1100)
+* 67a667024 - feat(JUnit5): Support multiple @MockServerConfig annotations on a provider test #1675 (Ronald Holshausen, Mon Mar 6 14:44:56 2023 +1100)
+* 89d531315 - Merge branch 'IlyaNerd-fix_message_merge' (Ronald Holshausen, Mon Feb 27 11:31:29 2023 +1100)
+* e296deb6e - chore: stupid codenarc (Ronald Holshausen, Mon Feb 27 11:29:52 2023 +1100)
+* 0da32ec3a - fix merging message pacts - old messages taking precedence (ilya.aliaksandrovich, Fri Feb 24 17:32:22 2023 +0100)
+* 97aa67398 - Update README.md (Ronald Holshausen, Fri Feb 24 17:31:24 2023 +1100)
+* 26ea6bc11 - bump version to 4.4.8 (Ronald Holshausen, Fri Feb 24 16:42:04 2023 +1100)
+
 # 4.5.1 - Fix Maven plugin
 
 * bf08170dc - fix: task to generate Maven plugin descriptor was accidentally commented out #1672 (Ronald Holshausen, Thu Mar 2 14:41:44 2023 +1100)

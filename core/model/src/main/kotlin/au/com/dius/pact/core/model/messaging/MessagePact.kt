@@ -70,7 +70,7 @@ class MessagePact @JvmOverloads constructor (
 
   override fun mergeInteractions(interactions: List<Interaction>): Pact {
     interactions as List<Message>
-    messages = (messages + interactions).distinctBy { it.uniqueKey() }.toMutableList()
+    messages = (interactions + messages).distinctBy { it.uniqueKey() }.toMutableList()
     sortInteractions()
     return this
   }

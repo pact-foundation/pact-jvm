@@ -356,3 +356,9 @@ class CsvClientTest {
 We are tracking anonymous analytics to gather important usage statistics like JVM version
 and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
 variable to 'true'.
+
+# Mixing Pact and non-Pact test methods in the same test class
+
+By default, the Pact lifecycle will be invoked for every test method and will expect there to be a method annotated
+with `@Pact` for each test method invoked. To add non-Pact tests, just annotate the non-Pact test method with the
+`@PactIgnore` annotation.
