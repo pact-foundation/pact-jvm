@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.3 - Bugfix Release
+
+* e2905aeb8 - fix(JUnit5): Initialise any plugins before running the provider verification (Ronald Holshausen, Thu Mar 16 16:12:54 2023 +1100)
+* f4c1862e0 - chore: correct the project dependency versions (Ronald Holshausen, Thu Mar 16 12:23:03 2023 +1100)
+* 83a17c93d - feat: update the general verifier to support verification via plugins (Ronald Holshausen, Thu Mar 16 12:10:29 2023 +1100)
+* 9a7d4d090 - bump version to 4.5.3 (Ronald Holshausen, Tue Mar 7 12:32:37 2023 +1100)
+
 # 4.5.2 - Bugfix Release
 
 * a7b26907e - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Tue Mar 7 12:13:34 2023 +1100)
