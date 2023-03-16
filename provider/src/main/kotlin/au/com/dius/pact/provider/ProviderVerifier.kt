@@ -42,7 +42,6 @@ import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.DefaultPluginManager
-import io.pact.plugins.jvm.core.InteractionVerificationData
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import mu.KLogging
 import java.io.File
@@ -227,6 +226,7 @@ interface IProviderVerifier {
   /**
    * Verifies the response from the provider against the interaction
    */
+  @Suppress("LongParameterList")
   fun verifyResponseFromProvider(
     provider: IProviderInfo,
     interaction: SynchronousRequestResponse,
@@ -240,6 +240,7 @@ interface IProviderVerifier {
   /**
    * Verifies the interaction by invoking a method on a provider test class
    */
+  @Suppress("LongParameterList")
   fun verifyResponseByInvokingProviderMethods(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -249,6 +250,7 @@ interface IProviderVerifier {
     pending: Boolean
   ): VerificationResult
 
+  @Suppress("LongParameterList")
   fun verifyResponseByFactory(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -261,6 +263,7 @@ interface IProviderVerifier {
   /**
    * Compares the expected and actual responses
    */
+  @Suppress("LongParameterList")
   fun verifyRequestResponsePact(
     expectedResponse: IResponse,
     actualResponse: ProviderResponse,
@@ -326,6 +329,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var providerVersion: Supplier<String> = ProviderVersion {
     SystemPropertyResolver.resolveValue(PACT_PROVIDER_VERSION, "")
   },
+  @Deprecated("Use version that returns multiple tags", replaceWith = ReplaceWith("providerTags"))
   override var providerTag: Supplier<String?>? = Supplier {
     SystemPropertyResolver.resolveValue(PACT_PROVIDER_TAG, "")
   },
@@ -357,7 +361,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     return when {
       !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) ->
         verificationReporter.publishingResultsDisabled(SystemPropertyResolver)
-      else -> projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+      else -> projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.lowercase() != "true"
     }
   }
 
@@ -654,11 +658,25 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   @JvmOverloads
+  @Deprecated("Use the version of verifyInteraction that passes in the full Pact and transport entry",
+    ReplaceWith("verifyInteraction(provider, consumer, failures, interaction, pact, transportEntry, providerClient)")
+  )
   fun verifyInteraction(
     provider: IProviderInfo,
     consumer: IConsumerInfo,
     failures: MutableMap<String, Any>,
     interaction: Interaction,
+    providerClient: ProviderClient = ProviderClient(provider, HttpClientFactory())
+  ): VerificationResult = verifyInteraction(provider, consumer, failures, interaction, null, null, providerClient)
+
+  @JvmOverloads
+  fun verifyInteraction(
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    failures: MutableMap<String, Any>,
+    interaction: Interaction,
+    pact: Pact?,
+    transportEntry: CatalogueEntry?,
     providerClient: ProviderClient = ProviderClient(provider, HttpClientFactory())
   ): VerificationResult {
     Metrics.sendMetrics(MetricEvent.ProviderVerificationRan(1, verificationSource.ifNullOrEmpty { "unknown" }!!))
@@ -701,13 +719,28 @@ open class ProviderVerifier @JvmOverloads constructor (
         }
         PactVerification.PLUGIN -> {
           logger.debug { "Verifying via plugin" }
-//          when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
-//            interaction.asV4Interaction(), config)) {
-//            is Ok -> result.value to null
-//            is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
-//          }
-//          verifyInteractionViaPlugin(provider, consumer, interaction, providerClient, )
-          TODO("Not yet implemented")
+          if (pact != null && pact.isV4Pact() && transportEntry != null) {
+            val v4pact = pact.asV4Pact().unwrap()
+            val v4Interaction = interaction.asV4Interaction()
+            val config = mutableMapOf(
+              "host" to provider.host.toString(),
+              "port" to provider.port
+            )
+
+            for ((k, v) in stateChangeResult.stateChangeResult.value) {
+              config[k] = v
+            }
+
+            val request = when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry,
+              v4pact, v4Interaction, config)) {
+              is Ok -> result.value
+              is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
+            }
+            verifyInteractionViaPlugin(provider, consumer, v4pact, v4Interaction, providerClient, request, context)
+          } else {
+            throw RuntimeException("INTERNAL ERROR: Verification via a plugin requires the version of " +
+              "verifyInteraction to be called with the full V4 Pact model")
+          }
         }
         else -> {
           logger.debug { "Verifying via provider methods" }
@@ -827,7 +860,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     client: ProviderClient
   ) = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, client, mutableMapOf(), false)
 
-  @Suppress("TooGenericExceptionCaught")
+  @Suppress("TooGenericExceptionCaught", "LongParameterList")
   override fun verifyResponseFromProvider(
     provider: IProviderInfo,
     interaction: SynchronousRequestResponse,
@@ -893,7 +926,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       VerificationResult.Ok()
     } else {
       val result = pact.interactions.map {
-        verifyInteraction(provider, consumer, failures, it)
+        verifyInteraction(provider, consumer, failures, it, pact, provider.transportEntry)
       }.reduce { acc, result -> acc.merge(result) }
       result.merge(when {
         pact.isFiltered() -> {

@@ -16,6 +16,7 @@ import au.com.dius.pact.core.support.json.JsonValue
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
+import io.pact.plugins.jvm.core.CatalogueEntry
 import mu.KLogging
 import org.apache.hc.client5.http.classic.methods.HttpDelete
 import org.apache.hc.client5.http.classic.methods.HttpGet
@@ -56,6 +57,7 @@ interface IProviderInfo {
   var port: Any?
   var path: String
   var name: String
+  val transportEntry: CatalogueEntry?
 
   val requestFilter: Any?
   val stateChangeRequestFilter: Any?

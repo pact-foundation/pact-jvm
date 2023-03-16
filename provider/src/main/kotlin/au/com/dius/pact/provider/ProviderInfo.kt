@@ -9,6 +9,8 @@ import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.mapOk
+import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.CatalogueManager
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
@@ -171,6 +173,9 @@ open class ProviderInfo @JvmOverloads constructor (
 
     return consumers
   }
+
+  override val transportEntry: CatalogueEntry?
+    get() = CatalogueManager.lookupEntry("transport/$protocol")
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

@@ -10,6 +10,8 @@ import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.gradle.PactPluginBase.Companion.PACT_VERIFY
 import groovy.lang.Closure
+import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.CatalogueManager
 import mu.KLogging
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
@@ -50,6 +52,9 @@ open class GradleProviderInfo @Inject constructor(
   var startProviderTask: Any? by provider::startProviderTask
   var terminateProviderTask: Any? by provider::terminateProviderTask
   var isDependencyForPactVerify: Boolean by provider::isDependencyForPactVerify
+
+  override val transportEntry: CatalogueEntry?
+    get() = CatalogueManager.lookupEntry("transport/$protocol")
 
   open fun hasPactWith(consumer: String, closure: Closure<GradleConsumerInfo>): IConsumerInfo {
     val consumerInfo = objectFactory.newInstance(GradleConsumerInfo::class.java, consumer)

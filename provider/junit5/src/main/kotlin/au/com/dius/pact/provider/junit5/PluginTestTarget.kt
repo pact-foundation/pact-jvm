@@ -55,6 +55,9 @@ data class PluginProvider(
       config["port"] = value
     }
 
+  override val transportEntry: CatalogueEntry?
+    get() = CatalogueManager.lookupEntry("transport/${config.getOrDefault("transport", "http")}")
+
   override var verificationType: PactVerification? = PactVerification.PLUGIN
 
   override var path: String = ""
