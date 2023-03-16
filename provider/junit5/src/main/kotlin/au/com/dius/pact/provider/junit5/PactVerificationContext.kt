@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.Result
@@ -21,6 +22,7 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.TestDescription
+import io.pact.plugins.jvm.core.PluginConfiguration
 import org.junit.jupiter.api.extension.ExtensionContext
 
 /**
@@ -55,7 +57,7 @@ data class PactVerificationContext @JvmOverloads constructor(
     try {
       Metrics.sendMetrics(MetricEvent.ProviderVerificationRan(1, "junit5"))
 
-      val result = validateTestExecution(client, request, testContext.executionContext ?: mutableMapOf())
+      val result = validateTestExecution(client, request, testContext.executionContext ?: mutableMapOf(), pact)
       verifier!!.displayOutput(result.flatMap { it.getResultOutput() })
 
       this.testExecutionResult.addAll(result.filterIsInstance<VerificationResult.Failed>())
@@ -81,7 +83,8 @@ data class PactVerificationContext @JvmOverloads constructor(
   private fun validateTestExecution(
     client: Any?,
     request: Any?,
-    context: MutableMap<String, Any>
+    context: MutableMap<String, Any>,
+    pact: Pact
   ): List<VerificationResult> {
     var interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
       " - ${interaction.description}"
@@ -92,19 +95,27 @@ data class PactVerificationContext @JvmOverloads constructor(
     when (providerInfo.verificationType) {
       null, PactVerification.REQUEST_RESPONSE -> {
         return try {
-          val reqResInteraction = if (interaction is V4Interaction.SynchronousHttp) {
-            interaction.asV3Interaction()
+          val (reqResInteraction, pluginData) = if (interaction is V4Interaction.SynchronousHttp) {
+            interaction.asV3Interaction() to interaction.pluginConfiguration.toMap()
           } else {
-            interaction as RequestResponseInteraction
+            interaction as RequestResponseInteraction to emptyMap()
           }
+          val pactPluginData = pact.asV4Pact().get()?.pluginData() ?: emptyList()
           val expectedResponse = DefaultResponseGenerator.generateResponse(reqResInteraction.response, context,
-            GeneratorTestMode.Provider, emptyList(), emptyMap()) // TODO: need to pass any plugin config here
+            GeneratorTestMode.Provider, pactPluginData, pluginData)
           val actualResponse = target.executeInteraction(client, request)
+          val pluginContext = pactPluginData.associate {
+            it.name to PluginConfiguration(
+              pluginData[it.name].orEmpty().toMutableMap(),
+              it.configuration.mapValues { (_, v) -> Json.toJson(v) }.toMutableMap()
+            )
+          }
 
           listOf(
             verifier!!.verifyRequestResponsePact(
               expectedResponse, actualResponse, interactionMessage, mutableMapOf(),
-              reqResInteraction.interactionId.orEmpty(), consumer.pending
+              reqResInteraction.interactionId.orEmpty(), consumer.pending,
+              pluginContext
             )
           )
         } catch (e: Exception) {
@@ -127,7 +138,7 @@ data class PactVerificationContext @JvmOverloads constructor(
         }
       }
       PactVerification.PLUGIN -> {
-        val v4pact = when(val p = pact.asV4Pact()) {
+        val v4pact = when(val p = this.pact.asV4Pact()) {
           is Result.Ok -> p.value
           is Result.Err -> return listOf(
             VerificationResult.Failed(

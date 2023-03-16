@@ -402,15 +402,4 @@ fun calculateCharset(headers: Map<String, List<String?>>): Charset {
   return default
 }
 
-fun interactionCatalogueEntries(): List<CatalogueEntry> {
-  return listOf(
-    CatalogueEntry(CatalogueEntryType.TRANSPORT, CatalogueEntryProviderType.CORE, "core",
-      "http", mapOf()),
-    CatalogueEntry(CatalogueEntryType.TRANSPORT, CatalogueEntryProviderType.CORE, "core",
-      "https", mapOf()),
-    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
-      "message", mapOf()),
-    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
-      "synchronous-message", mapOf())
-  )
-}
+fun interactionCatalogueEntries() = au.com.dius.pact.core.matchers.interactionCatalogueEntries()

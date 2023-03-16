@@ -664,7 +664,7 @@ open class V4Pact @JvmOverloads constructor(
     }
   }
 
-  fun pluginData(): List<PluginData> {
+  open fun pluginData(): List<PluginData> {
     return when (val plugins = metadata["plugins"]) {
       is List<*> -> plugins.mapNotNull {
         when (it) {
@@ -677,5 +677,10 @@ open class V4Pact @JvmOverloads constructor(
       }
       else -> emptyList()
     }
+  }
+
+  open fun requiresPlugins(): Boolean {
+    val pluginData = metadata["plugins"]
+    return pluginData is List<*> && pluginData.isNotEmpty()
   }
 }

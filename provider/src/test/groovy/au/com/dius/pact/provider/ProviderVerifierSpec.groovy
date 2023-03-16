@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.PluginData
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
@@ -20,6 +21,7 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.V4Interaction
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -34,6 +36,7 @@ import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.json.JsonOutput
+import io.pact.plugins.jvm.core.PluginManager
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -426,6 +429,7 @@ class ProviderVerifierSpec extends Specification {
     def interaction2 = Stub(RequestResponseInteraction)
     def mockPact = Stub(Pact) {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
+      asV4Pact() >> new Result.Err('Not V4')
     }
 
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS }
@@ -475,6 +479,7 @@ class ProviderVerifierSpec extends Specification {
     def interaction2 = Stub(RequestResponseInteraction)
     def mockPact = Stub(Pact) {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
+      asV4Pact() >> new Result.Err('Not V4')
     }
 
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS }
@@ -520,6 +525,7 @@ class ProviderVerifierSpec extends Specification {
     def interaction2 = Stub(RequestResponseInteraction)
     def mockPact = Stub(Pact) {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
+      asV4Pact() >> new Result.Err('Not V4')
     }
 
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS }
@@ -565,6 +571,7 @@ class ProviderVerifierSpec extends Specification {
     interaction2.asSynchronousRequestResponse() >> { interaction2 }
     def mockPact = Mock(Pact) {
       getSource() >> UnknownPactSource.INSTANCE
+      asV4Pact() >> new Result.Err('Not V4')
     }
 
     verifier.pactReader.loadPact(_) >> mockPact
@@ -884,5 +891,31 @@ class ProviderVerifierSpec extends Specification {
     result.failures.size() == 1
     result.failures['abc123'][0].description == 'Verification factory method failed with an exception'
     result.failures['abc123'][0].e instanceof RuntimeException
+  }
+
+  def 'when verifying a V4 Pact, it should load any required plugins'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    PactBrokerClient pactBrokerClient = Mock(PactBrokerClient, constructorArgs: [''])
+    verifier.pactReader = Stub(PactReader)
+    def v4pact = Mock(V4Pact) {
+      requiresPlugins() >> true
+      pluginData() >> { [new PluginData('a', '1.0', [:]), new PluginData('b', '2.0', [:])] }
+    }
+    def mockPact = Stub(Pact) {
+      getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
+      asV4Pact() >> new Result.Ok(v4pact)
+    }
+
+    verifier.pactReader.loadPact(_) >> mockPact
+    verifier.pluginManager = Mock(PluginManager)
+
+    when:
+    verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
+
+    then:
+    1 * verifier.pluginManager.loadPlugin('a', '1.0') >> new Result.Ok(null)
+    1 * verifier.pluginManager.loadPlugin('b', '2.0') >> new Result.Ok(null)
   }
 }

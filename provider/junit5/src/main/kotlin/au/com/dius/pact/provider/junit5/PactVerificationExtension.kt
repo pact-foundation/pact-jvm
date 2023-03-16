@@ -157,6 +157,7 @@ open class PactVerificationExtension(
 
     setupReporters(verifier, serviceName, interaction.description, extContext, testContext.valueResolver)
 
+    verifier.initialisePlugins(pact)
     verifier.initialiseReporters(testContext.providerInfo)
     verifier.reportVerificationForConsumer(consumer, testContext.providerInfo, pactSource)
 

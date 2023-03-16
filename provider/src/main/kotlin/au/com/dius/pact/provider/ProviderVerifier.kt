@@ -3,9 +3,12 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
+import au.com.dius.pact.core.matchers.MatchingConfig
 import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
+import au.com.dius.pact.core.matchers.interactionCatalogueEntries
+import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
@@ -30,7 +33,8 @@ import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.Result
-import au.com.dius.pact.core.support.Result.*
+import au.com.dius.pact.core.support.Result.Err
+import au.com.dius.pact.core.support.Result.Ok
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.ifNullOrEmpty
@@ -41,8 +45,11 @@ import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
+import io.pact.plugins.jvm.core.PluginConfiguration
+import io.pact.plugins.jvm.core.PluginManager
 import mu.KLogging
 import java.io.File
 import java.lang.reflect.Method
@@ -270,8 +277,24 @@ interface IProviderVerifier {
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     interactionId: String,
-    pending: Boolean
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult
+
+  /**
+   * Compares the expected and actual responses
+   */
+  @Suppress("LongParameterList")
+  @Deprecated("Use the version that passes in any plugin configuration")
+  fun verifyRequestResponsePact(
+    expectedResponse: IResponse,
+    actualResponse: ProviderResponse,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    interactionId: String,
+    pending: Boolean
+  ): VerificationResult = verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
+    interactionId, pending, emptyMap())
 
   /**
    * If publishing of verification results has been disabled
@@ -353,6 +376,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   var stateChangeHandler: StateChange = DefaultStateChange
   var pactReader: PactReader = DefaultPactReader
   override var verificationSource: String? = null
+  var pluginManager: PluginManager = DefaultPluginManager
 
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
@@ -412,8 +436,15 @@ open class ProviderVerifier @JvmOverloads constructor (
             val actualResponse = ProviderResponse(response["statusCode"] as Int,
               response["headers"] as Map<String, List<String>>, ContentType.UNKNOWN, body
             )
-            result = result.merge(this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage,
-              failures, interactionId.orEmpty(), pending))
+            result = result.merge(this.verifyRequestResponsePact(
+              expectedResponse,
+              actualResponse,
+              interactionMessage,
+              failures,
+              interactionId.orEmpty(),
+              pending,
+              emptyMap() // TODO: pass any plugin config here
+            ))
           }
           result
         }
@@ -468,7 +499,8 @@ open class ProviderVerifier @JvmOverloads constructor (
           interactionMessage,
           failures,
           interactionId,
-          pending
+          pending,
+          emptyMap() // TODO: Pass in any plugin config here
         )
       }
     } catch (e: Exception) {
@@ -786,9 +818,10 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     interactionId: String,
-    pending: Boolean
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
-    val comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse)
+    val comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse, pluginConfiguration)
 
     reporters.forEach { it.returnsAResponseWhich() }
 
@@ -874,8 +907,15 @@ open class ProviderVerifier @JvmOverloads constructor (
       val expectedResponse = interaction.response.generatedResponse(context, GeneratorTestMode.Provider)
       val actualResponse = client.makeRequest(interaction.request.generatedRequest(context, GeneratorTestMode.Provider))
 
-      verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
-        interaction.interactionId.orEmpty(), pending)
+      verifyRequestResponsePact(
+        expectedResponse,
+        actualResponse,
+        interactionMessage,
+        failures,
+        interaction.interactionId.orEmpty(),
+        pending,
+        emptyMap() // TODO: Pass any plugin config in here
+      )
     } catch (e: Exception) {
       failures[interactionMessage] = e
       reporters.forEach {
@@ -920,7 +960,10 @@ open class ProviderVerifier @JvmOverloads constructor (
     client: IPactBrokerClient? = null
   ): VerificationResult {
     val pact = FilteredPact(loadPactFileForConsumer(consumer)) { filterInteractions(it) }
+
     reportVerificationForConsumer(consumer, provider, pact.source)
+    initialisePlugins(pact)
+
     return if (pact.interactions.isEmpty()) {
       reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact) }
       VerificationResult.Ok()
@@ -953,6 +996,30 @@ open class ProviderVerifier @JvmOverloads constructor (
           }
         }
       })
+    }
+  }
+
+  /**
+   * Initialise any required plugins and plugin entries required for the verification
+   */
+  fun initialisePlugins(pact: Pact) {
+    CatalogueManager.registerCoreEntries(
+      MatchingConfig.contentMatcherCatalogueEntries() +
+      matcherCatalogueEntries() +
+      interactionCatalogueEntries() +
+      MatchingConfig.contentHandlerCatalogueEntries()
+    )
+    val v4pact = pact.asV4Pact().get()
+    if (v4pact != null && v4pact.requiresPlugins()) {
+      logger.info { "Pact file requires plugins, will load those now" }
+      for (pluginDetails in v4pact.pluginData()) {
+        val result = pluginManager.loadPlugin(pluginDetails.name, pluginDetails.version)
+        if (result is Err) {
+          throw RuntimeException(
+            "Failed to load plugin ${pluginDetails.name}/${pluginDetails.version} - ${result.error}"
+          )
+        }
+      }
     }
   }
 
