@@ -18,6 +18,7 @@ import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
+import au.com.dius.pact.provider.ProviderUtils.pluginConfigForInteraction
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
@@ -104,18 +105,12 @@ data class PactVerificationContext @JvmOverloads constructor(
           val expectedResponse = DefaultResponseGenerator.generateResponse(reqResInteraction.response, context,
             GeneratorTestMode.Provider, pactPluginData, pluginData)
           val actualResponse = target.executeInteraction(client, request)
-          val pluginContext = pactPluginData.associate {
-            it.name to PluginConfiguration(
-              pluginData[it.name].orEmpty().toMutableMap(),
-              it.configuration.mapValues { (_, v) -> Json.toJson(v) }.toMutableMap()
-            )
-          }
 
           listOf(
             verifier!!.verifyRequestResponsePact(
               expectedResponse, actualResponse, interactionMessage, mutableMapOf(),
               reqResInteraction.interactionId.orEmpty(), consumer.pending,
-              pluginContext
+              pluginConfigForInteraction(pact, interaction)
             )
           )
         } catch (e: Exception) {
@@ -156,7 +151,7 @@ data class PactVerificationContext @JvmOverloads constructor(
       }
       else -> {
         return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
-          interaction.description, mutableMapOf(), consumer.pending))
+          interaction.description, mutableMapOf(), consumer.pending, pluginConfigForInteraction(pact, interaction)))
       }
     }
   }

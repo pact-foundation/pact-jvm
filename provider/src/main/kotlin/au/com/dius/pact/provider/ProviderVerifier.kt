@@ -30,6 +30,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.support.Auth
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.Result
@@ -38,6 +39,7 @@ import au.com.dius.pact.core.support.Result.Ok
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.ifNullOrEmpty
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.Event
@@ -248,7 +250,33 @@ interface IProviderVerifier {
    * Verifies the interaction by invoking a method on a provider test class
    */
   @Suppress("LongParameterList")
+  @Deprecated("Use the version that passes in any plugin configuration")
   fun verifyResponseByInvokingProviderMethods(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean
+  ): VerificationResult
+
+  /**
+   * Verifies the interaction by invoking a method on a provider test class
+   */
+  @Suppress("LongParameterList")
+  fun verifyResponseByInvokingProviderMethods(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
+  ): VerificationResult
+
+  @Deprecated("Use the version that passes in any plugin configuration")
+  @Suppress("LongParameterList")
+  fun verifyResponseByFactory(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
     interaction: Interaction,
@@ -264,7 +292,8 @@ interface IProviderVerifier {
     interaction: Interaction,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
-    pending: Boolean
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult
 
   /**
@@ -377,6 +406,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   var pactReader: PactReader = DefaultPactReader
   override var verificationSource: String? = null
   var pluginManager: PluginManager = DefaultPluginManager
+  var responseComparer: IResponseComparison = ResponseComparison.Companion
 
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
@@ -389,7 +419,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator", "LongParameterList")
+  @Deprecated("Use the version that passes in any plugin configuration")
+  @Suppress("LongParameterList")
   override fun verifyResponseByInvokingProviderMethods(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -397,6 +428,18 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     pending: Boolean
+  ) = verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction, interactionMessage, failures,
+    pending, emptyMap())
+
+  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator", "LongParameterList")
+  override fun verifyResponseByInvokingProviderMethods(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
     val interactionId = interaction.interactionId
     try {
@@ -426,7 +469,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       } else {
         return if (interaction.isAsynchronousMessage()) {
           verifyMessage(methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage,
-            failures, pending)
+            failures, pending, pluginConfiguration)
         } else {
           val expectedResponse = (interaction as SynchronousRequestResponse).response
           var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
@@ -443,7 +486,7 @@ open class ProviderVerifier @JvmOverloads constructor (
               failures,
               interactionId.orEmpty(),
               pending,
-              emptyMap() // TODO: pass any plugin config here
+              pluginConfiguration
             ))
           }
           result
@@ -461,7 +504,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  @Suppress("TooGenericExceptionCaught")
+  @Deprecated("Use the version that passes in any plugin configuration")
   override fun verifyResponseByFactory(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -469,6 +512,17 @@ open class ProviderVerifier @JvmOverloads constructor (
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     pending: Boolean
+  ) = verifyResponseByFactory(providerInfo, consumer, interaction, interactionMessage, failures, pending, emptyMap())
+
+  @Suppress("TooGenericExceptionCaught")
+  override fun verifyResponseByFactory(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
     val interactionId = interaction.interactionId.orEmpty()
     try {
@@ -480,7 +534,8 @@ open class ProviderVerifier @JvmOverloads constructor (
           interactionId,
           interactionMessage,
           failures,
-          pending
+          pending,
+          pluginConfiguration
         )
       } else {
         val expectedResponse = (interaction as SynchronousRequestResponse).response
@@ -500,7 +555,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           failures,
           interactionId,
           pending,
-          emptyMap() // TODO: Pass in any plugin config here
+          pluginConfiguration
         )
       }
     } catch (e: Exception) {
@@ -572,12 +627,24 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
+  @Deprecated("Use version that takes the Plugin Config as a parameter",
+    ReplaceWith("verifyMessage(methods, message, interactionMessage, failures, pending, pluginConfiguration)")
+  )
   fun verifyMessage(
     methods: Set<Method>,
     message: MessageInteraction,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     pending: Boolean
+  ) = verifyMessage(methods, message, interactionMessage, failures, pending, emptyMap())
+
+  fun verifyMessage(
+    methods: Set<Method>,
+    message: MessageInteraction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
     val interactionId = message.interactionId
     var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
@@ -590,19 +657,35 @@ open class ProviderVerifier @JvmOverloads constructor (
         interactionId.orEmpty(),
         interactionMessage,
         failures,
-        pending
+        pending,
+        pluginConfiguration
       ))
     }
     return result
   }
 
-  private fun verifyMessage(
+  @Deprecated("Use version that takes the Plugin Config as a parameter",
+    ReplaceWith(
+      "verifyMessage(messageFactory, message, interactionId, interactionMessage, failures, pending, pluginConfig)"
+    )
+  )
+  fun verifyMessage(
     messageFactory: Function<String, Any>,
     message: MessageInteraction,
     interactionId: String,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     pending: Boolean
+  ) = verifyMessage(messageFactory, message, interactionId, interactionMessage, failures, pending, emptyMap())
+
+  fun verifyMessage(
+    messageFactory: Function<String, Any>,
+    message: MessageInteraction,
+    interactionId: String,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
     emitEvent(Event.GeneratesAMessageWhich)
     val messageResult = messageFactory.apply(message.description)
@@ -629,8 +712,8 @@ open class ProviderVerifier @JvmOverloads constructor (
         actualMessage = messageResult.toString().toByteArray()
       }
     }
-    val comparison = ResponseComparison.compareMessage(message,
-      OptionalBody.body(actualMessage, contentType), messageMetadata)
+    val comparison = responseComparer.compareMessage(message, OptionalBody.body(actualMessage, contentType),
+      messageMetadata, pluginConfiguration)
     val s = ": generates a message which"
     return displayBodyResult(
       failures,
@@ -747,7 +830,9 @@ open class ProviderVerifier @JvmOverloads constructor (
         }
         PactVerification.RESPONSE_FACTORY -> {
           logger.debug { "Verifying via response factory function" }
-          verifyResponseByFactory(provider, consumer, interaction, interactionMessage, failures, pending)
+          verifyResponseByFactory(provider, consumer, interaction, interactionMessage, failures, pending,
+            ProviderUtils.pluginConfigForInteraction(pact, interaction)
+          )
         }
         PactVerification.PLUGIN -> {
           logger.debug { "Verifying via plugin" }
@@ -777,7 +862,9 @@ open class ProviderVerifier @JvmOverloads constructor (
         else -> {
           logger.debug { "Verifying via provider methods" }
           verifyResponseByInvokingProviderMethods(
-            provider, consumer, interaction, interactionMessage, failures, pending)
+            provider, consumer, interaction, interactionMessage, failures, pending,
+            ProviderUtils.pluginConfigForInteraction(pact, interaction)
+          )
         }
       }
 
@@ -821,7 +908,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
-    val comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse, pluginConfiguration)
+    val comparison = responseComparer.compareResponse(expectedResponse, actualResponse, pluginConfiguration)
 
     reporters.forEach { it.returnsAResponseWhich() }
 

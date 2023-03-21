@@ -3,8 +3,11 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
+import io.pact.plugins.jvm.core.PluginConfiguration
 import mu.KLogging
 import org.apache.commons.io.FilenameUtils
 import java.io.File
@@ -177,5 +180,23 @@ object ProviderUtils : KLogging() {
     }
     pactLoader.initLoader(testClass, testInstance)
     return pactLoader
+  }
+
+  @JvmStatic
+  fun pluginConfigForInteraction(pact: Pact?, interaction: Interaction): Map<String, PluginConfiguration> {
+    return if (pact != null && pact.isV4Pact()) {
+      val v4Pact = pact.asV4Pact().unwrap()
+      val v4Interaction = interaction.asV4Interaction()
+      val pactPluginData = v4Pact.pluginData()
+      val interactionPluginData = v4Interaction.pluginConfiguration.toMap()
+      pactPluginData.associate {
+        it.name to PluginConfiguration(
+          interactionPluginData[it.name].orEmpty().toMutableMap(),
+          it.configuration.mapValues { (_, v) -> Json.toJson(v) }.toMutableMap()
+        )
+      }
+    } else {
+      emptyMap()
+    }
   }
 }

@@ -41,6 +41,7 @@ open class MessageTarget @JvmOverloads constructor(
     context: MutableMap<String, Any>,
     pending: Boolean
   ) {
+    // TODO: Require the plugin config here
     val result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
       interaction.description, mutableMapOf(), false)
     reportTestResult(result, verifier)

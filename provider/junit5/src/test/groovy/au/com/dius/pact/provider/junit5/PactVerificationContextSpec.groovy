@@ -148,6 +148,6 @@ class PactVerificationContextSpec extends Specification {
 
     then:
     1 * verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
-      interaction.description, [:], true) >> new VerificationResult.Ok()
+      interaction.description, [:], true, _) >> new VerificationResult.Ok()
   }
 }

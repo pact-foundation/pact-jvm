@@ -27,19 +27,24 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.json.JsonOutput
+import io.pact.plugins.jvm.core.PluginConfiguration
 import io.pact.plugins.jvm.core.PluginManager
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
+
+import java.util.function.Function
 
 @SuppressWarnings('UnnecessaryGetter')
 class ProviderVerifierSpec extends Specification {
@@ -623,7 +628,7 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.pactReader.loadPact(_) >> pact
     1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Result.Ok([:]), '')
-    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _, false) >> new VerificationResult.Ok()
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _, false, _) >> new VerificationResult.Ok()
     0 * client.publishVerificationResults(_, new TestResult.Ok(), _, _)
   }
 
@@ -917,5 +922,32 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.pluginManager.loadPlugin('a', '1.0') >> new Result.Ok(null)
     1 * verifier.pluginManager.loadPlugin('b', '2.0') >> new Result.Ok(null)
+  }
+
+  def 'verifyMessage must pass through any plugin config to the content matcher'() {
+    given:
+    def failures = [:]
+    def pluginConfiguration = new PluginConfiguration(
+      [a: new JsonValue.Integer(100)],
+      [b: new JsonValue.Integer(100)]
+    )
+    def config = [
+      b: [a: new JsonValue.Integer(100)]
+    ]
+    def interaction = new V4Interaction.AsynchronousMessage(null, 'verifyMessage Test Message',
+      new MessageContents(), null, [], [:], false, config)
+    def interactionMessage = 'Test'
+    verifier.responseComparer = Mock(IResponseComparison)
+    def actual = OptionalBody.body('"Message Data"', ContentType.JSON)
+    Function<String, Object> messageFactory = { String desc -> '"Message Data"' }
+
+    when:
+    def result = verifier.verifyMessage(messageFactory, interaction as MessageInteraction,
+      '', interactionMessage, failures, false, [b: pluginConfiguration])
+
+    then:
+    1 * verifier.responseComparer.compareMessage(interaction, actual, null, [b: pluginConfiguration]) >>
+      new ComparisonResult()
+    result instanceof VerificationResult.Ok
   }
 }

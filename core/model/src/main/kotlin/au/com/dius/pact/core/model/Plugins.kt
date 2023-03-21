@@ -14,6 +14,10 @@ data class PluginData(
   /** Any configuration supplied by the plugin */
   val configuration: Map<String, Any?>
 ) {
+  fun configAsJsonMap(): Map<String, JsonValue> {
+    return configuration.mapValues { Json.toJson(it.value) }
+  }
+
   companion object {
     fun fromJson(json: JsonValue): PluginData {
       val configuration = when (val config = json["configuration"]) {

@@ -15,7 +15,8 @@ class MessageSpecificationSpec extends Specification {
   @SuppressWarnings('UnnecessaryGetter')
   def '#test #matchDesc'() {
     expect:
-    ResponseComparison.compareMessage(expected, actual).bodyMismatches.value.mismatches.isEmpty() == match
+    ResponseComparison.Companion.newInstance().compareMessage(expected, actual, null, [:])
+      .bodyMismatches.value.mismatches.isEmpty() == match
 
     where:
     [test, match, matchDesc, expected, actual] << loadTestCases()
@@ -38,5 +39,4 @@ class MessageSpecificationSpec extends Specification {
     }
     result
   }
-
 }

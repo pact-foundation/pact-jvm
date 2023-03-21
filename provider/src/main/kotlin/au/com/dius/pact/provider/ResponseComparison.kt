@@ -50,6 +50,43 @@ data class ComparisonResult(
 )
 
 /**
+ * Interface to the utility class that provides the logic to compare responses
+ */
+interface IResponseComparison {
+  @Deprecated("Use version that takes pluginConfiguration parameter")
+  fun compareResponse(
+    response: IResponse,
+    actualResponse: ProviderResponse
+  ): ComparisonResult
+
+  fun compareResponse(
+    response: IResponse,
+    actualResponse: ProviderResponse,
+    pluginConfiguration: Map<String, PluginConfiguration>
+  ): ComparisonResult
+
+  @Deprecated("Use version that takes pluginConfiguration parameter")
+  fun compareMessage(
+    message: MessageInteraction,
+    actual: OptionalBody
+  ): ComparisonResult
+
+  @Deprecated("Use version that takes pluginConfiguration parameter")
+  fun compareMessage(
+    message: MessageInteraction,
+    actual: OptionalBody,
+    metadata: Map<String, Any>?
+  ): ComparisonResult
+
+  fun compareMessage(
+    message: MessageInteraction,
+    actual: OptionalBody,
+    metadata: Map<String, Any>?,
+    pluginConfiguration: Map<String, PluginConfiguration>
+  ): ComparisonResult
+}
+
+/**
  * Utility class to compare responses
  */
 class ResponseComparison(
@@ -104,7 +141,7 @@ class ResponseComparison(
     }
   }
 
-  companion object : KLogging() {
+  companion object : KLogging(), IResponseComparison {
     private fun generateFullDiff(
       actual: String,
       contentType: ContentType,
@@ -149,12 +186,19 @@ class ResponseComparison(
       }
     }
 
-    @JvmStatic
-    @JvmOverloads
-    fun compareResponse(
+    @Deprecated("Use version that takes pluginConfiguration parameter", ReplaceWith(
+      "compareResponse(response, actualResponse, emptyMap())",
+      "au.com.dius.pact.provider.ResponseComparison.Companion.compareResponse")
+    )
+    override fun compareResponse(
+      response: IResponse,
+      actualResponse: ProviderResponse
+    ) = compareResponse(response, actualResponse, emptyMap())
+
+    override fun compareResponse(
       response: IResponse,
       actualResponse: ProviderResponse,
-      pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
+      pluginConfiguration: Map<String, PluginConfiguration>
     ): ComparisonResult {
       val actualResponseContentType = actualResponse.contentType
       val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
@@ -166,13 +210,26 @@ class ResponseComparison(
         comparison.bodyResult(mismatches, SystemPropertyResolver))
     }
 
-    @JvmStatic
-    @JvmOverloads
-    fun compareMessage(
+
+    @Deprecated("Use version that takes pluginConfiguration parameter", ReplaceWith(
+      "compareMessage(message, actual, null, pluginConfiguration)",
+      "au.com.dius.pact.provider.ResponseComparison.Companion.compareMessage")
+    )
+    override fun compareMessage(message: MessageInteraction, actual: OptionalBody) =
+      compareMessage(message, actual, null, emptyMap())
+
+    @Deprecated("Use version that takes pluginConfiguration parameter", ReplaceWith(
+      "compareMessage(message, actual, metadata, pluginConfiguration)",
+      "au.com.dius.pact.provider.ResponseComparison.Companion.compareMessage")
+    )
+    override fun compareMessage(message: MessageInteraction, actual: OptionalBody, metadata: Map<String, Any>?) =
+      compareMessage(message, actual, metadata, emptyMap())
+
+    override fun compareMessage(
       message: MessageInteraction,
       actual: OptionalBody,
-      metadata: Map<String, Any>? = null,
-      pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
+      metadata: Map<String, Any>?,
+      pluginConfiguration: Map<String, PluginConfiguration>
     ): ComparisonResult {
       val (bodyMismatches, metadataMismatches) = when (message) {
         is V4Interaction.AsynchronousMessage -> {

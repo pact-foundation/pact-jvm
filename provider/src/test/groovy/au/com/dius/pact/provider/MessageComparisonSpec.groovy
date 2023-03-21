@@ -10,13 +10,15 @@ import spock.lang.Specification
 @SuppressWarnings('LineLength')
 class MessageComparisonSpec extends Specification {
 
+  def responseComparison = ResponseComparison.Companion.newInstance()
+
   def 'compares the message contents as JSON'() {
     given:
     def message = new Message('test', [], OptionalBody.body('{"a":1,"b":"2"}'.bytes))
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
 
     when:
-    def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
+    def result = responseComparison.compareMessage(message, actual, null, [:]).bodyMismatches
 
     then:
     result instanceof Result.Ok
@@ -32,7 +34,7 @@ class MessageComparisonSpec extends Specification {
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
 
     when:
-    def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
+    def result = responseComparison.compareMessage(message, actual, null, [:]).bodyMismatches
 
     then:
     result instanceof Result.Ok
@@ -54,7 +56,7 @@ class MessageComparisonSpec extends Specification {
     def actualMetadata = [destination: 'X002']
 
     when:
-    def result = ResponseComparison.compareMessage(message, actual, actualMetadata).metadataMismatches.collectEntries {
+    def result = responseComparison.compareMessage(message, actual, actualMetadata, [:]).metadataMismatches.collectEntries {
       [ it.key, it.value*.description() ]
     }
 

@@ -68,6 +68,11 @@ interface MessageInteraction {
    * Returns the message content as a String. This will convert the contents if necessary.
    */
   fun contentsAsString(): String?
+
+  /**
+   * Any configuration provided by plugins
+   */
+  val pluginConfiguration: Map<String, Map<String, JsonValue>>
 }
 
 /**
@@ -97,6 +102,9 @@ class Message @JvmOverloads constructor(
     isKafkaSchemaRegistryJson() -> KafkaSchemaRegistryWireFormatter.addMagicBytesToString(contents.valueAsString())
     else -> contents.valueAsString()
   }
+
+  override val pluginConfiguration: Map<String, MutableMap<String, JsonValue>>
+    get() = emptyMap()
 
   @Suppress("NestedBlockDepth")
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
