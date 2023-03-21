@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.5.4 - [?62;1;4c
+# 4.5.4 - Bugfix Release
 
 * be98ba2f8 - fix: verifyMessage must pass through any plugin config to the content matcher (Ronald Holshausen, Tue Mar 21 18:05:46 2023 +1100)
 * 6a7b57313 - bump version to 4.5.4 (Ronald Holshausen, Thu Mar 16 17:00:00 2023 +1100)
