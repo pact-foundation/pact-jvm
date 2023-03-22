@@ -8,13 +8,13 @@ group = 'au.com.dius.pact.core'
 dependencies {
     api project(":core:support")
     api project(":core:pactbroker")
+    api 'org.apache.tika:tika-core'
 
     implementation 'org.apache.commons:commons-lang3'
     implementation 'org.apache.commons:commons-collections4'
     implementation 'org.slf4j:slf4j-api'
     implementation 'com.github.mifmif:generex:1.0.2'
     implementation 'javax.mail:mail:1.5.0-b01'
-    implementation 'org.apache.tika:tika-core'
     implementation 'io.ktor:ktor-http-jvm'
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
