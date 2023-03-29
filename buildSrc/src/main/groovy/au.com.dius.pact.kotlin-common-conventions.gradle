@@ -61,6 +61,7 @@ dependencies {
         testImplementation 'net.bytebuddy:byte-buddy:1.12.7'
         testImplementation 'com.github.tomakehurst:wiremock-jre8:2.34.0'
         testImplementation 'org.junit.vintage:junit-vintage-engine:5.9.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     }
 
     // Align versions of all Kotlin components
