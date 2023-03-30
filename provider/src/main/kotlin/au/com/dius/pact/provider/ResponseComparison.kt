@@ -191,6 +191,30 @@ class ResponseComparison(
             messageContentType.isJson(), messageContentType, actual)
           responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
         }
+
+        is V4Interaction.SynchronousMessages -> {
+          if (message.response.size > 1) {
+            logger.warn {
+              "Messages with multiple responses are not currently supported, will only compare the first one"
+            }
+          }
+          val messageContents = message.response.first()
+          val bodyContext = MatchingContext(messageContents.matchingRules.rulesForCategory("body"),
+            true, pluginConfiguration)
+          val metadataContext = MatchingContext(messageContents.matchingRules.rulesForCategory("metadata"),
+            true, pluginConfiguration)
+          val bodyMismatches = compareMessageBody(message, actual, bodyContext)
+          val metadataMismatches = when (metadata) {
+            null -> emptyList()
+            else -> Matching.compareMessageMetadata(messageContents.metadata, metadata, metadataContext)
+          }
+          val messageContentType = messageContents.getContentType().or(ContentType.TEXT_PLAIN)
+          val responseComparison = ResponseComparison(
+            mapOf("Content-Type" to listOf(messageContentType.toString())), messageContents.contents,
+            messageContentType.isJson(), messageContentType, actual)
+          responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
+        }
+
         is Message -> {
           val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body"),
             true, pluginConfiguration)
@@ -222,6 +246,10 @@ class ResponseComparison(
     ): MutableList<BodyMismatch> {
       val (contents, contentType) = when (message) {
         is V4Interaction.AsynchronousMessage -> message.contents.contents to message.contents.getContentType()
+        is V4Interaction.SynchronousMessages -> {
+          val messageContents = message.response.first()
+          messageContents.contents to messageContents.getContentType()
+        }
         is Message -> message.contents to message.getContentType()
         else -> TODO("Matching a ${message.javaClass.simpleName} is not implemented")
       }

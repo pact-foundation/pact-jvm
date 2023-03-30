@@ -155,13 +155,17 @@ open class HttpsTestTarget @JvmOverloads constructor (
 }
 
 /**
- * Test target for use with asynchronous providers (like with message queues).
+ * Test target for use with asynchronous providers (like with message queues) and synchronous request/response message
+ * flows (like gRPC or Kafka request/reply strategies).
  *
  * This target will look for methods with a @PactVerifyProvider annotation where the value is the description of the
- * interaction.
+ * interaction. For asynchronous messages, these functions must take no parameter and return the message
+ * (or message + metadata), while for synchronous messages they can receive the request message then must return the
+ * response message (or message + metadata).
  *
  * @property packagesToScan List of packages to scan for methods with @PactVerifyProvider annotations. Defaults to the
  * full test classpath.
+ * @property classLoader (Optional) ClassLoader to use to scan for packages
  */
 open class MessageTestTarget @JvmOverloads constructor(
   private val packagesToScan: List<String> = emptyList(),

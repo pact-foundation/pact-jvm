@@ -25,12 +25,14 @@ import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.Result
-import au.com.dius.pact.core.support.Result.*
+import au.com.dius.pact.core.support.Result.Err
+import au.com.dius.pact.core.support.Result.Ok
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.ifNullOrEmpty
@@ -42,7 +44,6 @@ import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.DefaultPluginManager
-import io.pact.plugins.jvm.core.InteractionVerificationData
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import mu.KLogging
 import java.io.File
@@ -50,6 +51,7 @@ import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.function.BiConsumer
+import java.util.function.BiFunction
 import java.util.function.Function
 import java.util.function.Supplier
 import kotlin.reflect.KMutableProperty1
@@ -340,7 +342,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     SystemPropertyResolver.resolveValue(PACT_PROVIDER_BRANCH, "")
   },
   override var projectClassLoader: Supplier<ClassLoader?>? = null,
-  override var responseFactory: Function<String, Any>? = null
+  override var responseFactory: Function<String, Any>? = null // TODO: This does not support sync message needs
 ) : IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
@@ -392,18 +394,42 @@ open class ProviderVerifier @JvmOverloads constructor (
       logger.debug { "Found methods = $methodsAnnotatedWith" }
       if (methodsAnnotatedWith.isEmpty()) {
         emitEvent(Event.ErrorHasNoAnnotatedMethodsFoundForInteraction(interaction))
-        throw RuntimeException("No annotated methods were found for interaction " +
-          "'${interaction.description}'. You need to provide a method annotated with " +
-          "@PactVerifyProvider(\"${interaction.description}\") on the classpath that returns the message contents.")
+        if (interaction.isSynchronousMessages()) {
+          throw RuntimeException(
+            "No annotated methods were found for interaction " +
+              "'${interaction.description}'. You need to provide a method annotated with " +
+              "@PactVerifyProvider(\"${interaction.description}\") on the classpath that receives the request message" +
+              " and returns the response message contents."
+          )
+        } else {
+          throw RuntimeException(
+            "No annotated methods were found for interaction " +
+              "'${interaction.description}'. You need to provide a method annotated with " +
+              "@PactVerifyProvider(\"${interaction.description}\") on the classpath that returns the message contents."
+          )
+        }
       } else {
         return if (interaction.isAsynchronousMessage()) {
-          verifyMessage(methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage,
-            failures, pending)
+          verifyMessage(
+            methodsAnnotatedWith.toHashSet(), interaction as MessageInteraction, interactionMessage,
+            failures, pending
+          )
+        } else if (interaction.isSynchronousMessages()) {
+          verifySynchronousMessage(
+            methodsAnnotatedWith.toHashSet(),
+            interaction as V4Interaction.SynchronousMessages,
+            interactionId,
+            interactionMessage,
+            failures,
+            pending
+          )
         } else {
-          val expectedResponse = (interaction as SynchronousRequestResponse).response
+          val synchronousRequestResponse = interaction as SynchronousRequestResponse
+          val expectedResponse = synchronousRequestResponse.response
           var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
           methodsAnnotatedWith.forEach {
-            val response = invokeProviderMethod(it, null) as Map<String, Any>
+            val response = invokeProviderMethod(synchronousRequestResponse.description, synchronousRequestResponse,
+              it, null) as Map<String, Any>
             val body = OptionalBody.body(response["data"] as String?)
             val actualResponse = ProviderResponse(response["statusCode"] as Int,
               response["headers"] as Map<String, List<String>>, ContentType.UNKNOWN, body
@@ -426,6 +452,85 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
+  private fun verifySynchronousMessage(
+    methods: HashSet<Method>,
+    interaction: V4Interaction.SynchronousMessages,
+    interactionId: String?,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean
+  ): VerificationResult {
+    var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
+    methods.forEach { method ->
+      val messageFactory = BiFunction<String, Any, Any> {
+        desc, req -> invokeProviderMethod(desc, interaction, method, providerMethodInstance.apply(method)/*, req*/)!!
+      }
+      result = result.merge(verifySynchronousMessage(
+        messageFactory,
+        interaction,
+        interactionId,
+        interactionMessage,
+        failures,
+        pending
+      ))
+    }
+    return result
+  }
+
+  private fun verifySynchronousMessage(
+    factory: BiFunction<String, Any, Any>,
+    interaction: V4Interaction.SynchronousMessages,
+    interactionId: String?,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    pending: Boolean
+  ): VerificationResult {
+    emitEvent(Event.GeneratesAMessageWhich)
+    val messageResult = factory.apply(interaction.description, interaction.request)
+    val actualMessage: ByteArray
+    var messageMetadata: Map<String, Any>? = null
+    var contentType = ContentType.JSON
+    when (messageResult) {
+      is MessageAndMetadata -> {
+        messageMetadata = messageResult.metadata
+        contentType = Message.contentType(messageResult.metadata)
+        actualMessage = messageResult.messageData
+      }
+      is Pair<*, *> -> {
+        messageMetadata = messageResult.second as Map<String, Any>
+        contentType = Message.contentType(messageMetadata)
+        actualMessage = messageResult.first.toString().toByteArray(contentType.asCharset())
+      }
+      is org.apache.commons.lang3.tuple.Pair<*, *> -> {
+        messageMetadata = messageResult.right as Map<String, Any>
+        contentType = Message.contentType(messageMetadata)
+        actualMessage = messageResult.left.toString().toByteArray(contentType.asCharset())
+      }
+      else -> {
+        actualMessage = messageResult.toString().toByteArray()
+      }
+    }
+    val comparison = ResponseComparison.compareMessage(interaction, OptionalBody.body(actualMessage, contentType),
+      messageMetadata)
+    val s = ": generates a message which"
+    return displayBodyResult(
+      failures,
+      comparison.bodyMismatches,
+      interactionMessage + s,
+      interactionId.orEmpty(),
+      pending
+    ).merge(
+      displayMetadataResult(
+        messageMetadata ?: emptyMap(),
+        failures,
+        comparison.metadataMismatches,
+        interactionMessage + s,
+        interactionId.orEmpty(),
+        pending
+      )
+    )
+  }
+
   @Suppress("TooGenericExceptionCaught")
   override fun verifyResponseByFactory(
     providerInfo: IProviderInfo,
@@ -442,6 +547,15 @@ open class ProviderVerifier @JvmOverloads constructor (
         verifyMessage(
           factory,
           interaction as MessageInteraction,
+          interactionId,
+          interactionMessage,
+          failures,
+          pending
+        )
+      } else if (interaction.isSynchronousMessages()) {
+        verifySynchronousMessage(
+          { s, req -> factory.apply(s) }, // TODO: This does not support sync message needs
+          interaction as V4Interaction.SynchronousMessages,
           interactionId,
           interactionMessage,
           failures,
@@ -498,6 +612,7 @@ open class ProviderVerifier @JvmOverloads constructor (
 
     val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
     if (scan.isNotEmpty()) {
+      @Suppress("SpreadOperator")
       classGraph.whitelistPackages(*scan.toTypedArray())
     }
     return classGraph
@@ -547,7 +662,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
     methods.forEach { method ->
       val messageFactory: Function<String, Any> =
-        Function { invokeProviderMethod(method, providerMethodInstance.apply(method))!! }
+        Function { invokeProviderMethod(message.description, message, method, providerMethodInstance.apply(method))!! }
       result = result.merge(verifyMessage(
         messageFactory,
         message,
@@ -1091,11 +1206,30 @@ open class ProviderVerifier @JvmOverloads constructor (
     const val PACT_PROVIDER_BRANCH = "pact.provider.branch"
     const val PACT_PROVIDER_VERSION_TRIM_SNAPSHOT = "pact.provider.version.trimSnapshot"
 
-    @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")
-    fun invokeProviderMethod(m: Method, instance: Any?): Any? {
+    @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "UnusedPrivateMember", "ThrowsCount")
+    fun invokeProviderMethod(_desc: String, interaction: Interaction, m: Method, instance: Any?): Any? {
+      // TODO: do we need to support passing in the description?
       try {
         m.isAccessible = true
-        return m.invoke(instance)
+        return if (m.parameters.size == 1) {
+          when (m.parameters[0].type) {
+            V4Interaction.AsynchronousMessage::class.java -> m.invoke(instance, interaction.asAsynchronousMessage())
+            V4Interaction.SynchronousMessages::class.java -> m.invoke(instance, interaction.asSynchronousMessages())
+            MessageContents::class.java -> if (interaction.isAsynchronousMessage()) {
+              val contents = interaction.asAsynchronousMessage()!!.contents
+              m.invoke(instance, contents)
+            } else if (interaction.isSynchronousMessages()) {
+              val contents = interaction.asSynchronousMessages()!!.request
+              m.invoke(instance, contents)
+            } else throw RuntimeException("Failed to invoke provider method '${m.name}': " +
+              "Only V4 message interactions support MessageContents")
+
+            else -> throw RuntimeException("Failed to invoke provider method '${m.name}': " +
+              "Parameters of type ${m.parameters[0].type} are not supported")
+          }
+        } else {
+          m.invoke(instance)
+        }
       } catch (e: Throwable) {
         throw RuntimeException("Failed to invoke provider method '${m.name}'", e)
       }

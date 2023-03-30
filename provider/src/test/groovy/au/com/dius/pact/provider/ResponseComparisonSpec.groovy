@@ -4,13 +4,15 @@ import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessageInteraction
-import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -187,5 +189,119 @@ class ResponseComparisonSpec extends Specification {
       '$.stuff': ["Expected 'is good' (String) but received 'should make the test fail' (String)"]
     ]
     result.value.diff.empty
+  }
+
+  def 'comparing messages - V3 message'() {
+    given:
+    def body = OptionalBody.body('{"a": "b"}', ContentType.JSON)
+    def body2 = OptionalBody.body('{"a": "c"}', ContentType.JSON)
+    def expectedMetadata = [
+      X: 'Z'
+    ]
+    def matchingRules = new MatchingRulesImpl()
+    def generators = new Generators()
+    def message = new Message('test', [], body2, matchingRules, generators, expectedMetadata)
+
+    when:
+    def result = ResponseComparison.compareMessage(message, body, [X: 'Y'])
+
+    then:
+    result.statusMismatch == null
+    result.headerMismatches.isEmpty()
+    result.bodyMismatches.get().mismatches.size() == 1
+    result.bodyMismatches.get().mismatches.keySet() == ['$.a'] as Set
+    result.metadataMismatches.size() == 1
+    result.metadataMismatches.keySet() == ['X'] as Set
+  }
+
+  def 'comparing messages - V4 message'() {
+    given:
+    def body = OptionalBody.body('{"a": "b"}', ContentType.JSON)
+    def body2 = OptionalBody.body('{"a": "c"}', ContentType.JSON)
+    def expectedMetadata = [
+      X: 'Z'
+    ]
+    def contents = new MessageContents(body2, expectedMetadata)
+    def message = new V4Interaction.AsynchronousMessage('test', [], contents)
+
+    when:
+    def result = ResponseComparison.compareMessage(message, body, [X: 'Y'])
+
+    then:
+    result.statusMismatch == null
+    result.headerMismatches.isEmpty()
+    result.bodyMismatches.get().mismatches.size() == 1
+    result.bodyMismatches.get().mismatches.keySet() == ['$.a'] as Set
+    result.metadataMismatches.size() == 1
+    result.metadataMismatches.keySet() == ['X'] as Set
+  }
+
+  def 'comparing messages - V4 sync message'() {
+    given:
+    def body = OptionalBody.body('{"a": "b"}', ContentType.JSON)
+    def body2 = OptionalBody.body('{"a": "c"}', ContentType.JSON)
+    def expectedMetadata = [
+      X: 'Z'
+    ]
+    def request = new MessageContents(body2, expectedMetadata)
+    def expectedResponse = new MessageContents(body2, expectedMetadata)
+    def message = new V4Interaction.SynchronousMessages('test', [], request, [ expectedResponse ])
+
+    when:
+    def result = ResponseComparison.compareMessage(message, body, [X: 'Y'])
+
+    then:
+    result.statusMismatch == null
+    result.headerMismatches.isEmpty()
+    result.bodyMismatches.get().mismatches.size() == 1
+    result.bodyMismatches.get().mismatches.keySet() == ['$.a'] as Set
+    result.metadataMismatches.size() == 1
+    result.metadataMismatches.keySet() == ['X'] as Set
+  }
+
+  def 'compareMessageBody - V3 message'() {
+    given:
+    def body = OptionalBody.body('{"a": "b"}', ContentType.JSON)
+    def body2 = OptionalBody.body('{"a": "c"}', ContentType.JSON)
+    def message = new Message('test', [], body2)
+    def context = new MatchingContext(new MatchingRuleCategory('body'), false)
+
+    when:
+    def result = ResponseComparison.compareMessageBody(message, body, context)
+
+    then:
+    result.size() == 1
+    result*.path == ['$.a']
+  }
+
+  def 'compareMessageBody - V4 message'() {
+    given:
+    def body = OptionalBody.body('{"a": "b"}', ContentType.JSON)
+    def body2 = OptionalBody.body('{"a": "c"}', ContentType.JSON)
+    def message = new V4Interaction.AsynchronousMessage('test', [], new MessageContents(body2))
+    def context = new MatchingContext(new MatchingRuleCategory('body'), false)
+
+    when:
+    def result = ResponseComparison.compareMessageBody(message, body, context)
+
+    then:
+    result.size() == 1
+    result*.path == ['$.a']
+  }
+
+  def 'compareMessageBody - V4 sync message'() {
+    given:
+    def body = OptionalBody.body('{"a": "b"}', ContentType.JSON)
+    def body2 = OptionalBody.body('{"a": "c"}', ContentType.JSON)
+    def message = new V4Interaction.SynchronousMessages('test', [], new MessageContents(body2),
+      [ new MessageContents(body2) ])
+    def context = new MatchingContext(new MatchingRuleCategory('body'), false)
+
+    when:
+    def result = ResponseComparison.compareMessageBody(message, body, context)
+
+    then:
+    result.size() == 1
+    result*.path == ['$.a']
   }
 }
