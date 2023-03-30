@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.4.9 - Support verification tests for sync request/response messages with MessageTestTarget
+
+* b1e5c4833 - feat(JUnit5): Add example to Junit 5 readme #1681 (Ronald Holshausen, Thu Mar 30 13:59:13 2023 +1100)
+* c07f70799 - feat(JUnit5): Support verification tests for sync request/response messages with MessageTestTarget #1681 (Ronald Holshausen, Thu Mar 30 13:38:08 2023 +1100)
+* 1721cb046 - feat(DSL): check varargs for NULL values #1679 (Ronald Holshausen, Wed Mar 29 11:45:58 2023 +1100)
+* 0a065566f - chore: Upgrade plugin driver to 0.3.2 (Ronald Holshausen, Wed Mar 22 15:19:23 2023 +1100)
+* f858a1728 - chore: Update versions in readme (Ronald Holshausen, Tue Mar 7 12:39:17 2023 +1100)
+* 479007606 - chore: correct changelog (Ronald Holshausen, Tue Mar 7 12:03:10 2023 +1100)
+* 7f0c1b28a - bump version to 4.4.9 (Ronald Holshausen, Tue Mar 7 11:57:42 2023 +1100)
+
 # 4.4.8 - Bugfix Release
 
 * 8ab6b7ac8 - feat: Update readme with support mixing pact and non-pact test methods with @PactIgnore annotation #1674 (Ronald Holshausen, Tue Mar 7 10:57:09 2023 +1100)
