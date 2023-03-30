@@ -21,18 +21,18 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 
 /**
- * Interface to a synchronous message
+ * Interface to an asynchronous message
  */
-interface MessageInteraction {
+interface MessageInteraction: Interaction {
   /**
    * Message description
    */
-  val description: String
+  override var description: String
 
   /**
    * Message interaction ID. This will only be set if fetched from a Pact Broker
    */
-  val interactionId: String?
+  override val interactionId: String?
 
   /**
    * Message contents

@@ -6,15 +6,16 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.SynchronousRequestResponse
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.IHttpClientFactory
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderClient
-import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest
@@ -155,13 +156,17 @@ open class HttpsTestTarget @JvmOverloads constructor (
 }
 
 /**
- * Test target for use with asynchronous providers (like with message queues).
+ * Test target for use with asynchronous providers (like with message queues) and synchronous request/response message
+ * flows (like gRPC or Kafka request/reply strategies).
  *
  * This target will look for methods with a @PactVerifyProvider annotation where the value is the description of the
- * interaction.
+ * interaction. For asynchronous messages, these functions must take no parameter and return the message
+ * (or message + metadata), while for synchronous messages they can receive the request message then must return the
+ * response message (or message + metadata).
  *
  * @property packagesToScan List of packages to scan for methods with @PactVerifyProvider annotations. Defaults to the
  * full test classpath.
+ * @property classLoader (Optional) ClassLoader to use to scan for packages
  */
 open class MessageTestTarget @JvmOverloads constructor(
   private val packagesToScan: List<String> = emptyList(),
@@ -188,7 +193,7 @@ open class MessageTestTarget @JvmOverloads constructor(
   }
 
   override fun prepareRequest(pact: Pact, interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any>? {
-    if (interaction is MessageInteraction) {
+    if (interaction is MessageInteraction || interaction is V4Interaction.SynchronousMessages) {
       return null
     }
     throw UnsupportedOperationException("Only message interactions can be used with an AMPQ test target")

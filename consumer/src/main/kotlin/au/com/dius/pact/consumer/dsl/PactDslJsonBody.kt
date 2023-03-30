@@ -236,9 +236,12 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param value boolean value
    */
-  fun booleanValue(name: String, vararg values: Boolean): PactDslJsonBody {
+  fun booleanValue(name: String, vararg values: Boolean?): PactDslJsonBody {
     require(values.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(values.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && values.size > 1) {
       throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
@@ -247,10 +250,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, if (values[0]) JsonValue.True else JsonValue.False)
+      is JsonValue.Object -> body.add(name, if (values[0]!!) JsonValue.True else JsonValue.False)
       is JsonValue.Array -> {
         values.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, if (value) JsonValue.True else JsonValue.False)
+          body[i].asObject()!!.add(name, if (value!!) JsonValue.True else JsonValue.False)
         }
       }
       else -> {}
@@ -310,9 +313,12 @@ open class PactDslJsonBody : DslPart {
    * Attributes that can be any string
    * @param names attribute names
    */
-  fun stringTypes(vararg names: String): PactDslJsonBody {
+  fun stringTypes(vararg names: String?): PactDslJsonBody {
+    require(names.none { it == null }) {
+      "Attribute names can not be null"
+    }
     for (name in names) {
-      stringType(name)
+      stringType(name!!)
     }
     return this
   }
@@ -322,9 +328,12 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param example example value to use for generated bodies
    */
-  fun stringType(name: String, vararg examples: String): PactDslJsonBody {
+  fun stringType(name: String, vararg examples: String?): PactDslJsonBody {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(examples.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && examples.size > 1) {
       throw IllegalArgumentException(
@@ -335,10 +344,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, JsonValue.StringValue(examples[0].toCharArray()))
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(examples[0]!!.toCharArray()))
       is JsonValue.Array -> {
         examples.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))
+          body[i].asObject()!!.add(name, JsonValue.StringValue(value!!.toCharArray()))
         }
       }
       else -> {}
@@ -362,9 +371,15 @@ open class PactDslJsonBody : DslPart {
    * Attributes that can be any number
    * @param names attribute names
    */
-  fun numberTypes(vararg names: String): PactDslJsonBody {
+  fun numberTypes(vararg names: String?): PactDslJsonBody {
+    require(names.isNotEmpty()) {
+      "At least one attribute name is required"
+    }
+    require(names.none { it == null }) {
+      "Attribute names can not be null"
+    }
     for (name in names) {
-      numberType(name)
+      numberType(name!!)
     }
     return this
   }
@@ -374,9 +389,12 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example number to use for generated bodies
    */
-  fun numberType(name: String, vararg numbers: Number): PactDslJsonBody {
+  fun numberType(name: String, vararg numbers: Number?): PactDslJsonBody {
     require(numbers.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(numbers.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && numbers.size > 1) {
       throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
@@ -385,10 +403,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0].toString().toCharArray()))
+      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0]!!.toString().toCharArray()))
       is JsonValue.Array -> {
         numbers.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+          body[i].asObject()!!.add(name, JsonValue.Decimal(value!!.toString().toCharArray()))
         }
       }
       else -> {}
@@ -405,16 +423,22 @@ open class PactDslJsonBody : DslPart {
    */
   fun integerType(name: String): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
-    return integerType(name, 100)
+    return integerType(name, 100 as Int)
   }
 
   /**
    * Attributes that must be an integer
    * @param names attribute names
    */
-  fun integerTypes(vararg names: String): PactDslJsonBody {
+  fun integerTypes(vararg names: String?): PactDslJsonBody {
+    require(names.isNotEmpty()) {
+      "At least one attribute name is required"
+    }
+    require(names.none { it == null }) {
+      "Attribute names can not be null"
+    }
     for (name in names) {
-      integerType(name)
+      integerType(name!!)
     }
     return this
   }
@@ -424,9 +448,12 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example integer value to use for generated bodies
    */
-  fun integerType(name: String, vararg numbers: Long): PactDslJsonBody {
+  fun integerType(name: String, vararg numbers: Long?): PactDslJsonBody {
     require(numbers.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(numbers.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && numbers.size > 1) {
       throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
@@ -435,10 +462,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, JsonValue.Integer(numbers[0].toString().toCharArray()))
+      is JsonValue.Object -> body.add(name, JsonValue.Integer(numbers[0]!!.toString().toCharArray()))
       is JsonValue.Array -> {
         numbers.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
+          body[i].asObject()!!.add(name, JsonValue.Integer(value!!.toString().toCharArray()))
         }
       }
       else -> {}
@@ -454,9 +481,12 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example integer value to use for generated bodies
    */
-  fun integerType(name: String, vararg numbers: Int): PactDslJsonBody {
+  fun integerType(name: String, vararg numbers: Int?): PactDslJsonBody {
     require(numbers.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(numbers.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && numbers.size > 1) {
       throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
@@ -465,10 +495,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, JsonValue.Integer(numbers[0].toString().toCharArray()))
+      is JsonValue.Object -> body.add(name, JsonValue.Integer(numbers[0]!!.toString().toCharArray()))
       is JsonValue.Array -> {
         numbers.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, JsonValue.Integer(value.toString().toCharArray()))
+          body[i].asObject()!!.add(name, JsonValue.Integer(value!!.toString().toCharArray()))
         }
       }
       else -> {}
@@ -492,9 +522,15 @@ open class PactDslJsonBody : DslPart {
    * Attributes that must be a decimal values (have significant digits after the decimal point)
    * @param names attribute names
    */
-  fun decimalTypes(vararg names: String): PactDslJsonBody {
+  fun decimalTypes(vararg names: String?): PactDslJsonBody {
+    require(names.isNotEmpty()) {
+      "At least one attribute name is required"
+    }
+    require(names.none { it == null }) {
+      "Attribute names can not be null"
+    }
     for (name in names) {
-      decimalType(name)
+      decimalType(name!!)
     }
     return this
   }
@@ -504,9 +540,12 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example decimalType value
    */
-  fun decimalType(name: String, vararg numbers: BigDecimal): PactDslJsonBody {
+  fun decimalType(name: String, vararg numbers: BigDecimal?): PactDslJsonBody {
     require(numbers.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(numbers.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && numbers.size > 1) {
       throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
@@ -515,10 +554,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0].toString().toCharArray()))
+      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0]!!.toString().toCharArray()))
       is JsonValue.Array -> {
         numbers.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+          body[i].asObject()!!.add(name, JsonValue.Decimal(value!!.toString().toCharArray()))
         }
       }
       else -> {}
@@ -534,9 +573,12 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    * @param number example decimalType value
    */
-  fun decimalType(name: String, vararg numbers: Double): PactDslJsonBody {
+  fun decimalType(name: String, vararg numbers: Double?): PactDslJsonBody {
     require(numbers.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(numbers.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && numbers.size > 1) {
       throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
@@ -545,10 +587,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0].toString().toCharArray()))
+      is JsonValue.Object -> body.add(name, JsonValue.Decimal(numbers[0]!!.toString().toCharArray()))
       is JsonValue.Array -> {
         numbers.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, JsonValue.Decimal(value.toString().toCharArray()))
+          body[i].asObject()!!.add(name, JsonValue.Decimal(value!!.toString().toCharArray()))
         }
       }
       else -> {}
@@ -651,9 +693,15 @@ open class PactDslJsonBody : DslPart {
    * Attributes that must be a boolean
    * @param names attribute names
    */
-  fun booleanTypes(vararg names: String): PactDslJsonBody {
+  fun booleanTypes(vararg names: String?): PactDslJsonBody {
+    require(names.isNotEmpty()) {
+      "At least one attribute name is required"
+    }
+    require(names.none { it == null }) {
+      "Attribute names can not be null"
+    }
     for (name in names) {
-      booleanType(name)
+      booleanType(name!!)
     }
     return this
   }
@@ -664,9 +712,12 @@ open class PactDslJsonBody : DslPart {
    * @param example example boolean to use for generated bodies
    */
   @JvmOverloads
-  fun booleanType(name: String, vararg examples: Boolean = booleanArrayOf(true)): PactDslJsonBody {
+  fun booleanType(name: String, vararg examples: Boolean? = arrayOf(true)): PactDslJsonBody {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(examples.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && examples.size > 1) {
       throw IllegalArgumentException(
@@ -677,10 +728,10 @@ open class PactDslJsonBody : DslPart {
     }
 
     when (val body = body) {
-      is JsonValue.Object -> body.add(name, if (examples[0]) JsonValue.True else JsonValue.False)
+      is JsonValue.Object -> body.add(name, if (examples[0]!!) JsonValue.True else JsonValue.False)
       is JsonValue.Array -> {
         examples.padTo(body.size()).forEachIndexed { i, value ->
-          body[i].asObject()!!.add(name, if (value) JsonValue.True else JsonValue.False)
+          body[i].asObject()!!.add(name, if (value!!) JsonValue.True else JsonValue.False)
         }
       }
       else -> {}
@@ -698,9 +749,12 @@ open class PactDslJsonBody : DslPart {
    * @param value example value to use for generated bodies
    */
   @Suppress("ThrowsCount")
-  fun stringMatcher(name: String, regex: String, vararg values: String): PactDslJsonBody {
+  fun stringMatcher(name: String, regex: String, vararg values: String?): PactDslJsonBody {
     require(values.isNotEmpty()) {
       "At least one example value is required"
+    }
+    require(values.none { it == null }) {
+      "Example values can not be null"
     }
     if (body is JsonValue.Object && values.size > 1) {
       throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
@@ -711,14 +765,14 @@ open class PactDslJsonBody : DslPart {
     val re = Regex(regex)
     when (val body = body) {
       is JsonValue.Object -> {
-        if (!values[0].matches(re)) {
+        if (!values[0]!!.matches(re)) {
           throw InvalidMatcherException("Example \"${values[0]}\" does not match regular expression \"$regex\"")
         }
-        body.add(name, JsonValue.StringValue(values[0].toCharArray()))
+        body.add(name, JsonValue.StringValue(values[0]!!.toCharArray()))
       }
       is JsonValue.Array -> {
         values.padTo(body.size()).forEachIndexed { i, value ->
-          if (!value.matches(re)) {
+          if (!value!!.matches(re)) {
             throw InvalidMatcherException("Example \"$value\" does not match regular expression \"$regex\"")
           }
           body[i].asObject()!!.add(name, JsonValue.StringValue(value.toCharArray()))

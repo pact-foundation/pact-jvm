@@ -43,4 +43,5 @@ dependencies {
   testRuntimeOnly 'org.objenesis:objenesis:3.2'
   testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
   testImplementation 'io.grpc:grpc-protobuf:1.43.2'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }

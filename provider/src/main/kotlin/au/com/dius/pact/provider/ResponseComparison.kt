@@ -13,6 +13,7 @@ import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IResponse
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.V4Interaction
@@ -82,6 +83,13 @@ interface IResponseComparison {
     message: MessageInteraction,
     actual: OptionalBody,
     metadata: Map<String, Any>?,
+    pluginConfiguration: Map<String, PluginConfiguration>
+  ): ComparisonResult
+
+  fun compareSynchronousMessage(
+    interaction: V4Interaction.SynchronousMessages,
+    body: OptionalBody,
+    messageMetadata: Map<String, Any>?,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): ComparisonResult
 }
@@ -248,6 +256,7 @@ class ResponseComparison(
             messageContentType.isJson(), messageContentType, actual)
           responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver) to metadataMismatches
         }
+
         is Message -> {
           val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body"),
             true, pluginConfiguration)
@@ -271,14 +280,48 @@ class ResponseComparison(
         metadataMismatches = metadataMismatches.groupBy { it.key })
     }
 
+    override fun compareSynchronousMessage(
+      interaction: V4Interaction.SynchronousMessages,
+      actual: OptionalBody,
+      messageMetadata: Map<String, Any>?,
+      pluginConfiguration: Map<String, PluginConfiguration>
+    ): ComparisonResult {
+      if (interaction.response.size > 1) {
+        logger.warn {
+          "Messages with multiple responses are not currently supported, will only compare the first one"
+        }
+      }
+      val messageContents = interaction.response.first()
+      val bodyContext = MatchingContext(messageContents.matchingRules.rulesForCategory("body"),
+        true, pluginConfiguration)
+      val metadataContext = MatchingContext(messageContents.matchingRules.rulesForCategory("metadata"),
+        true, pluginConfiguration)
+      val bodyMismatches = compareMessageBody(interaction, actual, bodyContext)
+      val metadataMismatches = when (messageMetadata) {
+        null -> emptyList()
+        else -> Matching.compareMessageMetadata(messageContents.metadata, messageMetadata, metadataContext)
+      }
+      val messageContentType = messageContents.getContentType().or(ContentType.TEXT_PLAIN)
+      val responseComparison = ResponseComparison(
+        mapOf("Content-Type" to listOf(messageContentType.toString())), messageContents.contents,
+        messageContentType.isJson(), messageContentType, actual)
+      val bodyResult = responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver)
+      return ComparisonResult(bodyMismatches = bodyResult,
+        metadataMismatches = metadataMismatches.groupBy { it.key })
+    }
+
     @JvmStatic
     fun compareMessageBody(
-      message: MessageInteraction,
+      message: Interaction,
       actual: OptionalBody,
       context: MatchingContext
     ): MutableList<BodyMismatch> {
       val (contents, contentType) = when (message) {
         is V4Interaction.AsynchronousMessage -> message.contents.contents to message.contents.getContentType()
+        is V4Interaction.SynchronousMessages -> {
+          val messageContents = message.response.first()
+          messageContents.contents to messageContents.getContentType()
+        }
         is Message -> message.contents to message.contentType
         else -> TODO("Matching a ${message.javaClass.simpleName} is not implemented")
       }

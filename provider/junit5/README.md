@@ -338,3 +338,48 @@ using the `au.com.dius.pact.provider.RequestData` type. This can be used to add 
 We are tracking anonymous analytics to gather important usage statistics like JVM version
 and operating system. To disable tracking, set the 'pact_do_not_track' system property or environment
 variable to 'true'.
+
+# Testing message interactions
+
+When testing with message interactions, the default mechanism is to call a method on the test class that will return
+the actual message to test. This works by adding the `@PactVerifyProvider` annotation to the method with the
+description of the message interaction. For asynchronous messages, the function must take no parameters, and return
+either the message contents or the message contents plus any metadata. For synchronous messages, the method can also
+take the request message as a parameter. 
+
+For example:
+
+```java
+  @PactVerifyProvider('an order confirmation message')
+  public String verifyMessageForOrder() {
+     Order order = new Order();
+     order.setId(10000004);
+     order.setPrice(BigDecimal.TEN);
+     order.setUnits(15);
+
+     ConfirmationKafkaMessage message = new ConfirmationKafkaMessageBuilder()
+     .withOrder(order)
+     .build()
+
+     return JsonOutput.toJson(message);
+  }
+```
+
+Synchronous message example:
+
+```java
+    @PactVerifyProvider("a test message")
+    public MessageAndMetadata messageRecievedAndCreated(MessageContents requestMessage) {
+
+        var req = MyMessageHandler.getRequest(requestMessage.getContents().valueAsString());
+        Message<String> message = MyMessageBuilder.createResponse(req);
+        return generateMessageAndMetadata(message);
+    }
+
+    private MessageAndMetadata generateMessageAndMetadata(Message<String> message) {
+        HashMap<String, Object> metadata = new HashMap<String, Object>();
+        message.getHeaders().forEach((k, v) -> metadata.put(k, v));
+
+        return new MessageAndMetadata(message.getPayload().getBytes(), metadata);
+    }
+```
