@@ -48,8 +48,8 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch                                                                 | Specification | JDK        | Kotlin Version | Latest Version | Notes |
 |------------------------------------------------------------------------|---------------|------------|----------------|----------------|-------|
-| [4.5.x](https://github.com/DiUS/pact-jvm/blob/v4.5.x/README.md)        | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.2          |       |
-| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md) master | V4 + plugins  | 11+        | 1.6.21         | 4.4.8          |       |
+| [4.5.x](https://github.com/DiUS/pact-jvm/blob/v4.5.x/README.md) master | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.5          |       |
+| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md)        | V4 + plugins  | 11+        | 1.6.21         | 4.4.9          |       |
 | [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12       | 1.3.72         | 4.1.41         |       |
 
 **Notes:**
