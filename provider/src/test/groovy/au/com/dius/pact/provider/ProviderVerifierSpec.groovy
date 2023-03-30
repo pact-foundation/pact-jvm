@@ -38,7 +38,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
-@SuppressWarnings('UnnecessaryGetter')
+@SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
 class ProviderVerifierSpec extends Specification {
 
   ProviderVerifier verifier
@@ -884,5 +884,46 @@ class ProviderVerifierSpec extends Specification {
     result.failures.size() == 1
     result.failures['abc123'][0].description == 'Verification factory method failed with an exception'
     result.failures['abc123'][0].e instanceof RuntimeException
+  }
+
+  @SuppressWarnings('UnusedMethodParameter')
+  static class TestClass {
+    String method1() { 'method1' }
+    String method2(V4Interaction.AsynchronousMessage message) { 'method2' }
+    String method3(V4Interaction.SynchronousMessages message) { 'method3' }
+    String method4(MessageContents message) { 'method4' }
+  }
+
+  def 'invokeProviderMethod - is able to invoke a async message method'() {
+    given:
+    def interaction = new Message('Test Message')
+    def method = TestClass.getMethod('method1')
+    def instance = new TestClass()
+
+    when:
+    def result = ProviderVerifier.Companion.newInstance().invokeProviderMethod('', interaction, method, instance)
+
+    then:
+    result == 'method1'
+  }
+
+  def 'invokeProviderMethod - is able to pass the message to the method'() {
+    given:
+    def instance = new TestClass()
+
+    when:
+    def i = interaction as Interaction
+    def result = ProviderVerifier.Companion.newInstance().invokeProviderMethod('', i,
+      TestClass.getMethod(testMethod, param), instance)
+
+    then:
+    result == resultValue
+
+    where:
+
+    testMethod | param                             | interaction                                   | resultValue
+    'method2'  | V4Interaction.AsynchronousMessage | new V4Interaction.AsynchronousMessage('test') | 'method2'
+    'method3'  | V4Interaction.SynchronousMessages | new V4Interaction.SynchronousMessages('test') | 'method3'
+    'method4'  | MessageContents                   | new V4Interaction.SynchronousMessages('test') | 'method4'
   }
 }
