@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.5 - Support verification tests for sync request/response messages with MessageTestTarget
+
+* c98834b1b - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Thu Mar 30 15:10:35 2023 +1100)
+* 906c49237 - Merge branch 'master' into v4.4.x (Ronald Holshausen, Thu Mar 30 14:29:26 2023 +1100)
+* a669ffeda - bump version to 4.4.10 (Ronald Holshausen, Thu Mar 30 14:22:47 2023 +1100)
+* f07ffeb25 - update changelog for release 4.4.9 (Ronald Holshausen, Thu Mar 30 14:11:25 2023 +1100)
+* b1e5c4833 - feat(JUnit5): Add example to Junit 5 readme #1681 (Ronald Holshausen, Thu Mar 30 13:59:13 2023 +1100)
+* c07f70799 - feat(JUnit5): Support verification tests for sync request/response messages with MessageTestTarget #1681 (Ronald Holshausen, Thu Mar 30 13:38:08 2023 +1100)
+* 1721cb046 - feat(DSL): check varargs for NULL values #1679 (Ronald Holshausen, Wed Mar 29 11:45:58 2023 +1100)
+* b77138add - Merge branch 'master' into v4.5.x (Ronald Holshausen, Wed Mar 22 15:20:20 2023 +1100)
+* 0a065566f - chore: Upgrade plugin driver to 0.3.2 (Ronald Holshausen, Wed Mar 22 15:19:23 2023 +1100)
+* f821ef544 - chore: correct changelog (Ronald Holshausen, Tue Mar 21 18:41:55 2023 +1100)
+* 7d8d2b47c - bump version to 4.5.5 (Ronald Holshausen, Tue Mar 21 18:33:19 2023 +1100)
+* f858a1728 - chore: Update versions in readme (Ronald Holshausen, Tue Mar 7 12:39:17 2023 +1100)
+
 # 4.4.9 - Support verification tests for sync request/response messages with MessageTestTarget
 
 * b1e5c4833 - feat(JUnit5): Add example to Junit 5 readme #1681 (Ronald Holshausen, Thu Mar 30 13:59:13 2023 +1100)
