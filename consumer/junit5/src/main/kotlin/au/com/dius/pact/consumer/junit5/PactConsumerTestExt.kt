@@ -29,6 +29,7 @@ import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
+import au.com.dius.pact.core.support.isNotEmpty
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
@@ -364,7 +365,9 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
               methodAnnotation != null -> if (methodAnnotation.pactMethods.isNotEmpty()) {
                 methodAnnotation.pactMethods.map {
                   val providerName = providerNameFromPactMethod(it, context)
-                  val provider = providerInfo.copy(providerName = providerName)
+                  val provider = if (providerName.isNotEmpty())
+                    providerInfo.copy(providerName = providerName)
+                    else providerInfo
                   val mockServerConfig = mockServerConfigFromAnnotation(context, provider)
                   provider.withMockServerConfig(mockServerConfig) to it
                 }
@@ -376,7 +379,9 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
               classAnnotation != null -> if (classAnnotation.pactMethods.isNotEmpty()) {
                 classAnnotation.pactMethods.map {
                   val providerName = providerNameFromPactMethod(it, context)
-                  val provider = providerInfo.copy(providerName = providerName)
+                  val provider = if (providerName.isNotEmpty())
+                    providerInfo.copy(providerName = providerName)
+                  else providerInfo
                   val mockServerConfig = mockServerConfigFromAnnotation(context, provider)
                   provider.withMockServerConfig(mockServerConfig) to it
                 }

@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.Consumer
@@ -10,6 +11,7 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
 import groovy.json.JsonSlurper
@@ -224,6 +226,30 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.first().first.https
     providerInfo.first().first.port == '1235'
     providerInfo.first().second == ''
+  }
+
+  @PactTestFor(providerName = 'TestClassEmptyProviderOnMethod', pactVersion = PactSpecVersion.V3)
+  static class TestClassEmptyProviderOnMethod {
+    @Pact
+    RequestResponsePact pactMethod(PactDslWithProvider builder) { builder.toPact() }
+
+    @PactTestFor(pactMethods = [ 'pactMethod' ])
+    def pactTestForMethod() { }
+  }
+
+  def 'lookupProviderInfo - do not overwrite the class level values if the method level one is empty'() {
+    given:
+    testMethod = TestClassEmptyProviderOnMethod.getMethod('pactTestForMethod')
+    requiredTestClass = TestClassEmptyProviderOnMethod
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName == 'TestClassEmptyProviderOnMethod'
+    providerInfo.first().first.pactVersion == PactSpecVersion.V3
+    providerInfo.first().second == 'pactMethod'
   }
 
   def 'mockServerConfigured - returns false when there are no MockServerConfig annotations'() {
