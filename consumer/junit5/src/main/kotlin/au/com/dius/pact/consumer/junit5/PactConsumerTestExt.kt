@@ -367,7 +367,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         val methodAnnotation = pactTestForTestMethod(context)
         val classAnnotation = pactTestForClass(context)
 
-        val providerInfo = when {
+        var providerInfo = when {
           classAnnotation != null && methodAnnotation != null ->
             ProviderInfo.fromAnnotation(methodAnnotation)
               .merge(ProviderInfo.fromAnnotation(classAnnotation))
@@ -383,24 +383,14 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           providerInfo != null -> {
             when {
               methodAnnotation != null -> if (methodAnnotation.pactMethods.isNotEmpty()) {
-                buildProviderList(methodAnnotation, context, providerInfo)
+                buildProviderListFromPactMethods(methodAnnotation, context, providerInfo)
               } else {
-                val mockServerConfig = mockServerConfigFromAnnotation(context, providerInfo)
-                val provider = providerInfo.withMockServerConfig(mockServerConfig)
-                val pactMethods = if (methodAnnotation.pactMethod.isNotEmpty())
-                  listOf(methodAnnotation.pactMethod)
-                else emptyList()
-                listOf(provider to pactMethods)
+                buildProviderListFromPactMethod(methodAnnotation, context, providerInfo)
               }
               classAnnotation != null -> if (classAnnotation.pactMethods.isNotEmpty()) {
-                buildProviderList(classAnnotation, context, providerInfo)
+                buildProviderListFromPactMethods(classAnnotation, context, providerInfo)
               } else {
-                val mockServerConfig = mockServerConfigFromAnnotation(context, providerInfo)
-                val provider = providerInfo.withMockServerConfig(mockServerConfig)
-                val pactMethods = if (classAnnotation.pactMethod.isNotEmpty())
-                  listOf(classAnnotation.pactMethod)
-                else emptyList()
-                listOf(provider to pactMethods)
+                buildProviderListFromPactMethod(classAnnotation, context, providerInfo)
               }
               else -> {
                 logger.warn { "No @PactTestFor annotation found on test class, using defaults" }
@@ -423,7 +413,24 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     return providerInfo
   }
 
-  private fun buildProviderList(
+  private fun buildProviderListFromPactMethod(
+    annotation: PactTestFor,
+    context: ExtensionContext,
+    provider: ProviderInfo
+  ): List<Pair<ProviderInfo, List<String>>> {
+    var providerInfo = provider
+    val pactMethod = if (annotation.pactMethod.isNotEmpty()) {
+      val providerName = providerNameFromPactMethod(annotation.pactMethod, context)
+      if (providerName.isNotEmpty()) {
+        providerInfo = providerInfo.copy(providerName = providerName)
+      }
+      listOf(annotation.pactMethod)
+    } else emptyList()
+    val mockServerConfig = mockServerConfigFromAnnotation(context, providerInfo)
+    return listOf(providerInfo.withMockServerConfig(mockServerConfig) to pactMethod)
+  }
+
+  private fun buildProviderListFromPactMethods(
     annotation: PactTestFor,
     context: ExtensionContext,
     providerInfo: ProviderInfo
@@ -478,7 +485,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
   private fun providerNameFromPactMethod(methodName: String, context: ExtensionContext): String {
     val method = pactMethodAnnotation(null, context, methodName)
-    return method!!.getAnnotation(Pact::class.java).provider
+    return method?.getAnnotation(Pact::class.java)?.provider.orEmpty()
   }
 
   fun lookupPact(

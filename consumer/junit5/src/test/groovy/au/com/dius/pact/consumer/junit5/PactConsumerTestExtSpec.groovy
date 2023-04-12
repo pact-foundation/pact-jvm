@@ -289,6 +289,51 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.first().second == ['pactMethod1', 'pactMethod2']
   }
 
+  @PactTestFor
+  static class TestClassWithProviderOnPactAnnotation {
+    @Pact(provider = 'TestClassWithProviderOnPactAnnotation')
+    RequestResponsePact pactMethod(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 1')
+        .path('/one')
+        .toPact()
+    }
+
+    @PactTestFor(pactMethods = [ 'pactMethod' ])
+    def pactTestForMethod() { }
+
+    @PactTestFor(pactMethod = 'pactMethod')
+    def pactTestForMethod2() { }
+  }
+
+  def 'lookupProviderInfo - with provider name on the pact method - pactMethods'() {
+    given:
+    testMethod = TestClassWithProviderOnPactAnnotation.getMethod('pactTestForMethod')
+    requiredTestClass = TestClassWithProviderOnPactAnnotation
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName == 'TestClassWithProviderOnPactAnnotation'
+    providerInfo.first().second == ['pactMethod']
+  }
+
+  def 'lookupProviderInfo - with provider name on the pact method - pactMethod'() {
+    given:
+    testMethod = TestClassWithProviderOnPactAnnotation.getMethod('pactTestForMethod2')
+    requiredTestClass = TestClassWithProviderOnPactAnnotation
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName == 'TestClassWithProviderOnPactAnnotation'
+    providerInfo.first().second == ['pactMethod']
+  }
+
   def 'mockServerConfigured - returns false when there are no MockServerConfig annotations'() {
     expect:
     !testExt.mockServerConfigured(mockContext)

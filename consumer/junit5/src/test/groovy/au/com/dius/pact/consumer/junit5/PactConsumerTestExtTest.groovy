@@ -58,6 +58,7 @@ class PactConsumerTestExtTest {
     hostInterface = 'localhost', port = '8080', pactVersion = PactSpecVersion.V3)
   class TestClassWithClassLevelAnnotation {
     @SuppressWarnings('UnusedMethodParameter')
+    @Pact
     RequestResponsePact pactMethod(PactDslWithProvider builder) {
       pact
     }
@@ -67,6 +68,7 @@ class PactConsumerTestExtTest {
     @SuppressWarnings('UnusedMethodParameter')
     @PactTestFor(providerName = 'TestClassWithMethodLevelAnnotation', pactMethod = 'pactMethod',
       hostInterface = 'localhost', port = '8080', pactVersion = PactSpecVersion.V3)
+    @Pact
     RequestResponsePact pactMethod(PactDslWithProvider builder) {
       pact
     }
@@ -77,6 +79,7 @@ class PactConsumerTestExtTest {
   class TestClassWithMethodAndClassLevelAnnotation {
     @SuppressWarnings('UnusedMethodParameter')
     @PactTestFor(pactMethod = 'pactMethod', hostInterface = 'testServer')
+    @Pact
     RequestResponsePact pactMethod(PactDslWithProvider builder) {
       pact
     }
@@ -87,6 +90,7 @@ class PactConsumerTestExtTest {
   class TestClassWithMethodAndClassLevelAnnotation2 {
     @SuppressWarnings('UnusedMethodParameter')
     @PactTestFor(pactMethod = 'pactMethod', hostInterface = 'testServer', pactVersion = PactSpecVersion.V3)
+    @Pact
     RequestResponsePact pactMethod(PactDslWithProvider builder) {
       pact
     }
