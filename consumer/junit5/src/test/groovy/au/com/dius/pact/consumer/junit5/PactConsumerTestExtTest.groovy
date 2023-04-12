@@ -6,23 +6,17 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
-import org.apache.commons.lang3.JavaVersion
-import org.apache.commons.lang3.SystemUtils
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
-import spock.lang.Requires
 
 import java.lang.reflect.Method
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.jupiter.api.Assertions.assertThrows
 
-// TODO: Groovy mocks don't work on JDK 16
-@Requires(reason = "Groovy mocks don't work on JDK 16",
-  value = { SystemUtils.isJavaVersionAtMost(JavaVersion.JAVA_15) })
 class PactConsumerTestExtTest {
 
   private final subject = new PactConsumerTestExt()
@@ -163,7 +157,7 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.hostInterface, Matchers.is(''))
     assertThat(providerInfo.first.port, Matchers.is(''))
     assertThat(providerInfo.first.pactVersion, Matchers.is(Matchers.nullValue()))
-    assertThat(providerInfo.second, Matchers.is(''))
+    assert providerInfo.second == []
   }
 
   @Test
@@ -181,7 +175,7 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
     assertThat(providerInfo.first.port, Matchers.is('8080'))
     assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V3))
-    assertThat(providerInfo.second, Matchers.is('pactMethod'))
+    assert providerInfo.second == ['pactMethod']
   }
 
   @Test
@@ -199,7 +193,7 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
     assertThat(providerInfo.first.port, Matchers.is('8080'))
     assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V3))
-    assertThat(providerInfo.second, Matchers.is('pactMethod'))
+    assert providerInfo.second == ['pactMethod']
   }
 
   @Test
@@ -219,7 +213,7 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.hostInterface, Matchers.is('testServer'))
     assertThat(providerInfo.first.port, Matchers.is('1234'))
     assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V1_1))
-    assertThat(providerInfo.second, Matchers.is('pactMethod'))
+    assert providerInfo.second == ['pactMethod']
   }
 
   @Test

@@ -26,7 +26,7 @@ import spock.util.environment.RestoreSystemProperties
 import java.lang.reflect.Method
 
 @SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter', 'UnnecessaryGetter',
-  'UnnecessaryParenthesesForMethodCallWithClosure', 'LineLength'])
+  'UnnecessaryParenthesesForMethodCallWithClosure', 'LineLength', 'ExplicitHashSetInstantiation'])
 @PactTestFor(providerName = 'PactConsumerTestExtSpecProvider', pactVersion = PactSpecVersion.V3)
 class PactConsumerTestExtSpec extends Specification {
 
@@ -58,6 +58,7 @@ class PactConsumerTestExtSpec extends Specification {
       getTestMethod() >> { Optional.ofNullable(testMethod) }
       getExecutionException() >> Optional.empty()
       getStore(_) >> mockStore
+      getRequiredTestInstance() >> { requiredTestClass.newInstance() }
     }
   }
 
@@ -71,7 +72,7 @@ class PactConsumerTestExtSpec extends Specification {
 
     def store = [get: { arg ->
       if (arg == 'providers') {
-        [new Pair(providerInfo, 'test')]
+        [new Pair(providerInfo, ['test'])]
       } else if (model.isAssignableFrom(V4Pact)) {
         model.newInstance(new Consumer(), new Provider(), [])
       } else {
@@ -110,7 +111,7 @@ class PactConsumerTestExtSpec extends Specification {
 
     mockStoreData['mockServer:provider'] = new JUnit5MockServerSupport(mockServer)
     mockStoreData['mockServerConfig:provider'] = new MockProviderConfig()
-    mockStoreData['providers']  = [new Pair(new ProviderInfo('provider'), 'test')]
+    mockStoreData['providers']  = [new Pair(new ProviderInfo('provider'), ['test'])]
 
     def provider = new Provider('provider')
     def consumer = new Consumer('consumer')
@@ -141,7 +142,7 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.size() == 1
     providerInfo.first().first.providerName == 'PactConsumerTestExtSpecProvider'
     providerInfo.first().first.pactVersion == PactSpecVersion.V3
-    providerInfo.first().second == ''
+    providerInfo.first().second.empty
   }
 
   static class TestClass {
@@ -160,7 +161,7 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.size() == 1
     providerInfo.first().first.providerName ==  'PactConsumerTestExtSpecMethodProvider'
     providerInfo.first().first.pactVersion == PactSpecVersion.V1
-    providerInfo.first().second == ''
+    providerInfo.first().second.empty
   }
 
   @PactTestFor(providerName = 'PactConsumerTestExtSpecClassProvider', pactVersion = PactSpecVersion.V3)
@@ -181,7 +182,7 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.size() == 1
     providerInfo.first().first.providerName ==  'PactConsumerTestExtSpecMethodProvider'
     providerInfo.first().first.pactVersion == PactSpecVersion.V3
-    providerInfo.first().second == ''
+    providerInfo.first().second.empty
   }
 
   @PactTestFor(providerName = 'PactConsumerTestExtSpecClassProvider', pactVersion = PactSpecVersion.V3)
@@ -201,7 +202,7 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.first().first.pactVersion == PactSpecVersion.V3
     providerInfo.first().first.https
     providerInfo.first().first.port == '1234'
-    providerInfo.first().second == ''
+    providerInfo.first().second.empty
   }
 
   @PactTestFor(providerName = 'PactConsumerTestExtSpecClassProvider', pactVersion = PactSpecVersion.V3)
@@ -225,7 +226,7 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.first().first.pactVersion == PactSpecVersion.V3
     providerInfo.first().first.https
     providerInfo.first().first.port == '1235'
-    providerInfo.first().second == ''
+    providerInfo.first().second.empty
   }
 
   @PactTestFor(providerName = 'TestClassEmptyProviderOnMethod', pactVersion = PactSpecVersion.V3)
@@ -249,7 +250,43 @@ class PactConsumerTestExtSpec extends Specification {
     providerInfo.size() == 1
     providerInfo.first().first.providerName == 'TestClassEmptyProviderOnMethod'
     providerInfo.first().first.pactVersion == PactSpecVersion.V3
-    providerInfo.first().second == 'pactMethod'
+    providerInfo.first().second == ['pactMethod']
+  }
+
+  @PactTestFor(providerName = 'TestClassMultiplePactMethods')
+  static class TestClassMultiplePactMethods {
+    @Pact
+    RequestResponsePact pactMethod1(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 1')
+        .path('/one')
+        .toPact()
+    }
+
+    @Pact
+    RequestResponsePact pactMethod2(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 2')
+        .path('/two')
+        .toPact()
+    }
+
+    @PactTestFor(pactMethods = [ 'pactMethod1', 'pactMethod2' ])
+    def pactTestForMethod() { }
+  }
+
+  def 'lookupProviderInfo - with multiple pact methods for the same provider'() {
+    given:
+    testMethod = TestClassMultiplePactMethods.getMethod('pactTestForMethod')
+    requiredTestClass = TestClassMultiplePactMethods
+
+    when:
+    def providerInfo = testExt.lookupProviderInfo(mockContext)
+
+    then:
+    providerInfo.size() == 1
+    providerInfo.first().first.providerName == 'TestClassMultiplePactMethods'
+    providerInfo.first().second == ['pactMethod1', 'pactMethod2']
   }
 
   def 'mockServerConfigured - returns false when there are no MockServerConfig annotations'() {
@@ -398,5 +435,62 @@ class PactConsumerTestExtSpec extends Specification {
 
     expect:
     testExt.ignoredTest(mockContext)
+  }
+
+  class TestSetupPactFor {
+    @Pact(consumer = 'consumer1')
+    RequestResponsePact pactMethod1(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 1')
+        .path('/one')
+        .willRespondWith()
+        .toPact()
+    }
+
+    @Pact(consumer = 'consumer1')
+    RequestResponsePact pactMethod2(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 2')
+        .path('/two')
+        .willRespondWith()
+        .toPact()
+    }
+
+    @PactTestFor
+    def testMethod() { }
+  }
+
+  def 'setupPactForTest - pact methods is empty'() {
+    given:
+    requiredTestClass = TestSetupPactFor
+    testMethod = TestSetupPactFor.getMethod('testMethod')
+    def provider = new ProviderInfo('setupPactForTest', '', '', PactSpecVersion.V3)
+    mockStoreData['executedFragments'] = new HashSet()
+
+    expect:
+    testExt.setupPactForTest(provider, [], mockContext).interactions*.description == ['interaction 1']
+  }
+
+  def 'setupPactForTest - pact methods has one entry'() {
+    given:
+    requiredTestClass = TestSetupPactFor
+    testMethod = TestSetupPactFor.getMethod('testMethod')
+    def provider = new ProviderInfo('setupPactForTest', '', '', PactSpecVersion.V3)
+    mockStoreData['executedFragments'] = new HashSet()
+
+    expect:
+    testExt.setupPactForTest(provider, ['pactMethod2'], mockContext).interactions*.description == ['interaction 2']
+  }
+
+  def 'setupPactForTest - pact methods has more than one entry'() {
+    given:
+    requiredTestClass = TestSetupPactFor
+    testMethod = TestSetupPactFor.getMethod('testMethod')
+    def provider = new ProviderInfo('setupPactForTest', '', '', PactSpecVersion.V3)
+    mockStoreData['executedFragments'] = new HashSet()
+
+    expect:
+    testExt.setupPactForTest(provider, ['pactMethod1', 'pactMethod2'], mockContext).interactions*.description ==
+      ['interaction 1', 'interaction 2']
   }
 }
