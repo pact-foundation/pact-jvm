@@ -33,7 +33,7 @@ dependencies {
 
   testImplementation 'org.clojure:tools.nrepl:0.2.13'
 
-  groovyDoc 'org.apache.groovy:groovy-all:4.0.6'
+  groovyDoc 'org.apache.groovy:groovy-all:4.0.11'
 }
 
 clojure.aotCompile = true
