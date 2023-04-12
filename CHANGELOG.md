@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.6 - Bugfix Release
+
+* 3f4d0f3fb - chore: Upgrade Groovy to 4.0.11 (Ronald Holshausen, Wed Apr 12 15:24:29 2023 +1000)
+* 2070ce537 - fix(JUnit5): Provider name can be provided with the @Pact annotation #1684 (Ronald Holshausen, Wed Apr 12 15:03:07 2023 +1000)
+* 8a70a1af3 - fix(JUnit5): IllegalStateException was being raised when mutiple Pacts were confgured for the same provider #1457 (Ronald Holshausen, Wed Apr 12 11:40:12 2023 +1000)
+* 9aebbb575 - fix(JUnit5): do not overwrite class level provider name is the method one is empty (Ronald Holshausen, Tue Apr 11 16:21:10 2023 +1000)
+* f726b0da8 - chore: set CI build to max JDK 18 as Groovy fails on 19 (Ronald Holshausen, Thu Mar 30 16:16:56 2023 +1100)
+* 6d4f6976b - chore: Switch master to v4.5.x, update README (Ronald Holshausen, Thu Mar 30 15:57:20 2023 +1100)
+* 560c66d0f - bump version to 4.5.6 (Ronald Holshausen, Thu Mar 30 15:48:14 2023 +1100)
+
 # 4.5.5 - Support verification tests for sync request/response messages with MessageTestTarget
 
 * c98834b1b - Merge branch 'v4.4.x' into v4.5.x (Ronald Holshausen, Thu Mar 30 15:10:35 2023 +1100)
