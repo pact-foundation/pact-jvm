@@ -15,9 +15,15 @@ The library is available on maven central using:
 
 ### 1. Add the Pact consumer test extension to the test class.
 
-To write Pact consumer tests with JUnit 5, you need to add `@ExtendWith(PactConsumerTestExt)` to your test class. This
+To write Pact consumer tests with JUnit 5, you need to add `@PactConsumerTest` to your test class. This
 replaces the `PactRunner` used for JUnit 4 tests. The rest of the test follows a similar pattern as for JUnit 4 tests.
 
+```java
+@PactConsumerTest
+class ExampleJavaConsumerPactTest {
+```
+
+Alternatively, you can explicitly declare the JUnit extension.
 ```java
 @ExtendWith(PactConsumerTestExt.class)
 class ExampleJavaConsumerPactTest {
@@ -55,7 +61,7 @@ allows you to set the hostname to bind to (default is `localhost`) and the port 
 can also set the Pact specification version to use (default is V3).
 
 ```java
-@ExtendWith(PactConsumerTestExt.class)
+@PactConsumerTest
 @PactTestFor(providerName = "ArticlesProvider")
 public class ExampleJavaConsumerPactTest {
 ```
@@ -303,7 +309,7 @@ setup the interaction.
 For example, if we use the CSV plugin from the plugins project, our test would look like:
 
 ```java
-@ExtendWith(PactConsumerTestExt.class)
+@PactConsumerTest
 class CsvClientTest {
   /**
    * Setup an interaction that makes a request for a CSV report 
