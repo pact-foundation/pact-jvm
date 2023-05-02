@@ -32,3 +32,4 @@ if (System.getenv('GITHUB_WORKFLOW') == null) {
 include 'pact-jvm-server'
 include 'pact-specification-test'
 include 'pact-publish'
+include 'compatibility-suite'

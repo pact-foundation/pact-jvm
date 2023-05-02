@@ -1,0 +1,30 @@
+plugins {
+  id 'au.com.dius.pact.kotlin-common-conventions'
+  id 'groovy'
+}
+
+configurations {
+  cucumberRuntime {
+    extendsFrom testImplementation
+  }
+}
+
+dependencies {
+  testImplementation project(':core:model')
+  testImplementation 'io.cucumber:cucumber-java:7.12.0'
+  testImplementation 'org.apache.groovy:groovy'
+}
+
+tasks.register('cucumber') {
+  dependsOn assemble, testClasses
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      args = [
+        '--plugin', 'pretty',
+        '--plugin', 'html:build/cucumber-report.html',
+        'pact-compatibility-suite/features']
+    }
+  }
+}
