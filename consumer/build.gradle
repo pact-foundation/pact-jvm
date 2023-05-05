@@ -42,7 +42,7 @@ dependencies {
   testImplementation 'org.apache.groovy:groovy-dateutil'
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
   testRuntimeOnly 'org.objenesis:objenesis:3.2'
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
-  testImplementation 'io.grpc:grpc-protobuf:1.43.2'
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
+  testImplementation 'io.grpc:grpc-protobuf:1.51.0'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }
