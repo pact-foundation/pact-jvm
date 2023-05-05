@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.support
 
-import org.apache.hc.client5.http.impl.classic.ProtocolExec
+import org.apache.hc.client5.http.impl.classic.MainClientExec
 import org.apache.hc.client5.http.protocol.RequestDefaultHeaders
 import spock.lang.Specification
 
@@ -16,7 +16,7 @@ class HttpClientSpec extends Specification {
     def defaultHeaders = null
     def execChain = result.component1().execChain
     while (defaultHeaders == null && execChain != null) {
-      if (execChain.handler instanceof ProtocolExec) {
+      if (execChain.handler instanceof MainClientExec) {
         def interceptor = execChain.handler.httpProcessor.requestInterceptors.find {
           it instanceof RequestDefaultHeaders
         }

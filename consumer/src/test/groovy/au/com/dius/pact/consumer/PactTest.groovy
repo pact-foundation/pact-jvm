@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import groovy.json.JsonSlurper
+import io.ktor.network.tls.certificates.KeyType
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager
@@ -77,7 +78,7 @@ class PactTest {
       .toPact()
 
     def jksFile = File.createTempFile('PactTest', '.jks')
-    def keystore = generateCertificate(jksFile, 'SHA1withRSA', 'PactTest', 'changeit', 'changeit', 1024)
+    def keystore = generateCertificate(jksFile, 'SHA1withRSA', 'PactTest', 'changeit', 'changeit', 1024, KeyType.Server)
 
     MockProviderConfig config = new MockHttpsProviderConfig('localhost', 8443, PactSpecVersion.V3,
       keystore, 'PactTest', 'changeit', 'changeit')

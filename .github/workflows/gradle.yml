@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         module: [ core, consumer, provider, pact-specification-test ]
-        jdk: [ 11, 17, 18 ]
+        jdk: [ 17, 18 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK

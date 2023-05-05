@@ -21,6 +21,7 @@ dependencies {
   implementation 'org.slf4j:slf4j-api'
   implementation 'io.ktor:ktor-server-netty'
   implementation 'io.ktor:ktor-network-tls-certificates'
+  implementation 'io.ktor:ktor-server-call-logging'
   implementation('io.pact.plugin.driver:core') {
     exclude group: 'au.com.dius.pact.core'
   }
