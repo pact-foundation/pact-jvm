@@ -72,4 +72,18 @@ fun <V, E> Result<V, E>.getOrElse(function: (E) -> V): V {
   }
 }
 
+fun <V, E> Result<V, E>.orElse(function: (E) -> Result<V, E>): Result<V, E> {
+  return when (this) {
+    is Result.Err -> function(error)
+    is Result.Ok -> this
+  }
+}
+
+fun <V, E> Result<V, E>.or(default: Result<V, E>): Result<V, E> {
+  return when (this) {
+    is Result.Err -> default
+    is Result.Ok -> this
+  }
+}
+
 class UnwrapException(message: String): RuntimeException(message)
