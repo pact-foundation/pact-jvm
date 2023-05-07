@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.0 - [?62;1;4cKotlin 1.8 + JDK 17 release
+
+* f5aff8277 - chore: Upgrade dependencies (Ronald Holshausen, Fri May 5 16:56:45 2023 +1000)
+* 1fafbf45c - chore: Upgrade Kotlin to 1.8.21, KTor to 2.3, plugin driver to 0.4.0 (Ronald Holshausen, Fri May 5 16:42:41 2023 +1000)
+* a4d0597ad - chore: start v4.6.x branch (Ronald Holshausen, Fri May 5 15:39:30 2023 +1000)
+* 1819fcf0b - chore: add or and orElse to Result class (Ronald Holshausen, Fri May 5 15:25:31 2023 +1000)
+* 6f072fb25 - Merge commit '276bf561a9a87cf2ed734cc30c31f2b495be8d4e' as 'compatibility-suite/pact-compatibility-suite' (Ronald Holshausen, Mon May 1 15:23:04 2023 +1000)
+* 276bf561a - Squashed 'compatibility-suite/pact-compatibility-suite/' content from commit b5ba1cc60 (Ronald Holshausen, Mon May 1 15:23:04 2023 +1000)
+* 8da0855fa - Merge pull request #1685 from holly-cummins/shorthand-annotation (Ronald Holshausen, Mon May 1 15:07:34 2023 +1000)
+* d3dbc522c - Use shorthand annotation instead of @ExtendWith (Holly Cummins, Wed Apr 19 15:01:00 2023 +0100)
+* a7c2314f7 - bump version to 4.5.7 (Ronald Holshausen, Wed Apr 12 15:50:47 2023 +1000)
+
 # 4.5.6 - Bugfix Release
 
 * 3f4d0f3fb - chore: Upgrade Groovy to 4.0.11 (Ronald Holshausen, Wed Apr 12 15:24:29 2023 +1000)
