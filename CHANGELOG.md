@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.6.0 - [?62;1;4cKotlin 1.8 + JDK 17 release
+# 4.6.0 - Kotlin 1.8 + JDK 17 release
 
 * f5aff8277 - chore: Upgrade dependencies (Ronald Holshausen, Fri May 5 16:56:45 2023 +1000)
 * 1fafbf45c - chore: Upgrade Kotlin to 1.8.21, KTor to 2.3, plugin driver to 0.4.0 (Ronald Holshausen, Fri May 5 16:42:41 2023 +1000)
