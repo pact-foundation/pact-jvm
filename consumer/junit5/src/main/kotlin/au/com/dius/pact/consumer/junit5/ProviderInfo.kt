@@ -115,7 +115,8 @@ data class ProviderInfo @JvmOverloads constructor(
         ProviderType.UNSPECIFIED -> null
         else -> annotation.providerType
       }
-      return ProviderInfo(providerName, annotation.hostInterface, annotation.port, pactVersion, providerType,
+      val port = ExpressionParser().parseExpression(annotation.port, DataType.STRING)?.toString() ?: annotation.port
+      return ProviderInfo(providerName, annotation.hostInterface, port, pactVersion, providerType,
         annotation.https, annotation.mockServerImplementation, annotation.keyStorePath, annotation.keyStoreAlias,
         annotation.keyStorePassword, annotation.privateKeyPassword)
     }
