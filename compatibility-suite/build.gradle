@@ -20,7 +20,7 @@ tasks.register('cucumber') {
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = [
         '--plugin', 'pretty',
-        '--plugin', 'html:target/cucumber-report.html',
+        '--plugin', 'html:build/cucumber-report.html',
         '--glue', 'steps',
         'pact-compatibility-suite/features']
     }
