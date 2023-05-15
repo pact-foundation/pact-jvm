@@ -9,7 +9,7 @@ configurations {
 }
 
 dependencies {
-  testImplementation 'io.cucumber:cucumber-java:6.10.4'
+  testImplementation 'io.cucumber:cucumber-java:7.12.0'
 }
 
 tasks.register('cucumber') {

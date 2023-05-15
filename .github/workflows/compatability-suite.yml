@@ -23,3 +23,4 @@ jobs:
       with:
         name: cucumber-report
         path: compatibility-suite/build/cucumber-report.html
+      if: always()
