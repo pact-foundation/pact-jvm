@@ -1,0 +1,28 @@
+plugins {
+  id 'au.com.dius.pact.kotlin-common-conventions'
+}
+
+configurations {
+  cucumberRuntime {
+    extendsFrom testImplementation
+  }
+}
+
+dependencies {
+  testImplementation 'io.cucumber:cucumber-java:6.10.4'
+}
+
+tasks.register('cucumber') {
+  dependsOn assemble, testClasses
+  doLast {
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      args = [
+        '--plugin', 'pretty',
+        '--plugin', 'html:target/cucumber-report.html',
+        '--glue', 'steps',
+        'pact-compatibility-suite/features']
+    }
+  }
+}
