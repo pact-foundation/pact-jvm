@@ -10,9 +10,19 @@ configurations {
 
 dependencies {
   testImplementation 'io.cucumber:cucumber-java:7.12.0'
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.apache.groovy:groovy-json'
+  testImplementation project(':core:model')
+  testImplementation project(':core:matchers')
+  testImplementation project(':consumer')
+  testImplementation project(':provider')
+  testImplementation('io.pact.plugin.driver:core') {
+    exclude group: 'au.com.dius.pact.core'
+  }
+  testImplementation 'ch.qos.logback:logback-classic'
 }
 
-tasks.register('cucumber') {
+tasks.register('v1') {
   dependsOn assemble, testClasses
   doLast {
     javaexec {
@@ -20,9 +30,9 @@ tasks.register('cucumber') {
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = [
         '--plugin', 'pretty',
-        '--plugin', 'html:build/cucumber-report.html',
-        '--glue', 'steps',
-        'pact-compatibility-suite/features']
+        '--plugin', 'html:build/cucumber-report-v1.html',
+        '--glue', 'steps.v1',
+        'pact-compatibility-suite/features/V1']
     }
   }
 }

@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.HttpStatus
+import au.com.dius.pact.core.support.isNotEmpty
 import com.github.ajalt.mordant.TermColors
 
 /**
@@ -92,6 +93,10 @@ data class QueryMismatch(
   val mismatch: String? = null,
   val path: String = "/"
 ) : Mismatch() {
+  override fun description() = if (mismatch.isNullOrEmpty())
+    "expected query parameter '$queryParameter' with value '$expected' but received '$actual'"
+  else mismatch
+
   override fun type() = "query"
 }
 

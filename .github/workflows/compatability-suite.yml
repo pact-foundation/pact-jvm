@@ -7,7 +7,7 @@ on:
     branches: [ master, v4.1.x, v4.4.x, v4.5.x ]
 
 jobs:
-  cucumber:
+  v1:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -17,10 +17,10 @@ jobs:
         distribution: temurin
         java-version: 18
     - name: Build with Gradle
-      run: ./gradlew --no-daemon :compatibility-suite:cucumber
+      run: ./gradlew --no-daemon :compatibility-suite:v1
     - name: Archive cucumber results
       uses: actions/upload-artifact@v3
       with:
         name: cucumber-report
-        path: compatibility-suite/build/cucumber-report.html
+        path: compatibility-suite/build/cucumber-report-v1.html
       if: always()
