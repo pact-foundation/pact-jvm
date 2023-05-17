@@ -20,6 +20,7 @@ dependencies {
     exclude group: 'au.com.dius.pact.core'
   }
   testImplementation 'ch.qos.logback:logback-classic'
+  implementation 'io.ktor:ktor-http-jvm'
 }
 
 tasks.register('v1') {

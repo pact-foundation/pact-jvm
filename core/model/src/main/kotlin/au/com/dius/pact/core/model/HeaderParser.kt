@@ -20,7 +20,7 @@ object HeaderParser {
     }
   }
 
-  private fun hvToString(headerValue: HeaderValue): String {
+  fun hvToString(headerValue: HeaderValue): String {
     return if (headerValue.params.isEmpty()) {
       headerValue.value.trim()
     } else {

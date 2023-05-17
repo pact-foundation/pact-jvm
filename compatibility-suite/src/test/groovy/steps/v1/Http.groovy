@@ -4,15 +4,18 @@ import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.PactTestExecutionContext
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.core.matchers.BodyMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
+import au.com.dius.pact.core.matchers.QueryMismatch
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
+import au.com.dius.pact.core.model.HeaderParser
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.provider.HttpClientFactory
@@ -33,6 +36,7 @@ import io.cucumber.java.en.When
 
 import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap
+import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 
 @SuppressWarnings('SpaceAfterOpeningBrace')
 class Http {
@@ -85,6 +89,36 @@ class Http {
 
       if (entry['query']) {
         interaction.request.query = queryStringToMap(entry['query'])
+      }
+
+      if (entry['headers']) {
+        interaction.request.headers = entry['headers'].split(',').collect {
+          it.trim()[1..-2].split(':')
+        }.collectEntries {
+          Map.entry(it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) })
+        }
+      }
+
+      if (entry['body']) {
+        if (entry['body'].startsWith('JSON:')) {
+          interaction.request.headers['content-type'] = ['application/json']
+          interaction.request.body = OptionalBody.body(entry['body'][5..-1].bytes, new ContentType('application/json'))
+        } else if (entry['body'].startsWith('XML:')) {
+          interaction.request.headers['content-type'] = ['application/xml']
+          interaction.request.body = OptionalBody.body(entry['body'][4..-1].bytes, new ContentType('application/xml'))
+        } else {
+          String contentType = 'text/plain'
+          if (entry['body'].endsWith('.json')) {
+            contentType = 'application/json'
+          } else if (entry['body'].endsWith('.xml')) {
+            contentType = 'application/xml'
+          }
+          interaction.request.headers['content-type'] = [contentType]
+          File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
+          contents.withInputStream {
+            interaction.request.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
+          }
+        }
       }
 
       if (entry['response']) {
@@ -157,6 +191,36 @@ class Http {
       request.query = queryStringToMap(entry['query'])
     }
 
+    if (entry['headers']) {
+      request.headers = entry['headers'].split(',').collect {
+        it.trim()[1..-2].split(':')
+      }.collectEntries {
+        Map.entry(it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) })
+      }
+    }
+
+    if (entry['body']) {
+      if (entry['body'].startsWith('JSON:')) {
+        request.headers['content-type'] = ['application/json']
+        request.body = OptionalBody.body(entry['body'][5..-1].bytes, new ContentType('application/json'))
+      } else if (entry['body'].startsWith('XML:')) {
+        request.headers['content-type'] = ['application/xml']
+        request.body = OptionalBody.body(entry['body'][4..-1].bytes, new ContentType('application/xml'))
+      } else {
+        String contentType = 'text/plain'
+        if (entry['body'].endsWith('.json')) {
+          contentType = 'application/json'
+        } else if (entry['body'].endsWith('.xml')) {
+          contentType = 'application/xml'
+        }
+        request.headers['content-type'] = [contentType]
+        File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
+        contents.withInputStream {
+          request.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
+        }
+      }
+    }
+
     response = client.makeRequest(request)
   }
 
@@ -217,9 +281,14 @@ class Http {
   @Then('the \\{{numType}} interaction response will contain the {string} document')
   void the_interaction_response_will_contain_the_document(Integer num, String fixture) {
     File contents = new File("pact-compatibility-suite/fixtures/${fixture}")
-    def json = new JsonSlurper().parse(contents)
-    assert loadedPact.interactions[num].asSynchronousRequestResponse().response.body.value ==
-      JsonOutput.toJson(json).bytes
+    if (fixture.endsWith('.json')) {
+      def json = new JsonSlurper().parse(contents)
+      assert loadedPact.interactions[num].asSynchronousRequestResponse().response.body.value ==
+        JsonOutput.toJson(json).bytes
+    } else {
+      assert loadedPact.interactions[num].asSynchronousRequestResponse().response.body.value ==
+        contents.bytes
+    }
   }
 
   @Then('the mock server status will be OK')
@@ -272,8 +341,8 @@ class Http {
         def mismatchResult = mockServerResult.mismatches.find {
           it instanceof PactVerificationResult.PartialMismatch
         } as PactVerificationResult.PartialMismatch
-        def mismatches = mismatchResult.mismatches.findAll {it.type() == mismatchType }
-        assert mismatches.find { it.description() == error } != null
+        def mismatches = mismatchResult?.mismatches?.findAll {it.type() == mismatchType }
+        assert mismatches?.find { it.description() == error } != null
       }
       case PactVerificationResult.PartialMismatch -> {
         def mismatches = mockServerResult.mismatches.findAll {it.type() == mismatchType }
@@ -283,8 +352,8 @@ class Http {
     }
   }
 
-  @Then("the mock server status will be an unexpected request received error for interaction \\{{int}}")
-  void the_mock_server_status_will_be_an_unexpected_request_received_error_for_interaction(Integer num) {
+  @Then("the mock server status will be an unexpected {string} request received error for interaction \\{{int}}")
+  void the_mock_server_status_will_be_an_unexpected_request_received_error_for_interaction(String method, Integer num) {
     switch (mockServerResult) {
       case PactVerificationResult.Mismatches -> {
         def mismatch = mockServerResult.mismatches.find {
@@ -292,9 +361,79 @@ class Http {
         } as PactVerificationResult.UnexpectedRequest
 
         def expectedRequest = interactions[num - 1].request
-        assert mismatch.request.method == expectedRequest.method
+        assert mismatch.request.method == method
         assert mismatch.request.path == expectedRequest.path
         assert mismatch.request.query == expectedRequest.query
+      }
+      default -> throw new IllegalArgumentException("$mockServerResult is not an expected result")
+    }
+  }
+
+  @Then("the mock server status will be an unexpected {string} request received error for path {string}")
+  void the_mock_server_status_will_be_an_unexpected_request_received_error(String method, String path) {
+    switch (mockServerResult) {
+      case PactVerificationResult.Mismatches -> {
+        def mismatch = mockServerResult.mismatches.find {
+          it instanceof PactVerificationResult.UnexpectedRequest
+        } as PactVerificationResult.UnexpectedRequest
+        assert mismatch.request.method == method
+        assert mismatch.request.path == path
+      }
+      default -> throw new IllegalArgumentException("$mockServerResult is not an expected result")
+    }
+  }
+
+  @Then('the \\{{numType}} interaction request will contain the header {string} with value {string}')
+  void the_interaction_request_will_contain_the_header_with_value(Integer num, String key, String value) {
+    def headers = loadedPact.interactions[num].asSynchronousRequestResponse().request.headers
+    assert headers[key] == [ value ]
+  }
+
+  @Then("the \\{{numType}} interaction request content type will be {string}")
+  void the_interaction_request_content_type_will_be(Integer num, String contentType) {
+    assert loadedPact.interactions[num].asSynchronousRequestResponse().request.contentTypeHeader() == contentType
+  }
+
+  @Then("the \\{{numType}} interaction request will contain the {string} document")
+  void the_interaction_request_will_contain_the_document(Integer num, String fixture) {
+    File contents = new File("pact-compatibility-suite/fixtures/${fixture}")
+    if (fixture.endsWith('.json')) {
+      def json = new JsonSlurper().parse(contents)
+      assert loadedPact.interactions[num].asSynchronousRequestResponse().request.body.value ==
+        JsonOutput.toJson(json).bytes
+    } else {
+      assert loadedPact.interactions[num].asSynchronousRequestResponse().request.body.value ==
+        contents.bytes
+    }
+  }
+
+  @Then("the mismatches will contain a {string} mismatch with path {string} with error {string}")
+  void the_mismatches_will_contain_a_mismatch_with_path_with_error(String mismatchType, String path, String error) {
+    switch (mockServerResult) {
+      case PactVerificationResult.Mismatches -> {
+        def mismatchResult = mockServerResult.mismatches.find {
+          it instanceof PactVerificationResult.PartialMismatch
+        } as PactVerificationResult.PartialMismatch
+        def mismatches = mismatchResult?.mismatches?.findAll {it.type() == mismatchType }
+        assert mismatches?.find {
+          switch (it) {
+            case QueryMismatch -> it.path == path && it.description() == error
+            case HeaderMismatch -> it.headerKey == path && it.description() == error
+            case BodyMismatch -> it.path == path && it.description() == error
+            default -> false
+          }
+        } != null
+      }
+      case PactVerificationResult.PartialMismatch -> {
+        def mismatches = mockServerResult.mismatches.findAll {it.type() == mismatchType }
+        assert mismatches?.find {
+          switch (it) {
+            case QueryMismatch -> it.path == path && it.description() == error
+            case HeaderMismatch -> it.headerKey == path && it.description() == error
+            case BodyMismatch -> it.path == path && it.description() == error
+            default -> false
+          }
+        } != null
       }
       default -> throw new IllegalArgumentException("$mockServerResult is not an expected result")
     }
