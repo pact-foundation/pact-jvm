@@ -134,11 +134,11 @@ Feature: Basic HTTP consumer
   Scenario: Request with the incorrect type of body contents
     When the mock server is started with interaction {4}
     And request {4} is made to the mock server with the following changes:
-      | body                           |
+      | body                                                                         |
       | XML: <?xml version="1.0" encoding="UTF-8"?><alligator name="Mary" feet="4"/> |
     Then a 500 error response is returned
     When the pact test is done
     Then the mock server status will NOT be OK
     And the mock server status will be mismatches
-    And the mismatches will contain a "body-content-type" mismatch with error "Expected a response type of 'application/json' but the actual type was 'application/xml'"
+    And the mismatches will contain a "body-content-type" mismatch with error "Expected a body of 'application/json' but the actual content type was 'application/xml'"
     And the mock server will NOT write out a Pact file for the interaction when done
