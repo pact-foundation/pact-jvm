@@ -41,7 +41,7 @@ jar {
           'Specification-Vendor': project.group,
           'Specification-Title': project.name,
           'Specification-Version': archiveVersion,
-          'Automatic-Module-Name': project.group + "." + project.name.replaceAll('-', '_')
+          'Automatic-Module-Name': (project.group + "." + project.name).replaceAll('-', '_')
     }
 }
 
