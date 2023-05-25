@@ -1,0 +1,314 @@
+{
+  "consumer": {
+    "name": "Pact Compatability Suite Broker Client"
+  },
+  "interactions": [
+    {
+      "description": "a request for the provider pacts",
+      "pending": false,
+      "request": {
+        "body": {
+          "content": {
+            "consumerVersionSelectors": [],
+            "includePendingStatus": false
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/pacts/provider/p/for-verification"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "_embedded": {
+              "pacts": [
+                {
+                  "_links": {
+                    "self": {
+                      "href": "http://localhost:9876/pacts/provider/p/consumer/c_2",
+                      "name": "Pact between c_2 and p"
+                    }
+                  },
+                  "shortDescription": "latest"
+                }
+              ]
+            },
+            "_links": {
+              "self": {
+                "href": "http://localhost:9876/pacts/provider/{provider}/for-verification",
+                "title": "Pacts to be verified"
+              }
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$._embedded.pacts[*]._links.self.href": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".*\\/(pacts\\/provider\\/p\\/consumer\\/c_2)$"
+                }
+              ]
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$._embedded.pacts[*]._links.self.href": {
+              "type": "MockServerURL",
+              "example": "http://localhost:9876/pacts/provider/p/consumer/c_2",
+              "regex": ".*\\/(pacts\\/provider\\/p\\/consumer\\/c_2)$"
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to the root",
+      "pending": false,
+      "request": {
+        "method": "GET",
+        "path": "/"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "_links": {
+              "pb:provider-pacts-for-verification": {
+                "href": "http://localhost:9876/pacts/provider/{provider}/for-verification",
+                "templated": true,
+                "title": "Pact versions to be verified for the specified provider"
+              }
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$._links.pb:provider-pacts-for-verification.href": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".*\\/(\\Qpacts\\E\\/\\Qprovider\\E\\/\\Q{provider}\\E\\/\\Qfor-verification\\E)$"
+                }
+              ]
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$._links.pb:provider-pacts-for-verification.href": {
+              "type": "MockServerURL",
+              "example": "http://localhost:9876/pacts/provider/{provider}/for-verification",
+              "regex": ".*\\/(\\Qpacts\\E\\/\\Qprovider\\E\\/\\Q{provider}\\E\\/\\Qfor-verification\\E)$"
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "publish verification results for c_2",
+      "pending": false,
+      "request": {
+        "method": "POST",
+        "path": "/pacts/provider/p/consumer/c_2/verification-results",
+        "headers": {
+          "Content-Type": [
+            "application\/json; charset=UTF-8"
+          ]
+        },
+        "body": {
+          "content": {
+            "providerApplicationVersion": "0.0.0",
+            "success": true,
+            "verifiedBy": {
+              "implementation": "Pact-JVM",
+              "version": "4.5.7"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.providerApplicationVersion": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$.verifiedBy.implementation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verifiedBy.version": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "semver"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 201
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "publish failed verification results for c_2",
+      "pending": false,
+      "request": {
+        "method": "POST",
+        "path": "/pacts/provider/p/consumer/c_2/verification-results",
+        "headers": {
+          "Content-Type": [
+            "application\/json; charset=UTF-8"
+          ]
+        },
+        "body": {
+          "content": {
+            "providerApplicationVersion": "0.0.0",
+            "success": false,
+            "testResults": [
+              {
+                "interactionId": "ID1",
+                "mismatches": [
+                  {
+                    "attribute": "status",
+                    "description": "expected status of 200 but was 500"
+                  }
+                ],
+                "success": false
+              }
+            ],
+            "verifiedBy": {
+              "implementation": "Pact-JVM",
+              "version": "4.5.7"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.providerApplicationVersion": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$.verifiedBy.implementation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verifiedBy.version": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "semver"
+                }
+              ]
+            },
+            "$.testResults[*].interactionId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.testResults[*].mismatches[*].attribute": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.testResults[*].mismatches[*].description": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 201
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "Pact Broker"
+  }
+}
