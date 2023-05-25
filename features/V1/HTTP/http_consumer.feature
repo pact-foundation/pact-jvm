@@ -1,3 +1,4 @@
+@consumer
 Feature: Basic HTTP consumer
   Supports basic HTTP consumer interactions
 
