@@ -10,6 +10,7 @@ configurations {
 
 dependencies {
   testImplementation 'io.cucumber:cucumber-java:7.12.0'
+  testImplementation 'io.cucumber:cucumber-picocontainer:7.12.0'
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.apache.groovy:groovy-json'
   testImplementation project(':core:model')
@@ -26,14 +27,21 @@ dependencies {
 tasks.register('v1') {
   dependsOn assemble, testClasses
   doLast {
+    def cucumberArgs = [
+      '--plugin', 'pretty',
+      '--plugin', 'html:build/cucumber-report-v1.html',
+      '--glue', 'steps.v1',
+      'pact-compatibility-suite/features/V1'
+    ]
+    if (project.hasProperty('cucumber.filter.tags')) {
+      cucumberArgs.add(0, project.property('cucumber.filter.tags'))
+      cucumberArgs.add(0, '-t')
+    }
     javaexec {
       main = "io.cucumber.core.cli.Main"
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-      args = [
-        '--plugin', 'pretty',
-        '--plugin', 'html:build/cucumber-report-v1.html',
-        '--glue', 'steps.v1',
-        'pact-compatibility-suite/features/V1']
+      args = cucumberArgs
+      systemProperty 'pact_do_not_track', 'true'
     }
   }
 }

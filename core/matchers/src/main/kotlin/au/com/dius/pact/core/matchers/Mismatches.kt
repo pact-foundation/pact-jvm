@@ -48,10 +48,10 @@ data class StatusMismatch(
 }
 
 data class BodyTypeMismatch(val expected: String?, val actual: String?) : Mismatch() {
-  override fun description() = "Expected a response type of '$expected' " +
-    "but the actual type was '$actual'"
+  override fun description() = "Expected a body of '$expected' " +
+    "but the actual content type was '$actual'"
   override fun description(t: TermColors) =
-    "Expected a response type of ${t.bold("'$expected'")} but the actual type was ${t.bold("'$actual'")}"
+    "Expected a body of ${t.bold("'$expected'")} but the actual content type was ${t.bold("'$actual'")}"
   fun toMap(): Map<String, Any?> {
     return mapOf("mismatch" to description())
   }

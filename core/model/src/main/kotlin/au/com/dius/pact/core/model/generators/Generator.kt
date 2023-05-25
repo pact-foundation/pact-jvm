@@ -569,7 +569,10 @@ data class MockServerURLGenerator(
                 href + "/" + match.groupValues[1]
               }
             } else {
-              logger.error { "MockServerURL: can not generate a value as the regex did not match the example" }
+              logger.error {
+                "MockServerURL: can not generate a value as the regex did not match the example, " +
+                  "regex='$regex', example='$example'"
+              }
               null
             }
           } catch (err: PatternSyntaxException) {

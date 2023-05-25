@@ -11,12 +11,10 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.HeaderParser
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
-import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
@@ -30,7 +28,6 @@ import io.cucumber.java.After
 import io.cucumber.java.Before
 import io.cucumber.java.ParameterType
 import io.cucumber.java.Scenario
-import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 
@@ -38,9 +35,9 @@ import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 
-@SuppressWarnings('SpaceAfterOpeningBrace')
-class Http {
-  List<RequestResponseInteraction> interactions = []
+@SuppressWarnings(['SpaceAfterOpeningBrace', 'AbcMetric', 'NestedBlockDepth'])
+class HttpConsumer {
+  CompatibilitySuiteWorld world
   RequestResponsePact pact
   MockProviderConfig config
   BaseMockServer mockServer
@@ -50,6 +47,10 @@ class Http {
   File pactFile
   Pact loadedPact
   Object loadPactJson
+
+  HttpConsumer(CompatibilitySuiteWorld world) {
+    this.world = world
+  }
 
   @Before
   void before(Scenario scenario) {
@@ -74,77 +75,10 @@ class Http {
     }
   }
 
-  @Given('the following HTTP interactions have been defined:')
-  void the_following_http_interactions_have_been_setup(DataTable dataTable) {
-    dataTable.entries().eachWithIndex { Map<String, String> entry, int i ->
-      Interaction interaction = new RequestResponseInteraction("Interaction $i")
-
-      if (entry['method']) {
-        interaction.request.method = entry['method']
-      }
-
-      if (entry['path']) {
-        interaction.request.path = entry['path']
-      }
-
-      if (entry['query']) {
-        interaction.request.query = queryStringToMap(entry['query'])
-      }
-
-      if (entry['headers']) {
-        interaction.request.headers = entry['headers'].split(',').collect {
-          it.trim()[1..-2].split(':')
-        }.collectEntries {
-          Map.entry(it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) })
-        }
-      }
-
-      if (entry['body']) {
-        if (entry['body'].startsWith('JSON:')) {
-          interaction.request.headers['content-type'] = ['application/json']
-          interaction.request.body = OptionalBody.body(entry['body'][5..-1].bytes, new ContentType('application/json'))
-        } else if (entry['body'].startsWith('XML:')) {
-          interaction.request.headers['content-type'] = ['application/xml']
-          interaction.request.body = OptionalBody.body(entry['body'][4..-1].bytes, new ContentType('application/xml'))
-        } else {
-          String contentType = 'text/plain'
-          if (entry['body'].endsWith('.json')) {
-            contentType = 'application/json'
-          } else if (entry['body'].endsWith('.xml')) {
-            contentType = 'application/xml'
-          }
-          interaction.request.headers['content-type'] = [contentType]
-          File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
-          contents.withInputStream {
-            interaction.request.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
-          }
-        }
-      }
-
-      if (entry['response']) {
-        interaction.response.status = entry['response'].toInteger()
-      }
-
-      if (entry['response body']) {
-        String contentType = 'text/plain'
-        if (entry['response content']) {
-          contentType = entry['response content']
-        }
-        interaction.response.headers['content-type'] = [ contentType ]
-        File contents = new File("pact-compatibility-suite/fixtures/${entry['response body']}")
-        contents.withInputStream {
-          interaction.response.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
-        }
-      }
-
-      interactions << interaction
-    }
-  }
-
   @When('the mock server is started with interaction \\{{int}}')
   void the_mock_server_is_started_with_interaction(Integer num) {
     pact = new RequestResponsePact(new Provider('p'),
-      new Consumer('v1-compatibility-suite-c'), [ interactions[num - 1] ])
+      new Consumer('v1-compatibility-suite-c'), [ world.interactions[num - 1] ])
     config = new MockProviderConfig()
     mockServer = mockServer(pact, config)
     mockServer.start()
@@ -154,7 +88,7 @@ class Http {
   void the_mock_server_is_started_with_interactions(String ids) {
     def interactions = ids.split(',\\s*').collect {
       def index = it.toInteger()
-      interactions[index - 1]
+      world.interactions[index - 1]
     }
     pact = new RequestResponsePact(new Provider('p'), new Consumer('v1-compatibility-suite-c'),
       interactions)
@@ -168,7 +102,7 @@ class Http {
     IProviderInfo providerInfo = new ProviderInfo()
     providerInfo.port = mockServer.port
     def client = new ProviderClient(providerInfo, new HttpClientFactory())
-    response = client.makeRequest(interactions[num - 1].request)
+    response = client.makeRequest(world.interactions[num - 1].request)
   }
 
   @When('request \\{{int}} is made to the mock server with the following changes:')
@@ -177,7 +111,7 @@ class Http {
     providerInfo.port = mockServer.port
     def client = new ProviderClient(providerInfo, new HttpClientFactory())
 
-    def request = interactions[num - 1].request.copy()
+    def request = world.interactions[num - 1].request.copy()
     def entry = dataTable.entries().first()
     if (entry['method']) {
       request.method = entry['method']
@@ -313,7 +247,7 @@ class Http {
   void the_mock_server_status_will_be_an_expected_but_not_received_error_for_interaction(Integer num) {
     switch (mockServerResult) {
       case PactVerificationResult.ExpectedButNotReceived ->
-        assert mockServerResult.expectedRequests.first() == interactions[num - 1].request
+        assert mockServerResult.expectedRequests.first() == world.interactions[num - 1].request
       default -> throw new IllegalArgumentException("$mockServerResult is not an expected result")
     }
   }
@@ -352,7 +286,7 @@ class Http {
     }
   }
 
-  @Then("the mock server status will be an unexpected {string} request received error for interaction \\{{int}}")
+  @Then('the mock server status will be an unexpected {string} request received error for interaction \\{{int}}')
   void the_mock_server_status_will_be_an_unexpected_request_received_error_for_interaction(String method, Integer num) {
     switch (mockServerResult) {
       case PactVerificationResult.Mismatches -> {
@@ -360,7 +294,7 @@ class Http {
           it instanceof PactVerificationResult.UnexpectedRequest
         } as PactVerificationResult.UnexpectedRequest
 
-        def expectedRequest = interactions[num - 1].request
+        def expectedRequest = world.interactions[num - 1].request
         assert mismatch.request.method == method
         assert mismatch.request.path == expectedRequest.path
         assert mismatch.request.query == expectedRequest.query
@@ -369,7 +303,7 @@ class Http {
     }
   }
 
-  @Then("the mock server status will be an unexpected {string} request received error for path {string}")
+  @Then('the mock server status will be an unexpected {string} request received error for path {string}')
   void the_mock_server_status_will_be_an_unexpected_request_received_error(String method, String path) {
     switch (mockServerResult) {
       case PactVerificationResult.Mismatches -> {
@@ -389,12 +323,12 @@ class Http {
     assert headers[key] == [ value ]
   }
 
-  @Then("the \\{{numType}} interaction request content type will be {string}")
+  @Then('the \\{{numType}} interaction request content type will be {string}')
   void the_interaction_request_content_type_will_be(Integer num, String contentType) {
     assert loadedPact.interactions[num].asSynchronousRequestResponse().request.contentTypeHeader() == contentType
   }
 
-  @Then("the \\{{numType}} interaction request will contain the {string} document")
+  @Then('the \\{{numType}} interaction request will contain the {string} document')
   void the_interaction_request_will_contain_the_document(Integer num, String fixture) {
     File contents = new File("pact-compatibility-suite/fixtures/${fixture}")
     if (fixture.endsWith('.json')) {
@@ -407,7 +341,7 @@ class Http {
     }
   }
 
-  @Then("the mismatches will contain a {string} mismatch with path {string} with error {string}")
+  @Then('the mismatches will contain a {string} mismatch with path {string} with error {string}')
   void the_mismatches_will_contain_a_mismatch_with_path_with_error(String mismatchType, String path, String error) {
     switch (mockServerResult) {
       case PactVerificationResult.Mismatches -> {

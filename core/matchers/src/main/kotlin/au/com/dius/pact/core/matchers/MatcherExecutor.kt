@@ -713,7 +713,7 @@ fun <M : Mismatch> matchSemver(
   val asText = when (actual) {
     is Element -> actual.nodeName
     is Attr -> actual.name
-    is JsonValue.StringValue -> actual.value.toString()
+    is JsonValue.StringValue -> actual.toString()
     else -> actual.toString()
   }
   val matches = try {

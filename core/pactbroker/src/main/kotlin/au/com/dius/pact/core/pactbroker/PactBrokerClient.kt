@@ -495,6 +495,7 @@ open class PactBrokerClient(
       is Result.Err<Exception> -> return navigateResult
       is Result.Ok<IHalClient> -> navigateResult.value
     }
+    halClient.logContext()
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
       halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION

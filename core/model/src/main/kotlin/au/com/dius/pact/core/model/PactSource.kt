@@ -107,3 +107,5 @@ data class S3PactSource(override val url: String) : UrlPactSource() {
 }
 
 data class ClosurePactSource(val closure: Supplier<Any>) : PactSource()
+
+data class StringSource(val pactJson: String) : PactSource()

@@ -110,8 +110,8 @@ abstract class AbstractBaseMockServer : MockServer {
 
 abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig) : AbstractBaseMockServer() {
 
-  private val mismatchedRequests = ConcurrentHashMap<IRequest, MutableList<PactVerificationResult>>()
-  private val matchedRequests = ConcurrentLinkedQueue<IRequest>()
+  val mismatchedRequests = ConcurrentHashMap<IRequest, MutableList<PactVerificationResult>>()
+  val matchedRequests = ConcurrentLinkedQueue<IRequest>()
   private val requestMatcher = RequestMatching(pact)
 
   override fun waitForServer() {
