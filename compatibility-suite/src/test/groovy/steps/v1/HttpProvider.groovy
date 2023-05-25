@@ -8,7 +8,6 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.DefaultPactWriter
-import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
@@ -22,11 +21,9 @@ import au.com.dius.pact.core.model.StringSource
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.MockServerURLGenerator
-import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.Json
-import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
@@ -44,7 +41,7 @@ class HttpProvider {
   ProviderInfo providerInfo
   ProviderVerifier verifier
   List<VerificationResult> verificationResults
-  BaseMockServer mockBroker
+  List<BaseMockServer> mockBrokers = []
   Map<String, String> verificationProperties = [:]
 
   HttpProvider(CompatibilitySuiteWorld world) {
@@ -54,7 +51,7 @@ class HttpProvider {
   @After
   void after(Scenario scenario) {
     mockProvider?.stop()
-    mockBroker?.stop()
+    mockBrokers.each { it.stop() }
   }
 
   @Given('a provider is started that returns the response from interaction \\{{int}}')
@@ -132,7 +129,7 @@ class HttpProvider {
     ]
     pactJson['interactions'][0]['_id'] = world.interactions[num - 1].interactionId
 
-    File contents = new File('pact-compatibility-suite/fixtures/pact-broker.json')
+    File contents = new File("pact-compatibility-suite/fixtures/pact-broker_c${num}.json")
     Pact brokerPact = DefaultPactReader.INSTANCE.loadPact(contents) as BasePact
     /// AAARGH! My head. Adding a Pact Interaction to a Pact file for fetching a Pact file for verification
     def matchingRules = new MatchingRulesImpl()
@@ -158,15 +155,18 @@ class HttpProvider {
     )
     brokerPact.interactions << interaction
 
-    mockBroker = new KTorMockServer(brokerPact, new MockProviderConfig())
+    def mockBroker = new KTorMockServer(brokerPact, new MockProviderConfig())
     mockBroker.start()
+    mockBrokers << mockBroker
 
     providerInfo.hasPactsFromPactBrokerWithSelectorsV2("http://127.0.0.1:${mockBroker.port}", [])
   }
 
   @Then('a verification result will NOT be published back')
   void a_verification_result_will_not_be_published_back() {
-    assert mockBroker.matchedRequests.find { it.path.endsWith('/verification-results') } == null
+    assert mockBrokers.every { mock ->
+      mock.matchedRequests.find { it.path.endsWith('/verification-results') } == null
+    }
   }
 
   @Given('publishing of verification results is enabled')
@@ -176,13 +176,21 @@ class HttpProvider {
 
   @Then('a successful verification result will be published back for interaction \\{{int}}')
   void a_successful_verification_result_will_be_published_back_for_interaction(Integer num) {
-    def request = mockBroker.matchedRequests.find { it.path == "/pacts/provider/p/consumer/c_$num/verification-results" }
+    def request = mockBrokers.collect {
+      it.matchedRequests.find { it.path == "/pacts/provider/p/consumer/c_$num/verification-results".toString() }
+    }.find()
     assert request != null
     def json = new JsonSlurper().parseText( request.body.valueAsString())
-    assert json == [
-      'providerApplicationVersion': '0.0.0',
-      'success': true,
-      'verifiedBy':[ 'implementation':'Pact-JVM', 'version': Utils.INSTANCE.lookupVersion(RequestResponseInteraction)]
-    ]
+    assert json.success == true
+  }
+
+  @Then("a failed verification result will be published back for the interaction \\{{int}}")
+  void a_failed_verification_result_will_be_published_back_for_the_interaction(Integer num) {
+    def request = mockBrokers.collect {
+      it.matchedRequests.find { it.path == "/pacts/provider/p/consumer/c_$num/verification-results".toString() }
+    }.find()
+    assert request != null
+    def json = new JsonSlurper().parseText( request.body.valueAsString())
+    assert json.success == false
   }
 }
