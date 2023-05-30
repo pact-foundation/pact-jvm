@@ -3,9 +3,9 @@ package au.com.dius.pact.core.model.generators
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class MockServerURLGeneratorSpec extends Specification {
 
-  @SuppressWarnings('LineLength')
   @Unroll
   def 'generate returns null when #desc'() {
     expect:
@@ -33,5 +33,13 @@ class MockServerURLGeneratorSpec extends Specification {
       [mockServer: [href: 'http://mockserver']],
       [mockServer: [href: 'http://mockserver/']]
     ]
+  }
+
+  def 'examples from Pact Compatability Suite'() {
+    expect:
+    new MockServerURLGenerator('http://localhost:9876/pacts/provider/{provider}/for-verification',
+      '.*(\\/\\Qpacts\\E\\/\\Qprovider\\E\\/\\Q{provider}\\E\\/\\Qfor-verification\\E)$')
+      .generate([mockServer: [href: 'http://localhost:40955']], null) ==
+      'http://localhost:40955/pacts/provider/%7Bprovider%7D/for-verification'
   }
 }

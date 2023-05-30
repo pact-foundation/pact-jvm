@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.support.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.DataType
@@ -563,11 +564,7 @@ data class MockServerURLGenerator(
             val regex = Regex(regex)
             val match = regex.matchEntire(example)
             if (match != null) {
-              if (href.endsWith('/')) {
-                href + match.groupValues[1]
-              } else {
-                href + "/" + match.groupValues[1]
-              }
+              buildUrl(href, match.groupValues[1]).toString()
             } else {
               logger.error {
                 "MockServerURL: can not generate a value as the regex did not match the example, " +
