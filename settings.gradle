@@ -1,4 +1,4 @@
-rootProject.name = 'pact-jvm'
+rootProject.name = 'au.com.dius.pact'
 
 include 'core:support'
 include 'core:pactbroker'
