@@ -27,6 +27,7 @@ class SharedSteps {
   }
 
   @Given('the following HTTP interactions have been defined:')
+  @SuppressWarnings('AbcMetric')
   void the_following_http_interactions_have_been_setup(DataTable dataTable) {
     dataTable.entries().eachWithIndex { Map<String, String> entry, int i ->
       Interaction interaction = new RequestResponseInteraction("Interaction $i", [], new Request(),

@@ -40,6 +40,6 @@ class MockServerURLGeneratorSpec extends Specification {
     new MockServerURLGenerator('http://localhost:9876/pacts/provider/{provider}/for-verification',
       '.*(\\/\\Qpacts\\E\\/\\Qprovider\\E\\/\\Q{provider}\\E\\/\\Qfor-verification\\E)$')
       .generate([mockServer: [href: 'http://localhost:40955']], null) ==
-      'http://localhost:40955/pacts/provider/%7Bprovider%7D/for-verification'
+      'http://localhost:40955/pacts/provider/{provider}/for-verification'
   }
 }

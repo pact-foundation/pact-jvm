@@ -16,6 +16,8 @@ import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
+import java.net.URLDecoder
+import java.nio.charset.Charset
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -564,7 +566,7 @@ data class MockServerURLGenerator(
             val regex = Regex(regex)
             val match = regex.matchEntire(example)
             if (match != null) {
-              buildUrl(href, match.groupValues[1]).toString()
+              URLDecoder.decode(buildUrl(href, match.groupValues[1]).toString(), Charset.defaultCharset())
             } else {
               logger.error {
                 "MockServerURL: can not generate a value as the regex did not match the example, " +

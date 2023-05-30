@@ -49,6 +49,7 @@ class HttpProvider {
   }
 
   @After
+  @SuppressWarnings('UnusedMethodParameter')
   void after(Scenario scenario) {
     mockProvider?.stop()
     mockBrokers.each { it.stop() }
@@ -122,9 +123,9 @@ class HttpProvider {
       new Consumer("c_$num"), [ world.interactions[num - 1] ])
     def pactJson = pact.toMap(PactSpecVersion.V1)
     pactJson['_links'] = [
-      "pb:publish-verification-results": [
-        "title": "Publish verification results",
-        "href": "http://localhost:1234/pacts/provider/p/consumer/c_$num/verification-results"
+      'pb:publish-verification-results': [
+        'title': 'Publish verification results',
+        'href': "http://localhost:1234/pacts/provider/p/consumer/c_$num/verification-results"
       ]
     ]
     pactJson['interactions'][0]['_id'] = world.interactions[num - 1].interactionId
@@ -184,7 +185,7 @@ class HttpProvider {
     assert json.success == true
   }
 
-  @Then("a failed verification result will be published back for the interaction \\{{int}}")
+  @Then('a failed verification result will be published back for the interaction \\{{int}}')
   void a_failed_verification_result_will_be_published_back_for_the_interaction(Integer num) {
     def request = mockBrokers.collect {
       it.matchedRequests.find { it.path == "/pacts/provider/p/consumer/c_$num/verification-results".toString() }
