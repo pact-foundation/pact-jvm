@@ -61,7 +61,7 @@
               "matchers": [
                 {
                   "match": "regex",
-                  "regex": ".*\\/(pacts\\/provider\\/p\\/consumer\\/c_2)$"
+                  "regex": ".*(\\/pacts\\/provider\\/p\\/consumer\\/c_2)$"
                 }
               ]
             }
@@ -72,7 +72,59 @@
             "$._embedded.pacts[*]._links.self.href": {
               "type": "MockServerURL",
               "example": "http://localhost:9876/pacts/provider/p/consumer/c_2",
-              "regex": ".*\\/(pacts\\/provider\\/p\\/consumer\\/c_2)$"
+              "regex": ".*(\\/pacts\\/provider\\/p\\/consumer\\/c_2)$"
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for the provider pacts link",
+      "pending": false,
+      "request": {
+        "method": "GET",
+        "path": "/pacts/provider/p/for-verification"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9876/pacts/provider/p/for-verification",
+                "title": "Pacts to be verified"
+              }
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$._links.self.href": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".*(\\/pacts\\/provider\\/p\\/for-verification)$"
+                }
+              ]
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$._links.self.href": {
+              "type": "MockServerURL",
+              "example": "http://localhost:9876/pacts/provider/p/for-verification",
+              "regex": ".*(\\/pacts\\/provider\\/p\\/for-verification)$"
             }
           }
         },
@@ -141,14 +193,13 @@
         "method": "POST",
         "path": "/pacts/provider/p/consumer/c_2/verification-results",
         "headers": {
-          "Content-Type": [
-            "application\/json; charset=UTF-8"
-          ]
+          "Content-Type": [ "application/json" ]
         },
         "body": {
           "content": {
             "providerApplicationVersion": "0.0.0",
             "success": true,
+            "testResults":[{"interactionId":"ID1","success":true}],
             "verifiedBy": {
               "implementation": "Pact-JVM",
               "version": "4.5.7"
@@ -175,6 +226,14 @@
                 }
               ]
             },
+            "$.testResults": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
             "$.verifiedBy.implementation": {
               "combine": "AND",
               "matchers": [
@@ -195,7 +254,15 @@
         }
       },
       "response": {
-        "status": 201
+        "status": 201,
+        "headers": {
+          "Content-Type": [ "application/json" ]
+        },
+        "body": {
+          "content": {},
+          "contentType": "application/json",
+          "encoded": false
+        }
       },
       "transport": "https",
       "type": "Synchronous/HTTP"
@@ -207,9 +274,7 @@
         "method": "POST",
         "path": "/pacts/provider/p/consumer/c_2/verification-results",
         "headers": {
-          "Content-Type": [
-            "application\/json; charset=UTF-8"
-          ]
+          "Content-Type": [ "application/json" ]
         },
         "body": {
           "content": {
@@ -297,7 +362,15 @@
         }
       },
       "response": {
-        "status": 201
+        "status": 201,
+        "headers": {
+          "Content-Type": [ "application/json" ]
+        },
+        "body": {
+          "content": {},
+          "contentType": "application/json",
+          "encoded": false
+        }
       },
       "transport": "https",
       "type": "Synchronous/HTTP"
