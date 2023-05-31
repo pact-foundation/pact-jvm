@@ -13,6 +13,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
@@ -35,6 +36,7 @@ import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 
+@SuppressWarnings('ThrowRuntimeException')
 class HttpProvider {
   CompatibilitySuiteWorld world
   BaseMockServer mockProvider
@@ -43,9 +45,19 @@ class HttpProvider {
   List<VerificationResult> verificationResults
   List<BaseMockServer> mockBrokers = []
   Map<String, String> verificationProperties = [:]
+  List providerStateParams = []
 
   HttpProvider(CompatibilitySuiteWorld world) {
     this.world = world
+  }
+
+  void providerStateCallback(ProviderState state, String isSetup) {
+    providerStateParams << [state, isSetup]
+  }
+
+  void failingProviderStateCallback(ProviderState state, String isSetup) {
+    providerStateParams << [state, isSetup]
+    throw new RuntimeException('failingProviderStateCallback has failed')
   }
 
   @After
@@ -63,6 +75,7 @@ class HttpProvider {
     mockProvider.start()
     providerInfo = new ProviderInfo('p')
     providerInfo.port = mockProvider.port
+    providerInfo.stateChangeTeardown = true
   }
 
   @Given('a Pact file for interaction \\{{int}} is to be verified')
@@ -75,6 +88,27 @@ class HttpProvider {
     }
     ConsumerInfo consumerInfo = new ConsumerInfo('c')
     consumerInfo.pactSource = new StringSource(writer.toString())
+    if (providerInfo.stateChangeRequestFilter) {
+      consumerInfo.stateChange = providerInfo.stateChangeRequestFilter
+    }
+    providerInfo.consumers << consumerInfo
+  }
+
+  @Given('a Pact file for interaction \\{{int}} is to be verified with a provider state {string} defined')
+  void a_pact_file_for_interaction_is_to_be_verified_with_a_provider_state_defined(Integer num, String providerState) {
+    def interaction = world.interactions[num - 1].copy()
+    interaction.providerStates << new ProviderState(providerState)
+    Pact pact = new RequestResponsePact(new Provider('p'),
+      new Consumer('v1-compatibility-suite-c'), [interaction])
+    StringWriter writer = new StringWriter()
+    writer.withPrintWriter {
+      DefaultPactWriter.INSTANCE.writePact(pact, it, PactSpecVersion.V1)
+    }
+    ConsumerInfo consumerInfo = new ConsumerInfo('c')
+    consumerInfo.pactSource = new StringSource(writer.toString())
+    if (providerInfo.stateChangeRequestFilter) {
+      consumerInfo.stateChange = providerInfo.stateChangeRequestFilter
+    }
     providerInfo.consumers << consumerInfo
   }
 
@@ -193,5 +227,40 @@ class HttpProvider {
     assert request != null
     def json = new JsonSlurper().parseText( request.body.valueAsString())
     assert json.success == false
+  }
+
+  @Given('a provider state callback is configured')
+  void a_provider_state_callback_is_configured() {
+    providerInfo.stateChangeRequestFilter = this.&providerStateCallback
+  }
+
+  @Given('a provider state callback is configured, but will return a failure')
+  void a_provider_state_callback_is_configured_but_will_return_a_failure() {
+    providerInfo.stateChangeRequestFilter = this.&failingProviderStateCallback
+  }
+
+  @Then('the provider state callback will be called before the verification is run')
+  void the_provider_state_callback_will_be_called_before_the_verification_is_run() {
+    assert !providerStateParams.findAll { p -> p[1] == 'setup'  }.empty
+  }
+
+  @Then('the provider state callback will receive a setup call with {string} as the provider state parameter')
+  void the_provider_state_callback_will_receive_a_setup_call_with_as_the_provider_state_parameter(String state) {
+    assert !providerStateParams.findAll { p -> p[0].name == state && p[1] == 'setup' }.empty
+  }
+
+  @Then('the provider state callback will be called after the verification is run')
+  void the_provider_state_callback_will_be_called_after_the_verification_is_run() {
+    assert !providerStateParams.findAll { p -> p[1] == 'teardown' }.empty
+  }
+
+  @Then('the provider state callback will receive a teardown call {string} as the provider state parameter')
+  void the_provider_state_callback_will_receive_a_teardown_call_as_the_provider_state_parameter(String providerState) {
+    assert !providerStateParams.findAll { p -> p[0].name == providerState && p[1] == 'teardown' }.empty
+  }
+
+  @Then('the provider state callback will NOT receive a teardown call')
+  void the_provider_state_callback_will_not_receive_a_teardown_call() {
+    assert providerStateParams.findAll { p -> p[1] == 'teardown' }.empty
   }
 }
