@@ -62,3 +62,33 @@ Feature: Basic HTTP provider
     When the verification is run
     Then the verification will NOT be successful
     And a failed verification result will be published back for the interaction {2}
+
+  Scenario: Verifying an interaction with a defined provider state
+    Given a provider is started that returns the response from interaction {1}
+    And a provider state callback is configured
+    And a Pact file for interaction {1} is to be verified with a provider state "state one" defined
+    When the verification is run
+    Then the provider state callback will be called before the verification is run
+    And the provider state callback will receive a setup call with "state one" as the provider state parameter
+    And the provider state callback will be called after the verification is run
+    And the provider state callback will receive a teardown call "state one" as the provider state parameter
+
+  Scenario: Verifying an interaction with no defined provider state
+    Given a provider is started that returns the response from interaction {1}
+    And a provider state callback is configured
+    And a Pact file for interaction {1} is to be verified
+    When the verification is run
+    Then the provider state callback will be called before the verification is run
+    And the provider state callback will receive a setup call with "" as the provider state parameter
+    And the provider state callback will be called after the verification is run
+    And the provider state callback will receive a teardown call "" as the provider state parameter
+
+  Scenario: Verifying an interaction where the provider state callback fails
+    Given a provider is started that returns the response from interaction {1}
+    And a provider state callback is configured, but will return a failure
+    And a Pact file for interaction {1} is to be verified with a provider state "state one" defined
+    When the verification is run
+    Then the provider state callback will be called before the verification is run
+    And the verification will NOT be successful
+    And the verification results will contain a "State change request failed" error
+    And the provider state callback will NOT receive a teardown call
