@@ -48,6 +48,16 @@ interface DslBuilder {
 }
 
 /**
+ * Sets up the data required by a plugin to configure an interaction
+ */
+interface PluginInteractionBuilder {
+  /**
+   * Construct the map of configuration that is to be passed through to the plugin
+   */
+  fun build(): Map<String, Any?>
+}
+
+/**
  * Pact builder DSL that supports V4 formatted Pact files
  */
 @Suppress("TooManyFunctions")
@@ -295,6 +305,16 @@ open class PactBuilder(
     }
 
     return this
+  }
+
+  /**
+   * Configure the interaction using a builder supplied by the plugin author.
+   */
+  fun with(builder: PluginInteractionBuilder): PactBuilder {
+    require(currentInteraction != null) {
+      "'with' must be preceded by 'expectsToReceive'"
+    }
+    return with(builder.build())
   }
 
   override fun addPluginConfiguration(matcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>) {
