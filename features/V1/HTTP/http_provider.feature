@@ -92,3 +92,20 @@ Feature: Basic HTTP provider
     And the verification will NOT be successful
     And the verification results will contain a "State change request failed" error
     And the provider state callback will NOT receive a teardown call
+
+  Scenario: Verifying an interaction where a provider state callback is not configured
+    Given a provider is started that returns the response from interaction {1}
+    And a Pact file for interaction {1} is to be verified with a provider state "state one" defined
+    When the verification is run
+    Then the verification will be successful
+    And a warning will be displayed that there was no provider state callback configured for provider state "state one"
+
+  Scenario: Verifying a HTTP request with a request filter configured
+    Given a provider is started that returns the response from interaction {1}
+    And a Pact file for interaction {1} is to be verified
+    And a request filter is configured to make the following changes:
+      | headers |
+      | 'A: 1'  |
+    When the verification is run
+    Then the verification will be successful
+    And the request to the provider will contain the header "A: 1"
