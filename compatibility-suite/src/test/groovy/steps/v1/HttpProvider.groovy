@@ -204,7 +204,7 @@ class HttpProvider {
   @Then('a verification result will NOT be published back')
   void a_verification_result_will_not_be_published_back() {
     assert mockBrokers.every { mock ->
-      mock.matchedRequests.find { it.path.endsWith('/verification-results') } == null
+      mock.matchedRequests.find { it.first.path.endsWith('/verification-results') } == null
     }
   }
 
@@ -216,20 +216,20 @@ class HttpProvider {
   @Then('a successful verification result will be published back for interaction \\{{int}}')
   void a_successful_verification_result_will_be_published_back_for_interaction(Integer num) {
     def request = mockBrokers.collect {
-      it.matchedRequests.find { it.path == "/pacts/provider/p/consumer/c_$num/verification-results".toString() }
+      it.matchedRequests.find { it.first.path == "/pacts/provider/p/consumer/c_$num/verification-results".toString() }
     }.find()
     assert request != null
-    def json = new JsonSlurper().parseText( request.body.valueAsString())
+    def json = new JsonSlurper().parseText( request.first.body.valueAsString())
     assert json.success == true
   }
 
   @Then('a failed verification result will be published back for the interaction \\{{int}}')
   void a_failed_verification_result_will_be_published_back_for_the_interaction(Integer num) {
     def request = mockBrokers.collect {
-      it.matchedRequests.find { it.path == "/pacts/provider/p/consumer/c_$num/verification-results".toString() }
+      it.matchedRequests.find { it.first.path == "/pacts/provider/p/consumer/c_$num/verification-results".toString() }
     }.find()
     assert request != null
-    def json = new JsonSlurper().parseText( request.body.valueAsString())
+    def json = new JsonSlurper().parseText( request.first.body.valueAsString())
     assert json.success == false
   }
 
