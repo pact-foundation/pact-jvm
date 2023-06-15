@@ -30,11 +30,14 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import groovy.json.JsonSlurper
+import io.cucumber.datatable.DataTable
 import io.cucumber.java.After
 import io.cucumber.java.Scenario
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
+import org.apache.hc.core5.http.ClassicHttpRequest
+import org.apache.hc.core5.http.io.entity.StringEntity
 
 @SuppressWarnings('ThrowRuntimeException')
 class HttpProvider {
@@ -117,6 +120,7 @@ class HttpProvider {
     verifier = new ProviderVerifier()
     verifier.projectHasProperty = { name -> verificationProperties.containsKey(name) }
     verifier.projectGetProperty = { name -> verificationProperties[name] }
+    verifier.reporters = [ new StubVerificationReporter() ]
     verificationResults = verifier.verifyProvider(providerInfo)
   }
 
@@ -262,5 +266,63 @@ class HttpProvider {
   @Then('the provider state callback will NOT receive a teardown call')
   void the_provider_state_callback_will_not_receive_a_teardown_call() {
     assert providerStateParams.findAll { p -> p[1] == 'teardown' }.empty
+  }
+
+  @Then('a warning will be displayed that there was no provider state callback configured for provider state {string}')
+  void a_warning_will_be_displayed_that_there_was_no_provider_state_callback_configured(String state) {
+    assert verifier.reporters.first().events.find { it.state == state }
+  }
+
+  @Given('a request filter is configured to make the following changes:')
+  void a_request_filter_is_configured_to_make_the_following_changes(DataTable dataTable) {
+    providerInfo.requestFilter = { ClassicHttpRequest request ->
+      def entry = dataTable.entries().first()
+      if (entry['path']) {
+        request.path = entry['path']
+      }
+
+      if (entry['headers']) {
+        entry['headers'].split(',').collect {
+          it.trim()[1..-2].split(':', 2)
+        }.collectEntries {
+          Map.entry(it[0].trim(), it[1].trim())
+        }.each {
+          request.addHeader(it.key.toString(), it.value)
+        }
+      }
+
+      if (entry['body']) {
+        if (entry['body'].startsWith('JSON:')) {
+          request.addHeader('content-type', 'application/json')
+          def ct = new org.apache.hc.core5.http.ContentType('application/json', null)
+          request.entity = new StringEntity(entry['body'][5..-1], ct)
+        } else if (entry['body'].startsWith('XML:')) {
+          request.addHeader('content-type', 'application/xml')
+          def ct = new org.apache.hc.core5.http.ContentType('application/xml', null)
+          request.entity = new StringEntity(entry['body'][4..-1], ct)
+        } else {
+          String contentType = 'text/plain'
+          if (entry['body'].endsWith('.json')) {
+            contentType = 'application/json'
+          } else if (entry['body'].endsWith('.xml')) {
+            contentType = 'application/xml'
+          }
+          request.addHeader('content-type', contentType)
+          File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
+          contents.withInputStream {
+            def ct = new org.apache.hc.core5.http.ContentType(contentType, null)
+            request.entity = new StringEntity(it.text, ct)
+          }
+        }
+      }
+    }
+  }
+
+  @Then('the request to the provider will contain the header {string}')
+  void the_request_to_the_provider_will_contain_the_header(String header) {
+    def h = header.split(':\\s+', 2)
+    assert mockProvider.matchedRequests.every {
+      it.second.headers.containsKey(h[0]) && it.second.headers[h[0]][0] == h[1]
+    }
   }
 }
