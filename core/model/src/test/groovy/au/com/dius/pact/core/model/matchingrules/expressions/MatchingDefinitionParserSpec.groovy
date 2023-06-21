@@ -15,7 +15,7 @@ import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
-@SuppressWarnings('LineLength')
+@SuppressWarnings(['LineLength', 'UnnecessaryGString'])
 class MatchingDefinitionParserSpec extends Specification {
   def 'if the string does not start with a valid matching definition'() {
     expect:
