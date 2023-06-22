@@ -6,13 +6,18 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
+import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
 import spock.lang.Issue
 import spock.lang.Specification
+
+import static au.com.dius.pact.core.matchers.Matchers.domatch
+import static au.com.dius.pact.core.model.PathExpressionsKt.constructPath
 
 class MatchingSpec extends Specification {
 
@@ -218,5 +223,47 @@ class MatchingSpec extends Specification {
     result.size() == 2
     result[0].mismatch == 'Actual map is missing the following keys: system'
     result[1].mismatch == 'Actual map is missing the following keys: id'
+  }
+
+  def 'each value matcher applying a regex to a list of strings'() {
+    given:
+    def eachValueMatcher = new EachValueMatcher(new MatchingRuleDefinition('00000000000000000000000000000000',
+      new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'), null))
+    bodyContext.matchers
+      .addRule('$', eachValueMatcher)
+    def callback = { List<String> p, String a, String b, MatchingContext c ->
+      [new BodyItemMatchResult(constructPath(p), domatch(c, p, a, b, BodyMismatchFactory.INSTANCE))]
+    }
+
+    when:
+    def result = Matchers.INSTANCE.compareLists(
+      ['$'],
+      eachValueMatcher,
+      ['*'],
+      ['*', '*'],
+      bodyContext,
+      { -> '' },
+      false,
+      callback
+    )
+    def result2 = Matchers.INSTANCE.compareLists(
+      ['$'],
+      eachValueMatcher,
+      ['*'],
+      ['*', 'x'],
+      bodyContext,
+      { -> '' },
+      false,
+      callback
+    )
+
+    then:
+    result == [new BodyItemMatchResult('$.0', []), new BodyItemMatchResult('$.1', [])]
+    result2 == [
+      new BodyItemMatchResult('$.0', []),
+      new BodyItemMatchResult('$.1', [new BodyMismatch('*', 'x',
+        "Expected 'x' to match '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'",
+        '$.1', null)])
+    ]
   }
 }
