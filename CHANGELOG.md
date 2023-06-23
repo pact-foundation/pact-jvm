@@ -1,5 +1,18 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.1 - Bugfix Release
+
+* 1c893cf9c - Merge branch 'master' into v4.6.x (Ronald Holshausen, Fri Jun 23 11:49:55 2023 +1000)
+* 16748fe5e - chore: correct changelog (Ronald Holshausen, Fri Jun 23 11:44:15 2023 +1000)
+* 6f16dc88a - bump version to 4.5.8 (Ronald Holshausen, Fri Jun 23 09:44:09 2023 +1000)
+* 9f5aa17ec - Merge branch 'master' into v4.6.x (Ronald Holshausen, Mon May 8 10:17:36 2023 +1000)
+* 1c41a324e - chore: fix changelog entry (Ronald Holshausen, Mon May 8 10:11:40 2023 +1000)
+* 046ddbcc0 - bump version to 4.6.1 (Ronald Holshausen, Mon May 8 09:34:01 2023 +1000)
+* d9fc82c4f - update changelog for release 4.6.0 (Ronald Holshausen, Mon May 8 09:23:26 2023 +1000)
+* f5aff8277 - chore: Upgrade dependencies (Ronald Holshausen, Fri May 5 16:56:45 2023 +1000)
+* 1fafbf45c - chore: Upgrade Kotlin to 1.8.21, KTor to 2.3, plugin driver to 0.4.0 (Ronald Holshausen, Fri May 5 16:42:41 2023 +1000)
+* a4d0597ad - chore: start v4.6.x branch (Ronald Holshausen, Fri May 5 15:39:30 2023 +1000)
+
 # 4.5.7 - Bugfix Release
 
 * abf5fb86b - fix: EachValue matcher was applying the associated rule to the list and not the items in the list (Ronald Holshausen, Thu Jun 22 15:29:09 2023 +1000)
