@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.5.7 - [?62;1;4c
+# 4.5.7 - Bugfix Release
 
 * abf5fb86b - fix: EachValue matcher was applying the associated rule to the list and not the items in the list (Ronald Holshausen, Thu Jun 22 15:29:09 2023 +1000)
 * d376e7e69 - chore: fix codenarc and detect voilations (Ronald Holshausen, Wed Jun 21 17:02:13 2023 +1000)
