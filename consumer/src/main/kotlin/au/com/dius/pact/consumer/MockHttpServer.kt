@@ -110,8 +110,8 @@ abstract class AbstractBaseMockServer : MockServer {
 
 abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig) : AbstractBaseMockServer() {
 
-  private val mismatchedRequests = ConcurrentHashMap<IRequest, MutableList<PactVerificationResult>>()
-  private val matchedRequests = ConcurrentLinkedQueue<IRequest>()
+  val mismatchedRequests = ConcurrentHashMap<IRequest, MutableList<PactVerificationResult>>()
+  val matchedRequests = ConcurrentLinkedQueue<Pair<IRequest, IRequest>>()
   private val requestMatcher = RequestMatching(pact)
 
   override fun waitForServer() {
@@ -184,10 +184,11 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
     if (mismatchedRequests.isNotEmpty()) {
       return PactVerificationResult.Mismatches(mismatchedRequests.values.flatten())
     }
+    val receivedRequests = matchedRequests.map { it.first }
     val expectedRequests = pact.interactions.asSequence()
       .filter { it.isSynchronousRequestResponse() }
       .map { it.asSynchronousRequestResponse()!!.request }
-      .filter { !matchedRequests.contains(it) }
+      .filter { !receivedRequests.contains(it) }
       .toList()
     if (expectedRequests.isNotEmpty()) {
       return PactVerificationResult.ExpectedButNotReceived(expectedRequests)
@@ -199,7 +200,7 @@ abstract class BaseMockServer(val pact: BasePact, val config: MockProviderConfig
     when (val matchResult = requestMatcher.matchInteraction(request)) {
       is FullRequestMatch -> {
         val interaction = matchResult.interaction
-        matchedRequests.add(interaction.request)
+        matchedRequests.add(interaction.request to request)
         return DefaultResponseGenerator.generateResponse(interaction.response,
           mutableMapOf(
             "mockServer" to mapOf("href" to getUrl(), "port" to getPort()),

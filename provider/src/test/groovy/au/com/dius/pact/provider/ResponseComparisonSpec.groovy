@@ -88,7 +88,7 @@ class ResponseComparisonSpec extends Specification {
     then:
     result instanceof Result.Err
     result.error.description() ==
-      'Expected a response type of \'application/json\' but the actual type was \'text/plain\''
+      'Expected a body of \'application/json\' but the actual content type was \'text/plain\''
   }
 
   def 'comparing bodies should pass with the same content types and body contents'() {

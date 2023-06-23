@@ -425,6 +425,8 @@ object DefaultPactReader : PactReader, KLogging() {
     } else if (source is String && fileExists(source)) {
       val file = File(source)
       return file.bufferedReader().use { JsonParser.parseReader(it).downcast<JsonValue.Object>() to FileSource(file) }
+    } else if (source is StringSource) {
+      return JsonParser.parseString(source.pactJson).downcast<JsonValue.Object>() to source
     } else {
       try {
         return JsonParser.parseString(source.toString()).downcast<JsonValue.Object>() to UnknownPactSource

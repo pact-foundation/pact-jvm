@@ -148,6 +148,7 @@ sealed class JsonValue {
   operator fun get(field: Any): JsonValue = when {
     this is Object -> this[field.toString()]
     this is Array && field is Int -> this.values[field]
+    this is Null -> Null
     else -> throw UnsupportedOperationException("Indexed lookups only work on Arrays and Objects, not $this")
   }
 

@@ -15,7 +15,7 @@ import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
-@SuppressWarnings('LineLength')
+@SuppressWarnings(['LineLength', 'UnnecessaryGString'])
 class MatchingDefinitionParserSpec extends Specification {
   def 'if the string does not start with a valid matching definition'() {
     expect:
@@ -164,5 +164,56 @@ class MatchingDefinitionParserSpec extends Specification {
     "notEmpty('true')"   | 'true' | ValueType.String
     "notEmpty( 'true' )" | 'true' | ValueType.String
     'notEmpty(true)'     | 'true' | ValueType.Boolean
+  }
+
+  def 'parsing string values'() {
+    expect:
+    new MatcherDefinitionParser(new MatcherDefinitionLexer(expression)).string().value == result
+
+    where:
+
+    expression                                      | result
+    "''"                                            | ''
+    "'Example value'"                               | 'Example value'
+    "'yyyy-MM-dd HH:mm:ssZZZZZ'"                    | 'yyyy-MM-dd HH:mm:ssZZZZZ'
+    "'2020-05-21 16:44:32+10:00'"                   | '2020-05-21 16:44:32+10:00'
+    "'\\w{3}\\d+'"                                  | "\\w{3}\\d+"
+    "'<?xml?><test/>'"                              | '<?xml?><test/>'
+    "'\\\$(\\.\\w+)+'"                              | "\\\$(\\.\\w+)+"
+    "'we don\\'t currently support parallelograms'" | "we don\\'t currently support parallelograms"
+    "'\\b backspace'"                               | "\b backspace"
+    "'\\f formfeed'"                                | "\f formfeed"
+    "'\\n linefeed'"                                | "\n linefeed"
+    "'\\r carriage return'"                         | "\r carriage return"
+    "'\\t tab'"                                     | "\t tab"
+    "'\\u0109 unicode hex code'"                    | "\u0109 unicode hex code"
+    "'\\u{1DF0B} unicode hex code'"                 | "${Character.toString(0x1DF0B)} unicode hex code"
+    "'\\u{1D400} unicode hex code'"                 | "𝐀 unicode hex code"
+  }
+
+  def 'process raw string'() {
+    expect:
+    new MatcherDefinitionParser(new MatcherDefinitionLexer("")).processRawString(expression).value == result
+
+    where:
+
+    expression                  | result
+    ''                          | ""
+    'Example value'             | 'Example value'
+    'not escaped \\$(\\.\\w+)+' | 'not escaped \\$(\\.\\w+)+'
+    'escaped \\\\'              | 'escaped \\'
+    'slash at end \\'           | 'slash at end \\'
+  }
+
+  def "process raw string error test"() {
+    given:
+    def parser = new MatcherDefinitionParser(new MatcherDefinitionLexer("'invalid escape \\u in string'"))
+
+    expect:
+    parser.processRawString("'invalid escape \\u in string'").errorValue() == "Invalid unicode escape found at index 0"
+    parser.processRawString('\\u0') instanceof Result.Err
+    parser.processRawString('\\u00') instanceof Result.Err
+    parser.processRawString('\\u000') instanceof Result.Err
+    parser.processRawString('\\u{000') instanceof Result.Err
   }
 }

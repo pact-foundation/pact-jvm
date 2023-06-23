@@ -145,7 +145,7 @@ class VerificationResultPayloadSpec extends Specification {
         interactionId: '36803e0333e8967092c2910b9d2f75c033e696ee'
       ],
       [
-        description: "Expected a response type of 'application/json' but the actual type was 'text/plain'",
+        description: "Expected a body of 'application/json' but the actual content type was 'text/plain'",
         interactionId: '1234',
         attribute: 'body'
       ]
@@ -172,7 +172,7 @@ class VerificationResultPayloadSpec extends Specification {
     result2.mismatches.size() == 1
     result2.mismatches[0] == [
       attribute: 'body',
-      description: "Expected a response type of 'application/json' but the actual type was 'text/plain'"
+      description: "Expected a body of 'application/json' but the actual content type was 'text/plain'"
     ]
   }
 

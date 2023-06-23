@@ -495,6 +495,7 @@ open class PactBrokerClient(
       is Result.Err<Exception> -> return navigateResult
       is Result.Ok<IHalClient> -> navigateResult.value
     }
+    halClient.logContext()
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
       halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION
@@ -827,56 +828,69 @@ open class PactBrokerClient(
     }
 
     logger.debug { "Test result = $result" }
-    if (result is TestResult.Failed && result.results.isNotEmpty()) {
-      val values = result.results
-        .groupBy { it["interactionId"] }
-        .map { mismatches ->
-          val values = mismatches.value
-            .filter { !it.containsKey("exception") }
-            .map { mismatch ->
-              val remainingAttributes = mismatch.filterNot { it.key == "interactionId" }
-              when (mismatch["attribute"]) {
-                "body-content-type" -> listOf("attribute" to "body", "description" to mismatch["description"])
-                else -> remainingAttributes.map { it.toPair() }
-              }
-            }.filter { it.isNotEmpty() }
-            .map { jsonObject(it) }
 
-          val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
-          val exceptions = if (exceptionDetails != null) {
-            val exception = exceptionDetails["exception"]
-            val description = exceptionDetails["description"]
-            if (exception is Throwable) {
-              if (description != null) {
-                jsonArray(jsonObject("message" to description.toString() + ": " + exception.message,
-                  "exceptionClass" to exception.javaClass.name))
+    when (result) {
+      is TestResult.Failed -> if (result.results.isNotEmpty()) {
+        val values = result.results
+          .groupBy { it["interactionId"] }
+          .map { mismatches ->
+            val values = mismatches.value
+              .filter { !it.containsKey("exception") }
+              .map { mismatch ->
+                val remainingAttributes = mismatch.filterNot { it.key == "interactionId" }
+                when (mismatch["attribute"]) {
+                  "body-content-type" -> listOf("attribute" to "body", "description" to mismatch["description"])
+                  else -> remainingAttributes.map { it.toPair() }
+                }
+              }.filter { it.isNotEmpty() }
+              .map { jsonObject(it) }
+
+            val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
+            val exceptions = if (exceptionDetails != null) {
+              val exception = exceptionDetails["exception"]
+              val description = exceptionDetails["description"]
+              if (exception is Throwable) {
+                if (description != null) {
+                  jsonArray(jsonObject("message" to description.toString() + ": " + exception.message,
+                    "exceptionClass" to exception.javaClass.name))
+                } else {
+                  jsonArray(jsonObject("message" to exception.message,
+                    "exceptionClass" to exception.javaClass.name))
+                }
               } else {
-                jsonArray(jsonObject("message" to exception.message,
-                  "exceptionClass" to exception.javaClass.name))
+                jsonArray(jsonObject("message" to exception.toString()))
               }
             } else {
-              jsonArray(jsonObject("message" to exception.toString()))
+              null
             }
-          } else {
-            null
-          }
 
-          val interactionJson = if (values.isEmpty() && exceptions == null) {
-            jsonObject("interactionId" to mismatches.key, "success" to true)
-          } else {
-            val json = jsonObject(
-              "interactionId" to mismatches.key, "success" to false,
-              "mismatches" to jsonArray(values)
-            )
-            if (exceptions != null) {
-              json["exceptions"] = exceptions
+            val interactionJson = if (values.isEmpty() && exceptions == null) {
+              jsonObject("interactionId" to mismatches.key, "success" to true)
+            } else {
+              val json = jsonObject(
+                "interactionId" to mismatches.key, "success" to false,
+                "mismatches" to jsonArray(values)
+              )
+              if (exceptions != null) {
+                json["exceptions"] = exceptions
+              }
+              json
             }
-            json
+            interactionJson
           }
-          interactionJson
+        jsonObject["testResults"] = jsonArray(values)
+      }
+      is TestResult.Ok -> if (result.interactionIds.isNotEmpty()) {
+        val values = result.interactionIds.map {
+          jsonObject(
+            "interactionId" to it,
+            "success" to true
+          )
         }
-      jsonObject["testResults"] = jsonArray(values)
+        jsonObject["testResults"] = jsonArray(values)
+      }
     }
+
     return jsonObject
   }
 

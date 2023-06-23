@@ -75,6 +75,10 @@ open class RequestResponseInteraction @JvmOverloads constructor(
 
   override fun asSynchronousRequestResponse() = this
 
+  fun copy(): RequestResponseInteraction = RequestResponseInteraction(
+    description, providerStates, request, response, interactionId
+  )
+
   companion object : KLogging() {
     const val COMMA = ", "
 

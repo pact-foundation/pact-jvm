@@ -150,6 +150,11 @@ interface IHalClient {
    * Return the authentication used to access the Pact broker
    */
   fun getAuth(): Auth?
+
+  /**
+   * Logs the current HAL context
+   */
+  fun logContext()
 }
 
 /**
@@ -318,6 +323,10 @@ open class HalClient @JvmOverloads constructor(
       is Auth -> authentication
       else -> null
     }
+  }
+
+  override fun logContext() {
+    logger.debug { "HAL Context = [lastUrl=$lastUrl, pathInfo=$pathInfo]" }
   }
 
   private fun handleHalResponse(response: ClassicHttpResponse, path: String): Result<JsonValue, Exception> {

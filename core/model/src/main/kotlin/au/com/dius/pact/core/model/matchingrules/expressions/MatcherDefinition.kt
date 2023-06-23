@@ -467,22 +467,99 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   fun string(): Result<String?, String> {
     lexer.skipWhitespace()
     return if (lexer.matchChar('\'')) {
-      var ch = lexer.peekNextChar()
+      var ch = lexer.nextChar()
+      var ch2 = lexer.peekNextChar()
       var stringResult = ""
-      while (ch != '\'' && ch != null) {
+      while (ch != null && ((ch == '\\' && ch2 == '\'') || (ch != '\''))) {
         stringResult += ch
-        lexer.advance()
-        ch = lexer.peekNextChar()
+        if (ch == '\\' && ch2 == '\'') {
+          stringResult += ch2
+          lexer.advance()
+        }
+        ch = lexer.nextChar()
+        ch2 = lexer.peekNextChar()
       }
 
       if (ch == '\'') {
-        lexer.advance()
-        Result.Ok(stringResult)
+        processRawString(stringResult)
       } else {
         Result.Err("Unterminated string found at index ${lexer.index}")
       }
     } else {
       Result.Err("Was expecting a string at index ${lexer.index}")
     }
+  }
+
+  @Suppress("ComplexMethod")
+  fun processRawString(rawString: String): Result<String, String> {
+    val buffer = StringBuilder(rawString.length)
+    val chars = rawString.chars().iterator()
+    while (chars.hasNext()) {
+      val ch = chars.nextInt().toChar()
+      if (ch == '\\') {
+        if (chars.hasNext()) {
+          when (val ch2 = chars.nextInt().toChar()) {
+            '\\' -> buffer.append(ch)
+            'b' -> buffer.append('\u0008')
+            'f' -> buffer.append('\u000C')
+            'n' -> buffer.append('\n')
+            'r' -> buffer.append('\r')
+            't' -> buffer.append('\t')
+            'u' -> {
+              if (!chars.hasNext()) {
+                return Result.Err("Invalid unicode escape found at index ${lexer.index}")
+              }
+              val code1 = chars.nextInt().toChar()
+              val b = StringBuilder(4)
+              if (code1 == '{') {
+                var c: Char? = null
+                while (chars.hasNext()) {
+                  c = chars.nextInt().toChar()
+                  if (c == '}') {
+                    break
+                  }
+                  b.append(c)
+                }
+                if (c != '}') {
+                  return Result.Err("Invalid unicode escape found at index ${lexer.index}")
+                }
+              } else {
+                b.append(code1)
+                if (!chars.hasNext()) {
+                  return Result.Err("Invalid unicode escape found at index ${lexer.index}")
+                }
+                val code2 = chars.nextInt().toChar()
+                b.append(code2)
+                if (!chars.hasNext()) {
+                  return Result.Err("Invalid unicode escape found at index ${lexer.index}")
+                }
+                val code3 = chars.nextInt().toChar()
+                b.append(code3)
+                if (!chars.hasNext()) {
+                  return Result.Err("Invalid unicode escape found at index ${lexer.index}")
+                }
+                val code4 = chars.nextInt().toChar()
+                b.append(code4)
+              }
+              val code = try {
+                b.toString().toInt(16)
+              } catch (e: NumberFormatException) {
+                return Result.Err("Invalid unicode escape found at index ${lexer.index}")
+              }
+              buffer.append(Character.toString(code))
+            }
+            else -> {
+              buffer.append(ch)
+              buffer.append(ch2)
+            }
+          }
+        } else {
+          buffer.append(ch)
+        }
+      } else {
+        buffer.append(ch)
+      }
+    }
+    return Result.Ok(buffer.toString())
   }
 }

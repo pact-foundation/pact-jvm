@@ -87,6 +87,15 @@ object DefaultStateChange : StateChange, KLogging() {
           it
         })
       }
+    } else {
+      val result = stateChange(verifier, ProviderState(""), provider, consumer, true, providerClient)
+      logger.debug { "State Change: \"\" -> $result" }
+      stateChangeResult.mapEither({
+        stateChangeResult.unwrap().plus(it)
+      }, {
+        failures[message] = it.message.toString()
+        it
+      })
     }
 
     return StateChangeResult(stateChangeResult, message)
@@ -102,6 +111,8 @@ object DefaultStateChange : StateChange, KLogging() {
     providerClient: ProviderClient
   ): Result<Map<String, Any?>, Exception> {
     verifier.reportStateForInteraction(state.name.toString(), provider, consumer, isSetup)
+
+    logger.debug { "stateChangeHandler: consumer.stateChange=${consumer.stateChange}, provider.stateChangeUrl=${provider.stateChangeUrl}" }
     try {
       var stateChangeHandler = consumer.stateChange
       var stateChangeUsesBody = consumer.stateChangeUsesBody
@@ -143,8 +154,12 @@ object DefaultStateChange : StateChange, KLogging() {
     consumer: IConsumerInfo,
     providerClient: ProviderClient
   ) {
-    interaction.providerStates.forEach {
-      stateChange(verifier, it, provider, consumer, false, providerClient)
+    if (interaction.providerStates.isNotEmpty()) {
+      interaction.providerStates.forEach {
+        stateChange(verifier, it, provider, consumer, false, providerClient)
+      }
+    } else {
+      stateChange(verifier, ProviderState(""), provider, consumer, false, providerClient)
     }
   }
 

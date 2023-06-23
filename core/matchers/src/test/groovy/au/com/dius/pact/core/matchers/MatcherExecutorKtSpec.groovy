@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 
 @SuppressWarnings('LineLength')
@@ -15,4 +16,16 @@ class MatcherExecutorKtSpec extends Specification {
     'look|look_bordered|slider_cta' | 'look_bordered' | []
   }
 
+  def 'match semver'() {
+    expect:
+    MatcherExecutorKt.matchSemver(['$'], '1.2.3', actual, { a, b, c, d -> new HeaderMismatch('test', '', actual.toString(), c) } as MismatchFactory) == result
+
+    where:
+
+    actual                             | result
+    '4.5.7'                            | []
+    '4.5.7.8'                          | [new HeaderMismatch('test', '', '4.5.7.8', "Expected '4.5.7.8' (String) to be a semantic version")]
+    '04.5.7'                           | [new HeaderMismatch('test', '', '04.5.7', "Expected '04.5.7' (String) to be a semantic version")]
+    new JsonValue.StringValue('4.5.7') | []
+  }
 }

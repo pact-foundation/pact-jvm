@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.HttpStatus
+import au.com.dius.pact.core.support.isNotEmpty
 import com.github.ajalt.mordant.TermColors
 
 /**
@@ -47,10 +48,10 @@ data class StatusMismatch(
 }
 
 data class BodyTypeMismatch(val expected: String?, val actual: String?) : Mismatch() {
-  override fun description() = "Expected a response type of '$expected' " +
-    "but the actual type was '$actual'"
+  override fun description() = "Expected a body of '$expected' " +
+    "but the actual content type was '$actual'"
   override fun description(t: TermColors) =
-    "Expected a response type of ${t.bold("'$expected'")} but the actual type was ${t.bold("'$actual'")}"
+    "Expected a body of ${t.bold("'$expected'")} but the actual content type was ${t.bold("'$actual'")}"
   fun toMap(): Map<String, Any?> {
     return mapOf("mismatch" to description())
   }
@@ -92,6 +93,10 @@ data class QueryMismatch(
   val mismatch: String? = null,
   val path: String = "/"
 ) : Mismatch() {
+  override fun description() = if (mismatch.isNullOrEmpty())
+    "expected query parameter '$queryParameter' with value '$expected' but received '$actual'"
+  else mismatch
+
   override fun type() = "query"
 }
 

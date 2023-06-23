@@ -19,6 +19,7 @@ import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
+import au.com.dius.pact.core.support.Either
 import mu.KLogging
 import java.math.BigInteger
 import java.util.Comparator
@@ -174,6 +175,38 @@ object Matchers : KLogging() {
               ))
             }
           }
+        }
+        is EachValueMatcher -> if (!cascaded) {
+          logger.debug { "Matching $path with EachValue" }
+          val associatedRules = matcher.definition.rules.mapNotNull {
+            when (it) {
+              is Either.A -> it.value
+              is Either.B -> {
+                result.add(
+                  BodyItemMatchResult(
+                    constructPath(path),
+                    listOf(
+                      BodyMismatch(
+                        expectedList, actualList,
+                        "Found an un-resolved reference ${it.value.name}", constructPath(path), generateDiff()
+                      )
+                    )
+                  )
+                )
+                null
+              }
+            }
+          }
+          val matcherPath = constructPath(path) + ".*"
+          val newContext = MatchingContext(
+            MatchingRuleCategory("body", mutableMapOf(
+              matcherPath to MatchingRuleGroup(associatedRules.toMutableList())
+            )),
+            context.allowUnexpectedKeys,
+            context.pluginConfiguration
+          )
+          result.addAll(compareListContent(expectedList.padTo(actualList.size, expectedList.first()),
+            actualList, path, newContext, generateDiff, callback))
         }
         else -> {
           result.addAll(compareListContent(expectedList.padTo(actualList.size, expectedList.first()),

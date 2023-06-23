@@ -2,6 +2,8 @@ package au.com.dius.pact.consumer.model
 
 import au.com.dius.pact.consumer.junit.MockServerConfig
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.core.support.expressions.ExpressionParser
 import io.ktor.util.network.hostname
 import java.net.InetSocketAddress
 import java.util.Optional
@@ -122,9 +124,10 @@ open class MockProviderConfig @JvmOverloads constructor (
     fun fromMockServerAnnotation(config: Optional<MockServerConfig>): MockProviderConfig? {
       return if (config.isPresent) {
         val annotation = config.get()
+        val port = ExpressionParser().parseExpression(annotation.port, DataType.STRING)?.toString() ?: annotation.port
         MockProviderConfig(
           annotation.hostInterface.ifEmpty { LOCALHOST },
-          if (annotation.port.isEmpty()) 0 else annotation.port.toInt(),
+          if (port.isEmpty()) 0 else port.toInt(),
           PactSpecVersion.UNSPECIFIED,
           if (annotation.tls) "https" else HTTP,
           annotation.implementation,
