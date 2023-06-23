@@ -38,6 +38,8 @@ import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.io.entity.StringEntity
+import steps.shared.CompatibilitySuiteWorld
+import steps.shared.StubVerificationReporter
 
 @SuppressWarnings('ThrowRuntimeException')
 class HttpProvider {

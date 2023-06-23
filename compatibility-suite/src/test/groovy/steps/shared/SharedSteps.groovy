@@ -1,4 +1,4 @@
-package steps.v1
+package steps.shared
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.HeaderParser

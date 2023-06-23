@@ -30,6 +30,7 @@ import io.cucumber.java.ParameterType
 import io.cucumber.java.Scenario
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
+import steps.shared.CompatibilitySuiteWorld
 
 import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap

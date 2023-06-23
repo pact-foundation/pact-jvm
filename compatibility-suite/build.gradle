@@ -30,6 +30,7 @@ tasks.register('v1') {
     def cucumberArgs = [
       '--plugin', 'pretty',
       '--plugin', 'html:build/cucumber-report-v1.html',
+      '--glue', 'steps.shared',
       '--glue', 'steps.v1',
       'pact-compatibility-suite/features/V1'
     ]
