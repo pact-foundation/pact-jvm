@@ -92,7 +92,7 @@ test {
 tasks.withType(CodeNarc).configureEach { codeNarcTask ->
     reports {
         console {
-            enabled = true
+            required = true
         }
     }
 }

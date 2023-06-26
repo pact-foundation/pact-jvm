@@ -12,7 +12,7 @@ buildscript {
 
 plugins {
   id 'au.com.dius.pact.kotlin-library-conventions'
-  id "nebula.clojure" version "9.4.1"
+  id "com.netflix.nebula.clojure" version "13.0.1"
 }
 
 description = 'Pact-JVM - Leiningen Provider test support library'
