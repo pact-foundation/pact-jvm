@@ -51,8 +51,15 @@ class SharedSteps {
       if (entry['headers']) {
         interaction.request.headers = entry['headers'].split(',').collect {
           it.trim()[1..-2].split(':')
-        }.collectEntries {
-          Map.entry(it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) })
+        }.collect {
+          [it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) }]
+        }.inject([:]) { acc, e ->
+          if (acc.containsKey(e[0])) {
+            acc[e[0]] += e[1].flatten()
+          } else {
+            acc[e[0]] = e[1].flatten()
+          }
+          acc
         }
       }
 
@@ -98,8 +105,15 @@ class SharedSteps {
       if (entry['response headers']) {
         interaction.response.headers = entry['response headers'].split(',').collect {
           it.trim()[1..-2].split(':')
-        }.collectEntries {
-          Map.entry(it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) })
+        }.collect {
+          [it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) }]
+        }.inject([:]) { acc, e ->
+          if (acc.containsKey(e[0])) {
+            acc[e[0]] += e[1].flatten()
+          } else {
+            acc[e[0]] = e[1].flatten()
+          }
+          acc
         }
       }
 

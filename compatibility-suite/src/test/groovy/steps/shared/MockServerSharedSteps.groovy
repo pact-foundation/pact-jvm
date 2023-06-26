@@ -19,6 +19,7 @@ import io.cucumber.java.After
 import io.cucumber.java.Scenario
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
+import org.apache.hc.core5.http.HttpRequest
 
 import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap
@@ -65,10 +66,6 @@ class MockServerSharedSteps {
 
   @When('request {int} is made to the mock server with the following changes:')
   void request_is_made_to_the_mock_server_with_the_following_changes(Integer num, DataTable dataTable) {
-    IProviderInfo providerInfo = new ProviderInfo()
-    providerInfo.port = mockServerData.mockServer.port
-    def client = new ProviderClient(providerInfo, new HttpClientFactory())
-
     def request = world.interactions[num - 1].request.copy()
     def entry = dataTable.entries().first()
     if (entry['method']) {
@@ -86,8 +83,15 @@ class MockServerSharedSteps {
     if (entry['headers']) {
       request.headers = entry['headers'].split(',').collect {
         it.trim()[1..-2].split(':')
-      }.collectEntries {
-        Map.entry(it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) })
+      }.collect {
+        [it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) }]
+      }.inject([:]) { acc, e ->
+        if (acc.containsKey(e[0])) {
+          acc[e[0]] += e[1].flatten()
+        } else {
+          acc[e[0]] = e[1].flatten()
+        }
+        acc
       }
     }
 
@@ -114,7 +118,23 @@ class MockServerSharedSteps {
       }
     }
 
-    mockServerData.response = client.makeRequest(request)
+    IProviderInfo providerInfo = new ProviderInfo()
+    providerInfo.port = mockServerData.mockServer.port
+    if (entry['raw headers']) {
+      def headers = entry['raw headers'].split(',').collect {
+        it.trim()[1..-2].split(':').collect { it.trim() }
+      }
+      providerInfo.requestFilter = { HttpRequest req ->
+        headers.each {
+          req.addHeader(it[0], it[1])
+        }
+      }
+      def client = new ProviderClient(providerInfo, new HttpClientFactory())
+      mockServerData.response = client.makeRequest(request)
+    } else {
+      def client = new ProviderClient(providerInfo, new HttpClientFactory())
+      mockServerData.response = client.makeRequest(request)
+    }
   }
 
   @Then('a {int} success response is returned')

@@ -1,4 +1,4 @@
-package steps.v1
+package steps.shared
 
 import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.KTorMockServer
@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.DefaultPactWriter
+import au.com.dius.pact.core.model.HeaderParser
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
@@ -38,8 +39,8 @@ import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.io.entity.StringEntity
-import steps.shared.CompatibilitySuiteWorld
-import steps.shared.StubVerificationReporter
+
+import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 
 @SuppressWarnings('ThrowRuntimeException')
 class HttpProvider {
@@ -96,11 +97,16 @@ class HttpProvider {
 
     if (entry['headers']) {
       entry['headers'].split(',').collect {
-        it.trim()[1..-2].split(':', 2)
-      }.collectEntries {
-        Map.entry(it[0].trim(), it[1].trim())
-      }.each {
-        interaction.response.headers[it.key.toString()] = [ it.value.toString() ]
+        it.trim()[1..-2].split(':')
+      }.collect {
+        [it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) }]
+      }.inject(interaction.response.headers) { headers, e ->
+        if (headers.containsKey(e[0])) {
+          headers[e[0]] += e[1].flatten()
+        } else {
+          headers[e[0]] = e[1].flatten()
+        }
+        headers
       }
     }
 
@@ -335,11 +341,11 @@ class HttpProvider {
 
       if (entry['headers']) {
         entry['headers'].split(',').collect {
-          it.trim()[1..-2].split(':', 2)
-        }.collectEntries {
-          Map.entry(it[0].trim(), it[1].trim())
+          it.trim()[1..-2].split(':')
+        }.collect {
+          [it[0].trim(), it[1].trim()]
         }.each {
-          request.addHeader(it.key.toString(), it.value)
+          request.addHeader(it[0].toString(), it[1])
         }
       }
 
