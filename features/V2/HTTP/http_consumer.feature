@@ -4,11 +4,14 @@ Feature: Basic HTTP consumer
 
   Background:
     Given the following HTTP interactions have been defined:
-      | method | path  | query | headers | body       | matching rules | response | response content | response body |
-      | POST   | /path |       |         | basic.json | regex.json     | 200      |                  |               |
-      | POST   | /path |       |         | basic.json | type.json      | 200      |                  |               |
+      | method | path      | query                | headers        | body       | matching rules               |
+      | POST   | /path     |                      |                | basic.json | regex-matcher-v2.json        |
+      | POST   | /path     |                      |                | basic.json | type-matcher-v2.json         |
+      | GET    | /aaa/100/ |                      |                |            | regex-matcher-path-v2.json   |
+      | GET    | /path     | a=1&b=2&c=abc&d=true |                |            | regex-matcher-query-v2.json  |
+      | GET    | /path     |                      | 'X-Test: 1000' |            | regex-matcher-header-v2.json |
 
-  Scenario: Supports a regex matcher
+  Scenario: Supports a regex matcher (negative case)
     When the mock server is started with interaction 1
     And request 1 is made to the mock server
     Then a 500 error response is returned
@@ -21,7 +24,7 @@ Feature: Basic HTTP consumer
       | JSON: { "one": "HHH123", "two": "b" } |
     Then a 200 success response is returned
 
-  Scenario: Supports a type matcher
+  Scenario: Supports a type matcher (negative case)
     When the mock server is started with interaction 2
     And request 2 is made to the mock server with the following changes:
       | body                             |
@@ -34,4 +37,54 @@ Feature: Basic HTTP consumer
     And request 2 is made to the mock server with the following changes:
       | body                                  |
       | JSON: { "one": "HHH123", "two": "b" } |
+    Then a 200 success response is returned
+
+  Scenario: Supports a matcher for request paths
+    When the mock server is started with interaction 3
+    And request 3 is made to the mock server with the following changes:
+      | path     |
+      | /XYZ/123 |
+    Then a 200 success response is returned
+
+  Scenario: Supports matchers for request query parameters
+    When the mock server is started with interaction 4
+    And request 4 is made to the mock server with the following changes:
+      | query                  |
+      | b=2&c=abc&d=true&a=999 |
+    Then a 200 success response is returned
+
+  Scenario: Supports matchers for repeated request query parameters
+    When the mock server is started with interaction 4
+    And request 4 is made to the mock server with the following changes:
+      | query                         |
+      | a=123&b=2&c=abc&d=true&a=9999 |
+    Then a 200 success response is returned
+
+  Scenario: Supports matchers for request headers
+    When the mock server is started with interaction 5
+    And request 5 is made to the mock server with the following changes:
+      | headers        |
+      | 'X-Test: 1000' |
+    Then a 200 success response is returned
+
+  Scenario: Supports matchers for repeated request headers (positive case)
+    When the mock server is started with interaction 5
+    And request 5 is made to the mock server with the following changes:
+      | raw headers                                    |
+      | 'X-Test: 1000', 'X-Test: 1234', 'X-Test: 9999' |
+    Then a 200 success response is returned
+
+  Scenario: Supports matchers for repeated request headers (negative case)
+    When the mock server is started with interaction 5
+    And request 5 is made to the mock server with the following changes:
+      | raw headers                                       |
+      | 'X-Test: 1000', 'X-Test: 1234', 'X-Test: 9999ABC' |
+    Then a 500 error response is returned
+    And the mismatches will contain a "header" mismatch with error "Expected '9999ABC' to match '\d{1,4}'"
+
+  Scenario: Supports matchers for request bodies
+    When the mock server is started with interaction 2
+    And request 2 is made to the mock server with the following changes:
+      | body                                  |
+      | JSON: { "one": "c", "two": "b" } |
     Then a 200 success response is returned

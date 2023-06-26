@@ -1,0 +1,6 @@
+{
+  "$.query.a": {
+    "match": "regex",
+    "regex": "\\d{1,4}"
+  }
+}
