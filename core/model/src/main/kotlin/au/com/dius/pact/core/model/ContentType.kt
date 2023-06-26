@@ -96,6 +96,7 @@ class ContentType(val contentType: MediaType?) {
         type == "application" && contentType.subtype.matches(JSON_TYPE) -> false
         superType == MediaType.APPLICATION_ZIP -> true
         superType == MediaType.OCTET_STREAM -> true
+        type == "multipart" -> true
         else -> false
       }
     } else false
