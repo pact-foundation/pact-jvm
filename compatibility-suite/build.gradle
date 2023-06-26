@@ -46,3 +46,26 @@ tasks.register('v1') {
     }
   }
 }
+
+tasks.register('v2') {
+  dependsOn assemble, testClasses
+  doLast {
+    def cucumberArgs = [
+      '--plugin', 'pretty',
+      '--plugin', 'html:build/cucumber-report-v2.html',
+      '--glue', 'steps.shared',
+      '--glue', 'steps.v2',
+      'pact-compatibility-suite/features/V2'
+    ]
+    if (project.hasProperty('cucumber.filter.tags')) {
+      cucumberArgs.add(0, project.property('cucumber.filter.tags'))
+      cucumberArgs.add(0, '-t')
+    }
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      args = cucumberArgs
+      systemProperty 'pact_do_not_track', 'true'
+    }
+  }
+}

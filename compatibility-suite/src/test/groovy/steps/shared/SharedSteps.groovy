@@ -7,6 +7,9 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.json.JsonValue
 import groovy.transform.Canonical
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.en.Given
@@ -75,6 +78,19 @@ class SharedSteps {
         }
       }
 
+      if (entry['matching rules']) {
+        JsonValue json
+        if (entry['matching rules'].startsWith('JSON:')) {
+          json = JsonParser.INSTANCE.parseString(entry['body'][5..-1])
+        } else {
+          File contents = new File("pact-compatibility-suite/fixtures/${entry['matching rules']}")
+          contents.withInputStream {
+            json = JsonParser.INSTANCE.parseStream(it)
+          }
+        }
+        interaction.request.matchingRules = MatchingRulesImpl.fromJson(json)
+      }
+
       if (entry['response']) {
         interaction.response.status = entry['response'].toInteger()
       }
@@ -89,6 +105,19 @@ class SharedSteps {
         contents.withInputStream {
           interaction.response.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
         }
+      }
+
+      if (entry['response matching rules']) {
+        JsonValue json
+        if (entry['response matching rules'].startsWith('JSON:')) {
+          json = JsonParser.INSTANCE.parseString(entry['body'][5..-1])
+        } else {
+          File contents = new File("pact-compatibility-suite/fixtures/${entry['response matching rules']}")
+          contents.withInputStream {
+            json = JsonParser.INSTANCE.parseStream(it)
+          }
+        }
+        interaction.response.matchingRules = MatchingRulesImpl.fromJson(json)
       }
 
       world.interactions << interaction
