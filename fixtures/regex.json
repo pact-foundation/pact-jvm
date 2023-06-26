@@ -1,0 +1,13 @@
+{
+  "body": {
+    "$.one": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "regex",
+          "regex": "\\w{3}\\d{3}"
+        }
+      ]
+    }
+  }
+}
