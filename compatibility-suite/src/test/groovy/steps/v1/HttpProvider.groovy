@@ -72,10 +72,10 @@ class HttpProvider {
     mockBrokers.each { it.stop() }
   }
 
-  @Given('a provider is started that returns the response from interaction \\{{int}}')
+  @Given('a provider is started that returns the response from interaction {int}')
   void a_provider_is_started_that_returns_the_response_from_interaction(Integer num) {
     Pact pact = new RequestResponsePact(new Provider('p'),
-      new Consumer('v1-compatibility-suite-c'), [world.interactions[num - 1] ])
+      new Consumer('v1-compatibility-suite-c'), [ world.interactions[num - 1].copy() ])
     mockProvider = new KTorMockServer(pact, new MockProviderConfig())
     mockProvider.start()
     providerInfo = new ProviderInfo('p')
@@ -83,10 +83,60 @@ class HttpProvider {
     providerInfo.stateChangeTeardown = true
   }
 
-  @Given('a Pact file for interaction \\{{int}} is to be verified')
+  @Given('a provider is started that returns the response from interaction {int}, with the following changes:')
+  void a_provider_is_started_that_returns_the_response_from_interaction_with_the_following_changes(
+    Integer num,
+    DataTable dataTable
+  ) {
+    def interaction = world.interactions[num - 1].copy()
+    def entry = dataTable.entries().first()
+    if (entry['status']) {
+      interaction.response.status = entry['status'].toInteger()
+    }
+
+    if (entry['headers']) {
+      entry['headers'].split(',').collect {
+        it.trim()[1..-2].split(':', 2)
+      }.collectEntries {
+        Map.entry(it[0].trim(), it[1].trim())
+      }.each {
+        interaction.response.headers[it.key.toString()] = [ it.value.toString() ]
+      }
+    }
+
+    if (entry['body']) {
+      if (entry['body'].startsWith('JSON:')) {
+        interaction.response.headers['content-type'] = ['application/json']
+        interaction.response.body = OptionalBody.body(entry['body'][5..-1].bytes, new ContentType('application/json'))
+      } else if (entry['body'].startsWith('XML:')) {
+        interaction.response.headers['content-type'] = ['application/xml']
+        interaction.response.body = OptionalBody.body(entry['body'][4..-1].bytes, new ContentType('application/xml'))
+      } else {
+        String contentType = 'text/plain'
+        if (entry['content']) {
+          contentType = entry['content']
+        }
+        interaction.response.headers['content-type'] = [contentType]
+        File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
+        contents.withInputStream {
+          interaction.response.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
+        }
+      }
+    }
+
+    Pact pact = new RequestResponsePact(new Provider('p'),
+      new Consumer('v1-compatibility-suite-c'), [ interaction ])
+    mockProvider = new KTorMockServer(pact, new MockProviderConfig())
+    mockProvider.start()
+    providerInfo = new ProviderInfo('p')
+    providerInfo.port = mockProvider.port
+    providerInfo.stateChangeTeardown = true
+  }
+
+  @Given('a Pact file for interaction {int} is to be verified')
   void a_pact_file_for_interaction_is_to_be_verified(Integer num) {
     Pact pact = new RequestResponsePact(new Provider('p'),
-      new Consumer('v1-compatibility-suite-c'), [world.interactions[num - 1] ])
+      new Consumer('v1-compatibility-suite-c'), [ world.interactions[num - 1].copy() ])
     StringWriter writer = new StringWriter()
     writer.withPrintWriter {
       DefaultPactWriter.INSTANCE.writePact(pact, it, PactSpecVersion.V1)
@@ -99,7 +149,7 @@ class HttpProvider {
     providerInfo.consumers << consumerInfo
   }
 
-  @Given('a Pact file for interaction \\{{int}} is to be verified with a provider state {string} defined')
+  @Given('a Pact file for interaction {int} is to be verified with a provider state {string} defined')
   void a_pact_file_for_interaction_is_to_be_verified_with_a_provider_state_defined(Integer num, String providerState) {
     def interaction = world.interactions[num - 1].copy()
     interaction.providerStates << new ProviderState(providerState)
@@ -157,7 +207,7 @@ class HttpProvider {
     }
   }
 
-  @Given('a Pact file for interaction \\{{int}} is to be verified from a Pact broker')
+  @Given('a Pact file for interaction {int} is to be verified from a Pact broker')
   void a_pact_file_for_interaction_is_to_be_verified_from_a_pact_broker(Integer num) {
     Pact pact = new RequestResponsePact(new Provider('p'),
       new Consumer("c_$num"), [ world.interactions[num - 1] ])

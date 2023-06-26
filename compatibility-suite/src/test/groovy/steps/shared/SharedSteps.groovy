@@ -95,6 +95,14 @@ class SharedSteps {
         interaction.response.status = entry['response'].toInteger()
       }
 
+      if (entry['response headers']) {
+        interaction.response.headers = entry['response headers'].split(',').collect {
+          it.trim()[1..-2].split(':')
+        }.collectEntries {
+          Map.entry(it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) })
+        }
+      }
+
       if (entry['response body']) {
         String contentType = 'text/plain'
         if (entry['response content']) {
