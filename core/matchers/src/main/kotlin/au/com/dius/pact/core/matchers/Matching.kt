@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
+import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.PluginConfiguration
 import mu.KLogging
 
@@ -190,7 +191,7 @@ object Matching : KLogging() {
     return e.entries.fold(listOf()) { list, values ->
       if (a.containsKey(values.key)) {
         val actual = a[values.key].orEmpty()
-        list + HeaderMatchResult(values.key, values.value.mapIndexed { index, headerValue ->
+        list + HeaderMatchResult(values.key, values.value.padTo(actual.size).mapIndexed { index, headerValue ->
           HeaderMatcher.compareHeader(values.key, headerValue, actual.getOrElse(index) { "" }, context)
         }.filterNotNull())
       } else {
