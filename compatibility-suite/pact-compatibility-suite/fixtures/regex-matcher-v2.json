@@ -1,0 +1,6 @@
+{
+  "$.body.one": {
+    "match": "regex",
+    "regex": "\\w{3}\\d{3}"
+  }
+}
