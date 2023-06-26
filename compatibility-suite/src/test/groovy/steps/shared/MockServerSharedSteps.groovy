@@ -41,6 +41,7 @@ class MockServerSharedSteps {
   }
 
   @After
+  @SuppressWarnings('UnusedMethodParameter')
   void after(Scenario scenario) {
     mockServerData?.mockServer?.stop()
   }
@@ -138,6 +139,7 @@ class MockServerSharedSteps {
   }
 
   @Then('the mismatches will contain a {string} mismatch with error {string}')
+  @SuppressWarnings('SpaceAfterOpeningBrace')
   void the_mismatches_will_contain_a_mismatch_with_error(String mismatchType, String error) {
     def mismatches = mockServerData.mockServer.mismatchedRequests
       .values()
@@ -148,10 +150,10 @@ class MockServerSharedSteps {
             def mismatchResult = it.mismatches.find {
               it instanceof PactVerificationResult.PartialMismatch
             } as PactVerificationResult.PartialMismatch
-            mismatchResult?.mismatches?.findAll {it.type() == mismatchType }
+            mismatchResult?.mismatches?.findAll { it.type() == mismatchType }
           }
           case PactVerificationResult.PartialMismatch -> {
-            it.mismatches.findAll {it.type() == mismatchType }
+            it.mismatches.findAll { it.type() == mismatchType }
           }
           default -> throw new IllegalArgumentException("$it is not an expected result")
         }

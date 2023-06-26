@@ -1,6 +1,5 @@
 package steps.v1
 
-import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.PactTestExecutionContext
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.model.MockProviderConfig
@@ -8,22 +7,13 @@ import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.QueryMismatch
 import au.com.dius.pact.core.model.Consumer
-import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
-import au.com.dius.pact.core.model.HeaderParser
-import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.provider.HttpClientFactory
-import au.com.dius.pact.provider.IProviderInfo
-import au.com.dius.pact.provider.ProviderClient
-import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.ProviderResponse
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import io.cucumber.datatable.DataTable
 import io.cucumber.java.After
 import io.cucumber.java.Before
 import io.cucumber.java.ParameterType
@@ -35,7 +25,6 @@ import steps.shared.MockServerData
 
 import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap
-import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 
 @SuppressWarnings(['SpaceAfterOpeningBrace', 'AbcMetric', 'NestedBlockDepth'])
 class HttpConsumer {
@@ -93,7 +82,8 @@ class HttpConsumer {
   void the_pact_test_is_done() {
     mockServerData.mockServer.stop()
     PactTestExecutionContext testContext = new PactTestExecutionContext("build/compatibility-suite/v1/$scenarioId")
-    mockServerResult = mockServerData.mockServer.verifyResultAndWritePact(true, testContext, mockServerData.pact, PactSpecVersion.V1)
+    mockServerResult = mockServerData.mockServer.verifyResultAndWritePact(true, testContext,
+      mockServerData.pact, PactSpecVersion.V1)
     def dir = "build/compatibility-suite/v1/$scenarioId" as File
     pactFile = new File(dir, 'v1-compatibility-suite-c-p.json')
   }
