@@ -53,12 +53,20 @@ Feature: Basic HTTP consumer
       | b=2&c=abc&d=true&a=999 |
     Then a 200 success response is returned
 
-  Scenario: Supports matchers for repeated request query parameters
+  Scenario: Supports matchers for repeated request query parameters (positive case)
     When the mock server is started with interaction 4
     And request 4 is made to the mock server with the following changes:
       | query                         |
       | a=123&b=2&c=abc&d=true&a=9999 |
     Then a 200 success response is returned
+
+  Scenario: Supports matchers for repeated request query parameters (negative case)
+    When the mock server is started with interaction 4
+    And request 4 is made to the mock server with the following changes:
+      | query                          |
+      | a=123&b=2&c=abc&d=true&a=9999X |
+    Then a 500 error response is returned
+    And the mismatches will contain a "query" mismatch with error "Expected '9999X' to match '\d{1,4}'"
 
   Scenario: Supports matchers for request headers
     When the mock server is started with interaction 5
