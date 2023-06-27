@@ -22,6 +22,7 @@ class CompatibilitySuiteWorld {
   List<RequestResponseInteraction> interactions = []
 }
 
+@SuppressWarnings('MethodSize')
 class SharedSteps {
   CompatibilitySuiteWorld world
 

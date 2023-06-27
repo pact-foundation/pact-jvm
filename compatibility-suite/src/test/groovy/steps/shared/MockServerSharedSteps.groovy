@@ -32,6 +32,7 @@ class MockServerData {
   ProviderResponse response
 }
 
+@SuppressWarnings('AbcMetric')
 class MockServerSharedSteps {
   CompatibilitySuiteWorld world
   MockServerData mockServerData
@@ -122,7 +123,7 @@ class MockServerSharedSteps {
     providerInfo.port = mockServerData.mockServer.port
     if (entry['raw headers']) {
       def headers = entry['raw headers'].split(',').collect {
-        it.trim()[1..-2].split(':').collect { it.trim() }
+        it.trim()[1..-2].split(':')*.trim()
       }
       providerInfo.requestFilter = { HttpRequest req ->
         headers.each {

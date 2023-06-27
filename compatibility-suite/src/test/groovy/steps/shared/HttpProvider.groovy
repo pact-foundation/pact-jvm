@@ -42,7 +42,7 @@ import org.apache.hc.core5.http.io.entity.StringEntity
 
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 
-@SuppressWarnings('ThrowRuntimeException')
+@SuppressWarnings(['ThrowRuntimeException', 'AbcMetric'])
 class HttpProvider {
   CompatibilitySuiteWorld world
   BaseMockServer mockProvider
