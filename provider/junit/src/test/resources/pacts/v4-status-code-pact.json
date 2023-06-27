@@ -1,0 +1,66 @@
+{
+  "consumer": {
+    "name": "V4Consumer"
+  },
+  "interactions": [
+    {
+      "description": "a test request, part 2",
+      "key": "b3a96005",
+      "pending": false,
+      "request": {
+        "method": "GET",
+        "path": "/test2"
+      },
+      "response": {
+        "matchingRules": {
+          "status": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "statusCode",
+                "status": "clientError"
+              }
+            ]
+          }
+        },
+        "status": 400
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a test request",
+      "key": "a98bd112",
+      "pending": false,
+      "request": {
+        "method": "GET",
+        "path": "/test"
+      },
+      "response": {
+        "matchingRules": {
+          "status": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "statusCode",
+                "status": "success"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.2.7"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "V4Service"
+  }
+}
