@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.junit
 
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.expressions.DataType

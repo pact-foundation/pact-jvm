@@ -67,6 +67,13 @@ class PactRunnerSpec extends Specification {
 
   }
 
+  @Provider('test_provider_combined')
+  @PactFolder('pacts')
+  class V4TestClass {
+    @TestTarget
+    Target target
+  }
+
   static class PactLoaderWithConstructorParameter implements PactLoader {
 
     private final Class clazz
@@ -263,6 +270,15 @@ class PactRunnerSpec extends Specification {
 
     then:
     !runner.children.empty
+  }
+
+  @Issue('#1692')
+  def 'PactRunner supports V4 Pacts'() {
+    when:
+    new PactRunner(V4TestClass).run(new RunNotifier())
+
+    then:
+    notThrown(InitializationError)
   }
 
   @Provider('ExpectedName')

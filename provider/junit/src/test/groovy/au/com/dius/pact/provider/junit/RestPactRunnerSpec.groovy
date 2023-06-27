@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
@@ -16,6 +17,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactFilter
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
+import spock.lang.Issue
 import spock.lang.Specification
 
 class RestPactRunnerSpec extends Specification {
@@ -39,6 +41,13 @@ class RestPactRunnerSpec extends Specification {
   @Provider('myAwesomeService')
   @PactFolder('pacts')
   class TestClass2 {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('test_provider_combined')
+  @PactFolder('pacts')
+  class V4TestClass {
     @TestTarget
     Target target
   }
@@ -95,4 +104,17 @@ class RestPactRunnerSpec extends Specification {
     result.size() == 1
   }
 
+  @Issue('#1692')
+  def 'supports V4 Pacts'() {
+    given:
+    RestPactRunner pactRunner = new RestPactRunner(V4TestClass)
+    def pactLoader = pactRunner.getPactSource(new org.junit.runners.model.TestClass(V4TestClass), null)
+
+    when:
+    def result = pactRunner.filterPacts(pactLoader.load('test_provider_combined'))
+
+    then:
+    result.size() == 1
+    result.first() instanceof V4Pact
+  }
 }

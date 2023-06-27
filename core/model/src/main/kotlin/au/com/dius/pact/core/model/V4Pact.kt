@@ -168,6 +168,11 @@ sealed class V4Interaction(
     }
   }
 
+  /**
+   * returns true if the interaction is of the required type
+   */
+  abstract fun isInteractionType(interactionType: V4InteractionType): Boolean
+
   open class SynchronousHttp @JvmOverloads constructor(
     key: String?,
     description: String,
@@ -232,6 +237,9 @@ sealed class V4Interaction(
         .toMap()
       this.response.updateProperties(responseConfig)
     }
+
+    override fun isInteractionType(interactionType: V4InteractionType) =
+      interactionType == V4InteractionType.SynchronousHTTP
 
     override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
       val map = mutableMapOf(
@@ -411,6 +419,9 @@ sealed class V4Interaction(
       contents = contents.copy(metadata = metadata.toMutableMap())
       return this
     }
+
+    override fun isInteractionType(interactionType: V4InteractionType) =
+      interactionType == V4InteractionType.AsynchronousMessages
   }
 
   open class SynchronousMessages @Suppress("LongParameterList") @JvmOverloads constructor(
@@ -516,6 +527,9 @@ sealed class V4Interaction(
     override fun isSynchronousMessages() = true
 
     override fun asSynchronousMessages() = this
+
+    override fun isInteractionType(interactionType: V4InteractionType) =
+      interactionType == V4InteractionType.SynchronousMessages
   }
 
   companion object : KLogging() {
@@ -682,5 +696,12 @@ open class V4Pact @JvmOverloads constructor(
   open fun requiresPlugins(): Boolean {
     val pluginData = metadata["plugins"]
     return pluginData is List<*> && pluginData.isNotEmpty()
+  }
+
+  /**
+   * Returns true if the Pact has interactions of the given type
+   */
+  fun hasInteractionsOfType(interactionType: V4InteractionType): Boolean {
+    return interactions.any { it.asV4Interaction().isInteractionType(interactionType) }
   }
 }
