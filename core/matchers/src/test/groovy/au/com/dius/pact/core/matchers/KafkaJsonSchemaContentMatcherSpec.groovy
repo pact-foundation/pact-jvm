@@ -619,7 +619,7 @@ class KafkaJsonSchemaContentMatcherSpec extends Specification {
     then:
     !mismatches.empty
     mismatches*.mismatch == ['Expected [red, blue] to match [blue, seven] ignoring order of elements',
-                             'Expected "seven" to match \'red|blue\'']
+                             "Expected 'seven' to match 'red|blue'"]
     mismatches*.path == ['$', '$.1']
   }
 

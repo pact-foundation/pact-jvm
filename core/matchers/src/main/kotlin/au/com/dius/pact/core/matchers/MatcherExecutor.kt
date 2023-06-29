@@ -60,7 +60,7 @@ private val booleanRegex = Regex("^true|false$")
 fun valueOf(value: Any?): String {
   return when (value) {
     null -> "null"
-    is String -> "'$value'"
+    is String, is JsonValue.StringValue -> "'$value'"
     is Element -> "<${QualifiedName(value)}>"
     is Text -> "'${value.wholeText}'"
     is JsonValue -> value.serialise()
@@ -222,7 +222,7 @@ fun <M : Mismatch> matchType(
   allowEmpty: Boolean
 ): List<M> {
   logger.debug {
-    "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to ${valueOf(expected)} (${typeOf(expected)}) at $path"
+    "comparing type of [$actual] (${actual?.javaClass?.simpleName}) to [$expected] (${expected?.javaClass?.simpleName}) at $path"
   }
   return if (expected is Number && actual is Number ||
     expected is Boolean && actual is Boolean ||

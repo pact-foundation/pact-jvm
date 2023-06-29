@@ -168,7 +168,7 @@ class MatchingContextSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected "200.3" (String) to be the same type as 100 (Integer)']
+    mismatches*.mismatch == ["Expected '200.3' (String) to be the same type as 100 (Integer)"]
   }
 
   def 'type matcher - match on type - map elements should inherit the matchers from the parent'() {
@@ -183,7 +183,7 @@ class MatchingContextSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected "200.3" (String) to be the same type as 100 (Integer)']
+    mismatches*.mismatch == ["Expected '200.3' (String) to be the same type as 100 (Integer)"]
   }
 
   def 'path matching - match root node'() {

@@ -64,8 +64,8 @@ class EachValueMatcherSpec extends Specification {
 
     then:
     result.mismatches*.mismatch == [
-      'Expected 100 (Integer) to be the same type as "foo" (String)',
-      "Expected \"x\" to match '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'"
+      "Expected 100 (Integer) to be the same type as 'foo' (String)",
+      "Expected 'x' to match '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'"
     ]
   }
 }
