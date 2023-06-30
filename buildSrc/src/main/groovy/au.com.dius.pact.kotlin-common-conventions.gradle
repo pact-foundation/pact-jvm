@@ -47,6 +47,7 @@ dependencies {
         implementation 'io.netty:netty-handler:4.1.84.Final'
         implementation 'org.apache.groovy:groovy:4.0.11'
         implementation 'org.apache.groovy:groovy-json:4.0.11'
+        implementation 'org.apache.groovy:groovy-xml:4.0.11'
         implementation 'io.pact.plugin.driver:core:0.3.2'
 
         testImplementation 'org.apache.groovy:groovy:4.0.11'

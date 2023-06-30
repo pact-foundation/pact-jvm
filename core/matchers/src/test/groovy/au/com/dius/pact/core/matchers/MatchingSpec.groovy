@@ -161,7 +161,7 @@ class MatchingSpec extends Specification {
 
     then:
     !result.empty
-    result[0].mismatch.endsWith("is not equal to the expected body 'hello'")
+    result[0].mismatch.endsWith('is not equal to the expected body [image/jpeg, 5 bytes, starting with 68656c6c6f]')
   }
 
   def 'Body Matching - ignores well known body matchers if there is a content type matcher'() {

@@ -2,6 +2,7 @@ package steps.shared
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.HeaderParser
+import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Request
@@ -11,6 +12,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import groovy.transform.Canonical
+import groovy.xml.XmlSlurper
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.en.Given
 
@@ -65,25 +67,7 @@ class SharedSteps {
       }
 
       if (entry['body']) {
-        if (entry['body'].startsWith('JSON:')) {
-          interaction.request.headers['content-type'] = ['application/json']
-          interaction.request.body = OptionalBody.body(entry['body'][5..-1].bytes, new ContentType('application/json'))
-        } else if (entry['body'].startsWith('XML:')) {
-          interaction.request.headers['content-type'] = ['application/xml']
-          interaction.request.body = OptionalBody.body(entry['body'][4..-1].bytes, new ContentType('application/xml'))
-        } else {
-          String contentType = 'text/plain'
-          if (entry['body'].endsWith('.json')) {
-            contentType = 'application/json'
-          } else if (entry['body'].endsWith('.xml')) {
-            contentType = 'application/xml'
-          }
-          interaction.request.headers['content-type'] = [contentType]
-          File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
-          contents.withInputStream {
-            interaction.request.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
-          }
-        }
+        configureBody(entry['body'], interaction.request)
       }
 
       if (entry['matching rules']) {
@@ -119,21 +103,13 @@ class SharedSteps {
       }
 
       if (entry['response body']) {
-        String contentType = 'text/plain'
-        if (entry['response content']) {
-          contentType = entry['response content']
-        }
-        interaction.response.headers['content-type'] = [ contentType ]
-        File contents = new File("pact-compatibility-suite/fixtures/${entry['response body']}")
-        contents.withInputStream {
-          interaction.response.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
-        }
+        configureBody(entry['response body'], interaction.response)
       }
 
       if (entry['response matching rules']) {
         JsonValue json
         if (entry['response matching rules'].startsWith('JSON:')) {
-          json = JsonParser.INSTANCE.parseString(entry['body'][5..-1])
+          json = JsonParser.INSTANCE.parseString(entry['response matching rules'][5..-1])
         } else {
           File contents = new File("pact-compatibility-suite/fixtures/${entry['response matching rules']}")
           contents.withInputStream {
@@ -145,5 +121,47 @@ class SharedSteps {
 
       world.interactions << interaction
     }
+  }
+
+  static void configureBody(String entry, HttpPart part) {
+    if (entry.startsWith('JSON:')) {
+      part.headers['content-type'] = ['application/json']
+      part.body = OptionalBody.body(entry[5..-1].bytes, new ContentType('application/json'))
+    } else if (entry.startsWith('XML:')) {
+      part.headers['content-type'] = ['application/xml']
+      part.body = OptionalBody.body(entry[4..-1].trim().bytes, new ContentType('application/xml'))
+    } else if (entry.startsWith('file:')) {
+      if (entry.endsWith('-body.xml')) {
+        File contents = new File("pact-compatibility-suite/fixtures/${entry[5..-1].trim()}")
+        def fixture = new XmlSlurper().parse(contents)
+        def contentType = fixture.contentType.toString()
+        part.headers['content-type'] = [contentType]
+        part.body = OptionalBody.body(fixture.contents.text(), new ContentType(contentType))
+      } else {
+        String contentType = determineContentType(entry, part)
+        part.headers['content-type'] = [contentType]
+        File contents = new File("pact-compatibility-suite/fixtures/${entry[5..-1].trim()}")
+        contents.withInputStream {
+          part.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
+        }
+      }
+    } else {
+      part.headers['content-type'] = [determineContentType(entry, part)]
+      part.body = OptionalBody.body(entry)
+    }
+  }
+
+  private static String determineContentType(String entry, HttpPart part) {
+    String contentType = part.contentTypeHeader()
+    if (entry.endsWith('.json')) {
+      contentType = 'application/json'
+    } else if (entry.endsWith('.xml')) {
+      contentType = 'application/xml'
+    } else if (entry.endsWith('.jpg')) {
+      contentType = 'image/jpeg'
+    } else if (entry.endsWith('.pdf')) {
+      contentType = 'application/pdf'
+    }
+    contentType ?: 'text/plain'
   }
 }

@@ -4,9 +4,7 @@ import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.Consumer
-import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.HeaderParser
-import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.provider.HttpClientFactory
@@ -24,6 +22,7 @@ import org.apache.hc.core5.http.HttpRequest
 import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
+import static steps.shared.SharedSteps.configureBody
 
 class MockServerData {
   RequestResponsePact pact
@@ -97,26 +96,7 @@ class MockServerSharedSteps {
     }
 
     if (entry['body']) {
-      println(entry['body'].inspect())
-      if (entry['body'].startsWith('JSON:')) {
-        request.headers['content-type'] = ['application/json']
-        request.body = OptionalBody.body(entry['body'][5..-1].bytes, new ContentType('application/json'))
-      } else if (entry['body'].startsWith('XML:')) {
-        request.headers['content-type'] = ['application/xml']
-        request.body = OptionalBody.body(entry['body'][4..-1].bytes, new ContentType('application/xml'))
-      } else {
-        String contentType = 'text/plain'
-        if (entry['body'].endsWith('.json')) {
-          contentType = 'application/json'
-        } else if (entry['body'].endsWith('.xml')) {
-          contentType = 'application/xml'
-        }
-        request.headers['content-type'] = [contentType]
-        File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
-        contents.withInputStream {
-          request.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
-        }
-      }
+      configureBody(entry['body'], request)
     }
 
     IProviderInfo providerInfo = new ProviderInfo()

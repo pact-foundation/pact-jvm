@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 
@@ -71,6 +72,27 @@ class FormPostContentMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('a=b&c=d'.bytes)
   }
 
+  def 'returns mismatches - when the expected body contains less values than the actual body'() {
+    expect:
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
+      ['Expected form post parameter \'a\' with 1 value(s) but received 2 value(s)']
+
+    where:
+    actualBody = OptionalBody.body('a=b&a=c'.bytes)
+    expectedBody = OptionalBody.body('a=b'.bytes)
+  }
+
+  def 'returns mismatches - when the expected body contains more values than the actual body'() {
+    expect:
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
+      ['Expected form post parameter \'c\'[0] with value \'1\' but was \'2\'',
+       'Expected form post parameter \'c\'=\'3000\' but was missing']
+
+    where:
+    actualBody = OptionalBody.body('a=b&c=2'.bytes)
+    expectedBody = OptionalBody.body('c=1&a=b&c=3000'.bytes)
+  }
+
   @SuppressWarnings('LineLength')
   def 'returns mismatches - when the actual body contains keys that are not in the expected body and we do not allow extra keys'() {
     given:
@@ -123,7 +145,7 @@ class FormPostContentMatcherSpec extends Specification {
   def 'returns mismatches - when the actual body contains values that are not the same as the expected body'() {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
-      ['Expected form post parameter \'c\'[0] with value \'d\' but was \'1\'']
+      ['Expected form post parameter \'c\' with value \'d\' but was \'1\'']
 
     where:
     actualBody = OptionalBody.body('a=b&c=1'.bytes)
@@ -133,7 +155,7 @@ class FormPostContentMatcherSpec extends Specification {
   def 'handles delimiters in the values'() {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch ==
-      ['Expected form post parameter \'c\'[0] with value \'1\' but was \'1=2\'']
+      ['Expected form post parameter \'c\' with value \'1\' but was \'1=2\'']
 
     where:
     actualBody = OptionalBody.body('a=b&c=1=2'.bytes)
@@ -150,5 +172,17 @@ class FormPostContentMatcherSpec extends Specification {
     where:
     actualBody = OptionalBody.body('a=b&c=2'.bytes)
     expectedBody = OptionalBody.body('c=1&a=b'.bytes)
+  }
+
+  def 'correctly uses a matcher when there are repeated values'() {
+    given:
+    context.matchers.addRule('$.c', new RegexMatcher('\\d+'))
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
+
+    where:
+    actualBody = OptionalBody.body('c=1&a=b&c=3000'.bytes)
+    expectedBody = OptionalBody.body('a=b&c=2'.bytes)
   }
 }

@@ -32,8 +32,7 @@ import org.apache.hc.core5.http.ClassicHttpResponse
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntityContainer
 import org.apache.hc.core5.http.HttpRequest
-import org.apache.hc.core5.http.io.HttpClientResponseHandler
-import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.apache.hc.core5.net.URIBuilder
 import java.io.File
@@ -344,16 +343,13 @@ open class ProviderClient(
   open fun setupBody(request: IRequest, method: HttpRequest) {
     if (method is HttpEntityContainer && request.body.isPresent()) {
       val contentTypeHeader = request.asHttpPart().contentTypeHeader()
-      if (null != contentTypeHeader) {
-        try {
-          val contentType = ContentType.parse(contentTypeHeader)
-          method.entity = StringEntity(request.body.valueAsString(), contentType)
-        } catch (e: UnsupportedCharsetException) {
-          method.entity = StringEntity(request.body.valueAsString())
-        }
-      } else {
-        method.entity = StringEntity(request.body.valueAsString())
+      val contentType = try {
+        val ct = contentTypeHeader ?: request.body.contentType.toString()
+        ContentType.parse(ct)
+      } catch (e: UnsupportedCharsetException) {
+        null
       }
+      method.entity = ByteArrayEntity(request.body.orEmpty(), contentType)
     }
   }
 

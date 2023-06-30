@@ -18,6 +18,7 @@ import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.Header
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.HttpRequest
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity
 import org.apache.hc.core5.http.io.entity.StringEntity
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest
 import org.apache.hc.core5.http.message.BasicHeader
@@ -202,7 +203,7 @@ class ProviderClientSpec extends Specification {
     client.setupBody(request, httpRequest)
 
     then:
-    1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == '{}' }
+    1 * httpRequest.setEntity { it instanceof ByteArrayEntity && it.content.text == '{}' }
     0 * httpRequest._
   }
 
@@ -216,7 +217,7 @@ class ProviderClientSpec extends Specification {
     client.setupBody(request, httpRequest)
 
     then:
-    1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == 'A=B' }
+    1 * httpRequest.setEntity { it instanceof ByteArrayEntity && it.content.text == 'A=B' }
     0 * httpRequest._
   }
 
@@ -230,7 +231,7 @@ class ProviderClientSpec extends Specification {
     client.setupBody(request, httpRequest)
 
     then:
-    1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == 'A=B' }
+    1 * httpRequest.setEntity { it instanceof ByteArrayEntity && it.content.text == 'A=B' }
     0 * httpRequest._
   }
 
@@ -739,11 +740,12 @@ class ProviderClientSpec extends Specification {
     def method = new BasicClassicHttpRequest('PUT', '/')
 
     when:
-    client.setupBody(new Request('PUT', '/', [:], headers, OptionalBody.body(body.bytes)), method)
+    client.setupBody(new Request('PUT', '/', [:], headers,
+      OptionalBody.body(body.getBytes(charset), new PactContentType(contentType))), method)
 
     then:
     method.entity.contentType == contentType
-    method.entity.content.getText(charset) == body
+    method.entity.content.getBytes() == body.getBytes(charset)
 
     where:
 
@@ -752,11 +754,11 @@ class ProviderClientSpec extends Specification {
     'ISO-8859-1' | 'text/plain; charset=ISO-8859-1'
   }
 
-  def 'setupBody() Content-Type defaults to plain text with encoding'() {
+  def 'setupBody() Content-Type defaults to application/octet-stream'() {
     given:
-    def contentType = 'text/plain; charset=ISO-8859-1'
+    def contentType = 'application/octet-stream'
     def body = 'ÄÉÌÕÛ'
-    def request = new Request('PUT', '/', [:], [:], OptionalBody.body(body.bytes))
+    def request = new Request('PUT', '/', [:], [:], OptionalBody.body(body.getBytes('ISO-8859-1')))
     def method = new BasicClassicHttpRequest('PUT', '/')
 
     when:

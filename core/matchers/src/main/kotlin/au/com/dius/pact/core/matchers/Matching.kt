@@ -19,6 +19,7 @@ import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.PluginConfiguration
 import mu.KLogging
+import org.apache.commons.codec.binary.Hex
 
 data class MatchingContext @JvmOverloads constructor(
   val matchers: MatchingRuleCategory,
@@ -256,15 +257,31 @@ object Matching : KLogging() {
 
   fun matchBodyContents(expected: HttpPart, actual: HttpPart): BodyMatchResult {
     val matcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
+    val contentType = expected.determineContentType()
     return when {
-      matcher != null && matcher.canMatch(expected.determineContentType()) ->
+      matcher != null && matcher.canMatch(contentType) ->
         BodyMatchResult(null, listOf(BodyItemMatchResult("$",
           domatch(matcher, listOf("$"), expected.body.unwrap(), actual.body.unwrap(), BodyMismatchFactory))))
       expected.body.unwrap().contentEquals(actual.body.unwrap()) -> BodyMatchResult(null, emptyList())
-      else -> BodyMatchResult(null, listOf(BodyItemMatchResult("$",
-        listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
-        "Actual body '${actual.body.valueAsString()}' is not equal to the expected body " +
-          "'${expected.body.valueAsString()}'")))))
+      else -> {
+        val actualContentType = actual.determineContentType()
+        val actualBody = actual.body.unwrap()
+        val actualDisplay = if (actualContentType.isBinaryType()) {
+          "$actualContentType, ${actualBody.size} bytes, starting with ${Hex.encodeHexString(actual.body.slice(32))}"
+        } else {
+          "$actualContentType, ${actualBody.size} bytes, starting with ${actual.body.slice(32).toString(actual.body.contentType.asCharset())}"
+        }
+        val expectedBody = expected.body.unwrap()
+        val expectedDisplay = if (contentType.isBinaryType()) {
+          "$contentType, ${expectedBody.size} bytes, starting with ${Hex.encodeHexString(expected.body.slice(32))}"
+        } else {
+          "$contentType, ${expectedBody.size} bytes, starting with ${expected.body.slice(32).toString(expected.body.contentType.asCharset())}"
+        }
+        BodyMatchResult(null, listOf(BodyItemMatchResult("$",
+          listOf(BodyMismatch(
+            expectedBody, actualBody,
+            "Actual body [$actualDisplay] is not equal to the expected body [$expectedDisplay]")))))
+      }
     }
   }
 
