@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.constructPath
@@ -213,7 +214,7 @@ object Matching : KLogging() {
     else MethodMismatch(expected, actual)
 
   @Suppress("ComplexMethod")
-  fun matchBody(expected: HttpPart, actual: HttpPart, context: MatchingContext): BodyMatchResult {
+  fun matchBody(expected: IHttpPart, actual: IHttpPart, context: MatchingContext): BodyMatchResult {
     logger.debug { "matchBody: context=$context" }
 
     val expectedContentType = expected.determineContentType()
@@ -255,7 +256,7 @@ object Matching : KLogging() {
     }
   }
 
-  fun matchBodyContents(expected: HttpPart, actual: HttpPart): BodyMatchResult {
+  fun matchBodyContents(expected: IHttpPart, actual: IHttpPart): BodyMatchResult {
     val matcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
     val contentType = expected.determineContentType()
     return when {

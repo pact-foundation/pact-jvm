@@ -14,19 +14,18 @@ object MatchingConfig {
     "text/xml" to "au.com.dius.pact.core.matchers.XmlContentMatcher",
     ".*json.*" to "au.com.dius.pact.core.matchers.JsonContentMatcher",
     "text/plain" to "au.com.dius.pact.core.matchers.PlainTextContentMatcher",
-    "multipart/form-data" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
-    "multipart/mixed" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
+    "multipart/.*" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
     "application/x-www-form-urlencoded" to "au.com.dius.pact.core.matchers.FormPostContentMatcher"
   )
 
   @JvmStatic
   fun lookupContentMatcher(contentType: String?): ContentMatcher? {
     return if (contentType != null) {
-      val contentType1 = ContentType(contentType)
-      val contentMatcher = CatalogueManager.findContentMatcher(contentType1)
+      val ct = ContentType(contentType)
+      val contentMatcher = CatalogueManager.findContentMatcher(ct)
       if (contentMatcher != null) {
         if (!contentMatcher.isCore) {
-          PluginContentMatcher(contentMatcher, contentType1)
+          PluginContentMatcher(contentMatcher, ct)
         } else {
           coreContentMatcher(contentType)
         }
