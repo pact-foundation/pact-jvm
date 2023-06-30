@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<body>
+    <contentType>application/xml</contentType>
+    <contents><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
+<values><one>A</one><two>B</two></values>
+]]>
+    </contents>
+</body>

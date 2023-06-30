@@ -4,12 +4,12 @@ Feature: Basic HTTP provider
 
   Background:
     Given the following HTTP interactions have been defined:
-      | method | path          | query   | headers                 | body       | response | response headers    | response content | response body |
-      | GET    | /basic        |         |                         |            | 200      |                     | application/json | basic.json    |
-      | GET    | /with_params  | a=1&b=2 |                         |            | 200      |                     |                  |               |
-      | GET    | /with_headers |         | 'X-TEST: Compatibility' |            | 200      |                     |                  |               |
-      | PUT    | /basic        |         |                         | basic.json | 200      |                     |                  |               |
-      | GET    | /basic        |         |                         |            | 200      | 'X-TEST: Something' | application/json | basic.json    |
+      | method | path          | query   | headers                 | body             | response | response headers    | response content | response body    |
+      | GET    | /basic        |         |                         |                  | 200      |                     | application/json | file: basic.json |
+      | GET    | /with_params  | a=1&b=2 |                         |                  | 200      |                     |                  |                  |
+      | GET    | /with_headers |         | 'X-TEST: Compatibility' |                  | 200      |                     |                  |                  |
+      | PUT    | /basic        |         |                         | file: basic.json | 200      |                     |                  |                  |
+      | GET    | /basic        |         |                         |                  | 200      | 'X-TEST: Something' | application/json | file: basic.json |
 
   Scenario: Verifying a simple HTTP request
     Given a provider is started that returns the response from interaction 1
