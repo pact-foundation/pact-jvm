@@ -13,6 +13,7 @@ Feature: Basic HTTP consumer
       | PUT    | /xml          |         |                         | file: xml-body.xml       | 200      |                  |                  |
       | PUT    | /bin          |         |                         | file: rat.jpg            | 200      |                  |                  |
       | PUT    | /form         |         |                         | file: form-post-body.xml | 200      |                  |                  |
+      | PUT    | /multipart    |         |                         | file: multipart-body.xml | 200      |                  |                  |
 
   Scenario: When all requests are made to the mock server
     When the mock server is started with interaction 1
@@ -213,5 +214,15 @@ Feature: Basic HTTP consumer
     Then a 500 error response is returned
     And the mismatches will contain a "body" mismatch with error "Expected form post parameter 'c' with value '3' but was '33'"
 
-#    "multipart/form-data" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
-#    "multipart/mixed" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
+  Scenario: Request with a multipart body (positive case)
+    When the mock server is started with interaction 9
+    And request 9 is made to the mock server
+    Then a 200 success response is returned
+
+  Scenario: Request with a multipart body (negative case)
+    When the mock server is started with interaction 9
+    And request 9 is made to the mock server with the following changes:
+      | body                      |
+      | file: multipart2-body.xml |
+    Then a 500 error response is returned
+    And the mismatches will contain a "body" mismatch with error "Actual body [application/octet-stream, 50 bytes, starting with 7b0a2020202022626f6479223a2022546869732069732074686520626f647920] is not equal to the expected body [application/octet-stream, 97 bytes, starting with 3c68746d6c3e0a20203c686561643e0a20203c2f686561643e0a20203c626f64]"
