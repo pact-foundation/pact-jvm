@@ -41,6 +41,7 @@ import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.io.entity.StringEntity
 
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
+import static steps.shared.SharedSteps.configureBody
 
 @SuppressWarnings(['ThrowRuntimeException', 'AbcMetric'])
 class HttpProvider {
@@ -111,23 +112,7 @@ class HttpProvider {
     }
 
     if (entry['body']) {
-      if (entry['body'].startsWith('JSON:')) {
-        interaction.response.headers['content-type'] = ['application/json']
-        interaction.response.body = OptionalBody.body(entry['body'][5..-1].bytes, new ContentType('application/json'))
-      } else if (entry['body'].startsWith('XML:')) {
-        interaction.response.headers['content-type'] = ['application/xml']
-        interaction.response.body = OptionalBody.body(entry['body'][4..-1].bytes, new ContentType('application/xml'))
-      } else {
-        String contentType = 'text/plain'
-        if (entry['content']) {
-          contentType = entry['content']
-        }
-        interaction.response.headers['content-type'] = [contentType]
-        File contents = new File("pact-compatibility-suite/fixtures/${entry['body']}")
-        contents.withInputStream {
-          interaction.response.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
-        }
-      }
+      configureBody(entry['body'], interaction.response)
     }
 
     Pact pact = new RequestResponsePact(new Provider('p'),

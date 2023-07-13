@@ -22,6 +22,7 @@ dependencies {
     exclude group: 'au.com.dius.pact.core'
   }
   testImplementation 'ch.qos.logback:logback-classic'
+  testImplementation 'ch.qos.logback:logback-core'
   implementation 'io.ktor:ktor-http-jvm'
 }
 
@@ -44,6 +45,11 @@ tasks.register('v1') {
       classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
       args = cucumberArgs
       systemProperty 'pact_do_not_track', 'true'
+      if (project.hasProperty('cucumber.log.level')) {
+        environment 'ROOT_LOG_LEVEL', project.property('cucumber.log.level')
+      } else {
+        environment 'ROOT_LOG_LEVEL', 'ERROR'
+      }
     }
   }
 }
