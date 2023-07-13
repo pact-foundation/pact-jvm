@@ -4,9 +4,9 @@ Feature: Basic HTTP provider
 
   Background:
     Given the following HTTP interactions have been defined:
-      | method | path | response | response headers | response content | response body    | response matching rules      |
-      | GET    | /one | 200      | 'X-TEST: 1'      | application/json | file: basic.json | regex-matcher-header-v2.json |
-      | GET    | /two | 200      |                  | application/json | file: basic.json | type-matcher-v2.json         |
+      | No | method | path | response | response headers | response content | response body    | response matching rules      |
+      | 1  | GET    | /one | 200      | 'X-TEST: 1'      | application/json | file: basic.json | regex-matcher-header-v2.json |
+      | 2  | GET    | /two | 200      |                  | application/json | file: basic.json | type-matcher-v2.json         |
 
   Scenario: Supports matching rules for the response headers (positive case)
     Given a provider is started that returns the response from interaction 1, with the following changes:

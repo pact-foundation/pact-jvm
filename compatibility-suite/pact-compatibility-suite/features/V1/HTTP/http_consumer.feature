@@ -4,16 +4,16 @@ Feature: Basic HTTP consumer
 
   Background:
     Given the following HTTP interactions have been defined:
-      | method | path          | query   | headers                 | body                     | response | response content | response body    |
-      | GET    | /basic        |         |                         |                          | 200      | application/json | file: basic.json |
-      | GET    | /with_params  | a=1&b=2 |                         |                          | 200      |                  |                  |
-      | GET    | /with_headers |         | 'X-TEST: Compatibility' |                          | 200      |                  |                  |
-      | PUT    | /basic        |         |                         | file: basic.json         | 200      |                  |                  |
-      | PUT    | /plain        |         |                         | file: text-body.xml      | 200      |                  |                  |
-      | PUT    | /xml          |         |                         | file: xml-body.xml       | 200      |                  |                  |
-      | PUT    | /bin          |         |                         | file: rat.jpg            | 200      |                  |                  |
-      | PUT    | /form         |         |                         | file: form-post-body.xml | 200      |                  |                  |
-      | PUT    | /multipart    |         |                         | file: multipart-body.xml | 200      |                  |                  |
+      | No | method | path          | query   | headers                 | body                     | response | response content | response body    |
+      | 1  | GET    | /basic        |         |                         |                          | 200      | application/json | file: basic.json |
+      | 2  | GET    | /with_params  | a=1&b=2 |                         |                          | 200      |                  |                  |
+      | 3  | GET    | /with_headers |         | 'X-TEST: Compatibility' |                          | 200      |                  |                  |
+      | 4  | PUT    | /basic        |         |                         | file: basic.json         | 200      |                  |                  |
+      | 5  | PUT    | /plain        |         |                         | file: text-body.xml      | 200      |                  |                  |
+      | 6  | PUT    | /xml          |         |                         | file: xml-body.xml       | 200      |                  |                  |
+      | 7  | PUT    | /bin          |         |                         | file: rat.jpg            | 200      |                  |                  |
+      | 8  | PUT    | /form         |         |                         | file: form-post-body.xml | 200      |                  |                  |
+      | 9  | PUT    | /multipart    |         |                         | file: multipart-body.xml | 200      |                  |                  |
 
   Scenario: When all requests are made to the mock server
     When the mock server is started with interaction 1

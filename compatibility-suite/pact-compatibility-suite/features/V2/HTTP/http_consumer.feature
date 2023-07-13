@@ -4,12 +4,12 @@ Feature: Basic HTTP consumer
 
   Background:
     Given the following HTTP interactions have been defined:
-      | method | path      | query                | headers        | body             | matching rules               |
-      | POST   | /path     |                      |                | file: basic.json | regex-matcher-v2.json        |
-      | POST   | /path     |                      |                | file: basic.json | type-matcher-v2.json         |
-      | GET    | /aaa/100/ |                      |                |                  | regex-matcher-path-v2.json   |
-      | GET    | /path     | a=1&b=2&c=abc&d=true |                |                  | regex-matcher-query-v2.json  |
-      | GET    | /path     |                      | 'X-Test: 1000' |                  | regex-matcher-header-v2.json |
+      | No | method | path      | query                | headers        | body             | matching rules               |
+      | 1  | POST   | /path     |                      |                | file: basic.json | regex-matcher-v2.json        |
+      | 2  | POST   | /path     |                      |                | file: basic.json | type-matcher-v2.json         |
+      | 3  | GET    | /aaa/100/ |                      |                |                  | regex-matcher-path-v2.json   |
+      | 4  | GET    | /path     | a=1&b=2&c=abc&d=true |                |                  | regex-matcher-query-v2.json  |
+      | 5  | GET    | /path     |                      | 'X-Test: 1000' |                  | regex-matcher-header-v2.json |
 
   Scenario: Supports a regex matcher (negative case)
     When the mock server is started with interaction 1

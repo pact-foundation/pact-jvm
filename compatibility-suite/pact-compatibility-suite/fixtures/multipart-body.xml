@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <body>
     <contentType>multipart/mixed; boundary=gc0p4Jq0M2Yt08jU534c0p</contentType>
-    <contents>
+    <contents eol="CRLF">
 <![CDATA[
 --gc0p4Jq0M2Yt08jU534c0p
 Content-Type: text/plain
@@ -11,8 +11,7 @@ This is the body of the message.
 Content-Type: application/octet-stream
 Content-Transfer-Encoding: base64
 
-PGh0bWw+CiAgPGhlYWQ+CiAgPC9oZWFkPgogIDxib2R5PgogICAgPHA+VGhpcyBpcyB0aGUg
-Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==
+PGh0bWw+CiAgPGhlYWQ+CiAgPC9oZWFkPgogIDxib2R5PgogICAgPHA+VGhpcyBpcyB0aGUgYm9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==
 --gc0p4Jq0M2Yt08jU534c0p--
 ]]>
     </contents>
