@@ -32,6 +32,25 @@ Feature: Basic HTTP consumer
     Then a 500 error response is returned
     And the mismatches will contain a "body" mismatch with error "Expected 100 (Integer) to be the same type as 'a' (String)"
 
+  Scenario: Type matchers cascade to children (positive case)
+    When the mock server is started with interaction 2 but with the following changes:
+      | body               |
+      | file: 3-level.json |
+    And request 2 is made to the mock server with the following changes:
+      | body                                                                                                        |
+      | JSON: { "one": { "a": { "ids": [100], "status": "Lovely" }  }, "two": [ { "ids": [1], "status": "BAD" } ] } |
+    Then a 200 success response is returned
+
+  Scenario: Type matchers cascade to children (negative case)
+    When the mock server is started with interaction 2 but with the following changes:
+      | body               |
+      | file: 3-level.json |
+    And request 2 is made to the mock server with the following changes:
+      | body                                                                                                        |
+      | JSON: { "one": { "a": { "ids": ["100"], "status": "Lovely" }  }, "two": [ { "ids": [1], "status": "BAD" } ] } |
+    Then a 500 error response is returned
+    And the mismatches will contain a "body" mismatch with error "Expected '100' (String) to be the same type as 1 (Integer)"
+
   Scenario: Supports a type matcher (positive case)
     When the mock server is started with interaction 2
     And request 2 is made to the mock server with the following changes:

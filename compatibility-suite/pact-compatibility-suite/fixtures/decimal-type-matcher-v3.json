@@ -1,0 +1,12 @@
+{
+  "body": {
+    "$.one": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "decimal"
+        }
+      ]
+    }
+  }
+}

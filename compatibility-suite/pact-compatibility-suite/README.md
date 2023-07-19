@@ -31,7 +31,7 @@ This is the root element.
 This sets the content type of the body. It must be a valid MIME type. If not provided, it will default to either `text/plain` or `application/octet-stream`.
 
 #### body/contents
-The contents of the body. If newlines are required to be preserved, wrap the contents in a CDATA block. If the contents require the line endings to be CRLF
+The contents of the body. If newlines are required to be preserved, wrap the contents in a CDATA block. If the contents require the line endings to be CRLF 
 (for instance, MIME multipart formats require CRLF line endings), set the attrribute `eol="CRLF"`.
 
 ### Matcher fragments
