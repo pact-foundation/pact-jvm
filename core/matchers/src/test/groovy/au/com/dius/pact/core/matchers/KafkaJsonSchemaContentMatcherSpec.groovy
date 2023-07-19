@@ -429,14 +429,14 @@ class KafkaJsonSchemaContentMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ["Expected $message to have maximum $maxSize"]
+    mismatches*.mismatch == ["Expected $message to have maximum size of $maxSize"]
     mismatches*.path == ['$']
 
     where:
 
     expected                | actual                                      | message
-    '[1,2]'                 | '[1,2,3,4,5,6]'                             | '[1, 2, 3, 4, 5, 6]'
-    '[{"i":"a"},{"i":"b"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":"a"}, {"i":"b"}, {"i":"c"}, {"i":"d"}]'
+    '[1,2]'                 | '[1,2,3,4,5,6]'                             | '[1, 2, 3, 4, 5, 6] (size 6)'
+    '[{"i":"a"},{"i":"b"}]' | '[{"i":"a"},{"i":"b"},{"i":"c"},{"i":"d"}]' | '[{"i":"a"}, {"i":"b"}, {"i":"c"}, {"i":"d"}] (size 4)'
   }
 
   @Unroll

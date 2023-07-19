@@ -33,7 +33,7 @@ class QueryMatcherSpec extends Specification {
     expect:
     QueryMatcher.compareQuery('a',
       ['1000-01-01', '2000-01-01'], ['2000-01-01', '2000x-01-03'], context)*.mismatch ==
-      ["Expected '2000x-01-03' to match a date of 'yyyy-MM-dd': Unable to parse the date: 2000x-01-03"]
+      ["Expected '2000x-01-03' to match a date pattern of 'yyyy-MM-dd': Unable to parse the date: 2000x-01-03"]
   }
 
   def 'applies matching rules to multiple parameter values'() {

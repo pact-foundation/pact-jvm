@@ -17,6 +17,7 @@ import static au.com.dius.pact.core.matchers.RequestMatching.requestMismatches
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 import static steps.shared.SharedSteps.configureBody
 
+@SuppressWarnings('SpaceAfterOpeningBrace')
 class HttpMatching {
   Request expectedRequest
   List<Request> receivedRequests = []
@@ -83,7 +84,7 @@ class HttpMatching {
 
   @When('the requests are compared to the expected one')
   void the_requests_are_compared_to_the_expected_one() {
-    results.addAll(receivedRequests.collect {requestMismatches(expectedRequest, it) })
+    results.addAll(receivedRequests.collect { requestMismatches(expectedRequest, it) })
   }
 
   @Then('the comparison should be OK')

@@ -130,6 +130,7 @@ fun <M : Mismatch> domatch(
   }
 }
 
+@Suppress("ComplexMethod")
 fun <M : Mismatch> domatch(
   matcher: MatchingRule,
   path: List<String>,
@@ -168,6 +169,7 @@ fun <M : Mismatch> domatch(
   }
 }
 
+@Suppress("ComplexMethod")
 fun <M : Mismatch> matchEquality(
   path: List<String>,
   expected: Any?,
@@ -194,6 +196,7 @@ fun <M : Mismatch> matchEquality(
   }
 }
 
+@Suppress("ComplexCondition")
 fun <M : Mismatch> matchRegex(
   regex: String,
   path: List<String>,
@@ -214,6 +217,7 @@ fun <M : Mismatch> matchRegex(
   }
 }
 
+@Suppress("ComplexMethod", "ComplexCondition")
 fun <M : Mismatch> matchType(
   path: List<String>,
   expected: Any?,
@@ -270,7 +274,7 @@ fun <M : Mismatch> matchType(
   }
 }
 
-@Suppress("ReturnCount")
+@Suppress("ReturnCount", "ComplexMethod", "ComplexCondition")
 fun <M : Mismatch> matchNumber(
   numberType: NumberTypeMatcher.NumberType,
   path: List<String>,
@@ -346,6 +350,7 @@ fun matchInteger(actual: Any?): Boolean {
   return result
 }
 
+@Suppress("ComplexMethod")
 fun <M : Mismatch> matchBoolean(
   path: List<String>,
   expected: Any?,
@@ -708,6 +713,7 @@ fun matchStatusCode(
   }
 }
 
+@Suppress("SwallowedException")
 fun <M : Mismatch> matchSemver(
   path: List<String>,
   expected: Any?,

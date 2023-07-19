@@ -39,7 +39,6 @@ class HttpConsumer {
     builder = builder.given(state, entry)
   }
 
-
   @When('the Pact file for the test is generated')
   void the_pact_file_for_the_test_is_generated() {
     pact = builder.uponReceiving('some request')
@@ -64,7 +63,7 @@ class HttpConsumer {
     assert providerStates.values.find { it.get('name').toString() == state } != null
   }
 
-  @Then("the provider state {string} in the Pact file will contain the following parameters:")
+  @Then('the provider state {string} in the Pact file will contain the following parameters:')
   void the_provider_state_in_the_pact_file_will_contain_the_following_parameters(String state, DataTable dataTable) {
     def entry = dataTable.entries().first()['parameters']
     JsonValue.Object interaction = pactJson['interactions'].asArray().get(0).asObject()

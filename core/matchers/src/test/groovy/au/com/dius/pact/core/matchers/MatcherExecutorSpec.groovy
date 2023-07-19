@@ -279,7 +279,8 @@ class MatcherExecutorSpec extends Specification {
     where:
 
     value             | result
-    '100'             | false
+    '100'             | true
+    '100x'            | false
     100               | true
     100.0             | false
     100i              | true
