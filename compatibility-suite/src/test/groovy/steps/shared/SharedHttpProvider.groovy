@@ -44,7 +44,7 @@ import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 import static steps.shared.SharedSteps.configureBody
 
 @SuppressWarnings(['ThrowRuntimeException', 'AbcMetric'])
-class HttpProvider {
+class SharedHttpProvider {
   CompatibilitySuiteWorld world
   BaseMockServer mockProvider
   ProviderInfo providerInfo
@@ -54,7 +54,7 @@ class HttpProvider {
   Map<String, String> verificationProperties = [:]
   List providerStateParams = []
 
-  HttpProvider(CompatibilitySuiteWorld world) {
+  SharedHttpProvider(CompatibilitySuiteWorld world) {
     this.world = world
   }
 
