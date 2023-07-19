@@ -1,1 +1,0 @@
-Pact-JVM - Leiningen Provider test support library
