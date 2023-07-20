@@ -1,0 +1,5 @@
+{
+  "body": {
+    "$.one": { "type": "RandomHexadecimal", "digits": 6 }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "body": {
+    "$.one": { "type": "Regex", "regex": "\\d{1,8}" }
+  }
+}
