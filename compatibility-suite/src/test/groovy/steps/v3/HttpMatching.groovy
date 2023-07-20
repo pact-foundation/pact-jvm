@@ -46,7 +46,7 @@ class HttpMatching {
     if (entry['matching rules']) {
       JsonValue json
       if (entry['matching rules'].startsWith('JSON:')) {
-        json = JsonParser.INSTANCE.parseString(entry['body'][5..-1])
+        json = JsonParser.INSTANCE.parseString(entry['matching rules'][5..-1])
       } else {
         File contents = new File("pact-compatibility-suite/fixtures/${entry['matching rules']}")
         contents.withInputStream {
