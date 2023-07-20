@@ -425,7 +425,7 @@ data class TimeGenerator @JvmOverloads constructor(
     return if (!format.isNullOrEmpty()) {
       time.format(DateTimeFormatter.ofPattern(format))
     } else {
-      time.format(DateTimeFormatter.ISO_LOCAL_TIME)
+      time.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
     }
   }
 

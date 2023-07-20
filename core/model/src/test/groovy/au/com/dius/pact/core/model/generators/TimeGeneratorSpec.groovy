@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class TimeGeneratorSpec extends Specification {
 
@@ -31,6 +32,7 @@ class TimeGeneratorSpec extends Specification {
     def base = baseTime.atOffset(ZoneOffset.ofHours(11)).atDate(LocalDate.now())
 
     expect:
-    TimeGenerator.@Companion.fromJson(json).generate([baseTime: base], null) == baseTime.toString()
+    TimeGenerator.@Companion.fromJson(json).generate([baseTime: base], null) ==
+      baseTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
   }
 }
