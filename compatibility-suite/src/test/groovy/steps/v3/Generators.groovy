@@ -94,7 +94,7 @@ class Generators {
       }
       case 'time' -> {
         assert element.type() == 'String'
-        assert element.toString() ==~ /\d{2}:\d{2}:\d{2}\.\d{1,9}/
+        assert element.toString() ==~ /\d{2}:\d{2}:\d{2}/
       }
       case 'date-time' -> {
         assert element.type() == 'String'

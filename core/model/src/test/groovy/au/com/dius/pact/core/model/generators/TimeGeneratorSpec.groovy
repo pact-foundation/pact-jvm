@@ -33,6 +33,6 @@ class TimeGeneratorSpec extends Specification {
 
     expect:
     TimeGenerator.@Companion.fromJson(json).generate([baseTime: base], null) ==
-      baseTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+      baseTime.format(DateTimeFormatter.ofPattern('HH:mm:ss'))
   }
 }
