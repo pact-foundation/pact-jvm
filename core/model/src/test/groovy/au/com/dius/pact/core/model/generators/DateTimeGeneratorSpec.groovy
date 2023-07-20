@@ -6,6 +6,7 @@ import spock.lang.Specification
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 @SuppressWarnings('LineLength')
 class DateTimeGeneratorSpec extends Specification {
@@ -35,7 +36,7 @@ class DateTimeGeneratorSpec extends Specification {
 
     expect:
     DateTimeGenerator.@Companion.fromJson(json).generate([baseDateTime: baseWithOffset], null) ==
-      baseDateTime.toString()
+      baseDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
   }
 
   def 'supports timezones with zone IDs'() {
