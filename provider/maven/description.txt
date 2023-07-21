@@ -1,1 +1,0 @@
-Pact-JVM - Pact Maven plugin
