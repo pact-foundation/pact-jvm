@@ -10,7 +10,7 @@ import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import io.pact.plugins.jvm.core.PluginConfiguration
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 sealed class RequestMatch {
   private val score: Int

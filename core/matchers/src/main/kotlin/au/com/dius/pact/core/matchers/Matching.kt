@@ -19,7 +19,7 @@ import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.PluginConfiguration
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.codec.binary.Hex
 
 data class MatchingContext @JvmOverloads constructor(

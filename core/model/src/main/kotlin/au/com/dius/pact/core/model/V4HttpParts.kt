@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.beanutils.BeanUtils
 
 private fun headersFromJson(json: JsonValue): Map<String, List<String>> {

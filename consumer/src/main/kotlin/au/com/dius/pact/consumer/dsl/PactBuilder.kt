@@ -38,7 +38,7 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryNotFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists

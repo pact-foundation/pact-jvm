@@ -9,7 +9,7 @@ import au.com.dius.pact.provider.junitsupport.StateChangeAction
 import com.github.restdriver.clientdriver.ClientDriverRule
 import com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse
 import com.github.restdriver.clientdriver.RestClientDriver.onRequestTo
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.equalTo

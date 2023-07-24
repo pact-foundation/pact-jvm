@@ -21,7 +21,7 @@ import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider

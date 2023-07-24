@@ -11,7 +11,7 @@ import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.mapOk
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
 import java.io.File

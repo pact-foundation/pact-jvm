@@ -4,7 +4,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintWriter

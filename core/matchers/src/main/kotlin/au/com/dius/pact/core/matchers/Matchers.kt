@@ -20,7 +20,7 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Either
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.math.BigInteger
 import java.util.Comparator
 

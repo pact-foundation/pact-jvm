@@ -19,7 +19,7 @@ import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.util.regex.Pattern
 
 open class BaseBuilder(

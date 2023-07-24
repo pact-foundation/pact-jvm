@@ -25,7 +25,7 @@ import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.isNotEmpty
 import com.mifmif.common.regex.Generex
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.DateUtils
 import java.text.ParseException

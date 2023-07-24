@@ -12,8 +12,8 @@ import au.com.dius.pact.core.support.getOr
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import com.mifmif.common.regex.Generex
-import mu.KLogging
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal

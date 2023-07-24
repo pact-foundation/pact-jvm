@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.matchers
 
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 object HeaderMatcher : KLogging() {
 

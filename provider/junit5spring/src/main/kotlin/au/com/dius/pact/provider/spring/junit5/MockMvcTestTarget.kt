@@ -12,7 +12,7 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
 import au.com.dius.pact.provider.junit5.TestTarget
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.lang3.StringUtils
 import org.hamcrest.core.IsAnything
 import org.springframework.http.HttpHeaders

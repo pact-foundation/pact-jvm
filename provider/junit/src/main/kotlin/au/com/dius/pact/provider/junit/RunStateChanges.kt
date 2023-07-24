@@ -4,7 +4,7 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
 import java.util.function.Supplier

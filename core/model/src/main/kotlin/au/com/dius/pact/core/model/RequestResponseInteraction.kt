@@ -2,7 +2,7 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.net.URLEncoder
 
 /**

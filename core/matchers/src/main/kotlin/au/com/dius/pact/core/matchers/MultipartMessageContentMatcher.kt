@@ -6,7 +6,7 @@ import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.util.Enumeration
 import javax.mail.BodyPart
 import javax.mail.Header

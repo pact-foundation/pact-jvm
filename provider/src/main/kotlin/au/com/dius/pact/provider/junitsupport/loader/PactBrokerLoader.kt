@@ -19,7 +19,7 @@ import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.core5.net.URIBuilder
 import java.io.IOException
 import java.lang.reflect.Method

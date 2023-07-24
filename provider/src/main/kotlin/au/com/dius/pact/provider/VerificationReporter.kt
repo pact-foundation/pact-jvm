@@ -10,7 +10,7 @@ import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.mapError
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 /**
  * Interface to the reporter that published the verification results

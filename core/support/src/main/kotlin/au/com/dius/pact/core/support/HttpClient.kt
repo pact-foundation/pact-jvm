@@ -4,7 +4,7 @@ import au.com.dius.pact.core.support.Auth.Companion.DEFAULT_AUTH_HEADER
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.ValueResolver
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.auth.CredentialsProvider
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials

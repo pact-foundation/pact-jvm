@@ -14,8 +14,8 @@ import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonObject
-import mu.KLogging
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
 

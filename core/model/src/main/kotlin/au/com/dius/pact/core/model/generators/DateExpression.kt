@@ -7,7 +7,7 @@ import au.com.dius.pact.core.support.generators.expressions.DateExpressionLexer
 import au.com.dius.pact.core.support.generators.expressions.DateExpressionParser
 import au.com.dius.pact.core.support.generators.expressions.DateOffsetType
 import au.com.dius.pact.core.support.generators.expressions.Operation
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.time.DayOfWeek
 import java.time.Month
 import java.time.OffsetDateTime

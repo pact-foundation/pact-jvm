@@ -10,7 +10,7 @@ import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 object JsonContentMatcher : ContentMatcher, KLogging() {
 
