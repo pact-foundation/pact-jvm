@@ -20,7 +20,7 @@ import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
 import io.pact.plugins.jvm.core.InteractionVerificationData
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback

@@ -29,7 +29,7 @@ import io.ktor.util.network.hostname
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.text.StringEscapeUtils
 import org.apache.hc.client5.http.classic.methods.HttpOptions
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy

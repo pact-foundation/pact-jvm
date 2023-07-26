@@ -36,7 +36,7 @@ import com.github.zafarkhaja.semver.Version
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.time.DateUtils
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream

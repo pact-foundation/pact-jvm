@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.zipAll
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node

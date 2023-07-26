@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import javax.inject.Inject

@@ -8,7 +8,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import io.pact.plugins.jvm.core.PluginConfiguration
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.io.FilenameUtils
 import java.io.File
 import kotlin.reflect.KClass

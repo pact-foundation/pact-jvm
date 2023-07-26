@@ -15,7 +15,7 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
 import au.com.dius.pact.provider.junitsupport.Provider
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.net.URLClassLoader
 import java.util.function.Function
 import java.util.function.Supplier

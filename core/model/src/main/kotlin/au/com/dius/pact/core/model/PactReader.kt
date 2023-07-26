@@ -20,8 +20,8 @@ import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.unwrap
-import mu.KLogging
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
 import org.apache.hc.client5.http.classic.methods.HttpGet

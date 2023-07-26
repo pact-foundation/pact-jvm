@@ -12,7 +12,7 @@ import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.lang.RuntimeException
 
 /**

@@ -10,7 +10,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.orNull
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.util.Locale
 
 enum class Category {

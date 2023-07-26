@@ -4,7 +4,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.io.File
 import java.util.Collections
 import kotlin.reflect.full.declaredFunctions

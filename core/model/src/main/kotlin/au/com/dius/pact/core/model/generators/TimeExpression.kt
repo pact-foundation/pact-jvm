@@ -7,7 +7,7 @@ import au.com.dius.pact.core.support.generators.expressions.TimeBase
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionLexer
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionParser
 import au.com.dius.pact.core.support.generators.expressions.TimeOffsetType
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset

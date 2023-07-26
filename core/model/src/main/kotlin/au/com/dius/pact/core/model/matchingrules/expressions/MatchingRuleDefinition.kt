@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.isNotEmpty
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 data class MatchingReference(
   val name: String
