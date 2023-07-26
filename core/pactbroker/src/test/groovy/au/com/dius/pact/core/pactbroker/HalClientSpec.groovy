@@ -513,7 +513,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute(_, _) >> { args ->
-      assert args[0].getURI().toString() == 'http://localhost:1234/subpath/one/two/';
+      assert args[0].getURI().toString() == 'http://localhost:1234/subpath/one/two/'
       mockResponse
     }
   }
