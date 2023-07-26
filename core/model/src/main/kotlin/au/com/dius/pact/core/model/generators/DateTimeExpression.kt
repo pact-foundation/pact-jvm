@@ -2,7 +2,7 @@ package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.mapError
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.lang.Integer.parseInt
 import java.time.OffsetDateTime
 

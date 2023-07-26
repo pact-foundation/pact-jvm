@@ -9,7 +9,7 @@ import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.json.JsonValue
 import io.pact.plugins.jvm.core.CatalogueManager
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 interface ResponseGenerator {
   /**

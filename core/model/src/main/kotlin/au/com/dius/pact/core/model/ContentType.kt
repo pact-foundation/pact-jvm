@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.isNotEmpty
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.tika.mime.MediaType
 import org.apache.tika.mime.MediaTypeRegistry
 import org.apache.tika.mime.MimeTypes

@@ -14,7 +14,7 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.MockServerDetails
 import io.pact.plugins.jvm.core.MockServerResults
 import io.pact.plugins.jvm.core.PluginManager
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 /**
  * Mock server provided by a plugin

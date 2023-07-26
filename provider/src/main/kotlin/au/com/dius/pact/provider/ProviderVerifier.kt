@@ -53,7 +53,7 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import io.pact.plugins.jvm.core.PluginConfiguration
 import io.pact.plugins.jvm.core.PluginManager
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.io.File
 import java.lang.reflect.Method
 import java.net.URL

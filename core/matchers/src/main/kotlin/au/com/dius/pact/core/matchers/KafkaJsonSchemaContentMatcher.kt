@@ -8,7 +8,7 @@ import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.KafkaSchemaRegistryWireFormatter
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 class KafkaJsonSchemaContentMatcher : ContentMatcher {
 

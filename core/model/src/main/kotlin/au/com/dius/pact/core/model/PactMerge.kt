@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Result
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 data class MergeResult(val ok: Boolean, val message: String, val result: Pact? = null)
 

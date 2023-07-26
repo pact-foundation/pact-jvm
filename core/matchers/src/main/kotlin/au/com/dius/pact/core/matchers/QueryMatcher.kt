@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.support.padTo
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.atteo.evo.inflector.English
 
 object QueryMatcher : KLogging() {

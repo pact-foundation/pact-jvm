@@ -3,7 +3,7 @@ package au.com.dius.pact.core.model.matchingrules
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 class MatchingRulesImpl : MatchingRules {
 

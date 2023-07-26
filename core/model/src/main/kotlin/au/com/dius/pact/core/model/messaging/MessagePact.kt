@@ -18,7 +18,7 @@ import au.com.dius.pact.core.support.Utils.extractFromMap
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonObject
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.io.File
 
 /**

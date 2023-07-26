@@ -6,7 +6,7 @@ import au.com.dius.pact.core.model.ContentType.Companion.UNKNOWN
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
 import au.com.dius.pact.core.support.json.JsonParser
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.codec.binary.Hex
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream

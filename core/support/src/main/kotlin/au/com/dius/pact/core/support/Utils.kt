@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.support
 
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.lang3.RandomUtils
 import java.io.IOException
 import java.net.ServerSocket

@@ -15,7 +15,7 @@ import au.com.dius.pact.core.support.json.get
 import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.unwrap
 import com.google.common.net.UrlEscapers
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.classic.methods.HttpPut

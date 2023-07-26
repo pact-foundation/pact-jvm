@@ -16,7 +16,7 @@ import au.com.dius.pact.core.support.mapOk
 import au.com.dius.pact.core.support.mapError
 import au.com.dius.pact.core.support.toJson
 import com.google.common.net.UrlEscapers.urlFormParameterEscaper
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.io.File
 import java.io.IOException
 import java.net.URLDecoder

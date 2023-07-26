@@ -10,7 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 /**
  * Contents of a message interaction
@@ -53,7 +53,9 @@ data class MessageContents @JvmOverloads constructor(
     return generators + matchingRuleGenerators
   }
 
-  companion object : KLogging() {
+  companion object {
+
+    private val logger = KotlinLogging.logger {}
     fun fromJson(json: JsonValue): MessageContents {
       val metadata = if (json.has("metadata")) {
         val jsonValue = json["metadata"]

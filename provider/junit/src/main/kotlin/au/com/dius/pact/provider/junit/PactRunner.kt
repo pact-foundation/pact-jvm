@@ -24,7 +24,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.junit.Ignore
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.ParentRunner

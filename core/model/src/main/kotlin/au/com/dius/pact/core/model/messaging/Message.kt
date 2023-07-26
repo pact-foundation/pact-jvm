@@ -16,7 +16,7 @@ import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.KafkaSchemaRegistryWireFormatter
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 

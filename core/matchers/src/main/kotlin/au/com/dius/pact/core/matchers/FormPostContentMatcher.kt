@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.core5.http.NameValuePair
 import org.apache.hc.core5.net.WWWFormCodec
 

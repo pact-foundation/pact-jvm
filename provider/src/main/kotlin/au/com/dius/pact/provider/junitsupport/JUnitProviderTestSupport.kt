@@ -10,7 +10,7 @@ import au.com.dius.pact.provider.junitsupport.filter.InteractionFilter
 import au.com.dius.pact.provider.junitsupport.loader.OverrideablePactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactFilter
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import kotlin.reflect.full.createInstance

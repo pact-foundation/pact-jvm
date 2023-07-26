@@ -2,7 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.IResponse
 import io.pact.plugins.jvm.core.PluginConfiguration
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 sealed class ResponseMatch
 object FullResponseMatch : ResponseMatch()
