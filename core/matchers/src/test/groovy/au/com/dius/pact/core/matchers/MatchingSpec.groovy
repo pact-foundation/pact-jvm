@@ -258,12 +258,12 @@ class MatchingSpec extends Specification {
     )
 
     then:
-    result == [new BodyItemMatchResult('$.0', []), new BodyItemMatchResult('$.1', [])]
+    result == [new BodyItemMatchResult('$[0]', []), new BodyItemMatchResult('$[1]', [])]
     result2 == [
-      new BodyItemMatchResult('$.0', []),
-      new BodyItemMatchResult('$.1', [new BodyMismatch('*', 'x',
+      new BodyItemMatchResult('$[0]', []),
+      new BodyItemMatchResult('$[1]', [new BodyMismatch('*', 'x',
         "Expected 'x' to match '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'",
-        '$.1', null)])
+        '$[1]', null)])
     ]
   }
 }

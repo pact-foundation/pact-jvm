@@ -176,6 +176,8 @@ fun constructValidPath(segment: String, rootPath: String): String {
       val root = StringUtils.stripEnd(rootPath, ".")
       if (segment.any { !validPathCharacter(it) }) {
         "$root['$segment']"
+      } else if (segment.all { it.isDigit() }) {
+        "$root[$segment]"
       } else {
         "$root.$segment"
       }

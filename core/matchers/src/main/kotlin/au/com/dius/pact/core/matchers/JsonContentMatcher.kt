@@ -83,8 +83,8 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
       expected is JsonValue.Object && actual !is JsonValue.Object ||
         expected is JsonValue.Array && actual !is JsonValue.Array ->
         listOf(BodyItemMatchResult(constructPath(path),
-          listOf(BodyMismatch(expected, actual, "Type mismatch: Expected ${typeOf(expected)} " +
-          "${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}", constructPath(path),
+          listOf(BodyMismatch(expected, actual, "Type mismatch: Expected ${typeOf(actual)} " +
+          "${valueOf(actual)} to be equal to ${typeOf(expected)} ${valueOf(expected)}", constructPath(path),
           generateJsonDiff(expected, actual)))))
       else -> compareValues(path, expected, actual, context)
     }
@@ -178,8 +178,8 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
         listOf(BodyItemMatchResult(constructPath(path), emptyList()))
       } else {
         listOf(BodyItemMatchResult(constructPath(path),
-          listOf(BodyMismatch(expected, actual, "Expected ${valueOf(expected)} (${typeOf(expected)}) " +
-            "but received ${valueOf(actual)} (${typeOf(actual)})", constructPath(path)))))
+          listOf(BodyMismatch(expected, actual, "Expected ${valueOf(actual)} (${typeOf(actual)}) " +
+            "to be equal to ${valueOf(expected)} (${typeOf(expected)})", constructPath(path)))))
       }
     }
   }

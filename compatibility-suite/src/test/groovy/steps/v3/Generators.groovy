@@ -140,7 +140,7 @@ class Generators {
         UUID.fromString(element.toString())
       }
       case 'boolean' -> {
-        assert element.type() ==~ /True|False/
+        assert element.type() == 'Boolean'
       }
       default -> throw new AssertionError("Invalid type: $type")
     }

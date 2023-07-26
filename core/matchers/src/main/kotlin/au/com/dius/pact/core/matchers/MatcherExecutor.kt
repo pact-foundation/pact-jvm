@@ -192,7 +192,8 @@ fun <M : Mismatch> matchEquality(
     emptyList()
   } else {
     listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} (${typeOf(actual)}) to equal ${valueOf(expected)} (${typeOf(expected)})", path))
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be equal to " +
+        "${valueOf(expected)} (${typeOf(expected)})", path))
   }
 }
 
@@ -226,7 +227,8 @@ fun <M : Mismatch> matchType(
   allowEmpty: Boolean
 ): List<M> {
   logger.debug {
-    "comparing type of [$actual] (${actual?.javaClass?.simpleName}) to [$expected] (${expected?.javaClass?.simpleName}) at $path"
+    "comparing type of [$actual] (${actual?.javaClass?.simpleName}) to " +
+      "[$expected] (${expected?.javaClass?.simpleName}) at $path"
   }
   return if (expected is Number && actual is Number ||
     expected is Boolean && actual is Boolean ||
@@ -251,7 +253,8 @@ fun <M : Mismatch> matchType(
         else -> false
       }
       if (empty) {
-        listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to not be empty", path))
+        listOf(mismatchFactory.create(expected, actual,
+          "Expected ${valueOf(actual)} (${typeOf(actual)}) to not be empty", path))
       } else {
         emptyList()
       }
@@ -265,7 +268,8 @@ fun <M : Mismatch> matchType(
     if (actual == null || actual is JsonValue.Null) {
       emptyList()
     } else {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
+      listOf(mismatchFactory.create(expected, actual,
+        "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
     }
   } else {
     listOf(mismatchFactory.create(expected, actual,
@@ -283,7 +287,8 @@ fun <M : Mismatch> matchNumber(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   if (expected == null && actual != null) {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
   }
   when (numberType) {
     NumberTypeMatcher.NumberType.NUMBER -> {
@@ -358,7 +363,8 @@ fun <M : Mismatch> matchBoolean(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   if (expected == null && actual != null) {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
   }
   logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to match a boolean at $path" }
   return when {
@@ -476,21 +482,24 @@ fun <M : Mismatch> matchMinType(
     when (actual) {
       is List<*> -> {
         if (actual.size < min) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have minimum size of $min", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have minimum size of $min", path))
         } else {
           emptyList()
         }
       }
       is JsonValue.Array -> {
         if (actual.size < min) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have minimum size of $min", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have minimum size of $min", path))
         } else {
           emptyList()
         }
       }
       is Element -> {
         if (actual.childNodes.length < min) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.childNodes.length}) to have minimum size of $min", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+            "(size ${actual.childNodes.length}) to have minimum size of $min", path))
         } else {
           emptyList()
         }
@@ -515,21 +524,24 @@ fun <M : Mismatch> matchMaxType(
     when (actual) {
       is List<*> -> {
         if (actual.size > max) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have maximum size of $max", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have maximum size of $max", path))
         } else {
           emptyList()
         }
       }
       is JsonValue.Array -> {
         if (actual.size > max) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have maximum size of $max", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have maximum size of $max", path))
         } else {
           emptyList()
         }
       }
       is Element -> {
         if (actual.childNodes.length > max) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.childNodes.length}) to have maximum size of $max", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+            "(size ${actual.childNodes.length}) to have maximum size of $max", path))
         } else {
           emptyList()
         }
@@ -586,19 +598,22 @@ fun <M : Mismatch> matchMinEqualsIgnoreOrder(
   logger.debug { "comparing ${valueOf(actual)} with minimum $min at $path" }
   return if (actual is List<*>) {
     if (actual.size < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have minimum size of $min", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have minimum size of $min", path))
     } else {
       emptyList()
     }
   } else if (actual is JsonValue.Array) {
     if (actual.size() < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have minimum size of $min", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have minimum size of $min", path))
     } else {
       emptyList()
     }
   } else if (actual is Element) {
     if (actual.childNodes.length < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.childNodes.length}) to have minimum size of $min", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+        "(size ${actual.childNodes.length}) to have minimum size of $min", path))
     } else {
       emptyList()
     }
@@ -617,19 +632,22 @@ fun <M : Mismatch> matchMaxEqualsIgnoreOrder(
   logger.debug { "comparing ${valueOf(actual)} with maximum $max at $path" }
   return if (actual is List<*>) {
     if (actual.size > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have maximum size of $max", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have maximum size of $max", path))
     } else {
       emptyList()
     }
   } else if (actual is JsonValue.Array) {
     if (actual.size() > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size}) to have maximum size of $max", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have maximum size of $max", path))
     } else {
       emptyList()
     }
   } else if (actual is Element) {
     if (actual.childNodes.length > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.childNodes.length}) to have maximum size of $max", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+        "(size ${actual.childNodes.length}) to have maximum size of $max", path))
     } else {
       emptyList()
     }
@@ -644,7 +662,8 @@ fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: 
   return if (matches) {
     emptyList()
   } else {
-    listOf(mismatchFactory.create(null, actual, "Expected ${valueOf(actual)} to be null", path))
+    listOf(mismatchFactory.create(null, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
   }
 }
 

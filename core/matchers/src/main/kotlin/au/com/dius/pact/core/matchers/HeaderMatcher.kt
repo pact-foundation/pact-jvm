@@ -14,7 +14,7 @@ object HeaderMatcher : KLogging() {
     val expectedParameters = parseParameters(expectedValues.drop(1))
     val actualParameters = parseParameters(actualValues.drop(1))
     val headerMismatch = HeaderMismatch(headerKey, expected, actual,
-      "Expected header $headerKey to have value '$expected' but was '$actual'")
+      "Expected header '$headerKey' to have value '$expected' but was '$actual'")
 
     return if (expectedValue.equals(actualValue, ignoreCase = true)) {
       expectedParameters.map { entry ->

@@ -98,7 +98,7 @@ class MultipartMessageContentMatcherSpec extends Specification {
   def 'returns a mismatch - when the parts have different content'() {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
-      'Expected \'This is some other text\' (String) but received \'This is some text\' (String)'
+      'Expected \'This is some text\' (String) to be equal to \'This is some other text\' (String)'
     ]
 
     where:

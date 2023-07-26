@@ -207,7 +207,7 @@ class JsonContentMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Expected 100 (Integer) but received 101 (Integer)')
+        it.mismatch.contains('Expected 101 (Integer) to be equal to 100 (Integer)')
     }
 
     where:
@@ -220,8 +220,8 @@ class JsonContentMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Type mismatch: Expected Map {"something":100,"somethingElse":100} ' +
-          'but received List [100,100]')
+        it.mismatch.contains(
+          'Type mismatch: Expected List [100,100] to be equal to Map {"something":100,"somethingElse":100}')
     }
 
     where:
@@ -234,7 +234,7 @@ class JsonContentMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Type mismatch: Expected List [100,100] but received Integer 100')
+        it.mismatch.contains('Type mismatch: Expected Integer 100 to be equal to List [100,100]')
     }
 
     where:
@@ -490,7 +490,7 @@ class JsonContentMatcherSpec extends Specification {
     then:
     mismatches.size() == 2
     mismatches*.mismatch[0].matches(/Expected \[(.*)\] to match \[(.*)\] ignoring order of elements/)
-    mismatches*.path == ['$', '$.2']
+    mismatches*.path == ['$', '$[2]']
 
     where:
 
@@ -529,7 +529,7 @@ class JsonContentMatcherSpec extends Specification {
     then:
     mismatches.size() == 1 + 4
     mismatches*.mismatch[0].matches(/Expected \[(.*)\] to match \[(.*)\] ignoring order of elements/)
-    mismatches*.path == ['$'] + ['$.0'] * 4
+    mismatches*.path == ['$'] + ['$[0]'] * 4
 
     where:
 
@@ -562,7 +562,7 @@ class JsonContentMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, context)
       .bodyResults.collectMany { it.result }.find {
-        it instanceof BodyMismatch && it.mismatch.contains('Expected 1 (Integer) but received 2 (Integer)')
+        it instanceof BodyMismatch && it.mismatch.contains('Expected 2 (Integer) to be equal to 1 (Integer)')
       }
 
     where:
@@ -618,7 +618,7 @@ class JsonContentMatcherSpec extends Specification {
     !mismatches.empty
     mismatches*.mismatch == ['Expected [red, blue] to match [blue, seven] ignoring order of elements',
                              "Expected 'seven' to match 'red|blue'"]
-    mismatches*.path == ['$', '$.1']
+    mismatches*.path == ['$', '$[1]']
   }
 
   @Unroll
@@ -730,14 +730,14 @@ class JsonContentMatcherSpec extends Specification {
     then:
     [ //[path, expected, [...actual]]
         ['$', expected, [actual]],
-        ['$.0', '[1, 2, 3]', ['[6, 4, 5]', '[2, 3, 1]']],
-        ['$.0.0', '1', ['6', '2']],
-        ['$.0.1', '2', ['4', '3']],
-        ['$.0.2', '3', ['5', '1']],
-        ['$.1', '[4, 5, 6]', ['[2, 3, 1]']],
-        ['$.1.0', '4', ['2', '3', '1']],
-        ['$.1.1', '5', ['2', '3', '1']],
-        ['$.1.2', '6', ['2', '3', '1']]
+        ['$[0]', '[1, 2, 3]', ['[6, 4, 5]', '[2, 3, 1]']],
+        ['$[0][0]', '1', ['6', '2']],
+        ['$[0][1]', '2', ['4', '3']],
+        ['$[0][2]', '3', ['5', '1']],
+        ['$[1]', '[4, 5, 6]', ['[2, 3, 1]']],
+        ['$[1][0]', '4', ['2', '3', '1']],
+        ['$[1][1]', '5', ['2', '3', '1']],
+        ['$[1][2]', '6', ['2', '3', '1']]
     ].eachWithIndex { expectedResult, i ->
       assert expectedResult == results[i]
     }
