@@ -134,7 +134,7 @@ Feature: Basic HTTP consumer
     When the pact test is done
     Then the mock server status will NOT be OK
     And the mock server status will be mismatches
-    And the mismatches will contain a "body" mismatch with path "$.two" with error "Expected 'b' (String) but received 'c' (String)"
+    And the mismatches will contain a "body" mismatch with path "$.two" with error "Expected 'c' (String) to be equal to 'b' (String)"
     And the mock server will NOT write out a Pact file for the interaction when done
 
   Scenario: Request with the incorrect type of body contents

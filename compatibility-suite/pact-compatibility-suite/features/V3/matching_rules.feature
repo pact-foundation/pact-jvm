@@ -9,7 +9,7 @@ Feature: V3 era Matching Rules
       | JSON: { "one": { "a": { "ids": [100], "status": "Lovely" }  }, "two": [ { "ids": [1], "status": "BAD" } ] } |
     When the request is compared to the expected one
     Then the comparison should NOT be OK
-    And the mismatches will contain a mismatch with error "$.one.a.status" -> "Expected 'Lovely' (String) to equal 'OK' (String)"
+    And the mismatches will contain a mismatch with error "$.one.a.status" -> "Expected 'Lovely' (String) to be equal to 'OK' (String)"
 
   Scenario: Supports an include matcher (positive case)
     Given an expected request configured with the following:
@@ -73,7 +73,7 @@ Feature: V3 era Matching Rules
     When the request is compared to the expected one
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one.a.ids" -> "Expected [] (size 0) to have minimum size of 1"
-    And the mismatches will contain a mismatch with error "$.two.0.ids" -> "Expected [1, 2, 3, 4, 5] (size 5) to have maximum size of 4"
+    And the mismatches will contain a mismatch with error "$.two[0].ids" -> "Expected [1, 2, 3, 4, 5] (size 5) to have maximum size of 4"
 
   Scenario: Supports a number type matcher (positive case)
     Given an expected request configured with the following:
@@ -96,7 +96,7 @@ Feature: V3 era Matching Rules
       | JSON: { "one": "100X01", "two": "b" } | String  |
     When the requests are compared to the expected one
     Then the comparison should NOT be OK
-    And the mismatches will contain a mismatch with error "$.one" -> "Expected true (True) to be a number"
+    And the mismatches will contain a mismatch with error "$.one" -> "Expected true (Boolean) to be a number"
     And the mismatches will contain a mismatch with error "$.one" -> "Expected '100X01' (String) to be a number"
 
   Scenario: Supports an integer type matcher, no digits after the decimal point (positive case)
@@ -170,7 +170,7 @@ Feature: V3 era Matching Rules
       | JSON: { "one": "", "two": "b" } |
     When the request is compared to the expected one
     Then the comparison should NOT be OK
-    And the mismatches will contain a mismatch with error "$.one" -> "Expected '' to be null"
+    And the mismatches will contain a mismatch with error "$.one" -> "Expected '' (String) to be a null value"
 
   Scenario: Supports a Date and Time matcher (positive case)
     Given an expected request configured with the following:

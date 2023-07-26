@@ -4,7 +4,8 @@
       "combine": "AND",
       "matchers": [
         {
-          "match": "date"
+          "match": "date",
+          "format": "yyyy-MM-dd"
         }
       ]
     }
