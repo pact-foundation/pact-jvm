@@ -3,7 +3,14 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import io.ktor.http.HeaderValue
+import io.ktor.http.HeaderValueParam
+import io.ktor.http.HeaderValueWithParameters
 import io.ktor.http.parseHeaderValue
+
+class HeaderWithParameters(
+  content: String,
+  parameters: List<HeaderValueParam>
+) : HeaderValueWithParameters(content, parameters)
 
 object HeaderParser {
     private val SINGLE_VALUE_HEADERS = setOf("date", "accept-datetime", "if-modified-since", "if-unmodified-since",
@@ -24,7 +31,8 @@ object HeaderParser {
     return if (headerValue.params.isEmpty()) {
       headerValue.value.trim()
     } else {
-      headerValue.value.trim() + ";" + headerValue.params.joinToString(";") { it.name + "=" + it.value }
+      val h = HeaderWithParameters(headerValue.value, headerValue.params)
+      h.toString()
     }
   }
 }
