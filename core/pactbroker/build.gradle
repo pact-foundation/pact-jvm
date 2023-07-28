@@ -3,7 +3,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   compile "com.google.guava:guava:${project.guavaVersion}"
-  compile('io.github.microutils:kotlin-logging:1.6.26') {
+  compile("io.github.microutils:kotlin-logging:${project.kotlinLogging}") {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
@@ -12,10 +12,10 @@ dependencies {
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-  testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
-  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.3-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
   testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"

@@ -7,23 +7,24 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   implementation "com.google.code.findbugs:jsr305:3.0.2"
-  api('io.github.microutils:kotlin-logging:1.6.26') {
+  api "org.slf4j:slf4j-api:${project.slf4jVersion}"
+  api("io.github.microutils:kotlin-logging:${project.kotlinLogging}") {
     exclude group: 'org.jetbrains.kotlin'
   }
   api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   implementation "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}"
   api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
-  testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile('org.spockframework:spock-core:2.0-groovy-3.0') {
+  testImplementation 'org.hamcrest:hamcrest:2.1'
+  testImplementation('org.spockframework:spock-core:2.3-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile "junit:junit:${project.junitVersion}"
+  testImplementation "junit:junit:${project.junitVersion}"
 
   antlr "org.antlr:antlr4:4.7.2"
 }
