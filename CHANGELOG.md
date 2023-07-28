@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.42 - Back-ported fixes from v4.2.x
+
+* 038669bb1 - fix: Replace com.github.zafarkhaja.semver.Version with a local version parser (Ronald Holshausen, Fri Jul 28 16:42:10 2023 +1000)
+* d390ce87d - refactor: converted the remaining Java DSL body classes to Kotlin (Ronald Holshausen, Mon Jan 25 15:30:37 2021 +1100)
+* 9677c8f8c - refactor: converted PactDslJsonBody to Kotlin (Ronald Holshausen, Mon Jan 25 14:59:15 2021 +1100)
+* b3fc7a548 - refactor: converted PactDslJsonArray to Kotlin (Ronald Holshausen, Mon Jan 25 14:05:54 2021 +1100)
+* 367d33274 - refactor: converted DslPart to Kotlin (Ronald Holshausen, Mon Jan 25 12:45:27 2021 +1100)
+* c2b44e339 - chore: do not publish jar for pact-publish module (Ronald Holshausen, Fri Nov 6 13:10:40 2020 +1100)
+* 56dc42d68 - chore: Minor dependency upgrade (Ronald Holshausen, Fri Jul 28 10:37:55 2023 +1000)
+* a73b2f44f - chore: Upgrade Groovy to 3.0.18 (Ronald Holshausen, Fri Jul 28 10:23:54 2023 +1000)
+* fc22f66fc - chore: :consumer:junit:clojureTest fails on Windows after the upgrade of Gradle (Ronald Holshausen, Sat Sep 19 16:34:51 2020 +1000)
+* e5f656e3b - chore: :consumer:junit:clojureTest fails on Windows after the upgrade of Gradle (Ronald Holshausen, Sat Sep 19 16:27:40 2020 +1000)
+* 04f4d5c80 - fix: Pact parser is removing quoting on Content-Type params #1538 (Ronald Holshausen, Fri Jul 28 09:49:16 2023 +1000)
+* 313be5c19 - chore: Upgrade Gradle to 6.9.4 (Ronald Holshausen, Wed Jul 26 15:35:03 2023 +1000)
+* cf3b2c409 - chore: correct changelog (Ronald Holshausen, Fri Dec 23 12:26:21 2022 +1100)
+* 6c7b6ae93 - bump version to 4.1.42 (Ronald Holshausen, Fri Dec 23 12:22:53 2022 +1100)
+
 # 4.1.41 - fix: write date/time matchers in the correct format as per the spec
 
 * 57d676c6f - chore: remove JDK 10 (Ronald Holshausen, Fri Dec 23 11:56:17 2022 +1100)
