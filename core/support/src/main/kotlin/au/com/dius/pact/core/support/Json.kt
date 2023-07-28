@@ -36,7 +36,7 @@ object Json {
   /**
    * Converts a JSON object to a raw string if it is a string value, else just calls toString()
    */
-  fun toString(json: JsonValue?): String = json?.asString() ?: "null"
+  fun toString(json: JsonValue?): String = json?.asString() ?: json?.serialise() ?: "null"
 
   /**
    * Converts a JSON object to the Map of values

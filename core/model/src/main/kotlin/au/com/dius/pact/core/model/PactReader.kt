@@ -10,6 +10,7 @@ import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Version
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
@@ -20,8 +21,8 @@ import au.com.dius.pact.core.support.jsonObject
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.expect
 import com.github.michaelbull.result.runCatching
-import com.github.zafarkhaja.semver.Version
 import mu.KLogging
 import mu.KotlinLogging
 import org.apache.http.auth.AuthScope
@@ -186,6 +187,11 @@ interface PactReader {
    * @param options to use when loading the pact
    */
   fun loadPact(source: Any, options: Map<String, Any>): Pact<*>
+
+  /**
+   * Parses the JSON into a Pact model
+   */
+  fun pactFromJson(json: JsonValue.Object, source: PactSource): Pact<*>
 }
 
 /**
@@ -201,12 +207,17 @@ object DefaultPactReader : PactReader, KLogging() {
   override fun loadPact(source: Any) = loadPact(source, emptyMap())
 
   override fun loadPact(source: Any, options: Map<String, Any>): Pact<*> {
-    val pactInfo = loadFile(source, options)
-    val version = determineSpecVersion(pactInfo.first)
-    val specVersion = Version.valueOf(version)
-    return when (specVersion.majorVersion) {
-      3 -> loadV3Pact(pactInfo.second, pactInfo.first)
-      else -> loadV2Pact(pactInfo.second, pactInfo.first)
+    val json = loadFile(source, options)
+    return pactFromJson(json.first, json.second)
+  }
+
+  override fun pactFromJson(json: JsonValue.Object, source: PactSource): Pact<*> {
+    val version = determineSpecVersion(json)
+    val specVersion = Version.parse(version).expect { "'$version' is not a valid version" }
+    return when (specVersion.major) {
+      3 -> loadV3Pact(source, json)
+      4 -> throw IllegalArgumentException("V4 Pacts require Pact-JVM 4.2.x+")
+      else -> loadV2Pact(source, json)
     }
   }
 
@@ -221,9 +232,6 @@ object DefaultPactReader : PactReader, KLogging() {
         metadata.has("pact-specification") -> specVersion(metadata["pact-specification"], version)
         else -> version
       }
-    }
-    if (version == "3.0") {
-      version = "3.0.0"
     }
     return version
   }
