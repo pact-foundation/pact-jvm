@@ -106,7 +106,8 @@ class HttpMatching {
           case BodyMismatch -> it.path == path
           default -> false
         }
-        it.description().contains(error) && pathMatches
+        def desc = it.description()
+        (desc.contains(error) || desc.matches(error)) && pathMatches
       } != null
     }
   }
