@@ -2,10 +2,12 @@ package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.atLeast
 import au.com.dius.pact.core.model.generators.ArrayContainsGenerator
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.NullGenerator
 import au.com.dius.pact.core.model.generators.lookupGenerator
+import au.com.dius.pact.core.model.lessThan
 import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
 import au.com.dius.pact.core.model.matchingrules.expressions.ValueType
 import au.com.dius.pact.core.support.Either
@@ -29,7 +31,7 @@ interface MatchingRule {
   /**
    * Converts this rule into a Map that can be serialised to JSON
    */
-  fun toMap(spec: PactSpecVersion): Map<String, Any?>
+  fun toMap(spec: PactSpecVersion?): Map<String, Any?>
 
   /**
    * If this rule can be applied to the content type
@@ -39,7 +41,7 @@ interface MatchingRule {
   /**
    * Validates this rule against the Pact specification version
    */
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String>
 
   /**
    * Any generators associated with this matching rule
@@ -236,9 +238,9 @@ interface MatchingRule {
  * Matching Rule for dates
  */
 data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "date", "format" to format)
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "date", "format" to format)
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Date matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -255,9 +257,9 @@ data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-d
  * Matching rule for equality
  */
 object EqualsMatcher : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "equality")
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "equality")
   override fun canMatch(contentType: ContentType) = true
-  override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+  override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
 
   override val name: String
     get() = "equality"
@@ -269,10 +271,10 @@ object EqualsMatcher : MatchingRule {
  * Matcher for a substring in a string
  */
 data class IncludeMatcher(val value: String) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "include", "value" to value)
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "include", "value" to value)
   override fun canMatch(contentType: ContentType) = true
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Include matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -289,8 +291,8 @@ data class IncludeMatcher(val value: String) : MatchingRule {
  * Type matching with a maximum size
  */
 data class MaxTypeMatcher(val max: Int) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type", "max" to max)
-  override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type", "max" to max)
+  override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
 
   override val name: String
     get() = "max-type"
@@ -302,8 +304,8 @@ data class MaxTypeMatcher(val max: Int) : MatchingRule {
  * Type matcher with a minimum size and maximum size
  */
 data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type", "min" to min, "max" to max)
-  override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type", "min" to min, "max" to max)
+  override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
 
   override val name: String
     get() = "min-max-type"
@@ -315,8 +317,8 @@ data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
  * Type matcher with a minimum size
  */
 data class MinTypeMatcher(val min: Int) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type", "min" to min)
-  override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type", "min" to min)
+  override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
 
   override val name: String
     get() = "min-type"
@@ -334,14 +336,14 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
     DECIMAL
   }
 
-  override fun toMap(spec: PactSpecVersion) = if (spec >= PactSpecVersion.V3) {
+  override fun toMap(spec: PactSpecVersion?) = if (spec.atLeast(PactSpecVersion.V3)) {
     mapOf("match" to numberType.name.lowercase())
   } else {
     TypeMatcher.toMap(spec)
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Number matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -358,12 +360,12 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
  * Type matching for booleans
  */
 object BooleanMatcher : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = when {
+  override fun toMap(spec: PactSpecVersion?) = when {
     spec == PactSpecVersion.V4 -> mapOf("match" to "boolean")
     else -> TypeMatcher.toMap(spec)
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> = listOf()
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> = listOf()
 
   override val name: String
     get() = "boolean"
@@ -375,8 +377,8 @@ object BooleanMatcher : MatchingRule {
  * Regular Expression Matcher
  */
 data class RegexMatcher @JvmOverloads constructor (val regex: String, val example: String? = null) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "regex", "regex" to regex)
-  override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "regex", "regex" to regex)
+  override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
 
   override val name: String
     get() = "regex"
@@ -388,9 +390,9 @@ data class RegexMatcher @JvmOverloads constructor (val regex: String, val exampl
  * Matcher for time values
  */
 data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "time", "format" to format)
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "time", "format" to format)
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Time matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -407,9 +409,9 @@ data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"
  * Matcher for time values
  */
 data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZZZ") : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "timestamp", "format" to format)
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "timestamp", "format" to format)
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("DateTime matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -426,8 +428,8 @@ data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy
  * Matcher for types
  */
 object TypeMatcher : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "type")
-  override fun validateForVersion(pactVersion: PactSpecVersion) = emptyList<String>()
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type")
+  override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
 
   override val name: String
     get() = "type"
@@ -439,9 +441,9 @@ object TypeMatcher : MatchingRule {
  * Matcher for null values
  */
 object NullMatcher : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "null")
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "null")
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Null matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -458,9 +460,9 @@ object NullMatcher : MatchingRule {
  * Matcher for values in a map, ignoring the keys
  */
 object ValuesMatcher : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "values")
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "values")
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Values matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -477,10 +479,10 @@ object ValuesMatcher : MatchingRule {
  * Content type matcher. Matches the content type of binary data
  */
 data class ContentTypeMatcher(val contentType: String) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "contentType", "value" to contentType)
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "contentType", "value" to contentType)
   override fun canMatch(contentType: ContentType) = true
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Content Type matchers can only be used with Pact specification versions >= V3")
     } else {
       listOf()
@@ -499,9 +501,9 @@ data class ContentTypeMatcher(val contentType: String) : MatchingRule {
  * This matcher will default to equality matching for non-array items.
  */
 object EqualsIgnoreOrderMatcher : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order")
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V4) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order")
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
@@ -520,9 +522,9 @@ object EqualsIgnoreOrderMatcher : MatchingRule {
  * This matcher will default to equality matching for non-array items.
  */
 data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order", "min" to min)
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V4) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order", "min" to min)
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
@@ -541,9 +543,9 @@ data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
  * This matcher will default to equality matching for non-array items.
  */
 data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order", "max" to max)
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V4) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order", "max" to max)
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
@@ -562,9 +564,9 @@ data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
  * This matcher will default to equality matching for non-array items.
  */
 data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion) = mapOf("match" to "ignore-order", "min" to min, "max" to max)
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V4) {
+  override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order", "min" to min, "max" to max)
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
@@ -583,7 +585,7 @@ data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : Matching
 data class ArrayContainsMatcher(
   val variants: List<Triple<Int, MatchingRuleCategory, Map<String, Generator>>>
 ) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
+  override fun toMap(spec: PactSpecVersion?): Map<String, Any?> {
     return mapOf("match" to "arrayContains", "variants" to variants.map { (index, rules, generators) ->
       mapOf(
         "index" to index,
@@ -594,11 +596,11 @@ data class ArrayContainsMatcher(
   }
 
   override fun canMatch(contentType: ContentType) = true
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3) {
-      listOf("Array contains matchers can only be used with Pact specification versions >= V3")
-    } else {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.atLeast(PactSpecVersion.V3)) {
       listOf()
+    } else {
+      listOf("Array contains matchers can only be used with Pact specification versions >= V3")
     }
   }
 
@@ -627,12 +629,12 @@ data class ArrayContainsMatcher(
  * Matcher for HTTP status codes
  */
 data class StatusCodeMatcher(val statusType: HttpStatus, val values: List<Int> = emptyList()) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
+  override fun toMap(spec: PactSpecVersion?): Map<String, Any?> {
     return mapOf("match" to "statusCode", "status" to statusType.toJson(values))
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V4) {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Status code matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
@@ -650,11 +652,11 @@ data class MatchingRuleGroup @JvmOverloads constructor(
   val ruleLogic: RuleLogic = RuleLogic.AND,
   val cascaded: Boolean = false
 ) {
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
-    return if (pactSpecVersion < PactSpecVersion.V3) {
-      rules.first().toMap(pactSpecVersion)
-    } else {
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any?> {
+    return if (pactSpecVersion.atLeast(PactSpecVersion.V3)) {
       mapOf("matchers" to rules.map { it.toMap(pactSpecVersion) }, "combine" to ruleLogic.name)
+    } else {
+      rules.first().toMap(pactSpecVersion)
     }
   }
 
@@ -663,7 +665,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
   /**
    * Validates all the rules in this group against the Pact specification version
    */
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return rules.flatMap { it.validateForVersion(pactVersion) }
   }
 
@@ -768,7 +770,7 @@ interface MatchingRules {
   /**
    * Converts these rules into a Map that can be serialised to JSON
    */
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?>
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any?>
 
   /**
    * Create a new copy of the matching rules
@@ -776,7 +778,7 @@ interface MatchingRules {
   fun copy(): MatchingRules
 
   /** Validates the matching rules against the specification version */
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String>
 
   /** Creates a copy of the matching rules with a category renamed */
   fun rename(oldCategory: String, newCategory: String): MatchingRules

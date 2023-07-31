@@ -107,7 +107,7 @@ class Message @JvmOverloads constructor(
     get() = emptyMap()
 
   @Suppress("NestedBlockDepth")
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any?> {
     val map: MutableMap<String, Any?> = mutableMapOf(
       "description" to description,
       "metaData" to metadata
@@ -223,7 +223,7 @@ class Message @JvmOverloads constructor(
     return this
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))

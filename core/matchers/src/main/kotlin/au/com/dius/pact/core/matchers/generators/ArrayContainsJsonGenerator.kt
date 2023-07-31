@@ -35,7 +35,7 @@ object ArrayContainsJsonGenerator : KLogging(), Generator {
     }
   }
 
-  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = emptyMap<String, Any>()
 
   private fun findMatchingVariant(
     example: JsonValue,

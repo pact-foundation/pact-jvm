@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.atLeast
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.support.json.JsonValue
 import io.github.oshai.kotlinlogging.KLogging
@@ -137,8 +138,16 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   /**
    * Serialise this category to a Map
    */
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
-    return if (pactSpecVersion < PactSpecVersion.V3) {
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any?> {
+    return if (pactSpecVersion.atLeast(PactSpecVersion.V3)) {
+      matchingRules.flatMap { entry ->
+        if (entry.key.isEmpty()) {
+          entry.value.toMap(pactSpecVersion).entries.map { it.toPair() }
+        } else {
+          listOf(entry.key to entry.value.toMap(pactSpecVersion))
+        }
+      }.toMap()
+    } else {
       matchingRules.entries.associate {
         val keyBase = when (name) {
           "header" -> "\$.headers"
@@ -152,14 +161,6 @@ data class MatchingRuleCategory @JvmOverloads constructor(
         }
         Pair(key, it.value.toMap(pactSpecVersion))
       }
-    } else {
-      matchingRules.flatMap { entry ->
-        if (entry.key.isEmpty()) {
-          entry.value.toMap(pactSpecVersion).entries.map { it.toPair() }
-        } else {
-          listOf(entry.key to entry.value.toMap(pactSpecVersion))
-        }
-      }.toMap()
     }
   }
 
@@ -202,7 +203,7 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   fun numRules(key: String) = matchingRules.getOrDefault(key, MatchingRuleGroup()).rules.size
 
   /** Validates all the rules in this category against the Pact specification version */
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return matchingRules.values.flatMap { it.validateForVersion(pactVersion) }
   }
 

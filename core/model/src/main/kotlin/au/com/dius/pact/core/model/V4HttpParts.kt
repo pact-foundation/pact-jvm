@@ -34,7 +34,7 @@ data class HttpRequest @JvmOverloads constructor(
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
 ): IRequest, IHttpPart, KLogging() {
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))
@@ -167,7 +167,7 @@ data class HttpResponse @JvmOverloads constructor(
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
 ) : IResponse, IHttpPart {
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))

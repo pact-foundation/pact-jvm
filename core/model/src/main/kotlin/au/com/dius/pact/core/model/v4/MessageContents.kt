@@ -24,7 +24,7 @@ data class MessageContents @JvmOverloads constructor(
 ) {
   fun getContentType() = contents.contentType.or(Message.contentType(metadata))
 
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
     val map = mutableMapOf(
       "contents" to contents.toV4Format()
     )

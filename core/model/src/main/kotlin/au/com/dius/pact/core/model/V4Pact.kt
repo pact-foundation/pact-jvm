@@ -241,7 +241,7 @@ sealed class V4Interaction(
     override fun isInteractionType(interactionType: V4InteractionType) =
       interactionType == V4InteractionType.SynchronousHTTP
 
-    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+    override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
       val map = mutableMapOf(
         "type" to V4InteractionType.SynchronousHTTP.toString(),
         "key" to uniqueKey(),
@@ -274,7 +274,7 @@ sealed class V4Interaction(
       return map
     }
 
-    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
       val errors = mutableListOf<String>()
       errors.addAll(request.validateForVersion(pactVersion))
       errors.addAll(response.validateForVersion(pactVersion))
@@ -363,7 +363,7 @@ sealed class V4Interaction(
 
     override fun updateProperties(values: Map<String, Any?>) { }
 
-    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+    override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
       val map = (mapOf(
         "type" to V4InteractionType.AsynchronousMessages.toString(),
         "key" to key,
@@ -394,7 +394,7 @@ sealed class V4Interaction(
       return map
     }
 
-    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
       val errors = mutableListOf<String>()
       errors.addAll(contents.matchingRules.validateForVersion(pactVersion))
       errors.addAll(contents.generators.validateForVersion(pactVersion))
@@ -473,8 +473,8 @@ sealed class V4Interaction(
       return builder.build().toUInt().toString(16)
     }
 
-    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
-      require(pactSpecVersion >= PactSpecVersion.V4) {
+    override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
+      require(pactSpecVersion.atLeast(PactSpecVersion.V4)) {
         "A Synchronous Messages interaction can not be written to a $pactSpecVersion pact file"
       }
       val map = mutableMapOf(
@@ -509,7 +509,7 @@ sealed class V4Interaction(
       return map
     }
 
-    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
       val errors = mutableListOf<String>()
       errors.addAll(request.matchingRules.validateForVersion(pactVersion))
       errors.addAll(request.generators.validateForVersion(pactVersion))

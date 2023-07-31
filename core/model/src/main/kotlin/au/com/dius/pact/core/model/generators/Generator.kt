@@ -104,7 +104,7 @@ fun findGeneratorClass(generatorType: String): Class<*> {
 interface Generator {
   val type: String
   fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any?
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any>
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any>
   fun correspondsToMode(mode: GeneratorTestMode): Boolean = true
 }
 
@@ -115,7 +115,7 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   override val type: String
     get() = "RandomInt"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "min" to min, "max" to max)
   }
 
@@ -150,7 +150,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   override val type: String
     get() = "RandomDecimal"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "digits" to digits)
   }
 
@@ -200,7 +200,7 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   override val type: String
     get() = "RandomHexadecimal"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "digits" to digits)
   }
 
@@ -229,7 +229,7 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   override val type: String
     get() = "RandomString"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "size" to size)
   }
 
@@ -258,7 +258,7 @@ data class RegexGenerator(val regex: String) : Generator {
   override val type: String
     get() = "Regex"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "regex" to regex)
   }
 
@@ -322,7 +322,7 @@ data class UuidGenerator @JvmOverloads constructor(val format: UuidFormat? = nul
   override val type: String
     get() = "Uuid"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return if (format != null) {
       mapOf("type" to type, "format" to format.toString())
     } else {
@@ -364,7 +364,7 @@ data class DateGenerator @JvmOverloads constructor(
   override val type: String
     get() = "Date"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     val map = mutableMapOf("type" to type)
     if (!format.isNullOrEmpty()) {
       map["format"] = this.format
@@ -407,7 +407,7 @@ data class TimeGenerator @JvmOverloads constructor(
   override val type: String
     get() = "Time"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     val map = mutableMapOf("type" to type)
     if (!format.isNullOrEmpty()) {
       map["format"] = this.format
@@ -449,7 +449,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
   override val type: String
     get() = "DateTime"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     val map = mutableMapOf("type" to type)
     if (!format.isNullOrEmpty()) {
       map["format"] = this.format
@@ -489,7 +489,7 @@ object RandomBooleanGenerator : Generator, KLogging() {
   override val type: String
     get() = "RandomBoolean"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type)
   }
 
@@ -518,7 +518,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   override val type: String
     get() = "ProviderState"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf(
       "type" to type,
       "expression" to ep.toDefaultExpressions(expression),
@@ -562,7 +562,7 @@ data class MockServerURLGenerator(
   override val type: String
     get() = "MockServerURL"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion) = mutableMapOf(
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = mutableMapOf(
     "type" to type,
     "example" to example,
     "regex" to regex
@@ -620,7 +620,7 @@ object NullGenerator : Generator {
   override val type: String
     get() = "Null"
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?) = null
-  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = emptyMap<String, Any>()
 }
 
 data class ArrayContainsGenerator(
@@ -645,5 +645,5 @@ data class ArrayContainsGenerator(
     }
   }
 
-  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = emptyMap<String, Any>()
 }

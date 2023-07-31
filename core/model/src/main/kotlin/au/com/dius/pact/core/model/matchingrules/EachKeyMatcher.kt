@@ -1,12 +1,13 @@
 package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.lessThan
 import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 
 data class EachKeyMatcher(val definition: MatchingRuleDefinition) : MatchingRule {
-  override fun toMap(spec: PactSpecVersion): Map<String, Any?> {
+  override fun toMap(spec: PactSpecVersion?): Map<String, Any?> {
     val map = mutableMapOf<String, Any?>("match" to "eachKey")
 
     map["rules"] = definition.rules.map {
@@ -25,8 +26,8 @@ data class EachKeyMatcher(val definition: MatchingRuleDefinition) : MatchingRule
     return map
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V4) {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("eachKey matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()

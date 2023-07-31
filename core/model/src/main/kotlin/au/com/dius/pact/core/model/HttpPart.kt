@@ -70,7 +70,7 @@ abstract class HttpPart: IHttpPart {
     }
   }
 
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))

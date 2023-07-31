@@ -53,6 +53,25 @@ class RequestResponseInteractionSpec extends Specification {
     ]
   }
 
+  def 'creates a V3 map format if UNSPECIFIED spec'() {
+    when:
+    def map = interaction.toMap(PactSpecVersion.UNSPECIFIED)
+
+    then:
+    map == [
+      description: 'test interaction',
+      request: [method: 'GET', path: '/', generators: [header: [a: [type: 'RandomString', size: 4]]]],
+      response: [status: 200, generators: [header: [a: [type: 'RandomString', size: 4]]]],
+      providerStates: [
+        [name: 'state one'],
+        [name: 'state two', params: [
+          value: 'one', other: '2']
+        ]
+      ]
+    ]
+
+  }
+
   def 'does not include a provide state if there is not any'() {
     when:
     interaction = new RequestResponseInteraction('test interaction', [],

@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.JsonUtils.queryObjectGraph
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.lessThan
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
@@ -231,8 +232,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
    */
   fun isNotEmpty() = categories.isNotEmpty() && categories.any { it.value.isNotEmpty() }
 
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (pactSpecVersion < PactSpecVersion.V3) {
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
+    if (pactSpecVersion.lessThan(PactSpecVersion.V3)) {
       throw InvalidPactException("Generators are only supported with pact specification version 3+")
     }
     return categories.entries.associate { (key, value) ->
@@ -264,8 +265,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return generators
   }
 
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3 && categories.any { it.value.isNotEmpty() }) {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3) && categories.any { it.value.isNotEmpty() }) {
       listOf("Generators can only be used with Pact specification versions >= V3")
     } else {
       listOf()

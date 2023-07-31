@@ -29,6 +29,7 @@ dependencies {
     testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.232'
     testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
     testImplementation 'junit:junit'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
 task pactsJar(type: Jar, dependsOn: testClasses) {
