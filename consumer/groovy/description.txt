@@ -1,1 +1,0 @@
-Pact-JVM - Groovy DSL for Pact JVM consumer tests

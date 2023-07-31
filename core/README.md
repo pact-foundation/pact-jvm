@@ -1,2 +1,0 @@
-Core Pact-JVM Modules
-=====================
