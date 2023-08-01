@@ -28,7 +28,7 @@ Feature: V3 era Generators applied to HTTP parts
       | body             | generators               |
       | file: basic.json | randomint-generator.json |
     When the request is prepared for use
-    Then the body value for "$.one" will have been replaced with a "integer"
+    Then the body value for "$.one" will have been replaced with an "integer"
 
   Scenario: Supports using a generator with the response status
     Given a response configured with the following generators:
