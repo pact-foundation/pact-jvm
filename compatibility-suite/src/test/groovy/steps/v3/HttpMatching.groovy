@@ -16,6 +16,7 @@ import io.cucumber.java.en.When
 import static au.com.dius.pact.core.matchers.RequestMatching.requestMismatches
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 import static steps.shared.SharedSteps.configureBody
+import static steps.shared.SharedSteps.determineContentType
 
 @SuppressWarnings('SpaceAfterOpeningBrace')
 class HttpMatching {
@@ -40,7 +41,9 @@ class HttpMatching {
     expectedRequest = new Request()
     def entry = dataTable.entries().first()
     if (entry['body']) {
-      configureBody(entry['body'], expectedRequest)
+      def part = configureBody(entry['body'], determineContentType(entry['body'], expectedRequest.contentTypeHeader()))
+      expectedRequest.body = part.body
+      expectedRequest.headers.putAll(part.headers)
     }
 
     if (entry['matching rules']) {
@@ -62,7 +65,10 @@ class HttpMatching {
     receivedRequests << new Request()
     def entry = dataTable.entries().first()
     if (entry['body']) {
-      configureBody(entry['body'], receivedRequests[0])
+      def part = configureBody(entry['body'], determineContentType(entry['body'],
+        receivedRequests[0].contentTypeHeader()))
+      receivedRequests[0].body = part.body
+      receivedRequests[0].headers.putAll(part.headers)
     }
   }
 
@@ -71,7 +77,9 @@ class HttpMatching {
     for (entry in dataTable.entries()) {
       def request = new Request()
       if (entry['body']) {
-        configureBody(entry['body'], request)
+        def part = configureBody(entry['body'], determineContentType(entry['body'], request.contentTypeHeader()))
+        request.body = part.body
+        request.headers.putAll(part.headers)
       }
       receivedRequests << request
     }

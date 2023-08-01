@@ -231,14 +231,18 @@ class Message @JvmOverloads constructor(
   }
 
   override fun asV4Interaction(): V4Interaction {
-    return V4Interaction.AsynchronousMessage("", description, MessageContents(contents, metadata,
-      matchingRules.rename("body", "content"), generators),
-      interactionId, providerStates).withGeneratedKey()
+    return asAsynchronousMessage().withGeneratedKey()
   }
 
   override fun isAsynchronousMessage() = true
 
   override fun asMessage() = this
+
+  override fun asAsynchronousMessage(): V4Interaction.AsynchronousMessage {
+    return V4Interaction.AsynchronousMessage("", description, MessageContents(contents, metadata.toMutableMap(),
+      matchingRules.rename("body", "content"), generators),
+      interactionId, providerStates)
+  }
 
   companion object : KLogging() {
 

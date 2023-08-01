@@ -42,6 +42,7 @@ import org.apache.hc.core5.http.io.entity.StringEntity
 
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 import static steps.shared.SharedSteps.configureBody
+import static steps.shared.SharedSteps.determineContentType
 
 @SuppressWarnings(['ThrowRuntimeException', 'AbcMetric'])
 class SharedHttpProvider {
@@ -112,7 +113,10 @@ class SharedHttpProvider {
     }
 
     if (entry['body']) {
-      configureBody(entry['body'], interaction.response)
+      def part = configureBody(entry['body'], determineContentType(entry['body'],
+        interaction.response.contentTypeHeader()))
+      interaction.response.body = part.body
+      interaction.response.headers.putAll(part.headers)
     }
 
     Pact pact = new RequestResponsePact(new Provider('p'),

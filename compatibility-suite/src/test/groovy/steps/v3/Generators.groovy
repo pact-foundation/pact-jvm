@@ -14,6 +14,7 @@ import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 
 import static steps.shared.SharedSteps.configureBody
+import static steps.shared.SharedSteps.determineContentType
 
 @SuppressWarnings('SpaceAfterOpeningBrace')
 class Generators {
@@ -31,7 +32,9 @@ class Generators {
     request = new Request('GET', '/path/one')
     def entry = dataTable.entries().first()
     if (entry['body']) {
-      configureBody(entry['body'], request)
+      def part = configureBody(entry['body'], determineContentType(entry['body'], request.contentTypeHeader()))
+      request.body = part.body
+      request.headers.putAll(part.headers)
     }
     if (entry['generators']) {
       JsonValue json
@@ -52,7 +55,9 @@ class Generators {
     response = new Response()
     def entry = dataTable.entries().first()
     if (entry['body']) {
-      configureBody(entry['body'], response)
+      def part = configureBody(entry['body'], determineContentType(entry['body'], response.contentTypeHeader()))
+      response.body = part.body
+      response.headers.putAll(part.headers)
     }
     if (entry['generators']) {
       JsonValue json
@@ -98,11 +103,15 @@ class Generators {
       JsonParser.INSTANCE.parseString(generatedRequest.body.valueAsString()) : null
   }
 
-  @Then('the body value for {string} will have been replaced with a {string}')
+  @Then('the body value for {string} will have been replaced with a(n) {string}')
   void the_body_value_for_will_have_been_replaced_with_a_value(String path, String type) {
     def originalElement = JsonUtils.INSTANCE.fetchPath(originalJson, path)
     def element = JsonUtils.INSTANCE.fetchPath(generatedJson, path)
     assert originalElement != element
+    matchTypeOfElement(type, element)
+  }
+
+  static void matchTypeOfElement(String type, JsonValue element) {
     switch (type) {
       case 'integer' -> {
         assert element.type() == 'Integer'

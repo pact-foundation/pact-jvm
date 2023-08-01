@@ -67,7 +67,10 @@ class SharedSteps {
       }
 
       if (entry['body']) {
-        configureBody(entry['body'], interaction.request)
+        def part = configureBody(entry['body'], determineContentType(entry['body'],
+          interaction.request.contentTypeHeader()))
+        interaction.request.body = part.body
+        interaction.request.headers.putAll(part.headers)
       }
 
       if (entry['matching rules']) {
@@ -103,7 +106,10 @@ class SharedSteps {
       }
 
       if (entry['response body']) {
-        configureBody(entry['response body'], interaction.response)
+        def part = configureBody(entry['response body'], determineContentType(entry['response body'],
+          interaction.response.contentTypeHeader()))
+        interaction.response.body = part.body
+        interaction.response.headers.putAll(part.headers)
       }
 
       if (entry['response matching rules']) {
@@ -123,36 +129,38 @@ class SharedSteps {
     }
   }
 
-  static void configureBody(String entry, HttpPart part) {
+  static HttpPart configureBody(String entry, String detectedContentType) {
+    def request = new Request()
     if (entry.startsWith('JSON:')) {
-      part.headers['content-type'] = ['application/json']
-      part.body = OptionalBody.body(entry[5..-1].bytes, new ContentType('application/json'))
+      request.headers['content-type'] = ['application/json']
+      request.body = OptionalBody.body(entry[5..-1].bytes, new ContentType('application/json'))
     } else if (entry.startsWith('XML:')) {
-      part.headers['content-type'] = ['application/xml']
-      part.body = OptionalBody.body(entry[4..-1].trim().bytes, new ContentType('application/xml'))
+      request.headers['content-type'] = ['application/xml']
+      request.body = OptionalBody.body(entry[4..-1].trim().bytes, new ContentType('application/xml'))
     } else if (entry.startsWith('file:')) {
       if (entry.endsWith('-body.xml')) {
         File contents = new File("pact-compatibility-suite/fixtures/${entry[5..-1].trim()}")
         def fixture = new XmlSlurper().parse(contents)
         def contentType = fixture.contentType.toString()
-        part.headers['content-type'] = [contentType]
-        part.body = OptionalBody.body(fixture.contents.text(), new ContentType(contentType))
+        request.headers['content-type'] = [contentType]
+        request.body = OptionalBody.body(fixture.contents.text(), new ContentType(contentType))
       } else {
-        String contentType = determineContentType(entry, part)
-        part.headers['content-type'] = [contentType]
+        String contentType = detectedContentType
+        request.headers['content-type'] = [contentType]
         File contents = new File("pact-compatibility-suite/fixtures/${entry[5..-1].trim()}")
         contents.withInputStream {
-          part.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
+          request.body = OptionalBody.body(it.readAllBytes(), new ContentType(contentType))
         }
       }
     } else {
-      part.headers['content-type'] = [determineContentType(entry, part)]
-      part.body = OptionalBody.body(entry)
+      request.headers['content-type'] = [detectedContentType]
+      request.body = OptionalBody.body(entry)
     }
+    request
   }
 
-  private static String determineContentType(String entry, HttpPart part) {
-    String contentType = part.contentTypeHeader()
+  static String determineContentType(String entry, String contentTypeHeader) {
+    String contentType = contentTypeHeader
     if (entry.endsWith('.json')) {
       contentType = 'application/json'
     } else if (entry.endsWith('.xml')) {

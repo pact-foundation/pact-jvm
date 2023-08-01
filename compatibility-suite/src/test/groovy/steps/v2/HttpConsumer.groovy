@@ -14,6 +14,7 @@ import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 import static steps.shared.SharedSteps.configureBody
+import static steps.shared.SharedSteps.determineContentType
 
 class HttpConsumer {
   CompatibilitySuiteWorld world
@@ -56,7 +57,10 @@ class HttpConsumer {
     }
 
     if (entry['body']) {
-      configureBody(entry['body'], interaction.request)
+      def part = configureBody(entry['body'], determineContentType(entry['body'],
+        interaction.request.contentTypeHeader()))
+      interaction.request.body = part.body
+      interaction.request.headers.putAll(part.headers)
     }
 
     mockServerData.pact = new RequestResponsePact(new Provider('p'),

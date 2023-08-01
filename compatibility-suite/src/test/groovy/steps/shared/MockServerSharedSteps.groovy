@@ -23,6 +23,7 @@ import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 import static au.com.dius.pact.core.model.PactReaderKt.queryStringToMap
 import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
 import static steps.shared.SharedSteps.configureBody
+import static steps.shared.SharedSteps.determineContentType
 
 class MockServerData {
   RequestResponsePact pact
@@ -96,7 +97,9 @@ class MockServerSharedSteps {
     }
 
     if (entry['body']) {
-      configureBody(entry['body'], request)
+      def part = configureBody(entry['body'], determineContentType(entry['body'], request.contentTypeHeader()))
+      request.body = part.body
+      request.headers.putAll(part.headers)
     }
 
     IProviderInfo providerInfo = new ProviderInfo()
