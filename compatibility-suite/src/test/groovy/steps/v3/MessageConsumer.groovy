@@ -90,7 +90,7 @@ class MessageConsumer {
     builder.expectsToReceive('a message')
   }
 
-  @Given('the message configured with the following:')
+  @Given('the message is configured with the following:')
   void the_message_configured_with_the_following(DataTable dataTable) {
     builder.expectsToReceive('a message')
     def message = builder.messages.last()
@@ -240,7 +240,7 @@ class MessageConsumer {
     assert result instanceof PactVerificationResult.Error
   }
 
-  @Then('the consume test error will be {string}')
+  @Then('the consumer test error will be {string}')
   void the_consume_test_error_will_be_blah(String error) {
     assert result.error.message == error
   }
