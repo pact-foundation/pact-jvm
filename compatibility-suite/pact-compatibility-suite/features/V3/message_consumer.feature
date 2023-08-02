@@ -1,4 +1,4 @@
-@consumer
+@message
 Feature: Message consumer
   Supports V3 message consumer interactions
 
@@ -19,7 +19,7 @@ Feature: Message consumer
     And the message payload contains the "basic" JSON document
     When the message is NOT successfully processed with a "Test failed" exception
     Then the consumer test will have failed
-    And the consume test error will be "Test failed"
+    And the consumer test error will be "Test failed"
     And a Pact file for the message interaction will NOT have been written
 
   Scenario: Supports arbitrary message metadata
@@ -62,7 +62,7 @@ Feature: Message consumer
 
   Scenario: Supports the use of generators with the message body
     Given a message integration is being defined for a consumer test
-    And the message configured with the following:
+    And the message is configured with the following:
       | body             | generators               |
       | file: basic.json | randomint-generator.json |
     When the message is successfully processed
@@ -70,7 +70,7 @@ Feature: Message consumer
 
   Scenario: Supports the use of generators with message metadata
     Given a message integration is being defined for a consumer test
-    And the message configured with the following:
+    And the message is configured with the following:
       | generators                                                                      | metadata                                  |
       | JSON: { "metadata": { "ID": { "type": "RandomInt", "min": 0,  "max": 1000 } } } | { "ID": "sjhdjkshsdjh", "weight": 100.5 } |
     When the message is successfully processed
