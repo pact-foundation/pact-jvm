@@ -63,7 +63,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result == [
       'destination': [
-        "Expected metadata key 'destination' to have value 'X001' (String) but was 'X002' (String)"
+        "Expected 'X002' (String) to be equal to 'X001' (String)"
       ]
     ]
   }

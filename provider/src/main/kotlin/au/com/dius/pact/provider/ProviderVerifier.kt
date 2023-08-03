@@ -678,6 +678,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         )
       }
     } catch (e: Exception) {
+      logger.error(e) { "Verification factory method failed with an exception" }
       failures[interactionMessage] = e
       emitEvent(Event.VerificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)))
       val errors = listOf(

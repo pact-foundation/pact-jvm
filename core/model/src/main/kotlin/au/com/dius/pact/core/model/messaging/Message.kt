@@ -83,7 +83,7 @@ class Message @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),
   var contents: OptionalBody = OptionalBody.missing(),
-  override val matchingRules: MatchingRules = MatchingRulesImpl(),
+  override var matchingRules: MatchingRules = MatchingRulesImpl(),
   override var generators: Generators = Generators(),
   override var metadata: MutableMap<String, Any?> = mutableMapOf(),
   interactionId: String? = null

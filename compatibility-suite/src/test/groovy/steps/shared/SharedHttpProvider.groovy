@@ -28,7 +28,6 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import groovy.json.JsonSlurper
 import io.cucumber.datatable.DataTable
@@ -36,7 +35,6 @@ import io.cucumber.java.After
 import io.cucumber.java.Scenario
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
-import io.cucumber.java.en.When
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.io.entity.StringEntity
 
@@ -47,25 +45,13 @@ import static steps.shared.SharedSteps.determineContentType
 @SuppressWarnings(['ThrowRuntimeException', 'AbcMetric'])
 class SharedHttpProvider {
   CompatibilitySuiteWorld world
+  VerificationData verificationData
   BaseMockServer mockProvider
-  ProviderInfo providerInfo
-  ProviderVerifier verifier
-  List<VerificationResult> verificationResults
   List<BaseMockServer> mockBrokers = []
-  Map<String, String> verificationProperties = [:]
-  List providerStateParams = []
 
-  SharedHttpProvider(CompatibilitySuiteWorld world) {
+  SharedHttpProvider(CompatibilitySuiteWorld world, VerificationData verificationData) {
+    this.verificationData = verificationData
     this.world = world
-  }
-
-  void providerStateCallback(ProviderState state, String isSetup) {
-    providerStateParams << [state, isSetup]
-  }
-
-  void failingProviderStateCallback(ProviderState state, String isSetup) {
-    providerStateParams << [state, isSetup]
-    throw new RuntimeException('failingProviderStateCallback has failed')
   }
 
   @After
@@ -81,9 +67,9 @@ class SharedHttpProvider {
       new Consumer('v1-compatibility-suite-c'), [ world.interactions[num - 1].copy() ])
     mockProvider = new KTorMockServer(pact, new MockProviderConfig())
     mockProvider.start()
-    providerInfo = new ProviderInfo('p')
-    providerInfo.port = mockProvider.port
-    providerInfo.stateChangeTeardown = true
+    verificationData.providerInfo = new ProviderInfo('p')
+    verificationData.providerInfo.port = mockProvider.port
+    verificationData.providerInfo.stateChangeTeardown = true
   }
 
   @Given('a provider is started that returns the response from interaction {int}, with the following changes:')
@@ -123,9 +109,9 @@ class SharedHttpProvider {
       new Consumer('v1-compatibility-suite-c'), [ interaction ])
     mockProvider = new KTorMockServer(pact, new MockProviderConfig())
     mockProvider.start()
-    providerInfo = new ProviderInfo('p')
-    providerInfo.port = mockProvider.port
-    providerInfo.stateChangeTeardown = true
+    verificationData.providerInfo = new ProviderInfo('p')
+    verificationData.providerInfo.port = mockProvider.port
+    verificationData.providerInfo.stateChangeTeardown = true
   }
 
   @Given('a Pact file for interaction {int} is to be verified')
@@ -138,10 +124,10 @@ class SharedHttpProvider {
     }
     ConsumerInfo consumerInfo = new ConsumerInfo('c')
     consumerInfo.pactSource = new StringSource(writer.toString())
-    if (providerInfo.stateChangeRequestFilter) {
-      consumerInfo.stateChange = providerInfo.stateChangeRequestFilter
+    if (verificationData.providerInfo.stateChangeRequestFilter) {
+      consumerInfo.stateChange = verificationData.providerInfo.stateChangeRequestFilter
     }
-    providerInfo.consumers << consumerInfo
+    verificationData.providerInfo.consumers << consumerInfo
   }
 
   @Given('a Pact file for interaction {int} is to be verified with a provider state {string} defined')
@@ -156,24 +142,10 @@ class SharedHttpProvider {
     }
     ConsumerInfo consumerInfo = new ConsumerInfo('c')
     consumerInfo.pactSource = new StringSource(writer.toString())
-    if (providerInfo.stateChangeRequestFilter) {
-      consumerInfo.stateChange = providerInfo.stateChangeRequestFilter
+    if (verificationData.providerInfo.stateChangeRequestFilter) {
+      consumerInfo.stateChange = verificationData.providerInfo.stateChangeRequestFilter
     }
-    providerInfo.consumers << consumerInfo
-  }
-
-  @When('the verification is run')
-  void the_verification_is_run() {
-    verifier = new ProviderVerifier()
-    verifier.projectHasProperty = { name -> verificationProperties.containsKey(name) }
-    verifier.projectGetProperty = { name -> verificationProperties[name] }
-    verifier.reporters = [ new StubVerificationReporter() ]
-    verificationResults = verifier.verifyProvider(providerInfo)
-  }
-
-  @Then('the verification will be successful')
-  void the_verification_will_be_successful() {
-    assert verificationResults.inject(true) { acc, result -> acc && result instanceof VerificationResult.Ok }
+    verificationData.providerInfo.consumers << consumerInfo
   }
 
   @Given('a provider is started that returns the responses from interactions {string}')
@@ -186,20 +158,8 @@ class SharedHttpProvider {
       interactions)
     mockProvider = new KTorMockServer(pact, new MockProviderConfig())
     mockProvider.start()
-    providerInfo = new ProviderInfo('p')
-    providerInfo.port = mockProvider.port
-  }
-
-  @Then('the verification will NOT be successful')
-  void the_verification_will_not_be_successful() {
-    assert verificationResults.any { it instanceof VerificationResult.Failed }
-  }
-
-  @Then('the verification results will contain a {string} error')
-  void the_verification_results_will_contain_a_error(String error) {
-    assert verificationResults.any {
-      it instanceof VerificationResult.Failed && it.description == error
-    }
+    verificationData.providerInfo = new ProviderInfo('p')
+    verificationData.providerInfo.port = mockProvider.port
   }
 
   @Given('a Pact file for interaction {int} is to be verified from a Pact broker')
@@ -245,7 +205,7 @@ class SharedHttpProvider {
     mockBroker.start()
     mockBrokers << mockBroker
 
-    providerInfo.hasPactsFromPactBrokerWithSelectorsV2("http://127.0.0.1:${mockBroker.port}", [])
+    verificationData.providerInfo.hasPactsFromPactBrokerWithSelectorsV2("http://127.0.0.1:${mockBroker.port}", [])
   }
 
   @Then('a verification result will NOT be published back')
@@ -257,7 +217,7 @@ class SharedHttpProvider {
 
   @Given('publishing of verification results is enabled')
   void publishing_of_verification_results_is_enabled() {
-    verificationProperties['pact.verifier.publishResults'] = 'true'
+    verificationData.verificationProperties['pact.verifier.publishResults'] = 'true'
   }
 
   @Then('a successful verification result will be published back for interaction \\{{int}}')
@@ -280,49 +240,9 @@ class SharedHttpProvider {
     assert json.success == false
   }
 
-  @Given('a provider state callback is configured')
-  void a_provider_state_callback_is_configured() {
-    providerInfo.stateChangeRequestFilter = this.&providerStateCallback
-  }
-
-  @Given('a provider state callback is configured, but will return a failure')
-  void a_provider_state_callback_is_configured_but_will_return_a_failure() {
-    providerInfo.stateChangeRequestFilter = this.&failingProviderStateCallback
-  }
-
-  @Then('the provider state callback will be called before the verification is run')
-  void the_provider_state_callback_will_be_called_before_the_verification_is_run() {
-    assert !providerStateParams.findAll { p -> p[1] == 'setup'  }.empty
-  }
-
-  @Then('the provider state callback will receive a setup call with {string} as the provider state parameter')
-  void the_provider_state_callback_will_receive_a_setup_call_with_as_the_provider_state_parameter(String state) {
-    assert !providerStateParams.findAll { p -> p[0].name == state && p[1] == 'setup' }.empty
-  }
-
-  @Then('the provider state callback will be called after the verification is run')
-  void the_provider_state_callback_will_be_called_after_the_verification_is_run() {
-    assert !providerStateParams.findAll { p -> p[1] == 'teardown' }.empty
-  }
-
-  @Then('the provider state callback will receive a teardown call {string} as the provider state parameter')
-  void the_provider_state_callback_will_receive_a_teardown_call_as_the_provider_state_parameter(String providerState) {
-    assert !providerStateParams.findAll { p -> p[0].name == providerState && p[1] == 'teardown' }.empty
-  }
-
-  @Then('the provider state callback will NOT receive a teardown call')
-  void the_provider_state_callback_will_not_receive_a_teardown_call() {
-    assert providerStateParams.findAll { p -> p[1] == 'teardown' }.empty
-  }
-
-  @Then('a warning will be displayed that there was no provider state callback configured for provider state {string}')
-  void a_warning_will_be_displayed_that_there_was_no_provider_state_callback_configured(String state) {
-    assert verifier.reporters.first().events.find { it.state == state }
-  }
-
   @Given('a request filter is configured to make the following changes:')
   void a_request_filter_is_configured_to_make_the_following_changes(DataTable dataTable) {
-    providerInfo.requestFilter = { ClassicHttpRequest request ->
+    verificationData.providerInfo.requestFilter = { ClassicHttpRequest request ->
       def entry = dataTable.entries().first()
       if (entry['path']) {
         request.path = entry['path']

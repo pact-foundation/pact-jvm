@@ -182,6 +182,7 @@ fun <M : Mismatch> matchEquality(
     actual is Attr && expected is Attr -> QualifiedName(actual) == QualifiedName(expected) &&
       actual.nodeValue == expected.nodeValue
     actual is BigDecimal && expected is BigDecimal -> actual.compareTo(expected) == 0
+    actual is String && expected is JsonValue.StringValue -> actual == expected.toString()
     else -> actual != null && actual == expected
   }
   logger.debug {

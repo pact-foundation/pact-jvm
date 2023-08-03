@@ -15,16 +15,19 @@ import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import steps.shared.CompatibilitySuiteWorld
 import steps.shared.SharedHttpProvider
+import steps.shared.VerificationData
 
 import static au.com.dius.pact.core.support.json.JsonParser.parseString
 
 class HttpProvider {
   CompatibilitySuiteWorld world
   SharedHttpProvider sharedProvider
+  VerificationData verificationData
 
-  HttpProvider(CompatibilitySuiteWorld world, SharedHttpProvider sharedProvider) {
+  HttpProvider(CompatibilitySuiteWorld world, SharedHttpProvider sharedProvider, VerificationData verificationData) {
     this.world = world
     this.sharedProvider = sharedProvider
+    this.verificationData = verificationData
   }
 
   @Given('a Pact file for interaction {int} is to be verified with the following provider states defined:')
@@ -48,10 +51,10 @@ class HttpProvider {
     }
     ConsumerInfo consumerInfo = new ConsumerInfo('c')
     consumerInfo.pactSource = new StringSource(writer.toString())
-    if (sharedProvider.providerInfo.stateChangeRequestFilter) {
-      consumerInfo.stateChange = sharedProvider.providerInfo.stateChangeRequestFilter
+    if (verificationData.providerInfo.stateChangeRequestFilter) {
+      consumerInfo.stateChange = verificationData.providerInfo.stateChangeRequestFilter
     }
-    sharedProvider.providerInfo.consumers << consumerInfo
+    verificationData.providerInfo.consumers << consumerInfo
   }
 
   @Then('the provider state callback will receive a setup call with {string} and the following parameters:')
@@ -62,7 +65,7 @@ class HttpProvider {
     def params = dataTable.asMaps().first().collectEntries {
       [it.key, Json.INSTANCE.fromJson(parseString(it.value))]
     }
-    assert !sharedProvider.providerStateParams.findAll { p ->
+    assert !verificationData.providerStateParams.findAll { p ->
       p[0].name == state && p[0].params == params && p[1] == 'setup'
     }.empty
   }
@@ -75,7 +78,7 @@ class HttpProvider {
     def params = dataTable.asMaps().first().collectEntries {
       [it.key, Json.INSTANCE.fromJson(parseString(it.value))]
     }
-    assert !sharedProvider.providerStateParams.findAll { p ->
+    assert !verificationData.providerStateParams.findAll { p ->
       p[0].name == state && p[0].params == params && p[1] == 'teardown'
     }.empty
   }

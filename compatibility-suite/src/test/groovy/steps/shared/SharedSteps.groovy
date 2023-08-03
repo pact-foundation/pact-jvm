@@ -143,7 +143,11 @@ class SharedSteps {
         def fixture = new XmlSlurper().parse(contents)
         def contentType = fixture.contentType.toString()
         request.headers['content-type'] = [contentType]
-        request.body = OptionalBody.body(fixture.contents.text(), new ContentType(contentType))
+        if (fixture.contents.@encoding == 'base64') {
+          request.body = OptionalBody.body(Base64.decoder.decode(fixture.contents.text().trim()), new ContentType(contentType))
+        } else {
+          request.body = OptionalBody.body(fixture.contents.text(), new ContentType(contentType))
+        }
       } else {
         String contentType = detectedContentType
         request.headers['content-type'] = [contentType]

@@ -104,7 +104,7 @@ class MatchingSpec extends Specification {
     where:
     mismatch = [
       new MetadataMismatch('A', 'B', 'C',
-        "Expected metadata key 'A' to have value 'B' (String) but was 'C' (String)")
+        "Expected 'C' (String) to be equal to 'B' (String)")
     ]
   }
 
