@@ -144,7 +144,8 @@ class SharedSteps {
         def contentType = fixture.contentType.toString()
         request.headers['content-type'] = [contentType]
         if (fixture.contents.@encoding == 'base64') {
-          request.body = OptionalBody.body(Base64.decoder.decode(fixture.contents.text().trim()), new ContentType(contentType))
+          def decoded = Base64.decoder.decode(fixture.contents.text().trim())
+          request.body = OptionalBody.body(decoded, new ContentType(contentType))
         } else {
           request.body = OptionalBody.body(fixture.contents.text(), new ContentType(contentType))
         }

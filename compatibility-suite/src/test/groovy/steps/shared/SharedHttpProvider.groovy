@@ -28,7 +28,6 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.VerificationResult
 import groovy.json.JsonSlurper
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.After
