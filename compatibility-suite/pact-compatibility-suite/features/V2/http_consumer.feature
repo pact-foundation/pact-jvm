@@ -112,6 +112,6 @@ Feature: Basic HTTP consumer
   Scenario: Supports matchers for request bodies
     When the mock server is started with interaction 2
     And request 2 is made to the mock server with the following changes:
-      | body                                  |
+      | body                             |
       | JSON: { "one": "c", "two": "b" } |
     Then a 200 success response is returned

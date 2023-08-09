@@ -1,0 +1,11 @@
+{
+  "status": {
+    "combine": "AND",
+    "matchers": [
+      {
+        "match": "statusCode",
+        "status": "success"
+      }
+    ]
+  }
+}

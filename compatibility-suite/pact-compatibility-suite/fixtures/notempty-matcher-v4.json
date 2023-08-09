@@ -1,0 +1,20 @@
+{
+  "body": {
+    "$.one": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "notEmpty"
+        }
+      ]
+    },
+    "$.two": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "notEmpty"
+        }
+      ]
+    }
+  }
+}
