@@ -92,3 +92,66 @@ Feature: V4 era Matching Rules
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one" -> "Expected '1.0' (String) to be a semantic version"
     And the mismatches will contain a mismatch with error "$.two" -> "Expected '1.0abc' (String) to be a semantic version"
+
+  Scenario: Supports an EachKey matcher (positive case)
+    Given an expected request configured with the following:
+      | body             | matching rules          |
+      | file: basic.json | eachkey-matcher-v4.json |
+    And a request is received with the following:
+      | body                                                        |
+      | JSON: { "one": "a", "two": "b", "three": "c", "four": "d" } |
+    When the request is compared to the expected one
+    Then the comparison should be OK
+
+  Scenario: Supports an EachKey matcher (negative case)
+    Given an expected request configured with the following:
+      | body             | matching rules         |
+      | file: basic.json | eachkey-matcher-v4.json |
+    And a request is received with the following:
+      | body                                                       |
+      | JSON: { "one": "a", "two": "b", "three": "c", "100": "d" } |
+    When the request is compared to the expected one
+    Then the comparison should NOT be OK
+    And the mismatches will contain a mismatch with error "$[100]" -> "Expected '100' to match '[a-z]+"
+
+  Scenario: Supports an EachValue matcher (positive case)
+    Given an expected request configured with the following:
+      | body             | matching rules            |
+      | file: basic.json | eachvalue-matcher-v4.json |
+    And a request is received with the following:
+      | body                                                         |
+      | JSON: { "one": "a", "three": "b", "four": "c", "five": "d" } |
+    When the request is compared to the expected one
+    Then the comparison should be OK
+
+  Scenario: Supports a EachValue matcher (negative case)
+    Given an expected request configured with the following:
+      | body             | matching rules            |
+      | file: basic.json | eachvalue-matcher-v4.json |
+    And a request is received with the following:
+      | body                                                         |
+      | JSON: { "one": "", "two": "b", "three": "c", "four": "100" } |
+    When the request is compared to the expected one
+    Then the comparison should NOT be OK
+    And the mismatches will contain a mismatch with error "$.four" -> "Expected '100' to match '[a-z]+"
+
+  Scenario: Supports an ArrayContains matcher (positive case)
+    Given an expected request configured with the following:
+      | content type               | body             | matching rules                |
+      | application/vnd.siren+json | file: siren.json | arraycontains-matcher-v4.json |
+    And a request is received with the following:
+      | content type               | body              |
+      | application/vnd.siren+json | file: siren2.json |
+    When the request is compared to the expected one
+    Then the comparison should be OK
+
+  Scenario: Supports a ArrayContains matcher (negative case)
+    Given an expected request configured with the following:
+      | content type               | body             | matching rules                |
+      | application/vnd.siren+json | file: siren.json | arraycontains-matcher-v4.json |
+    And a request is received with the following:
+      | content type               | body              |
+      | application/vnd.siren+json | file: siren3.json |
+    When the request is compared to the expected one
+    Then the comparison should NOT be OK
+    And the mismatches will contain a mismatch with error "$.actions" -> "Variant at index 1 ({\"href\":\"http://api.x.io/orders/42/items\",\"method\":\"DELETE\",\"name\":\"delete-item\",\"title\":\"Delete Item\"}) was not found in the actual list"
