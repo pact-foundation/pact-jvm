@@ -1,0 +1,12 @@
+{
+  "body": {
+    "$": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "contentType", "value": "image/jpeg"
+        }
+      ]
+    }
+  }
+}

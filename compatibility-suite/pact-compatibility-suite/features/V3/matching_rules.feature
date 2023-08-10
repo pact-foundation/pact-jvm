@@ -192,3 +192,66 @@ Feature: V3 era Matching Rules
     When the request is compared to the expected one
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one" -> "Expected '23/07/19' to match a date pattern of 'yyyy-MM-dd'"
+
+  Scenario: Supports a Boolean matcher (positive case)
+    Given an expected request configured with the following:
+      | body                              | matching rules          |
+      | JSON: { "one": true, "two": "b" } | boolean-matcher-v3.json |
+    And a request is received with the following:
+      | body                               |
+      | JSON: { "one": false, "two": "b" } |
+    When the request is compared to the expected one
+    Then the comparison should be OK
+
+  Scenario: Supports a Boolean matcher (negative case)
+    Given an expected request configured with the following:
+      | body                              | matching rules          |
+      | JSON: { "one": true, "two": "b" } | boolean-matcher-v3.json |
+    And a request is received with the following:
+      | body                            |
+      | JSON: { "one": "", "two": "b" } |
+    When the request is compared to the expected one
+    Then the comparison should NOT be OK
+    And the mismatches will contain a mismatch with error "$.one" -> "Expected '' (String) to match a boolean"
+
+  Scenario: Supports a ContentType matcher (positive case)
+    Given an expected request configured with the following:
+      | body          | matching rules              |
+      | file: rat.jpg | contenttype-matcher-v3.json |
+    And a request is received with the following:
+      | body             |
+      | file: spider.jpg |
+    When the request is compared to the expected one
+    Then the comparison should be OK
+
+  Scenario: Supports a ContentType matcher (negative case)
+    Given an expected request configured with the following:
+      | body          | matching rules              |
+      | file: rat.jpg | contenttype-matcher-v3.json |
+    And a request is received with the following:
+      | body             |
+      | file: sample.pdf |
+    When the request is compared to the expected one
+    Then the comparison should NOT be OK
+    And the mismatches will contain a mismatch with error "$" -> "Expected binary contents to have content type 'image/jpeg' but detected contents was 'application/pdf'"
+
+  Scenario: Supports a Values matcher (positive case, ignores missing and additional keys)
+    Given an expected request configured with the following:
+      | body             | matching rules         |
+      | file: basic.json | values-matcher-v3.json |
+    And a request is received with the following:
+      | body                                                          |
+      | JSON: { "one": "", "three": "b", "four": "c", "five": "100" } |
+    When the request is compared to the expected one
+    Then the comparison should be OK
+
+  Scenario: Supports a Values matcher (negative case, final type is wrong)
+    Given an expected request configured with the following:
+      | body             | matching rules         |
+      | file: basic.json | values-matcher-v3.json |
+    And a request is received with the following:
+      | body                                                       |
+      | JSON: { "one": "", "two": "b", "three": "c", "four": 100 } |
+    When the request is compared to the expected one
+    Then the comparison should NOT be OK
+    And the mismatches will contain a mismatch with error "$.four" -> "Expected 100 (Integer) to be the same type as 'a' (String)"
