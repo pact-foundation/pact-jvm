@@ -64,6 +64,7 @@ fun valueOf(value: Any?): String {
     is Element -> "<${QualifiedName(value)}>"
     is Text -> "'${value.wholeText}'"
     is JsonValue -> value.serialise()
+    is ByteArray -> "${value.size} byte(s)"
     else -> value.toString()
   }
 }
@@ -139,6 +140,7 @@ fun <M : Mismatch> domatch(
   mismatchFn: MismatchFactory<M>,
   cascaded: Boolean
 ): List<M> {
+  logger.debug { "Matching value at $path with $matcher" }
   return when (matcher) {
     is RegexMatcher -> matchRegex(matcher.regex, path, expected, actual, mismatchFn)
     is TypeMatcher -> matchType(path, expected, actual, mismatchFn, true)
@@ -239,6 +241,8 @@ fun <M : Mismatch> matchType(
     emptyList()
   } else if (expected is String && actual is String ||
     expected is List<*> && actual is List<*> ||
+    expected is Array<*> && actual is Array<*> ||
+    expected is ByteArray && actual is ByteArray ||
     expected is JsonValue.Array && actual is JsonValue.Array ||
     expected is Map<*, *> && actual is Map<*, *> ||
     expected is JsonValue.Object && actual is JsonValue.Object) {
@@ -248,6 +252,8 @@ fun <M : Mismatch> matchType(
       val empty = when (actual) {
         is String -> actual.isEmpty()
         is List<*> -> actual.isEmpty()
+        is Array<*> -> actual.isEmpty()
+        is ByteArray -> actual.isEmpty()
         is Map<*, *> -> actual.isEmpty()
         is JsonValue.Array -> actual.size == 0
         is JsonValue.Object -> actual.size == 0
@@ -264,7 +270,22 @@ fun <M : Mismatch> matchType(
     ((expected.isBoolean && actual.isBoolean) ||
       (expected.isNumber && actual.isNumber) ||
       (expected.isString && actual.isString))) {
+    if (allowEmpty) {
       emptyList()
+    } else {
+      val empty = when (actual) {
+        is JsonValue.Array -> actual.size == 0
+        is JsonValue.Object -> actual.size == 0
+        is JsonValue.StringValue -> actual.value.chars.isEmpty()
+        else -> false
+      }
+      if (empty) {
+        listOf(mismatchFactory.create(expected, actual,
+          "Expected ${valueOf(actual)} (${typeOf(actual)}) to not be empty", path))
+      } else {
+        emptyList()
+      }
+    }
   } else if (expected == null || expected is JsonValue.Null) {
     if (actual == null || actual is JsonValue.Null) {
       emptyList()

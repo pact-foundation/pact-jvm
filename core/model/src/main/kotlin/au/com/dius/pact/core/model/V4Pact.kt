@@ -158,6 +158,24 @@ sealed class V4Interaction(
   abstract fun updateProperties(values: Map<String, Any?>)
 
   /**
+   * Adds a freeform text comment to the interaction. Comments may be displayed during verification.
+   */
+  fun addTextComment(comment: String) {
+    if (comments.containsKey("text")) {
+      comments["text"]!!.add(JsonValue.StringValue(comment))
+    } else {
+      comments["text"] = JsonValue.Array(mutableListOf(JsonValue.StringValue(comment)))
+    }
+  }
+
+  /**
+   * Sets the test name that generated the interaction
+   */
+  fun setTestName(name: String) {
+    comments["testname"] = JsonValue.StringValue(name)
+  }
+
+  /**
    * Add configuration values from the plugin to this interaction
    */
   fun addPluginConfiguration(plugin: String, config: Map<String, JsonValue>) {

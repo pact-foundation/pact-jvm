@@ -572,7 +572,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
     if (providerInfo.pactVersion != null && providerInfo.pactVersion >= PactSpecVersion.V4) {
       pact.asV4Pact().unwrap().interactions.forEach { i ->
-       i.comments["testname"] = Json.toJson(context.testClass.map { it.name + "." }.orElse("") +
+        (i as V4Interaction).setTestName(context.testClass.map { it.name + "." }.orElse("") +
          context.displayName)
       }
     }

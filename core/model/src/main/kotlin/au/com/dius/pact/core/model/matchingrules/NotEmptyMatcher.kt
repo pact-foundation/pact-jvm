@@ -1,10 +1,11 @@
 package au.com.dius.pact.core.model.matchingrules
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.json.JsonValue
 
 /**
- * String type matcher that checks the string length
+ * Type matcher that checks the length of the type
  */
 object NotEmptyMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = when (spec) {
@@ -13,6 +14,8 @@ object NotEmptyMatcher : MatchingRule {
   }
 
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> = listOf()
+
+  override fun canMatch(contentType: ContentType) = true
 
   override val name: String
     get() = "not-empty"

@@ -50,7 +50,7 @@ open class SynchronousMessageBuilder(
    */
   fun testname(testname: String): SynchronousMessageBuilder {
     if (testname.isNotEmpty()) {
-      interaction.comments["testname"] = JsonValue.StringValue(testname)
+      interaction.setTestName(testname)
     }
     return this
   }

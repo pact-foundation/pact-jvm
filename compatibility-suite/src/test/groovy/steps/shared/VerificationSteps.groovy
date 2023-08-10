@@ -94,13 +94,16 @@ class VerificationSteps {
   @Then('the verification will be successful')
   void the_verification_will_be_successful() {
     assert verificationData.verificationResults.inject(true) { acc, result ->
-      acc && result instanceof VerificationResult.Ok
+      acc && (result instanceof VerificationResult.Ok ||
+        (result instanceof VerificationResult.Failed && result.pending))
     }
   }
 
   @Then('the verification will NOT be successful')
   void the_verification_will_not_be_successful() {
-    assert verificationData.verificationResults.any { it instanceof VerificationResult.Failed }
+    assert verificationData.verificationResults.any {
+      it instanceof VerificationResult.Failed && !it.pending
+    }
   }
 
   @Then('the verification results will contain a {string} error')

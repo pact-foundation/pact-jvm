@@ -106,11 +106,7 @@ open class HttpInteractionBuilder(
    * Adds a text comment to the interaction
    */
   fun comment(comment: String): HttpInteractionBuilder {
-    if (interaction.comments.containsKey("text")) {
-      interaction.comments["text"]!!.add(JsonValue.StringValue(comment))
-    } else {
-      interaction.comments["text"] = JsonValue.Array(mutableListOf(JsonValue.StringValue(comment)))
-    }
+    interaction.addTextComment(comment)
     return this
   }
 }

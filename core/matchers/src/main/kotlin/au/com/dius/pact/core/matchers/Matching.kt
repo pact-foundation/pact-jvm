@@ -223,8 +223,8 @@ object Matching : KLogging() {
 
     return when {
       rootMatcher != null && rootMatcher.canMatch(expectedContentType) -> BodyMatchResult(null,
-        listOf(BodyItemMatchResult("$", domatch(rootMatcher, listOf("$"), expected.body.unwrap(),
-          actual.body.unwrap(), BodyMismatchFactory))))
+        listOf(BodyItemMatchResult("$", domatch(rootMatcher, listOf("$"), expected.body.orEmpty(),
+          actual.body.orEmpty(), BodyMismatchFactory))))
       expectedContentType.getBaseType() == actualContentType.getBaseType() -> {
         val matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
         if (matcher != null) {
