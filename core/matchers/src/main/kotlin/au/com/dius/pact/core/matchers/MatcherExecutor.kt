@@ -37,6 +37,7 @@ import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang3.time.DateUtils
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
@@ -161,8 +162,7 @@ fun <M : Mismatch> domatch(
     is MaxEqualsIgnoreOrderMatcher -> matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
     is MinMaxEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn) +
             matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
-    is ContentTypeMatcher ->
-      matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
+    is ContentTypeMatcher -> matchContentType(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     is ArrayContainsMatcher, is EachKeyMatcher, is EachValueMatcher, is ValuesMatcher -> listOf()
     is BooleanMatcher -> matchBoolean(path, expected, actual, mismatchFn)
     is StatusCodeMatcher ->
@@ -691,7 +691,7 @@ fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: 
 
 private val tika = TikaConfig()
 
-fun <M : Mismatch> matchHeaderWithParameters(
+fun <M : Mismatch> matchContentType(
   path: List<String>,
   contentType: ContentType,
   actual: Any?,
@@ -701,6 +701,14 @@ fun <M : Mismatch> matchHeaderWithParameters(
     is ByteArray -> actual
     else -> actual.toString().toByteArray(contentType.asCharset())
   }
+
+  val slice = if (binaryData.size > 16) {
+    binaryData.copyOf(16)
+  } else {
+    binaryData
+  }
+  logger.debug { "matchContentType: $path, $contentType, ${binaryData.size} bytes starting with ${Hex.encodeHexString(slice)}...)" }
+
   val metadata = Metadata()
   val stream = TikaInputStream.get(binaryData)
   var detectedContentType = stream.use { stream ->
