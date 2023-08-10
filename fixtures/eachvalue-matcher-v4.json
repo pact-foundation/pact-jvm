@@ -1,0 +1,19 @@
+{
+  "body": {
+    "$": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "eachValue",
+          "rules": [
+            {
+              "match": "regex",
+              "regex": "[a-z]+"
+            }
+          ],
+          "value": "one"
+        }
+      ]
+    }
+  }
+}
