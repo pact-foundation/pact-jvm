@@ -1,1 +1,0 @@
-Pact-JVM - Provides a DSL and a base test class for use with Junit to build consumer tests

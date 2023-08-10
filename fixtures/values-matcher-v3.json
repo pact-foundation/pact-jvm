@@ -1,0 +1,20 @@
+{
+  "body": {
+    "$": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "values"
+        }
+      ]
+    },
+    "$.*": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "type"
+        }
+      ]
+    }
+  }
+}
