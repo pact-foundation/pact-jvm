@@ -216,21 +216,21 @@ Feature: V3 era Matching Rules
 
   Scenario: Supports a ContentType matcher (positive case)
     Given an expected request configured with the following:
-      | body          | matching rules              |
-      | file: rat.jpg | contenttype-matcher-v3.json |
+      | content type             | body          | matching rules              |
+      | application/octet-stream | file: rat.jpg | contenttype-matcher-v3.json |
     And a request is received with the following:
-      | body             |
-      | file: spider.jpg |
+      | content type             | body             |
+      | application/octet-stream | file: spider.jpg |
     When the request is compared to the expected one
     Then the comparison should be OK
 
   Scenario: Supports a ContentType matcher (negative case)
     Given an expected request configured with the following:
-      | body          | matching rules              |
-      | file: rat.jpg | contenttype-matcher-v3.json |
+      | content type             | body          | matching rules              |
+      | application/octet-stream | file: rat.jpg | contenttype-matcher-v3.json |
     And a request is received with the following:
-      | body             |
-      | file: sample.pdf |
+      | content type             | body             |
+      | application/octet-stream | file: sample.pdf |
     When the request is compared to the expected one
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$" -> "Expected binary contents to have content type 'image/jpeg' but detected contents was 'application/pdf'"
