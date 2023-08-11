@@ -84,15 +84,47 @@ object Matchers : KLogging() {
     actualEntries: Map<String, T>,
     context: MatchingContext,
     generateDiff: () -> String,
-    callback: (List<String>, T?, T?) -> List<BodyItemMatchResult>
+    callback: (List<String>, T?, T?, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
     if (matcher is ValuesMatcher || matcher is EachValueMatcher) {
+      logger.debug { "Matcher is ValuesMatcher or EachValueMatcher, checking just the values" }
+      val subContext = if (matcher is EachValueMatcher) {
+        val associatedRules = matcher.definition.rules.mapNotNull {
+          when (it) {
+            is Either.A -> it.value
+            is Either.B -> {
+              result.add(
+                BodyItemMatchResult(
+                  constructPath(path),
+                  listOf(
+                    BodyMismatch(
+                      expectedEntries, actualEntries,
+                      "Found an un-resolved reference ${it.value.name}", constructPath(path), generateDiff()
+                    )
+                  )
+                )
+              )
+              null
+            }
+          }
+        }
+        val matcherPath = constructPath(path) + ".*"
+        MatchingContext(
+          MatchingRuleCategory("body", mutableMapOf(
+            matcherPath to MatchingRuleGroup(associatedRules.toMutableList())
+          )),
+          context.allowUnexpectedKeys,
+          context.pluginConfiguration
+        )
+      } else {
+        context
+      }
       actualEntries.entries.forEach { (key, value) ->
         if (expectedEntries.containsKey(key)) {
-          result.addAll(callback(path + key, expectedEntries[key]!!, value))
+          result.addAll(callback(path + key, expectedEntries[key]!!, value, subContext))
         } else {
-          result.addAll(callback(path + key, expectedEntries.values.firstOrNull(), value))
+          result.addAll(callback(path + key, expectedEntries.values.firstOrNull(), value, subContext))
         }
       }
     } else {
@@ -100,7 +132,7 @@ object Matchers : KLogging() {
       if (matcher !is EachKeyMatcher) {
         expectedEntries.entries.forEach { (key, value) ->
           if (actualEntries.containsKey(key)) {
-            result.addAll(callback(path + key, value, actualEntries[key]))
+            result.addAll(callback(path + key, value, actualEntries[key], context))
           }
         }
       }

@@ -144,9 +144,10 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
       val expectedEntries = expectedValues.entries
       val actualEntries = actualValues.entries
       if (context.matcherDefined(path)) {
+        logger.debug { "compareMaps: matcher defined for path $path" }
         for (matcher in context.selectBestMatcher(path).rules) {
           result.addAll(Matchers.compareMaps(path, matcher, expectedEntries, actualEntries, context, generateDiff) {
-            p, expected, actual -> compare(p, expected ?: JsonValue.Null, actual ?: JsonValue.Null, context)
+            p, expected, actual, ctx -> compare(p, expected ?: JsonValue.Null, actual ?: JsonValue.Null, ctx)
           })
         }
       } else {

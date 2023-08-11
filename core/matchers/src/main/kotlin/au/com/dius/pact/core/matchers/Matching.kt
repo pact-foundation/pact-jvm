@@ -84,7 +84,7 @@ data class MatchingContext @JvmOverloads constructor(
 
     val result = mutableListOf<BodyItemMatchResult>()
 
-    if (!directMatcherDefined(path, listOf(EachValueMatcher::class.java, ValuesMatcher::class.java))) {
+    if (!directMatcherDefined(path, listOf(EachKeyMatcher::class.java, EachValueMatcher::class.java, ValuesMatcher::class.java))) {
       if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
         result.add(
           BodyItemMatchResult(
@@ -226,7 +226,10 @@ object Matching : KLogging() {
         listOf(BodyItemMatchResult("$", domatch(rootMatcher, listOf("$"), expected.body.orEmpty(),
           actual.body.orEmpty(), BodyMismatchFactory))))
       expectedContentType.getBaseType() == actualContentType.getBaseType() -> {
-        val matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
+        var matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
+        if (matcher == null) {
+          matcher = MatchingConfig.lookupContentMatcher(actualContentType.getSupertype().toString())
+        }
         if (matcher != null) {
           logger.debug { "Found a matcher for $actualContentType -> $matcher" }
           matcher.matchBody(expected.body, actual.body, context)

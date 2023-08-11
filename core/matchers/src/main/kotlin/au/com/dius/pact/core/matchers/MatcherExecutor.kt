@@ -141,7 +141,7 @@ fun <M : Mismatch> domatch(
   mismatchFn: MismatchFactory<M>,
   cascaded: Boolean
 ): List<M> {
-  logger.debug { "Matching value at $path with $matcher" }
+  logger.debug { "Matching value $actual at $path with $matcher" }
   return when (matcher) {
     is RegexMatcher -> matchRegex(matcher.regex, path, expected, actual, mismatchFn)
     is TypeMatcher -> matchType(path, expected, actual, mismatchFn, true)

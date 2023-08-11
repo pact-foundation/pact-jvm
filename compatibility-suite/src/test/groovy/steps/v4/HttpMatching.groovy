@@ -87,7 +87,12 @@ class HttpMatching {
     expectedRequest = new HttpRequest()
     def entry = dataTable.entries().first()
     if (entry['body']) {
-      def part = configureBody(entry['body'], determineContentType(entry['body'], expectedRequest.contentTypeHeader()))
+      def part
+      if (entry['content type']) {
+        part = configureBody(entry['body'], entry['content type'])
+      } else {
+        part = configureBody(entry['body'], determineContentType(entry['body'], expectedRequest.contentTypeHeader()))
+      }
       expectedRequest.body = part.body
       expectedRequest.headers.putAll(part.headers)
     }
@@ -111,8 +116,13 @@ class HttpMatching {
     receivedRequests << new HttpRequest()
     def entry = dataTable.entries().first()
     if (entry['body']) {
-      def part = configureBody(entry['body'], determineContentType(entry['body'],
-        receivedRequests[0].contentTypeHeader()))
+      def part
+      if (entry['content type']) {
+        part = configureBody(entry['body'], entry['content type'])
+      } else {
+        part = configureBody(entry['body'], determineContentType(entry['body'],
+          receivedRequests[0].contentTypeHeader()))
+      }
       receivedRequests[0].body = part.body
       receivedRequests[0].headers.putAll(part.headers)
     }
