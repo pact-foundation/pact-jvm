@@ -15,7 +15,7 @@ Feature: V4 era Matching Rules
     And a status 400 response is received
     When the response is compared to the expected one
     Then the response comparison should NOT be OK
-    And the response mismatches will contain a "status" mismatch with error "expected Successful response (200–299) but was 400"
+    And the response mismatches will contain a "status" mismatch with error "Expected status code 400 to be a Successful response (200–299)"
 
   Scenario: Supports a not empty matcher (positive case)
     Given an expected request configured with the following:
@@ -47,7 +47,7 @@ Feature: V4 era Matching Rules
     When the request is compared to the expected one
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one" -> "Expected '' (String) to not be empty"
-    And the mismatches will contain a mismatch with error "$.two" -> "Expected [] (ArrayList) to not be empty"
+    And the mismatches will contain a mismatch with error "$.two" -> "Expected [] (Array) to not be empty"
 
   Scenario: Supports a not empty matcher (negative case 2, types are different)
     Given an expected request configured with the following:
@@ -58,18 +58,18 @@ Feature: V4 era Matching Rules
       | JSON: { "one": "a", "two": "b" } |
     When the request is compared to the expected one
     Then the comparison should NOT be OK
-    And the mismatches will contain a mismatch with error "$.two" -> "Type mismatch: Expected String 'b' to be equal to List [\"b\"]"
+    And the mismatches will contain a mismatch with error "$.two" -> "Type mismatch: Expected 'b' (String) to be the same type as [\"b\"] (Array)"
 
   Scenario: Supports a not empty matcher with binary data (negative case)
     Given an expected request configured with the following:
       | body          | matching rules            |
       | file: rat.jpg | notempty2-matcher-v4.json |
     And a request is received with the following:
-      | body |
-      |      |
+      | content type | body  |
+      | image/jpeg   | EMPTY |
     When the request is compared to the expected one
     Then the comparison should NOT be OK
-    And the mismatches will contain a mismatch with error "$" -> "Expected 0 byte(s) (byte[]) to not be empty"
+    And the mismatches will contain a mismatch with error "$" -> "Expected [] (0 bytes) to not be empty"
 
   Scenario: Supports a semver matcher (positive case)
     Given an expected request configured with the following:
@@ -90,8 +90,8 @@ Feature: V4 era Matching Rules
       | JSON: { "one": "1.0", "two": "1.0abc" } |
     When the request is compared to the expected one
     Then the comparison should NOT be OK
-    And the mismatches will contain a mismatch with error "$.one" -> "Expected '1.0' (String) to be a semantic version"
-    And the mismatches will contain a mismatch with error "$.two" -> "Expected '1.0abc' (String) to be a semantic version"
+    And the mismatches will contain a mismatch with error "$.one" -> "'1.0' is not a valid semantic version"
+    And the mismatches will contain a mismatch with error "$.two" -> "'1.0abc' is not a valid semantic version"
 
   Scenario: Supports an EachKey matcher (positive case)
     Given an expected request configured with the following:
