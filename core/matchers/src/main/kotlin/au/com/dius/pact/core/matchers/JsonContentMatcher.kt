@@ -60,9 +60,9 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
 
   private fun typeOf(value: Any?) = when {
     value is Map<*, *> -> "Map"
-    value is JsonValue.Object -> "Map"
+    value is JsonValue.Object -> "Object"
     value is List<*> -> "List"
-    value is JsonValue.Array -> "List"
+    value is JsonValue.Array -> "Array"
     value is JsonValue.Null -> "Null"
     value is JsonValue -> value.name
     value == null -> "Null"
@@ -83,8 +83,9 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
       expected is JsonValue.Object && actual !is JsonValue.Object ||
         expected is JsonValue.Array && actual !is JsonValue.Array ->
         listOf(BodyItemMatchResult(constructPath(path),
-          listOf(BodyMismatch(expected, actual, "Type mismatch: Expected ${typeOf(actual)} " +
-          "${valueOf(actual)} to be equal to ${typeOf(expected)} ${valueOf(expected)}", constructPath(path),
+          listOf(BodyMismatch(expected, actual, "Type mismatch: Expected " +
+            "${valueOf(actual)} (${typeOf(actual)}) to be the same type as ${valueOf(expected)} (${typeOf(expected)})",
+            constructPath(path),
           generateJsonDiff(expected, actual)))))
       else -> compareValues(path, expected, actual, context)
     }

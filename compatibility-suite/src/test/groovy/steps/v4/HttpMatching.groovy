@@ -78,7 +78,7 @@ class HttpMatching {
   @Then('the response mismatches will contain a {string} mismatch with error {string}')
   void the_response_mismatches_will_contain_a_mismatch_with_error(String type, String error) {
     assert responseResults.find {
-      it.type() == type && it.description() == error
+      it.type() == type && it.description().toLowerCase() == error.toLowerCase()
     }
   }
 

@@ -221,9 +221,8 @@ class KafkaJsonSchemaContentMatcherSpec extends Specification {
   def 'matching json bodies - returns a mismatch - when comparing a map to a list'() {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
-      it instanceof BodyMismatch &&
-        it.mismatch.contains(
-          'Type mismatch: Expected List [100,100] to be equal to Map {"something":100,"somethingElse":100}')
+      it instanceof BodyMismatch && it.mismatch.contains('Type mismatch: Expected [100,100] (Array) to be the same' +
+        ' type as {"something":100,"somethingElse":100} (Object)')
     }
 
     where:
@@ -236,7 +235,7 @@ class KafkaJsonSchemaContentMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Type mismatch: Expected Integer 100 to be equal to List [100,100]')
+        it.mismatch.contains('Type mismatch: Expected 100 (Integer) to be the same type as [100,100] (Array)')
     }
 
     where:

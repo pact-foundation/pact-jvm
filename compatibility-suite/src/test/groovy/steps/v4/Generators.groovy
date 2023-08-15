@@ -76,6 +76,7 @@ class Generators {
     matchTypeOfElement(type, element)
   }
 
+  @SuppressWarnings('AbcMetric')
   static void matchTypeOfElement(String type, JsonValue element) {
     switch (type) {
       case 'integer' -> {

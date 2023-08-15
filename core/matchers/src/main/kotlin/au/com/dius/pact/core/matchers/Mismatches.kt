@@ -30,7 +30,7 @@ data class StatusMismatch(
     return when (statusType) {
       null -> "expected status of $expected but was $actual"
       HttpStatus.StatusCodes -> "expected a status in $statusCodes but was $actual"
-      else -> "expected $statusType but was $actual"
+      else -> "expected status code $actual to be a $statusType"
     }
   }
   override fun description(t: TermColors): String {

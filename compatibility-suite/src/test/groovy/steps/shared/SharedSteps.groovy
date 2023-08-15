@@ -158,8 +158,12 @@ class SharedSteps {
         }
       }
     } else {
+      def contents = entry
+      if (entry == 'EMPTY') {
+        contents = ''
+      }
       request.headers['content-type'] = [detectedContentType]
-      request.body = OptionalBody.body(entry)
+      request.body = OptionalBody.body(contents)
     }
     request
   }

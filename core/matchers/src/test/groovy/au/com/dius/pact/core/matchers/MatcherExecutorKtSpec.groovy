@@ -24,8 +24,8 @@ class MatcherExecutorKtSpec extends Specification {
 
     actual                             | result
     '4.5.7'                            | []
-    '4.5.7.8'                          | [new HeaderMismatch('test', '', '4.5.7.8', "Expected '4.5.7.8' (String) to be a semantic version")]
-    '04.5.7'                           | [new HeaderMismatch('test', '', '04.5.7', "Expected '04.5.7' (String) to be a semantic version")]
+    '4.5.7.8'                          | [new HeaderMismatch('test', '', '4.5.7.8', "'4.5.7.8' is not a valid semantic version")]
+    '04.5.7'                           | [new HeaderMismatch('test', '', '04.5.7', "'04.5.7' is not a valid semantic version")]
     new JsonValue.StringValue('4.5.7') | []
   }
 }

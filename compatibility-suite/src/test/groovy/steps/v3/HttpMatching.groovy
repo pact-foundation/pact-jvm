@@ -76,8 +76,13 @@ class HttpMatching {
   void the_following_requests_are_received(DataTable dataTable) {
     for (entry in dataTable.entries()) {
       def request = new Request()
+
       if (entry['body']) {
-        def part = configureBody(entry['body'], determineContentType(entry['body'], request.contentTypeHeader()))
+        def body = entry['body']
+        if (entry['body'] == 'EMPTY') {
+          body = ''
+        }
+        def part = configureBody(body, determineContentType(body, request.contentTypeHeader()))
         request.body = part.body
         request.headers.putAll(part.headers)
       }

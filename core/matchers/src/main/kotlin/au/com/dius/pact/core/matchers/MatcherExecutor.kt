@@ -65,7 +65,7 @@ fun valueOf(value: Any?): String {
     is Element -> "<${QualifiedName(value)}>"
     is Text -> "'${value.wholeText}'"
     is JsonValue -> value.serialise()
-    is ByteArray -> "${value.size} byte(s)"
+    is ByteArray -> "${value.asList()}"
     else -> value.toString()
   }
 }
@@ -75,6 +75,9 @@ fun typeOf(value: Any?): String {
     null -> "Null"
     is JsonValue -> value.type()
     is Attr -> "XmlAttr"
+    is List<*> -> "Array"
+    is Array<*> -> "Array"
+    is ByteArray -> "${value.size} bytes"
     else -> value.javaClass.simpleName
   }
 }
@@ -229,8 +232,13 @@ fun <M : Mismatch> matchType(
   mismatchFactory: MismatchFactory<M>,
   allowEmpty: Boolean
 ): List<M> {
+  val kotlinClass = if (actual != null) {
+    actual::class.qualifiedName
+  } else {
+    "NULL"
+  }
   logger.debug {
-    "comparing type of [$actual] (${actual?.javaClass?.simpleName}) to " +
+    "comparing type of [$actual] ($kotlinClass, ${actual?.javaClass?.simpleName}) to " +
       "[$expected] (${expected?.javaClass?.simpleName}) at $path"
   }
   return if (expected is Number && actual is Number ||
@@ -790,7 +798,7 @@ fun <M : Mismatch> matchSemver(
     emptyList()
   } else {
     listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a semantic version", path))
+      "${valueOf(actual)} is not a valid semantic version", path))
   }
 }
 
