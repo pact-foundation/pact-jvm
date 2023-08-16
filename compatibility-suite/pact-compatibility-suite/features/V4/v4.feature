@@ -5,5 +5,5 @@ Feature: General V4 features
     Given an HTTP interaction is being defined for a consumer test
     And a message interaction is being defined for a consumer test
     When the Pact file for the test is generated
-    Then the first interaction in the Pact file will have a type of "Synchronous/HTTP"
-    Then the second interaction in the Pact file will have a type of "Asynchronous/Messages"
+    Then there will be an interaction in the Pact file with a type of "Synchronous/HTTP"
+    And there will be an interaction in the Pact file with a type of "Asynchronous/Messages"
