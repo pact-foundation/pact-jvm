@@ -34,4 +34,19 @@ class MessageConsumer {
       builder.build()
     }
   }
+
+  @Given('a key of {string} is specified for the message interaction')
+  void a_key_of_is_specified_for_the_message_interaction(String key) {
+    builder.key(key)
+  }
+
+  @Given('the message interaction is marked as pending')
+  void the_message_interaction_is_marked_as_pending() {
+    builder.pending(true)
+  }
+
+  @Given('a comment {string} is added to the message interaction')
+  void a_comment_is_added_to_the_message_interaction(String comment) {
+    builder.comment(comment)
+  }
 }

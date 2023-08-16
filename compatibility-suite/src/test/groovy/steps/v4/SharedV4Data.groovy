@@ -62,4 +62,10 @@ class SharedV4Steps {
     def json = JsonParser.parseString(value)
     assert interactions.get(index)[name] == json
   }
+
+  @Then('there will be an interaction in the Pact file with a type of {string}')
+  void there_will_be_an_interaction_in_the_pact_file_with_a_type_of(String type) {
+    JsonValue.Array interactions = pactJson['interactions'].asArray()
+    assert interactions.values.find { it['type'] == type } != null
+  }
 }
