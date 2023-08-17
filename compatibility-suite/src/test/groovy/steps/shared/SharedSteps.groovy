@@ -181,4 +181,66 @@ class SharedSteps {
     }
     contentType ?: 'text/plain'
   }
+
+  @SuppressWarnings(['AbcMetric', 'SpaceAfterOpeningBrace'])
+  static void matchTypeOfElement(String type, JsonValue element) {
+    switch (type) {
+      case 'integer' -> {
+        assert element.type() == 'Integer'
+        assert element.toString() ==~ /\d+/
+      }
+      case 'decimal number' -> {
+        assert element.type() == 'Decimal'
+        assert element.toString() ==~ /\d+\.\d+/
+      }
+      case 'hexadecimal number' -> {
+        assert element.type() == 'String'
+        assert element.toString() ==~ /[a-fA-F0-9]+/
+      }
+      case 'random string' -> {
+        assert element.type() == 'String'
+      }
+      case 'string from the regex' -> {
+        assert element.type() == 'String'
+        assert element.toString() ==~ /\d{1,8}/
+      }
+      case 'date' -> {
+        assert element.type() == 'String'
+        assert element.toString() ==~ /\d{4}-\d{2}-\d{2}/
+      }
+      case 'time' -> {
+        assert element.type() == 'String'
+        assert element.toString() ==~ /\d{2}:\d{2}:\d{2}/
+      }
+      case 'date-time' -> {
+        assert element.type() == 'String'
+        assert element.toString() ==~ /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,9}/
+      }
+      case 'UUID' -> {
+        assert element.type() == 'String'
+        UUID.fromString(element.toString())
+      }
+      case 'simple UUID' -> {
+        assert element.type() == 'String'
+        assert element.toString() ==~ /[0-9a-zA-Z]{32}/
+      }
+      case 'lower-case-hyphenated UUID' -> {
+        assert element.type() == 'String'
+        UUID.fromString(element.toString())
+      }
+      case 'upper-case-hyphenated UUID' -> {
+        assert element.type() == 'String'
+        UUID.fromString(element.toString())
+      }
+      case 'URN UUID' -> {
+        assert element.type() == 'String'
+        assert element.toString().startsWith('urn:uuid:')
+        UUID.fromString(element.toString().substring('urn:uuid:'.length()))
+      }
+      case 'boolean' -> {
+        assert element.type() == 'Boolean'
+      }
+      default -> throw new AssertionError("Invalid type: $type")
+    }
+  }
 }

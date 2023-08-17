@@ -15,6 +15,7 @@ import io.cucumber.java.en.When
 
 import static steps.shared.SharedSteps.configureBody
 import static steps.shared.SharedSteps.determineContentType
+import static steps.shared.SharedSteps.matchTypeOfElement
 
 @SuppressWarnings('SpaceAfterOpeningBrace')
 class Generators {
@@ -109,50 +110,6 @@ class Generators {
     def element = JsonUtils.INSTANCE.fetchPath(generatedJson, path)
     assert originalElement != element
     matchTypeOfElement(type, element)
-  }
-
-  static void matchTypeOfElement(String type, JsonValue element) {
-    switch (type) {
-      case 'integer' -> {
-        assert element.type() == 'Integer'
-        assert element.toString() ==~ /\d+/
-      }
-      case 'decimal number' -> {
-        assert element.type() == 'Decimal'
-        assert element.toString() ==~ /\d+\.\d+/
-      }
-      case 'hexadecimal number' -> {
-        assert element.type() == 'String'
-        assert element.toString() ==~ /[a-fA-F0-9]+/
-      }
-      case 'random string' -> {
-        assert element.type() == 'String'
-      }
-      case 'string from the regex' -> {
-        assert element.type() == 'String'
-        assert element.toString() ==~ /\d{1,8}/
-      }
-      case 'date' -> {
-        assert element.type() == 'String'
-        assert element.toString() ==~ /\d{4}-\d{2}-\d{2}/
-      }
-      case 'time' -> {
-        assert element.type() == 'String'
-        assert element.toString() ==~ /\d{2}:\d{2}:\d{2}/
-      }
-      case 'date-time' -> {
-        assert element.type() == 'String'
-        assert element.toString() ==~ /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,9}/
-      }
-      case 'UUID' -> {
-        assert element.type() == 'String'
-        UUID.fromString(element.toString())
-      }
-      case 'boolean' -> {
-        assert element.type() == 'Boolean'
-      }
-      default -> throw new AssertionError("Invalid type: $type")
-    }
   }
 
   @Then('the body value for {string} will have been replaced with {string}')

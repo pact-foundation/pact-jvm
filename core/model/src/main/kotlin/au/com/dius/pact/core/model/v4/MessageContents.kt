@@ -16,7 +16,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
  * Contents of a message interaction
  */
 data class MessageContents @JvmOverloads constructor(
-  val contents: OptionalBody = OptionalBody.missing(),
+  var contents: OptionalBody = OptionalBody.missing(),
   val metadata: MutableMap<String, Any?> = mutableMapOf(),
   val matchingRules: MatchingRules = MatchingRulesImpl(),
   val generators: Generators = Generators(),

@@ -29,7 +29,7 @@ import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runMessageConsumerT
 import static au.com.dius.pact.core.support.Json.toJson
 import static steps.shared.SharedSteps.configureBody
 import static steps.shared.SharedSteps.determineContentType
-import static steps.v3.Generators.matchTypeOfElement
+import static steps.shared.SharedSteps.matchTypeOfElement
 
 @SuppressWarnings(['ThrowRuntimeException'])
 class MessageConsumer {

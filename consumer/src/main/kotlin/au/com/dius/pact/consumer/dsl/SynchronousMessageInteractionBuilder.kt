@@ -2,17 +2,18 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.V4Interaction
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.json.JsonValue
 
 /**
  * Pact Message builder DSL that supports V4 formatted Pact files
  */
-open class MessageInteractionBuilder(
+open class SynchronousMessageInteractionBuilder(
   description: String,
   providerStates: MutableList<ProviderState>,
   comments: MutableList<JsonValue.StringValue>
 ) {
-  val interaction = V4Interaction.AsynchronousMessage(description, providerStates)
+  val interaction = V4Interaction.SynchronousMessages(description, providerStates)
 
   init {
     if (comments.isNotEmpty()) {
@@ -24,7 +25,7 @@ open class MessageInteractionBuilder(
    * Sets the unique key for the interaction. If this is not set, or is empty, a key will be calculated from the
    * contents of the interaction.
    */
-  fun key(key: String?): MessageInteractionBuilder {
+  fun key(key: String?): SynchronousMessageInteractionBuilder {
     interaction.key = key
     return this;
   }
@@ -32,7 +33,7 @@ open class MessageInteractionBuilder(
   /**
    * Sets the interaction description
    */
-  fun description(description: String): MessageInteractionBuilder {
+  fun description(description: String): SynchronousMessageInteractionBuilder {
     interaction.description = description
     return this
   }
@@ -41,7 +42,7 @@ open class MessageInteractionBuilder(
    * Adds a provider state to the interaction.
    */
   @JvmOverloads
-  fun state(stateDescription: String, params: Map<String, Any?> = emptyMap()): MessageInteractionBuilder {
+  fun state(stateDescription: String, params: Map<String, Any?> = emptyMap()): SynchronousMessageInteractionBuilder {
     interaction.providerStates.add(ProviderState(stateDescription, params))
     return this
   }
@@ -49,7 +50,7 @@ open class MessageInteractionBuilder(
   /**
    * Adds a provider state to the interaction with a parameter.
    */
-  fun state(stateDescription: String, paramKey: String, paramValue: Any?): MessageInteractionBuilder {
+  fun state(stateDescription: String, paramKey: String, paramValue: Any?): SynchronousMessageInteractionBuilder {
     interaction.providerStates.add(ProviderState(stateDescription, mapOf(paramKey to paramValue)))
     return this
   }
@@ -57,7 +58,7 @@ open class MessageInteractionBuilder(
   /**
    * Adds a provider state to the interaction with parameters a pairs of key/values.
    */
-  fun state(stateDescription: String, vararg params: Pair<String, Any?>): MessageInteractionBuilder {
+  fun state(stateDescription: String, vararg params: Pair<String, Any?>): SynchronousMessageInteractionBuilder {
     interaction.providerStates.add(ProviderState(stateDescription, params.toMap()))
     return this
   }
@@ -65,7 +66,7 @@ open class MessageInteractionBuilder(
   /**
    * Marks the interaction as pending.
    */
-  fun pending(pending: Boolean): MessageInteractionBuilder {
+  fun pending(pending: Boolean): SynchronousMessageInteractionBuilder {
     interaction.pending = pending
     return this
   }
@@ -73,21 +74,40 @@ open class MessageInteractionBuilder(
   /**
    * Adds a text comment to the interaction
    */
-  fun comment(comment: String): MessageInteractionBuilder {
+  fun comment(comment: String): SynchronousMessageInteractionBuilder {
     interaction.addTextComment(comment)
     return this
   }
 
   /**
-   * Build the contents of the interaction using a contents builder
+   * Build the request part of the interaction using a contents builder
    */
-  fun withContents(builderFn: (MessageContentsBuilder) -> MessageContentsBuilder?): MessageInteractionBuilder {
-    val builder = MessageContentsBuilder(interaction.contents)
+  fun withRequest(
+    builderFn: (MessageContentsBuilder) -> MessageContentsBuilder?
+  ): SynchronousMessageInteractionBuilder {
+    val builder = MessageContentsBuilder(interaction.request)
     val result = builderFn(builder)
     if (result != null) {
-      interaction.contents = result.contents
+      interaction.request = result.contents
     } else {
-      interaction.contents = builder.contents
+      interaction.request = builder.contents
+    }
+    return this;
+  }
+
+  /**
+   * Build the response part of the interaction using a response builder. This can be called multiple times to add
+   * additional response messages.
+   */
+  fun willRespondWith(
+    builderFn: (MessageContentsBuilder) -> MessageContentsBuilder?
+  ): SynchronousMessageInteractionBuilder {
+    val builder = MessageContentsBuilder(MessageContents())
+    val result = builderFn(builder)
+    if (result != null) {
+      interaction.response.add(result.contents)
+    } else {
+      interaction.response.add(builder.contents)
     }
     return this;
   }

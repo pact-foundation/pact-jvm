@@ -96,4 +96,16 @@ class MessageContentsBuilder(var contents: MessageContents) {
 
     return this
   }
+
+  /**
+   * Adds the string as the message contents with the given content type
+   */
+  fun withContent(payload: String, contentType: String): MessageContentsBuilder {
+    val ct = ContentType(contentType)
+    contents = contents.copy(
+      contents = OptionalBody.body(payload.toByteArray(ct.asCharset()), ct),
+      metadata = (contents.metadata + Pair("contentType", contentType)).toMutableMap()
+    )
+    return this
+  }
 }

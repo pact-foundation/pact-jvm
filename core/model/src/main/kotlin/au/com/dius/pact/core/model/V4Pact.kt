@@ -548,6 +548,10 @@ sealed class V4Interaction(
 
     override fun isInteractionType(interactionType: V4InteractionType) =
       interactionType == V4InteractionType.SynchronousMessages
+
+    override fun toString(): String {
+      return "SynchronousMessages(key=$key, description=$description, request=$request, response=$response)"
+    }
   }
 
   companion object : KLogging() {

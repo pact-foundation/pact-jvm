@@ -14,6 +14,9 @@ class SharedV4PactData {
   String scenarioId
   PactBuilder pactBuilder = new PactBuilder('V4 consumer', 'V4 provider', PactSpecVersion.V4)
   List<Closure> builderCallbacks = []
+  V4Pact pact
+  String pactJsonStr
+  JsonValue.Object pactJson
 
   @SuppressWarnings('UnnecessaryConstructor')
   SharedV4PactData() { }
@@ -32,9 +35,6 @@ static Integer numType(String numType) {
 
 class SharedV4Steps {
   SharedV4PactData sharedV4PactData
-  V4Pact pact
-  String pactJsonStr
-  JsonValue.Object pactJson
 
   SharedV4Steps(SharedV4PactData sharedV4PactData) {
     this.sharedV4PactData = sharedV4PactData
@@ -45,27 +45,27 @@ class SharedV4Steps {
     sharedV4PactData.builderCallbacks.forEach {
       sharedV4PactData.pactBuilder.interactions.add(it.call())
     }
-    pact = sharedV4PactData.pactBuilder.toPact()
-    pactJsonStr = Json.INSTANCE.prettyPrint(pact.toMap(PactSpecVersion.V3))
-    pactJson = JsonParser.parseString(pactJsonStr).asObject()
+    sharedV4PactData.pact = sharedV4PactData.pactBuilder.toPact()
+    sharedV4PactData.pactJsonStr = Json.INSTANCE.prettyPrint(sharedV4PactData.pact.toMap(PactSpecVersion.V4))
+    sharedV4PactData.pactJson = JsonParser.parseString(sharedV4PactData.pactJsonStr).asObject()
   }
 
   @Then('the {numType} interaction in the Pact file will have a type of {string}')
   void the_interaction_in_the_pact_file_will_have_a_type_of(Integer index, String type) {
-    JsonValue.Array interactions = pactJson['interactions'].asArray()
+    JsonValue.Array interactions = sharedV4PactData.pactJson['interactions'].asArray()
     assert interactions.get(index)['type'] == type
   }
 
   @Then('the {numType} interaction in the Pact file will have {string} = {string}')
   void the_first_interaction_in_the_pact_file_will_have(Integer index, String name, String value) {
-    JsonValue.Array interactions = pactJson['interactions'].asArray()
+    JsonValue.Array interactions = sharedV4PactData.pactJson['interactions'].asArray()
     def json = JsonParser.parseString(value)
     assert interactions.get(index)[name] == json
   }
 
   @Then('there will be an interaction in the Pact file with a type of {string}')
   void there_will_be_an_interaction_in_the_pact_file_with_a_type_of(String type) {
-    JsonValue.Array interactions = pactJson['interactions'].asArray()
+    JsonValue.Array interactions = sharedV4PactData.pactJson['interactions'].asArray()
     assert interactions.values.find { it['type'] == type } != null
   }
 }
