@@ -30,10 +30,11 @@ dependencies {
     testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.232'
     testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
     testImplementation 'junit:junit'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
 task pactsJar(type: Jar, dependsOn: testClasses) {
-    classifier = 'test-pacts'
+    archiveClassifier = 'test-pacts'
     into('jar-pacts') {
         from(sourceSets.test.output) {
             include 'test_pact_v3.json'

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<body>
+    <contentType>multipart/mixed; boundary=gc0p4Jq0M2Yt08jU534c0p</contentType>
+    <contents eol="CRLF">
+<![CDATA[
+--gc0p4Jq0M2Yt08jU534c0p
+Content-Type: text/plain
+
+This is the body of the message.
+--gc0p4Jq0M2Yt08jU534c0p
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: base64
+
+ewogICAgImJvZHkiOiAiVGhpcyBpcyB0aGUgYm9keSBvZiB0aGUgbWVzc2FnZS4iCn0=
+--gc0p4Jq0M2Yt08jU534c0p--
+]]>
+    </contents>
+</body>

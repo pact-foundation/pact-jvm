@@ -27,7 +27,7 @@ import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

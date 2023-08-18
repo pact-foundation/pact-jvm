@@ -13,7 +13,7 @@ import au.com.dius.pact.provider.VerificationResult
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.lang3.StringUtils
 import org.hamcrest.Matchers.anything
 import org.springframework.http.HttpHeaders

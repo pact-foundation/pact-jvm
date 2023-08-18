@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<body>
+    <contentType>application/vnd.schemaregistry.v1+json</contentType>
+    <contents>
+        <![CDATA[{"one": "a",  "two": "b"}]]>
+    </contents>
+</body>

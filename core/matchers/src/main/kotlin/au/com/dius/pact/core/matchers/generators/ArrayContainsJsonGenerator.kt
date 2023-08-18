@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.generators.JsonContentTypeHandler
 import au.com.dius.pact.core.model.generators.JsonQueryResult
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 object ArrayContainsJsonGenerator : KLogging(), Generator {
   override val type: String
@@ -35,7 +35,7 @@ object ArrayContainsJsonGenerator : KLogging(), Generator {
     }
   }
 
-  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = emptyMap<String, Any>()
 
   private fun findMatchingVariant(
     example: JsonValue,

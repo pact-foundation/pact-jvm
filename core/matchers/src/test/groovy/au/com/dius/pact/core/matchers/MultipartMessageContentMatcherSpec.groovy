@@ -3,8 +3,10 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import spock.lang.Specification
 
+@SuppressWarnings('ThrowRuntimeException')
 class MultipartMessageContentMatcherSpec extends Specification {
 
   private MultipartMessageContentMatcher matcher
@@ -47,26 +49,14 @@ class MultipartMessageContentMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('"Blah"'.bytes)
   }
 
-  def 'returns a mismatch - when the actual body is missing a header'() {
-    expect:
-    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
-      'Expected a multipart header \'Test\', but was missing'
-    ]
-
-    where:
-
-    actualBody = multipart('form-data', 'file', '476.csv', 'text/plain', '', '1234')
-    expectedBody = multipart('form-data', 'file', '476.csv', 'text/plain', 'Test: true\n', '1234')
-  }
-
   def 'Ignores missing content type header, which is optional'() {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches.empty
 
     where:
 
-    actualBody = multipart('form-data', 'file', '476.csv', null, '', '1234')
-    expectedBody = multipart('form-data', 'file', '476.csv', 'text/plain', '', '1234')
+    actualBody = multipartFormData('form-data', 'file', '476.csv', null, '', '1234')
+    expectedBody = multipartFormData('form-data', 'file', '476.csv', 'text/plain', '', '1234')
   }
 
   def 'returns a mismatch - when the headers do not match'() {
@@ -77,43 +67,89 @@ class MultipartMessageContentMatcherSpec extends Specification {
 
     where:
 
-    actualBody = multipart('form-data', 'file', '476.csv', 'text/plain', 'Test: true\n', '1234')
-    expectedBody = multipart('form-data', 'file', '476.csv', 'text/html', 'Test: true\n', '1234')
+    actualBody = multipartFile('file', '476.csv', 'text/plain', '1234')
+    expectedBody = multipartFile('file', '476.csv', 'text/html', '1234')
   }
 
   def 'returns a mismatch - when the actual body is empty'() {
     expect:
     matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
-      'Expected content with the multipart, but received no bytes of content'
+      'Expected body \'1234\' to match \'\' using equality but did not match'
     ]
 
     where:
 
-    actualBody = multipart('form-data', 'file', '476.csv', 'text/plain', '',
-      '')
-    expectedBody = multipart('form-data', 'file', '476.csv', 'text/plain', '',
-      '1234')
+    actualBody = multipartFile('file', '476.csv', 'text/plain', '')
+    expectedBody = multipartFile('file', '476.csv', 'text/plain', '1234')
+  }
+
+  def 'returns a mismatch - when the number of parts is different'() {
+    expect:
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
+      'Expected a multipart message with 1 part(s), but received one with 2 part(s)'
+    ]
+
+    where:
+
+    actualBody = multipart('text/plain', 'This is some text', 'text/plain', 'this is some more text')
+    expectedBody = multipart('text/plain', 'This is some text')
+  }
+
+  def 'returns a mismatch - when the parts have different content'() {
+    expect:
+    matcher.matchBody(expectedBody, actualBody, context).mismatches*.mismatch == [
+      'Expected \'This is some text\' (String) to be equal to \'This is some other text\' (String)'
+    ]
+
+    where:
+
+    actualBody = multipart('application/json', '{"text": "This is some text"}')
+    expectedBody = multipart('application/json', '{"text": "This is some other text"}')
   }
 
   @SuppressWarnings('ParameterCount')
-  OptionalBody multipart(disposition, name, filename, contentType, headers, body) {
+  OptionalBody multipartFile(String name, String filename, String contentType, String body) {
+    def builder = MultipartEntityBuilder.create()
+    def type = contentType ? org.apache.hc.core5.http.ContentType.parse(contentType) : null
+    builder.addBinaryBody(name, body.bytes, type, filename)
+
+    def entity = builder.build()
+    OptionalBody.body(entity.content.bytes, new ContentType(entity.contentType))
+  }
+
+  OptionalBody multipart(String... partData) {
+    if (partData.length % 2 != 0) {
+      throw new RuntimeException('multipart requires pairs')
+    }
+
+    def builder = MultipartEntityBuilder.create()
+    partData.collate(2).eachWithIndex { pair, index ->
+      builder.addTextBody("part-$index", pair[1],
+        org.apache.hc.core5.http.ContentType.parse(pair[0]))
+    }
+
+    def entity = builder.build()
+    OptionalBody.body(entity.content.bytes, new ContentType(entity.contentType))
+  }
+
+  @SuppressWarnings('ParameterCount')
+  OptionalBody multipartFormData(disposition, name, filename, contentType, headers, body) {
     def contentTypeLine = ''
     def headersLine = ''
     if (contentType) {
-      contentTypeLine = "Content-Type: $contentType"
+      contentTypeLine = "Content-Type: $contentType\n"
       if (headers) {
-        headersLine = "$contentTypeLine\n$headers"
+        headersLine = "$contentTypeLine\n$headers\n"
       } else {
         headersLine = contentTypeLine
       }
     } else if (headers) {
-      headersLine = headers
+      headersLine = headers ?: '\n'
     }
     OptionalBody.body(
       """--XXX
         |Content-Disposition: $disposition; name=\"$name\"; filename=\"$filename\"
         |$headersLine
-        |
         |$body
         |--XXX
        """.stripMargin().bytes, new ContentType('multipart/form-data; boundary=XXX')

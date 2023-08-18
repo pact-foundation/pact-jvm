@@ -8,17 +8,19 @@ import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.KafkaSchemaRegistryWireFormatter
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
-class KafkaJsonSchemaContentMatcher : ContentMatcher {
+class KafkaJsonSchemaContentMatcher : ContentMatcher, KLogging() {
 
   override fun matchBody(
     expected: OptionalBody,
     actual: OptionalBody,
     context: MatchingContext
   ): BodyMatchResult {
+    logger.debug { "Matching Kafka Json Schema Content" }
 
     val raw = removeMagicBytes(actual)
+    logger.debug { "Raw content = $raw" }
 
     if (isInvalidActualValue(expected, raw))
       return getInvalidActualJsonResult(expected, raw)

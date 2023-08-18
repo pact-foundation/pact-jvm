@@ -1,0 +1,13 @@
+{
+  "body": {
+    "$.one": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "include",
+          "value": "a"
+        }
+      ]
+    }
+  }
+}

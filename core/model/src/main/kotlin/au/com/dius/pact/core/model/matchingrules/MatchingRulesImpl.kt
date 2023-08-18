@@ -1,9 +1,10 @@
 package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.atLeast
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 class MatchingRulesImpl : MatchingRules {
 
@@ -60,12 +61,12 @@ class MatchingRulesImpl : MatchingRules {
 
     override fun hashCode(): Int = rules.hashCode()
 
-    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> = when {
-        pactSpecVersion < PactSpecVersion.V3 -> toV2Map()
-        else -> toV3Map(pactSpecVersion)
+    override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any?> = when {
+        pactSpecVersion.atLeast(PactSpecVersion.V3) -> toV3Map(pactSpecVersion)
+        else -> toV2Map()
     }
 
-    private fun toV3Map(pactSpecVersion: PactSpecVersion): Map<String, Map<String, Any?>> =
+    private fun toV3Map(pactSpecVersion: PactSpecVersion?): Map<String, Map<String, Any?>> =
       rules.filter { it.value.isNotEmpty() }.mapValues { entry ->
         entry.value.toMap(pactSpecVersion)
     }
@@ -76,7 +77,7 @@ class MatchingRulesImpl : MatchingRules {
     }
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return rules.values.flatMap { it.validateForVersion(pactVersion) }
   }
 

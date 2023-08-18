@@ -9,7 +9,7 @@ import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.json.JsonValue
 import io.pact.plugins.jvm.core.CatalogueManager
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 interface ResponseGenerator {
   /**
@@ -85,6 +85,7 @@ object DefaultResponseGenerator: ResponseGenerator, MessageContentsGenerator, KL
     interactionData: Map<String, Map<String, JsonValue>>,
     forRequest: Boolean
   ): MessageContents {
+    logger.debug { "Generating message contents for message $contents" }
     var copy = contents.copy()
     val metadataGenerators = contents.setupGeneratorsFor(Category.METADATA, context)
     if (metadataGenerators.isNotEmpty()) {
@@ -93,7 +94,10 @@ object DefaultResponseGenerator: ResponseGenerator, MessageContentsGenerator, KL
       }
     }
     if (contents.contents.isPresent()) {
-      val bodyGenerators = contents.setupGeneratorsFor(Category.BODY, context)
+      var bodyGenerators = contents.setupGeneratorsFor(Category.CONTENT, context)
+      if (bodyGenerators.isEmpty()) {
+        bodyGenerators = contents.setupGeneratorsFor(Category.BODY, context)
+      }
       if (bodyGenerators.isNotEmpty()) {
         val contentType = contents.getContentType()
         val contentHandler = CatalogueManager.findContentGenerator(contentType)

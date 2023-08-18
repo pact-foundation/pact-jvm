@@ -2,7 +2,7 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.net.URLEncoder
 
 /**
@@ -23,17 +23,21 @@ open class RequestResponseInteraction @JvmOverloads constructor(
 
   override fun uniqueKey() = "${displayState()}_$description"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     val interactionJson = mutableMapOf(
       "description" to description,
       "request" to requestToMap(request, pactSpecVersion),
       "response" to responseToMap(response, pactSpecVersion)
     )
-    if (pactSpecVersion < PactSpecVersion.V3 && providerStates.isNotEmpty()) {
-      interactionJson["providerState"] = providerStates.first().name.toString()
-    } else if (providerStates.isNotEmpty()) {
-      interactionJson["providerStates"] = providerStates.map { it.toMap() }
+
+    if (providerStates.isNotEmpty()) {
+      if (pactSpecVersion.lessThan(PactSpecVersion.V3)) {
+        interactionJson["providerState"] = providerStates.first().name.toString()
+      } else if (providerStates.isNotEmpty()) {
+        interactionJson["providerStates"] = providerStates.map { it.toMap() }
+      }
     }
+
     return interactionJson
   }
 
@@ -59,7 +63,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     return result
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(request.validateForVersion(pactVersion))
     errors.addAll(response.validateForVersion(pactVersion))
@@ -76,14 +80,14 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   override fun asSynchronousRequestResponse() = this
 
   fun copy(): RequestResponseInteraction = RequestResponseInteraction(
-    description, providerStates, request, response, interactionId
+    description, providerStates, request.copy(), response.copyResponse(), interactionId
   )
 
   companion object : KLogging() {
     const val COMMA = ", "
 
     @JvmStatic
-    fun requestToMap(request: Request, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+    fun requestToMap(request: Request, pactSpecVersion: PactSpecVersion?): Map<String, Any?> {
       val map = mutableMapOf<String, Any?>(
         "method" to request.method.toUpperCase(),
         "path" to request.path
@@ -92,7 +96,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
         map["headers"] = request.headers.entries.associate { (key, value) -> key to value.joinToString(COMMA) }
       }
       if (request.query.isNotEmpty()) {
-        map["query"] = if (pactSpecVersion >= PactSpecVersion.V3) request.query else mapToQueryStr(request.query)
+        map["query"] = if (pactSpecVersion.atLeast(PactSpecVersion.V3)) request.query else mapToQueryStr(request.query)
       }
 
       if (request.body.isPresent()) {
@@ -104,7 +108,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       if (request.matchingRules.isNotEmpty()) {
         map["matchingRules"] = request.matchingRules.toMap(pactSpecVersion)
       }
-      if (request.generators.isNotEmpty() && pactSpecVersion >= PactSpecVersion.V3) {
+      if (request.generators.isNotEmpty() && pactSpecVersion.atLeast(PactSpecVersion.V3)) {
         map["generators"] = request.generators.toMap(pactSpecVersion)
       }
 
@@ -112,7 +116,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     }
 
     @JvmStatic
-    fun responseToMap(response: Response, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+    fun responseToMap(response: Response, pactSpecVersion: PactSpecVersion?): Map<String, Any?> {
       val map = mutableMapOf<String, Any?>("status" to response.status)
       if (response.headers.isNotEmpty()) {
         map["headers"] = response.headers.entries.associate { (key, value) -> key to value.joinToString(COMMA) }
@@ -127,7 +131,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       if (response.matchingRules.isNotEmpty()) {
         map["matchingRules"] = response.matchingRules.toMap(pactSpecVersion)
       }
-      if (response.generators.isNotEmpty() && pactSpecVersion >= PactSpecVersion.V3) {
+      if (response.generators.isNotEmpty() && pactSpecVersion.atLeast(PactSpecVersion.V3)) {
         map["generators"] = response.generators.toMap(pactSpecVersion)
       }
       return map

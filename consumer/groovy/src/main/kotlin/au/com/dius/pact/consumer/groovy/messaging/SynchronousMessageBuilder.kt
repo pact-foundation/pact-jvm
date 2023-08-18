@@ -10,7 +10,7 @@ import au.com.dius.pact.core.support.deepMerge
 import au.com.dius.pact.core.support.json.JsonValue
 import groovy.lang.Closure
 import io.pact.plugins.jvm.core.ContentMatcher
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 open class SynchronousMessageBuilder(
   private val description: String,
@@ -50,7 +50,7 @@ open class SynchronousMessageBuilder(
    */
   fun testname(testname: String): SynchronousMessageBuilder {
     if (testname.isNotEmpty()) {
-      interaction.comments["testname"] = JsonValue.StringValue(testname)
+      interaction.setTestName(testname)
     }
     return this
   }

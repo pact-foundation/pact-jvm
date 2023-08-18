@@ -1,0 +1,20 @@
+{
+  "body": {
+    "$.one": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "type"
+        }
+      ]
+    },
+    "$.one.a.status": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "equality"
+        }
+      ]
+    }
+  }
+}

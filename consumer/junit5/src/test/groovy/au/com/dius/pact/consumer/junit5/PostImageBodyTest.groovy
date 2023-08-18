@@ -42,11 +42,11 @@ class PostImageBodyTest {
   void testFiles(MockServer mockServer) {
     CloseableHttpClient httpclient = HttpClients.createDefault()
     def result = httpclient.withCloseable {
-      PostImageBodyTest.getResourceAsStream('/RAT.JPG').withCloseable { stream ->
+      PostImageBodyTest.getResourceAsStream('/ron.jpg').withCloseable { stream ->
         def data = MultipartEntityBuilder.create()
           .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
           .addBinaryBody('photo', stream, ContentType.create('image/jpeg'), 'ron.jpg')
-          .addBinaryBody('text', 'some text stuff'.bytes, ContentType.create('text/plain'), 'ron.txt')
+          .addBinaryBody('text', 'hello world!'.bytes, ContentType.create('text/plain'), 'ron.txt')
           .build()
         def request = RequestBuilder
           .post(mockServer.url + '/images')

@@ -14,8 +14,8 @@ import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonObject
-import mu.KLogging
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
 
@@ -158,6 +158,24 @@ sealed class V4Interaction(
   abstract fun updateProperties(values: Map<String, Any?>)
 
   /**
+   * Adds a freeform text comment to the interaction. Comments may be displayed during verification.
+   */
+  fun addTextComment(comment: String) {
+    if (comments.containsKey("text")) {
+      comments["text"]!!.add(JsonValue.StringValue(comment))
+    } else {
+      comments["text"] = JsonValue.Array(mutableListOf(JsonValue.StringValue(comment)))
+    }
+  }
+
+  /**
+   * Sets the test name that generated the interaction
+   */
+  fun setTestName(name: String) {
+    comments["testname"] = JsonValue.StringValue(name)
+  }
+
+  /**
    * Add configuration values from the plugin to this interaction
    */
   fun addPluginConfiguration(plugin: String, config: Map<String, JsonValue>) {
@@ -167,6 +185,11 @@ sealed class V4Interaction(
       pluginConfiguration[plugin] = config.toMutableMap()
     }
   }
+
+  /**
+   * returns true if the interaction is of the required type
+   */
+  abstract fun isInteractionType(interactionType: V4InteractionType): Boolean
 
   open class SynchronousHttp @JvmOverloads constructor(
     key: String?,
@@ -233,7 +256,10 @@ sealed class V4Interaction(
       this.response.updateProperties(responseConfig)
     }
 
-    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+    override fun isInteractionType(interactionType: V4InteractionType) =
+      interactionType == V4InteractionType.SynchronousHTTP
+
+    override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
       val map = mutableMapOf(
         "type" to V4InteractionType.SynchronousHTTP.toString(),
         "key" to uniqueKey(),
@@ -266,7 +292,7 @@ sealed class V4Interaction(
       return map
     }
 
-    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
       val errors = mutableListOf<String>()
       errors.addAll(request.validateForVersion(pactVersion))
       errors.addAll(response.validateForVersion(pactVersion))
@@ -355,7 +381,7 @@ sealed class V4Interaction(
 
     override fun updateProperties(values: Map<String, Any?>) { }
 
-    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+    override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
       val map = (mapOf(
         "type" to V4InteractionType.AsynchronousMessages.toString(),
         "key" to key,
@@ -386,7 +412,7 @@ sealed class V4Interaction(
       return map
     }
 
-    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
       val errors = mutableListOf<String>()
       errors.addAll(contents.matchingRules.validateForVersion(pactVersion))
       errors.addAll(contents.generators.validateForVersion(pactVersion))
@@ -411,6 +437,9 @@ sealed class V4Interaction(
       contents = contents.copy(metadata = metadata.toMutableMap())
       return this
     }
+
+    override fun isInteractionType(interactionType: V4InteractionType) =
+      interactionType == V4InteractionType.AsynchronousMessages
   }
 
   open class SynchronousMessages @Suppress("LongParameterList") @JvmOverloads constructor(
@@ -462,8 +491,8 @@ sealed class V4Interaction(
       return builder.build().toUInt().toString(16)
     }
 
-    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
-      require(pactSpecVersion >= PactSpecVersion.V4) {
+    override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
+      require(pactSpecVersion.atLeast(PactSpecVersion.V4)) {
         "A Synchronous Messages interaction can not be written to a $pactSpecVersion pact file"
       }
       val map = mutableMapOf(
@@ -498,7 +527,7 @@ sealed class V4Interaction(
       return map
     }
 
-    override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+    override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
       val errors = mutableListOf<String>()
       errors.addAll(request.matchingRules.validateForVersion(pactVersion))
       errors.addAll(request.generators.validateForVersion(pactVersion))
@@ -516,6 +545,13 @@ sealed class V4Interaction(
     override fun isSynchronousMessages() = true
 
     override fun asSynchronousMessages() = this
+
+    override fun isInteractionType(interactionType: V4InteractionType) =
+      interactionType == V4InteractionType.SynchronousMessages
+
+    override fun toString(): String {
+      return "SynchronousMessages(key=$key, description=$description, request=$request, response=$response)"
+    }
   }
 
   companion object : KLogging() {
@@ -682,5 +718,12 @@ open class V4Pact @JvmOverloads constructor(
   open fun requiresPlugins(): Boolean {
     val pluginData = metadata["plugins"]
     return pluginData is List<*> && pluginData.isNotEmpty()
+  }
+
+  /**
+   * Returns true if the Pact has interactions of the given type
+   */
+  fun hasInteractionsOfType(interactionType: V4InteractionType): Boolean {
+    return interactions.any { it.asV4Interaction().isInteractionType(interactionType) }
   }
 }

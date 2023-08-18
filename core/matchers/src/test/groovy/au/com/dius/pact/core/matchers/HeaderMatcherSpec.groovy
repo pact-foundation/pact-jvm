@@ -49,6 +49,15 @@ class HeaderMatcherSpec extends Specification {
       "Expected 'XYZ' to match 'X=.*', Expected 'XYZ' to match 'A=.*', Expected 'XYZ' to match 'B=.*'"
   }
 
+  def "matching headers - applies the matching rule to all header values"() {
+    given:
+    context.matchers.addRule('HEADER', new RegexMatcher('\\d+'))
+
+    expect:
+    Matching.INSTANCE.compareHeaders([HEADER: ['100']], [HEADER: ['100', '20x', '300']], context)*.result*.mismatch ==
+      [["Expected '20x' to match '\\d+'"]]
+  }
+
   @Unroll
   @SuppressWarnings('LineLength')
   def "matching headers - content type header - be true when #description"() {

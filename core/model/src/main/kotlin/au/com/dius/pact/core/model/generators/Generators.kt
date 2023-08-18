@@ -2,16 +2,16 @@ package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.InvalidPactException
+import au.com.dius.pact.core.model.JsonUtils.queryObjectGraph
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.lessThan
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.orNull
-import mu.KLogging
-import org.apache.commons.collections4.IteratorUtils
+import io.github.oshai.kotlinlogging.KLogging
 import java.util.Locale
 
 enum class Category {
@@ -67,47 +67,6 @@ object JsonContentTypeHandler : ContentTypeHandler {
         else -> body.value = Json.toJson(generator.generate(context, body.value))
       }
     }
-  }
-
-  @Suppress("ReturnCount")
-  private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: JsonQueryResult, fn: (JsonQueryResult) -> Unit) {
-    var bodyCursor = body
-    while (pathExp.hasNext()) {
-      val cursorValue = bodyCursor.value
-      when (val token = pathExp.next()) {
-        is PathToken.Field -> if (cursorValue is JsonValue.Object && cursorValue.has(token.name)) {
-          bodyCursor = JsonQueryResult(cursorValue[token.name], token.name, bodyCursor.jsonValue)
-        } else {
-          return
-        }
-        is PathToken.Index -> if (cursorValue is JsonValue.Array && cursorValue.values.size > token.index) {
-          bodyCursor = JsonQueryResult(cursorValue[token.index], token.index, bodyCursor.jsonValue)
-        } else {
-          return
-        }
-        is PathToken.Star -> if (cursorValue is JsonValue.Object) {
-          val pathIterator = IteratorUtils.toList(pathExp)
-          cursorValue.entries.forEach { (key, value) ->
-            queryObjectGraph(pathIterator.iterator(), JsonQueryResult(value, key, cursorValue), fn)
-          }
-          return
-        } else {
-          return
-        }
-        is PathToken.StarIndex -> if (cursorValue is JsonValue.Array) {
-          val pathIterator = IteratorUtils.toList(pathExp)
-          cursorValue.values.forEachIndexed { index, item ->
-            queryObjectGraph(pathIterator.iterator(), JsonQueryResult(item, index, cursorValue), fn)
-          }
-          return
-        } else {
-          return
-        }
-        else -> {}
-      }
-    }
-
-    fn(bodyCursor)
   }
 }
 
@@ -273,8 +232,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
    */
   fun isNotEmpty() = categories.isNotEmpty() && categories.any { it.value.isNotEmpty() }
 
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (pactSpecVersion < PactSpecVersion.V3) {
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
+    if (pactSpecVersion.lessThan(PactSpecVersion.V3)) {
       throw InvalidPactException("Generators are only supported with pact specification version 3+")
     }
     return categories.entries.associate { (key, value) ->
@@ -306,8 +265,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return generators
   }
 
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
-    return if (pactVersion < PactSpecVersion.V3 && categories.any { it.value.isNotEmpty() }) {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.lessThan(PactSpecVersion.V3) && categories.any { it.value.isNotEmpty() }) {
       listOf("Generators can only be used with Pact specification versions >= V3")
     } else {
       listOf()

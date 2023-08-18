@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.support
 
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 

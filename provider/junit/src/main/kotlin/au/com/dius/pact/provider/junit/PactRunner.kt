@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.junit
 
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.expressions.DataType
@@ -25,7 +24,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.junit.Ignore
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.ParentRunner

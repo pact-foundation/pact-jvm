@@ -120,7 +120,7 @@ class ResponseComparisonSpec extends Specification {
     expect:
     result instanceof Result.Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.stuff': ["Expected 'is good' (String) but received 'should make the test fail' (String)"]
+      '$.stuff': ["Expected 'should make the test fail' (String) to be equal to 'is good' (String)"]
     ]
     result.value.diff[1] == '-  "stuff": "is good"'
     result.value.diff[2] == '+  "stuff": "should make the test fail"'
@@ -188,7 +188,7 @@ class ResponseComparisonSpec extends Specification {
     expect:
     result instanceof Result.Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.stuff': ["Expected 'is good' (String) but received 'should make the test fail' (String)"]
+      '$.stuff': ["Expected 'should make the test fail' (String) to be equal to 'is good' (String)"]
     ]
     result.value.diff.empty
   }

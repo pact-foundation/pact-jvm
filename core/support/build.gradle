@@ -7,6 +7,7 @@ group = 'au.com.dius.pact.core'
 
 dependencies {
     api 'io.github.microutils:kotlin-logging-jvm'
+    api 'io.github.oshai:kotlin-logging-jvm:5.0.0'
     api 'org.apache.httpcomponents.client5:httpclient5'
     api 'org.apache.httpcomponents.client5:httpclient5-fluent'
 

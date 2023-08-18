@@ -33,7 +33,7 @@ import io.ktor.util.network.port
 import io.netty.channel.Channel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.net.SocketAddress
 import java.util.zip.DeflaterInputStream
 import java.util.zip.GZIPInputStream

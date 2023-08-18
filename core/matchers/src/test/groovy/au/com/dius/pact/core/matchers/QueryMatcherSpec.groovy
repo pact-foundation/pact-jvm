@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import spock.lang.Specification
 
 class QueryMatcherSpec extends Specification {
@@ -32,6 +33,16 @@ class QueryMatcherSpec extends Specification {
     expect:
     QueryMatcher.compareQuery('a',
       ['1000-01-01', '2000-01-01'], ['2000-01-01', '2000x-01-03'], context)*.mismatch ==
-      ["Expected '2000x-01-03' to match a date of 'yyyy-MM-dd': Unable to parse the date: 2000x-01-03"]
+      ["Expected '2000x-01-03' to match a date pattern of 'yyyy-MM-dd': Unable to parse the date: 2000x-01-03"]
+  }
+
+  def 'applies matching rules to multiple parameter values'() {
+    given:
+    context.matchers.addRule('a', new RegexMatcher('\\d+'))
+
+    expect:
+    QueryMatcher.compareQuery('a',
+      ['100'], ['100', '200', '300x'], context)*.mismatch ==
+      ["Expected '300x' to match '\\d+'"]
   }
 }

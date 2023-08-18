@@ -35,6 +35,7 @@ class ContentTypeSpec extends Specification {
     'application/x-thrift'                   || true
     'application/x-other'                    || false
     'application/graphql'                    || true
+    'application/vnd.siren+json'             || true
 
     contentType = new ContentType(value)
   }
@@ -113,6 +114,7 @@ class ContentTypeSpec extends Specification {
     'application/json'                  || false
     'application/hal+json'              || false
     'application/HAL+JSON'              || false
+    'application/vnd.siren+json'        || false
     'application/xml'                   || false
     'application/atom+xml'              || false
     'application/octet-stream'          || true
@@ -142,6 +144,7 @@ class ContentTypeSpec extends Specification {
     'application/json'                  || 'application/javascript'
     'application/hal+json'              || 'application/json'
     'application/HAL+JSON'              || 'application/json'
+    'application/vnd.siren+json'        || 'application/json'
     'application/xml'                   || 'text/plain'
     'application/atom+xml'              || 'application/xml'
     'application/octet-stream'          || null

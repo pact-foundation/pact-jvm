@@ -188,6 +188,8 @@ sealed class JsonValue {
   fun type(): String {
     return when (this) {
       is StringValue -> "String"
+      is True -> "Boolean"
+      is False -> "Boolean"
       else -> this::class.java.simpleName
     }
   }

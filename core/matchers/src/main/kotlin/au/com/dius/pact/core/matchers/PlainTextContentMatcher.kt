@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 class PlainTextContentMatcher : ContentMatcher {
 

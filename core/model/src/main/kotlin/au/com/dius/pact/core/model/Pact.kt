@@ -60,7 +60,7 @@ interface Interaction {
   /**
    * Converts this interaction to a Map
    */
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *>
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *>
 
   /**
    * Generates a unique key for this interaction
@@ -78,7 +78,7 @@ interface Interaction {
   val comments: MutableMap<String, JsonValue>
 
   /** Validates if this Interaction can be used with the provided Pact specification version */
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String>
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String>
 
   /** Converts this interaction to a V4 format */
   fun asV4Interaction(): V4Interaction

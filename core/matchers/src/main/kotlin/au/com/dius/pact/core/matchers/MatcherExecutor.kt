@@ -36,7 +36,8 @@ import com.github.zafarkhaja.semver.Version
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang3.time.DateUtils
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
@@ -60,10 +61,11 @@ private val booleanRegex = Regex("^true|false$")
 fun valueOf(value: Any?): String {
   return when (value) {
     null -> "null"
-    is String -> "'$value'"
+    is String, is JsonValue.StringValue -> "'$value'"
     is Element -> "<${QualifiedName(value)}>"
     is Text -> "'${value.wholeText}'"
     is JsonValue -> value.serialise()
+    is ByteArray -> "${value.asList()}"
     else -> value.toString()
   }
 }
@@ -73,6 +75,9 @@ fun typeOf(value: Any?): String {
     null -> "Null"
     is JsonValue -> value.type()
     is Attr -> "XmlAttr"
+    is List<*> -> "Array"
+    is Array<*> -> "Array"
+    is ByteArray -> "${value.size} bytes"
     else -> value.javaClass.simpleName
   }
 }
@@ -130,6 +135,7 @@ fun <M : Mismatch> domatch(
   }
 }
 
+@Suppress("ComplexMethod")
 fun <M : Mismatch> domatch(
   matcher: MatchingRule,
   path: List<String>,
@@ -138,6 +144,7 @@ fun <M : Mismatch> domatch(
   mismatchFn: MismatchFactory<M>,
   cascaded: Boolean
 ): List<M> {
+  logger.debug { "Matching value $actual at $path with $matcher" }
   return when (matcher) {
     is RegexMatcher -> matchRegex(matcher.regex, path, expected, actual, mismatchFn)
     is TypeMatcher -> matchType(path, expected, actual, mismatchFn, true)
@@ -158,8 +165,7 @@ fun <M : Mismatch> domatch(
     is MaxEqualsIgnoreOrderMatcher -> matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
     is MinMaxEqualsIgnoreOrderMatcher -> matchMinEqualsIgnoreOrder(matcher.min, path, expected, actual, mismatchFn) +
             matchMaxEqualsIgnoreOrder(matcher.max, path, expected, actual, mismatchFn)
-    is ContentTypeMatcher ->
-      matchHeaderWithParameters(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
+    is ContentTypeMatcher -> matchContentType(path, ContentType.fromString(matcher.contentType), actual, mismatchFn)
     is ArrayContainsMatcher, is EachKeyMatcher, is EachValueMatcher, is ValuesMatcher -> listOf()
     is BooleanMatcher -> matchBoolean(path, expected, actual, mismatchFn)
     is StatusCodeMatcher ->
@@ -168,6 +174,7 @@ fun <M : Mismatch> domatch(
   }
 }
 
+@Suppress("ComplexMethod")
 fun <M : Mismatch> matchEquality(
   path: List<String>,
   expected: Any?,
@@ -180,6 +187,7 @@ fun <M : Mismatch> matchEquality(
     actual is Attr && expected is Attr -> QualifiedName(actual) == QualifiedName(expected) &&
       actual.nodeValue == expected.nodeValue
     actual is BigDecimal && expected is BigDecimal -> actual.compareTo(expected) == 0
+    actual is String && expected is JsonValue.StringValue -> actual == expected.toString()
     else -> actual != null && actual == expected
   }
   logger.debug {
@@ -190,10 +198,12 @@ fun <M : Mismatch> matchEquality(
     emptyList()
   } else {
     listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} (${typeOf(actual)}) to equal ${valueOf(expected)} (${typeOf(expected)})", path))
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be equal to " +
+        "${valueOf(expected)} (${typeOf(expected)})", path))
   }
 }
 
+@Suppress("ComplexCondition")
 fun <M : Mismatch> matchRegex(
   regex: String,
   path: List<String>,
@@ -214,6 +224,7 @@ fun <M : Mismatch> matchRegex(
   }
 }
 
+@Suppress("ComplexMethod", "ComplexCondition")
 fun <M : Mismatch> matchType(
   path: List<String>,
   expected: Any?,
@@ -221,8 +232,14 @@ fun <M : Mismatch> matchType(
   mismatchFactory: MismatchFactory<M>,
   allowEmpty: Boolean
 ): List<M> {
+  val kotlinClass = if (actual != null) {
+    actual::class.qualifiedName
+  } else {
+    "NULL"
+  }
   logger.debug {
-    "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to ${valueOf(expected)} (${typeOf(expected)}) at $path"
+    "comparing type of [$actual] ($kotlinClass, ${actual?.javaClass?.simpleName}) to " +
+      "[$expected] (${expected?.javaClass?.simpleName}) at $path"
   }
   return if (expected is Number && actual is Number ||
     expected is Boolean && actual is Boolean ||
@@ -232,6 +249,8 @@ fun <M : Mismatch> matchType(
     emptyList()
   } else if (expected is String && actual is String ||
     expected is List<*> && actual is List<*> ||
+    expected is Array<*> && actual is Array<*> ||
+    expected is ByteArray && actual is ByteArray ||
     expected is JsonValue.Array && actual is JsonValue.Array ||
     expected is Map<*, *> && actual is Map<*, *> ||
     expected is JsonValue.Object && actual is JsonValue.Object) {
@@ -241,13 +260,16 @@ fun <M : Mismatch> matchType(
       val empty = when (actual) {
         is String -> actual.isEmpty()
         is List<*> -> actual.isEmpty()
+        is Array<*> -> actual.isEmpty()
+        is ByteArray -> actual.isEmpty()
         is Map<*, *> -> actual.isEmpty()
         is JsonValue.Array -> actual.size == 0
         is JsonValue.Object -> actual.size == 0
         else -> false
       }
       if (empty) {
-        listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to not be empty", path))
+        listOf(mismatchFactory.create(expected, actual,
+          "Expected ${valueOf(actual)} (${typeOf(actual)}) to not be empty", path))
       } else {
         emptyList()
       }
@@ -256,12 +278,28 @@ fun <M : Mismatch> matchType(
     ((expected.isBoolean && actual.isBoolean) ||
       (expected.isNumber && actual.isNumber) ||
       (expected.isString && actual.isString))) {
+    if (allowEmpty) {
       emptyList()
+    } else {
+      val empty = when (actual) {
+        is JsonValue.Array -> actual.size == 0
+        is JsonValue.Object -> actual.size == 0
+        is JsonValue.StringValue -> actual.value.chars.isEmpty()
+        else -> false
+      }
+      if (empty) {
+        listOf(mismatchFactory.create(expected, actual,
+          "Expected ${valueOf(actual)} (${typeOf(actual)}) to not be empty", path))
+      } else {
+        emptyList()
+      }
+    }
   } else if (expected == null || expected is JsonValue.Null) {
     if (actual == null || actual is JsonValue.Null) {
       emptyList()
     } else {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
+      listOf(mismatchFactory.create(expected, actual,
+        "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
     }
   } else {
     listOf(mismatchFactory.create(expected, actual,
@@ -270,7 +308,7 @@ fun <M : Mismatch> matchType(
   }
 }
 
-@Suppress("ReturnCount")
+@Suppress("ReturnCount", "ComplexMethod", "ComplexCondition")
 fun <M : Mismatch> matchNumber(
   numberType: NumberTypeMatcher.NumberType,
   path: List<String>,
@@ -279,7 +317,8 @@ fun <M : Mismatch> matchNumber(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   if (expected == null && actual != null) {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
   }
   when (numberType) {
     NumberTypeMatcher.NumberType.NUMBER -> {
@@ -320,6 +359,8 @@ fun matchDecimal(actual: Any?): Boolean {
       bigDecimal == BigDecimal.ZERO || bigDecimal.scale() > 0
     }
     actual is JsonValue.Integer -> decimalRegex.matches(actual.toString())
+    actual is String -> decimalRegex.matches(actual)
+    actual is JsonValue.StringValue -> decimalRegex.matches(actual.toString())
     actual is Attr -> decimalRegex.matches(actual.nodeValue)
     else -> false
   }
@@ -335,6 +376,8 @@ fun matchInteger(actual: Any?): Boolean {
     actual is JsonValue.Integer -> true
     actual is BigDecimal && actual.scale() == 0 -> true
     actual is JsonValue.Decimal -> integerRegex.matches(actual.toString())
+    actual is String -> integerRegex.matches(actual)
+    actual is JsonValue.StringValue -> integerRegex.matches(actual.toString())
     actual is Attr -> integerRegex.matches(actual.nodeValue)
     else -> false
   }
@@ -342,6 +385,7 @@ fun matchInteger(actual: Any?): Boolean {
   return result
 }
 
+@Suppress("ComplexMethod")
 fun <M : Mismatch> matchBoolean(
   path: List<String>,
   expected: Any?,
@@ -349,7 +393,8 @@ fun <M : Mismatch> matchBoolean(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   if (expected == null && actual != null) {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
   }
   logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to match a boolean at $path" }
   return when {
@@ -381,7 +426,7 @@ fun <M : Mismatch> matchDate(
       emptyList<M>()
     } catch (e: ParseException) {
       listOf(mismatchFactory.create(expected, actual,
-        "Expected ${valueOf(actual)} to match a date of '$pattern': " +
+        "Expected ${valueOf(actual)} to match a date pattern of '$pattern': " +
           "${e.message}", path))
     }
   }
@@ -405,7 +450,7 @@ fun <M : Mismatch> matchTime(
       emptyList<M>()
     } catch (e: ParseException) {
       listOf(mismatchFactory.create(expected, actual,
-        "Expected ${valueOf(actual)} to match a time of '$pattern': " +
+        "Expected ${valueOf(actual)} to match a time pattern of '$pattern': " +
           "${e.message}", path))
     }
   }
@@ -447,7 +492,7 @@ fun <M : Mismatch> matchDateTime(
         emptyList<M>()
       } catch (e: ParseException) {
         listOf(mismatchFactory.create(expected, actual,
-                "Expected ${valueOf(actual)} to match a datetime of '$pattern': " +
+                "Expected ${valueOf(actual)} to match a datetime pattern of '$pattern': " +
                         "${e.message}", path))
       }
     }
@@ -467,21 +512,24 @@ fun <M : Mismatch> matchMinType(
     when (actual) {
       is List<*> -> {
         if (actual.size < min) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have minimum size of $min", path))
         } else {
           emptyList()
         }
       }
       is JsonValue.Array -> {
         if (actual.size < min) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have minimum size of $min", path))
         } else {
           emptyList()
         }
       }
       is Element -> {
         if (actual.childNodes.length < min) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+            "(size ${actual.childNodes.length}) to have minimum size of $min", path))
         } else {
           emptyList()
         }
@@ -506,21 +554,24 @@ fun <M : Mismatch> matchMaxType(
     when (actual) {
       is List<*> -> {
         if (actual.size > max) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have maximum size of $max", path))
         } else {
           emptyList()
         }
       }
       is JsonValue.Array -> {
         if (actual.size > max) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+            " to have maximum size of $max", path))
         } else {
           emptyList()
         }
       }
       is Element -> {
         if (actual.childNodes.length > max) {
-          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+          listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+            "(size ${actual.childNodes.length}) to have maximum size of $max", path))
         } else {
           emptyList()
         }
@@ -577,19 +628,22 @@ fun <M : Mismatch> matchMinEqualsIgnoreOrder(
   logger.debug { "comparing ${valueOf(actual)} with minimum $min at $path" }
   return if (actual is List<*>) {
     if (actual.size < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have minimum size of $min", path))
     } else {
       emptyList()
     }
   } else if (actual is JsonValue.Array) {
     if (actual.size() < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have minimum size of $min", path))
     } else {
       emptyList()
     }
   } else if (actual is Element) {
     if (actual.childNodes.length < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+        "(size ${actual.childNodes.length}) to have minimum size of $min", path))
     } else {
       emptyList()
     }
@@ -608,19 +662,22 @@ fun <M : Mismatch> matchMaxEqualsIgnoreOrder(
   logger.debug { "comparing ${valueOf(actual)} with maximum $max at $path" }
   return if (actual is List<*>) {
     if (actual.size > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have maximum size of $max", path))
     } else {
       emptyList()
     }
   } else if (actual is JsonValue.Array) {
     if (actual.size() > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} (size ${actual.size})" +
+        " to have maximum size of $max", path))
     } else {
       emptyList()
     }
   } else if (actual is Element) {
     if (actual.childNodes.length > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} " +
+        "(size ${actual.childNodes.length}) to have maximum size of $max", path))
     } else {
       emptyList()
     }
@@ -635,13 +692,14 @@ fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: 
   return if (matches) {
     emptyList()
   } else {
-    listOf(mismatchFactory.create(null, actual, "Expected ${valueOf(actual)} to be null", path))
+    listOf(mismatchFactory.create(null, actual,
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a null value", path))
   }
 }
 
 private val tika = TikaConfig()
 
-fun <M : Mismatch> matchHeaderWithParameters(
+fun <M : Mismatch> matchContentType(
   path: List<String>,
   contentType: ContentType,
   actual: Any?,
@@ -651,6 +709,14 @@ fun <M : Mismatch> matchHeaderWithParameters(
     is ByteArray -> actual
     else -> actual.toString().toByteArray(contentType.asCharset())
   }
+
+  val slice = if (binaryData.size > 16) {
+    binaryData.copyOf(16)
+  } else {
+    binaryData
+  }
+  logger.debug { "matchContentType: $path, $contentType, ${binaryData.size} bytes starting with ${Hex.encodeHexString(slice)}...)" }
+
   val metadata = Metadata()
   val stream = TikaInputStream.get(binaryData)
   var detectedContentType = stream.use { stream ->
@@ -704,6 +770,7 @@ fun matchStatusCode(
   }
 }
 
+@Suppress("SwallowedException")
 fun <M : Mismatch> matchSemver(
   path: List<String>,
   expected: Any?,
@@ -731,7 +798,7 @@ fun <M : Mismatch> matchSemver(
     emptyList()
   } else {
     listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a semantic version", path))
+      "${valueOf(actual)} is not a valid semantic version", path))
   }
 }
 

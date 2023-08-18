@@ -10,6 +10,7 @@ import java.util.regex.Pattern
 /**
  * Pact HTTP Response builder DSL that supports V4 formatted Pact files
  */
+@Suppress("TooManyFunctions")
 open class HttpResponseBuilder(private val response: HttpResponse): HttpPartBuilder(response) {
   /**
    * Terminate the builder and return the response object

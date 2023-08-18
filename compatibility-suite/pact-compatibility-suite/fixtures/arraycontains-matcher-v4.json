@@ -1,0 +1,78 @@
+{
+  "body": {
+    "$.actions": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "arrayContains",
+          "variants": [
+            {
+              "generators": {},
+              "index": 0,
+              "rules": {
+                "$.name": {
+                  "combine": "AND",
+                  "matchers": [
+                    {
+                      "match": "regex",
+                      "regex": "add\\-item"
+                    }
+                  ]
+                },
+                "$.method": {
+                  "combine": "AND",
+                  "matchers": [
+                    {
+                      "match": "regex",
+                      "regex": "POST"
+                    }
+                  ]
+                },
+                "$.*": {
+                  "combine": "AND",
+                  "matchers": [
+                    {
+                      "match": "type"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "generators": { },
+              "index": 1,
+              "rules": {
+                "$.name": {
+                  "combine": "AND",
+                  "matchers": [
+                    {
+                      "match": "regex",
+                      "regex": "delete\\-item"
+                    }
+                  ]
+                },
+                "$.method": {
+                  "combine": "AND",
+                  "matchers": [
+                    {
+                      "match": "regex",
+                      "regex": "DELETE"
+                    }
+                  ]
+                },
+                "$.*": {
+                  "combine": "AND",
+                  "matchers": [
+                    {
+                      "match": "type"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

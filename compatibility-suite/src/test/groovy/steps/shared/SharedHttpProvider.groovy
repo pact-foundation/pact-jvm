@@ -1,4 +1,4 @@
-package steps.v1
+package steps.shared
 
 import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.KTorMockServer
@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.DefaultPactWriter
+import au.com.dius.pact.core.model.HeaderParser
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
@@ -27,40 +28,29 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.ProviderVerifier
-import au.com.dius.pact.provider.VerificationResult
 import groovy.json.JsonSlurper
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.After
 import io.cucumber.java.Scenario
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
-import io.cucumber.java.en.When
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.io.entity.StringEntity
 
-@SuppressWarnings('ThrowRuntimeException')
-class HttpProvider {
+import static io.ktor.http.HttpHeaderValueParserKt.parseHeaderValue
+import static steps.shared.SharedSteps.configureBody
+import static steps.shared.SharedSteps.determineContentType
+
+@SuppressWarnings(['ThrowRuntimeException', 'AbcMetric'])
+class SharedHttpProvider {
   CompatibilitySuiteWorld world
+  VerificationData verificationData
   BaseMockServer mockProvider
-  ProviderInfo providerInfo
-  ProviderVerifier verifier
-  List<VerificationResult> verificationResults
   List<BaseMockServer> mockBrokers = []
-  Map<String, String> verificationProperties = [:]
-  List providerStateParams = []
 
-  HttpProvider(CompatibilitySuiteWorld world) {
+  SharedHttpProvider(CompatibilitySuiteWorld world, VerificationData verificationData) {
+    this.verificationData = verificationData
     this.world = world
-  }
-
-  void providerStateCallback(ProviderState state, String isSetup) {
-    providerStateParams << [state, isSetup]
-  }
-
-  void failingProviderStateCallback(ProviderState state, String isSetup) {
-    providerStateParams << [state, isSetup]
-    throw new RuntimeException('failingProviderStateCallback has failed')
   }
 
   @After
@@ -70,34 +60,76 @@ class HttpProvider {
     mockBrokers.each { it.stop() }
   }
 
-  @Given('a provider is started that returns the response from interaction \\{{int}}')
+  @Given('a provider is started that returns the response from interaction {int}')
   void a_provider_is_started_that_returns_the_response_from_interaction(Integer num) {
     Pact pact = new RequestResponsePact(new Provider('p'),
-      new Consumer('v1-compatibility-suite-c'), [world.interactions[num - 1] ])
+      new Consumer('v1-compatibility-suite-c'), [ world.interactions[num - 1].copy() ])
     mockProvider = new KTorMockServer(pact, new MockProviderConfig())
     mockProvider.start()
-    providerInfo = new ProviderInfo('p')
-    providerInfo.port = mockProvider.port
-    providerInfo.stateChangeTeardown = true
+    verificationData.providerInfo = new ProviderInfo('p')
+    verificationData.providerInfo.port = mockProvider.port
+    verificationData.providerInfo.stateChangeTeardown = true
   }
 
-  @Given('a Pact file for interaction \\{{int}} is to be verified')
+  @Given('a provider is started that returns the response from interaction {int}, with the following changes:')
+  void a_provider_is_started_that_returns_the_response_from_interaction_with_the_following_changes(
+    Integer num,
+    DataTable dataTable
+  ) {
+    def interaction = world.interactions[num - 1].copy()
+    def entry = dataTable.entries().first()
+    if (entry['status']) {
+      interaction.response.status = entry['status'].toInteger()
+    }
+
+    if (entry['headers']) {
+      entry['headers'].split(',').collect {
+        it.trim()[1..-2].split(':')
+      }.collect {
+        [it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) }]
+      }.inject(interaction.response.headers) { headers, e ->
+        if (headers.containsKey(e[0])) {
+          headers[e[0]] += e[1].flatten()
+        } else {
+          headers[e[0]] = e[1].flatten()
+        }
+        headers
+      }
+    }
+
+    if (entry['body']) {
+      def part = configureBody(entry['body'], determineContentType(entry['body'],
+        interaction.response.contentTypeHeader()))
+      interaction.response.body = part.body
+      interaction.response.headers.putAll(part.headers)
+    }
+
+    Pact pact = new RequestResponsePact(new Provider('p'),
+      new Consumer('v1-compatibility-suite-c'), [ interaction ])
+    mockProvider = new KTorMockServer(pact, new MockProviderConfig())
+    mockProvider.start()
+    verificationData.providerInfo = new ProviderInfo('p')
+    verificationData.providerInfo.port = mockProvider.port
+    verificationData.providerInfo.stateChangeTeardown = true
+  }
+
+  @Given('a Pact file for interaction {int} is to be verified')
   void a_pact_file_for_interaction_is_to_be_verified(Integer num) {
     Pact pact = new RequestResponsePact(new Provider('p'),
-      new Consumer('v1-compatibility-suite-c'), [world.interactions[num - 1] ])
+      new Consumer('v1-compatibility-suite-c'), [ world.interactions[num - 1].copy() ])
     StringWriter writer = new StringWriter()
     writer.withPrintWriter {
       DefaultPactWriter.INSTANCE.writePact(pact, it, PactSpecVersion.V1)
     }
     ConsumerInfo consumerInfo = new ConsumerInfo('c')
     consumerInfo.pactSource = new StringSource(writer.toString())
-    if (providerInfo.stateChangeRequestFilter) {
-      consumerInfo.stateChange = providerInfo.stateChangeRequestFilter
+    if (verificationData.providerInfo.stateChangeRequestFilter) {
+      consumerInfo.stateChange = verificationData.providerInfo.stateChangeRequestFilter
     }
-    providerInfo.consumers << consumerInfo
+    verificationData.providerInfo.consumers << consumerInfo
   }
 
-  @Given('a Pact file for interaction \\{{int}} is to be verified with a provider state {string} defined')
+  @Given('a Pact file for interaction {int} is to be verified with a provider state {string} defined')
   void a_pact_file_for_interaction_is_to_be_verified_with_a_provider_state_defined(Integer num, String providerState) {
     def interaction = world.interactions[num - 1].copy()
     interaction.providerStates << new ProviderState(providerState)
@@ -109,24 +141,10 @@ class HttpProvider {
     }
     ConsumerInfo consumerInfo = new ConsumerInfo('c')
     consumerInfo.pactSource = new StringSource(writer.toString())
-    if (providerInfo.stateChangeRequestFilter) {
-      consumerInfo.stateChange = providerInfo.stateChangeRequestFilter
+    if (verificationData.providerInfo.stateChangeRequestFilter) {
+      consumerInfo.stateChange = verificationData.providerInfo.stateChangeRequestFilter
     }
-    providerInfo.consumers << consumerInfo
-  }
-
-  @When('the verification is run')
-  void the_verification_is_run() {
-    verifier = new ProviderVerifier()
-    verifier.projectHasProperty = { name -> verificationProperties.containsKey(name) }
-    verifier.projectGetProperty = { name -> verificationProperties[name] }
-    verifier.reporters = [ new StubVerificationReporter() ]
-    verificationResults = verifier.verifyProvider(providerInfo)
-  }
-
-  @Then('the verification will be successful')
-  void the_verification_will_be_successful() {
-    assert verificationResults.inject(true) { acc, result -> acc && result instanceof VerificationResult.Ok }
+    verificationData.providerInfo.consumers << consumerInfo
   }
 
   @Given('a provider is started that returns the responses from interactions {string}')
@@ -139,23 +157,11 @@ class HttpProvider {
       interactions)
     mockProvider = new KTorMockServer(pact, new MockProviderConfig())
     mockProvider.start()
-    providerInfo = new ProviderInfo('p')
-    providerInfo.port = mockProvider.port
+    verificationData.providerInfo = new ProviderInfo('p')
+    verificationData.providerInfo.port = mockProvider.port
   }
 
-  @Then('the verification will NOT be successful')
-  void the_verification_will_not_be_successful() {
-    assert verificationResults.any { it instanceof VerificationResult.Failed }
-  }
-
-  @Then('the verification results will contain a {string} error')
-  void the_verification_results_will_contain_a_error(String error) {
-    assert verificationResults.any {
-      it instanceof VerificationResult.Failed && it.description == error
-    }
-  }
-
-  @Given('a Pact file for interaction \\{{int}} is to be verified from a Pact broker')
+  @Given('a Pact file for interaction {int} is to be verified from a Pact broker')
   void a_pact_file_for_interaction_is_to_be_verified_from_a_pact_broker(Integer num) {
     Pact pact = new RequestResponsePact(new Provider('p'),
       new Consumer("c_$num"), [ world.interactions[num - 1] ])
@@ -198,7 +204,7 @@ class HttpProvider {
     mockBroker.start()
     mockBrokers << mockBroker
 
-    providerInfo.hasPactsFromPactBrokerWithSelectorsV2("http://127.0.0.1:${mockBroker.port}", [])
+    verificationData.providerInfo.hasPactsFromPactBrokerWithSelectorsV2("http://127.0.0.1:${mockBroker.port}", [])
   }
 
   @Then('a verification result will NOT be published back')
@@ -210,7 +216,7 @@ class HttpProvider {
 
   @Given('publishing of verification results is enabled')
   void publishing_of_verification_results_is_enabled() {
-    verificationProperties['pact.verifier.publishResults'] = 'true'
+    verificationData.verificationProperties['pact.verifier.publishResults'] = 'true'
   }
 
   @Then('a successful verification result will be published back for interaction \\{{int}}')
@@ -233,49 +239,9 @@ class HttpProvider {
     assert json.success == false
   }
 
-  @Given('a provider state callback is configured')
-  void a_provider_state_callback_is_configured() {
-    providerInfo.stateChangeRequestFilter = this.&providerStateCallback
-  }
-
-  @Given('a provider state callback is configured, but will return a failure')
-  void a_provider_state_callback_is_configured_but_will_return_a_failure() {
-    providerInfo.stateChangeRequestFilter = this.&failingProviderStateCallback
-  }
-
-  @Then('the provider state callback will be called before the verification is run')
-  void the_provider_state_callback_will_be_called_before_the_verification_is_run() {
-    assert !providerStateParams.findAll { p -> p[1] == 'setup'  }.empty
-  }
-
-  @Then('the provider state callback will receive a setup call with {string} as the provider state parameter')
-  void the_provider_state_callback_will_receive_a_setup_call_with_as_the_provider_state_parameter(String state) {
-    assert !providerStateParams.findAll { p -> p[0].name == state && p[1] == 'setup' }.empty
-  }
-
-  @Then('the provider state callback will be called after the verification is run')
-  void the_provider_state_callback_will_be_called_after_the_verification_is_run() {
-    assert !providerStateParams.findAll { p -> p[1] == 'teardown' }.empty
-  }
-
-  @Then('the provider state callback will receive a teardown call {string} as the provider state parameter')
-  void the_provider_state_callback_will_receive_a_teardown_call_as_the_provider_state_parameter(String providerState) {
-    assert !providerStateParams.findAll { p -> p[0].name == providerState && p[1] == 'teardown' }.empty
-  }
-
-  @Then('the provider state callback will NOT receive a teardown call')
-  void the_provider_state_callback_will_not_receive_a_teardown_call() {
-    assert providerStateParams.findAll { p -> p[1] == 'teardown' }.empty
-  }
-
-  @Then('a warning will be displayed that there was no provider state callback configured for provider state {string}')
-  void a_warning_will_be_displayed_that_there_was_no_provider_state_callback_configured(String state) {
-    assert verifier.reporters.first().events.find { it.state == state }
-  }
-
   @Given('a request filter is configured to make the following changes:')
   void a_request_filter_is_configured_to_make_the_following_changes(DataTable dataTable) {
-    providerInfo.requestFilter = { ClassicHttpRequest request ->
+    verificationData.providerInfo.requestFilter = { ClassicHttpRequest request ->
       def entry = dataTable.entries().first()
       if (entry['path']) {
         request.path = entry['path']
@@ -283,11 +249,11 @@ class HttpProvider {
 
       if (entry['headers']) {
         entry['headers'].split(',').collect {
-          it.trim()[1..-2].split(':', 2)
-        }.collectEntries {
-          Map.entry(it[0].trim(), it[1].trim())
+          it.trim()[1..-2].split(':')
+        }.collect {
+          [it[0].trim(), it[1].trim()]
         }.each {
-          request.addHeader(it.key.toString(), it.value)
+          request.addHeader(it[0].toString(), it[1])
         }
       }
 

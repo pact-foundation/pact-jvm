@@ -1,10 +1,12 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.HttpRequest
+import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Result
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.util.Enumeration
 import javax.mail.BodyPart
 import javax.mail.Header
@@ -25,12 +27,43 @@ class MultipartMessageContentMatcher : ContentMatcher {
           null, "Expected a multipart body but was missing")))))
       expected.isEmpty() && actual.isEmpty() -> BodyMatchResult(null, emptyList())
       else -> {
-        val expectedMultipart = parseMultipart(expected.valueAsString(), expected.contentType.toString())
-        val actualMultipart = parseMultipart(actual.valueAsString(), actual.contentType.toString())
-        BodyMatchResult(null, compareHeaders(expectedMultipart, actualMultipart, context) +
-          compareContents(expectedMultipart, actualMultipart, context))
+        val expectedMultipart = MimeMultipart(ByteArrayDataSource(expected.orEmpty(), expected.contentType.toString()))
+        val actualMultipart = MimeMultipart(ByteArrayDataSource(actual.orEmpty(), actual.contentType.toString()))
+        BodyMatchResult(null, compareParts(expectedMultipart, actualMultipart, context))
       }
     }
+  }
+
+  private fun compareParts(
+    expectedMultipart: MimeMultipart,
+    actualMultipart: MimeMultipart,
+    context: MatchingContext
+  ): List<BodyItemMatchResult> {
+    val matchResults = mutableListOf<BodyItemMatchResult>()
+
+    logger.debug { "Comparing multiparts: expected has ${expectedMultipart.count} part(s), " +
+      "actual has ${actualMultipart.count} part(s)" }
+
+    if (expectedMultipart.count != actualMultipart.count) {
+      matchResults.add(BodyItemMatchResult("$", listOf(BodyMismatch(expectedMultipart.count, actualMultipart.count,
+        "Expected a multipart message with ${expectedMultipart.count} part(s), " +
+          "but received one with ${actualMultipart.count} part(s)"))))
+    }
+
+    for (i in 0 until expectedMultipart.count) {
+      val expectedPart = expectedMultipart.getBodyPart(i)
+      if (i < actualMultipart.count) {
+        val actualPart = actualMultipart.getBodyPart(i)
+        val path = "\$.$i"
+        val headerResult = compareHeaders(path, expectedPart, actualPart, context)
+        logger.debug { "Comparing part $i: header mismatches ${headerResult.size}" }
+        val bodyMismatches = compareContents(path, expectedPart, actualPart, context)
+        logger.debug { "Comparing part $i: content mismatches ${bodyMismatches.size}" }
+        matchResults.add(BodyItemMatchResult(path, headerResult + bodyMismatches))
+      }
+    }
+
+    return matchResults
   }
 
   override fun setupBodyFromConfig(
@@ -46,53 +79,54 @@ class MultipartMessageContentMatcher : ContentMatcher {
 
   @Suppress("UnusedPrivateMember")
   private fun compareContents(
+    path: String,
     expectedMultipart: BodyPart,
     actualMultipart: BodyPart,
     context: MatchingContext
-  ): List<BodyItemMatchResult> {
-    val expectedContents = expectedMultipart.content.toString().trim()
-    val actualContents = actualMultipart.content.toString().trim()
-    return when {
-      expectedContents.isEmpty() && actualContents.isEmpty() -> emptyList()
-      expectedContents.isNotEmpty() && actualContents.isNotEmpty() -> emptyList()
-      expectedContents.isEmpty() && actualContents.isNotEmpty() -> listOf(BodyItemMatchResult("$",
-        listOf(BodyMismatch(expectedContents, actualContents,
-        "Expected no contents, but received ${actualContents.toByteArray().size} bytes of content"))))
-      else -> listOf(BodyItemMatchResult("$", listOf(BodyMismatch(expectedContents,
-        actualContents, "Expected content with the multipart, but received no bytes of content"))))
+  ): List<BodyMismatch> {
+    val expected = bodyPartTpHttpPart(expectedMultipart)
+    val actual = bodyPartTpHttpPart(actualMultipart)
+    logger.debug { "Comparing multipart contents: ${expected.determineContentType()} -> ${actual.determineContentType()}" }
+    val result = Matching.matchBody(expected, actual, context)
+    return result.bodyResults.flatMap { matchResult ->
+      matchResult.result.map {
+        it.copy(path = path + it.path.removePrefix("$"))
+      }
     }
   }
 
+  private fun bodyPartTpHttpPart(multipart: BodyPart): IHttpPart {
+    return HttpRequest(headers = mutableMapOf("content-type" to listOf(multipart.contentType)),
+      body = OptionalBody.body(multipart.inputStream.readAllBytes(), ContentType(multipart.contentType)))
+  }
+
   private fun compareHeaders(
+    path: String,
     expectedMultipart: BodyPart,
     actualMultipart: BodyPart,
     context: MatchingContext
-  ): List<BodyItemMatchResult> {
-    val mismatches = mutableListOf<BodyItemMatchResult>()
+  ): List<BodyMismatch> {
+    val mismatches = mutableListOf<BodyMismatch>()
     (expectedMultipart.allHeaders as Enumeration<Header>).asSequence().forEach {
       val header = actualMultipart.getHeader(it.name)
       if (header != null) {
         val actualValue = header.joinToString(separator = ", ")
         if (actualValue != it.value) {
-          mismatches.add(BodyItemMatchResult(it.name, listOf(BodyMismatch(it.toString(), null,
-                  "Expected a multipart header '${it.name}' with value '${it.value}', but was '$actualValue'"))))
+          mismatches.add(BodyMismatch(it.toString(), null,
+            "Expected a multipart header '${it.name}' with value '${it.value}', but was '$actualValue'",
+            path + "." + it.name))
         }
       } else {
         if (it.name.equals("Content-Type", ignoreCase = true)) {
           logger.debug { "Ignoring missing Content-Type header" }
         } else {
-          mismatches.add(BodyItemMatchResult(it.name, listOf(BodyMismatch(it.toString(), null,
-            "Expected a multipart header '${it.name}', but was missing"))))
+          mismatches.add(BodyMismatch(it.toString(), null,
+            "Expected a multipart header '${it.name}', but was missing", path + "." + it.name))
         }
       }
     }
 
     return mismatches
-  }
-
-  private fun parseMultipart(body: String, contentType: String): BodyPart {
-    val multipart = MimeMultipart(ByteArrayDataSource(body, contentType))
-    return multipart.getBodyPart(0)
   }
 
   companion object : KLogging()

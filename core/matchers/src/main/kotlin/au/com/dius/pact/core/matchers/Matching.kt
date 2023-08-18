@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.constructPath
@@ -16,8 +17,10 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
+import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.PluginConfiguration
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
+import org.apache.commons.codec.binary.Hex
 
 data class MatchingContext @JvmOverloads constructor(
   val matchers: MatchingRuleCategory,
@@ -81,7 +84,7 @@ data class MatchingContext @JvmOverloads constructor(
 
     val result = mutableListOf<BodyItemMatchResult>()
 
-    if (!directMatcherDefined(path, listOf(EachValueMatcher::class.java, ValuesMatcher::class.java))) {
+    if (!directMatcherDefined(path, listOf(EachKeyMatcher::class.java, EachValueMatcher::class.java, ValuesMatcher::class.java))) {
       if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
         result.add(
           BodyItemMatchResult(
@@ -190,7 +193,7 @@ object Matching : KLogging() {
     return e.entries.fold(listOf()) { list, values ->
       if (a.containsKey(values.key)) {
         val actual = a[values.key].orEmpty()
-        list + HeaderMatchResult(values.key, values.value.mapIndexed { index, headerValue ->
+        list + HeaderMatchResult(values.key, values.value.padTo(actual.size).mapIndexed { index, headerValue ->
           HeaderMatcher.compareHeader(values.key, headerValue, actual.getOrElse(index) { "" }, context)
         }.filterNotNull())
       } else {
@@ -211,7 +214,7 @@ object Matching : KLogging() {
     else MethodMismatch(expected, actual)
 
   @Suppress("ComplexMethod")
-  fun matchBody(expected: HttpPart, actual: HttpPart, context: MatchingContext): BodyMatchResult {
+  fun matchBody(expected: IHttpPart, actual: IHttpPart, context: MatchingContext): BodyMatchResult {
     logger.debug { "matchBody: context=$context" }
 
     val expectedContentType = expected.determineContentType()
@@ -220,10 +223,13 @@ object Matching : KLogging() {
 
     return when {
       rootMatcher != null && rootMatcher.canMatch(expectedContentType) -> BodyMatchResult(null,
-        listOf(BodyItemMatchResult("$", domatch(rootMatcher, listOf("$"), expected.body.unwrap(),
-          actual.body.unwrap(), BodyMismatchFactory))))
+        listOf(BodyItemMatchResult("$", domatch(rootMatcher, listOf("$"), expected.body.orEmpty(),
+          actual.body.orEmpty(), BodyMismatchFactory))))
       expectedContentType.getBaseType() == actualContentType.getBaseType() -> {
-        val matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
+        var matcher = MatchingConfig.lookupContentMatcher(actualContentType.getBaseType())
+        if (matcher == null) {
+          matcher = MatchingConfig.lookupContentMatcher(actualContentType.getSupertype().toString())
+        }
         if (matcher != null) {
           logger.debug { "Found a matcher for $actualContentType -> $matcher" }
           matcher.matchBody(expected.body, actual.body, context)
@@ -253,17 +259,33 @@ object Matching : KLogging() {
     }
   }
 
-  fun matchBodyContents(expected: HttpPart, actual: HttpPart): BodyMatchResult {
+  fun matchBodyContents(expected: IHttpPart, actual: IHttpPart): BodyMatchResult {
     val matcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
+    val contentType = expected.determineContentType()
     return when {
-      matcher != null && matcher.canMatch(expected.determineContentType()) ->
+      matcher != null && matcher.canMatch(contentType) ->
         BodyMatchResult(null, listOf(BodyItemMatchResult("$",
           domatch(matcher, listOf("$"), expected.body.unwrap(), actual.body.unwrap(), BodyMismatchFactory))))
       expected.body.unwrap().contentEquals(actual.body.unwrap()) -> BodyMatchResult(null, emptyList())
-      else -> BodyMatchResult(null, listOf(BodyItemMatchResult("$",
-        listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
-        "Actual body '${actual.body.valueAsString()}' is not equal to the expected body " +
-          "'${expected.body.valueAsString()}'")))))
+      else -> {
+        val actualContentType = actual.determineContentType()
+        val actualBody = actual.body.unwrap()
+        val actualDisplay = if (actualContentType.isBinaryType()) {
+          "$actualContentType, ${actualBody.size} bytes, starting with ${Hex.encodeHexString(actual.body.slice(32))}"
+        } else {
+          "$actualContentType, ${actualBody.size} bytes, starting with ${actual.body.slice(32).toString(actual.body.contentType.asCharset())}"
+        }
+        val expectedBody = expected.body.unwrap()
+        val expectedDisplay = if (contentType.isBinaryType()) {
+          "$contentType, ${expectedBody.size} bytes, starting with ${Hex.encodeHexString(expected.body.slice(32))}"
+        } else {
+          "$contentType, ${expectedBody.size} bytes, starting with ${expected.body.slice(32).toString(expected.body.contentType.asCharset())}"
+        }
+        BodyMatchResult(null, listOf(BodyItemMatchResult("$",
+          listOf(BodyMismatch(
+            expectedBody, actualBody,
+            "Actual body [$actualDisplay] is not equal to the expected body [$expectedDisplay]")))))
+      }
     }
   }
 

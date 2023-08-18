@@ -13,6 +13,7 @@ repositories {
 }
 
 version = '4.6.2'
+version = '4.5.9'
 
 java {
     targetCompatibility = '17'
@@ -49,6 +50,7 @@ dependencies {
         implementation 'io.netty:netty-handler:4.1.86.Final'
         implementation 'org.apache.groovy:groovy:4.0.11'
         implementation 'org.apache.groovy:groovy-json:4.0.11'
+        implementation 'org.apache.groovy:groovy-xml:4.0.11'
         implementation 'io.pact.plugin.driver:core:0.4.0'
         implementation 'commons-codec:commons-codec:1.15'
         implementation 'io.github.microutils:kotlin-logging-jvm:3.0.4'
@@ -96,7 +98,7 @@ test {
 tasks.withType(CodeNarc).configureEach { codeNarcTask ->
     reports {
         console {
-            enabled = true
+            required = true
         }
     }
 }

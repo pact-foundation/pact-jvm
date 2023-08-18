@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.support
 
 import au.com.dius.pact.core.support.Utils.lookupVersion
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.message.BasicNameValuePair

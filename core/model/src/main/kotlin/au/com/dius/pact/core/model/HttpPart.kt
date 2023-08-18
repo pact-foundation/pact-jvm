@@ -6,7 +6,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.nio.charset.Charset
 import java.util.Base64
 
@@ -70,7 +70,7 @@ abstract class HttpPart: IHttpPart {
     }
   }
 
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))

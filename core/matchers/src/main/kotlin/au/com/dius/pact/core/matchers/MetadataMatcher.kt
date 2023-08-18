@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.matchers
 
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 object MetadataMatcher : KLogging() {
 
@@ -12,14 +12,16 @@ object MetadataMatcher : KLogging() {
     logger.debug { "Comparing metadata key '$key': '$actual' (${actual?.javaClass?.simpleName}) to '$expected'" +
       " (${expected?.javaClass?.simpleName})" }
 
+    val path = listOf(key)
     return when {
-      context.matcherDefined(listOf(key)) -> {
-        val matchResult = Matchers.domatch(context, listOf(key), expected, actual, MetadataMismatchFactory)
+      context.matcherDefined(path) -> {
+        val matchResult = Matchers.domatch(context, path, expected, actual, MetadataMismatchFactory)
         return matchResult.fold(null as MetadataMismatch?) { acc, item -> acc?.merge(item) ?: item }
       }
-      expected == actual -> null
-      else -> MetadataMismatch(key, expected, actual, "Expected metadata key '$key' to have value " +
-        "'$expected' (${expected?.javaClass?.simpleName}) but was '$actual' (${actual?.javaClass?.simpleName})")
+      else -> {
+        val matchResult = matchEquality(path, expected, actual, MetadataMismatchFactory)
+        return matchResult.fold(null as MetadataMismatch?) { acc, item -> acc?.merge(item) ?: item }
+      }
     }
   }
 }

@@ -48,10 +48,10 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch                                                                 | Specification | JDK        | Kotlin Version | Latest Version | Notes |
 |------------------------------------------------------------------------|---------------|------------|----------------|----------------|-------|
-| [4.6.x](https://github.com/DiUS/pact-jvm/blob/v4.6.x/README.md)        | V4 + plugins  | 17+        | 1.8.21         | 4.6.0          |       |
-| [4.5.x](https://github.com/DiUS/pact-jvm/blob/v4.5.x/README.md) master | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.5          |       |
+| [4.6.x](https://github.com/DiUS/pact-jvm/blob/v4.6.x/README.md)        | V4 + plugins  | 17+        | 1.8.21         | 4.6.1          |       |
+| [4.5.x](https://github.com/DiUS/pact-jvm/blob/v4.5.x/README.md) master | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.7          |       |
 | [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md)        | V4 + plugins  | 11+        | 1.6.21         | 4.4.9          |       |
-| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12       | 1.3.72         | 4.1.41         |       |
+| [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12       | 1.3.72         | 4.1.42         |       |
 
 **Notes:**
 * **1:** Spring6 support library requires JDK 17+. The rest of Pact-JVM libs require 11+.

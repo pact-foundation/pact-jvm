@@ -16,7 +16,7 @@ import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.KafkaSchemaRegistryWireFormatter
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
 
@@ -83,7 +83,7 @@ class Message @JvmOverloads constructor(
   description: String,
   providerStates: List<ProviderState> = listOf(),
   var contents: OptionalBody = OptionalBody.missing(),
-  override val matchingRules: MatchingRules = MatchingRulesImpl(),
+  override var matchingRules: MatchingRules = MatchingRulesImpl(),
   override var generators: Generators = Generators(),
   override var metadata: MutableMap<String, Any?> = mutableMapOf(),
   interactionId: String? = null
@@ -107,7 +107,7 @@ class Message @JvmOverloads constructor(
     get() = emptyMap()
 
   @Suppress("NestedBlockDepth")
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any?> {
     val map: MutableMap<String, Any?> = mutableMapOf(
       "description" to description,
       "metaData" to metadata
@@ -223,7 +223,7 @@ class Message @JvmOverloads constructor(
     return this
   }
 
-  override fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))
@@ -231,14 +231,18 @@ class Message @JvmOverloads constructor(
   }
 
   override fun asV4Interaction(): V4Interaction {
-    return V4Interaction.AsynchronousMessage("", description, MessageContents(contents, metadata,
-      matchingRules.rename("body", "content"), generators),
-      interactionId, providerStates).withGeneratedKey()
+    return asAsynchronousMessage().withGeneratedKey()
   }
 
   override fun isAsynchronousMessage() = true
 
   override fun asMessage() = this
+
+  override fun asAsynchronousMessage(): V4Interaction.AsynchronousMessage {
+    return V4Interaction.AsynchronousMessage("", description, MessageContents(contents, metadata.toMutableMap(),
+      matchingRules.rename("body", "content"), generators),
+      interactionId, providerStates)
+  }
 
   companion object : KLogging() {
 

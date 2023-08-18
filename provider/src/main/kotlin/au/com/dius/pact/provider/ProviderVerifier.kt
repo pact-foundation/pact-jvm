@@ -53,7 +53,7 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import io.pact.plugins.jvm.core.PluginConfiguration
 import io.pact.plugins.jvm.core.PluginManager
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
@@ -678,6 +678,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         )
       }
     } catch (e: Exception) {
+      logger.error(e) { "Verification factory method failed with an exception" }
       failures[interactionMessage] = e
       emitEvent(Event.VerificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)))
       val errors = listOf(

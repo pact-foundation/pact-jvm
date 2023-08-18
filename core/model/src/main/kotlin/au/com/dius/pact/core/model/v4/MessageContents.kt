@@ -10,13 +10,13 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 /**
  * Contents of a message interaction
  */
 data class MessageContents @JvmOverloads constructor(
-  val contents: OptionalBody = OptionalBody.missing(),
+  var contents: OptionalBody = OptionalBody.missing(),
   val metadata: MutableMap<String, Any?> = mutableMapOf(),
   val matchingRules: MatchingRules = MatchingRulesImpl(),
   val generators: Generators = Generators(),
@@ -24,7 +24,7 @@ data class MessageContents @JvmOverloads constructor(
 ) {
   fun getContentType() = contents.contentType.or(Message.contentType(metadata))
 
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *> {
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
     val map = mutableMapOf(
       "contents" to contents.toV4Format()
     )
@@ -53,7 +53,9 @@ data class MessageContents @JvmOverloads constructor(
     return generators + matchingRuleGenerators
   }
 
-  companion object : KLogging() {
+  companion object {
+
+    private val logger = KotlinLogging.logger {}
     fun fromJson(json: JsonValue): MessageContents {
       val metadata = if (json.has("metadata")) {
         val jsonValue = json["metadata"]

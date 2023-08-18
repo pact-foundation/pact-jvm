@@ -10,7 +10,7 @@ import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 
 object JsonContentMatcher : ContentMatcher, KLogging() {
 
@@ -60,9 +60,9 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
 
   private fun typeOf(value: Any?) = when {
     value is Map<*, *> -> "Map"
-    value is JsonValue.Object -> "Map"
+    value is JsonValue.Object -> "Object"
     value is List<*> -> "List"
-    value is JsonValue.Array -> "List"
+    value is JsonValue.Array -> "Array"
     value is JsonValue.Null -> "Null"
     value is JsonValue -> value.name
     value == null -> "Null"
@@ -83,8 +83,9 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
       expected is JsonValue.Object && actual !is JsonValue.Object ||
         expected is JsonValue.Array && actual !is JsonValue.Array ->
         listOf(BodyItemMatchResult(constructPath(path),
-          listOf(BodyMismatch(expected, actual, "Type mismatch: Expected ${typeOf(expected)} " +
-          "${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}", constructPath(path),
+          listOf(BodyMismatch(expected, actual, "Type mismatch: Expected " +
+            "${valueOf(actual)} (${typeOf(actual)}) to be the same type as ${valueOf(expected)} (${typeOf(expected)})",
+            constructPath(path),
           generateJsonDiff(expected, actual)))))
       else -> compareValues(path, expected, actual, context)
     }
@@ -144,9 +145,10 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
       val expectedEntries = expectedValues.entries
       val actualEntries = actualValues.entries
       if (context.matcherDefined(path)) {
+        logger.debug { "compareMaps: matcher defined for path $path" }
         for (matcher in context.selectBestMatcher(path).rules) {
           result.addAll(Matchers.compareMaps(path, matcher, expectedEntries, actualEntries, context, generateDiff) {
-            p, expected, actual -> compare(p, expected ?: JsonValue.Null, actual ?: JsonValue.Null, context)
+            p, expected, actual, ctx -> compare(p, expected ?: JsonValue.Null, actual ?: JsonValue.Null, ctx)
           })
         }
       } else {
@@ -178,8 +180,8 @@ object JsonContentMatcher : ContentMatcher, KLogging() {
         listOf(BodyItemMatchResult(constructPath(path), emptyList()))
       } else {
         listOf(BodyItemMatchResult(constructPath(path),
-          listOf(BodyMismatch(expected, actual, "Expected ${valueOf(expected)} (${typeOf(expected)}) " +
-            "but received ${valueOf(actual)} (${typeOf(actual)})", constructPath(path)))))
+          listOf(BodyMismatch(expected, actual, "Expected ${valueOf(actual)} (${typeOf(actual)}) " +
+            "to be equal to ${valueOf(expected)} (${typeOf(expected)})", constructPath(path)))))
       }
     }
   }

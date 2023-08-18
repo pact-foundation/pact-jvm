@@ -30,7 +30,7 @@ import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.jsonObject
 import io.pact.plugins.jvm.core.PluginConfiguration
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.lang.Integer.max
 
 data class BodyComparisonResult(

@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.beanutils.BeanUtils
 
 private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
@@ -34,7 +34,7 @@ data class HttpRequest @JvmOverloads constructor(
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
 ): IRequest, IHttpPart, KLogging() {
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))
@@ -167,7 +167,7 @@ data class HttpResponse @JvmOverloads constructor(
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
 ) : IResponse, IHttpPart {
-  fun validateForVersion(pactVersion: PactSpecVersion): List<String> {
+  fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
     errors.addAll(generators.validateForVersion(pactVersion))

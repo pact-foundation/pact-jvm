@@ -7,7 +7,7 @@ import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.mapEither
 import groovy.lang.Closure
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.EntityUtils

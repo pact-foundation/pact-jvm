@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
-import mu.KLogging
+import au.com.dius.pact.core.support.padTo
+import io.github.oshai.kotlinlogging.KLogging
 import org.atteo.evo.inflector.English
 
 object QueryMatcher : KLogging() {
@@ -33,7 +34,9 @@ object QueryMatcher : KLogging() {
     path: List<String>,
     context: MatchingContext
   ): List<QueryMismatch> {
-    return expected.mapIndexed { index, value -> index to value }
+    return expected
+      .padTo(actual.size)
+      .mapIndexed { index, value -> index to value }
       .flatMap { (index, value) ->
         when {
           index < actual.size -> compare(parameter, value, actual[index], context)

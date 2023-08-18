@@ -1,0 +1,5 @@
+{
+  "body": {
+    "$.one": { "type": "MockServerURL", "regex": ".*(/a)", "example": "http://1234:8080/a" }
+  }
+}

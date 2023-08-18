@@ -9,10 +9,11 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.getOr
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import com.mifmif.common.regex.Generex
-import mu.KLogging
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
@@ -103,7 +104,7 @@ fun findGeneratorClass(generatorType: String): Class<*> {
 interface Generator {
   val type: String
   fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any?
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any>
+  fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any>
   fun correspondsToMode(mode: GeneratorTestMode): Boolean = true
 }
 
@@ -114,15 +115,16 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   override val type: String
     get() = "RandomInt"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "min" to min, "max" to max)
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     return RandomUtils.nextInt(min, max)
   }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object): RandomIntGenerator {
       val min = if (json["min"].isNumber) {
         json["min"].asNumber()!!.toInt()
@@ -148,11 +150,12 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   override val type: String
     get() = "RandomDecimal"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "digits" to digits)
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     return when {
       digits < 1 -> throw UnsupportedOperationException("RandomDecimalGenerator digits must be > 0, got $digits")
       digits == 1 -> BigDecimal(RandomUtils.nextInt(0, 9))
@@ -177,7 +180,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
     }
   }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object): RandomDecimalGenerator {
       val digits = if (json["digits"].isNumber) {
         json["digits"].asNumber()!!.toInt()
@@ -197,14 +200,16 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   override val type: String
     get() = "RandomHexadecimal"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "digits" to digits)
   }
 
-  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any =
-    RandomStringUtils.random(digits, "0123456789abcdef")
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
+    return RandomStringUtils.random(digits, "0123456789abcdef")
+  }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object): RandomHexadecimalGenerator {
       val digits = if (json["digits"].isNumber) {
         json["digits"].asNumber()!!.toInt()
@@ -224,15 +229,16 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   override val type: String
     get() = "RandomString"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "size" to size)
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     return RandomStringUtils.randomAlphanumeric(size)
   }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object): RandomStringGenerator {
       val size = if (json["size"].isNumber) {
         json["size"].asNumber()!!.toInt()
@@ -252,13 +258,16 @@ data class RegexGenerator(val regex: String) : Generator {
   override val type: String
     get() = "Regex"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type, "regex" to regex)
   }
 
-  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any = Generex(regex).random()
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
+    return Generex(regex).random()
+  }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object) = RegexGenerator(Json.toString(json["regex"]))
   }
 }
@@ -313,7 +322,7 @@ data class UuidGenerator @JvmOverloads constructor(val format: UuidFormat? = nul
   override val type: String
     get() = "Uuid"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return if (format != null) {
       mapOf("type" to type, "format" to format.toString())
     } else {
@@ -322,6 +331,7 @@ data class UuidGenerator @JvmOverloads constructor(val format: UuidFormat? = nul
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     return if (format != null) {
       when (format) {
         UuidFormat.Simple -> UUID.randomUUID().toString().replace("-", "")
@@ -334,7 +344,7 @@ data class UuidGenerator @JvmOverloads constructor(val format: UuidFormat? = nul
     }
   }
 
-  companion object {
+  companion object: KLogging() {
     @JvmStatic
     fun fromJson(json: JsonValue.Object): UuidGenerator {
       val format = if (json["format"].isString) UuidFormat.fromString(json["format"].asString()) else null
@@ -354,7 +364,7 @@ data class DateGenerator @JvmOverloads constructor(
   override val type: String
     get() = "Date"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     val map = mutableMapOf("type" to type)
     if (!format.isNullOrEmpty()) {
       map["format"] = this.format
@@ -366,17 +376,18 @@ data class DateGenerator @JvmOverloads constructor(
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     val base = if (context.containsKey("baseDate")) context["baseDate"] as OffsetDateTime
       else OffsetDateTime.now()
     val date = DateExpression.executeDateExpression(base, expression).getOr(base)
     return if (!format.isNullOrEmpty()) {
       date.format(DateTimeFormatter.ofPattern(format))
     } else {
-      date.toString()
+      date.format(DateTimeFormatter.ISO_LOCAL_DATE)
     }
   }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object): DateGenerator {
       val format = if (json["format"].isString) json["format"].asString() else null
       val expression = if (json["expression"].isString) json["expression"].asString() else null
@@ -396,7 +407,7 @@ data class TimeGenerator @JvmOverloads constructor(
   override val type: String
     get() = "Time"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     val map = mutableMapOf("type" to type)
     if (!format.isNullOrEmpty()) {
       map["format"] = this.format
@@ -408,16 +419,17 @@ data class TimeGenerator @JvmOverloads constructor(
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetDateTime else OffsetDateTime.now()
     val time = TimeExpression.executeTimeExpression(base, expression).getOr(base)
     return if (!format.isNullOrEmpty()) {
       time.format(DateTimeFormatter.ofPattern(format))
     } else {
-      time.toString()
+      time.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
     }
   }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object): TimeGenerator {
       val format = if (json["format"].isString) json["format"].asString() else null
       val expression = if (json["expression"].isString) json["expression"].asString() else null
@@ -437,7 +449,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
   override val type: String
     get() = "DateTime"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     val map = mutableMapOf("type" to type)
     if (!format.isNullOrEmpty()) {
       map["format"] = this.format
@@ -449,17 +461,18 @@ data class DateTimeGenerator @JvmOverloads constructor(
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     val base = if (context.containsKey("baseDateTime")) context["baseDateTime"] as OffsetDateTime
       else OffsetDateTime.now()
     val datetime = DateTimeExpression.executeExpression(base, expression).getOr(base)
     return if (!format.isNullOrEmpty()) {
       datetime.toZonedDateTime().format(DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault()))
     } else {
-      datetime.toString()
+      datetime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
   }
 
-  companion object {
+  companion object: KLogging() {
     fun fromJson(json: JsonValue.Object): DateTimeGenerator {
       val format = if (json["format"].isString) json["format"].asString() else null
       val expression = if (json["expression"].isString) json["expression"].asString() else null
@@ -472,15 +485,16 @@ data class DateTimeGenerator @JvmOverloads constructor(
  * Generates a random boolean value
  */
 @SuppressWarnings("EqualsWithHashCodeExist")
-object RandomBooleanGenerator : Generator {
+object RandomBooleanGenerator : Generator, KLogging() {
   override val type: String
     get() = "RandomBoolean"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf("type" to type)
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
+    logger.debug { "Applying Generator $this" }
     return ThreadLocalRandom.current().nextBoolean()
   }
 
@@ -504,7 +518,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   override val type: String
     get() = "ProviderState"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> {
     return mapOf(
       "type" to type,
       "expression" to ep.toDefaultExpressions(expression),
@@ -513,6 +527,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
+    logger.debug { "Applying Generator $this" }
     return when (val providerState = context["providerState"]) {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
@@ -528,7 +543,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
 
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
-  companion object {
+  companion object: KLogging() {
     @JvmStatic
     fun fromJson(json: JsonValue.Object) = ProviderStateGenerator(
       ExpressionParser().correctExpressionMarkers(Json.toString(json["expression"])),
@@ -547,7 +562,7 @@ data class MockServerURLGenerator(
   override val type: String
     get() = "MockServerURL"
 
-  override fun toMap(pactSpecVersion: PactSpecVersion) = mutableMapOf(
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = mutableMapOf(
     "type" to type,
     "example" to example,
     "regex" to regex
@@ -556,17 +571,17 @@ data class MockServerURLGenerator(
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Consumer
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
-    logger.debug { "context = $context" }
+    logger.debug { "Applying Generator $this with context = $context" }
     val mockServerDetails = context["mockServer"]
     return if (mockServerDetails != null) {
       if (mockServerDetails is Map<*, *>) {
-        val href = mockServerDetails["href"]
-        if (href is String && href.isNotEmpty()) {
+        val href = mockServerDetails["href"]?.toString()
+        if (href.isNotEmpty()) {
           try {
             val regex = Regex(regex)
             val match = regex.matchEntire(example)
             if (match != null) {
-              URLDecoder.decode(buildUrl(href, match.groupValues[1]).toString(), Charset.defaultCharset())
+              URLDecoder.decode(buildUrl(href!!, match.groupValues[1]).toString(), Charset.defaultCharset())
             } else {
               logger.error {
                 "MockServerURL: can not generate a value as the regex did not match the example, " +
@@ -605,7 +620,7 @@ object NullGenerator : Generator {
   override val type: String
     get() = "Null"
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?) = null
-  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = emptyMap<String, Any>()
 }
 
 data class ArrayContainsGenerator(
@@ -630,5 +645,5 @@ data class ArrayContainsGenerator(
     }
   }
 
-  override fun toMap(pactSpecVersion: PactSpecVersion) = emptyMap<String, Any>()
+  override fun toMap(pactSpecVersion: PactSpecVersion?) = emptyMap<String, Any>()
 }

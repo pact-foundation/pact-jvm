@@ -4,7 +4,7 @@ import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 
 import java.time.LocalDate
-import java.time.OffsetDateTime
+import java.time.OffsetTime
 
 class DateGeneratorSpec extends Specification {
 
@@ -26,10 +26,11 @@ class DateGeneratorSpec extends Specification {
     given:
     def map = [:]
     def json = Json.INSTANCE.toJson(map).asObject()
-    def baseDate = OffsetDateTime.now()
+    def baseDate = LocalDate.now()
+    def baseWithTime = baseDate.atTime(OffsetTime.now())
 
     expect:
-    DateGenerator.@Companion.fromJson(json).generate([baseDate: baseDate], null) == baseDate.toString()
+    DateGenerator.@Companion.fromJson(json).generate([baseDate: baseWithTime], null) == baseDate.toString()
   }
 
 }

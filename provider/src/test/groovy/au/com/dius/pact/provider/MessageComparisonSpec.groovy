@@ -23,7 +23,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result instanceof Result.Ok
     result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.b': ['Expected \'2\' (String) but received \'3\' (String)']
+      '$.b': ['Expected \'3\' (String) to be equal to \'2\' (String)']
     ]
   }
 
@@ -63,7 +63,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result == [
       'destination': [
-        "Expected metadata key 'destination' to have value 'X001' (String) but was 'X002' (String)"
+        "Expected 'X002' (String) to be equal to 'X001' (String)"
       ]
     ]
   }

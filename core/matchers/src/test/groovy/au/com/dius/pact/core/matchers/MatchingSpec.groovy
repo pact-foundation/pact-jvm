@@ -104,7 +104,7 @@ class MatchingSpec extends Specification {
     where:
     mismatch = [
       new MetadataMismatch('A', 'B', 'C',
-        "Expected metadata key 'A' to have value 'B' (String) but was 'C' (String)")
+        "Expected 'C' (String) to be equal to 'B' (String)")
     ]
   }
 
@@ -161,7 +161,7 @@ class MatchingSpec extends Specification {
 
     then:
     !result.empty
-    result[0].mismatch.endsWith("is not equal to the expected body 'hello'")
+    result[0].mismatch.endsWith('is not equal to the expected body [image/jpeg, 5 bytes, starting with 68656c6c6f]')
   }
 
   def 'Body Matching - ignores well known body matchers if there is a content type matcher'() {
@@ -258,12 +258,12 @@ class MatchingSpec extends Specification {
     )
 
     then:
-    result == [new BodyItemMatchResult('$.0', []), new BodyItemMatchResult('$.1', [])]
+    result == [new BodyItemMatchResult('$[0]', []), new BodyItemMatchResult('$[1]', [])]
     result2 == [
-      new BodyItemMatchResult('$.0', []),
-      new BodyItemMatchResult('$.1', [new BodyMismatch('*', 'x',
+      new BodyItemMatchResult('$[0]', []),
+      new BodyItemMatchResult('$[1]', [new BodyMismatch('*', 'x',
         "Expected 'x' to match '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'",
-        '$.1', null)])
+        '$[1]', null)])
     ]
   }
 }

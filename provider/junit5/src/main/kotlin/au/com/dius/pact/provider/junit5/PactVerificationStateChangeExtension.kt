@@ -13,7 +13,7 @@ import au.com.dius.pact.provider.junitsupport.IgnoreMissingStateChange
 import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtensionContext

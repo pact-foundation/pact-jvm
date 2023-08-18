@@ -38,7 +38,7 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryNotFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists
@@ -482,6 +482,60 @@ open class PactBuilder(
     }
 
     val builder = HttpInteractionBuilder(description, providerStates, comments)
+    val result = builderFn(builder)
+    if (result != null) {
+      interactions.add(result.build())
+    } else {
+      interactions.add(builder.build())
+    }
+
+    providerStates.clear()
+    comments.clear()
+
+    return this
+  }
+
+  /**
+   * Creates a new asynchronous message interaction with the given description, and passes a builder to the builder
+   * function to construct it.
+   */
+  fun expectsToReceiveMessageInteraction(
+    description: String,
+    builderFn: (MessageInteractionBuilder) -> MessageInteractionBuilder?
+  ): PactBuilder {
+    if (currentInteraction != null) {
+      interactions.add(currentInteraction!!)
+      currentInteraction = null
+    }
+
+    val builder = MessageInteractionBuilder(description, providerStates, comments)
+    val result = builderFn(builder)
+    if (result != null) {
+      interactions.add(result.build())
+    } else {
+      interactions.add(builder.build())
+    }
+
+    providerStates.clear()
+    comments.clear()
+
+    return this
+  }
+
+  /**
+   * Creates a new synchronous message interaction with the given description, and passes a builder to the builder
+   * function to construct it.
+   */
+  fun expectsToReceiveSynchronousMessageInteraction(
+    description: String,
+    builderFn: (SynchronousMessageInteractionBuilder) -> SynchronousMessageInteractionBuilder?
+  ): PactBuilder {
+    if (currentInteraction != null) {
+      interactions.add(currentInteraction!!)
+      currentInteraction = null
+    }
+
+    val builder = SynchronousMessageInteractionBuilder(description, providerStates, comments)
     val result = builderFn(builder)
     if (result != null) {
       interactions.add(result.build())

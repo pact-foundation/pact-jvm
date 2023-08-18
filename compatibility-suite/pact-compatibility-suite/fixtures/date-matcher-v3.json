@@ -1,0 +1,13 @@
+{
+  "body": {
+    "$.one": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "date",
+          "format": "yyyy-MM-dd"
+        }
+      ]
+    }
+  }
+}

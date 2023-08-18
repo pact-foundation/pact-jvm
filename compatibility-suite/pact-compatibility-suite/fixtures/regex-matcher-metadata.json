@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "Origin": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "regex",
+          "regex": "\\w{3}-\\d+"
+        }
+      ]
+    }
+  }
+}

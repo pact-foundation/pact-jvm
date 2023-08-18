@@ -3,7 +3,10 @@ package au.com.dius.pact.core.model.generators
 import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 @SuppressWarnings('LineLength')
 class DateTimeGeneratorSpec extends Specification {
@@ -28,11 +31,12 @@ class DateTimeGeneratorSpec extends Specification {
     given:
     def map = [:]
     def json = Json.INSTANCE.toJson(map).asObject()
-    def baseDateTime = OffsetDateTime.now()
+    def baseDateTime = LocalDateTime.now()
+    def baseWithOffset = baseDateTime.atOffset(ZoneOffset.ofHours(11))
 
     expect:
-    DateTimeGenerator.@Companion.fromJson(json).generate([baseDateTime: baseDateTime], null) ==
-      baseDateTime.toString()
+    DateTimeGenerator.@Companion.fromJson(json).generate([baseDateTime: baseWithOffset], null) ==
+      baseDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
   }
 
   def 'supports timezones with zone IDs'() {

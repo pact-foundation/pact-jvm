@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.isNotEmpty
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.tika.mime.MediaType
 import org.apache.tika.mime.MediaTypeRegistry
 import org.apache.tika.mime.MimeTypes
@@ -96,6 +96,7 @@ class ContentType(val contentType: MediaType?) {
         type == "application" && contentType.subtype.matches(JSON_TYPE) -> false
         superType == MediaType.APPLICATION_ZIP -> true
         superType == MediaType.OCTET_STREAM -> true
+        type == "multipart" -> true
         else -> false
       }
     } else false

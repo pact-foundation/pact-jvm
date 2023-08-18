@@ -3,7 +3,11 @@ package au.com.dius.pact.core.model.generators
 import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class TimeGeneratorSpec extends Specification {
 
@@ -24,9 +28,11 @@ class TimeGeneratorSpec extends Specification {
   def 'Uses json deserialization to work correctly with optional format fields'() {
     given:
     def json = Json.INSTANCE.toJson([:]).asObject()
-    def baseTime = OffsetDateTime.now()
+    def baseTime = LocalTime.now()
+    def base = baseTime.atOffset(ZoneOffset.ofHours(11)).atDate(LocalDate.now())
 
     expect:
-    TimeGenerator.@Companion.fromJson(json).generate([baseTime: baseTime], null) == baseTime.toString()
+    TimeGenerator.@Companion.fromJson(json).generate([baseTime: base], null) ==
+      baseTime.format(DateTimeFormatter.ofPattern('HH:mm:ss'))
   }
 }

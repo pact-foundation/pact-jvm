@@ -3,8 +3,9 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.InteractionContents
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.core5.http.NameValuePair
 import org.apache.hc.core5.net.WWWFormCodec
 
@@ -39,6 +40,7 @@ class FormPostContentMatcher : ContentMatcher {
       ))))
   }
 
+  @Suppress("LongMethod")
   private fun compareParameters(
     expectedParameters: List<NameValuePair>,
     actualParameters: List<NameValuePair>,
@@ -47,34 +49,74 @@ class FormPostContentMatcher : ContentMatcher {
     val expectedMap = expectedParameters.groupBy { it.name }
     val actualMap = actualParameters.groupBy { it.name }
     val result = mutableListOf<BodyItemMatchResult>()
-    expectedMap.forEach {
-      if (actualMap.containsKey(it.key)) {
-        it.value.forEachIndexed { index, valuePair ->
-          val path = listOf("$", it.key, index.toString())
-          if (context.matcherDefined(path)) {
-            logger.debug { "Matcher defined for form post parameter '${it.key}'[$index]" }
+    expectedMap.forEach { entry ->
+      if (actualMap.containsKey(entry.key)) {
+        val actualParameterValues = actualMap[entry.key]!!
+        val path = listOf("$", entry.key)
+        if (context.matcherDefined(path)) {
+          logger.debug { "Matcher defined for form post parameter '${entry.key}'" }
+          entry.value.padTo(actualParameterValues.size).forEachIndexed { index, valuePair ->
+            val childPath = path + index.toString()
             result.add(
-              BodyItemMatchResult(path.joinToString("."),
-                Matchers.domatch(context, path, valuePair.value,
-                  actualMap[it.key]!![index].value, BodyMismatchFactory)))
-          } else {
-            logger.debug { "No matcher defined for form post parameter '${it.key}'[$index], using equality" }
-            val actualValues = actualMap[it.key]!!
-            if (actualValues.size <= index) {
-              result.add(BodyItemMatchResult(path.joinToString("."), listOf(
-                BodyMismatch("${it.key}=${valuePair.value}", null,
-                "Expected form post parameter '${it.key}'='${valuePair.value}' but was missing"))))
-            } else if (valuePair.value != actualValues[index].value) {
-              result.add(BodyItemMatchResult(path.joinToString("."), listOf(
-                BodyMismatch("${it.key}=${valuePair.value}",
-                "${it.key}=${actualValues[index].value}", "Expected form post parameter " +
-                "'${it.key}'[$index] with value '${valuePair.value}' but was '${actualValues[index].value}'"))))
+              BodyItemMatchResult(
+                childPath.joinToString("."),
+                Matchers.domatch(context, childPath, valuePair.value,
+                  actualParameterValues[index].value, BodyMismatchFactory)
+              )
+            )
+          }
+        } else {
+          if (actualParameterValues.size > entry.value.size) {
+            result.add(
+              BodyItemMatchResult(
+                path.joinToString("."), listOf(
+                  BodyMismatch(
+                    "${entry.key}=${entry.value.map { it.value }}",
+                    "${entry.key}=${actualParameterValues.map { it.value }}",
+                    "Expected form post parameter '${entry.key}' with ${entry.value.size} value(s) " +
+                      "but received ${actualParameterValues.size} value(s)"
+                  )
+                )
+              )
+            )
+          }
+          entry.value.forEachIndexed { index, valuePair ->
+            logger.debug { "No matcher defined for form post parameter '${entry.key}'[$index], using equality" }
+            if (actualParameterValues.size <= index) {
+              result.add(
+                BodyItemMatchResult(
+                  path.joinToString("."), listOf(
+                    BodyMismatch(
+                      "${entry.key}=${valuePair.value}", null,
+                      "Expected form post parameter '${entry.key}'='${valuePair.value}' but was missing"
+                    )
+                  )
+                )
+              )
+            } else if (valuePair.value != actualParameterValues[index].value) {
+              val mismatch = if (entry.value.size == 1 && actualParameterValues.size == 1)
+                "Expected form post parameter '${entry.key}' with value '${valuePair.value}'" +
+                  " but was '${actualParameterValues[index].value}'"
+              else
+                "Expected form post parameter '${entry.key}'[$index] with value '${valuePair.value}'" +
+                  " but was '${actualParameterValues[index].value}'"
+              result.add(
+                BodyItemMatchResult(
+                  path.joinToString("."), listOf(
+                    BodyMismatch(
+                      "${entry.key}=${valuePair.value}",
+                      "${entry.key}=${actualParameterValues[index].value}",
+                      mismatch
+                    )
+                  )
+                )
+              )
             }
           }
         }
       } else {
-        result.add(BodyItemMatchResult(it.key, listOf(BodyMismatch(it.key, null,
-          "Expected form post parameter '${it.key}' but was missing"))))
+        result.add(BodyItemMatchResult(entry.key, listOf(BodyMismatch(entry.key, null,
+          "Expected form post parameter '${entry.key}' but was missing"))))
       }
     }
 

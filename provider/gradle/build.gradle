@@ -2,7 +2,7 @@ plugins {
   id 'au.com.dius.pact.kotlin-common-conventions'
   id 'java-library'
   id 'java-gradle-plugin'
-  id "com.gradle.plugin-publish" version "1.0.0"
+  id "com.gradle.plugin-publish" version "1.2.0"
 }
 
 group = 'au.com.dius.pact.provider'
@@ -16,6 +16,7 @@ dependencies {
   implementation 'commons-io:commons-io:2.11.0'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'io.github.microutils:kotlin-logging-jvm'
+  implementation 'io.github.oshai:kotlin-logging-jvm:5.0.0'
 
   testImplementation 'junit:junit'
   testImplementation 'org.mockito:mockito-core:2.28.2'
@@ -31,20 +32,16 @@ groovydoc {
   enabled = false
 }
 
-pluginBundle {
+gradlePlugin {
   website = 'https://github.com/pact-foundation/pact-jvm/tree/master/provider/gradle'
   vcsUrl = 'https://github.com/pact-foundation/pact-jvm'
-  description = 'Gradle plugin for verifying pacts against a provider.'
-  tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']
-}
-
-gradlePlugin {
   plugins {
     pactProviderPlugin {
       id = 'au.com.dius.pact'
       displayName = 'Gradle Pact Provider plugin'
       implementationClass = 'au.com.dius.pact.provider.gradle.PactPlugin'
       description = 'Gradle plugin for verifying pacts against a provider.'
+      tags.set(['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting'])
     }
   }
 }

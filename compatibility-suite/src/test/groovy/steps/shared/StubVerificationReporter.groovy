@@ -1,4 +1,4 @@
-package steps.v1
+package steps.shared
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
@@ -9,6 +9,8 @@ import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.reporters.BaseVerifierReporter
+import au.com.dius.pact.provider.reporters.Event
+import org.jetbrains.annotations.NotNull
 
 @SuppressWarnings('GetterMethodCouldBeProperty')
 class StubVerificationReporter extends BaseVerifierReporter  {
@@ -132,4 +134,15 @@ class StubVerificationReporter extends BaseVerifierReporter  {
 
   @Override
   void metadataComparisonFailed(String key, Object value, Object comparison) { }
+
+  @Override
+  void receive(@NotNull Event event) {
+    switch (event) {
+      case Event.DisplayInteractionComments:
+        events << [comments: event.comments]
+        break
+      default:
+        super.receive(event)
+    }
+  }
 }
