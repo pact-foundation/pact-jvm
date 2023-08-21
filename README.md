@@ -59,7 +59,7 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch                                                                    | Specification | JDK       | Kotlin Version | Scala Versions | Latest Version |
 |---------------------------------------------------------------------------|---------------|-----------|----------------|----------------|----------------|
-| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md)           | V4 + plugins  | 11+       | 1.6.21         | 4.4.9          |                |
+| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md)           | V4 + plugins  | 11+       | 1.6.21         | N/A            | 4.4.9          |
 | [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md)           | V4            | 11+       | 1.6.21         | N/A            | 4.3.19         |
 | [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md)           | V4 (1)        | 11-15 (2) | 1.4.32         | N/A            | 4.2.21         |
 | [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md)             | V3            | 8-12      | 1.3.71         | N/A            | 4.0.10         |
