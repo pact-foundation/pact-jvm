@@ -31,10 +31,10 @@ dependencies {
         api 'org.apache.httpcomponents.client5:httpclient5:5.1.3'
         api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.1.3'
         api 'org.json:json:20230618'
-        api 'io.pact.plugin.driver:core:0.3.2'
-        api 'org.apache.tika:tika-core:1.28.5'
-        
-        implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+        api 'io.pact.plugin.driver:core:0.4.1'
+        api 'org.apache.tika:tika-core:2.7.0'
+
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib'
         implementation 'org.apache.commons:commons-lang3:3.12.0'
         implementation 'org.apache.commons:commons-text:1.10.0'
         implementation 'org.apache.commons:commons-collections4:4.4'
@@ -48,7 +48,8 @@ dependencies {
         implementation 'org.apache.groovy:groovy:4.0.11'
         implementation 'org.apache.groovy:groovy-json:4.0.11'
         implementation 'org.apache.groovy:groovy-xml:4.0.11'
-        implementation 'io.pact.plugin.driver:core:0.3.2'
+        implementation 'io.pact.plugin.driver:core:0.4.1'
+        implementation 'commons-codec:commons-codec:1.15'
 
         testImplementation 'org.apache.groovy:groovy:4.0.11'
         testImplementation 'org.apache.groovy:groovy-json:4.0.11'
@@ -69,7 +70,7 @@ dependencies {
     implementation platform('org.jetbrains.kotlin:kotlin-bom')
 
     // Use the Kotlin JDK 8 standard library.
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
     codenarc('org.codenarc:CodeNarc:3.1.0-groovy-4.0')
