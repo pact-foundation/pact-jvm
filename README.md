@@ -50,16 +50,16 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 |------------------------------------------------------------------------|---------------|------------|----------------|----------------|-------|
 | [4.6.x](https://github.com/DiUS/pact-jvm/blob/v4.6.x/README.md) master | V4 + plugins  | 17+        | 1.8.22         | 4.6.2          |       |
 | [4.5.x](https://github.com/DiUS/pact-jvm/blob/v4.5.x/README.md)        | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.8          |       |
-| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md)        | V4 + plugins  | 11+        | 1.6.21         | 4.4.9          |       |
 | [4.1.x](https://github.com/DiUS/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12       | 1.3.72         | 4.1.42         |       |
 
 **Notes:**
-* **1:** Spring6 support library requires JDK 17+. The rest of Pact-JVM libs require 11+.
+* **1:** Spring6 support library requires JDK 17+. The rest of Pact-JVM 4.5.x libs require 11+.
 
 ### Previous versions (not actively supported)
 
 | Branch                                                                    | Specification | JDK       | Kotlin Version | Scala Versions | Latest Version |
 |---------------------------------------------------------------------------|---------------|-----------|----------------|----------------|----------------|
+| [4.4.x](https://github.com/DiUS/pact-jvm/blob/v4.4.x/README.md)           | V4 + plugins  | 11+       | 1.6.21         | 4.4.9          |                |
 | [4.3.x](https://github.com/DiUS/pact-jvm/blob/v4.3.x/README.md)           | V4            | 11+       | 1.6.21         | N/A            | 4.3.19         |
 | [4.2.x](https://github.com/DiUS/pact-jvm/blob/v4.2.x/README.md)           | V4 (1)        | 11-15 (2) | 1.4.32         | N/A            | 4.2.21         |
 | [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md)             | V3            | 8-12      | 1.3.71         | N/A            | 4.0.10         |
