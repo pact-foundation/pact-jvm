@@ -2,9 +2,9 @@ name: Pact-JVM Build
 
 on:
   push:
-    branches: [ master, v4.1.x, v4.4.x, v4.5.x ]
+    branches: [ master, v4.1.x, v4.4.x, v4.5.x, v4.6.x ]
   pull_request:
-    branches: [ master, v4.1.x, v4.4.x, v4.5.x ]
+    branches: [ master, v4.1.x, v4.4.x, v4.5.x, v4.6.x ]
 
 jobs:
   latest_jdk:
@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         module: [ core, consumer, provider, pact-specification-test ]
-        jdk: [ 11, 17, 18 ]
+        jdk: [ 17, 18 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
