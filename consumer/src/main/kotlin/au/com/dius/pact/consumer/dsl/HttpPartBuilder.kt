@@ -232,6 +232,11 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
    */
   open fun body(builder: BodyBuilder): HttpPartBuilder {
     part.matchingRules.addCategory(builder.matchers)
+    val headerMatchers = builder.headerMatchers
+    if (headerMatchers != null) {
+      part.matchingRules.addCategory(headerMatchers)
+    }
+
     part.generators.addGenerators(builder.generators)
 
     val contentTypeHeader = part.contentTypeHeader()

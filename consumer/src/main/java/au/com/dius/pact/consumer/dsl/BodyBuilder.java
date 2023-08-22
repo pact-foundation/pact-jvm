@@ -27,4 +27,9 @@ public interface BodyBuilder {
    * Constructs the body returning the contents as a byte array
    */
   byte[] buildBody();
+
+  /**
+   * Returns any matchers that are required for headers
+   */
+  default MatchingRuleCategory getHeaderMatchers() { return null; }
 }
