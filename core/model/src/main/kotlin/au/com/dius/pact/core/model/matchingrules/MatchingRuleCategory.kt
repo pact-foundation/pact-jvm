@@ -227,4 +227,15 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   fun any(matchers: List<Class<out MatchingRule>>): Boolean {
     return matchingRules.values.any { it.any(matchers)  }
   }
+
+  /**
+   * Creates a copy of the rules that start with the given prefix, re-keyed with the new root
+   */
+  fun updateKeys(prefix: String, newRoot: String): MatchingRuleCategory {
+    return copy(matchingRules = matchingRules.filter {
+      it.key.startsWith(prefix)
+    }.mapKeys {
+      it.key.replace(prefix, newRoot)
+    }.toMutableMap())
+  }
 }

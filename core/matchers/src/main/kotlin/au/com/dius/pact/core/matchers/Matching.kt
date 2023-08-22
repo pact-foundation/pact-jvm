@@ -161,6 +161,14 @@ data class MatchingContext @JvmOverloads constructor(
         it is MinMaxEqualsIgnoreOrderMatcher
     }
   }
+
+  /**
+   * Creates a new context with all rules that match the rootPath, with that path replaced with root
+   */
+  fun extractPath(rootPath: String): MatchingContext {
+    return copy(matchers = matchers.updateKeys(rootPath, "$"),
+      allowUnexpectedKeys = allowUnexpectedKeys, pluginConfiguration = pluginConfiguration)
+  }
 }
 
 @Suppress("TooManyFunctions")

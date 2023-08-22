@@ -24,11 +24,11 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
-import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Result.*
 import au.com.dius.pact.core.support.deepMerge
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
+import io.github.oshai.kotlinlogging.KLogging
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
@@ -38,10 +38,6 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryNotFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
-import io.github.oshai.kotlinlogging.KLogging
-import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.exists
 
 interface DslBuilder {
   fun addPluginConfiguration(matcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>)

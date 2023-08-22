@@ -261,6 +261,23 @@ open class PactDslResponse @JvmOverloads constructor(
   }
 
   /**
+   * Sets the body using the builder
+   * @param builder Body Builder
+   */
+  fun body(builder: BodyBuilder): PactDslResponse {
+    responseMatchers.addCategory(builder.matchers)
+    val headerMatchers = builder.headerMatchers
+    if (headerMatchers != null) {
+      responseMatchers.addCategory(headerMatchers)
+    }
+    responseGenerators.addGenerators(builder.generators)
+    val contentType = builder.contentType
+    responseHeaders[PactDslRequestBase.CONTENT_TYPE] = listOf(contentType.toString())
+    responseBody = body(builder.buildBody(), contentType)
+    return this
+  }
+
+  /**
    * Response body as a binary data. It will match any expected bodies against the content type.
    * @param example Example contents to use in the consumer test
    * @param contentType Content type of the data

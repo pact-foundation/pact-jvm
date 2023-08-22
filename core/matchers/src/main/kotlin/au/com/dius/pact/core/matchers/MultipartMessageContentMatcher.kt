@@ -5,12 +5,15 @@ import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Result
-import io.pact.plugins.jvm.core.InteractionContents
+import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KLogging
+import io.pact.plugins.jvm.core.InteractionContents
 import java.util.Enumeration
 import javax.mail.BodyPart
 import javax.mail.Header
+import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
+import javax.mail.internet.MimePart
 import javax.mail.util.ByteArrayDataSource
 
 class MultipartMessageContentMatcher : ContentMatcher {
@@ -54,7 +57,18 @@ class MultipartMessageContentMatcher : ContentMatcher {
       val expectedPart = expectedMultipart.getBodyPart(i)
       if (i < actualMultipart.count) {
         val actualPart = actualMultipart.getBodyPart(i)
-        val path = "\$.$i"
+        var path = i.toString()
+        if (expectedPart is MimePart) {
+          val disposition = expectedPart.getHeader("Content-Disposition", null)
+          if (disposition != null) {
+            val cd = ContentDisposition(disposition)
+            val parameter = cd.getParameter("name")
+            if (parameter.isNotEmpty()) {
+              path = parameter
+            }
+          }
+        }
+
         val headerResult = compareHeaders(path, expectedPart, actualPart, context)
         logger.debug { "Comparing part $i: header mismatches ${headerResult.size}" }
         val bodyMismatches = compareContents(path, expectedPart, actualPart, context)
@@ -87,7 +101,7 @@ class MultipartMessageContentMatcher : ContentMatcher {
     val expected = bodyPartTpHttpPart(expectedMultipart)
     val actual = bodyPartTpHttpPart(actualMultipart)
     logger.debug { "Comparing multipart contents: ${expected.determineContentType()} -> ${actual.determineContentType()}" }
-    val result = Matching.matchBody(expected, actual, context)
+    val result = Matching.matchBody(expected, actual, context.extractPath("\$.$path"))
     return result.bodyResults.flatMap { matchResult ->
       matchResult.result.map {
         it.copy(path = path + it.path.removePrefix("$"))

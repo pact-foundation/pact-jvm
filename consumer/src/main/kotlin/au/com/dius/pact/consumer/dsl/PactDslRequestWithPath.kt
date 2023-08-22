@@ -611,11 +611,15 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   }
 
   /**
-   * Sets the body using the buidler
+   * Sets the body using the builder
    * @param builder Body Builder
    */
   fun body(builder: BodyBuilder): PactDslRequestWithPath {
     requestMatchers.addCategory(builder.matchers)
+    val headerMatchers = builder.headerMatchers
+    if (headerMatchers != null) {
+      requestMatchers.addCategory(headerMatchers)
+    }
     requestGenerators.addGenerators(builder.generators)
     val contentType = builder.contentType
     requestHeaders[CONTENT_TYPE] = listOf(contentType.toString())
