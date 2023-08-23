@@ -2067,7 +2067,7 @@ open class PactDslJsonBody : DslPart {
   }
 
   /**
-   * Adds an attribute that will have it's value injected from the provider state
+   * Adds an attribute that will have its value injected from the provider state
    * @param name Attribute name
    * @param expression Expression to be evaluated from the provider state
    * @param example Example value to be used in the consumer test

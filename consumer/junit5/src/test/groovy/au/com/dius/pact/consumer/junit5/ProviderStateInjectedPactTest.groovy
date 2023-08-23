@@ -24,6 +24,10 @@ class ProviderStateInjectedPactTest {
       .uponReceiving('a request')
         .path('/values')
         .method('POST')
+        .body(
+          new PactDslJsonBody()
+            .valueFromProviderState('userId', 'userId', 100)
+        )
       .willRespondWith()
         .headerFromProviderState('LOCATION', 'http://server/users/${userId}', 'http://server/users/666')
         .status(200)
@@ -46,7 +50,8 @@ class ProviderStateInjectedPactTest {
   @Test
   void testArticles(MockServer mockServer) {
     HttpResponse httpResponse = Request.post("${mockServer.url}/values")
-      .bodyString(JsonOutput.toJson([userName: 'Test', userClass: 'Shoddy']), ContentType.APPLICATION_JSON)
+      .bodyString(JsonOutput.toJson([userId: 12345]),
+        ContentType.APPLICATION_JSON)
       .execute().returnResponse()
     assert httpResponse.code == 200
     assert httpResponse.entity.content.text == '{"userId":100,"userName":"Test"}'
