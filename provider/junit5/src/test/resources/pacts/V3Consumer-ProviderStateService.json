@@ -1,0 +1,111 @@
+{
+  "consumer": {
+    "name": "V3Consumer"
+  },
+  "interactions": [
+    {
+      "description": "a request",
+      "providerStates": [
+        {
+          "name": "a provider state with injectable values",
+          "params": {
+            "valueA": "A",
+            "valueB": 100
+          }
+        }
+      ],
+      "request": {
+        "body": {
+          "userId": 100
+        },
+        "generators": {
+          "body": {
+            "$.userId": {
+              "dataType": "INTEGER",
+              "expression": "userId",
+              "type": "ProviderState"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/values"
+      },
+      "response": {
+        "body": {
+          "userId": 100,
+          "userName": "Test"
+        },
+        "generators": {
+          "body": {
+            "$.userId": {
+              "dataType": "INTEGER",
+              "expression": "userId",
+              "type": "ProviderState"
+            }
+          },
+          "header": {
+            "LOCATION": {
+              "dataType": "STRING",
+              "expression": "http://server/users/${userId}",
+              "type": "ProviderState"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8",
+          "LOCATION": "http://server/users/666"
+        },
+        "matchingRules": {
+          "body": {
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.3"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "ProviderStateService"
+  }
+}
