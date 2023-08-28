@@ -104,6 +104,43 @@ class SynchronousMessagePactBuilder @JvmOverloads constructor(
   }
 
   /**
+   * Marks the interaction as pending.
+   */
+  fun pending(pending: Boolean): SynchronousMessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before pending")
+    }
+    val message = messages.last()
+    message.pending = pending
+    return this
+  }
+
+  /**
+   * Adds a text comment to the interaction
+   */
+  fun comment(comment: String): SynchronousMessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before comment")
+    }
+    val message = messages.last()
+    message.addTextComment(comment)
+    return this
+  }
+
+  /**
+   * Sets the unique key for the interaction. If this is not set, or is empty, a key will be calculated from the
+   * contents of the interaction.
+   */
+  fun key(key: String?): SynchronousMessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before key")
+    }
+    val message = messages.last()
+    message.key = key
+    return this;
+  }
+
+  /**
    * Adds a message expectation to the pact.
    *
    * @param description message description.
