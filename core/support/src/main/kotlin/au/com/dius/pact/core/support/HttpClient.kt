@@ -18,6 +18,7 @@ import org.apache.hc.client5.http.socket.ConnectionSocketFactory
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder
 import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy
+import org.apache.hc.core5.http.HttpRequest
 import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.http.message.BasicHeader
 import org.apache.hc.core5.ssl.SSLContexts
@@ -70,6 +71,13 @@ sealed class Auth {
   }
 }
 
+private class RetryAnyMethod(
+  maxRetries: Int,
+  defaultRetryInterval: TimeValue
+): DefaultHttpRequestRetryStrategy(maxRetries, defaultRetryInterval) {
+  override fun handleAsIdempotent(request: HttpRequest) = true
+}
+
 /**
  * HTTP client support functions
  */
@@ -86,7 +94,7 @@ object HttpClient : KLogging() {
     insecureTLS: Boolean = false
   ): Pair<CloseableHttpClient, CredentialsProvider?> {
     val builder = HttpClients.custom().useSystemProperties()
-      .setRetryStrategy(DefaultHttpRequestRetryStrategy(maxPublishRetries,
+      .setRetryStrategy(RetryAnyMethod(maxPublishRetries,
         TimeValue.ofMilliseconds(publishRetryInterval.toLong())))
 
     val defaultHeaders = mutableMapOf<String, String>()
