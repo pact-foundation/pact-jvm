@@ -158,6 +158,8 @@ class ContentType(val contentType: MediaType?) {
     @JvmStatic
     val TEXT_PLAIN = ContentType("text/plain; charset=ISO-8859-1")
     @JvmStatic
+    val OCTET_STEAM = ContentType("application/octet-stream")
+    @JvmStatic
     val HTML = ContentType("text/html")
     @JvmStatic
     val JSON = ContentType("application/json")

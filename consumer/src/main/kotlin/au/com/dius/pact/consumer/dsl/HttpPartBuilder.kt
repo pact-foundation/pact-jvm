@@ -206,6 +206,35 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
   }
 
   /**
+   * Sets the body of the HTTP part as a byte array. If the content type is not already set, will default to
+   * application/octet-stream.
+   */
+  open fun body(body: ByteArray) = body(body, null)
+
+  /**
+   * Sets the body of the HTTP part as a string value. If the content type is not provided or already set, will
+   * default to application/octet-stream.
+   */
+  open fun body(body: ByteArray, contentTypeString: String?): HttpPartBuilder {
+    val contentTypeHeader = part.contentTypeHeader()
+    val contentType = if (!contentTypeString.isNullOrEmpty()) {
+      ContentType.fromString(contentTypeString)
+    } else if (contentTypeHeader != null) {
+      ContentType.fromString(contentTypeHeader)
+    } else {
+      ContentType.OCTET_STEAM
+    }
+
+    part.body = OptionalBody.body(body, contentType)
+
+    if (contentTypeHeader == null || contentTypeString.isNotEmpty()) {
+      part.headers["content-type"] = listOf(contentType.toString())
+    }
+
+    return this
+  }
+
+  /**
    * Sets the body, content type and matching rules from a DslPart
    */
   open fun body(dslPart: DslPart): HttpPartBuilder {

@@ -4,19 +4,26 @@ import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.v4.MessageContents
+import au.com.dius.pact.core.support.isNotEmpty
 
 /**
  * DSL builder for the message contents part of a V4 message
  */
 class MessageContentsBuilder(var contents: MessageContents) {
+  fun build() = contents
+
   /**
    *  Adds the expected metadata to the message contents
    */
   fun withMetadata(metadata: Map<String, Any>): MessageContentsBuilder {
     contents = contents.copy(metadata = metadata.mapValues { (key, value) ->
       if (value is Matcher) {
-        contents.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
+        if (value.matcher != null) {
+          contents.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
+        }
         if (value.generator != null) {
           contents.generators.addGenerator(Category.METADATA, key, value.generator!!)
         }
@@ -98,14 +105,57 @@ class MessageContentsBuilder(var contents: MessageContents) {
   }
 
   /**
-   * Adds the string as the message contents with the given content type
+   * Adds the string as the message contents with the given content type. If the content type is not supplied,
+   * it will try to detect it otherwise will default to plain text.
    */
-  fun withContent(payload: String, contentType: String): MessageContentsBuilder {
-    val ct = ContentType(contentType)
+  @JvmOverloads
+  fun withContent(payload: String, contentType: String? = null): MessageContentsBuilder {
+    val contentTypeMetadata = Message.contentType(contents.metadata)
+    val ct = if (contentType.isNotEmpty()) {
+      ContentType.fromString(contentType)
+    } else if (contentTypeMetadata.contentType != null) {
+      contentTypeMetadata
+    } else {
+      OptionalBody.detectContentTypeInByteArray(payload.toByteArray()) ?: ContentType.TEXT_PLAIN
+    }
     contents = contents.copy(
       contents = OptionalBody.body(payload.toByteArray(ct.asCharset()), ct),
-      metadata = (contents.metadata + Pair("contentType", contentType)).toMutableMap()
+      metadata = (contents.metadata + Pair("contentType", ct.toString())).toMutableMap()
     )
+    return this
+  }
+
+  /**
+   * Sets the contents of the message as a byte array. If the content type is not provided or already set, will
+   * default to application/octet-stream.
+   */
+  @JvmOverloads
+  fun withContent(payload: ByteArray, contentType: String? = null): MessageContentsBuilder {
+    val contentTypeMetadata = Message.contentType(contents.metadata)
+    val ct = if (contentType.isNotEmpty()) {
+      ContentType.fromString(contentType)
+    } else if (contentTypeMetadata.contentType != null) {
+      contentTypeMetadata
+    } else {
+      ContentType.OCTET_STEAM
+    }
+
+    contents = contents.copy(
+      contents = OptionalBody.body(payload, ct),
+      metadata = (contents.metadata + Pair("contentType", ct.toString())).toMutableMap()
+    )
+
+    return this
+  }
+
+  /**
+   * Sets up a content type matcher to match any payload of the given content type
+   */
+  fun withContentsMatchingContentType(contentType: String, exampleContents: ByteArray): MessageContentsBuilder {
+    val ct = ContentType(contentType)
+    contents.contents = OptionalBody.body(exampleContents, ct)
+    contents.metadata["contentType"] = contentType
+    contents.matchingRules.addCategory("body").addRule("$", ContentTypeMatcher(contentType))
     return this
   }
 }

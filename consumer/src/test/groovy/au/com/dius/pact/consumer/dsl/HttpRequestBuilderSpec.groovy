@@ -232,12 +232,14 @@ class HttpRequestBuilderSpec extends Specification {
   }
 
   def 'supports setting up a content type matcher on the body'() {
-    when:
+    given:
     def gif1px = [
       0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
       0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
       0001, 0000, 0073
     ] as byte[]
+
+    when:
     def request = builder
       .bodyMatchingContentType('image/gif', gif1px)
       .build()
@@ -251,6 +253,44 @@ class HttpRequestBuilderSpec extends Specification {
         '$': new MatchingRuleGroup([new ContentTypeMatcher('image/gif')])
       ]
     )
+  }
+
+  def 'allows setting the body of the request as a byte array'() {
+    given:
+    def gif1px = [
+      0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
+      0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
+      0001, 0000, 0073
+    ] as byte[]
+
+    when:
+    def request = builder
+      .body(gif1px)
+      .build()
+
+    then:
+    request.body.unwrap() == gif1px
+    request.body.contentType.toString() == 'application/octet-stream'
+    request.headers['content-type'] == ['application/octet-stream']
+  }
+
+  def 'allows setting the body of the request as a a byte array with a content type'() {
+    given:
+    def gif1px = [
+      0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
+      0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
+      0001, 0000, 0073
+    ] as byte[]
+
+    when:
+    def request = builder
+      .body(gif1px, 'image/gif')
+      .build()
+
+    then:
+    request.body.unwrap() == gif1px
+    request.body.contentType.toString() == 'image/gif'
+    request.headers['content-type'] == ['image/gif']
   }
 
   def 'allows adding query parameters to the request'() {
