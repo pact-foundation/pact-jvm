@@ -38,8 +38,8 @@ data class ProviderState @JvmOverloads constructor(val name: String?, val params
 
   fun uniqueKey(): Int {
     val builder = HashCodeBuilder().append(name)
-    for (param in params) {
-      builder.append(param.key)
+    for (param in params.keys.sorted()) {
+      builder.append(param)
     }
     return builder.toHashCode()
   }

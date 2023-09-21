@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -40,5 +41,22 @@ class ProviderStateSpec extends Specification {
     state1.uniqueKey() == state2.uniqueKey()
     state1.uniqueKey() != state3.uniqueKey()
     state1.uniqueKey() != state4.uniqueKey()
+  }
+
+  @Issue("#1717")
+  def 'uniqueKey should be deterministic'() {
+    given:
+    def state = new ProviderState('a user profile exists', [
+      email_address: 'test@email.com',
+      family_name: 'Test'
+    ])
+    def state2 = new ProviderState('a user profile exists', [
+      family_name: 'Test',
+      email_address: 'test@email.com'
+    ])
+
+    expect:
+    state.uniqueKey() == state.uniqueKey()
+    state.uniqueKey() == state2.uniqueKey()
   }
 }
