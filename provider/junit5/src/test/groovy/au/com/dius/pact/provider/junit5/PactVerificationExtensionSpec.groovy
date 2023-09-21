@@ -20,6 +20,7 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.RequestData
 import au.com.dius.pact.provider.RequestDataToBeVerified
 import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.VerificationResult
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.HttpRequest
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -47,6 +48,7 @@ class PactVerificationExtensionSpec extends Specification {
   @Shared ClassicHttpRequest classicHttpRequest
   @Shared ProviderVerifier verifier
   @Shared RequestDataToBeVerified data
+  @Shared Optional<Throwable> executionException
 
   def setupSpec() {
     verifier = Mock(ProviderVerifier)
@@ -61,8 +63,10 @@ class PactVerificationExtensionSpec extends Specification {
       put(_, _) >> { args -> contextMap[args[0]] = args[1]  }
     }
 
+    executionException = Optional.empty()
     extContext = Stub {
       getStore(_) >> store
+      getExecutionException() >> { executionException }
     }
     interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
     interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
@@ -128,6 +132,28 @@ class PactVerificationExtensionSpec extends Specification {
       new Result.Err(['failed'])
     def exception = thrown(AssertionError)
     exception.message == 'Failed to update the test results: failed'
+  }
+
+  @Issue('#1715')
+  def 'If the JUnit test framework has an exception, add a failure to the test results'() {
+    given:
+    pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction1, interaction2], [:], pactSource)
+
+    extension = new PactVerificationExtension(pact, pactSource, interaction1,
+      'service', 'consumer', mockValueResolver)
+    extension.testResultAccumulator = Mock(TestResultAccumulator)
+
+    executionException = Optional.of(new RuntimeException('No test result for you'))
+
+    when:
+    extension.afterTestExecution(extContext)
+
+    then:
+    1 * extension.testResultAccumulator.updateTestResult(pact, interaction1, {
+      def result = it[0]
+      result instanceof VerificationResult.Failed &&
+        result.description == 'Test method has failed with an exception: No test result for you'
+    }, pactSource, mockValueResolver)
   }
 
   @Issue('#1572')
