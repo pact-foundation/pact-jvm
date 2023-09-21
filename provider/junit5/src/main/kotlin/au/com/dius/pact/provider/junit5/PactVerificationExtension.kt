@@ -17,6 +17,8 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.RequestData
 import au.com.dius.pact.provider.RequestDataToBeVerified
 import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.VerificationFailureType
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
 import io.pact.plugins.jvm.core.InteractionVerificationData
@@ -211,10 +213,26 @@ open class PactVerificationExtension(
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
     val pact = if (this.pact is FilteredPact) pact.pact else pact
-    val updateTestResult = testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult,
-      pactSource, propertyResolver)
-    if (updateTestResult is Result.Err) {
-      throw AssertionError("Failed to update the test results: " + updateTestResult.error.joinToString("\n"))
+    if (context.executionException.isPresent) {
+      val e = context.executionException.get()
+      val failure = VerificationResult.Failed("Test method has failed with an exception: ${e.message}",
+        failures = mapOf(
+          interaction.interactionId.orEmpty() to
+            listOf(VerificationFailureType.ExceptionFailure("Test method has failed with an exception", e))
+        )
+      )
+      testResultAccumulator.updateTestResult(
+        pact, interaction, testContext.testExecutionResult + failure,
+        pactSource, propertyResolver
+      )
+    } else {
+      val updateTestResult = testResultAccumulator.updateTestResult(
+        pact, interaction, testContext.testExecutionResult,
+        pactSource, propertyResolver
+      )
+      if (updateTestResult is Result.Err) {
+        throw AssertionError("Failed to update the test results: " + updateTestResult.error.joinToString("\n"))
+      }
     }
   }
 
