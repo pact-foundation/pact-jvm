@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.v4
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.bodyFromJson
@@ -22,7 +23,7 @@ data class MessageContents @JvmOverloads constructor(
   val generators: Generators = Generators(),
   val partName: String = ""
 ) {
-  fun getContentType() = contents.contentType.or(Message.contentType(metadata))
+  fun getContentType() = contents.contentType.or(Message.contentType(metadata) ?: ContentType.OCTET_STEAM)
 
   fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, *> {
     val map = mutableMapOf(

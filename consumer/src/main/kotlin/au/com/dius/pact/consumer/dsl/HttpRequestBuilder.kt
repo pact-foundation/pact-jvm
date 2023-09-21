@@ -73,6 +73,14 @@ open class HttpRequestBuilder(private val request: HttpRequest): HttpPartBuilder
     return super.body(body, contentTypeString) as HttpRequestBuilder
   }
 
+  override fun body(body: ByteArray): HttpRequestBuilder {
+    return super.body(body) as HttpRequestBuilder
+  }
+
+  override fun body(body: ByteArray, contentTypeString: String?): HttpRequestBuilder {
+    return super.body(body, contentTypeString) as HttpRequestBuilder
+  }
+
   override fun body(dslPart: DslPart): HttpRequestBuilder {
     return super.body(dslPart) as HttpRequestBuilder
   }

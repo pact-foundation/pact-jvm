@@ -151,6 +151,14 @@ open class HttpResponseBuilder(private val response: HttpResponse): HttpPartBuil
     return super.body(body, contentTypeString) as HttpResponseBuilder
   }
 
+  override fun body(body: ByteArray): HttpResponseBuilder {
+    return super.body(body) as HttpResponseBuilder
+  }
+
+  override fun body(body: ByteArray, contentTypeString: String?): HttpResponseBuilder {
+    return super.body(body, contentTypeString) as HttpResponseBuilder
+  }
+
   override fun body(dslPart: DslPart): HttpResponseBuilder {
     return super.body(dslPart) as HttpResponseBuilder
   }

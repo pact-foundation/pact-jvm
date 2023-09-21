@@ -275,4 +275,42 @@ class HttpResponseBuilderSpec extends Specification {
       ]
     )
   }
+
+  def 'allows setting the body of the response as a byte array'() {
+    given:
+    def gif1px = [
+      0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
+      0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
+      0001, 0000, 0073
+    ] as byte[]
+
+    when:
+    def response = builder
+      .body(gif1px)
+      .build()
+
+    then:
+    response.body.unwrap() == gif1px
+    response.body.contentType.toString() == 'application/octet-stream'
+    response.headers['content-type'] == ['application/octet-stream']
+  }
+
+  def 'allows setting the body of the response as a a byte array with a content type'() {
+    given:
+    def gif1px = [
+      0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
+      0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
+      0001, 0000, 0073
+    ] as byte[]
+
+    when:
+    def response = builder
+      .body(gif1px, 'image/gif')
+      .build()
+
+    then:
+    response.body.unwrap() == gif1px
+    response.body.contentType.toString() == 'image/gif'
+    response.headers['content-type'] == ['image/gif']
+  }
 }
