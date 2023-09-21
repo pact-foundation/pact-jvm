@@ -43,7 +43,7 @@ class ProviderStateSpec extends Specification {
     state1.uniqueKey() != state4.uniqueKey()
   }
 
-  @Issue("#1717")
+  @Issue('#1717')
   def 'uniqueKey should be deterministic'() {
     given:
     def state = new ProviderState('a user profile exists', [
