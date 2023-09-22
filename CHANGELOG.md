@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.3 - Bugfix Release
+
+* b318149bf - chore: fix codenarc violations #1717 (Ronald Holshausen, Thu Sep 21 12:43:18 2023 +1000)
+* 5d2911613 - fix: Unstable key generation with provider states #1717 (Ronald Holshausen, Thu Sep 21 12:36:54 2023 +1000)
+* c6efac9c0 - fix: If the JUnit test framework has an exception, add a failure to the test results #1715 (Ronald Holshausen, Thu Sep 21 11:58:10 2023 +1000)
+* e3950d413 - feat: Update the new builder DSL to allow setting contents as byte arrays #600 (Ronald Holshausen, Thu Sep 21 10:56:54 2023 +1000)
+* 90d6cc447 - Merge pull request #1713 from monochromata/retry-any-http-method (Ronald Holshausen, Wed Sep 6 09:47:48 2023 +1000)
+* ef22eb3a5 - feat: Retry all http methods (Sebastian Lohmeier, Mon Sep 4 22:03:05 2023 +0200)
+* 2b2055f0d - chore: Add missing key and pending methods to SynchronousMessagePactBuilder #1707 (Ronald Holshausen, Mon Aug 28 10:40:55 2023 +1000)
+* 1b00f6325 - chore: add a ProviderState injected test with integer values #1700 (Ronald Holshausen, Wed Aug 23 14:08:20 2023 +1000)
+* b1806abeb - feat: Add support for adding multiparts that can use JSON DSL #1642 (Ronald Holshausen, Tue Aug 22 11:50:21 2023 +1000)
+* f98f1adf2 - chore: Upgrade plugin driver to 0.4.1 #1698 (Ronald Holshausen, Mon Aug 21 15:04:27 2023 +1000)
+* 5e6fe7550 - Update README.md (Ronald Holshausen, Mon Aug 21 14:44:06 2023 +1000)
+* 3755f1e3c - Update README.md (Ronald Holshausen, Mon Aug 21 14:43:30 2023 +1000)
+* 4c97e3915 - Update README.md (Ronald Holshausen, Mon Aug 21 14:41:46 2023 +1000)
+* 07904cfcf - Merge branch 'v4.6.x' (Ronald Holshausen, Mon Aug 21 14:40:37 2023 +1000)
+* a91598b74 - Update README.md (Ronald Holshausen, Fri Aug 18 15:27:27 2023 +1000)
+* ad6a0316a - bump version to 4.6.3 (Ronald Holshausen, Fri Aug 18 15:19:17 2023 +1000)
+
 # 4.6.2 - Maintenance Release
 
 * 017fc6cfe - chore: Upgrade Kotlin to 1.8.22 (Ronald Holshausen, Fri Aug 18 14:53:06 2023 +1000)
