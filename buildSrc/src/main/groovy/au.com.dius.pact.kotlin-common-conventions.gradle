@@ -30,7 +30,7 @@ dependencies {
         // Define dependency versions as constraints
         api 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
         api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.2.1'
-        api 'org.json:json:20230227'
+        api 'org.json:json:20230618'
         api 'io.pact.plugin.driver:core:0.4.1'
         api 'org.apache.tika:tika-core:2.7.0'
         api 'io.github.microutils:kotlin-logging-jvm:3.0.4'
