@@ -241,7 +241,9 @@ class ResponseComparison(
     ): ComparisonResult {
       val (bodyMismatches, metadataMismatches) = when (message) {
         is V4Interaction.AsynchronousMessage -> {
-          val bodyContext = MatchingContext(message.contents.matchingRules.rulesForCategory("body"),
+          val bodyContext = MatchingContext(
+            message.contents.matchingRules.rulesForCategory("content")
+              .orElse(message.contents.matchingRules.rulesForCategory("body")),
             true, pluginConfiguration)
           val metadataContext = MatchingContext(message.contents.matchingRules.rulesForCategory("metadata"),
             true, pluginConfiguration)
@@ -258,7 +260,8 @@ class ResponseComparison(
         }
 
         is Message -> {
-          val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("body"),
+          val bodyContext = MatchingContext(message.matchingRules.rulesForCategory("content")
+            .orElse(message.matchingRules.rulesForCategory("body")),
             true, pluginConfiguration)
           val metadataContext = MatchingContext(message.matchingRules.rulesForCategory("metadata"),
             true, pluginConfiguration)
@@ -282,7 +285,7 @@ class ResponseComparison(
 
     override fun compareSynchronousMessage(
       interaction: V4Interaction.SynchronousMessages,
-      actual: OptionalBody,
+      body: OptionalBody,
       messageMetadata: Map<String, Any>?,
       pluginConfiguration: Map<String, PluginConfiguration>
     ): ComparisonResult {
@@ -296,7 +299,7 @@ class ResponseComparison(
         true, pluginConfiguration)
       val metadataContext = MatchingContext(messageContents.matchingRules.rulesForCategory("metadata"),
         true, pluginConfiguration)
-      val bodyMismatches = compareMessageBody(interaction, actual, bodyContext)
+      val bodyMismatches = compareMessageBody(interaction, body, bodyContext)
       val metadataMismatches = when (messageMetadata) {
         null -> emptyList()
         else -> Matching.compareMessageMetadata(messageContents.metadata, messageMetadata, metadataContext)
@@ -304,7 +307,7 @@ class ResponseComparison(
       val messageContentType = messageContents.getContentType().or(ContentType.TEXT_PLAIN)
       val responseComparison = ResponseComparison(
         mapOf("Content-Type" to listOf(messageContentType.toString())), messageContents.contents,
-        messageContentType.isJson(), messageContentType, actual)
+        messageContentType.isJson(), messageContentType, body)
       val bodyResult = responseComparison.bodyResult(bodyMismatches, SystemPropertyResolver)
       return ComparisonResult(bodyMismatches = bodyResult,
         metadataMismatches = metadataMismatches.groupBy { it.key })
