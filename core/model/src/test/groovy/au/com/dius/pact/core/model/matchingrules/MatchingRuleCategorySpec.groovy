@@ -113,4 +113,29 @@ class MatchingRuleCategorySpec extends Specification {
     category.matchingRules[''].rules == [ new RegexMatcher('/api/test/\\d{1,8}', null) ]
     category.matchingRules[''].ruleLogic == RuleLogic.OR
   }
+
+  @Issue('#1509')
+  def 'orElse can default to another rule set if empty'() {
+    given:
+    def categoryA = new MatchingRuleCategory('A')
+    def categoryB = new MatchingRuleCategory('B', [
+      a: new MatchingRuleGroup(),
+      b: new MatchingRuleGroup()
+    ])
+    def categoryC = new MatchingRuleCategory('C', [
+      a: new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
+      b: new MatchingRuleGroup()
+    ])
+    def categoryD = new MatchingRuleCategory('D', [
+      a: new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
+      b: new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
+    ])
+
+    expect:
+    categoryA.orElse(categoryA) == categoryA
+    categoryA.orElse(categoryB) == categoryB
+    categoryA.orElse(categoryC) == categoryC
+    categoryC.orElse(categoryA) == categoryC
+    categoryC.orElse(categoryD) == categoryC
+  }
 }

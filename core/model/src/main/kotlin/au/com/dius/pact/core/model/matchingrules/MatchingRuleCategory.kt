@@ -238,4 +238,9 @@ data class MatchingRuleCategory @JvmOverloads constructor(
       it.key.replace(prefix, newRoot)
     }.toMutableMap())
   }
+
+  /**
+   * If this MatchingRuleCategory is not empty, return it, otherwise, return the other set of rules
+   */
+  fun orElse(otherRules: MatchingRuleCategory): MatchingRuleCategory = if (isEmpty()) otherRules else this
 }
