@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath 'au.com.dius.pact.provider:gradle:4.3.18'
+    classpath 'au.com.dius.pact.provider:gradle:4.5.8'
   }
 }
 
@@ -27,6 +27,15 @@ dependencies {
   testRuntimeOnly 'ch.qos.logback:logback-classic'
 }
 
+def gitBranch() {
+  def branch = ""
+  def proc = "git rev-parse --abbrev-ref HEAD".execute()
+  proc.in.eachLine { line -> branch = line }
+  proc.err.eachLine { line -> println line }
+  proc.waitFor()
+  branch
+}
+
 if (System.env.PACT_PUBLISH == 'true') {
   pact {
     publish {
@@ -34,6 +43,7 @@ if (System.env.PACT_PUBLISH == 'true') {
       if (project.hasProperty('pactBrokerToken')) {
         pactBrokerToken = project.pactBrokerToken
       }
+      consumerBranch = gitBranch()
       excludes = ['JVM Pact Broker Client-Imaginary Pact Broker']
     }
   }
