@@ -368,3 +368,43 @@ variable to 'true'.
 By default, the Pact lifecycle will be invoked for every test method and will expect there to be a method annotated
 with `@Pact` for each test method invoked. To add non-Pact tests, just annotate the non-Pact test method with the
 `@PactIgnore` annotation.
+
+# ClassicJavaPact - Setup
+
+1. Install Windows Subsystem for Linux (WSL).
+2. Install Docker in the WSL.
+   [version of docker: Docker version 24.0.5, build 24.0.5-0ubuntu1~22.04.1]
+3. Install Docker-compose plugin in WSL.
+    1. Download Docker Compose
+       ```bash
+       sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose 
+       ```
+    2. Make the Docker Compose binary executable
+       ```bash
+        sudo chmod +x /usr/local/bin/docker-compose
+       ```
+    3. Verify the installation
+       ```bash
+        docker-compose --version
+       ```
+4. Run the Docker compose command to run Pact-broker.yml file
+   ```bash
+       docker-compose up -d
+   ```
+5. Run the ClassicJavaPactTest in Consumer/Junit5 package
+6. Run the docker-compose file in resources of Junit5 in wsl
+7. Then publish the interaction file to localserver at 9292 port. By using plugin and below gradle task:
+    ```bash 
+      id "au.com.dius.pact" version "4.3.10"
+    ```
+   ```bash
+    //./gradlew pactPublish --> command to publish pact file to pact broker.
+    pact {
+      publish {
+        pactDirectory = file('build/pacts/samples')
+        pactBrokerUrl = 'http://localhost:9292'
+        consumerVersion = '1.0.0'
+      }
+    }
+    ```
+8. Run the ClassicJavaPactTest in Provider/Junit5 package
