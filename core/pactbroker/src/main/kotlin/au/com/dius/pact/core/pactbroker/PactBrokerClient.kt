@@ -101,7 +101,7 @@ sealed class Latest {
 /**
  * Specifies the target for the can-i-deploy check (tag or environment)
  */
-data class To @JvmOverloads constructor(val tag: String? = null, val environment: String? = null)
+data class To @JvmOverloads constructor(val tag: String? = null, val environment: String? = null, val mainBranch: Boolean? = null)
 
 /**
  * Model for a CanIDeploy result
@@ -1151,7 +1151,11 @@ open class PactBrokerClient(
         if (to.tag.isNotEmpty()) {
           params.add("latest" to "true")
           params.add("tag" to escaper.escape(to.tag))
-        } else if (to.environment.isNullOrEmpty()) {
+        }
+
+        if (to.mainBranch == true) {
+          params.add("mainBranch" to "true")
+        } else if (to.environment.isNullOrEmpty() && to.tag.isNullOrEmpty()) {
           params.add("latest" to "true")
         }
       } else {
