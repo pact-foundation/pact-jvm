@@ -33,6 +33,9 @@ open class PactCanIDeployMojo : PactBaseMojo() {
   @Parameter(property = "toEnvironment", defaultValue = "")
   private var toEnvironment: String? = ""
 
+  @Parameter(property = "toMainBranch")
+  private var toMainBranch: Boolean? = null
+
   @Parameter(property = "ignore")
   private var ignore: Array<IgnoreSelector> = emptyArray()
 
@@ -56,7 +59,7 @@ open class PactCanIDeployMojo : PactBaseMojo() {
       throw MojoExecutionException("The can-i-deploy task requires -DpacticipantVersion=... or -Dlatest=true", null)
     }
 
-    val to = To(toTag, toEnvironment)
+    val to = To(toTag, toEnvironment, toMainBranch)
     val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion.orEmpty(), latest, to, ignore.asList())
     if (result.ok) {
       println("Computer says yes \\o/ ${result.message}\n\n${t.green(result.reason)}")

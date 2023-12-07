@@ -113,6 +113,21 @@ class PactCanIDeployMojoSpec extends Specification {
       new Latest.UseLatest(true), new To('', 'prod'), _) >> new CanIDeployResult(true, '', '', null, null)
   }
 
+  def 'passes toMainBranch parameter to the pact broker client'() {
+    given:
+    mojo.latest = 'true'
+    mojo.toMainBranch = true
+    mojo.brokerClient = Mock(PactBrokerClient)
+
+    when:
+    mojo.execute()
+
+    then:
+    notThrown(MojoExecutionException)
+    1 * mojo.brokerClient.canIDeploy('test', '1234',
+            new Latest.UseLatest(true), new To('', '', true), _) >> new CanIDeployResult(true, '', '', null, null)
+  }
+
   def 'passes ignore parameters to the pact broker client'() {
     given:
     IgnoreSelector[] selectors = [new IgnoreSelector('bob')] as IgnoreSelector[]
