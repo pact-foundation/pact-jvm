@@ -23,6 +23,7 @@ import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.http.message.BasicHeader
 import org.apache.hc.core5.ssl.SSLContexts
 import org.apache.hc.core5.util.TimeValue
+import java.io.File
 import java.net.URI
 
 /**
@@ -144,6 +145,8 @@ object HttpClient : KLogging() {
       setupInsecureTLS(builder)
     }
 
+    setupX509Certificate(builder)
+
     return builder.build() to credsProvider
   }
 
@@ -181,5 +184,28 @@ object HttpClient : KLogging() {
             .build()
         )
       )
+  }
+
+  private fun setupX509Certificate(builder: HttpClientBuilder) {
+    val keystorePath = "tmp/machine-id/keystore.jks"
+    val truststorePath = "tmp/machine-id/truststore.jks"
+    val keystorePassword = "123456"
+    val truststorePassword = "123456"
+
+    val sslContext = SSLContexts.custom()
+      .loadKeyMaterial(File(keystorePath), keystorePassword.toCharArray(), keystorePassword.toCharArray())
+      .loadTrustMaterial(File(truststorePath), truststorePassword.toCharArray())
+      .build()
+
+    val sslSocketFactory = SSLConnectionSocketFactoryBuilder.create().setSslContext(sslContext).build()
+
+    builder.setConnectionManager(
+      BasicHttpClientConnectionManager(
+        RegistryBuilder.create<ConnectionSocketFactory>()
+          .register("http", PlainConnectionSocketFactory.getSocketFactory())
+          .register("https", sslSocketFactory)
+          .build()
+      )
+    )
   }
 }
