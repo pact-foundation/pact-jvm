@@ -21,6 +21,7 @@ abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
   static final String PACTICIPANT_VERSION = 'pacticipantVersion'
   static final String TO = 'toTag'
   static final String TO_ENVIRONMENT = 'toEnvironment'
+  static final String TO_MAIN_BRANCH = 'toMainBranch'
   static final String LATEST = 'latest'
 
   @Internal
@@ -45,6 +46,10 @@ abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
   @Input
   @Optional
   abstract Property<Object> getToEnvironment()
+
+  @Input
+  @Optional
+  abstract Property<Object> getToMainBranch()
 
   @Input
   @Optional
@@ -79,7 +84,11 @@ abstract class PactCanIDeployTask extends PactCanIDeployBaseTask {
     if (toEnvironment.present) {
       environment = toEnvironment.get()
     }
-    def to = new To(toTag, environment)
+    Boolean mainBranch = null
+    if (toMainBranch.present) {
+      mainBranch = toMainBranch.get()
+    }
+    def to = new To(toTag, environment, mainBranch)
     def t = new TermColors()
     logger.debug(
       "Calling canIDeploy(pacticipant=$pacticipant, pacticipantVersion=$pacticipantVersion, latest=$latest, to=$to)"

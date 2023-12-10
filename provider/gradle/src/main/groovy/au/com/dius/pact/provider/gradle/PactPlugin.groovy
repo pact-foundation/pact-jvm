@@ -40,6 +40,7 @@ class PactPlugin extends PactPluginBase {
           toProp.set(project.hasProperty(TO) ? project.property(TO) : null)
           latestProp.set(project.hasProperty(LATEST) ? project.property(LATEST) : null)
           toEnvironment.set(project.hasProperty(TO_ENVIRONMENT) ? project.property(TO_ENVIRONMENT) : null)
+          toMainBranch.set(project.hasProperty(TO_MAIN_BRANCH) ? project.property(TO_MAIN_BRANCH) : null)
         }
 
         project.afterEvaluate {
