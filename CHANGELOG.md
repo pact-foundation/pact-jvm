@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.4 - Maintenance Release
+
+* b3c2bcb8f - Merge pull request #1747 from pact-foundation/chore/remove-xerces (Ronald Holshausen, Mon Dec 11 15:36:07 2023 +1100)
+* ece6a68e4 - chore: Remove xerces #1743 (Ronald Holshausen, Mon Dec 11 15:19:08 2023 +1100)
+* 0f015b282 - chore: Upgrade Gradle to 7.6.3 (Ronald Holshausen, Mon Dec 11 13:39:44 2023 +1100)
+* b8129fa2a - chore: Upgrade KTor to 2.3.2 (Ronald Holshausen, Sun Dec 10 08:37:00 2023 +1100)
+* eae15a8db - Merge pull request #1742 from ealesjordan/1741-can-i-deploy-main (Ronald Holshausen, Mon Dec 11 10:06:57 2023 +1100)
+* 62c6f7b67 - Issue 1741 - Add to main branch option to match what is possible in the Pact Flow UI (jordan.eales, Thu Dec 7 16:28:46 2023 +0000)
+* c002e9a97 - Merge pull request #1735 from biergit/patch-2 (Yousaf Nabi, Wed Nov 29 15:54:29 2023 +0000)
+* b3611387a - Merge pull request #1734 from biergit/patch-1 (Yousaf Nabi, Wed Nov 29 15:54:19 2023 +0000)
+* 1b8fe1952 - Fix another typo (biergit, Wed Nov 29 09:59:50 2023 +0100)
+* dc65478c2 - Fix typos (biergit, Wed Nov 29 09:58:11 2023 +0100)
+* 36a39929d - chore: cleanup some unecessary files (Ronald Holshausen, Wed Nov 15 16:41:22 2023 +1100)
+* 9f4467e62 - fix: Message matching rules can be defined under content instead of body #1509 (Ronald Holshausen, Wed Nov 15 15:36:20 2023 +1100)
+* eef0810ba - chore: Add branch to published pacts #1714 (Ronald Holshausen, Wed Nov 15 15:23:19 2023 +1100)
+* 30d28c105 - Chore: Add test with headers with params with no values #1727 (Ronald Holshausen, Wed Nov 15 10:02:43 2023 +1100)
+* 367cb6e5e - chore: Upgrade org.json:json to latest #1720 (Ronald Holshausen, Tue Oct 24 16:47:19 2023 +1100)
+* d0997e5c9 - bump version to 4.6.4 (Ronald Holshausen, Fri Sep 22 10:43:32 2023 +1000)
+
 # 4.6.3 - Bugfix Release
 
 * b318149bf - chore: fix codenarc violations #1717 (Ronald Holshausen, Thu Sep 21 12:43:18 2023 +1000)
