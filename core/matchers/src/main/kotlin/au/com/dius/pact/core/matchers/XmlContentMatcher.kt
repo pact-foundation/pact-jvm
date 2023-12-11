@@ -6,7 +6,6 @@ import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.zipAll
 import io.pact.plugins.jvm.core.InteractionContents
 import io.github.oshai.kotlinlogging.KLogging
-import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
 import org.w3c.dom.Node.CDATA_SECTION_NODE
@@ -52,18 +51,18 @@ object XmlContentMatcher : ContentMatcher, KLogging() {
   }
 
   fun parse(xmlData: String): Node {
+    val dbFactory = DocumentBuilderFactory.newInstance()
+    if (System.getProperty("pact.matching.xml.validating") == "false") {
+      dbFactory.isValidating = false
+      dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
+      dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+    }
+    if (System.getProperty("pact.matching.xml.namespace-aware") != "false") {
+      dbFactory.isNamespaceAware = true
+    }
     return if (xmlData.isEmpty()) {
-      TextImpl()
+      dbFactory.newDocumentBuilder().newDocument()
     } else {
-      val dbFactory = DocumentBuilderFactory.newInstance()
-      if (System.getProperty("pact.matching.xml.validating") == "false") {
-        dbFactory.isValidating = false
-        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
-        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-      }
-      if (System.getProperty("pact.matching.xml.namespace-aware") != "false") {
-        dbFactory.isNamespaceAware = true
-      }
       val dBuilder = dbFactory.newDocumentBuilder()
       val xmlInput = InputSource(StringReader(xmlData))
       val doc = dBuilder.parse(xmlInput)
