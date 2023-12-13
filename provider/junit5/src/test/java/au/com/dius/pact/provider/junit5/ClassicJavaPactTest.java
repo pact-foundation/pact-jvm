@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerAuth;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.apache.hc.core5.http.HttpRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +14,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @Provider("ProviderTestPost")
-@PactBroker(host = "localhost", port = "9292", consumers = "ConsumerTestPost")
+@PactBroker(
+        host = "test.pactflow.io",
+        scheme = "https",
+        authentication = @PactBrokerAuth(username = "dXfltyFMgNOFZAxr8io9wJ37iUpY42M", password = "O5AIZWxelWbLvqMd8PkAVycBJh2Psyg1"),
+        consumers = "ConsumerTestPost"
+)
 public class ClassicJavaPactTest {
     private static final int WIREMOCK_PORT = 8080;
     private WireMockServer wireMockServer;

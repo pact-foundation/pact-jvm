@@ -398,7 +398,6 @@ with `@Pact` for each test method invoked. To add non-Pact tests, just annotate 
       id "au.com.dius.pact" version "4.3.10"
     ```
    ```bash
-    //./gradlew pactPublish --> command to publish pact file to pact broker.
     pact {
       publish {
         pactDirectory = file('build/pacts/samples')
@@ -407,4 +406,16 @@ with `@Pact` for each test method invoked. To add non-Pact tests, just annotate 
       }
     }
     ```
-8. Run the ClassicJavaPactTest in Provider/Junit5 package
+8. For example we have used test.pactflow.io url, we can replace it with our required pactserver url.
+   ```bash 
+   pact { 
+      publish {
+        pactDirectory = file('build/pacts/samples')
+        pactBrokerUrl = 'https://test.pactflow.io/'
+        pactBrokerUsername = 'dXfltyFMgNOFZAxr8io9wJ37iUpY42M'
+        pactBrokerPassword = 'O5AIZWxelWbLvqMd8PkAVycBJh2Psyg1'
+        consumerVersion = '1.0.0'
+      }
+   }
+   ```
+9. Run the ClassicJavaPactTest in Provider/Junit5 package
