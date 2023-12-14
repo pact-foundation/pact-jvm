@@ -2,11 +2,11 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.core.support.SimpleHttp
 import groovy.json.JsonSlurper
-import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 @IgnoreIf({ os.windows }) // Failing on GH action Windows agents
+@SuppressWarnings('LineLength')
 class PactBrokerResultSpec extends Specification {
 
     def 'case when the test passes and the pact is verified'() {
@@ -97,8 +97,6 @@ class PactBrokerResultSpec extends Specification {
               ' but received \'bad\' for query parameter \'status\', path=status)')
     }
 
-    @SuppressWarnings('LineLength')
-    @Ignore // TODO: Re-enable this test when the V4 req/res classes generate the correct toString values
     def 'case when the test passes and there is a missing request'() {
       given:
         def testService = new PactBuilder().build  {
@@ -130,15 +128,9 @@ class PactBrokerResultSpec extends Specification {
       then:
         def e = thrown(PactFailedException)
         e.message.contains(
-          '''|The following requests were not received:
-             |\tmethod: post
-             |\tpath: /path
-             |\tquery: {}
-             |\theaders: {Content-Type=[application/json]}
-             |\tmatchers: MatchingRules(rules={body=MatchingRuleCategory(name=body, matchingRules={}), path=MatchingRuleCategory(name=path, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})})
-             |\tgenerators: Generators(categories={})
-             |\tbody: PRESENT({
+          '''The following requests were not received:
+             |HttpRequest(method=post, path=/path, query={}, headers={Content-Type=[application/json]}, body=PRESENT({
              |    "status": "isGood"
-             |})'''.stripMargin())
+             |}), matchingRules=MatchingRules(rules={body=MatchingRuleCategory(name=body, matchingRules={}), path=MatchingRuleCategory(name=path, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})}), generators=Generators(categories={}))'''.stripMargin())
     }
 }
