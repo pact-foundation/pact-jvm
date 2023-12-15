@@ -119,6 +119,8 @@ class MatcherExecutorSpec extends Specification {
     xml('<a:e xmlns:a="a"/>') | xml('<b:e xmlns:b="a"/>')  || true
     xml('<e xmlns="a"/>')     | xml('<e xmlns="b"/>')      || false
     json('"hello"')           | json('"hello"')            || true
+    json('"hello"')           | 'hello'                    || true
+    'hello'                   | json('"hello"')            || true
     json('100')               | json('200')                || true
     2.3d                      | 2.300d                     || true
     2.3g                      | 2.300g                     || true
@@ -395,6 +397,7 @@ class MatcherExecutorSpec extends Specification {
     expected                  | actual                     || mustBeEmpty
     'Harry'                   | 'Some other string'        || true
     'Harry'                   | ''                         || false
+    'Harry'                   | json('""')                 || false
     100                       | 200.3                      || true
     true                      | false                      || true
     null                      | null                       || true
