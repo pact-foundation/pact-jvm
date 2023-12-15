@@ -217,5 +217,7 @@ class Spring6MockMvcTestTarget @JvmOverloads constructor(
         /* NO-OP */
     }
 
-    companion object : KLogging()
+  override fun supportsInteraction(interaction: Interaction)  = interaction is SynchronousRequestResponse
+
+  companion object : KLogging()
 }

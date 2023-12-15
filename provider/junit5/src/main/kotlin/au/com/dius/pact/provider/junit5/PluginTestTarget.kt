@@ -102,6 +102,8 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
     return false
   }
 
+  override fun supportsInteraction(interaction: Interaction) = interaction.isV4()
+
   override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
     return ProviderResponse()
   }
