@@ -1,0 +1,56 @@
+{
+    "consumer": {
+        "name": "test_consumer"
+    },
+    "interactions": [
+        {
+            "contents": {
+                "content": {
+                    "someField": "someValue"
+                },
+                "contentType": "application/json",
+                "encoded": false
+            },
+            "description": "A message with metadata",
+            "matchingRules": {
+                "body": {
+                    "$.someField": {
+                        "combine": "AND",
+                        "matchers": [
+                            {
+                                "match": "type"
+                            }
+                        ]
+                    }
+                },
+                "metadata": {
+                    "someKey": {
+                        "combine": "AND",
+                        "matchers": [
+                            {
+                                "match": "type"
+                            }
+                        ]
+                    }
+                }
+            },
+            "metadata": {
+                "contentType": "application/json",
+                "someKey": "someString"
+            },
+            "pending": false,
+            "type": "Asynchronous/Messages"
+        }
+    ],
+    "metadata": {
+        "pact-jvm": {
+            "version": "4.6.5"
+        },
+        "pactSpecification": {
+            "version": "4.0"
+        }
+    },
+    "provider": {
+        "name": "AmqpProviderWithMetadata"
+    }
+}

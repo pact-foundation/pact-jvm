@@ -247,7 +247,7 @@ fun <M : Mismatch> matchType(
     expected is Attr && actual is Attr && QualifiedName(actual) == QualifiedName(expected)
   ) {
     emptyList()
-  } else if (expected is String && actual is String ||
+  } else if (isString(expected) && isString(actual) ||
     expected is List<*> && actual is List<*> ||
     expected is Array<*> && actual is Array<*> ||
     expected is ByteArray && actual is ByteArray ||
@@ -259,6 +259,7 @@ fun <M : Mismatch> matchType(
     } else {
       val empty = when (actual) {
         is String -> actual.isEmpty()
+        is JsonValue.StringValue -> actual.toString().isEmpty()
         is List<*> -> actual.isEmpty()
         is Array<*> -> actual.isEmpty()
         is ByteArray -> actual.isEmpty()
@@ -359,8 +360,7 @@ fun matchDecimal(actual: Any?): Boolean {
       bigDecimal == BigDecimal.ZERO || bigDecimal.scale() > 0
     }
     actual is JsonValue.Integer -> decimalRegex.matches(actual.toString())
-    actual is String -> decimalRegex.matches(actual)
-    actual is JsonValue.StringValue -> decimalRegex.matches(actual.toString())
+    isString(actual) -> decimalRegex.matches(actual.toString())
     actual is Attr -> decimalRegex.matches(actual.nodeValue)
     else -> false
   }
@@ -376,8 +376,7 @@ fun matchInteger(actual: Any?): Boolean {
     actual is JsonValue.Integer -> true
     actual is BigDecimal && actual.scale() == 0 -> true
     actual is JsonValue.Decimal -> integerRegex.matches(actual.toString())
-    actual is String -> integerRegex.matches(actual)
-    actual is JsonValue.StringValue -> integerRegex.matches(actual.toString())
+    isString(actual) -> integerRegex.matches(actual.toString())
     actual is Attr -> integerRegex.matches(actual.nodeValue)
     else -> false
   }
@@ -402,13 +401,15 @@ fun <M : Mismatch> matchBoolean(
     actual is Boolean -> emptyList()
     actual is JsonValue && actual.isBoolean -> emptyList()
     actual is Attr && actual.nodeValue.matches(booleanRegex) -> emptyList()
-    actual is String && actual.matches(booleanRegex) -> emptyList()
+    isString(actual) && actual.toString().matches(booleanRegex) -> emptyList()
     actual is List<*> -> emptyList()
     actual is Map<*, *> -> emptyList()
     else -> listOf(mismatchFactory.create(expected, actual,
       "Expected ${valueOf(actual)} (${typeOf(actual)}) to match a boolean", path))
   }
 }
+
+private fun isString(value: Any?) = value is String || value is JsonValue.StringValue
 
 fun <M : Mismatch> matchDate(
   pattern: String,
