@@ -187,14 +187,11 @@ object HttpClient : KLogging() {
   }
 
   private fun setupX509Certificate(builder: HttpClientBuilder) {
-    val keystorePath = "tmp/machine-id/keystore.jks"
-    val truststorePath = "tmp/machine-id/truststore.jks"
+    val keystorePath = "tmp/machine-id/keystore.p12"
     val keystorePassword = "123456"
-    val truststorePassword = "123456"
 
     val sslContext = SSLContexts.custom()
       .loadKeyMaterial(File(keystorePath), keystorePassword.toCharArray(), keystorePassword.toCharArray())
-      .loadTrustMaterial(File(truststorePath), truststorePassword.toCharArray())
       .build()
 
     val sslSocketFactory = SSLConnectionSocketFactoryBuilder.create().setSslContext(sslContext).build()
