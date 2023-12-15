@@ -21,7 +21,6 @@ import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
-import io.pact.plugins.jvm.core.InteractionVerificationData
 import io.github.oshai.kotlinlogging.KLogging
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.HttpRequest
@@ -79,10 +78,10 @@ open class PactVerificationExtension(
     return when (parameterContext.parameter.type) {
       Pact::class.java -> true
       Interaction::class.java -> true
-      ClassicHttpRequest::class.java, HttpRequest::class.java -> testContext?.target is HttpTestTarget
+      ClassicHttpRequest::class.java, HttpRequest::class.java -> testContext.hasMultipleTargets() || testContext?.currentTarget() is HttpTestTarget
       PactVerificationContext::class.java -> true
       ProviderVerifier::class.java -> true
-      RequestData::class.java -> testContext?.target is PluginTestTarget
+      RequestData::class.java -> testContext.hasMultipleTargets() || testContext?.currentTarget() is PluginTestTarget
       else -> false
     }
   }
@@ -127,26 +126,34 @@ open class PactVerificationExtension(
     val store = context.getStore(namespace)
     val testContext = store.get("interactionContext") as PactVerificationContext
 
-    val providerInfo = testContext.target.getProviderInfo(serviceName, pactSource)
+    val target = testContext.currentTarget()
+      ?: throw UnsupportedOperationException(
+        "No test target has been configured for ${interaction.javaClass.simpleName} interactions")
+    val providerInfo = target.getProviderInfo(serviceName, pactSource)
     testContext.providerInfo = providerInfo
 
-    prepareVerifier(testContext, context, pactSource)
+    prepareVerifier(testContext, context, pactSource, target)
     store.put("verifier", testContext.verifier)
 
     val executionContext = testContext.executionContext ?: mutableMapOf()
     executionContext["ArrayContainsJsonGenerator"] = ArrayContainsJsonGenerator
-    val requestAndClient = testContext.target.prepareRequest(pact, interaction, executionContext)
+    val requestAndClient = target.prepareRequest(pact, interaction, executionContext)
     if (requestAndClient != null) {
       val (request, client) = requestAndClient
       store.put("request", request)
       store.put("client", client)
-      if (testContext.target.isHttpTarget()) {
+      if (target.isHttpTarget()) {
         store.put("httpRequest", request)
       }
     }
   }
 
-  private fun prepareVerifier(testContext: PactVerificationContext, extContext: ExtensionContext, pactSource: au.com.dius.pact.core.model.PactSource) {
+  private fun prepareVerifier(
+    testContext: PactVerificationContext,
+    extContext: ExtensionContext,
+    pactSource: au.com.dius.pact.core.model.PactSource,
+    target: TestTarget
+  ) {
     val consumer = when {
       pactSource is BrokerUrlSource && pactSource.result != null -> ConsumerInfo(pactSource.result!!.name,
         pactSource = pactSource, notices = pactSource.result!!.notices, pending = pactSource.result!!.pending)
@@ -155,7 +162,7 @@ open class PactVerificationExtension(
 
     val verifier = ProviderVerifier()
     verifier.verificationSource = "junit5"
-    testContext.target.prepareVerifier(verifier, extContext.requiredTestInstance, pact)
+    target.prepareVerifier(verifier, extContext.requiredTestInstance, pact)
 
     setupReporters(verifier, serviceName, interaction.description, extContext, testContext.valueResolver)
 

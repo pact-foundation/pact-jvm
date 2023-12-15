@@ -8,10 +8,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
-import au.com.dius.pact.core.support.Json
-import au.com.dius.pact.core.support.MetricEvent
-import au.com.dius.pact.core.support.Metrics
-import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.*
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.IConsumerInfo
@@ -25,6 +22,7 @@ import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.TestDescription
 import io.pact.plugins.jvm.core.PluginConfiguration
 import org.junit.jupiter.api.extension.ExtensionContext
+import kotlin.collections.isNotEmpty
 
 /**
  * The instance that holds the context for the test of an interaction. The test target will need to be set on it in
@@ -40,7 +38,8 @@ data class PactVerificationContext @JvmOverloads constructor(
   val consumer: IConsumerInfo,
   val interaction: Interaction,
   val pact: Pact,
-  var testExecutionResult: MutableList<VerificationResult.Failed> = mutableListOf()
+  var testExecutionResult: MutableList<VerificationResult.Failed> = mutableListOf(),
+  val additionalTargets: MutableList<TestTarget> = mutableListOf()
 ) {
   val stateChangeHandlers: MutableList<Any> = mutableListOf()
   var executionContext: MutableMap<String, Any>? = null
@@ -164,4 +163,22 @@ data class PactVerificationContext @JvmOverloads constructor(
   fun addStateChangeHandlers(vararg stateClasses: Any) {
     stateChangeHandlers.addAll(stateClasses)
   }
+
+  /**
+   * Adds additional targets to the context for the test.
+   */
+  fun addAdditionalTarget(target: TestTarget) {
+    additionalTargets.add(target)
+  }
+
+  fun currentTarget(): TestTarget? {
+    return if (target.supportsInteraction(interaction)) {
+      target
+    } else {
+      additionalTargets.firstOrNull { it.supportsInteraction(interaction) }
+    }
+  }
 }
+
+fun PactVerificationContext?.hasMultipleTargets() = if (this == null)
+  false else additionalTargets.isNotEmpty()

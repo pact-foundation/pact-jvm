@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.IConsumerInfo
@@ -42,7 +43,7 @@ class PactVerificationExtensionSpec extends Specification {
   @Shared ExtensionContext extContext
   @Shared Map<String, Object> contextMap
   ValueResolver mockValueResolver
-  @Shared RequestResponseInteraction interaction1, interaction2
+  @Shared Interaction interaction1, interaction2
   @Shared RequestResponsePact pact
   PactBrokerSource pactSource
   @Shared ClassicHttpRequest classicHttpRequest
@@ -173,8 +174,11 @@ class PactVerificationExtensionSpec extends Specification {
 
   def 'supports parameter test'() {
     given:
-    context.target = target
-    extension = new PactVerificationExtension(pact, pactSource, interaction1, 'service', 'consumer',
+    def interaction = new V4Interaction.SynchronousHttp(null, 'interaction2')
+    context = new PactVerificationContext(store, extContext, target, Stub(IProviderVerifier),
+      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction, pact, [])
+
+    extension = new PactVerificationExtension(pact, pactSource, interaction, 'service', 'consumer',
       mockValueResolver)
     Parameter parameter = mock(Parameter)
     when(parameter.getType()).thenReturn(parameterType)

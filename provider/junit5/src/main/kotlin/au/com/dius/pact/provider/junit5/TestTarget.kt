@@ -61,6 +61,11 @@ interface TestTarget {
    * Prepares the verifier for use during the test
    */
   fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact)
+
+  /**
+   * If the test target supports the given interaction
+   */
+  fun supportsInteraction(interaction: Interaction): Boolean = false
 }
 
 /**
@@ -99,6 +104,8 @@ open class HttpTestTarget @JvmOverloads constructor (
   }
 
   override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact) { }
+
+  override fun supportsInteraction(interaction: Interaction) = interaction is SynchronousRequestResponse
 
   override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
     val providerClient = client as ProviderClient
@@ -216,6 +223,9 @@ open class MessageTestTarget @JvmOverloads constructor(
       }
     }
   }
+
+  override fun supportsInteraction(interaction: Interaction) = interaction is MessageInteraction ||
+    interaction is V4Interaction.SynchronousMessages
 
   override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
     return ProviderResponse(200)
