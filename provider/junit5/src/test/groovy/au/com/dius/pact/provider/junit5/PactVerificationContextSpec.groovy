@@ -150,4 +150,82 @@ class PactVerificationContextSpec extends Specification {
     1 * verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
       interaction.description, [:], true, _) >> new VerificationResult.Ok()
   }
+
+  def 'currentTarget - returns the current target if it supports the interaction'() {
+    given:
+    def expectedTarget = new HttpTestTarget()
+    ExtensionContext.Store store = Stub()
+    ExtensionContext extContext = Stub()
+    IProviderVerifier verifier = Mock()
+    ValueResolver valueResolver = Stub()
+    IProviderInfo provider = Stub()
+    IConsumerInfo consumer = Stub()
+    Interaction interaction = new RequestResponseInteraction('test')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction])
+    List<VerificationResult> testResults = []
+
+    def context = new PactVerificationContext(store, extContext, expectedTarget, verifier, valueResolver,
+      provider, consumer, interaction, pact, testResults)
+
+    when:
+    def result = context.currentTarget()
+
+    then:
+    result == expectedTarget
+  }
+
+  @SuppressWarnings('LineLength')
+  def 'currentTarget - searches for a target in the additional ones if the current target does not support the interaction'() {
+    given:
+    def expectedTarget = new HttpTestTarget()
+    ExtensionContext.Store store = Stub()
+    ExtensionContext extContext = Stub()
+    IProviderVerifier verifier = Mock()
+    ValueResolver valueResolver = Stub()
+    IProviderInfo provider = Stub()
+    IConsumerInfo consumer = Stub()
+    Interaction interaction = new RequestResponseInteraction('test')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction])
+    List<VerificationResult> testResults = []
+    TestTarget otherTarget = Mock {
+      supportsInteraction(_) >> false
+    }
+
+    def context = new PactVerificationContext(store, extContext, new MessageTestTarget(), verifier, valueResolver,
+      provider, consumer, interaction, pact, testResults)
+    context.addAdditionalTarget(otherTarget)
+    context.addAdditionalTarget(expectedTarget)
+
+    when:
+    def result = context.currentTarget()
+
+    then:
+    result == expectedTarget
+  }
+
+  def 'currentTarget - returns null if no target can be found that supports the interaction'() {
+    given:
+    ExtensionContext.Store store = Stub()
+    ExtensionContext extContext = Stub()
+    IProviderVerifier verifier = Mock()
+    ValueResolver valueResolver = Stub()
+    IProviderInfo provider = Stub()
+    IConsumerInfo consumer = Stub()
+    Interaction interaction = new RequestResponseInteraction('test')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction])
+    List<VerificationResult> testResults = []
+    TestTarget otherTarget = Mock {
+      supportsInteraction(_) >> false
+    }
+
+    def context = new PactVerificationContext(store, extContext, new MessageTestTarget(), verifier, valueResolver,
+      provider, consumer, interaction, pact, testResults)
+    context.addAdditionalTarget(otherTarget)
+
+    when:
+    def result = context.currentTarget()
+
+    then:
+    result == null
+  }
 }

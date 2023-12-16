@@ -207,6 +207,41 @@ class PactVerificationExtensionSpec extends Specification {
     RequestData             | new PluginTestTarget()  | true
   }
 
+  def 'supports parameter test with mutiple test targets'() {
+    given:
+    def interaction = new V4Interaction.SynchronousHttp(null, 'interaction2')
+    context = new PactVerificationContext(store, extContext, target, Stub(IProviderVerifier),
+      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction, pact, [])
+    context.addAdditionalTarget(new MessageTestTarget())
+
+    extension = new PactVerificationExtension(pact, pactSource, interaction, 'service', 'consumer',
+      mockValueResolver)
+    Parameter parameter = mock(Parameter)
+    when(parameter.getType()).thenReturn(parameterType)
+    ParameterContext parameterContext = Stub {
+      getParameter() >> parameter
+    }
+
+    expect:
+    extension.supportsParameter(parameterContext, extContext) == true
+
+    where:
+
+    parameterType           | target
+    Pact                    | new HttpTestTarget()
+    Interaction             | new HttpTestTarget()
+    ClassicHttpRequest      | new HttpTestTarget()
+    ClassicHttpRequest      | new HttpsTestTarget()
+    ClassicHttpRequest      | new MessageTestTarget()
+    HttpRequest             | new HttpTestTarget()
+    HttpRequest             | new HttpsTestTarget()
+    HttpRequest             | new MessageTestTarget()
+    PactVerificationContext | new HttpTestTarget()
+    ProviderVerifier        | new HttpTestTarget()
+    RequestData             | new HttpTestTarget()
+    RequestData             | new PluginTestTarget()
+  }
+
   def 'resolve parameter test'() {
     given:
     extension = new PactVerificationExtension(pact, pactSource, interaction1, 'service', 'consumer',
@@ -233,5 +268,20 @@ class PactVerificationExtensionSpec extends Specification {
     ProviderVerifier            | verifier
     String                      | null
     RequestData                 | data
+  }
+
+  def 'beforeTestExecution - throws an exception if there is no valid test target for the interaction'() {
+    given:
+    context = new PactVerificationContext(store, extContext, new MessageTestTarget(), Stub(IProviderVerifier),
+      Stub(ValueResolver), Stub(IProviderInfo), Stub(IConsumerInfo), interaction1, pact, [])
+    extension = new PactVerificationExtension(pact, pactSource, interaction1, 'service', 'consumer',
+      mockValueResolver)
+
+    when:
+    extension.beforeTestExecution(extContext)
+
+    then:
+    def ex = thrown(UnsupportedOperationException)
+    ex.message == 'No test target has been configured for RequestResponseInteraction interactions'
   }
 }
