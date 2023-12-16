@@ -8,7 +8,9 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
-import au.com.dius.pact.core.support.*
+import au.com.dius.pact.core.support.MetricEvent
+import au.com.dius.pact.core.support.Metrics
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.IConsumerInfo
@@ -20,7 +22,6 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.TestDescription
-import io.pact.plugins.jvm.core.PluginConfiguration
 import org.junit.jupiter.api.extension.ExtensionContext
 import kotlin.collections.isNotEmpty
 

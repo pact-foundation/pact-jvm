@@ -4,6 +4,8 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.V4Interaction
+import au.com.dius.pact.core.model.messaging.Message
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
@@ -82,5 +84,18 @@ class WebFluxTargetSpec extends Specification {
     response.statusCode == 200
     response.contentType.toString() == 'application/json'
     response.body.valueAsString() == '{"id":1234}'
+  }
+
+  def 'supports any HTTP interaction'() {
+    expect:
+    new WebFluxTarget(routerFunction).supportsInteraction(interaction) == result
+
+    where:
+    interaction                                   | result
+    new RequestResponseInteraction('test')        | true
+    new Message('test')                           | false
+    new V4Interaction.AsynchronousMessage('test') | false
+    new V4Interaction.SynchronousMessages('test') | false
+    new V4Interaction.SynchronousHttp('test')     | true
   }
 }
