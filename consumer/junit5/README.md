@@ -49,6 +49,22 @@ interactions for the test.
     }
 ```
 
+Note for V4 Pacts, the format of the method needs to be
+```java
+    @Pact(provider="ArticlesProvider", consumer="test_consumer")
+    public V4Pact createPact(PactDslWithProvider builder) {
+        return builder
+            .given("test state")
+            .uponReceiving("ExampleJavaConsumerPactTest test interaction")
+                .path("/articles.json")
+                .method("GET")
+            .willRespondWith()
+                .status(200)
+                .body("{\"responsetest\": true}")
+            .toPact(V4Pact.class);
+    }
+```
+
 ### 3. Link the mock server with the interactions for the test with `@PactTestFor`
 
 Then the final step is to use the `@PactTestFor` annotation to tell the Pact extension how to setup the Pact test. You
