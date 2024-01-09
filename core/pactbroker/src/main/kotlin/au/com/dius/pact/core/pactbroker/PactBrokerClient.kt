@@ -1155,6 +1155,7 @@ open class PactBrokerClient(
 
         if (to.mainBranch == true) {
           params.add("mainBranch" to "true")
+          params.add("latest" to "true")
         } else if (to.environment.isNullOrEmpty() && to.tag.isNullOrEmpty()) {
           params.add("latest" to "true")
         }
