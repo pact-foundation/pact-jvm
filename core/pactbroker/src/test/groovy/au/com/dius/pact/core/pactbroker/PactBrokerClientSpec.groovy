@@ -707,9 +707,9 @@ class PactBrokerClientSpec extends Specification {
     'Test'       | ''                 | new Latest.UseLatest(true)         | new To(null, 'env1', false)   | []                                                                 || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env1'
     'Test'       | ''                 | new Latest.UseLatest(true)         | new To('tag1', 'env1', false) | []                                                                 || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env1&latest=true&tag=tag1'
     'Test'       | ''                 | new Latest.UseLatest(true)         | new To(null, 'env 1', false)  | []                                                                 || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env+1'
-    'Test'       | ''                 | new Latest.UseLatest(true)         | new To(null, 'env1', true)   | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env1&mainBranch=true'
-    'Test'       | ''                 | new Latest.UseLatest(true)         | new To('tag1', 'env1', true) | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env1&latest=true&tag=tag1&mainBranch=true'
-    'Test'       | ''                 | new Latest.UseLatest(true)         | new To(null, 'env 1', true)  | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env+1&mainBranch=true'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | new To(null, 'env1', true)   | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env1&mainBranch=true&latest=true'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | new To('tag1', 'env1', true) | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env1&latest=true&tag=tag1&mainBranch=true&latest=true'
+    'Test'       | ''                 | new Latest.UseLatest(true)         | new To(null, 'env 1', true)  | []                                                                  || 'q[][pacticipant]=Test&latestby=cvp&q[][latest]=true&environment=env+1&mainBranch=true&latest=true'
   }
 
   @Issue('#1511')
