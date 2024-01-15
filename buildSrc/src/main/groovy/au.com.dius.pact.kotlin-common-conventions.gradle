@@ -46,7 +46,7 @@ dependencies {
         implementation 'io.ktor:ktor-server-netty:2.3.2'
         implementation 'io.ktor:ktor-network-tls-certificates:2.3.2'
         implementation 'io.ktor:ktor-server-call-logging:2.3.2'
-        implementation 'io.netty:netty-handler:4.1.86.Final'
+        implementation 'io.netty:netty-handler:4.1.104.Final'
         implementation 'org.apache.groovy:groovy:4.0.11'
         implementation 'org.apache.groovy:groovy-json:4.0.11'
         implementation 'org.apache.groovy:groovy-xml:4.0.11'
