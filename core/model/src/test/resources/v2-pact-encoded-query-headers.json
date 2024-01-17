@@ -1,0 +1,52 @@
+{
+  "consumer": {
+    "name": "Consumer"
+  },
+  "interactions": [
+    {
+      "description": "a request for bookings count",
+      "request": {
+        "headers": {
+          "se-api-token": "15123-234234-234asd",
+          "se-token": "ABC123"
+        },
+        "matchingRules": {
+          "$.header['se-api-token']": {
+            "match": "type"
+          },
+          "$.header['se-token'][0]": {
+            "match": "type"
+          }
+        },
+        "method": "GET",
+        "path": "/v4/users/1234/bookings/count"
+      },
+      "response": {
+        "body": {
+          "cancelled": 1,
+          "past": 2,
+          "upcoming": 3
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "11.0.2"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "Provider"
+  }
+}

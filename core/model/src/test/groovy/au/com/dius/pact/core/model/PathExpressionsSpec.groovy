@@ -184,4 +184,24 @@ class PathExpressionsSpec extends Specification {
     'a b'   | 'a.b' || "a.b['a b']"
     '$a.b'  | 'a.b' || "a.b['\$a.b']"
   }
+
+  def 'construct path from tokens'() {
+    expect:
+    PathExpressionsKt.pathFromTokens(tokens) == result
+
+    where:
+
+    tokens                                                                            | result
+    []                                                                                | ''
+    [PathToken.Root.INSTANCE]                                                         | '$'
+    [PathToken.Root.INSTANCE, new PathToken.Field('a')]                               | '$.a'
+    [new PathToken.Field('a')]                                                        | 'a'
+    [PathToken.Root.INSTANCE, new PathToken.Field('a.b')]                             | '$[\'a.b\']'
+    [new PathToken.Field('a.b')]                                                      | '[\'a.b\']'
+    [PathToken.Root.INSTANCE, PathToken.Star.INSTANCE]                                | '$.*'
+    [PathToken.Star.INSTANCE]                                                         | '*'
+    [PathToken.Root.INSTANCE, PathToken.StarIndex.INSTANCE]                           | '$[*]'
+    [PathToken.StarIndex.INSTANCE]                                                    | '[*]'
+    [PathToken.Root.INSTANCE, new PathToken.Field('a'), PathToken.StarIndex.INSTANCE] | '$.a[*]'
+  }
 }
