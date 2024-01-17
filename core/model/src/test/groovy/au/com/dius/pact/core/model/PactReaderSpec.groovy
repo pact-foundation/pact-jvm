@@ -1,8 +1,11 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.json.JsonParser
 import com.amazonaws.services.s3.AmazonS3
@@ -72,6 +75,26 @@ class PactReaderSpec extends Specification {
     interaction.response.headers['access-control-allow-headers'] == ['Content-Type', 'Authorization']
     interaction.response.headers['access-control-allow-methods'] == ['POST', 'GET', 'PUT', 'HEAD', 'DELETE', 'OPTIONS',
                                                                      'PATCH']
+  }
+
+  def 'loads a pact with V2 version and encoded paths for query parameters and headers'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('v2-pact-encoded-query-headers.json')
+
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+    def interaction = pact.interactions.first()
+
+    then:
+    pact instanceof RequestResponsePact
+    interaction instanceof RequestResponseInteraction
+    interaction.request.headers == ['se-api-token': ['15123-234234-234asd'], 'se-token': ['ABC123']]
+    interaction.request.matchingRules.rules == [
+      header: new MatchingRuleCategory('header', [
+        'se-api-token': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+        'se-token[0]': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+      ])
+    ]
   }
 
   def 'loads a pact with V3 version using V3 loader'() {

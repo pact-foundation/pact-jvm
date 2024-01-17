@@ -7,11 +7,33 @@ const val PATH_SPECIAL_CHARS = "'[].@ \t\n"
 const val EXP_ALLOWED_SPECIAL_CHARS = "-_:#@"
 
 sealed class PathToken {
-  object Root : PathToken()
-  data class Field(val name: String) : PathToken()
-  data class Index(val index: Int) : PathToken()
-  object Star : PathToken()
-  object StarIndex : PathToken()
+  object Root : PathToken() {
+    override fun toString() = "$"
+  }
+
+  data class Field(val name: String) : PathToken() {
+    override fun toString(): String {
+      return if (StringUtils.containsAny(this.name, PATH_SPECIAL_CHARS)) {
+        "['${this.name}']"
+      } else {
+        this.name
+      }
+    }
+  }
+
+  data class Index(val index: Int) : PathToken() {
+    override fun toString(): String {
+      return "[${this.index}]"
+    }
+  }
+
+  object Star : PathToken() {
+    override fun toString() = "*"
+  }
+
+  object StarIndex : PathToken() {
+    override fun toString() = "[*]"
+  }
 }
 
 // string_path -> [^']+
@@ -196,3 +218,25 @@ fun constructPath(path: List<String>) =
       constructValidPath(segment, path)
     }
   }
+
+/**
+ * This will combine the path tokens into a valid path
+ */
+fun pathFromTokens(tokens: List<PathToken>): String {
+  return tokens.fold("") { acc, token ->
+    acc + when (token) {
+      PathToken.Root -> "$"
+      is PathToken.Field -> {
+        val s = token.toString()
+        if (acc.isEmpty() || s.startsWith("[")) {
+          s
+        } else {
+          ".$s"
+        }
+      }
+      is PathToken.Index -> "[${token.index}]"
+      PathToken.Star -> if (acc.isEmpty()) "*" else ".*"
+      PathToken.StarIndex -> "[*]"
+    }
+  }
+}

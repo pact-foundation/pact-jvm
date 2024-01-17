@@ -2,6 +2,8 @@ package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.atLeast
+import au.com.dius.pact.core.model.pathFromTokens
+import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import io.github.oshai.kotlinlogging.KLogging
@@ -29,7 +31,7 @@ class MatchingRulesImpl : MatchingRules {
 
     fun fromV2Json(json: JsonValue.Object) {
       json.entries.forEach { (key, value) ->
-        val path = key.split('.')
+        val path = parsePath(key)
         if (key.startsWith("$.body")) {
           if (key == "$.body") {
             addV2Rule("body", "$", Json.toMap(value))
@@ -37,9 +39,9 @@ class MatchingRulesImpl : MatchingRules {
             addV2Rule("body", "$${key.substring(6)}", Json.toMap(value))
           }
         } else if (key.startsWith("$.headers")) {
-          addV2Rule("header", path[2], Json.toMap(value))
+          addV2Rule("header", pathFromTokens(path.drop(2)), Json.toMap(value))
         } else {
-          addV2Rule(path[1], if (path.size > 2) path[2] else null, Json.toMap(value))
+          addV2Rule(path[1].toString(), if (path.size > 2) pathFromTokens(path.drop(2)) else null, Json.toMap(value))
         }
       }
     }
