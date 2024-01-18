@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.5 - Bugfix Release
+
+* 704f9cde5 - fix: newJsonBody() builder unable to handle certain field names #1760 (Ronald Holshausen, Thu Jan 18 11:46:48 2024 +1100)
+* e74487f67 - fix: Add set-cookie header to the list of single value headers (Ronald Holshausen, Wed Jan 17 13:52:06 2024 +1100)
+* 51762bd96 - Merge pull request #1759 from ealesjordan/check-latest-on-main-branch (Ronald Holshausen, Wed Jan 17 14:29:21 2024 +1100)
+* bcadfde6b - fix: Support V2 format with header/query params with encoded paths (Ronald Holshausen, Wed Jan 17 11:49:09 2024 +1100)
+* d60747597 - chore: Upgrade io.netty:netty-handler to 4.1.104.Final #1755 (Ronald Holshausen, Mon Jan 15 13:21:01 2024 +1100)
+* 51f9b5808 - Issue 1758 - Add latest flag when comparing to the main branch so only the latest contract is checked (jordan.eales, Tue Jan 9 14:41:34 2024 +0000)
+* be4b6968b - chore: Update Junit 5 readme with V4 Pact example #1745 (Ronald Holshausen, Wed Dec 20 15:53:00 2023 +1100)
+* 9a8d12133 - feat: Add tests for supportingmultiple test targets with JUnit 5 #1708 (Ronald Holshausen, Sat Dec 16 19:05:46 2023 +1100)
+* 4687d9695 - feat: Support multiple test targets with JUnit 5 #1708 (Ronald Holshausen, Fri Dec 15 23:36:28 2023 +1100)
+* fe8e0cc69 - chore: Correct Javadoc for @Pact annotation #1739 (Ronald Holshausen, Mon Dec 18 11:26:28 2023 +1100)
+* 2a641c47b - fix: Message metadata is parsed as JSON, so need to check for JSON types #1749 (Ronald Holshausen, Fri Dec 15 12:21:32 2023 +1100)
+* 3809c9b52 - chore: cleanup disabled test (Ronald Holshausen, Fri Dec 15 10:03:02 2023 +1100)
+* d918302a3 - bump version to 4.6.5 (Ronald Holshausen, Mon Dec 11 16:39:18 2023 +1100)
+
 # 4.6.4 - Maintenance Release
 
 * b3c2bcb8f - Merge pull request #1747 from pact-foundation/chore/remove-xerces (Ronald Holshausen, Mon Dec 11 15:36:07 2023 +1100)
