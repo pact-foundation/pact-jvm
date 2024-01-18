@@ -1,20 +1,20 @@
 package au.com.dius.pact.consumer.dsl;
 
-import au.com.dius.pact.consumer.dsl.DslPart;
-import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import au.com.dius.pact.consumer.dsl.LambdaDsl;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class LambdaDslTest {
 
     @Test
-    public void testArrayWithObjects() throws IOException {
+    public void testArrayWithObjects() {
         /*
             [
                 {
@@ -54,7 +54,7 @@ public class LambdaDslTest {
     }
 
     @Test
-    public void testObjectWithObjects() throws IOException {
+    public void testObjectWithObjects() {
         /*
             {
                 "propObj1": {
@@ -96,7 +96,7 @@ public class LambdaDslTest {
     }
 
     @Test
-    public void testObjectWithComplexStructure() throws IOException {
+    public void testObjectWithComplexStructure() {
         /*
             {
                 "propObj1": {
@@ -251,5 +251,27 @@ public class LambdaDslTest {
 
         assertThat(lambdaPactDsl.getBody().toString(), is(pactDslJson.getBody().toString()));
         assertThat(lambdaPactDsl.getMatchers(), is(pactDslJson.getMatchers()));
+    }
+
+    @Test
+    public void attribute_that_is_a_url() {
+        DslPart jsonBody = LambdaDsl.newJsonBody((body) -> {
+            body.nullValue("error");
+            body.stringValue("iss", "f2f");
+            body.stringValue("sub", "test-subject");
+            body.stringType("state", "f5f0d4d1-b937-4abe-b379-8269f600ad44");
+            body.minArrayLike(
+                "https://vocab.account.gov.uk/v1/credentialJWT",
+                1,
+                PactDslJsonRootValue.stringMatcher("[a-fA-F0-9]+", "0123456789abcdef"), 1);
+            body.nullValue("error_description");
+        }).build().close();
+
+        assertThat(jsonBody.getBody().toString(), is("{\"error\":null,\"error_description\":null,\"https://vocab.account.gov.uk/v1/credentialJWT\":[\"0123456789abcdef\"],\"iss\":\"f2f\",\"state\":\"f5f0d4d1-b937-4abe-b379-8269f600ad44\",\"sub\":\"test-subject\"}"));
+        assertThat(jsonBody.getMatchers(), is(equalTo(new MatchingRuleCategory("body", Map.of(
+            "$.state", new MatchingRuleGroup(List.of(au.com.dius.pact.core.model.matchingrules.TypeMatcher.INSTANCE)),
+            "$['https://vocab.account.gov.uk/v1/credentialJWT']", new MatchingRuleGroup(List.of(new au.com.dius.pact.core.model.matchingrules.MinTypeMatcher(1))),
+            "$['https://vocab.account.gov.uk/v1/credentialJWT'][*]", new MatchingRuleGroup(List.of(new au.com.dius.pact.core.model.matchingrules.RegexMatcher("[a-fA-F0-9]+", "0123456789abcdef")))
+        )))));
     }
 }

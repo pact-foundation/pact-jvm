@@ -49,13 +49,14 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
             "$.id",
-            "$.2.id",
-            "$.2.v1",
             "$.numbers[0]",
             "$.numbers[3]",
             "$.numbers[4].id",
             "$.numbers[4].timestamp",
-            "$.numbers[4].date_of_birth");
+            "$.numbers[4].date_of_birth",
+            "$[2].id",
+            "$[2].v1"
+        );
 
         return pact;
     }
