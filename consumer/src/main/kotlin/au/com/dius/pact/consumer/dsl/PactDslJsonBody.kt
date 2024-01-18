@@ -826,9 +826,10 @@ open class PactDslJsonBody : DslPart {
    * @param format datetime format
    */
   fun datetime(name: String, format: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateTimeGenerator(format, null))
+    val path = constructValidPath(name, rootPath)
+    generators.addGenerator(Category.BODY, path, DateTimeGenerator(format, null))
     val formatter = DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault())
-    matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+    matchers.addRule(path, matchTimestamp(format))
 
     val stringValue = JsonValue.StringValue(formatter.format(Date(DATE_2000).toInstant()).toCharArray())
     when (val body = body) {
@@ -884,7 +885,7 @@ open class PactDslJsonBody : DslPart {
     }
 
     val formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId())
-    matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchTimestamp(format))
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name,
@@ -940,7 +941,7 @@ open class PactDslJsonBody : DslPart {
     }
 
     val formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId())
-    matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchTimestamp(format))
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name,
@@ -963,8 +964,9 @@ open class PactDslJsonBody : DslPart {
   @JvmOverloads
   fun date(name: String = "date"): PactDslJsonBody {
     val pattern = DateFormatUtils.ISO_DATE_FORMAT.pattern
-    generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), DateGenerator(pattern, null))
-    matchers.addRule(matcherKey(name, rootPath), matchDate(pattern))
+    val path = constructValidPath(name, rootPath)
+    generators.addGenerator(Category.BODY, path, DateGenerator(pattern, null))
+    matchers.addRule(path, matchDate(pattern))
 
     val stringValue = JsonValue.StringValue(DateFormatUtils.ISO_DATE_FORMAT.format(Date(DATE_2000)).toCharArray())
     when (val body = body) {
@@ -986,9 +988,10 @@ open class PactDslJsonBody : DslPart {
    * @param format date format to match
    */
   fun date(name: String, format: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateGenerator(format, null))
+    val path = constructValidPath(name, rootPath)
+    generators.addGenerator(Category.BODY, path, DateGenerator(format, null))
     val instance = FastDateFormat.getInstance(format)
-    matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+    matchers.addRule(path, matchDate(format))
 
     val stringValue = JsonValue.StringValue(instance.format(Date(DATE_2000)).toCharArray())
     when (val body = body) {
@@ -1040,7 +1043,7 @@ open class PactDslJsonBody : DslPart {
     }
 
     val instance = FastDateFormat.getInstance(format, timeZone)
-    matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchDate(format))
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(examples[0]).toCharArray()))
@@ -1072,7 +1075,7 @@ open class PactDslJsonBody : DslPart {
     }
 
     val formatter = DateTimeFormatter.ofPattern(format)
-    matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchDate(format))
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name, JsonValue.StringValue(formatter.format(examples[0]).toCharArray()))
@@ -1097,8 +1100,9 @@ open class PactDslJsonBody : DslPart {
   @JvmOverloads
   fun time(name: String = "time"): PactDslJsonBody {
     val pattern = DateFormatUtils.ISO_TIME_FORMAT.pattern
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), TimeGenerator(pattern, null))
-    matchers.addRule(matcherKey(name, rootPath), matchTime(pattern))
+    val path = constructValidPath(name, rootPath)
+    generators.addGenerator(Category.BODY, path, TimeGenerator(pattern, null))
+    matchers.addRule(path, matchTime(pattern))
 
     val stringValue = JsonValue.StringValue(DateFormatUtils.ISO_TIME_FORMAT.format(Date(DATE_2000)).toCharArray())
     when (val body = body) {
@@ -1120,8 +1124,9 @@ open class PactDslJsonBody : DslPart {
    * @param format time format to match
    */
   fun time(name: String, format: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), TimeGenerator(format, null))
-    matchers.addRule(matcherKey(name, rootPath), matchTime(format))
+    val path = constructValidPath(name, rootPath)
+    generators.addGenerator(Category.BODY, path, TimeGenerator(format, null))
+    matchers.addRule(path, matchTime(format))
 
     val instance = FastDateFormat.getInstance(format)
     when (val body = body) {
@@ -1176,7 +1181,7 @@ open class PactDslJsonBody : DslPart {
     }
 
     val instance = FastDateFormat.getInstance(format, timeZone)
-    matchers.addRule(matcherKey(name, rootPath), matchTime(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchTime(format))
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name, JsonValue.StringValue(instance.format(examples[0]).toCharArray()))
@@ -1196,7 +1201,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun ipAddress(name: String): PactDslJsonBody {
-    matchers.addRule(matcherKey(name, rootPath), regexp("(\\d{1,3}\\.)+\\d{1,3}"))
+    matchers.addRule(constructValidPath(name, rootPath), regexp("(\\d{1,3}\\.)+\\d{1,3}"))
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name, JsonValue.StringValue("127.0.0.1".toCharArray()))
@@ -1216,7 +1221,7 @@ open class PactDslJsonBody : DslPart {
    * @param name field name
    */
   override fun `object`(name: String): PactDslJsonBody {
-    return PactDslJsonBody(matcherKey(name, rootPath) + ".", "", this)
+    return PactDslJsonBody(constructValidPath(name, rootPath) + ".", name, this)
   }
 
   override fun `object`(): PactDslJsonBody {
@@ -1229,12 +1234,12 @@ open class PactDslJsonBody : DslPart {
    * @param value DSL Part to set the value as
    */
   fun `object`(name: String, value: DslPart): PactDslJsonBody {
-    val base = matcherKey(name, rootPath)
+    val base = constructValidPath(name, rootPath)
     if (value is PactDslJsonBody) {
-      val obj = PactDslJsonBody(base, "", this, value)
+      val obj = PactDslJsonBody(base, name, this, value)
       putObjectPrivate(obj)
     } else if (value is PactDslJsonArray) {
-      val obj = PactDslJsonArray(base, "", this, (value as PactDslJsonArray?)!!)
+      val obj = PactDslJsonArray(base, name, this, (value as PactDslJsonArray?)!!)
       putArrayPrivate(obj)
     }
     return this
@@ -1343,9 +1348,9 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun eachLike(name: String, obj: DslPart): PactDslJsonBody {
-    val base = matcherKey(name, rootPath)
+    val base = constructValidPath(name, rootPath)
     matchers.addRule(base, TypeMatcher)
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val parent = PactDslJsonArray(base, name, this, true)
     if (obj is PactDslJsonBody) {
       parent.putObjectPrivate(obj)
     } else if (obj is PactDslJsonArray) {
@@ -1368,8 +1373,9 @@ open class PactDslJsonBody : DslPart {
    * @param numberExamples number of examples to generate
    */
   override fun eachLike(name: String, numberExamples: Int): PactDslJsonBody {
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, TypeMatcher)
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonBody(".", ".", parent, numberExamples)
   }
@@ -1386,8 +1392,9 @@ open class PactDslJsonBody : DslPart {
    */
   @JvmOverloads
   fun eachLike(name: String, value: PactDslJsonRootValue, numberExamples: Int = 1): PactDslJsonBody {
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, TypeMatcher)
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     parent.putObjectPrivate(value)
     return parent.closeArray() as PactDslJsonBody
@@ -1407,9 +1414,9 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun minArrayLike(name: String, size: Int, obj: DslPart): PactDslJsonBody {
-    val base = matcherKey(name, rootPath)
+    val base = constructValidPath(name, rootPath)
     matchers.addRule(base, matchMin(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val parent = PactDslJsonArray(base, name, this, true)
     if (obj is PactDslJsonBody) {
       parent.putObjectPrivate(obj)
     } else if (obj is PactDslJsonArray) {
@@ -1433,8 +1440,9 @@ open class PactDslJsonBody : DslPart {
       String.format("Number of example %d is less than the minimum size of %d",
         numberExamples, size)
     }
-    matchers.addRule(matcherKey(name, rootPath), matchMin(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMin(size))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonBody(".", "", parent, numberExamples)
   }
@@ -1457,8 +1465,9 @@ open class PactDslJsonBody : DslPart {
       String.format("Number of example %d is less than the minimum size of %d",
         numberExamples, size)
     }
-    matchers.addRule(matcherKey(name, rootPath), matchMin(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMin(size))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     parent.putObjectPrivate(value)
     return parent.closeArray() as PactDslJsonBody
@@ -1478,9 +1487,9 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun maxArrayLike(name: String, size: Int, obj: DslPart): PactDslJsonBody {
-    val base = matcherKey(name, rootPath)
+    val base = constructValidPath(name, rootPath)
     matchers.addRule(base, matchMax(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val parent = PactDslJsonArray(base, name, this, true)
     if (obj is PactDslJsonBody) {
       parent.putObjectPrivate(obj)
     } else if (obj is PactDslJsonArray) {
@@ -1504,8 +1513,9 @@ open class PactDslJsonBody : DslPart {
       String.format("Number of example %d is more than the maximum size of %d",
         numberExamples, size)
     }
-    matchers.addRule(matcherKey(name, rootPath), matchMax(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMax(size))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonBody(".", "", parent, numberExamples)
   }
@@ -1528,8 +1538,9 @@ open class PactDslJsonBody : DslPart {
       String.format("Number of example %d is more than the maximum size of %d",
         numberExamples, size)
     }
-    matchers.addRule(matcherKey(name, rootPath), matchMax(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMax(size))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     parent.putObjectPrivate(value)
     return parent.closeArray() as PactDslJsonBody
@@ -1541,8 +1552,9 @@ open class PactDslJsonBody : DslPart {
    */
   @JvmOverloads
   fun id(name: String = "id"): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+    val path = constructValidPath(name, rootPath)
+    generators.addGenerator(Category.BODY, path, RandomIntGenerator(0, Int.MAX_VALUE))
+    matchers.addRule(path, TypeMatcher)
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name, JsonValue.Integer("1234567890".toCharArray()))
@@ -1719,8 +1731,9 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun eachArrayLike(name: String, numberExamples: Int): PactDslJsonArray {
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), name, this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, TypeMatcher)
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonArray("", "", parent)
   }
@@ -1742,8 +1755,9 @@ open class PactDslJsonBody : DslPart {
       String.format("Number of example %d is more than the maximum size of %d",
         numberExamples, size)
     }
-    matchers.addRule(matcherKey(name, rootPath), matchMax(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), name, this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMax(size))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonArray("", "", parent)
   }
@@ -1766,8 +1780,9 @@ open class PactDslJsonBody : DslPart {
       String.format("Number of example %d is less than the minimum size of %d",
         numberExamples, size)
     }
-    matchers.addRule(matcherKey(name, rootPath), matchMin(size))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), name, this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMin(size))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonArray("", "", parent)
   }
@@ -1967,9 +1982,9 @@ open class PactDslJsonBody : DslPart {
 
   override fun minMaxArrayLike(name: String, minSize: Int, maxSize: Int, obj: DslPart): PactDslJsonBody {
     validateMinAndMaxAndExamples(minSize, maxSize, minSize)
-    val base = matcherKey(name, rootPath)
+    val base = constructValidPath(name, rootPath)
     matchers.addRule(base, matchMinMax(minSize, maxSize))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val parent = PactDslJsonArray(base, name, this, true)
     if (obj is PactDslJsonBody) {
       parent.putObjectPrivate(obj)
     } else if (obj is PactDslJsonArray) {
@@ -1989,8 +2004,9 @@ open class PactDslJsonBody : DslPart {
 
   override fun minMaxArrayLike(name: String, minSize: Int, maxSize: Int, numberExamples: Int): PactDslJsonBody {
     validateMinAndMaxAndExamples(minSize, maxSize, numberExamples)
-    matchers.addRule(matcherKey(name, rootPath), matchMinMax(minSize, maxSize))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMinMax(minSize, maxSize))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonBody(".", "", parent, numberExamples)
   }
@@ -2031,8 +2047,9 @@ open class PactDslJsonBody : DslPart {
     maxSize: Int
   ): PactDslJsonArray {
     validateMinAndMaxAndExamples(minSize, maxSize, numberExamples)
-    matchers.addRule(matcherKey(name, rootPath), matchMinMax(minSize, maxSize))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), name, this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMinMax(minSize, maxSize))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     return PactDslJsonArray("", "", parent)
   }
@@ -2059,8 +2076,9 @@ open class PactDslJsonBody : DslPart {
     numberExamples: Int
   ): PactDslJsonBody {
     validateMinAndMaxAndExamples(minSize, maxSize, numberExamples)
-    matchers.addRule(matcherKey(name, rootPath), matchMinMax(minSize, maxSize))
-    val parent = PactDslJsonArray(matcherKey(name, rootPath), "", this, true)
+    val path = constructValidPath(name, rootPath)
+    matchers.addRule(path, matchMinMax(minSize, maxSize))
+    val parent = PactDslJsonArray(path, name, this, true)
     parent.numberExamples = numberExamples
     parent.putObjectPrivate(value)
     return parent.closeArray() as PactDslJsonBody
@@ -2174,5 +2192,3 @@ open class PactDslJsonBody : DslPart {
     return PactDslJsonArrayContaining(rootPath, name, this)
   }
 }
-
-
