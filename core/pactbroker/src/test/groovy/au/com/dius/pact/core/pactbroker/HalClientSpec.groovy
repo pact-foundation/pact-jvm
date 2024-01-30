@@ -73,11 +73,14 @@ class HalClientSpec extends Specification {
 
     when:
     client.setupHttpClient()
+    def authScheme = client.httpContext.authCache.get(host)
 
     then:
     client.httpClient.credentialsProvider instanceof SystemDefaultCredentialsProvider
     client.httpContext != null
-    client.httpContext.authCache.get(host) instanceof BasicScheme
+    authScheme instanceof BasicScheme
+    authScheme.username == '1'
+    authScheme.password == ['2']
   }
 
   def 'retry strategy is added to execution chain of client'() {

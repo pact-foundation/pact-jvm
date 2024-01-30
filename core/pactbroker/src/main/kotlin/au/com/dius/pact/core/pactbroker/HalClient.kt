@@ -16,6 +16,7 @@ import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.unwrap
 import com.google.common.net.UrlEscapers
 import io.github.oshai.kotlinlogging.KLogging
+import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.classic.methods.HttpPut
@@ -225,18 +226,19 @@ open class HalClient @JvmOverloads constructor(
         logger.warn { "Authentication options needs to be either an instance of Auth or a list of values, ignoring." }
       }
       val uri = URI(baseUrl)
-      val result = HttpClient.newHttpClient(options["authentication"], uri, this.maxPublishRetries,
+      val (client, credentialsProvider) = HttpClient.newHttpClient(options["authentication"], uri, this.maxPublishRetries,
         this.publishRetryInterval, config.insecureTLS)
-      httpClient = result.first
+      httpClient = client
 
       if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {
         val targetHost = HttpHost(uri.scheme, uri.host, uri.port)
         logger.warn { "Using preemptive basic authentication with the pact broker at $targetHost" }
         val authCache = BasicAuthCache()
         val basicAuth = BasicScheme()
-        authCache.put(targetHost, basicAuth)
         httpContext = HttpClientContext.create()
-        httpContext!!.credentialsProvider = result.second
+        httpContext!!.credentialsProvider = credentialsProvider
+        basicAuth.initPreemptive(credentialsProvider!!.getCredentials(AuthScope(uri.host, uri.port), httpContext))
+        authCache.put(targetHost, basicAuth)
         httpContext!!.authCache = authCache
       }
     }
