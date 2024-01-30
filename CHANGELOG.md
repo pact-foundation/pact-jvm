@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.6 - Bugfix Release
+
+* 01058b318 - fix: when Preemptive Authentication is enabled, basic auth creds were not being set correctly #1764 (Ronald Holshausen, Tue Jan 30 15:07:58 2024 +1100)
+* 111ae7962 - fix: Implemented missing atLeast and atMost options with matching rule definitions (Ronald Holshausen, Tue Jan 30 13:42:01 2024 +1100)
+* 936cd3409 - Merge pull request #1761 from pact-foundation/docs/update-body-override (Ronald Holshausen, Mon Jan 22 11:01:12 2024 +1100)
+* a4509a047 - docs: update content type override system property (Matt Fellows, Mon Jan 22 09:34:05 2024 +1100)
+* fffc9ccdc - docs: update how to override body data type (Matt Fellows, Mon Jan 22 09:32:38 2024 +1100)
+* e78f514b3 - bump version to 4.6.6 (Ronald Holshausen, Thu Jan 18 15:51:31 2024 +1100)
+
 # 4.6.5 - Bugfix Release
 
 * 704f9cde5 - fix: newJsonBody() builder unable to handle certain field names #1760 (Ronald Holshausen, Thu Jan 18 11:46:48 2024 +1100)
