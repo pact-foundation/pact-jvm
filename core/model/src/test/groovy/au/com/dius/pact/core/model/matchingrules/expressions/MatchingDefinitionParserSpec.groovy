@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
@@ -215,5 +217,59 @@ class MatchingDefinitionParserSpec extends Specification {
     parser.processRawString('\\u00') instanceof Result.Err
     parser.processRawString('\\u000') instanceof Result.Err
     parser.processRawString('\\u{000') instanceof Result.Err
+  }
+
+  def 'parse atLeast matcher'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
+      new MatchingRuleDefinition("", ValueType.Unknown, [ Either.a(new MinTypeMatcher(value)) ], null)
+
+    where:
+
+    expression      | value
+    "atLeast(100)"  | 100
+    "atLeast( 22 )" | 22
+  }
+
+  def 'invalid atLeast matcher'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).errorValue() == error
+
+    where:
+
+    expression     | error
+    'atLeast'      | 'Error parsing expression: Was expecting a \'(\' at index 7'
+    'atLeast('     | 'Error parsing expression: Was expecting an unsigned number at index 8'
+    'atLeast()'    | 'Error parsing expression: Was expecting an unsigned number at index 8'
+    'atLeast(100'  | 'Error parsing expression: Was expecting a \')\' at index 11'
+    'atLeast(-10)' | 'Error parsing expression: Was expecting an unsigned number at index 8'
+    'atLeast(0.1)' | 'Error parsing expression: Was expecting a \')\' at index 9'
+  }
+
+  def 'parse atMost matcher'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
+      new MatchingRuleDefinition("", ValueType.Unknown, [ Either.a(new MaxTypeMatcher(value)) ], null)
+
+    where:
+
+    expression     | value
+    "atMost(100)"  | 100
+    "atMost( 22 )" | 22
+  }
+
+  def 'invalid atMost matcher'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).errorValue() == error
+
+    where:
+
+    expression    | error
+    'atMost'      | 'Error parsing expression: Was expecting a \'(\' at index 6'
+    'atMost('     | 'Error parsing expression: Was expecting an unsigned number at index 7'
+    'atMost()'    | 'Error parsing expression: Was expecting an unsigned number at index 7'
+    'atMost(100'  | 'Error parsing expression: Was expecting a \')\' at index 10'
+    'atMost(-10)' | 'Error parsing expression: Was expecting an unsigned number at index 7'
+    'atMost(0.1)' | 'Error parsing expression: Was expecting a \')\' at index 8'
   }
 }
