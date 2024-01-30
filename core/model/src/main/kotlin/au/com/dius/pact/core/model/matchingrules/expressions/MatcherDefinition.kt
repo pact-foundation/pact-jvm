@@ -9,6 +9,8 @@ import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
@@ -26,10 +28,13 @@ class MatcherDefinitionLexer(expression: String): StringLexer(expression) {
 
   fun matchInteger() = matchRegex(INTEGER_LITERAL).isNotEmpty()
 
+  fun matchWholeNumber() = matchRegex(NUMBER_LITERAL).isNotEmpty()
+
   fun matchBoolean() = matchRegex(BOOLEAN_LITERAL).isNotEmpty()
 
   companion object {
     val INTEGER_LITERAL = Regex("^-?\\d+")
+    val NUMBER_LITERAL = Regex("^\\d+")
     val DECIMAL_LITERAL = Regex("^-?\\d+\\.\\d+")
     val BOOLEAN_LITERAL = Regex("^(true|false)")
   }
@@ -90,23 +95,15 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
 
   //  matchingDefinitionExp returns [ MatchingRuleDefinition value ] :
   //      (
-  //        'matching' LEFT_BRACKET matchingRule RIGHT_BRACKET {
-  //          if ($matchingRule.reference != null) {
-  //            $value = new MatchingRuleDefinition($matchingRule.value, $matchingRule.reference, $matchingRule.generator);
-  //          } else {
-  //            $value = new MatchingRuleDefinition($matchingRule.value, $matchingRule.rule, $matchingRule.generator);
-  //          }
-  //        }
-  //        | 'notEmpty' LEFT_BRACKET primitiveValue RIGHT_BRACKET { $value = new MatchingRuleDefinition($primitiveValue.value, NotEmptyMatcher.INSTANCE, null).withType($primitiveValue.type); }
-  //        | 'eachKey' LEFT_BRACKET e=matchingDefinitionExp RIGHT_BRACKET { if ($e.value != null) { $value = new MatchingRuleDefinition(null, new EachKeyMatcher($e.value), null); } }
-  //        | 'eachValue' LEFT_BRACKET e=matchingDefinitionExp RIGHT_BRACKET {
-  //          if ($e.value != null) {
-  //            $value = new MatchingRuleDefinition(null, ValueType.Unknown, List.of((Either<MatchingRule, MatchingReference>) new Either.A(new EachValueMatcher($e.value))), null);
-  //          }
-  //        }
+  //        'matching' LEFT_BRACKET matchingRule RIGHT_BRACKET
+  //        | 'notEmpty' LEFT_BRACKET primitiveValue RIGHT_BRACKET
+  //        | 'eachKey' LEFT_BRACKET e=matchingDefinitionExp RIGHT_BRACKET
+  //        | 'eachValue' LEFT_BRACKET e=matchingDefinitionExp RIGHT_BRACKET
+  //        | 'atLeast' LEFT_BRACKET DIGIT+ RIGHT_BRACKET
+  //        | 'atMost' LEFT_BRACKET DIGIT+ RIGHT_BRACKET
   //      )
   //      ;
-  @Suppress("ReturnCount")
+  @Suppress("ReturnCount", "LongMethod")
   fun matchingDefinitionExp(): Result<MatchingRuleDefinition, String> {
     return when {
       lexer.matchString("matching") -> {
@@ -184,6 +181,38 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
               }
             }
             is Result.Err -> return definitionResult
+          }
+        } else {
+          Result.Err("Was expecting a '(' at index ${lexer.index}")
+        }
+      }
+      lexer.matchString("atLeast") -> {
+        if (matchChar('(')) {
+          when (val lengthResult = unsignedNumber()) {
+            is Result.Ok -> {
+              if (matchChar(')')) {
+                Result.Ok(MatchingRuleDefinition("", MinTypeMatcher(lengthResult.value), null))
+              } else {
+                Result.Err("Was expecting a ')' at index ${lexer.index}")
+              }
+            }
+            is Result.Err -> return lengthResult
+          }
+        } else {
+          Result.Err("Was expecting a '(' at index ${lexer.index}")
+        }
+      }
+      lexer.matchString("atMost") -> {
+        if (matchChar('(')) {
+          when (val lengthResult = unsignedNumber()) {
+            is Result.Ok -> {
+              if (matchChar(')')) {
+                Result.Ok(MatchingRuleDefinition("", MaxTypeMatcher(lengthResult.value), null))
+              } else {
+                Result.Err("Was expecting a ')' at index ${lexer.index}")
+              }
+            }
+            is Result.Err -> return lengthResult
           }
         } else {
           Result.Err("Was expecting a '(' at index ${lexer.index}")
@@ -346,6 +375,15 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
     Result.Err("Was expecting a ',' at index ${lexer.index}")
   }
 
+  private fun unsignedNumber(): Result<Int, String> {
+    lexer.skipWhitespace()
+    return if (lexer.matchWholeNumber()) {
+      Result.Ok(lexer.lastMatch!!.toInt())
+    } else {
+      Result.Err("Was expecting an unsigned number at index ${lexer.index}")
+    }
+  }
+
   private fun matchEqualOrType(equalTo: Boolean) = if (matchChar(',')) {
     when (val primitiveValueResult = primitiveValue()) {
       is Result.Ok -> {
@@ -435,10 +473,10 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   }
 
   //  primitiveValue returns [ String value, ValueType type ] :
-  //    string { $value = $string.contents; $type = ValueType.String; }
-  //    | v=DECIMAL_LITERAL { $value = $v.getText(); $type = ValueType.Decimal; }
-  //    | v=INTEGER_LITERAL { $value = $v.getText(); $type = ValueType.Integer; }
-  //    | v=BOOLEAN_LITERAL { $value = $v.getText(); $type = ValueType.Boolean; }
+  //    string
+  //    | v=DECIMAL_LITERAL
+  //    | v=INTEGER_LITERAL
+  //    | v=BOOLEAN_LITERAL
   //    ;
   fun primitiveValue(): Result<Pair<String?, ValueType>, String> {
     lexer.skipWhitespace()
@@ -490,7 +528,7 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
     }
   }
 
-  @Suppress("ComplexMethod")
+  @Suppress("ComplexMethod", "LongMethod")
   fun processRawString(rawString: String): Result<String, String> {
     val buffer = StringBuilder(rawString.length)
     val chars = rawString.chars().iterator()
