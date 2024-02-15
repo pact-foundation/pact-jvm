@@ -78,4 +78,19 @@ class PactDslRequestWithoutPathSpec extends Specification {
       '$': [matchers: [[match: 'contentType', value: 'application/xml']], combine: 'AND']
     ]
   }
+
+  @Issue('#1767')
+  def 'match path should valid the example against the regex'() {
+    given:
+    def request = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('a XML request')
+
+    when:
+    request.matchPath('\\/\\d+', '/abcd')
+
+    then:
+    def ex = thrown(au.com.dius.pact.consumer.InvalidMatcherException)
+    ex.message == 'Example "/abcd" does not match regular expression "\\/\\d+"'
+  }
 }

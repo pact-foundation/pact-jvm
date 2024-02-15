@@ -217,4 +217,52 @@ class PactDslRequestWithPathSpec extends Specification {
       '$': [matchers: [[match: 'contentType', value: 'application/xml']], combine: 'AND']
     ]
   }
+
+  @Issue('#1767')
+  def 'match path should valid the example against the regex'() {
+    given:
+    def request = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('a XML request')
+      .path('/path')
+
+    when:
+    request.matchPath('\\d+', 'abcd')
+
+    then:
+    def ex = thrown(au.com.dius.pact.consumer.InvalidMatcherException)
+    ex.message == 'Example "abcd" does not match regular expression "\\d+"'
+  }
+
+  @Issue('#1767')
+  def 'match header should valid the example against the regex'() {
+    given:
+    def request = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('a XML request')
+      .path('/path')
+
+    when:
+    request.matchHeader('H', '\\d+', 'abcd')
+
+    then:
+    def ex = thrown(au.com.dius.pact.consumer.InvalidMatcherException)
+    ex.message == 'Example "abcd" does not match regular expression "\\d+"'
+  }
+
+  @Issue('#1767')
+  def 'match query parameter should valid the example against the regex'() {
+    given:
+    def request = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('a XML request')
+      .path('/path')
+
+    when:
+    request.matchQuery('H', '\\d+', 'abcd')
+
+    then:
+    def ex = thrown(au.com.dius.pact.consumer.InvalidMatcherException)
+    ex.message == 'Example "abcd" does not match regular expression "\\d+"'
+  }
 }

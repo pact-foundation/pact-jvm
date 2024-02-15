@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
+import au.com.dius.pact.consumer.InvalidMatcherException
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.OptionalBody.Companion.body
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -324,6 +325,11 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
    */
   @JvmOverloads
   fun matchPath(pathRegex: String, path: String = Generex(pathRegex).random()): PactDslRequestWithPath {
+    val re = Regex(pathRegex)
+    if (!path.matches(re)) {
+      throw InvalidMatcherException("Example \"$path\" does not match regular expression \"$pathRegex\"")
+    }
+
     requestMatchers.addCategory("path").addRule(RegexMatcher(pathRegex))
     return PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
       description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
