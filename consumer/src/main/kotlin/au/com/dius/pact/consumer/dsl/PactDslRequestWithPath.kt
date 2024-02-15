@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
+import au.com.dius.pact.consumer.InvalidMatcherException
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType.Companion.JSON
@@ -384,6 +385,11 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    */
   @JvmOverloads
   fun matchPath(pathRegex: String, path: String = Generex(pathRegex).random()): PactDslRequestWithPath {
+    val re = Regex(pathRegex)
+    if (!path.matches(re)) {
+      throw InvalidMatcherException("Example \"$path\" does not match regular expression \"$pathRegex\"")
+    }
+
     requestMatchers.addCategory("path").addRule(RegexMatcher(pathRegex))
     this.path = path
     return this
@@ -403,6 +409,11 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     regex: String,
     headerExample: String = Generex(regex).random()
   ): PactDslRequestWithPath {
+    val re = Regex(regex)
+    if (!headerExample.matches(re)) {
+      throw InvalidMatcherException("Example \"$headerExample\" does not match regular expression \"$regex\"")
+    }
+
     requestMatchers.addCategory("header").setRule(header, RegexMatcher(regex))
     requestHeaders[header] = listOf(headerExample)
     return this
@@ -440,6 +451,11 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     regex: String,
     example: String = Generex(regex).random()
   ): PactDslRequestWithPath {
+    val re = Regex(regex)
+    if (!example.matches(re)) {
+      throw InvalidMatcherException("Example \"$example\" does not match regular expression \"$regex\"")
+    }
+
     requestMatchers.addCategory("query").addRule(parameter, RegexMatcher(regex))
     query[parameter] = listOf(example)
     return this
@@ -453,6 +469,13 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    * @param example   Example value list to use for the query parameter (unencoded)
    */
   fun matchQuery(parameter: String, regex: String, example: List<String>): PactDslRequestWithPath {
+    val re = Regex(regex)
+    for (e in example) {
+      if (!e.matches(re)) {
+        throw InvalidMatcherException("Example \"$e\" does not match regular expression \"$regex\"")
+      }
+    }
+
     requestMatchers.addCategory("query").addRule(parameter, RegexMatcher(regex))
     query[parameter] = example
     return this
