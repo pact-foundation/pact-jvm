@@ -812,4 +812,35 @@ class PactBrokerClientSpec extends Specification {
     result.ok
     result.verificationResultUrl == 'verificationResultUrl'
   }
+
+  @Issue('#1769')
+  def 'fetching pacts with selectors includes providerVersionBranch when matchingBranch is set and pending status is false'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def selectors = [
+      ConsumerVersionSelectors.MatchingBranch.INSTANCE,
+      ConsumerVersionSelectors.MainBranch.INSTANCE
+    ]
+    def expectedJson = '{"consumerVersionSelectors":[{"matchingBranch":true},{"mainBranch":true}],' +
+      '"includePendingStatus":false,"providerVersionBranch":"BRANCH"}'
+    def jsonResult = JsonParser.INSTANCE.parseString('''
+    {
+      "_embedded": {
+        "pacts": [
+        ]
+      }
+    }
+    ''')
+    when:
+    def result = client.fetchConsumersWithSelectorsV2('provider', selectors, [], 'BRANCH', false, null)
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> 'URL'
+    1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], expectedJson) >> new Result.Ok(jsonResult)
+    result instanceof Result.Ok
+  }
 }

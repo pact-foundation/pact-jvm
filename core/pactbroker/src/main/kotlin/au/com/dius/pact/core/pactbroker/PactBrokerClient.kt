@@ -579,12 +579,13 @@ open class PactBrokerClient(
     body["includePendingStatus"] = enablePending
     if (enablePending) {
       body["providerVersionTags"] = jsonArray(providerTags)
-      if (providerBranch.isNotEmpty()) {
-        body["providerVersionBranch"] = providerBranch
-      }
       if (includeWipPactsSince.isNotEmpty()) {
         body["includeWipPactsSince"] = includeWipPactsSince
       }
+    }
+
+    if (providerBranch.isNotEmpty()) {
+      body["providerVersionBranch"] = providerBranch
     }
 
     return handleWith {
