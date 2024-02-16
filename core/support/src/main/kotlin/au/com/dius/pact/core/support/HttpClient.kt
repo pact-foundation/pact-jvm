@@ -4,7 +4,7 @@ import au.com.dius.pact.core.support.Auth.Companion.DEFAULT_AUTH_HEADER
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.ValueResolver
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.auth.CredentialsProvider
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
@@ -24,6 +24,8 @@ import org.apache.hc.core5.http.message.BasicHeader
 import org.apache.hc.core5.ssl.SSLContexts
 import org.apache.hc.core5.util.TimeValue
 import java.net.URI
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Authentication options
@@ -81,7 +83,7 @@ private class RetryAnyMethod(
 /**
  * HTTP client support functions
  */
-object HttpClient : KLogging() {
+object HttpClient {
 
   /**
    * Creates a new HTTP client

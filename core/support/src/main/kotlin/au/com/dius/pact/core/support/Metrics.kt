@@ -1,12 +1,14 @@
 package au.com.dius.pact.core.support
 
 import au.com.dius.pact.core.support.Utils.lookupVersion
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.message.BasicNameValuePair
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Metric events to send
@@ -71,7 +73,7 @@ sealed class MetricEvent {
  * This sends anonymous metrics to a Google Analytics account. It is used to track usage of JVM and operating system
  * versions. This can be disabled by setting the 'pact_do_not_track' system property or environment variable to 'true'.
  */
-object Metrics : KLogging() {
+object Metrics {
   var warningLogged: Boolean = false
 
   const val UA_ACCOUNT = "UA-117778936-1"

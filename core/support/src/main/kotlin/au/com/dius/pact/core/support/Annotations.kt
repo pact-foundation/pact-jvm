@@ -1,10 +1,12 @@
 package au.com.dius.pact.core.support
 
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
-object Annotations : KLogging() {
+private val logger = KotlinLogging.logger {}
+
+object Annotations {
   /**
    * Searches for the given annotation, first up the class hierarchy, then on enclosing classes if there are any
    */

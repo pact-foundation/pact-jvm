@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.support
 
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.RandomUtils
 import java.io.IOException
 import java.net.ServerSocket
@@ -10,11 +10,13 @@ import kotlin.math.pow
 import kotlin.reflect.full.cast
 import kotlin.reflect.full.declaredMemberProperties
 
+private val logger = KotlinLogging.logger {}
+
 /**
  * Common utility functions
  */
 @Suppress("TooManyFunctions")
-object Utils : KLogging() {
+object Utils {
   /**
    * Recursively extracts a sequence of keys from a recursive Map structure
    */
