@@ -7,8 +7,12 @@ const val PATH_SPECIAL_CHARS = "'[].@ \t\n"
 const val EXP_ALLOWED_SPECIAL_CHARS = "-_:#@"
 
 sealed class PathToken {
+  abstract fun rawString(): String
+
   object Root : PathToken() {
     override fun toString() = "$"
+
+    override fun rawString() = "$"
   }
 
   data class Field(val name: String) : PathToken() {
@@ -19,20 +23,28 @@ sealed class PathToken {
         this.name
       }
     }
+
+    override fun rawString() = this.name
   }
 
   data class Index(val index: Int) : PathToken() {
     override fun toString(): String {
       return "[${this.index}]"
     }
+
+    override fun rawString() = this.index.toString()
   }
 
   object Star : PathToken() {
     override fun toString() = "*"
+
+    override fun rawString() = "*"
   }
 
   object StarIndex : PathToken() {
     override fun toString() = "[*]"
+
+    override fun rawString() = "[*]"
   }
 }
 
@@ -196,10 +208,10 @@ fun constructValidPath(segment: String, rootPath: String): String {
     segment.isEmpty() -> rootPath
     else -> {
       val root = StringUtils.stripEnd(rootPath, ".")
-      if (segment.any { !validPathCharacter(it) }) {
-        "$root['$segment']"
-      } else if (segment.all { it.isDigit() }) {
+      if (segment.all { it.isDigit() }) {
         "$root[$segment]"
+      } else if (segment.any { !validPathCharacter(it) }) {
+        "$root['$segment']"
       } else {
         "$root.$segment"
       }

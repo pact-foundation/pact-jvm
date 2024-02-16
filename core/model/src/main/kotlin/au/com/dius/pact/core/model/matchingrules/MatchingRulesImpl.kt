@@ -39,9 +39,17 @@ class MatchingRulesImpl : MatchingRules {
             addV2Rule("body", "$${key.substring(6)}", Json.toMap(value))
           }
         } else if (key.startsWith("$.headers")) {
-          addV2Rule("header", pathFromTokens(path.drop(2)), Json.toMap(value))
+          val headerValue = if (path.size > 3) {
+            pathFromTokens(path.drop(2))
+          } else path[2].rawString()
+          addV2Rule("header", headerValue, Json.toMap(value))
         } else {
-          addV2Rule(path[1].toString(), if (path.size > 2) pathFromTokens(path.drop(2)) else null, Json.toMap(value))
+          val ruleValue = if (path.size > 3) {
+            pathFromTokens(path.drop(2))
+          }
+          else if (path.size == 3) path[2].rawString()
+          else null
+          addV2Rule(path[1].toString(), ruleValue, Json.toMap(value))
         }
       }
     }
