@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 4.6.7 - OS
+# 4.6.7 - Bugfix Release
 
 * 2dd627172 - fix: Matching rules for query strings with square brackets were not bing written in V2 format correctly #1766 (Ronald Holshausen, Fri Feb 16 14:17:12 2024 +1100)
 * 9480fdc77 - fix: Provider branch not sent to Pact Broker in consumer version selectors if enablePending=false #1769 (Ronald Holshausen, Fri Feb 16 10:25:53 2024 +1100)

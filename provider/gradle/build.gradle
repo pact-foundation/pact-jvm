@@ -15,8 +15,7 @@ dependencies {
   implementation 'com.github.ajalt:mordant:1.2.1'
   implementation 'commons-io:commons-io:2.11.0'
   implementation 'org.apache.commons:commons-lang3'
-  implementation 'io.github.microutils:kotlin-logging-jvm'
-  implementation 'io.github.oshai:kotlin-logging-jvm:5.0.0'
+  implementation 'io.github.oshai:kotlin-logging-jvm'
 
   testImplementation 'junit:junit'
   testImplementation 'org.mockito:mockito-core:2.28.2'

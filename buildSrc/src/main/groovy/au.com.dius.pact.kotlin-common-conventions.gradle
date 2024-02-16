@@ -33,7 +33,7 @@ dependencies {
         api 'org.json:json:20230618'
         api 'io.pact.plugin.driver:core:0.4.1'
         api 'org.apache.tika:tika-core:2.7.0'
-        api 'io.github.microutils:kotlin-logging-jvm:3.0.4'
+        api 'io.github.oshai:kotlin-logging-jvm:5.1.4'
         
         implementation 'org.jetbrains.kotlin:kotlin-stdlib'
         implementation 'org.apache.commons:commons-lang3:3.12.0'
@@ -52,7 +52,7 @@ dependencies {
         implementation 'org.apache.groovy:groovy-xml:4.0.11'
         implementation 'io.pact.plugin.driver:core:0.4.1'
         implementation 'commons-codec:commons-codec:1.15'
-        implementation 'io.github.microutils:kotlin-logging-jvm:3.0.4'
+        implementation 'io.github.oshai:kotlin-logging-jvm:5.1.4'
 
         testImplementation 'org.apache.groovy:groovy:4.0.11'
         testImplementation 'org.apache.groovy:groovy-json:4.0.11'
