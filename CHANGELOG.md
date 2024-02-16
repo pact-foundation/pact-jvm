@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.7 - OS
+
+* 2dd627172 - fix: Matching rules for query strings with square brackets were not bing written in V2 format correctly #1766 (Ronald Holshausen, Fri Feb 16 14:17:12 2024 +1100)
+* 9480fdc77 - fix: Provider branch not sent to Pact Broker in consumer version selectors if enablePending=false #1769 (Ronald Holshausen, Fri Feb 16 10:25:53 2024 +1100)
+* d50ad0876 - chore: Disable query with [] test for now #1766 (Ronald Holshausen, Fri Feb 16 10:25:00 2024 +1100)
+* 24b14a357 - chore: Add a query with [] test #1766 (Ronald Holshausen, Fri Feb 16 09:29:14 2024 +1100)
+* 152c7bc5f - fix: matchPath should validate that the example provided explicitly matches the regex #1767 (Ronald Holshausen, Thu Feb 15 12:05:33 2024 +1100)
+* b52f5a7c5 - Update README.md (Ronald Holshausen, Tue Jan 30 17:32:50 2024 +1100)
+* 4806c6294 - bump version to 4.6.7 (Ronald Holshausen, Tue Jan 30 17:28:57 2024 +1100)
+
 # 4.6.6 - Bugfix Release
 
 * 01058b318 - fix: when Preemptive Authentication is enabled, basic auth creds were not being set correctly #1764 (Ronald Holshausen, Tue Jan 30 15:07:58 2024 +1100)
