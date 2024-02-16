@@ -8,6 +8,7 @@ import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
@@ -42,7 +43,7 @@ class PactBuilder extends GroovyBuilder {
   BasePact pact = new RequestResponsePact(new Provider(), new Consumer())
   Integer port = 0
   SynchronousRequestResponse currentInteraction
-  List interactions = []
+  List<Interaction> interactions = []
   List<ProviderState> providerStates = []
   boolean requestState
 
