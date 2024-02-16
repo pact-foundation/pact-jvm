@@ -7,7 +7,6 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -18,7 +17,6 @@ import static org.hamcrest.Matchers.is;
 
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "QueryWithSquareBrackets", pactVersion = PactSpecVersion.V2)
-@Disabled
 public class QueryWithSquareBracketsTest {
 
   @Pact(consumer="test_consumer")

@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.model.matchingrules
 
-import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.atLeast
+import au.com.dius.pact.core.model.*
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.support.json.JsonValue
 import io.github.oshai.kotlinlogging.KLogging
@@ -153,10 +152,15 @@ data class MatchingRuleCategory @JvmOverloads constructor(
           "header" -> "\$.headers"
           else -> "\$.$name"
         }
+        val keySuffix = when (name) {
+          "body" -> it.key
+          "header", "headers", "query" -> PathToken.Field(it.key).toString()
+          else -> it.key
+        }
         val key = when {
-          it.key.startsWith('$') -> keyBase + it.key.substring(1)
-          it.key.isNotEmpty() && !it.key.startsWith('[') -> keyBase + '.' + it.key
-          it.key.isNotEmpty() -> keyBase + it.key
+          keySuffix.startsWith('$') -> keyBase + keySuffix.substring(1)
+          keySuffix.isNotEmpty() && !keySuffix.startsWith('[') -> "$keyBase.$keySuffix"
+          keySuffix.isNotEmpty() -> keyBase + keySuffix
           else -> keyBase
         }
         Pair(key, it.value.toMap(pactSpecVersion))

@@ -371,4 +371,63 @@ class MatchingRulesSpec extends Specification {
     new TimeMatcher().toMap(PactSpecVersion.V3) == [match: 'time', format: 'HH:mm:ss']
     new TimeMatcher('hh').toMap(PactSpecVersion.V3) == [match: 'time', format: 'hh']
   }
+
+  @Issue('#1766')
+  def 'With V2 format, matching rules for queries should be encoded correctly'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules
+      .addCategory('query')
+      .addRule('X', new RegexMatcher('1'))
+      .addRule('principal_identifier[account_id]', new RegexMatcher('2'))
+
+    expect:
+    matchingRules.toV2Map() == [
+      '$.query.X': [match: 'regex', regex: '1'],
+      '$.query[\'principal_identifier[account_id]\']': [match: 'regex', regex: '2']
+    ]
+  }
+
+  @Issue('#1766')
+  def 'loads V2 query matching rules that are encoded'() {
+    given:
+    def matchingRulesMap = [
+      '$.query.Q1': ['match': 'regex', 'regex': '1'],
+      '$.query[\'principal_identifier[account_id]\']': ['match': 'regex', 'regex': '2']
+    ]
+
+    when:
+    def matchingRules = MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(matchingRulesMap))
+
+    then:
+    !matchingRules.empty
+    matchingRules.rulesForCategory('query') == new MatchingRuleCategory('query', [
+      Q1: new MatchingRuleGroup([ new RegexMatcher('1') ]),
+      'principal_identifier[account_id]': new MatchingRuleGroup([ new RegexMatcher('2') ])
+    ])
+  }
+
+  @Issue('#1766')
+  def 'With V3 format, matching rules for queries should not be encoded'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules
+      .addCategory('query')
+      .addRule('X', new RegexMatcher('1'))
+      .addRule('principal_identifier[account_id]', new RegexMatcher('2'))
+
+    expect:
+    matchingRules.toV3Map(PactSpecVersion.V3) == [
+      query: [
+        X: [
+          matchers: [[match: 'regex', regex: '1']],
+          combine: 'AND'
+        ],
+        'principal_identifier[account_id]': [
+          matchers: [[match: 'regex', regex: '2']],
+          combine: 'AND'
+        ]
+      ]
+    ]
+  }
 }
