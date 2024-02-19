@@ -283,6 +283,7 @@
             "testResults": [
               {
                 "interactionId": "ID1",
+                "interactionDescription":"ID1",
                 "mismatches": [
                   {
                     "attribute": "status",
@@ -334,7 +335,7 @@
                 }
               ]
             },
-            "$.testResults[*].interactionId": {
+            "$.testResults.*": {
               "combine": "AND",
               "matchers": [
                 {

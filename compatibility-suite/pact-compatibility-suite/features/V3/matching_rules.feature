@@ -32,27 +32,6 @@ Feature: V3 era Matching Rules
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one" -> "Expected 'dog' to include 'a'"
 
-  Scenario: Supports an include matcher (positive case)
-    Given an expected request configured with the following:
-      | body             | matching rules          |
-      | file: basic.json | include-matcher-v3.json |
-    And a request is received with the following:
-      | body                               |
-      | JSON: { "one": "cat", "two": "b" } |
-    When the request is compared to the expected one
-    Then the comparison should be OK
-
-  Scenario: Supports an include matcher (negative case)
-    Given an expected request configured with the following:
-      | body             | matching rules          |
-      | file: basic.json | include-matcher-v3.json |
-    And a request is received with the following:
-      | body                               |
-      | JSON: { "one": "dog", "two": "b" } |
-    When the request is compared to the expected one
-    Then the comparison should NOT be OK
-    And the mismatches will contain a mismatch with error "$.one" -> "Expected 'dog' to include 'a'"
-
   Scenario: Supports a minmax type matcher (positive case)
     Given an expected request configured with the following:
       | body               | matching rules              |
