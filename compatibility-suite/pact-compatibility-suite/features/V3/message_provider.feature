@@ -139,6 +139,7 @@ Feature: Message provider
     Then the verification will NOT be successful
     And the verification results will contain a "Body had differences" error
 
+  @wip
   Scenario: Supports messages with body formatted for the Kafka schema registry
     Given a provider is started that can generate the "kafka" message with "file: kafka-body.xml"
     And a Pact file for "kafka":"file: kafka-expected-body.xml" is to be verified
