@@ -838,7 +838,8 @@ open class PactBrokerClient(
             val values = mismatches.value
               .filter { !it.containsKey("exception") }
               .map { mismatch ->
-                val remainingAttributes = mismatch.filterNot { it.key == "interactionId" }
+                val remainingAttributes = mismatch
+                  .filterNot { it.key == "interactionId" || it.key == "interactionDescription" }
                 when (mismatch["attribute"]) {
                   "body-content-type" -> listOf("attribute" to "body", "description" to mismatch["description"])
                   else -> remainingAttributes.map { it.toPair() }
