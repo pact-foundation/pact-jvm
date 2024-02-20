@@ -67,7 +67,11 @@ sealed class VerificationFailureType {
     }
   }
 
-  data class ExceptionFailure(val description: String, val e: Throwable) : VerificationFailureType() {
+  data class ExceptionFailure(
+    val description: String,
+    val e: Throwable,
+    val interaction: Interaction? = null
+  ) : VerificationFailureType() {
     override fun description() = e.message ?: e.javaClass.name
     override fun formatForDisplay(t: TermColors): String {
       return if (e.message.isNotEmpty()) {
@@ -81,7 +85,11 @@ sealed class VerificationFailureType {
     override fun getException() = e
   }
 
-  data class StateChangeFailure(val description: String, val result: StateChangeResult) : VerificationFailureType() {
+  data class StateChangeFailure(
+    val description: String,
+    val result: StateChangeResult,
+    val interaction: Interaction? = null,
+  ) : VerificationFailureType() {
     override fun description() = formatForDisplay(TermColors())
     override fun formatForDisplay(t: TermColors): String {
       val e = result.stateChangeResult.errorValue()
@@ -174,24 +182,55 @@ sealed class VerificationResult {
         if (entry.value.isNotEmpty()) {
           entry.value.map { failure ->
             val errorMap = when (failure) {
-              is VerificationFailureType.ExceptionFailure -> listOf(
-                "exception" to failure.getException(), "description" to failure.description
-              )
-              is VerificationFailureType.StateChangeFailure -> listOf(
-                "exception" to failure.getException(), "description" to failure.description
-              )
-              is VerificationFailureType.MismatchFailure -> listOf(
-                "attribute" to failure.mismatch.type(),
-                "description" to failure.mismatch.description()
-              ) + when (val mismatch = failure.mismatch) {
-                is BodyMismatch -> listOf(
-                  "identifier" to mismatch.path, "description" to mismatch.mismatch,
-                  "diff" to mismatch.diff
+              is VerificationFailureType.ExceptionFailure -> {
+                val list = mutableListOf(
+                  "exception" to failure.getException(),
+                  "description" to failure.description
                 )
-                is HeaderMismatch -> listOf("identifier" to mismatch.headerKey, "description" to mismatch.mismatch)
-                is QueryMismatch -> listOf("identifier" to mismatch.queryParameter, "description" to mismatch.mismatch)
-                is MetadataMismatch -> listOf("identifier" to mismatch.key, "description" to mismatch.mismatch)
-                else -> listOf()
+                if (failure.interaction != null) {
+                  list.add("interactionDescription" to failure.interaction.description)
+                }
+                list
+              }
+              is VerificationFailureType.StateChangeFailure -> {
+                val list = mutableListOf(
+                  "exception" to failure.getException(),
+                  "description" to failure.description
+                )
+                if (failure.interaction != null) {
+                  list.add("interactionDescription" to failure.interaction.description)
+                }
+                list
+              }
+              is VerificationFailureType.MismatchFailure -> {
+                val list = mutableListOf<Pair<String, String?>>(
+                  "attribute" to failure.mismatch.type(),
+                  "description" to failure.mismatch.description()
+                )
+                when (val mismatch = failure.mismatch) {
+                  is BodyMismatch -> {
+                    list.add("identifier" to mismatch.path)
+                    list.add("description" to mismatch.mismatch)
+                    list.add("diff" to mismatch.diff)
+                  }
+                  is HeaderMismatch -> {
+                    list.add("identifier" to mismatch.headerKey)
+                    list.add("description" to mismatch.mismatch)
+                  }
+                  is QueryMismatch -> {
+                    list.add("identifier" to mismatch.queryParameter)
+                    list.add("description" to mismatch.mismatch)
+                  }
+                  is MetadataMismatch -> {
+                    list.add("identifier" to mismatch.key)
+                    list.add("description" to mismatch.mismatch)
+                  }
+                  else -> {}
+                }
+                if (failure.interaction != null) {
+                  list.add("interactionDescription" to failure.interaction.description)
+                }
+                list
               }
               is VerificationFailureType.PublishResultsFailure -> listOf(
                 "description" to failure.description()

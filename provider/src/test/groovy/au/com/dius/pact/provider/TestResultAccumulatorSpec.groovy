@@ -377,7 +377,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact3, interaction2_4,
       [new VerificationResult.Failed('failed', 'failed',
         [
-          interaction2_4: [new VerificationFailureType.ExceptionFailure('failed', exception)]
+          interaction2_4: [new VerificationFailureType.ExceptionFailure('failed', exception, null)]
         ], true)
       ], source3, mockValueResolver)
     testResultAccumulator.updateTestResult(pact2, interaction2_2,

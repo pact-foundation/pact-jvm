@@ -30,7 +30,7 @@ class DefaultVerificationReporterSpec extends Specification {
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '0', brokerClient, [], null)
 
     then:
-    1 * brokerClient.publishVerificationResults(links, testResult, '0') >> new Result.Ok(true)
+    1 * brokerClient.publishVerificationResults(links, testResult, '0', null) >> new Result.Ok(true)
     result == new Result.Ok(true)
   }
 
@@ -107,7 +107,7 @@ class DefaultVerificationReporterSpec extends Specification {
     def result = DefaultVerificationReporter.INSTANCE.reportResults(pact, testResult, '', brokerClient, [], null)
 
     then:
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Err('failed')
+    1 * brokerClient.publishVerificationResults(_, testResult, _, _) >> new Result.Err('failed')
     result == new Result.Err(['failed'])
   }
 
@@ -127,7 +127,7 @@ class DefaultVerificationReporterSpec extends Specification {
     then:
     0 * brokerClient.publishProviderBranch(_, 'provider', _, '')
     1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Result.Err(['failed'])
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Ok(true)
+    1 * brokerClient.publishVerificationResults(_, testResult, _, _) >> new Result.Ok(true)
     result == new Result.Err(['failed'])
   }
 
@@ -147,7 +147,7 @@ class DefaultVerificationReporterSpec extends Specification {
     then:
     0 * brokerClient.publishProviderTags(_, 'provider', _, '')
     1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Result.Err('failed')
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Ok(true)
+    1 * brokerClient.publishVerificationResults(_, testResult, _, _) >> new Result.Ok(true)
     result == new Result.Err(['failed'])
   }
 
@@ -168,7 +168,7 @@ class DefaultVerificationReporterSpec extends Specification {
     then:
     1 * brokerClient.publishProviderTags(_, 'provider', tags, '') >> new Result.Err(['tags failed'])
     1 * brokerClient.publishProviderBranch(_, 'provider', branch, '') >> new Result.Err('branch failed')
-    1 * brokerClient.publishVerificationResults(_, testResult, _) >> new Result.Ok(true)
+    1 * brokerClient.publishVerificationResults(_, testResult, _, _) >> new Result.Ok(true)
     result == new Result.Err(['tags failed', 'branch failed'])
   }
 }

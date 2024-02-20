@@ -225,7 +225,8 @@ open class PactVerificationExtension(
       val failure = VerificationResult.Failed("Test method has failed with an exception: ${e.message}",
         failures = mapOf(
           interaction.interactionId.orEmpty() to
-            listOf(VerificationFailureType.ExceptionFailure("Test method has failed with an exception", e))
+            listOf(VerificationFailureType.ExceptionFailure("Test method has failed with an exception",
+              e, interaction))
         )
       )
       testResultAccumulator.updateTestResult(

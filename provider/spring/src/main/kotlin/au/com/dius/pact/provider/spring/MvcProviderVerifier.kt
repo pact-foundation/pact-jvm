@@ -69,7 +69,8 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       }
       return VerificationResult.Failed("Request to provider method failed with an exception", interactionMessage,
         mapOf(interaction.interactionId.orEmpty() to listOf(
-          VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e))),
+          VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception",
+            e, interaction))),
         pending)
     }
   }

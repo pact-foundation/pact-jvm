@@ -31,7 +31,6 @@ import au.com.dius.pact.core.model.messaging.MessageInteraction
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.support.Auth
-import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.Result
@@ -40,7 +39,6 @@ import au.com.dius.pact.core.support.Result.Ok
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.ifNullOrEmpty
-import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.Event
@@ -53,7 +51,7 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import io.pact.plugins.jvm.core.PluginConfiguration
 import io.pact.plugins.jvm.core.PluginManager
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
@@ -63,6 +61,8 @@ import java.util.function.BiFunction
 import java.util.function.Function
 import java.util.function.Supplier
 import kotlin.reflect.KMutableProperty1
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Type of verification being preformed
@@ -410,6 +410,8 @@ open class ProviderVerifier @JvmOverloads constructor (
   var pluginManager: PluginManager = DefaultPluginManager
   var responseComparer: IResponseComparison = ResponseComparison.Companion
 
+  private var currentInteraction: Interaction? = null
+
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
    */
@@ -443,6 +445,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
+    currentInteraction = interaction
     val interactionId = interaction.interactionId
     try {
       val classGraph = setupClassGraph(providerInfo, consumer)
@@ -523,7 +526,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       failures[interactionMessage] = e
       emitEvent(Event.VerificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)))
       val errors = listOf(
-        VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e)
+        VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception",
+          e, interaction)
       )
       return VerificationResult.Failed(
         "Request to provider method failed with an exception", interactionMessage,
@@ -540,6 +544,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
+    currentInteraction = interaction
     var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
     methods.forEach { method ->
       val messageFactory = BiFunction<String, Any, Any> {
@@ -567,6 +572,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
+    currentInteraction = interaction
     emitEvent(Event.GeneratesAMessageWhich)
     val messageResult = factory.apply(interaction.description, interaction.request)
     val actualMessage: ByteArray
@@ -600,7 +606,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       comparison.bodyMismatches,
       interactionMessage + s,
       interactionId.orEmpty(),
-      pending
+      pending,
+ currentInteraction
     ).merge(
       displayMetadataResult(
         messageMetadata ?: emptyMap(),
@@ -608,7 +615,8 @@ open class ProviderVerifier @JvmOverloads constructor (
         comparison.metadataMismatches,
         interactionMessage + s,
         interactionId.orEmpty(),
-        pending
+        pending,
+ currentInteraction
       )
     )
   }
@@ -633,6 +641,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
+    currentInteraction = interaction
     val interactionId = interaction.interactionId.orEmpty()
     try {
       val factory = responseFactory!!
@@ -682,7 +691,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       failures[interactionMessage] = e
       emitEvent(Event.VerificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)))
       val errors = listOf(
-        VerificationFailureType.ExceptionFailure("Verification factory method failed with an exception", e)
+        VerificationFailureType.ExceptionFailure("Verification factory method failed with an exception",
+          e, interaction)
       )
       return VerificationResult.Failed(
         "Verification factory method failed with an exception", interactionMessage,
@@ -724,7 +734,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     comparison: Result<BodyComparisonResult, BodyTypeMismatch>,
     comparisonDescription: String,
     interactionId: String,
-    pending: Boolean
+    pending: Boolean,
+    interaction: Interaction?
   ): VerificationResult {
     return if (comparison is Ok && comparison.value.mismatches.isEmpty()) {
       emitEvent(Event.BodyComparisonOk)
@@ -736,13 +747,14 @@ open class ProviderVerifier @JvmOverloads constructor (
         is Err -> {
           failures[description] = comparison.error.description()
           VerificationResult.Failed("Body had differences", description,
-            mapOf(interactionId to listOf(VerificationFailureType.MismatchFailure(comparison.error))), pending)
+            mapOf(interactionId to listOf(VerificationFailureType.MismatchFailure(comparison.error, interaction))),
+            pending)
         }
         is Ok -> {
           failures[description] = comparison.value
           VerificationResult.Failed("Body had differences", description,
             mapOf(interactionId to comparison.value.mismatches.values.flatten()
-              .map { VerificationFailureType.MismatchFailure(it) }), pending)
+              .map { VerificationFailureType.MismatchFailure(it, interaction) }), pending)
         }
       }
     }
@@ -767,6 +779,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
+    currentInteraction = message
     val interactionId = message.interactionId
     var result: VerificationResult = VerificationResult.Ok(interactionId, emptyList())
     methods.forEach { method ->
@@ -808,6 +821,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
+    currentInteraction = message
     emitEvent(Event.GeneratesAMessageWhich)
     val messageResult = messageFactory.apply(message.description)
     val actualMessage: ByteArray
@@ -841,7 +855,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       comparison.bodyMismatches,
       interactionMessage + s,
       interactionId,
-      pending
+      pending,
+      currentInteraction
     ).merge(
       displayMetadataResult(
         messageMetadata ?: emptyMap(),
@@ -849,7 +864,8 @@ open class ProviderVerifier @JvmOverloads constructor (
         comparison.metadataMismatches,
         interactionMessage + s,
         interactionId,
-        pending
+        pending,
+        currentInteraction
       )
     )
   }
@@ -860,7 +876,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     comparison: Map<String, List<MetadataMismatch>>,
     comparisonDescription: String,
     interactionId: String,
-    pending: Boolean
+    pending: Boolean,
+    interaction: Interaction?
   ): VerificationResult {
     return if (comparison.isEmpty()) {
       emitEvent(Event.MetadataComparisonOk())
@@ -878,7 +895,8 @@ open class ProviderVerifier @JvmOverloads constructor (
           val description = "$comparisonDescription includes metadata \"$key\" with value \"$expectedValue\""
           failures[description] = metadataComparison
           result = result.merge(VerificationResult.Failed("", description,
-            mapOf(interactionId to metadataComparison.map { VerificationFailureType.MismatchFailure(it) }), pending))
+            mapOf(interactionId to metadataComparison.map { VerificationFailureType.MismatchFailure(it, interaction) }),
+            pending))
         }
       }
       result
@@ -906,6 +924,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult = verifyInteraction(provider, consumer, failures, interaction, null, null, providerClient)
 
   @JvmOverloads
+  @SuppressWarnings("TooGenericExceptionThrown")
   fun verifyInteraction(
     provider: IProviderInfo,
     consumer: IConsumerInfo,
@@ -915,6 +934,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     transportEntry: CatalogueEntry?,
     providerClient: ProviderClient = ProviderClient(provider, HttpClientFactory())
   ): VerificationResult {
+    currentInteraction = interaction
     Metrics.sendMetrics(MetricEvent.ProviderVerificationRan(1, verificationSource.ifNullOrEmpty { "unknown" }!!))
 
     var interactionMessage = "Verifying a pact between ${consumer.name}"
@@ -998,7 +1018,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       return VerificationResult.Failed("State change request failed",
         stateChangeResult.message,
         mapOf(interaction.interactionId.orEmpty() to
-          listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", stateChangeResult))
+          listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed",
+            stateChangeResult, interaction))
         ), pending)
     }
   }
@@ -1034,11 +1055,11 @@ open class ProviderVerifier @JvmOverloads constructor (
     reporters.forEach { it.returnsAResponseWhich() }
 
     return displayStatusResult(failures, expectedResponse.status, comparison.statusMismatch,
-        interactionMessage, interactionId, pending)
+        interactionMessage, interactionId, pending, currentInteraction)
       .merge(displayHeadersResult(failures, expectedResponse.headers, comparison.headerMismatches,
-        interactionMessage, interactionId, pending))
+        interactionMessage, interactionId, pending, currentInteraction))
       .merge(displayBodyResult(failures, comparison.bodyMismatches,
-        interactionMessage, interactionId, pending))
+        interactionMessage, interactionId, pending, currentInteraction))
   }
 
   fun displayStatusResult(
@@ -1047,7 +1068,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     mismatch: StatusMismatch?,
     comparisonDescription: String,
     interactionId: String,
-    pending: Boolean
+    pending: Boolean,
+    interaction: Interaction?
   ): VerificationResult {
     return if (mismatch == null) {
       reporters.forEach { it.statusComparisonOk(status) }
@@ -1057,7 +1079,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       val description = "$comparisonDescription: has status code $status"
       failures[description] = mismatch.description()
       VerificationResult.Failed("Response status did not match", description,
-        mapOf(interactionId to listOf(VerificationFailureType.MismatchFailure(mismatch))), pending)
+        mapOf(interactionId to listOf(VerificationFailureType.MismatchFailure(mismatch, interaction))), pending)
     }
   }
 
@@ -1067,7 +1089,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     headers: Map<String, List<HeaderMismatch>>,
     comparisonDescription: String,
     interactionId: String,
-    pending: Boolean
+    pending: Boolean,
+    interaction: Interaction?
   ): VerificationResult {
     val ok = VerificationResult.Ok(interactionId, emptyList())
     return if (headers.isEmpty()) {
@@ -1085,7 +1108,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           failures[description] = headerComparison.joinToString(", ") { it.description() }
           result = result.merge(VerificationResult.Failed("Headers had differences", description,
             mapOf(interactionId to headerComparison.map {
-              VerificationFailureType.MismatchFailure(it)
+              VerificationFailureType.MismatchFailure(it, interaction)
             }), pending))
         }
       }
@@ -1111,6 +1134,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     context: MutableMap<String, Any>,
     pending: Boolean
   ): VerificationResult {
+    currentInteraction = interaction
     return try {
       val expectedResponse = interaction.response.generatedResponse(context, GeneratorTestMode.Provider)
       val actualResponse = client.makeRequest(interaction.request.generatedRequest(context, GeneratorTestMode.Provider))
@@ -1131,7 +1155,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       }
       VerificationResult.Failed("Request to provider endpoint failed with an exception", interactionMessage,
         mapOf(interaction.interactionId.orEmpty() to
-          listOf(VerificationFailureType.ExceptionFailure("Request to provider endpoint failed with an exception", e))),
+          listOf(VerificationFailureType.ExceptionFailure("Request to provider endpoint failed with an exception",
+            e, interaction))),
         pending)
     }
   }
@@ -1210,6 +1235,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   /**
    * Initialise any required plugins and plugin entries required for the verification
    */
+  @SuppressWarnings("TooGenericExceptionThrown")
   fun initialisePlugins(pact: Pact) {
     CatalogueManager.registerCoreEntries(
       MatchingConfig.contentMatcherCatalogueEntries() +
@@ -1267,6 +1293,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     request: Any?,
     context: Map<String, Any>
   ): VerificationResult {
+    currentInteraction = interaction
     val userConfig = context["userConfig"] as Map<String, Any?>? ?: emptyMap()
     logger.debug { "Verifying interaction => $request" }
     return when (val result = DefaultPluginManager.verifyInteraction(
@@ -1285,7 +1312,7 @@ open class ProviderVerifier @JvmOverloads constructor (
               when (it) {
                 is InteractionVerificationDetails.Error -> VerificationFailureType.InvalidInteractionFailure(it.message)
                 is InteractionVerificationDetails.Mismatch -> VerificationFailureType.MismatchFailure(
-                  BodyMismatch(it.expected, it.actual, it.mismatch, it.path)
+                  BodyMismatch(it.expected, it.actual, it.mismatch, it.path), interaction
                 )
               }
             }), output = result.value.output
@@ -1385,7 +1412,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     reporters.forEach { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
-  companion object : KLogging() {
+  companion object {
     const val PACT_VERIFIER_PUBLISH_RESULTS = "pact.verifier.publishResults"
     const val PACT_VERIFIER_BUILD_URL = "pact.verifier.buildUrl"
     const val PACT_FILTER_CONSUMERS = "pact.filter.consumers"

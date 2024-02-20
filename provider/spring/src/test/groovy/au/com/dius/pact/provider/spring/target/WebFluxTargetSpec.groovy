@@ -58,7 +58,7 @@ class WebFluxTargetSpec extends Specification {
 
   def 'execute the test against router function'() {
     given:
-    def target = new WebFluxTarget()
+    WebFluxTarget target = new WebFluxTarget()
     target.setTestClass(new TestClass(WebFluxTargetSpec), this)
     def interaction = new RequestResponseInteraction('Test Interaction')
     def handler = Spy(TestHandler)
@@ -73,7 +73,7 @@ class WebFluxTargetSpec extends Specification {
 
   def 'execute the test against controller'() {
     given:
-    def target = new WebFluxTarget()
+    WebFluxTarget target = new WebFluxTarget()
     target.setTestClass(new TestClass(WebFluxTargetSpec), this)
     def interaction = new RequestResponseInteraction('Test Interaction')
     def controller = Spy(TestController)
@@ -88,7 +88,7 @@ class WebFluxTargetSpec extends Specification {
 
   def 'invokes any request filter'() {
     given:
-    def target = new WebFluxTarget()
+    WebFluxTarget target = new WebFluxTarget()
     def testInstance = Spy(TestClassWithFilter)
     target.setTestClass(new TestClass(TestClassWithFilter), testInstance)
     def interaction = new RequestResponseInteraction('Test Interaction')
