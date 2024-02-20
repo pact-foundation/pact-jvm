@@ -11,8 +11,8 @@ import spock.lang.Unroll
 @SuppressWarnings('LineLength')
 class VerificationResultSpec extends Specification {
 
-  static error1 = new VerificationFailureType.ExceptionFailure('Boom', new RuntimeException())
-  static error2 = new VerificationFailureType.ExceptionFailure('Splat', new RuntimeException())
+  static error1 = new VerificationFailureType.ExceptionFailure('Boom', new RuntimeException(), null)
+  static error2 = new VerificationFailureType.ExceptionFailure('Splat', new RuntimeException(), null)
 
   @Unroll
   def 'merging results test'() {
@@ -43,7 +43,7 @@ class VerificationResultSpec extends Specification {
     given:
     def description = 'Request to provider failed with an exception'
     def failures = [
-      '1234ABCD': [new VerificationFailureType.ExceptionFailure('Request to provider method failed with an exception', new RuntimeException('Boom'))]
+      '1234ABCD': [new VerificationFailureType.ExceptionFailure('Request to provider method failed with an exception', new RuntimeException('Boom'), null)]
     ]
     def verification = new VerificationResult.Failed(description, '', failures, false)
 
@@ -62,7 +62,7 @@ class VerificationResultSpec extends Specification {
     given:
     def description = 'Provider state change callback failed'
     def failures = [
-      '1234ABCD': [new VerificationFailureType.StateChangeFailure(description, new StateChangeResult(new Result.Err(new RuntimeException('Boom'))))]
+      '1234ABCD': [new VerificationFailureType.StateChangeFailure(description, new StateChangeResult(new Result.Err(new RuntimeException('Boom'))), null)]
     ]
     def verification = new VerificationResult.Failed(description, '', failures, false)
 

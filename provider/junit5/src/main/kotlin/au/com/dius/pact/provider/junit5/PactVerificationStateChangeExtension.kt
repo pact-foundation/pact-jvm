@@ -45,7 +45,8 @@ class PactVerificationStateChangeExtension(
       testContext.testExecutionResult.add(VerificationResult.Failed(
         description = "Provider state change callback failed",
         failures = mapOf(interaction.interactionId.orEmpty() to
-          listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", error))),
+          listOf(VerificationFailureType.StateChangeFailure("Provider state change callback failed", error,
+            testContext.interaction))),
         pending = pending
       ))
       if (!pending) {
@@ -68,7 +69,8 @@ class PactVerificationStateChangeExtension(
       testContext.testExecutionResult.add(VerificationResult.Failed(
         description = "Provider state change teardown callback failed",
         failures = mapOf(interaction.interactionId.orEmpty() to listOf(
-          VerificationFailureType.StateChangeFailure("Provider state change teardown callback failed", error))),
+          VerificationFailureType.StateChangeFailure("Provider state change teardown callback failed", error,
+            testContext.interaction))),
         pending = pending
       ))
       if (!pending) {

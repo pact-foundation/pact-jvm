@@ -13,6 +13,7 @@ import au.com.dius.pact.provider.VerificationResult
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -28,6 +29,8 @@ import java.util.function.Function
 import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
+
+val logger = KotlinLogging.logger {}
 
 class WebFluxProviderVerifier : ProviderVerifier() {
 
@@ -61,7 +64,8 @@ class WebFluxProviderVerifier : ProviderVerifier() {
       }
       return VerificationResult.Failed("Request to provider method failed with an exception", interactionMessage,
         mapOf(interaction.interactionId.orEmpty() to listOf(
-          VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception", e))),
+          VerificationFailureType.ExceptionFailure("Request to provider method failed with an exception",
+            e, interaction))),
         pending)
     }
   }

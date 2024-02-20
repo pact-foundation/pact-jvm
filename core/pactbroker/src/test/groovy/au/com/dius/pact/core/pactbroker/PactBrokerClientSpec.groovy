@@ -5,6 +5,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
+import groovy.json.JsonOutput
 import kotlin.Pair
 import kotlin.collections.MapsKt
 import spock.lang.Issue
@@ -318,6 +319,65 @@ class PactBrokerClientSpec extends Specification {
     'the links have different case'     | ['pb:Publish-Verification-Results': [HREF: 'URL']] | Result.Ok.simpleName
   }
 
+  def 'publishing verification results with an exception should support any type of exception'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def uploadResult = new Result.Ok(true)
+    halClient.postJson(_, _) >> uploadResult
+    def result = new TestResult.Failed([
+      [exception: new AssertionError('boom')]
+    ], 'Failed')
+    def doc = ['pb:publish-verification-results': [href: '']]
+
+    expect:
+    client.publishVerificationResults(doc, result, '0', null) == uploadResult
+  }
+
+  def 'publishing verification results includes the interaction description if it is set'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def uploadResult = new Result.Ok(true)
+    def result = new TestResult.Failed([
+      [
+        exception: new AssertionError('boom'),
+        interactionDescription: 'interaction description'
+      ]
+    ], 'Failed')
+    def doc = ['pb:publish-verification-results': [href: '']]
+    def expectedJson = JsonOutput.toJson([
+      providerApplicationVersion: '0',
+      success: false,
+      testResults: [
+        [
+          exceptions: [[exceptionClass: 'java.lang.AssertionError', message: 'boom']],
+          interactionDescription: 'interaction description',
+          interactionId: null,
+          mismatches: [],
+          success: false
+        ]
+      ],
+      verifiedBy: [
+        implementation: 'Pact-JVM',
+        version: ''
+      ]
+    ])
+    def actualJson
+
+    when:
+    def publishResult = client.publishVerificationResults(doc, result, '0', null)
+
+    then:
+    1 * halClient.postJson(_, _) >> { args -> actualJson = args[1]; uploadResult }
+    publishResult == uploadResult
+    actualJson == expectedJson
+  }
+
   def 'when fetching a pact, return the results as a Map'() {
     given:
     def halClient = Mock(IHalClient)
@@ -343,23 +403,6 @@ class PactBrokerClientSpec extends Specification {
     then:
     1 * halClient.fetch(url, _) >> new Result.Ok(json)
     result.pactFile == Json.INSTANCE.toJson([a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']])
-  }
-
-  def 'publishing verification results with an exception should support any type of exception'() {
-    given:
-    def halClient = Mock(IHalClient)
-    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
-      newHalClient() >> halClient
-    }
-    def uploadResult = new Result.Ok(true)
-    halClient.postJson(_, _) >> uploadResult
-    def result = new TestResult.Failed([
-      [exception: new AssertionError('boom')]
-    ], 'Failed')
-    def doc = ['pb:publish-verification-results': [href: '']]
-
-    expect:
-    client.publishVerificationResults(doc, result, '0', null) == uploadResult
   }
 
   @SuppressWarnings('LineLength')

@@ -125,7 +125,8 @@ data class PactVerificationContext @JvmOverloads constructor(
               "Request to provider failed with an exception", interactionMessage,
               mapOf(
                 interaction.interactionId.orEmpty() to
-                  listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))
+                  listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception",
+                    e, interaction))
               ),
               consumer.pending
             )

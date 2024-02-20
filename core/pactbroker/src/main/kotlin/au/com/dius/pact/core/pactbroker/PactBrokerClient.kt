@@ -869,12 +869,21 @@ open class PactBrokerClient(
               jsonObject("interactionId" to mismatches.key, "success" to true)
             } else {
               val json = jsonObject(
-                "interactionId" to mismatches.key, "success" to false,
+                "interactionId" to mismatches.key,
+                "success" to false,
                 "mismatches" to jsonArray(values)
               )
               if (exceptions != null) {
                 json["exceptions"] = exceptions
               }
+              val interactionDescription = mismatches.value
+                .firstOrNull { it["interactionDescription"]?.toString().isNotEmpty() }
+                ?.get("interactionDescription")
+                ?.toString()
+              if (interactionDescription.isNotEmpty()) {
+                json["interactionDescription"] = interactionDescription
+              }
+
               json
             }
             interactionJson

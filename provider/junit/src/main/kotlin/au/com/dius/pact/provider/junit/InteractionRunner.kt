@@ -186,7 +186,8 @@ open class InteractionRunner(
         } catch (e: Throwable) {
           testResult = VerificationResult.Failed("Request to provider failed with an exception", description.displayName,
             mapOf(interaction.interactionId.orEmpty() to
-              listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception", e))),
+              listOf(VerificationFailureType.ExceptionFailure("Request to provider failed with an exception",
+                e, interaction))),
             pending)
         } finally {
           val updateTestResult = testResultAccumulator.updateTestResult(if (pact is FilteredPact) pact.pact else pact, interaction,
