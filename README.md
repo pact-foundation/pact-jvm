@@ -106,7 +106,7 @@ Pact-JVM has a number of ways you can write your service consumer tests.
 
 ### I Use Scala
 
-You want to look at: [pact4s](https://github.com/jbwheatley/pact4s) or [scala-pact](https://github.com/ITV/scala-pact)
+You want to look at: [pact4s](https://github.com/jbwheatley/pact4s).
 
 ### I Use Java
 
