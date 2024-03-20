@@ -129,7 +129,7 @@ class JsonReporter(
 
   override fun interactionDescription(interaction: Interaction) {
     jsonData["execution"].asArray()!!.last()["interactions"].asArray()!!.add(jsonObject(
-      "interaction" to Json.toJson(interaction.toMap(PactSpecVersion.V3)),
+      "interaction" to Json.toJson(interaction.toMap(if (interaction.isV4()) PactSpecVersion.V4 else PactSpecVersion.V3)),
       "verification" to jsonObject("result" to "OK")
     ))
   }
