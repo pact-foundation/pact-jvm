@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.OptionalBody.Companion.body
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
+import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.expressions.DataType
@@ -286,6 +287,18 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
    */
   public override fun bodyMatchingContentType(contentType: String, exampleContents: String): PactDslRequestWithoutPath {
     return super.bodyMatchingContentType(contentType, exampleContents) as PactDslRequestWithoutPath
+  }
+
+  /**
+   * Request body as a binary data. It will match any expected bodies against the content type.
+   * @param example Example contents to use in the consumer test
+   * @param contentType Content type of the data
+   */
+  fun withBinaryData(example: ByteArray, contentType: String): PactDslRequestWithoutPath {
+    requestBody = body(example, au.com.dius.pact.core.model.ContentType.fromString(contentType))
+    requestHeaders["Content-Type"] = listOf(contentType)
+    requestMatchers.addCategory("body").addRule("$", ContentTypeMatcher(contentType))
+    return this
   }
 
   /**
