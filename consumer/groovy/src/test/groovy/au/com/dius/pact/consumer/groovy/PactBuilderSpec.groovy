@@ -346,4 +346,35 @@ class PactBuilderSpec extends Specification {
       new ProviderState('provider state one'), new ProviderState('provider state two')
     ]
   }
+
+  @Issue('#443')
+  def 'supports regex matcher on plain text body'() {
+    given:
+    aliceService {
+      uponReceiving('a request with plain test')
+      withAttributes(
+        method: 'post',
+        path: '/random',
+        body: regexp(~/\w+/, 'randomText'))
+      willRespondWith(
+        status: 200,
+      )
+    }
+
+    when:
+    aliceService.updateInteractions()
+
+    then:
+    aliceService.interactions.size() == 1
+    aliceService.interactions[0].request.body.valueAsString() == 'randomText'
+    aliceService.interactions[0].request.headers == [
+      'Content-Type': ['text/plain; charset=ISO-8859-1']
+    ]
+    aliceService.interactions[0].request.matchingRules.toV3Map(null) == [
+      body: [
+        '$': [
+          matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']
+        ]
+    ]
+  }
 }
