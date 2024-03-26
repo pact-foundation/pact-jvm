@@ -93,4 +93,27 @@ class PactDslRequestWithoutPathSpec extends Specification {
     def ex = thrown(au.com.dius.pact.consumer.InvalidMatcherException)
     ex.message == 'Example "/abcd" does not match regular expression "\\/\\d+"'
   }
+
+  @Issue('#1777')
+  def 'supports setting binary body contents'() {
+    given:
+    def request = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('a PUT request with binary data')
+    def gif1px = [
+      0107, 0111, 0106, 0070, 0067, 0141, 0001, 0000, 0001, 0000, 0200, 0000, 0000, 0377, 0377, 0377,
+      0377, 0377, 0377, 0054, 0000, 0000, 0000, 0000, 0001, 0000, 0001, 0000, 0000, 0002, 0002, 0104,
+      0001, 0000, 0073
+    ] as byte[]
+
+    when:
+    def result = request.withBinaryData(gif1px, 'image/gif')
+
+    then:
+    result.requestHeaders['Content-Type'] == ['image/gif']
+    result.requestBody.value == gif1px
+    result.requestMatchers.rulesForCategory('body').toMap(PactSpecVersion.V4) == [
+      '$': [matchers: [[match: 'contentType', value: 'image/gif']], combine: 'AND']
+    ]
+  }
 }
