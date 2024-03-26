@@ -6,6 +6,8 @@ import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
@@ -42,6 +44,15 @@ open class BaseBuilder(
         httpPart.matchingRules.addCategory(body::class.property("matchers")?.get(body) as MatchingRuleCategory)
         httpPart.generators.addGenerators(body::class.property("generators")?.get(body) as Generators)
         OptionalBody.body(body::class.property(BODY)?.get(body).toString().toByteArray(contentType.asCharset()))
+      } else if (body is Matcher) {
+        httpPart.matchingRules.addCategory("body").addRule("$", body.matcher!!)
+        if (body.generator != null) {
+          httpPart.generators.addGenerator(Category.BODY, "$", body.generator!!)
+        }
+        if (!httpPart.hasHeader("Content-Type")) {
+          httpPart.headers["Content-Type"] = listOf(ContentType.TEXT_PLAIN.toString())
+        }
+        OptionalBody.body(body.value?.toString()?.toByteArray(contentType.asCharset()), ContentType.TEXT_PLAIN)
       } else if (body != null && body !is String) {
         if (contentType.isBinaryType()) {
           when (body) {
