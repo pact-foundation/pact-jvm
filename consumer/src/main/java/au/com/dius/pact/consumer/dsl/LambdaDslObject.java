@@ -580,6 +580,17 @@ public class LambdaDslObject {
     }
 
     /**
+     * Attribute that is an array. This will accept any array, including an empty one. If you need to configure the
+     * array, use the method that takes a consumer.
+     *
+     * @param name field name
+     */
+    public LambdaDslObject array(final String name) {
+        object.array(name).closeArray();
+        return this;
+    }
+
+    /**
      * Attribute that is a JSON object
      *
      * @param name field name
@@ -589,6 +600,17 @@ public class LambdaDslObject {
         final LambdaDslObject dslObject = new LambdaDslObject(pactObject);
         nestedObject.accept(dslObject);
         pactObject.closeObject();
+        return this;
+    }
+
+    /**
+     * Attribute that is a JSON object. This will accept any JSON object, including an empty one.  If you need to
+     * configure the object, use the method that takes a consumer.
+     *
+     * @param name field name
+     */
+    public LambdaDslObject object(final String name) {
+        object.object(name).closeObject();
         return this;
     }
 
