@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.8 - Maintenance Release
+
+* 6ced027af - chore: upgrade Netty to version 4.1.108.Final #1782 (Ronald Holshausen, Wed Mar 27 14:36:04 2024 +1100)
+* 71d8fee59 - feat(consumer/groovy): Support matchers on plain text bodies #443 (Ronald Holshausen, Tue Mar 26 16:44:35 2024 +1100)
+* 7f7093639 - feat(consumer-dsl): Support object and array expectation without specifying consumer in LambdaDSL #1737 (Ronald Holshausen, Tue Mar 26 15:52:18 2024 +1100)
+* 314f9c096 - feat(consumer-dsl): Support request body as byte array #1777 (Ronald Holshausen, Tue Mar 26 15:03:32 2024 +1100)
+* 4f3177a42 - Merge pull request #1780 from gjkersten/fix-v4-syn-msg-json-report (Ronald Holshausen, Thu Mar 21 11:22:10 2024 +1100)
+* 245b17c39 - fix: allow synchronous messages to be saved in a v4 pact json report (Gert Jan Kersten, Wed Mar 20 08:14:38 2024 +0100)
+* ca1afe425 - Merge pull request #1772 from gaeljw/patch-1 (Ronald Holshausen, Mon Mar 18 12:03:03 2024 +1100)
+* 411fc8221 - docs: remove reference to scala-pact (Gaël Jourdan-Weil, Sat Mar 2 20:38:15 2024 +0100)
+* bc1e74468 - fix: Fix for failing Compatibility Suite build (Ronald Holshausen, Tue Feb 20 14:29:04 2024 +1100)
+* 1f7d401ec - feat: Add interaction description to the verification payload sent to the Pact Broker (Ronald Holshausen, Tue Feb 20 13:57:56 2024 +1100)
+* 30c462b23 - Merge commit 'fa1f85fd4e37374d207e14f69984cb332c61e6dc' (Ronald Holshausen, Mon Feb 19 13:15:39 2024 +1100)
+* fa1f85fd4 - Squashed 'compatibility-suite/pact-compatibility-suite/' changes from d22d4667c..416f3a64d (Ronald Holshausen, Mon Feb 19 13:15:39 2024 +1100)
+* f5cc82338 - chore: Upgrade dependencies (groovy) (Ronald Holshausen, Fri Feb 16 16:18:18 2024 +1100)
+* e89bf5bd6 - chore: Upgrade dependencies (ktor, netty) (Ronald Holshausen, Fri Feb 16 16:12:15 2024 +1100)
+* a3358ce84 - chore: Upgrade dependencies (json, tika, pact plugin driver) (Ronald Holshausen, Fri Feb 16 16:06:24 2024 +1100)
+* 7bada264d - chore: remove use of deplicated KLogging (Ronald Holshausen, Fri Feb 16 15:54:31 2024 +1100)
+* 04458fca2 - chore: Upgrade kotlin-logging to 5.1.4 (Ronald Holshausen, Fri Feb 16 15:32:14 2024 +1100)
+* dac93d75a - bump version to 4.6.8 (Ronald Holshausen, Fri Feb 16 15:10:16 2024 +1100)
+
 # 4.6.7 - Bugfix Release
 
 * 2dd627172 - fix: Matching rules for query strings with square brackets were not bing written in V2 format correctly #1766 (Ronald Holshausen, Fri Feb 16 14:17:12 2024 +1100)
