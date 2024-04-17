@@ -28,7 +28,7 @@ private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
 data class HttpRequest @JvmOverloads constructor(
   override var method: String = "GET",
   override var path: String = "/",
-  override var query: MutableMap<String, List<String>> = mutableMapOf(),
+  override var query: MutableMap<String, List<String?>> = mutableMapOf(),
   override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override val matchingRules: MatchingRules = MatchingRulesImpl(),

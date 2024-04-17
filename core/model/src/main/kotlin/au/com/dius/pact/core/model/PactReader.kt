@@ -152,22 +152,28 @@ private fun basicAuth(baseUrl: String, username: String, password: String, build
  * Parses the query string into a Map
  */
 @JvmOverloads
-fun queryStringToMap(query: String?, decode: Boolean = true): Map<String, List<String>> {
+fun queryStringToMap(query: String?, decode: Boolean = true): Map<String, List<String?>> {
   return if (query.isNullOrEmpty()) {
     emptyMap()
   } else {
     query.split("&")
-      .filter { it.isNotEmpty() }.map { val nv = it.split("=", limit = 2); nv[0] to nv[1] }
-      .fold(mutableMapOf<String, MutableList<String>>()) { map, nameAndValue ->
-      val name = if (decode) URLDecoder.decode(nameAndValue.first, "UTF-8") else nameAndValue.first
-      val value = if (decode) URLDecoder.decode(nameAndValue.second, "UTF-8") else nameAndValue.second
-      if (map.containsKey(name)) {
-        map[name]!!.add(value)
-      } else {
-        map[name] = mutableListOf(value)
+      .filter { it.isNotEmpty() }
+      .map {
+        val nv = it.split("=", limit = 2)
+        val value = if (nv.size > 1) nv[1] else null
+        nv[0] to value
       }
-      map
-    }
+      .fold(mutableMapOf<String, MutableList<String?>>()) { map, nameAndValue ->
+        val name = if (decode) URLDecoder.decode(nameAndValue.first, "UTF-8") else nameAndValue.first
+        val value = if (nameAndValue.second != null && decode) URLDecoder.decode(nameAndValue.second, "UTF-8")
+          else nameAndValue.second
+        if (map.containsKey(name)) {
+          map[name]!!.add(value)
+        } else {
+          map[name] = mutableListOf(value)
+        }
+        map
+      }
   }
 }
 

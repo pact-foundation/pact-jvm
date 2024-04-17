@@ -1,6 +1,5 @@
 package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import java.io.ByteArrayOutputStream
 import javax.mail.internet.InternetHeaders
@@ -45,12 +44,14 @@ abstract class BaseRequest : HttpPart() {
   fun isMultipartFileUpload() = determineContentType().isMultipartFormData()
 
   companion object {
-    fun parseQueryParametersToMap(query: JsonValue?): Map<String, List<String>> {
+    @JvmStatic
+    fun parseQueryParametersToMap(query: JsonValue?): Map<String, List<String?>> {
       return when (query) {
         null -> emptyMap()
         is JsonValue.Object -> query.entries.entries.associate { entry ->
           val list = when (val value = entry.value) {
-            is JsonValue.Array -> value.values.map { Json.toString(it) }
+            is JsonValue.Array -> value.values.map { it.asString() }
+            is JsonValue.StringValue -> listOf(value.toString())
             else -> emptyList()
           }
           entry.key to list

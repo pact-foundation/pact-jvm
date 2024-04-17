@@ -16,7 +16,7 @@ import io.github.oshai.kotlinlogging.KLogging
 interface IRequest: IHttpPart {
   var method: String
   var path: String
-  val query: MutableMap<String, List<String>>
+  val query: MutableMap<String, List<String?>>
   override val headers: MutableMap<String, List<String>>
   override var body: OptionalBody
   override val matchingRules: MatchingRules
@@ -41,7 +41,7 @@ interface IRequest: IHttpPart {
 class Request @Suppress("LongParameterList") @JvmOverloads constructor(
   override var method: String = DEFAULT_METHOD,
   override var path: String = DEFAULT_PATH,
-  override var query: MutableMap<String, List<String>> = mutableMapOf(),
+  override var query: MutableMap<String, List<String?>> = mutableMapOf(),
   override var headers: MutableMap<String, List<String>> = mutableMapOf(),
   override var body: OptionalBody = OptionalBody.missing(),
   override var matchingRules: MatchingRules = MatchingRulesImpl(),
