@@ -8,8 +8,8 @@ object QueryMatcher : KLogging() {
 
   private fun compare(
     parameter: String,
-    expected: String,
-    actual: String,
+    expected: String?,
+    actual: String?,
     context: MatchingContext
   ): List<QueryMismatch> {
     return if (context.matcherDefined(listOf(parameter))) {
@@ -29,8 +29,8 @@ object QueryMatcher : KLogging() {
 
   private fun compareQueryParameterValues(
     parameter: String,
-    expected: List<String>,
-    actual: List<String>,
+    expected: List<String?>,
+    actual: List<String?>,
     path: List<String>,
     context: MatchingContext
   ): List<QueryMismatch> {
@@ -52,8 +52,8 @@ object QueryMatcher : KLogging() {
   @JvmStatic
   fun compareQuery(
     parameter: String,
-    expected: List<String>,
-    actual: List<String>,
+    expected: List<String?>,
+    actual: List<String?>,
     context: MatchingContext
   ): List<QueryMismatch> {
     val path = listOf(parameter)

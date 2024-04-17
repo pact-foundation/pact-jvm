@@ -135,6 +135,18 @@ class RequestResponseInteractionSpec extends Specification {
       'include[]=course_image&include[]=favorites'
   }
 
+  @Issue('#1788')
+  def 'correctly encodes the query parameters with no values or empty ones'() {
+    given:
+    request.query = [p: [null, null, null], q: ['', '', '']]
+
+    when:
+    def map = interaction.toMap(PactSpecVersion.V2)
+
+    then:
+    map.request.query == 'p&p&p&q=&q=&q='
+  }
+
   @Issue('#1611')
   def 'supports empty bodies'() {
     expect:

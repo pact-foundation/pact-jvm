@@ -37,7 +37,7 @@ open class PactDslRequestBase(
   @JvmField
   var requestHeaders: MutableMap<String, List<String>> = mutableMapOf()
   @JvmField
-  var query: MutableMap<String, List<String>> = mutableMapOf()
+  var query: MutableMap<String, List<String?>> = mutableMapOf()
   @JvmField
   var requestBody = missing()
   @JvmField

@@ -88,8 +88,8 @@ data class MethodMismatch(val expected: String, val actual: String) : Mismatch()
 
 data class QueryMismatch(
   val queryParameter: String,
-  val expected: String,
-  val actual: String,
+  val expected: String?,
+  val actual: String?,
   val mismatch: String? = null,
   val path: String = "/"
 ) : Mismatch() {

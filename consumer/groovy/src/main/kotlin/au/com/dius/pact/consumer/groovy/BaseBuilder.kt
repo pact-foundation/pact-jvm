@@ -130,7 +130,7 @@ open class BaseBuilder(
     query: Any,
     matchers: MatchingRules,
     generators: Generators
-  ): Map<String, List<String>> {
+  ): Map<String, List<String?>> {
     return if (query is Map<*, *>) {
       query.entries.associate { (key, value) ->
         when (value) {

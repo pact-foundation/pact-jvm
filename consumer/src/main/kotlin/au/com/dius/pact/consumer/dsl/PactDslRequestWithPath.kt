@@ -55,7 +55,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
                        path: String,
                        requestMethod: String,
                        requestHeaders: MutableMap<String, List<String>>,
-                       query: MutableMap<String, List<String>>,
+                       query: MutableMap<String, List<String?>>,
                        requestBody: OptionalBody,
                        requestMatchers: MatchingRules,
                        requestGenerators: Generators,
