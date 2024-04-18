@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.9 - Bugfix Release
+
+* f835e2aca - chore: Removing publish test result step from CI (Ronald Holshausen, Thu Apr 18 11:29:20 2024 +1000)
+* 9fea4e229 - fix: Add tests for generating URLs with null or empty query parameter values #1788 (Ronald Holshausen, Thu Apr 18 11:20:45 2024 +1000)
+* be1989d40 - fix: IndexOutOfBoundsException when query param without value #1788 (Ronald Holshausen, Wed Apr 17 17:28:56 2024 +1000)
+* 78b265ece - Merge pull request #1785 from danifgxcom/patch-1 (Ronald Holshausen, Wed Apr 17 09:45:48 2024 +1000)
+* b5bf1b33a - Update README.md (danifgxcom, Wed Apr 3 01:16:30 2024 +0200)
+* da146a02b - bump version to 4.6.9 (Ronald Holshausen, Wed Mar 27 15:07:21 2024 +1100)
+
 # 4.6.8 - Maintenance Release
 
 * 6ced027af - chore: upgrade Netty to version 4.1.108.Final #1782 (Ronald Holshausen, Wed Mar 27 14:36:04 2024 +1100)
