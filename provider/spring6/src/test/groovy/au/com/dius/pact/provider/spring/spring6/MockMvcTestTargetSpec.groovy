@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import spock.lang.Issue
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
@@ -121,6 +122,18 @@ class MockMvcTestTargetSpec extends Specification {
         responseMap.statusCode == 200
         responseMap.contentType.toString() == 'application/json'
         responseMap.body.valueAsString() == 'Hello 1234'
+    }
+
+    @Issue('#1788')
+    def 'query parameters with null and empty values'() {
+        given:
+        def pactRequest = new Request('GET', '/', ['A': ['', ''], 'B': [null, null]])
+
+        when:
+        def request = mockMvcTestTarget.requestUriString(pactRequest)
+
+        then:
+        request.query == 'A=&A=&B&B'
     }
 
     @RestController

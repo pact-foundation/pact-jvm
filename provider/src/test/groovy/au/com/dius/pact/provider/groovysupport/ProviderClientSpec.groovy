@@ -789,4 +789,16 @@ class ProviderClientSpec extends Specification {
     entity.content.text == '{"ä": "äbc"}'
     entity.contentType == 'application/json; charset=UTF-8'
   }
+
+  @Issue('#1788')
+  def 'query parameters with null and empty values'() {
+    given:
+    def pactRequest = new Request('GET', '/', ['A': ['', ''], 'B': [null, null]])
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.uri.query == 'A=&A=&B&B'
+  }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.server.RequestPredicates
 import org.springframework.web.reactive.function.server.RouterFunction
 import org.springframework.web.reactive.function.server.RouterFunctions
 import org.springframework.web.reactive.function.server.ServerResponse
+import spock.lang.Issue
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
@@ -97,5 +98,18 @@ class WebFluxTargetSpec extends Specification {
     new V4Interaction.AsynchronousMessage('test') | false
     new V4Interaction.SynchronousMessages('test') | false
     new V4Interaction.SynchronousHttp('test')     | true
+  }
+
+  @Issue('#1788')
+  def 'query parameters with null and empty values'() {
+    given:
+    def pactRequest = new Request('GET', '/', ['A': ['', ''], 'B': [null, null]])
+    WebFluxTarget webFluxTarget = new WebFluxTarget(routerFunction)
+
+    when:
+    def request = webFluxTarget.requestUriString(pactRequest)
+
+    then:
+    request == '/?A=&A=&B&B'
   }
 }
