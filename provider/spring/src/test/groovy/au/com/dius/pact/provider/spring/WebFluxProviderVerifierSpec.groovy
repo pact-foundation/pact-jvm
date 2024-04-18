@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.server.RouterFunctions
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
+import spock.lang.Issue
 import spock.lang.Specification
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET
@@ -96,4 +97,15 @@ class WebFluxProviderVerifierSpec extends Specification {
     new String(bytes)
   }
 
+  @Issue('#1788')
+  def 'query parameters with null and empty values'() {
+    given:
+    def pactRequest = new Request('GET', '/', ['A': ['', ''], 'B': [null, null]])
+
+    when:
+    def request = verifier.requestUriString(pactRequest)
+
+    then:
+    request == '/?A=&A=&B&B'
+  }
 }
