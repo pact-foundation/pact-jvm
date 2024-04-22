@@ -14,7 +14,7 @@ class HeaderWithParameters(
 
 object HeaderParser {
     private val SINGLE_VALUE_HEADERS = setOf("date", "accept-datetime", "if-modified-since", "if-unmodified-since",
-      "expires", "retry-after", "last-modified", "set-cookie")
+      "expires", "retry-after", "last-modified", "set-cookie", "user-agent")
 
   fun fromJson(key: String, value: JsonValue): List<String> {
     return when {
