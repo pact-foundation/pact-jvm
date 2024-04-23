@@ -1,6 +1,7 @@
 name: Trigger update to docs.pact.io
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
