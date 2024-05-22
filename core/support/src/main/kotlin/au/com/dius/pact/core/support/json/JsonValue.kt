@@ -7,12 +7,16 @@ sealed class JsonValue {
     constructor(value: CharArray) : this(JsonToken.Integer(value))
     constructor(value: Int) : this(JsonToken.Integer(value.toString().toCharArray()))
     fun toBigInteger() = String(this.value.chars).toBigInteger()
+
+    override fun copy() = Integer(value.chars)
   }
 
   class Decimal(val value: JsonToken.Decimal) : JsonValue() {
     constructor(value: CharArray) : this(JsonToken.Decimal(value))
     constructor(value: Number) : this(JsonToken.Decimal(value.toString().toCharArray()))
     fun toBigDecimal() = String(this.value.chars).toBigDecimal()
+
+    override fun copy() = Decimal(value.chars)
   }
 
   class StringValue(val value: JsonToken.StringValue) : JsonValue() {
@@ -34,11 +38,21 @@ sealed class JsonValue {
       result = 31 * result + value.hashCode()
       return result
     }
+
+    override fun copy() = StringValue(value.chars)
   }
 
-  object True : JsonValue()
-  object False : JsonValue()
-  object Null : JsonValue()
+  object True : JsonValue() {
+    override fun copy() = True
+  }
+
+  object False : JsonValue() {
+    override fun copy() = False
+  }
+
+  object Null : JsonValue() {
+    override fun copy() = Null
+  }
 
   class Array @JvmOverloads constructor (val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
     fun find(function: (JsonValue) -> Boolean) = values.find(function)
@@ -69,14 +83,19 @@ sealed class JsonValue {
     }
 
     companion object {
-      fun of(vararg value: JsonValue) = JsonValue.Array(value.toMutableList())
+      fun of(vararg value: JsonValue) = Array(value.toMutableList())
     }
+
+    override fun copy() = Array(values.map { it.copy() }.toMutableList())
   }
 
   class Object @JvmOverloads constructor (val entries: MutableMap<String, JsonValue> = mutableMapOf()) : JsonValue() {
     constructor(vararg values: Pair<String, JsonValue>) : this(values.associate { it }.toMutableMap())
     operator fun get(name: String) = entries[name] ?: Null
     override fun has(field: String) = entries.containsKey(field)
+
+    override fun copy() = Object(entries.mapValues { it.value.copy() }.toMutableMap())
+
     operator fun set(key: String, value: Any?) {
       entries[key] = Json.toJson(value)
     }
@@ -313,6 +332,11 @@ sealed class JsonValue {
       throw UnsupportedOperationException("Can not downcast ${this.name} to type ${T::class}")
     }
   }
+
+  /**
+   * Makes a copy of this JSON value
+   */
+  abstract fun copy(): JsonValue
 }
 
 fun <R> JsonValue?.map(transform: (JsonValue) -> R): List<R> = when {

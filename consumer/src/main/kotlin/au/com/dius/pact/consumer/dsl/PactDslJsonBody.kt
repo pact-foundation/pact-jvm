@@ -2191,4 +2191,25 @@ open class PactDslJsonBody : DslPart {
   override fun arrayContaining(name: String): DslPart {
     return PactDslJsonArrayContaining(rootPath, name, this)
   }
+
+  /**
+   * Extends this JSON object from a base template.
+   */
+  fun extendFrom(baseTemplate: PactDslJsonBody) {
+    this.body = copyBody(baseTemplate.body)
+    matchers = baseTemplate.matchers.copyWithUpdatedMatcherRootPrefix("")
+    generators = baseTemplate.generators.copyWithUpdatedMatcherRootPrefix("")
+  }
+
+  // TODO: Replace this with JsonValue.copy in the next major version
+  private fun copyBody(body: JsonValue): JsonValue {
+    return when (body) {
+      is JsonValue.Array -> JsonValue.Array(body.values.map { it.copy() }.toMutableList())
+      is JsonValue.Decimal -> JsonValue.Decimal(body.value.chars)
+      is JsonValue.Integer -> JsonValue.Integer(body.value.chars)
+      is JsonValue.Object -> JsonValue.Object(body.entries.mapValues { it.value.copy() }.toMutableMap())
+      is JsonValue.StringValue -> JsonValue.StringValue(body.value.chars)
+      else -> body
+    }
+  }
 }

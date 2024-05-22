@@ -116,4 +116,16 @@ public class LambdaDsl {
         array.accept(dslBody);
         return dslBody;
     }
+
+  /**
+   * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonBody}. This takes a
+   * base template to copy the attributes from.
+   */
+  public static LambdaDslJsonBody newJsonBody(LambdaDslJsonBody baseTemplate, Consumer<LambdaDslJsonBody> array) {
+    final PactDslJsonBody pactDslJsonBody = new PactDslJsonBody();
+    pactDslJsonBody.extendFrom((PactDslJsonBody) baseTemplate.build());
+    final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(pactDslJsonBody);
+    array.accept(dslBody);
+    return dslBody;
+  }
 }

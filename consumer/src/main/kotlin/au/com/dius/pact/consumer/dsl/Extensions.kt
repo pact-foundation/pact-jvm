@@ -18,6 +18,16 @@ fun newJsonObject(kClass: KClass<*>): DslPart {
 }
 
 /**
+ * DSL function to simplify creating a [DslPart] generated from a [LambdaDslJsonBody]. The new object is
+ * extended from a base template object.
+ */
+fun newJsonObject(baseTemplate: DslPart, function: LambdaDslJsonBody.() -> Unit): DslPart {
+  require(baseTemplate is PactDslJsonBody) { "baseTemplate must be a PactDslJsonBody" }
+  val dslBody = LambdaDslJsonBody(baseTemplate.asBody())
+  return LambdaDsl.newJsonBody(dslBody) { it.function() }.build()
+}
+
+/**
  * DSL function to simplify creating a [DslPart] generated from a [LambdaDslJsonArray].
  */
 fun newJsonArray(body: LambdaDslJsonArray.() -> Unit): DslPart {
