@@ -1,8 +1,15 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
+import java.util.List
+import java.util.Map
 
 class ExtensionsTest {
     @Test
@@ -51,4 +58,44 @@ class ExtensionsTest {
 
         assertThat(actualJson, equalTo(expectedJson))
     }
+
+  // Issue #1796
+  @Test
+  fun `allow dsl to be extended from a common base`() {
+    val x = newJsonObject {
+      stringType("a", "foo")
+      id("b", 0L)
+      integerType("c", 0)
+      booleanType("d", false)
+    }
+    val y = newJsonObject(x) {
+      stringType("e", "bar")
+    }
+    val z = newJsonObject(x) {
+      nullValue("e")
+    }
+
+    val expectedY = "{\"a\":\"foo\",\"b\":0,\"c\":0,\"d\":false,\"e\":\"bar\"}"
+    val yRules = Map.of(
+      "$.a", MatchingRuleGroup(List.of(TypeMatcher)),
+      "$.b", MatchingRuleGroup(List.of(TypeMatcher)),
+      "$.c", MatchingRuleGroup(List.of(NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))),
+      "$.d", MatchingRuleGroup(List.of(TypeMatcher)),
+      "$.e", MatchingRuleGroup(List.of(TypeMatcher))
+    )
+    val expectedYMatchers = MatchingRuleCategory("body", yRules)
+    val expectedZ = "{\"a\":\"foo\",\"b\":0,\"c\":0,\"d\":false,\"e\":null}"
+    val zRules = Map.of(
+      "$.a", MatchingRuleGroup(List.of(TypeMatcher)),
+      "$.b", MatchingRuleGroup(List.of(TypeMatcher)),
+      "$.c", MatchingRuleGroup(List.of(NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))),
+      "$.d", MatchingRuleGroup(List.of(TypeMatcher))
+    )
+    val expectedZMatchers = MatchingRuleCategory("body", zRules)
+
+    assertThat(y.body.toString(), CoreMatchers.`is`(expectedY))
+    assertThat(y.matchers, CoreMatchers.`is`(expectedYMatchers))
+    assertThat(z.body.toString(), CoreMatchers.`is`(expectedZ))
+    assertThat(z.matchers, CoreMatchers.`is`(expectedZMatchers))
+  }
 }

@@ -1,6 +1,11 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.core.model.PactSpecVersion;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.NullMatcher;
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -16,7 +21,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -1069,5 +1073,47 @@ public class LambdaDslObjectTest {
     assertThat(map2, hasKey("matchers"));
     Map<String, Object> variant2Matcher = (Map<String, Object>) ((List) map2.get("matchers")).get(0);
     assertThat(variant2Matcher, hasEntry("match", "number"));
+  }
+
+  // Issue #1796
+  @Test
+  public void allowDslToBExtendedFromACommonBase() {
+    LambdaDslJsonBody base = newJsonBody(o -> {
+      o.stringType("a", "foo");
+      o.id("b", 0L);
+      o.integerType("c", 0);
+      o.booleanType("d", false);
+    });
+    LambdaDslJsonBody y = newJsonBody(base, o -> {
+      o.stringType("e", "bar");
+    });
+    LambdaDslJsonBody z = newJsonBody(base, o -> {
+      o.nullValue("e");
+    });
+
+    String expectedY = "{\"a\":\"foo\",\"b\":0,\"c\":0,\"d\":false,\"e\":\"bar\"}";
+    Map<String, MatchingRuleGroup> yRules = Map.of(
+      "$.a", new MatchingRuleGroup(List.of(TypeMatcher.INSTANCE)),
+      "$.b", new MatchingRuleGroup(List.of(TypeMatcher.INSTANCE)),
+      "$.c", new MatchingRuleGroup(List.of(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))),
+      "$.d", new MatchingRuleGroup(List.of(TypeMatcher.INSTANCE)),
+      "$.e", new MatchingRuleGroup(List.of(TypeMatcher.INSTANCE))
+    );
+    MatchingRuleCategory expectedYMatchers = new MatchingRuleCategory("body", yRules);
+    String expectedZ = "{\"a\":\"foo\",\"b\":0,\"c\":0,\"d\":false,\"e\":null}";
+    Map<String, MatchingRuleGroup> zRules = Map.of(
+      "$.a", new MatchingRuleGroup(List.of(TypeMatcher.INSTANCE)),
+      "$.b", new MatchingRuleGroup(List.of(TypeMatcher.INSTANCE)),
+      "$.c", new MatchingRuleGroup(List.of(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))),
+      "$.d", new MatchingRuleGroup(List.of(TypeMatcher.INSTANCE))
+    );
+    MatchingRuleCategory expectedZMatchers = new MatchingRuleCategory("body", zRules);
+
+    DslPart yPart = y.build();
+    assertThat(yPart.getBody().toString(), is(expectedY));
+    assertThat(yPart.getMatchers(), is(expectedYMatchers));
+    DslPart zPart = z.build();
+    assertThat(zPart.getBody().toString(), is(expectedZ));
+    assertThat(zPart.getMatchers(), is(expectedZMatchers));
   }
 }
