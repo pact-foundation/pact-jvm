@@ -23,6 +23,7 @@ import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.http.message.BasicHeader
 import org.apache.hc.core5.ssl.SSLContexts
 import org.apache.hc.core5.util.TimeValue
+import java.io.File
 import java.net.URI
 
 private val logger = KotlinLogging.logger {}
@@ -146,6 +147,8 @@ object HttpClient {
       setupInsecureTLS(builder)
     }
 
+    setupX509Certificate(builder)
+
     return builder.build() to credsProvider
   }
 
@@ -183,5 +186,25 @@ object HttpClient {
             .build()
         )
       )
+  }
+
+  private fun setupX509Certificate(builder: HttpClientBuilder) {
+    val keystorePath = "tmp/machine-id/keystore.p12"
+    val keystorePassword = "".toCharArray()
+
+    val sslContext = SSLContexts.custom()
+      .loadKeyMaterial(File(keystorePath), keystorePassword, keystorePassword)
+      .build()
+
+    val sslSocketFactory = SSLConnectionSocketFactoryBuilder.create().setSslContext(sslContext).build()
+
+    builder.setConnectionManager(
+      BasicHttpClientConnectionManager(
+        RegistryBuilder.create<ConnectionSocketFactory>()
+          .register("http", PlainConnectionSocketFactory.getSocketFactory())
+          .register("https", sslSocketFactory)
+          .build()
+      )
+    )
   }
 }
