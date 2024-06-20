@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.10 - Backported changes from v4.6.x
+
+* 83cee6ee0 - Update README.md (Ronald Holshausen, Mon May 27 09:43:50 2024 +1000)
+* bcc462549 - feat: Allow reusing common DSL parts in different LambdaDslJsonBody objects #1796 (Ronald Holshausen, Wed May 22 11:50:39 2024 +1000)
+* 010cc3337 - chore(ci): allow wf dispatch for docs trigger (Yousaf Nabi, Tue Apr 23 15:40:06 2024 +0100)
+* 5d547c1a9 - fix: Add user-agent to the list of single value headers (Ronald Holshausen, Tue Apr 23 09:45:37 2024 +1000)
+* 954a33241 - bump version to 4.5.10 (Ronald Holshausen, Mon Apr 22 17:29:36 2024 +1000)
+
 # 4.5.9 - Back-ported fixes from v4.6.x
 
 * 96ee06ea0 - fix: Fix for failing Compatibility Suite build (Ronald Holshausen, Tue Feb 20 14:29:04 2024 +1100)
