@@ -1461,6 +1461,18 @@ open class PactDslJsonBody : DslPart {
    */
   @JvmOverloads
   fun minArrayLike(name: String, size: Int, value: PactDslJsonRootValue, numberExamples: Int = 2): PactDslJsonBody {
+    return minArrayLike(name, size, value as DslPart, numberExamples)
+  }
+
+  /**
+   * Attribute that is an array of values with a minimum size that are not objects where each item must match
+   * the following example
+   * @param name field name
+   * @param size minimum size of the array
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  fun minArrayLike(name: String, size: Int, value: DslPart, numberExamples: Int): PactDslJsonBody {
     require(numberExamples >= size) {
       String.format("Number of example %d is less than the minimum size of %d",
         numberExamples, size)
@@ -1534,6 +1546,18 @@ open class PactDslJsonBody : DslPart {
    */
   @JvmOverloads
   fun maxArrayLike(name: String, size: Int, value: PactDslJsonRootValue, numberExamples: Int = 1): PactDslJsonBody {
+    return maxArrayLike(name, size, value as DslPart, numberExamples)
+  }
+
+  /**
+   * Attribute that is an array of values with a maximum size that are not objects where each item must match the
+   * following example
+   * @param name field name
+   * @param size maximum size of the array
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  fun maxArrayLike(name: String, size: Int, value: DslPart, numberExamples: Int): PactDslJsonBody {
     require(numberExamples <= size) {
       String.format("Number of example %d is more than the maximum size of %d",
         numberExamples, size)
@@ -2073,6 +2097,25 @@ open class PactDslJsonBody : DslPart {
     minSize: Int,
     maxSize: Int,
     value: PactDslJsonRootValue,
+    numberExamples: Int
+  ): PactDslJsonBody {
+    return minMaxArrayLike(name, minSize, maxSize, value as DslPart, numberExamples)
+  }
+
+  /**
+   * Attribute that is an array of values with a minimum and maximum size that are not objects where each item must
+   * match the following example
+   * @param name field name
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  fun minMaxArrayLike(
+    name: String,
+    minSize: Int,
+    maxSize: Int,
+    value: DslPart,
     numberExamples: Int
   ): PactDslJsonBody {
     validateMinAndMaxAndExamples(minSize, maxSize, numberExamples)
