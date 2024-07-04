@@ -38,15 +38,18 @@ object MatchingConfig {
   }
 
   private fun coreContentMatcher(contentType: String): ContentMatcher? {
-    val matcher = coreBodyMatchers.entries.find { contentType.matches(Regex(it.key)) }?.value
-    return if (matcher != null) {
-      val clazz = Class.forName(matcher).kotlin
-      (clazz.objectInstance ?: clazz.createInstance()) as ContentMatcher?
-    } else {
-      when (System.getProperty("pact.content_type.override.$contentType")) {
-        "json" -> JsonContentMatcher
-        "text" -> PlainTextContentMatcher()
-        else -> null
+    return when (val override = System.getProperty("pact.content_type.override.$contentType")) {
+      "json" -> JsonContentMatcher
+      "text" -> PlainTextContentMatcher()
+      is String -> lookupContentMatcher(override)
+      else -> {
+        val matcher = coreBodyMatchers.entries.find { contentType.matches(Regex(it.key)) }?.value
+        if (matcher != null) {
+          val clazz = Class.forName(matcher).kotlin
+          (clazz.objectInstance ?: clazz.createInstance()) as ContentMatcher?
+        } else {
+          null
+        }
       }
     }
   }
