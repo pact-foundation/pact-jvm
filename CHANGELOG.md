@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.11 - Maintenance Release
+
+* af93c029b - fix: Allow core content types to be able to be ovveridden #1812 (Ronald Holshausen, Thu Jul 4 11:29:35 2024 +1000)
+* 029fcaf34 - feat(DSL): Update min and max array like functions to also take a DslPart #1799 (Ronald Holshausen, Thu Jun 20 14:24:13 2024 +1000)
+* 527001f77 - bump version to 4.6.11 (Ronald Holshausen, Fri May 31 14:47:47 2024 +1000)
+
 # 4.6.10 - Updated DSL methods
 
 * 0131eb2e8 - Update README.md (Ronald Holshausen, Mon May 27 09:43:50 2024 +1000)
