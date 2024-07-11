@@ -89,6 +89,7 @@ class PactVerificationStateChangeExtension(
 
     val providerStateContext = mutableMapOf<String, Any?>()
     providerStates.forEach { state ->
+      providerStateContext.putAll(state.params)
       val stateChangeMethods = findStateChangeMethods(context.requiredTestInstance,
         testContext.stateChangeHandlers, state)
       if (stateChangeMethods.isEmpty()) {

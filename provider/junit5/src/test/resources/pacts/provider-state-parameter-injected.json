@@ -1,0 +1,49 @@
+{
+  "consumer": {
+    "name": "SomeConsumer"
+  },
+  "interactions": [
+    {
+      "description": "Hello John",
+      "providerStates": [
+        {
+          "name": "User exists",
+          "params": {
+            "name": "John"
+          }
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "dataType": "STRING",
+            "expression": "/api/hello/${name}",
+            "type": "ProviderState"
+          }
+        },
+        "method": "GET",
+        "path": "/api/hello/James"
+      },
+      "response": {
+        "body": {
+          "name": "John"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.7"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "ProviderStateParametersInjected"
+  }
+}
