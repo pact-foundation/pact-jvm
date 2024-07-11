@@ -302,6 +302,8 @@ open class InteractionRunner(
     return if (interaction.providerStates.isNotEmpty()) {
       var stateChange = statement
       for (state in interaction.providerStates.reversed()) {
+        testContext.putAll(state.params.filterValues { it != null } as Map<String, Any>)
+
         val methods = findStateChangeMethod(state, testTarget.getStateHandlers())
         if (methods.isEmpty()) {
           return if (ignoreMissingStateChangeMethod()) {
