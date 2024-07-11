@@ -57,8 +57,9 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     }
 
     @State(['Test 2'])
-    void state3(Map params) {
+    Map state3(Map params) {
       state3Called = params
+      [a: 100, b: '200']
     }
   }
 
@@ -113,6 +114,30 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     testInstance.state2Called
     testInstance.state3Called == state.params
     !testInstance.state2TeardownCalled
+  }
+
+  def 'returns any values returned from the state callback'() {
+    given:
+    def state = new ProviderState('Test 2', [a: 'A', b: 'B'])
+
+    when:
+    def result = verificationExtension.invokeStateChangeMethods(testContext, pactContext, [state],
+      StateChangeAction.SETUP)
+
+    then:
+    result == [a: 100, b: '200']
+  }
+
+  def 'falls back to the parameters of the provider state'() {
+    given:
+    def state = new ProviderState('Test 2', [a: 'A', c: 'C'])
+
+    when:
+    def result = verificationExtension.invokeStateChangeMethods(testContext, pactContext, [state],
+      StateChangeAction.SETUP)
+
+    then:
+    result == [a: 100, b: '200', c: 'C']
   }
 
   @SuppressWarnings('ClosureAsLastMethodParameter')

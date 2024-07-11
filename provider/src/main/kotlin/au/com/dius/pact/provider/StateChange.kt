@@ -90,7 +90,7 @@ object DefaultStateChange : StateChange, KLogging() {
     } else {
       val result = stateChange(verifier, ProviderState(""), provider, consumer, true, providerClient)
       logger.debug { "State Change: \"\" -> $result" }
-      stateChangeResult.mapEither({
+      result.mapEither({
         stateChangeResult.unwrap().plus(it)
       }, {
         failures[message] = it.message.toString()
@@ -101,7 +101,7 @@ object DefaultStateChange : StateChange, KLogging() {
     return StateChangeResult(stateChangeResult, message)
   }
 
-  @Suppress("TooGenericExceptionCaught", "ReturnCount")
+  @Suppress("TooGenericExceptionCaught", "ReturnCount", "ComplexMethod", "LongParameterList")
   override fun stateChange(
     verifier: IProviderVerifier,
     state: ProviderState,
@@ -112,7 +112,10 @@ object DefaultStateChange : StateChange, KLogging() {
   ): Result<Map<String, Any?>, Exception> {
     verifier.reportStateForInteraction(state.name.toString(), provider, consumer, isSetup)
 
-    logger.debug { "stateChangeHandler: consumer.stateChange=${consumer.stateChange}, provider.stateChangeUrl=${provider.stateChangeUrl}" }
+    logger.debug {
+      "stateChangeHandler: consumer.stateChange=${consumer.stateChange}, " +
+              "provider.stateChangeUrl=${provider.stateChangeUrl}"
+    }
     try {
       var stateChangeHandler = consumer.stateChange
       var stateChangeUsesBody = consumer.stateChangeUsesBody
@@ -135,12 +138,26 @@ object DefaultStateChange : StateChange, KLogging() {
         }
         logger.debug { "Invoked state change closure -> $result" }
         if (result !is URL) {
-          return Result.Ok(if (result is Map<*, *>) result as Map<String, Any> else emptyMap())
+          val map = if (result is Map<*, *>) {
+            state.params + (result as Map<String, Any?>)
+          } else {
+            state.params
+          }
+          return Result.Ok(map)
         }
         stateChangeHandler = result
       }
-      return executeHttpStateChangeRequest(verifier, stateChangeHandler, stateChangeUsesBody, state, provider, isSetup,
-        providerClient)
+
+      val stateChangeResult = executeHttpStateChangeRequest(
+        verifier, stateChangeHandler, stateChangeUsesBody, state, provider, isSetup,
+        providerClient
+      )
+      return when (stateChangeResult) {
+        is Result.Ok -> {
+          Result.Ok(state.params + stateChangeResult.value)
+        }
+        is Result.Err -> stateChangeResult
+      }
     } catch (e: Exception) {
       verifier.reportStateChangeFailed(state, e, isSetup)
       return Result.Err(e)
@@ -192,6 +209,7 @@ object DefaultStateChange : StateChange, KLogging() {
         }
       } ?: Result.Ok(emptyMap())
     } catch (ex: URISyntaxException) {
+      logger.error(ex) { "State change request is not valid" }
       verifier.reporters.forEach {
         it.warnStateChangeIgnoredDueToInvalidUrl(state.name.toString(), provider, isSetup, stateChangeHandler)
       }

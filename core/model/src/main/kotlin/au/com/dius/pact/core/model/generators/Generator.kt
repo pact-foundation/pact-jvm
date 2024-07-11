@@ -527,7 +527,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   }
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
-    logger.debug { "Applying Generator $this" }
+    logger.debug { "Applying Generator $this with context ${context["providerState"]}" }
     return when (val providerState = context["providerState"]) {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
