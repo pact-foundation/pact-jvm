@@ -6,7 +6,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.provider`
 * artifact-id = `junit`
-* version-id = `4.1.x`
+* version-id = `4.6.x`
 
 
 ## Overview
@@ -191,6 +191,7 @@ provider side, so there is no way to know what the ID would be beforehand.
 There are methods on the consumer DSLs that can provider an expression that contains variables (like '/api/user/${id}'
 for the path). The provider state callback can then return a map for values, and the `id` attribute from the map will
 be expanded in the expression. For this to work, just make your provider state method return a Map of the values.
+The injected values will fall back to the provider state parameters if the state change method does not return a value. 
 
 ### Using multiple classes for the state change methods
 
