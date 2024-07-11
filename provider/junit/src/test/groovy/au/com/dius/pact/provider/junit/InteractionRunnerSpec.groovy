@@ -20,12 +20,14 @@ import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.VerificationReporter
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junit.target.HttpTarget
+import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import junit.framework.AssertionFailedError
 import org.apache.commons.lang3.tuple.Pair
 import org.jetbrains.annotations.NotNull
 import org.junit.runner.notification.RunNotifier
+import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -458,5 +460,62 @@ class InteractionRunnerSpec extends Specification {
     1 * notifier.fireTestIgnored({ it.displayName.startsWith('consumer - Upon Interaction 1 ') })
     1 * notifier.fireTestIgnored({ it.displayName.startsWith('consumer - Upon Interaction 2 ') })
     0 * _
+  }
+
+  @SuppressWarnings('PublicInstanceField')
+  static class StateChangeClazz {
+    @TestTarget
+    public final Target target = new MockTarget()
+
+    @State('state 1')
+    Map<String, Object> state1() {
+      [a: 100, b: '200']
+    }
+  }
+
+  def 'withStateChanges copies any returned values to the test context'() {
+    given:
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [ new ProviderState('state 1') ])
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1 ])
+    def statement = [evaluate: { }] as Statement
+    def verifier = [:] as IProviderVerifier
+    def testTarget = [
+      getStateHandlers: { [] },
+      getVerifier: { verifier }
+    ] as Target
+    def stateChangeClazz = new TestClass(StateChangeClazz)
+
+    def runner = new InteractionRunner(stateChangeClazz, pact, UnknownPactSource.INSTANCE)
+
+    when:
+    def stateChangeStatement = runner.withStateChanges(interaction1, new StateChangeClazz(), statement, testTarget)
+    stateChangeStatement.evaluate()
+
+    then:
+    runner.testContext == [a: 100, b: '200']
+  }
+
+  def 'withStateChanges falls back to provider state parameters'() {
+    given:
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [
+      new ProviderState('state 1', [b: 200, c: 'test'])
+    ])
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1 ])
+    def statement = [evaluate: { }] as Statement
+    def verifier = [:] as IProviderVerifier
+    def testTarget = [
+      getStateHandlers: { [] },
+      getVerifier: { verifier }
+    ] as Target
+    def stateChangeClazz = new TestClass(StateChangeClazz)
+
+    def runner = new InteractionRunner(stateChangeClazz, pact, UnknownPactSource.INSTANCE)
+
+    when:
+    def stateChangeStatement = runner.withStateChanges(interaction1, new StateChangeClazz(), statement, testTarget)
+    stateChangeStatement.evaluate()
+
+    then:
+    runner.testContext == [a: 100, b: '200', c: 'test']
   }
 }

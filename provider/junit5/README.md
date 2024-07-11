@@ -6,7 +6,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.provider`
 * artifact-id = `junit5`
-* version-id = `4.3.x`
+* version-id = `4.6.x`
 
 ## Overview
 
