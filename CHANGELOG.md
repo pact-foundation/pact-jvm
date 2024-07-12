@@ -1,5 +1,10 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.11 - Bugfix Release
+
+* df1835b38 - fix: PactBrokerClient throws index-out-of-bounds when can-i-deploy is called for a new tag #1814 (Ronald Holshausen, Fri Jul 12 11:26:04 2024 +1000)
+* 2dba31c56 - bump version to 4.5.11 (Ronald Holshausen, Thu Jun 20 12:15:14 2024 +1000)
+
 # 4.5.10 - Backported changes from v4.6.x
 
 * 83cee6ee0 - Update README.md (Ronald Holshausen, Mon May 27 09:43:50 2024 +1000)
