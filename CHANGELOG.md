@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.1.43 - Bugfix Release
+
+* 8c30e1b5d - chore: JDK 9 and 12 are no longer available (Ronald Holshausen, Fri Jul 12 11:45:26 2024 +1000)
+* 722f555e9 - chore: Switch CI Java distribution to temurin (Ronald Holshausen, Fri Jul 12 11:41:09 2024 +1000)
+* 200f7de72 - chore: Remove Publish Unit Test Results step from CI (Ronald Holshausen, Fri Jul 12 11:32:21 2024 +1000)
+* c8cf3314f - fix: PactBrokerClient throws index-out-of-bounds when can-i-deploy is called for a new tag #1814 (Ronald Holshausen, Fri Jul 12 11:26:04 2024 +1000)
+* 5a18fa407 - bump version to 4.1.43 (Ronald Holshausen, Fri Jul 28 17:03:14 2023 +1000)
+
 # 4.1.42 - Back-ported fixes from v4.2.x
 
 * 038669bb1 - fix: Replace com.github.zafarkhaja.semver.Version with a local version parser (Ronald Holshausen, Fri Jul 28 16:42:10 2023 +1000)
