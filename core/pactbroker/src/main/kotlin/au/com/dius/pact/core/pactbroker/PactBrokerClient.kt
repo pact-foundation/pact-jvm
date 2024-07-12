@@ -1037,13 +1037,18 @@ open class PactBrokerClient(
       when (val result = halClient.getJson(path, false)) {
         is Result.Ok<JsonValue> -> {
           val summary: JsonValue.Object = result.value["summary"].downcast()
-          val verificationResultUrl = result.value["matrix"].asArray()
-            ?.get(0)?.asObject()
-            ?.get("verificationResult")?.asObject()
-            ?.get("_links")?.asObject()
-            ?.get("self")?.asObject()
-            ?.get("href")
-            ?.let{ url -> Json.toString(url) }
+          val matrix = result.value["matrix"]
+          val verificationResultUrl = if (matrix.isArray && matrix.size() > 0) {
+            result.value["matrix"].asArray()
+              ?.get(0)?.asObject()
+              ?.get("verificationResult")?.asObject()
+              ?.get("_links")?.asObject()
+              ?.get("self")?.asObject()
+              ?.get("href")
+              ?.let{ url -> Json.toString(url) }
+          } else {
+            null
+          }
           CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]),
             Json.toInteger(summary["unknown"]), verificationResultUrl)
         }
