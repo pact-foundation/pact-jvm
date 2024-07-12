@@ -1008,7 +1008,7 @@ open class PactBrokerClient(
         is Ok<JsonValue> -> {
           val summary = result.value["summary"].asObject()!!
           val matrix = result.value["matrix"]
-          val verificationResultUrl = if (matrix.isArray) {
+          val verificationResultUrl = if (matrix.isArray && matrix.size() > 0) {
             matrix.asArray()
               ?.get(0)?.asObject()
               ?.get("verificationResult")?.asObject()

@@ -792,4 +792,39 @@ class PactBrokerClientSpec extends Specification {
     result.ok
     result.verificationResultUrl == 'verificationResultUrl'
   }
+
+  @Issue('#1814')
+  def 'can-i-deploy - handles an empty matrix response'() {
+    given:
+    def halClient = Mock(IHalClient)
+    def config = new PactBrokerClientConfig(10, 0)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl', [:], config]) {
+      newHalClient() >> halClient
+    }
+    def json = JsonParser.parseString('''
+    |{
+    |    "summary": {
+    |      "deployable": true,
+    |      "reason": "There are no missing dependencies",
+    |      "success": 0,
+    |      "failed": 0,
+    |      "unknown": 0
+    |    },
+    |    "notices": [
+    |      {
+    |        "type": "success",
+    |        "text": "There are no missing dependencies"
+    |      }
+    |    ],
+    |    "matrix": []
+    |}'''.stripMargin())
+
+    when:
+    def result = client.canIDeploy('test', '1.2.3', new Latest.UseLatest(true), '')
+
+    then:
+    1 * halClient.getJson(_, _) >> new Ok(json)
+    result.ok
+    !result.verificationResultUrl
+  }
 }
