@@ -104,7 +104,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       .methods
       .find { AnnotationSupport.isAnnotated(it, TestTemplate::class.java) }
 
-    return testTemplate != null && testTemplate.parameters[0].type == V4Interaction.AsynchronousMessage::class.java
+    return testTemplate != null && testTemplate.parameters[0].type == AsynchronousMessageContext::class.java
   }
 
   override fun provideTestTemplateInvocationContexts(extensionContext: ExtensionContext): Stream<TestTemplateInvocationContext> {

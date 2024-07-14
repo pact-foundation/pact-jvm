@@ -68,9 +68,9 @@ class TestTemplateTest {
   }
 
   @TestTemplate
-  fun testPactForReservationBooking(message: V4Interaction.AsynchronousMessage) {
-    assertThat(message, `is`(notNullValue()))
-    when (message.description) {
+  fun testPactForReservationBooking(context: AsynchronousMessageContext) {
+    assertThat(context.message, `is`(notNullValue()))
+    when (context.message.description) {
         "a purchase started message to book a reservation" -> {
           reservationRan = true
         }
