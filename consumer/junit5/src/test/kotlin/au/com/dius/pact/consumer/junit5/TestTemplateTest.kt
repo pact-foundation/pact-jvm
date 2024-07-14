@@ -7,16 +7,20 @@ import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.annotations.Pact
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.notNullValue
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.ExtendWith
+import java.lang.IllegalStateException
 
 @ExtendWith(value = [PactConsumerTestExt::class])
 @PactTestFor(providerName = "checkout-service", providerType = ProviderType.ASYNCH, pactVersion = PactSpecVersion.V4)
 class TestTemplateTest {
   companion object {
+    private var reservationRan = false
+    private var cancellationRan = false
+
     private val reservationBody = newJsonBody { o ->
       o.stringType("purchaseId", "111")
       o.stringType("name", "PURCHASE_STARTED")
@@ -53,10 +57,25 @@ class TestTemplateTest {
               .withContent(cancelationBody)
               .toPact()
     }
+
+    @JvmStatic
+    @AfterAll
+    fun makeSureAllRan() {
+      if(!reservationRan || !cancellationRan) {
+        throw IllegalStateException("Not all messages were tested.\nReservation: $reservationRan\nCancellation: $cancellationRan")
+      }
+    }
   }
 
   @TestTemplate
   fun testPactForReservationBooking(message: V4Interaction.AsynchronousMessage) {
     assertThat(message, `is`(notNullValue()))
+    if (message.description == "a purchase started message to book a reservation") {
+      reservationRan = true
+    } else if(message.description == "a cancellation message to cancel a reservation") {
+      cancellationRan = true
+    } else {
+      throw IllegalArgumentException("Unknown message description")
+    }
   }
 }
