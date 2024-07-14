@@ -70,12 +70,16 @@ class TestTemplateTest {
   @TestTemplate
   fun testPactForReservationBooking(message: V4Interaction.AsynchronousMessage) {
     assertThat(message, `is`(notNullValue()))
-    if (message.description == "a purchase started message to book a reservation") {
-      reservationRan = true
-    } else if(message.description == "a cancellation message to cancel a reservation") {
-      cancellationRan = true
-    } else {
-      throw IllegalArgumentException("Unknown message description")
+    when (message.description) {
+        "a purchase started message to book a reservation" -> {
+          reservationRan = true
+        }
+        "a cancellation message to cancel a reservation" -> {
+          cancellationRan = true
+        }
+        else -> {
+          throw IllegalArgumentException("Unknown message description")
+        }
     }
   }
 }
