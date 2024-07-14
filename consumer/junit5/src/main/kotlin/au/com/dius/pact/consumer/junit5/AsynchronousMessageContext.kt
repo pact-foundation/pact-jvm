@@ -6,4 +6,7 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 class AsynchronousMessageContext(
     val message: V4Interaction.AsynchronousMessage
 ): TestTemplateInvocationContext {
+    override fun getDisplayName(invocationIndex: Int): String {
+        return message.description
+    }
 }

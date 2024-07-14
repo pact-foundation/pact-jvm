@@ -30,6 +30,7 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KLogging
+import org.apache.hc.core5.util.ReflectionUtils
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.TestTemplate
@@ -268,36 +269,38 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   ): BasePact {
     val store = context.getStore(NAMESPACE)
     val key = "pact:${providerInfo.providerName}"
+    var methods = pactMethods
+    if (methods.isEmpty()) {
+      methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java, HierarchyTraversalMode.TOP_DOWN)
+              .map { m -> m.name}
+    }
+
     return when {
       store[key] != null -> store[key] as BasePact
       else -> {
-        val pact = if (pactMethods.isEmpty()) {
-          lookupPact(providerInfo, "", context)
-        } else {
-          val head = pactMethods.first()
-          val tail = pactMethods.drop(1)
-          val initial = lookupPact(providerInfo, head, context)
-          tail.fold(initial) { acc, method ->
-            val pact = lookupPact(providerInfo, method, context)
+        val head = methods.first()
+        val tail = methods.drop(1)
+        val initial = lookupPact(providerInfo, head, context)
+        val pact = tail.fold(initial) { acc, method ->
+          val pact = lookupPact(providerInfo, method, context)
 
-            if (pact.provider != acc.provider) {
-              // Should not really get here, as the Pacts should have been sorted by provider
-              throw IllegalArgumentException("You are using different Pacts with different providers for the same test" +
-                " ('${acc.provider}') and '${pact.provider}'). A separate test (and ideally a separate test class)" +
-                " should be used for each provider.")
-            }
-
-            if (pact.consumer != acc.consumer) {
-              logger.warn {
-                "WARNING: You are using different Pacts with different consumers for the same test " +
-                  "('${acc.consumer}') and '${pact.consumer}'). The second consumer will be ignored and dropped from " +
-                  "the Pact and the interactions merged. If this is not your intention, you need to create a " +
-                  "separate test for each consumer."
-              }
-            }
-
-            acc.mergeInteractions(pact.interactions) as BasePact
+          if (pact.provider != acc.provider) {
+            // Should not really get here, as the Pacts should have been sorted by provider
+            throw IllegalArgumentException("You are using different Pacts with different providers for the same test" +
+              " ('${acc.provider}') and '${pact.provider}'). A separate test (and ideally a separate test class)" +
+              " should be used for each provider.")
           }
+
+          if (pact.consumer != acc.consumer) {
+            logger.warn {
+              "WARNING: You are using different Pacts with different consumers for the same test " +
+                "('${acc.consumer}') and '${pact.consumer}'). The second consumer will be ignored and dropped from " +
+                "the Pact and the interactions merged. If this is not your intention, you need to create a " +
+                "separate test for each consumer."
+            }
+          }
+
+          acc.mergeInteractions(pact.interactions) as BasePact
         }
         store.put(key, pact)
         pact
