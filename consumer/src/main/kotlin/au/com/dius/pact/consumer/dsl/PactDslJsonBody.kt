@@ -1808,7 +1808,26 @@ open class PactDslJsonBody : DslPart {
    * Accepts any key, and each key is mapped to a map that must match the following object definition
    * @param exampleKey Example key to use for generating bodies
    */
+  @Deprecated("Use eachValueLike instead", ReplaceWith("eachValueLike(exampleKey)"))
   fun eachKeyLike(exampleKey: String): PactDslJsonBody {
+    return eachValueLike(exampleKey)
+  }
+
+  /**
+   * Accepts any key, and each key is mapped to a map that must match the provided object definition
+   * @param exampleKey Example key to use for generating bodies
+   * @param value Value to use for matching and generated bodies
+   */
+  @Deprecated("Use eachValueLike instead", ReplaceWith("eachValueLike(exampleKey, value)"))
+  fun eachKeyLike(exampleKey: String, value: PactDslJsonRootValue): PactDslJsonBody {
+    return eachValueLike(exampleKey, value)
+  }
+
+  /**
+   * Accepts any key, and each key is mapped to a value that must match the following object definition
+   * @param exampleKey Example key to use for generating bodies
+   */
+  fun eachValueLike(exampleKey: String): PactDslJsonBody {
     matchers.addRule(
       if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath, ValuesMatcher
     )
@@ -1820,7 +1839,7 @@ open class PactDslJsonBody : DslPart {
    * @param exampleKey Example key to use for generating bodies
    * @param value Value to use for matching and generated bodies
    */
-  fun eachKeyLike(exampleKey: String, value: PactDslJsonRootValue): PactDslJsonBody {
+  fun eachValueLike(exampleKey: String, value: PactDslJsonRootValue): PactDslJsonBody {
     when (val body = body) {
       is JsonValue.Object -> body.add(exampleKey, value.body)
       is JsonValue.Array -> {

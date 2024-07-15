@@ -1,19 +1,15 @@
 package au.com.dius.pact.consumer.dsl;
 
-import au.com.dius.pact.core.matchers.UrlMatcherSupport;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import static au.com.dius.pact.consumer.dsl.Dsl.matcherKey;
 
 public class LambdaDslObject {
 
@@ -949,8 +945,31 @@ public class LambdaDslObject {
      * Accepts any key, and each key is mapped to a map that must match the following object definition.
      *
      * @param exampleKey Example key to use for generating bodies
+     * @deprecated Use eachValueLike instead
      */
+    @Deprecated
     public LambdaDslObject eachKeyLike(String exampleKey, Consumer<LambdaDslObject> nestedObject) {
+        return eachValueLike(exampleKey, nestedObject);
+    }
+
+    /**
+     * Accepts any key, and each key is mapped to a map that must match the provided object definition
+     *
+     * @param exampleKey Example key to use for generating bodies
+     * @param value      Value to use for matching and generated bodies
+     * @deprecated Use eachValueLike instead
+     */
+    @Deprecated
+    public LambdaDslObject eachKeyLike(String exampleKey, PactDslJsonRootValue value) {
+        return eachValueLike(exampleKey, value);
+    }
+
+    /**
+     * Accepts any key in a map, and each key is mapped to a value that must match the following object definition.
+     *
+     * @param exampleKey Example key to use for generating bodies
+     */
+    public LambdaDslObject eachValueLike(String exampleKey, Consumer<LambdaDslObject> nestedObject) {
         final PactDslJsonBody objectLike = object.eachKeyLike(exampleKey);
         final LambdaDslObject dslObject = new LambdaDslObject(objectLike);
         nestedObject.accept(dslObject);
@@ -959,12 +978,12 @@ public class LambdaDslObject {
     }
 
     /**
-     * Accepts any key, and each key is mapped to a map that must match the provided object definition
+     * Accepts any key, and each key is mapped to a value that must match the provided object definition
      *
      * @param exampleKey Example key to use for generating bodies
      * @param value      Value to use for matching and generated bodies
      */
-    public LambdaDslObject eachKeyLike(String exampleKey, PactDslJsonRootValue value) {
+    public LambdaDslObject eachValueLike(String exampleKey, PactDslJsonRootValue value) {
         object.eachKeyLike(exampleKey, value);
         return this;
     }
