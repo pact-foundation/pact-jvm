@@ -1143,4 +1143,26 @@ public class LambdaDslObject {
     arrayContaining.closeArray();
     return this;
   }
+
+  /**
+   * Configures a matching rule for each key in the object.
+   * @param matcher Matcher to apply to each key
+   */
+  public LambdaDslObject eachKeyMatching(Matcher matcher) {
+    object.eachKeyMatching(matcher);
+    return this;
+  }
+
+  /**
+   * Configures a matching rule for each value in the object, ignoring the keys.
+   * @param exampleKey Example key to use in the consumer test.
+   * @param nestedObject Nested object to match each value to.
+   */
+  public LambdaDslObject eachValueMatching(String exampleKey, final Consumer<LambdaDslObject> nestedObject) {
+    final PactDslJsonBody objectLike = object.eachValueMatching(exampleKey);
+    final LambdaDslObject dslObject = new LambdaDslObject(objectLike);
+    nestedObject.accept(dslObject);
+    objectLike.closeObject();
+    return this;
+  }
 }

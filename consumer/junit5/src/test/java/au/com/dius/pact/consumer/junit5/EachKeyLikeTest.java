@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.junit5;
 
 import au.com.dius.pact.consumer.MockServer;
-import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
+import au.com.dius.pact.consumer.dsl.Matchers;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.V4Pact;
@@ -32,8 +32,8 @@ public class EachKeyLikeTest {
       .method("POST")
       .body(newJsonBody(body ->
         body.object("a", aObj -> {
-          aObj.eachKeyLike("prop1", PactDslJsonRootValue.stringMatcher("prop\\d+", "prop1"));
-          aObj.eachKeyLike("prop1", propObj -> propObj.stringType("value", "x"));
+          aObj.eachKeyMatching(Matchers.regexp("prop\\d+", "prop1"));
+          aObj.eachValueMatching("prop1", propObj -> propObj.stringType("value", "x"));
         })).build())
       .willRespondWith()
       .status(200)
@@ -47,7 +47,7 @@ public class EachKeyLikeTest {
       "    \"prop1\": {\n" +
       "       \"value\": \"x\"\n" +
       "    },\n" +
-      "    \"prop\": {\n" +
+      "    \"prop2\": {\n" +
       "      \"value\": \"y\"\n" +
       "    }\n" +
       " }\n" +
@@ -57,5 +57,22 @@ public class EachKeyLikeTest {
       .execute()
       .returnResponse();
     assertThat(httpResponse.getCode(), is(200));
+
+// This should make the test fail
+//    String json2 = "{\n" +
+//      "  \"a\": {\n" +
+//      "    \"prop1\": {\n" +
+//      "       \"value\": \"x\"\n" +
+//      "    },\n" +
+//      "    \"prop\": {\n" +
+//      "      \"value\": \"y\"\n" +
+//      "    }\n" +
+//      " }\n" +
+//      "}";
+//    ClassicHttpResponse httpResponse2 = (ClassicHttpResponse) Request.post(mockServer.getUrl())
+//      .body(new StringEntity(json2, ContentType.APPLICATION_JSON))
+//      .execute()
+//      .returnResponse();
+//    assertThat(httpResponse2.getCode(), is(500));
   }
 }
