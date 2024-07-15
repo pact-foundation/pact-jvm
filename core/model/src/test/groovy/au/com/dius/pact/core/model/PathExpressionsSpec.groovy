@@ -183,6 +183,7 @@ class PathExpressionsSpec extends Specification {
     'a$'    | 'a.b' || "a.b['a\$']"
     'a b'   | 'a.b' || "a.b['a b']"
     '$a.b'  | 'a.b' || "a.b['\$a.b']"
+    '*'     | 'a.b' || 'a.b.*'
   }
 
   def 'construct path from tokens'() {

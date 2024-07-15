@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
@@ -10,6 +11,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
+import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
 import kotlin.Triple
 import spock.lang.Issue
 import spock.lang.Specification
@@ -434,5 +436,39 @@ class PactDslJsonBodySpec extends Specification {
     body.matchers.matchingRules['$.baz'] == new MatchingRuleGroup([
       new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
       new RegexMatcher('\\d{5}', '90210')])
+  }
+
+  @Issue('#1813')
+  def 'matching each key'() {
+    when:
+    PactDslJsonBody body = new PactDslJsonBody()
+      .object('test')
+        .eachKeyMatching(Matchers.regexp('\\d+\\.\\d{2}', '2.01'))
+      .closeObject()
+    body.closeObject()
+
+    then:
+    body.toString() == '{"test":{"2.01":null}}'
+    body.matchers.matchingRules.keySet() == ['$.test'] as Set
+    body.matchers.matchingRules['$.test'] == new MatchingRuleGroup([
+      new EachKeyMatcher(new MatchingRuleDefinition('2.01', new RegexMatcher('\\d+\\.\\d{2}', '2.01'), null))
+    ])
+  }
+
+  @Issue('#1813')
+  def 'matching each value'() {
+    when:
+    PactDslJsonBody body = new PactDslJsonBody()
+      .eachValueMatching('prop1')
+        .stringType('value', 'x')
+      .closeObject()
+    body.closeObject()
+
+    then:
+    body.toString() == '{"prop1":{"value":"x"}}'
+    body.matchers.matchingRules.keySet() == ['$.*.value'] as Set
+    body.matchers.matchingRules['$.*.value'] == new MatchingRuleGroup([
+      TypeMatcher.INSTANCE
+    ])
   }
 }

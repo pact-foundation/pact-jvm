@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.generators.RandomStringGenerator
 import au.com.dius.pact.core.model.generators.RegexGenerator
 import au.com.dius.pact.core.model.generators.TimeGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
@@ -28,6 +29,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
+import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.expressions.DataType.Companion.from
 import au.com.dius.pact.core.support.json.JsonValue
@@ -2273,5 +2275,31 @@ open class PactDslJsonBody : DslPart {
       is JsonValue.StringValue -> JsonValue.StringValue(body.value.chars)
       else -> body
     }
+  }
+
+  /**
+   * Applies a matching rule to each key in the object, ignoring the values.
+   */
+  fun eachKeyMatching(matcher: Matcher): PactDslJsonBody {
+    val path = if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath
+    val value = matcher.value.toString()
+    if (matcher.matcher != null) {
+      matchers.addRule(path, EachKeyMatcher(MatchingRuleDefinition(value, matcher.matcher!!, matcher.generator)))
+    }
+    if (!body.has(value)) {
+      when (val body = body) {
+        is JsonValue.Object -> body.add(value, JsonValue.Null)
+        else -> {}
+      }
+    }
+    return this
+  }
+
+  /**
+   * Applies matching rules to each value in the object, ignoring the keys.
+   */
+  fun eachValueMatching(exampleKey: String): PactDslJsonBody {
+    val path = constructValidPath("*", rootPath)
+    return PactDslJsonBody("$path.", exampleKey, this)
   }
 }
