@@ -30,11 +30,19 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KLogging
-import org.apache.hc.core5.util.ReflectionUtils
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.TestTemplate
-import org.junit.jupiter.api.extension.*
+import org.junit.jupiter.api.extension.AfterAllCallback
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback
+import org.junit.jupiter.api.extension.BeforeAllCallback
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
+import org.junit.jupiter.api.extension.Extension
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.extension.TestTemplateInvocationContext
+import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider
 import org.junit.platform.commons.support.AnnotationSupport
 import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
@@ -44,6 +52,10 @@ import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Stream
 import kotlin.reflect.full.findAnnotation
+
+private const val PACT_DSL_WITH_PROVIDER = "au.com.dius.pact.consumer.dsl.PactDslWithProvider"
+private const val MESSAGE_PACT_BUILDER = "au.com.dius.pact.consumer.MessagePactBuilder"
+private const val SYNCHRONOUS_MESSAGE_PACT_BUILDER = "au.com.dius.pact.consumer.dsl.SynchronousMessagePactBuilder"
 
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver,
   AfterTestExecutionCallback, AfterAllCallback, TestTemplateInvocationContextProvider {
@@ -107,10 +119,14 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     return testTemplate != null && testTemplate.parameters[0].type == AsynchronousMessageContext::class.java
   }
 
-  override fun provideTestTemplateInvocationContexts(extensionContext: ExtensionContext): Stream<TestTemplateInvocationContext> {
+  override fun provideTestTemplateInvocationContexts(
+    extensionContext: ExtensionContext
+  ): Stream<TestTemplateInvocationContext> {
     val providerInfo = this.lookupProviderInfo(extensionContext)
     val pact = setupPactForTest(providerInfo[0].first, providerInfo[0].second, extensionContext)
-    return pact.asV4Pact().unwrap().interactions.map { AsynchronousMessageContext(it.asAsynchronousMessage()!!) }.stream() as Stream<TestTemplateInvocationContext>
+    return pact.asV4Pact().unwrap().interactions.map {
+      AsynchronousMessageContext(it.asAsynchronousMessage()!!)
+    }.stream() as Stream<TestTemplateInvocationContext>
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
@@ -271,8 +287,8 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val key = "pact:${providerInfo.providerName}"
     var methods = pactMethods
     if (methods.isEmpty()) {
-      methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java, HierarchyTraversalMode.TOP_DOWN)
-              .map { m -> m.name}
+      methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
+        HierarchyTraversalMode.TOP_DOWN).map { m -> m.name}
     }
 
     return when {
@@ -513,19 +529,23 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     if (method == null) {
       throw UnsupportedOperationException("No method annotated with @Pact was found on test class " +
         context.requiredTestClass.simpleName + " for provider '${providerInfo.providerName}'")
-    } else if (providerType == ProviderType.SYNCH && !JUnitTestSupport.conformsToSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
+    } else if (providerType == ProviderType.SYNCH &&
+      !JUnitTestSupport.conformsToSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
       throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
         "'public [RequestResponsePact|V4Pact] xxx(PactBuilder builder)'")
-    } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
+    } else if (providerType == ProviderType.ASYNCH &&
+      !JUnitTestSupport.conformsToMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
       throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
         "'public [MessagePact|V4Pact] xxx(PactBuilder builder)'")
-    } else if (providerType == ProviderType.SYNCH_MESSAGE && !JUnitTestSupport.conformsToSynchMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
+    } else if (providerType == ProviderType.SYNCH_MESSAGE &&
+      !JUnitTestSupport.conformsToSynchMessagePactSignature(method, providerInfo.pactVersion ?: PactSpecVersion.V4)) {
       throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
         "'public V4Pact xxx(PactBuilder builder)'")
     }
 
     val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
-    val pactConsumer = ep.parseExpression(pactAnnotation.consumer, DataType.STRING)?.toString() ?: pactAnnotation.consumer
+    val pactConsumer = ep.parseExpression(pactAnnotation.consumer, DataType.STRING)?.toString()
+      ?: pactAnnotation.consumer
     logger.debug {
       "Invoking method '${method.name}' to get Pact for the test " +
         "'${context.testMethod.map { it.name }.orElse("unknown")}'"
@@ -535,7 +555,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val providerNameToUse = if (provider.isNullOrEmpty()) providerName else provider
     val pact = when (providerType) {
       ProviderType.SYNCH, ProviderType.UNSPECIFIED -> {
-        if (method.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.PactDslWithProvider"))) {
+        if (method.parameterTypes[0].isAssignableFrom(Class.forName(PACT_DSL_WITH_PROVIDER))) {
           val consumerPactBuilder = ConsumerPactBuilder.consumer(pactConsumer)
           if (providerInfo.pactVersion != null) {
             consumerPactBuilder.pactSpecVersion(providerInfo.pactVersion)
@@ -551,7 +571,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         }
       }
       ProviderType.ASYNCH -> {
-        if (method.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder"))) {
+        if (method.parameterTypes[0].isAssignableFrom(Class.forName(MESSAGE_PACT_BUILDER))) {
           ReflectionSupport.invokeMethod(
             method, context.testInstance,
             MessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V3)
@@ -566,7 +586,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         }
       }
       ProviderType.SYNCH_MESSAGE -> {
-        if (method.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.SynchronousMessagePactBuilder"))) {
+        if (method.parameterTypes[0].isAssignableFrom(Class.forName(SYNCHRONOUS_MESSAGE_PACT_BUILDER))) {
           ReflectionSupport.invokeMethod(
             method, context.requiredTestInstance,
             SynchronousMessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V4)
@@ -642,7 +662,8 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           } else {
             JUnitTestSupport.validateMockServerResult(result)
           }
-        } else if (provider.providerType == ProviderType.ASYNCH || provider.providerType == ProviderType.SYNCH_MESSAGE) {
+        } else if (provider.providerType == ProviderType.ASYNCH ||
+          provider.providerType == ProviderType.SYNCH_MESSAGE) {
           if (!context.executionException.isPresent) {
             storePactForWrite(store, provider, null)
           }
