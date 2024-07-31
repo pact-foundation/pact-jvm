@@ -24,23 +24,17 @@ import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
-import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KLogging
+import org.apache.hc.core5.util.ReflectionUtils
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.extension.AfterAllCallback
-import org.junit.jupiter.api.extension.AfterTestExecutionCallback
-import org.junit.jupiter.api.extension.BeforeAllCallback
-import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
-import org.junit.jupiter.api.extension.Extension
-import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.ParameterContext
-import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.TestTemplate
+import org.junit.jupiter.api.extension.*
 import org.junit.platform.commons.support.AnnotationSupport
 import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
@@ -48,10 +42,11 @@ import org.junit.platform.commons.util.AnnotationUtils.isAnnotated
 import java.lang.reflect.Method
 import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
+import java.util.stream.Stream
 import kotlin.reflect.full.findAnnotation
 
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver,
-  AfterTestExecutionCallback, AfterAllCallback {
+  AfterTestExecutionCallback, AfterAllCallback, TestTemplateInvocationContextProvider {
 
   private val ep: ExpressionParser = ExpressionParser()
 
@@ -101,6 +96,21 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     }
 
     return false
+  }
+
+  override fun supportsTestTemplate(extensionContext: ExtensionContext): Boolean {
+    val testTemplate = extensionContext
+      .testClass.get()
+      .methods
+      .find { AnnotationSupport.isAnnotated(it, TestTemplate::class.java) }
+
+    return testTemplate != null && testTemplate.parameters[0].type == AsynchronousMessageContext::class.java
+  }
+
+  override fun provideTestTemplateInvocationContexts(extensionContext: ExtensionContext): Stream<TestTemplateInvocationContext> {
+    val providerInfo = this.lookupProviderInfo(extensionContext)
+    val pact = setupPactForTest(providerInfo[0].first, providerInfo[0].second, extensionContext)
+    return pact.asV4Pact().unwrap().interactions.map { AsynchronousMessageContext(it.asAsynchronousMessage()!!) }.stream() as Stream<TestTemplateInvocationContext>
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
@@ -259,36 +269,38 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
   ): BasePact {
     val store = context.getStore(NAMESPACE)
     val key = "pact:${providerInfo.providerName}"
+    var methods = pactMethods
+    if (methods.isEmpty()) {
+      methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java, HierarchyTraversalMode.TOP_DOWN)
+              .map { m -> m.name}
+    }
+
     return when {
       store[key] != null -> store[key] as BasePact
       else -> {
-        val pact = if (pactMethods.isEmpty()) {
-          lookupPact(providerInfo, "", context)
-        } else {
-          val head = pactMethods.first()
-          val tail = pactMethods.drop(1)
-          val initial = lookupPact(providerInfo, head, context)
-          tail.fold(initial) { acc, method ->
-            val pact = lookupPact(providerInfo, method, context)
+        val head = methods.first()
+        val tail = methods.drop(1)
+        val initial = lookupPact(providerInfo, head, context)
+        val pact = tail.fold(initial) { acc, method ->
+          val pact = lookupPact(providerInfo, method, context)
 
-            if (pact.provider != acc.provider) {
-              // Should not really get here, as the Pacts should have been sorted by provider
-              throw IllegalArgumentException("You are using different Pacts with different providers for the same test" +
-                " ('${acc.provider}') and '${pact.provider}'). A separate test (and ideally a separate test class)" +
-                " should be used for each provider.")
-            }
-
-            if (pact.consumer != acc.consumer) {
-              logger.warn {
-                "WARNING: You are using different Pacts with different consumers for the same test " +
-                  "('${acc.consumer}') and '${pact.consumer}'). The second consumer will be ignored and dropped from " +
-                  "the Pact and the interactions merged. If this is not your intention, you need to create a " +
-                  "separate test for each consumer."
-              }
-            }
-
-            acc.mergeInteractions(pact.interactions) as BasePact
+          if (pact.provider != acc.provider) {
+            // Should not really get here, as the Pacts should have been sorted by provider
+            throw IllegalArgumentException("You are using different Pacts with different providers for the same test" +
+              " ('${acc.provider}') and '${pact.provider}'). A separate test (and ideally a separate test class)" +
+              " should be used for each provider.")
           }
+
+          if (pact.consumer != acc.consumer) {
+            logger.warn {
+              "WARNING: You are using different Pacts with different consumers for the same test " +
+                "('${acc.consumer}') and '${pact.consumer}'). The second consumer will be ignored and dropped from " +
+                "the Pact and the interactions merged. If this is not your intention, you need to create a " +
+                "separate test for each consumer."
+            }
+          }
+
+          acc.mergeInteractions(pact.interactions) as BasePact
         }
         store.put(key, pact)
         pact
@@ -541,7 +553,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       ProviderType.ASYNCH -> {
         if (method.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder"))) {
           ReflectionSupport.invokeMethod(
-            method, context.requiredTestInstance,
+            method, context.testInstance,
             MessagePactBuilder(providerInfo.pactVersion ?: PactSpecVersion.V3)
               .consumer(pactConsumer).hasPactWith(providerNameToUse)
           ) as BasePact
@@ -550,7 +562,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
           if (providerInfo.pactVersion != null) {
             pactBuilder.pactSpecVersion(providerInfo.pactVersion)
           }
-          ReflectionSupport.invokeMethod(method, context.requiredTestInstance, pactBuilder) as BasePact
+          ReflectionSupport.invokeMethod(method, context.testInstance, pactBuilder) as BasePact
         }
       }
       ProviderType.SYNCH_MESSAGE -> {
