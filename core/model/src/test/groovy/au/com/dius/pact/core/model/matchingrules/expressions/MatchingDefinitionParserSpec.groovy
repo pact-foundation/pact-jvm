@@ -21,15 +21,14 @@ import spock.lang.Specification
 class MatchingDefinitionParserSpec extends Specification {
   def 'if the string does not start with a valid matching definition'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Result.Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).errorValue() == message
 
     where:
 
-    expression << [
-      '',
-      'a, b, c',
-      'matching some other text'
-    ]
+    expression                 | message
+    ''                         | 'Error parsing expression: expression is empty'
+    'a, b, c'                  | 'Error parsing expression: Was expecting a matching rule definition type at index 0\n        a, b, c\n        ^'
+    'matching some other text' | 'Error parsing expression: Was expecting a \'(\' at index 9\n        matching some other text\n                 ^'
   }
 
   def 'parse type matcher'() {
@@ -62,13 +61,12 @@ class MatchingDefinitionParserSpec extends Specification {
 
   def 'invalid number matcher'() {
     expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression) instanceof Result.Err
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).errorValue() == error
 
     where:
 
-    expression << [
-      'matching(integer,100.101)'
-    ]
+    expression | error
+    'matching(integer,100.101)' | 'Error parsing expression: Was expecting a \')\' at index 20\n        matching(integer,100.101)\n                            ^'
   }
 
   def 'parse datetime matcher'() {
@@ -238,12 +236,12 @@ class MatchingDefinitionParserSpec extends Specification {
     where:
 
     expression     | error
-    'atLeast'      | 'Error parsing expression: Was expecting a \'(\' at index 7'
+    'atLeast'      | 'Error parsing expression: Was expecting a \'(\' at index 7\n        atLeast\n               ^'
     'atLeast('     | 'Error parsing expression: Was expecting an unsigned number at index 8'
     'atLeast()'    | 'Error parsing expression: Was expecting an unsigned number at index 8'
-    'atLeast(100'  | 'Error parsing expression: Was expecting a \')\' at index 11'
+    'atLeast(100'  | 'Error parsing expression: Was expecting a \')\' at index 11\n        atLeast(100\n                   ^'
     'atLeast(-10)' | 'Error parsing expression: Was expecting an unsigned number at index 8'
-    'atLeast(0.1)' | 'Error parsing expression: Was expecting a \')\' at index 9'
+    'atLeast(0.1)' | 'Error parsing expression: Was expecting a \')\' at index 9\n        atLeast(0.1)\n                 ^'
   }
 
   def 'parse atMost matcher'() {
@@ -265,11 +263,11 @@ class MatchingDefinitionParserSpec extends Specification {
     where:
 
     expression    | error
-    'atMost'      | 'Error parsing expression: Was expecting a \'(\' at index 6'
+    'atMost'      | 'Error parsing expression: Was expecting a \'(\' at index 6\n        atMost\n              ^'
     'atMost('     | 'Error parsing expression: Was expecting an unsigned number at index 7'
     'atMost()'    | 'Error parsing expression: Was expecting an unsigned number at index 7'
-    'atMost(100'  | 'Error parsing expression: Was expecting a \')\' at index 10'
+    'atMost(100'  | 'Error parsing expression: Was expecting a \')\' at index 10\n        atMost(100\n                  ^'
     'atMost(-10)' | 'Error parsing expression: Was expecting an unsigned number at index 7'
-    'atMost(0.1)' | 'Error parsing expression: Was expecting a \')\' at index 8'
+    'atMost(0.1)' | 'Error parsing expression: Was expecting a \')\' at index 8\n        atMost(0.1)\n                ^'
   }
 }

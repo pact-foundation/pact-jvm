@@ -1,4 +1,4 @@
-package au.com.dius.pact.core.model.matchingrules.expressions;
+package au.com.dius.pact.core.model.matchingrules.expressions
 
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
@@ -31,6 +31,11 @@ class MatcherDefinitionLexer(expression: String): StringLexer(expression) {
   fun matchWholeNumber() = matchRegex(NUMBER_LITERAL).isNotEmpty()
 
   fun matchBoolean() = matchRegex(BOOLEAN_LITERAL).isNotEmpty()
+
+  fun highlightPosition(): String {
+    return if (index > 0) "^".padStart(index + 1)
+    else "^"
+  }
 
   companion object {
     val INTEGER_LITERAL = Regex("^-?\\d+")
@@ -89,8 +94,14 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
     return if (lexer.empty) {
       Result.Ok(definition)
     } else {
-      Result.Err("Error parsing expression: Unexpected characters '${lexer.remainder}' at ${lexer.index}")
+      Result.Err(parseError("Error parsing expression: Unexpected characters at ${lexer.index}"))
     }
+  }
+
+  fun parseError(message: String): String {
+    return message +
+      "\n        ${lexer.buffer}" +
+      "\n        ${lexer.highlightPosition()}"
   }
 
   //  matchingDefinitionExp returns [ MatchingRuleDefinition value ] :
@@ -127,13 +138,13 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
                   )
                 }
               } else {
-                Result.Err("Was expecting a ')' at index ${lexer.index}")
+                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
             }
             is Result.Err -> return matchingRuleResult
           }
         } else {
-          Result.Err("Was expecting a '(' at index ${lexer.index}")
+          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
       }
       lexer.matchString("notEmpty") -> {
@@ -144,13 +155,13 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
                 Result.Ok(MatchingRuleDefinition(primitiveValueResult.value.first, NotEmptyMatcher, null)
                   .withType(primitiveValueResult.value.second))
               } else {
-                Result.Err("Was expecting a ')' at index ${lexer.index}")
+                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
             }
             is Result.Err -> return primitiveValueResult
           }
         } else {
-          Result.Err("Was expecting a '(' at index ${lexer.index}")
+          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
       }
       lexer.matchString("eachKey") -> {
@@ -160,13 +171,13 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
               if (matchChar(')')) {
                 Result.Ok(MatchingRuleDefinition(null, EachKeyMatcher(definitionResult.value), null))
               } else {
-                Result.Err("Was expecting a ')' at index ${lexer.index}")
+                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
             }
             is Result.Err -> return definitionResult
           }
         } else {
-          Result.Err("Was expecting a '(' at index ${lexer.index}")
+          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
       }
       lexer.matchString("eachValue") -> {
@@ -177,13 +188,13 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
                 Result.Ok(MatchingRuleDefinition(null, ValueType.Unknown,
                   listOf(Either.A(EachValueMatcher(definitionResult.value))), null))
               } else {
-                Result.Err("Was expecting a ')' at index ${lexer.index}")
+                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
             }
             is Result.Err -> return definitionResult
           }
         } else {
-          Result.Err("Was expecting a '(' at index ${lexer.index}")
+          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
       }
       lexer.matchString("atLeast") -> {
@@ -193,13 +204,13 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
               if (matchChar(')')) {
                 Result.Ok(MatchingRuleDefinition("", MinTypeMatcher(lengthResult.value), null))
               } else {
-                Result.Err("Was expecting a ')' at index ${lexer.index}")
+                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
             }
             is Result.Err -> return lengthResult
           }
         } else {
-          Result.Err("Was expecting a '(' at index ${lexer.index}")
+          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
       }
       lexer.matchString("atMost") -> {
@@ -209,16 +220,16 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
               if (matchChar(')')) {
                 Result.Ok(MatchingRuleDefinition("", MaxTypeMatcher(lengthResult.value), null))
               } else {
-                Result.Err("Was expecting a ')' at index ${lexer.index}")
+                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
             }
             is Result.Err -> return lengthResult
           }
         } else {
-          Result.Err("Was expecting a '(' at index ${lexer.index}")
+          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
       }
-      else -> Result.Err("Was expecting a matching rule definition type at index ${lexer.index}")
+      else -> Result.Err(parseError("Was expecting a matching rule definition type at index ${lexer.index}"))
     }
   }
 
