@@ -1,9 +1,11 @@
 package au.com.dius.pact.core.model.matchingrules.expressions
 
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
+import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
@@ -15,6 +17,7 @@ import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.expressions.DataType
 import spock.lang.Specification
 
 @SuppressWarnings(['LineLength', 'UnnecessaryGString'])
@@ -34,29 +37,45 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse type matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition('Name', TypeMatcher.INSTANCE, null)
+      new MatchingRuleDefinition('Name', TypeMatcher.INSTANCE, generator)
 
     where:
 
-    expression << [
-      "matching(type,'Name')",
-      "matching( type , 'Name' ) "
-    ]
+    expression                                         | generator
+    "matching(type,'Name')"                            | null
+    "matching( type , 'Name' ) "                       | null
+    "matching(type, fromProviderState('exp', 'Name'))" | new ProviderStateGenerator('exp', DataType.STRING)
+  }
+
+  def 'parse equal to matcher'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
+      new MatchingRuleDefinition(value, EqualsMatcher.INSTANCE, generator)
+
+    where:
+
+    expression                                       | value   | generator
+    "matching(equalTo,'Name')"                       | 'Name'  | null
+    "matching( equalTo , 123.4 ) "                   | '123.4' | null
+    "matching(equalTo, fromProviderState('exp', 3))" | '3'     | new ProviderStateGenerator('exp', DataType.INTEGER)
   }
 
   def 'parse number matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, new NumberTypeMatcher(matcher), null)
+      new MatchingRuleDefinition(value, new NumberTypeMatcher(matcher), generator)
 
     where:
 
-    expression                   | value      | matcher
-    'matching(number,100)'       | '100'      | NumberTypeMatcher.NumberType.NUMBER
-    'matching( number , 100 )'   | '100'      | NumberTypeMatcher.NumberType.NUMBER
-    'matching(number, -100.101)' | '-100.101' | NumberTypeMatcher.NumberType.NUMBER
-    'matching(integer,100)'      | '100'      | NumberTypeMatcher.NumberType.INTEGER
-    'matching(decimal,100.101)'  | '100.101'  | NumberTypeMatcher.NumberType.DECIMAL
+    expression                                       | value      | matcher                              | generator
+    'matching(number,100)'                           | '100'      | NumberTypeMatcher.NumberType.NUMBER  | null
+    'matching( number , 100 )'                       | '100'      | NumberTypeMatcher.NumberType.NUMBER  | null
+    'matching(number, -100.101)'                     | '-100.101' | NumberTypeMatcher.NumberType.NUMBER  | null
+    'matching(integer,100)'                          | '100'      | NumberTypeMatcher.NumberType.INTEGER | null
+    'matching(decimal,100.101)'                      | '100.101'  | NumberTypeMatcher.NumberType.DECIMAL | null
+    "matching(number, fromProviderState('exp', 3))"  | '3'        | NumberTypeMatcher.NumberType.NUMBER  | new ProviderStateGenerator('exp', DataType.INTEGER)
+    "matching(integer, fromProviderState('exp', 3))" | '3'        | NumberTypeMatcher.NumberType.INTEGER | new ProviderStateGenerator('exp', DataType.INTEGER)
+    "matching(decimal, fromProviderState('exp', 3))" | '3'        | NumberTypeMatcher.NumberType.DECIMAL | new ProviderStateGenerator('exp', DataType.INTEGER)
   }
 
   def 'invalid number matcher'() {
@@ -72,15 +91,18 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse datetime matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, matcherClass.newInstance(format), null)
+      new MatchingRuleDefinition(value, matcherClass.newInstance(format), generator)
 
     where:
 
-    expression                                                        | format                | value                 | matcherClass
-    "matching(datetime, 'yyyy-MM-dd HH:mm:ss','2000-01-01 12:00:00')" | 'yyyy-MM-dd HH:mm:ss' | '2000-01-01 12:00:00' | TimestampMatcher
-    "matching(date, 'yyyy-MM-dd','2000-01-01')"                       | 'yyyy-MM-dd'          | '2000-01-01'          | DateMatcher
-    "matching(time, 'HH:mm:ss','12:00:00')"                           | 'HH:mm:ss'            | '12:00:00'            | TimeMatcher
-    "matching( time , 'HH:mm:ss' , '12:00:00' )"                      | 'HH:mm:ss'            | '12:00:00'            | TimeMatcher
+    expression                                                                                   | format                | value                 | matcherClass     | generator
+    "matching(datetime, 'yyyy-MM-dd HH:mm:ss','2000-01-01 12:00:00')"                            | 'yyyy-MM-dd HH:mm:ss' | '2000-01-01 12:00:00' | TimestampMatcher | null
+    "matching(date, 'yyyy-MM-dd','2000-01-01')"                                                  | 'yyyy-MM-dd'          | '2000-01-01'          | DateMatcher      | null
+    "matching(time, 'HH:mm:ss','12:00:00')"                                                      | 'HH:mm:ss'            | '12:00:00'            | TimeMatcher      | null
+    "matching( time , 'HH:mm:ss' , '12:00:00' )"                                                 | 'HH:mm:ss'            | '12:00:00'            | TimeMatcher      | null
+    "matching(datetime, 'yyyy-MM-dd HH:mm:ss', fromProviderState('exp', '2000-01-01 12:00:00'))" | 'yyyy-MM-dd HH:mm:ss' | '2000-01-01 12:00:00' | TimestampMatcher | new ProviderStateGenerator('exp', DataType.STRING)
+    "matching(date, 'yyyy-MM-dd', fromProviderState('exp', '2000-01-01'))"                       | 'yyyy-MM-dd'          | '2000-01-01'          | DateMatcher      | new ProviderStateGenerator('exp', DataType.STRING)
+    "matching(time, 'HH:mm:ss', fromProviderState('exp', '12:00:00'))"                           | 'HH:mm:ss'            | '12:00:00'            | TimeMatcher      | new ProviderStateGenerator('exp', DataType.STRING)
   }
 
   def 'parse regex matcher'() {
@@ -156,14 +178,15 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse notEmpty matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, type, [ Either.a(NotEmptyMatcher.INSTANCE) ], null)
+      new MatchingRuleDefinition(value, type, [ Either.a(NotEmptyMatcher.INSTANCE) ], generator)
 
     where:
 
-    expression           | value  | type
-    "notEmpty('true')"   | 'true' | ValueType.String
-    "notEmpty( 'true' )" | 'true' | ValueType.String
-    'notEmpty(true)'     | 'true' | ValueType.Boolean
+    expression                              | value  | type              | generator
+    "notEmpty('true')"                      | 'true' | ValueType.String  | null
+    "notEmpty( 'true' )"                    | 'true' | ValueType.String  | null
+    'notEmpty(true)'                        | 'true' | ValueType.Boolean | null
+    "notEmpty(fromProviderState('exp', 3))" | '3'    | ValueType.Integer | new ProviderStateGenerator('exp', DataType.INTEGER)
   }
 
   def 'parsing string values'() {

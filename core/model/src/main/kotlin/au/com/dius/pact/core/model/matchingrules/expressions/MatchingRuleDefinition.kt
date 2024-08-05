@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KLogging
 
@@ -48,6 +49,17 @@ enum class ValueType {
         Unknown, Boolean -> Boolean
       }
       Unknown -> valueType
+    }
+  }
+
+  fun toDataType(): DataType {
+    return when (this) {
+      Unknown -> DataType.RAW
+      String -> DataType.STRING
+      Number -> DataType.DECIMAL
+      Integer -> DataType.INTEGER
+      Decimal -> DataType.DECIMAL
+      Boolean -> DataType.BOOLEAN
     }
   }
 }
