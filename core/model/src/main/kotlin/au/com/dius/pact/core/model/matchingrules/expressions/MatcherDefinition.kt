@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model.matchingrules.expressions
 
 import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
@@ -9,8 +10,8 @@ import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
-import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
@@ -149,11 +150,16 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
       }
       lexer.matchString("notEmpty") -> {
         if (matchChar('(')) {
-          when (val primitiveValueResult = primitiveValue()) {
+          when (val primitiveValueResult = primitiveValue(false)) {
             is Result.Ok -> {
               if (matchChar(')')) {
-                Result.Ok(MatchingRuleDefinition(primitiveValueResult.value.first, NotEmptyMatcher, null)
-                  .withType(primitiveValueResult.value.second))
+                Result.Ok(
+                  MatchingRuleDefinition(
+                    primitiveValueResult.value.first,
+                    NotEmptyMatcher,
+                    primitiveValueResult.value.third
+                  ).withType(primitiveValueResult.value.second)
+                )
               } else {
                 Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
@@ -310,24 +316,42 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
       when (val formatResult = string()) {
         is Result.Ok -> {
           val matcher = when (type) {
-            "date" -> if (formatResult.value != null) DateMatcher(formatResult.value!!) else DateMatcher()
-            "time" -> if (formatResult.value != null) TimeMatcher(formatResult.value!!) else TimeMatcher()
-            else -> if (formatResult.value != null) TimestampMatcher(formatResult.value!!) else TimestampMatcher()
+            "date" -> DateMatcher(formatResult.value)
+            "time" -> TimeMatcher(formatResult.value)
+            else -> TimestampMatcher(formatResult.value)
           }
+
           if (matchChar(',')) {
-            when (val stringResult = string()) {
-              is Result.Ok -> Result.Ok(MatchingRuleResult(stringResult.value, ValueType.String, matcher))
-              is Result.Err -> stringResult
+            lexer.skipWhitespace()
+            if (lexer.matchString("fromProviderState")) {
+              when (val providerStateResult = fromProviderState()) {
+                is Result.Ok -> {
+                  Result.Ok(
+                    MatchingRuleResult(
+                      providerStateResult.value.first,
+                      providerStateResult.value.second,
+                      matcher,
+                      providerStateResult.value.third
+                    )
+                  )
+                }
+                is Result.Err -> providerStateResult
+              }
+            } else {
+              when (val stringResult = string()) {
+                is Result.Ok -> Result.Ok(MatchingRuleResult(stringResult.value, ValueType.String, matcher))
+                is Result.Err -> stringResult
+              }
             }
           } else {
-            Result.Err("Was expecting a ',' at index ${lexer.index}")
+            Result.Err(parseError("Was expecting a ',' at index ${lexer.index}"))
           }
         }
 
         is Result.Err -> formatResult
       }
     } else {
-      Result.Err("Was expecting a ',' at index ${lexer.index}")
+      Result.Err(parseError("Was expecting a ',' at index ${lexer.index}"))
     }
   }
 
@@ -340,6 +364,22 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
           NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
         )
       )
+
+      lexer.matchString("fromProviderState") -> {
+        when (val providerStateResult = fromProviderState()) {
+          is Result.Ok -> {
+            Result.Ok(
+              MatchingRuleResult(
+                providerStateResult.value.first,
+                providerStateResult.value.second,
+                NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL),
+                providerStateResult.value.third
+              )
+            )
+          }
+          is Result.Err -> providerStateResult
+        }
+      }
 
       else -> Result.Err("Was expecting a decimal number at index ${lexer.index}")
     }
@@ -356,6 +396,22 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
           NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
         )
       )
+
+      lexer.matchString("fromProviderState") -> {
+        when (val providerStateResult = fromProviderState()) {
+          is Result.Ok -> {
+            Result.Ok(
+              MatchingRuleResult(
+                providerStateResult.value.first,
+                providerStateResult.value.second,
+                NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER),
+                providerStateResult.value.third
+              )
+            )
+          }
+          is Result.Err -> providerStateResult
+        }
+      }
 
       else -> Result.Err("Was expecting an integer at index ${lexer.index}")
     }
@@ -380,10 +436,26 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
         )
       )
 
-      else -> Result.Err("Was expecting a number at index ${lexer.index}")
+      lexer.matchString("fromProviderState") -> {
+        when (val providerStateResult = fromProviderState()) {
+          is Result.Ok -> {
+            Result.Ok(
+              MatchingRuleResult(
+                providerStateResult.value.first,
+                providerStateResult.value.second,
+                NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER),
+                providerStateResult.value.third
+              )
+            )
+          }
+          is Result.Err -> providerStateResult
+        }
+      }
+
+      else -> Result.Err(parseError("Was expecting a number at index ${lexer.index}"))
     }
   } else {
-    Result.Err("Was expecting a ',' at index ${lexer.index}")
+    Result.Err(parseError("Was expecting a ',' at index ${lexer.index}"))
   }
 
   private fun unsignedNumber(): Result<Int, String> {
@@ -396,12 +468,14 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   }
 
   private fun matchEqualOrType(equalTo: Boolean) = if (matchChar(',')) {
-    when (val primitiveValueResult = primitiveValue()) {
+    when (val primitiveValueResult = primitiveValue(false)) {
       is Result.Ok -> {
         Result.Ok(
           MatchingRuleResult(
-            primitiveValueResult.value.first, primitiveValueResult.value.second,
-            if (equalTo) EqualsMatcher else TypeMatcher
+            primitiveValueResult.value.first,
+            primitiveValueResult.value.second,
+            if (equalTo) EqualsMatcher else TypeMatcher,
+            primitiveValueResult.value.third
           )
         )
       }
@@ -409,13 +483,13 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
       is Result.Err -> primitiveValueResult
     }
   } else {
-    Result.Err("Was expecting a ',' at index ${lexer.index}")
+    Result.Err(parseError("Was expecting a ',' at index ${lexer.index}"))
   }
 
   // 'include' COMMA s=string { $rule = new IncludeMatcher($s.contents); $value = $s.contents; $type = ValueType.String; }
   private fun matchInclude() = if (matchChar(',')) {
     when (val stringResult = string()) {
-      is Result.Ok -> Result.Ok(MatchingRuleResult(stringResult.value, ValueType.String, IncludeMatcher(stringResult.value.toString())))
+      is Result.Ok -> Result.Ok(MatchingRuleResult(stringResult.value, ValueType.String, IncludeMatcher(stringResult.value)))
       is Result.Err -> stringResult
     }
   } else {
@@ -488,21 +562,24 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   //    | v=DECIMAL_LITERAL
   //    | v=INTEGER_LITERAL
   //    | v=BOOLEAN_LITERAL
+  //    | 'null'
+  //    | 'fromProviderState' fromProviderState
   //    ;
-  fun primitiveValue(): Result<Pair<String?, ValueType>, String> {
+  fun primitiveValue(alreadyCalled: Boolean): Result<Triple<String?, ValueType, Generator?>, String> {
     lexer.skipWhitespace()
     return when {
       lexer.peekNextChar() == '\'' -> {
         when (val stringResult = string()) {
-          is Result.Ok -> Result.Ok(stringResult.value to ValueType.String)
+          is Result.Ok -> Result.Ok(Triple(stringResult.value, ValueType.String, null))
           is Result.Err -> stringResult
         }
       }
-      lexer.matchString("null") -> Result.Ok(null to ValueType.String)
-      lexer.matchDecimal() -> Result.Ok(lexer.lastMatch to ValueType.Decimal)
-      lexer.matchInteger() -> Result.Ok(lexer.lastMatch to ValueType.Decimal)
-      lexer.matchBoolean() -> Result.Ok(lexer.lastMatch to ValueType.Boolean)
-      else -> Result.Err("Was expecting a primitive value at index ${lexer.index}")
+      lexer.matchString("null") -> Result.Ok(Triple(null, ValueType.String, null))
+      lexer.matchDecimal() -> Result.Ok(Triple(lexer.lastMatch, ValueType.Decimal, null))
+      lexer.matchInteger() -> Result.Ok(Triple(lexer.lastMatch, ValueType.Integer, null))
+      lexer.matchBoolean() -> Result.Ok(Triple(lexer.lastMatch, ValueType.Boolean, null))
+      !alreadyCalled && lexer.matchString("fromProviderState") -> fromProviderState()
+      else -> Result.Err(parseError("Was expecting a primitive value at index ${lexer.index}"))
     }
   }
 
@@ -511,9 +588,8 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   //      String contents = $STRING_LITERAL.getText();
   //      $contents = contents.substring(1, contents.length() - 1);
   //    }
-  //    | 'null'
   //    ;
-  fun string(): Result<String?, String> {
+  fun string(): Result<String, String> {
     lexer.skipWhitespace()
     return if (lexer.matchChar('\'')) {
       var ch = lexer.nextChar()
@@ -532,10 +608,10 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
       if (ch == '\'') {
         processRawString(stringResult)
       } else {
-        Result.Err("Unterminated string found at index ${lexer.index}")
+        Result.Err(parseError("Unterminated string found at index ${lexer.index}"))
       }
     } else {
-      Result.Err("Was expecting a string at index ${lexer.index}")
+      Result.Err(parseError("Was expecting a string at index ${lexer.index}"))
     }
   }
 
@@ -610,5 +686,40 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
       }
     }
     return Result.Ok(buffer.toString())
+  }
+
+  // '(' exp=STRING_LITERAL COMMA v=primitiveValue ')'
+  private fun fromProviderState(): Result<Triple<String?, ValueType, Generator?>, String> {
+    return if (matchChar('(')) {
+      when (val expressionResult = string()) {
+        is Result.Ok -> {
+          lexer.skipWhitespace()
+          if (matchChar(',')) {
+            when (val primitiveResult = primitiveValue(true)) {
+              is Result.Ok -> {
+                lexer.skipWhitespace()
+                if (matchChar(')')) {
+                  Result.Ok(
+                    Triple(
+                      primitiveResult.value.first,
+                      primitiveResult.value.second,
+                      ProviderStateGenerator(expressionResult.value, primitiveResult.value.second.toDataType())
+                    )
+                  )
+                } else {
+                  Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+                }
+              }
+              is Result.Err -> primitiveResult
+            }
+          } else {
+            Result.Err(parseError("Was expecting a ',' at index ${lexer.index}"))
+          }
+        }
+        is Result.Err -> return expressionResult
+      }
+    } else {
+      Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
+    }
   }
 }
