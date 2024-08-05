@@ -120,15 +120,20 @@ data class MatchingRuleDefinition(
      */
     @JvmStatic
     fun parseMatchingRuleDefinition(expression: String): Result<MatchingRuleDefinition, String> {
-      val lexer = MatcherDefinitionLexer(expression)
-      val parser = MatcherDefinitionParser(lexer)
-      return when (val result = parser.matchingDefinition()) {
-        is Result.Ok -> if (result.value == null) {
-          Result.Err("Error parsing expression")
-        } else {
-          Result.Ok(result.value!!)
+      return if (expression.isEmpty()) {
+        Result.Err("Error parsing expression: expression is empty")
+      } else {
+        val lexer = MatcherDefinitionLexer(expression)
+        val parser = MatcherDefinitionParser(lexer)
+        when (val result = parser.matchingDefinition()) {
+          is Result.Ok -> if (result.value == null) {
+            Result.Err("Error parsing expression")
+          } else {
+            Result.Ok(result.value!!)
+          }
+
+          is Result.Err -> Result.Err("Error parsing expression: ${result.error}")
         }
-        is Result.Err -> Result.Err("Error parsing expression: ${result.error}")
       }
     }
   }

@@ -2,7 +2,7 @@ package au.com.dius.pact.core.support.parsers
 
 import au.com.dius.pact.core.support.Result
 
-open class StringLexer(private val buffer: String) {
+open class StringLexer(val buffer: String) {
   var index = 0
     private set
 
