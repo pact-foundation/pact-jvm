@@ -1,5 +1,18 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.12 - Bugfix Release
+
+* a8c7a48ee - feat: Update the matching rule expression parser to support values from provider states (Ronald Holshausen, Mon Aug 5 17:38:19 2024 +1000)
+* 787740484 - Feat: Improve some of the matching definition parser errors (Ronald Holshausen, Mon Aug 5 16:17:47 2024 +1000)
+* bf662357c - feat: Add DSL methods to handle matching each key and value in a JSON object #1813 (Ronald Holshausen, Mon Jul 15 16:49:01 2024 +1000)
+* ae0607954 - fix: Deprecate eachKeyLike methods as they actually act on the values #1813 (Ronald Holshausen, Mon Jul 15 11:22:14 2024 +1000)
+* 877f21bac - fix: PactBrokerClient throws index-out-of-bounds when can-i-deploy is called for a new tag #1814 (Ronald Holshausen, Fri Jul 12 11:26:04 2024 +1000)
+* 65ae785b6 - Update README.md (Ronald Holshausen, Fri Jul 12 15:11:36 2024 +1000)
+* 521e26513 - docs(JUnit 4): Update README with allowing provider state generator to fall back to the provider state parameters (Ronald Holshausen, Thu Jul 11 17:00:28 2024 +1000)
+* e586656e4 - feat(JUnit 4): Allow provider state generator to fall back to the provider state parameters (Ronald Holshausen, Thu Jul 11 16:55:57 2024 +1000)
+* 7550a6dc7 - feat: Allow provider state generator to fall back to the provider state parameters (Ronald Holshausen, Thu Jul 11 15:34:40 2024 +1000)
+* ea7037f44 - bump version to 4.6.12 (Ronald Holshausen, Fri Jul 5 12:07:48 2024 +1000)
+
 # 4.6.11 - Maintenance Release
 
 * af93c029b - fix: Allow core content types to be able to be ovveridden #1812 (Ronald Holshausen, Thu Jul 4 11:29:35 2024 +1000)
