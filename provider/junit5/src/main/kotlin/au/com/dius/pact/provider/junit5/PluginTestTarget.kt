@@ -15,6 +15,7 @@ import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
+import io.pact.plugins.jvm.core.PluginManager
 import java.io.File
 import java.net.URL
 
@@ -79,6 +80,7 @@ data class PluginProvider(
  */
 class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMapOf()) : TestTarget {
   private lateinit var transportEntry: CatalogueEntry
+  private var pluginManager: PluginManager = DefaultPluginManager
 
   override val userConfig: Map<String, Any?>
     get() = config
@@ -89,10 +91,16 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
 
   override fun prepareRequest(pact: Pact, interaction: Interaction, context: MutableMap<String, Any>): Pair<Any, Any?>? {
     return when (val v4pact = pact.asV4Pact()) {
-      is Ok -> when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
-        interaction.asV4Interaction(), config)) {
-        is Ok -> RequestDataToBeVerified(result.value) to transportEntry
-        is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
+      is Ok -> {
+        val testContext = config.toMutableMap()
+        if (context.containsKey("providerState")) {
+          testContext["providerState"] = context["providerState"]
+        }
+        when (val result = pluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
+          interaction.asV4Interaction(), testContext)) {
+          is Ok -> RequestDataToBeVerified(result.value) to transportEntry
+          is Err -> throw RuntimeException("Failed to configure the interaction for verification - ${result.error}")
+        }
       }
       is Err -> throw RuntimeException("PluginTestTarget can only be used with V4 Pacts")
     }
@@ -113,7 +121,7 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
       when (val v4pact = pact.asV4Pact()) {
         is Ok -> {
           for (plugin in v4pact.value.pluginData()) {
-            when (DefaultPluginManager.loadPlugin(plugin.name, plugin.version)) {
+            when (pluginManager.loadPlugin(plugin.name, plugin.version)) {
               is Ok -> {}
               is Err -> throw PactPluginNotFoundException(plugin.name, plugin.version)
             }
