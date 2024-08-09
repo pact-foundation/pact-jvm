@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.12 - Bugfix Release
+
+* 17ab6d4ba - feat: Update the matching rule expression parser to support values from provider states (Ronald Holshausen, Mon Aug 5 17:38:19 2024 +1000)
+* 8653f2f1c - Feat: Improve some of the matching definition parser errors (Ronald Holshausen, Mon Aug 5 16:17:47 2024 +1000)
+* 2bb8eefbf - feat: Add DSL methods to handle matching each key and value in a JSON object #1813 (Ronald Holshausen, Mon Jul 15 16:49:01 2024 +1000)
+* 3030270c8 - fix: Deprecate eachKeyLike methods as they actually act on the values #1813 (Ronald Holshausen, Mon Jul 15 11:22:14 2024 +1000)
+* cff891d93 - docs(JUnit 4): Update README with allowing provider state generator to fall back to the provider state parameters (Ronald Holshausen, Thu Jul 11 17:00:28 2024 +1000)
+* b02d8ae22 - feat(JUnit 4): Allow provider state generator to fall back to the provider state parameters (Ronald Holshausen, Thu Jul 11 16:55:57 2024 +1000)
+* e710a84e1 - feat: Allow provider state generator to fall back to the provider state parameters (Ronald Holshausen, Thu Jul 11 15:34:40 2024 +1000)
+* 29fad4b24 - fix: Need to pass any provider state data through to the plugins (Ronald Holshausen, Wed Aug 7 12:09:02 2024 +1000)
+* 836fc9f0b - bump version to 4.5.12 (Ronald Holshausen, Fri Jul 12 15:03:24 2024 +1000)
+
 # 4.5.11 - Bugfix Release
 
 * df1835b38 - fix: PactBrokerClient throws index-out-of-bounds when can-i-deploy is called for a new tag #1814 (Ronald Holshausen, Fri Jul 12 11:26:04 2024 +1000)
