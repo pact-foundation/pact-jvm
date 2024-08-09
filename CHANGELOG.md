@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.13 - Bugfix Release
+
+* ea14386fa - fix: Need to pass any provider state data through to the plugins (Ronald Holshausen, Wed Aug 7 12:09:02 2024 +1000)
+* aa5770aae - Update README.md (Ronald Holshausen, Tue Aug 6 10:49:30 2024 +1000)
+* 9289a3c8b - bump version to 4.6.13 (Ronald Holshausen, Tue Aug 6 10:36:04 2024 +1000)
+
 # 4.6.12 - Bugfix Release
 
 * a8c7a48ee - feat: Update the matching rule expression parser to support values from provider states (Ronald Holshausen, Mon Aug 5 17:38:19 2024 +1000)
