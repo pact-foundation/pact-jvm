@@ -43,6 +43,6 @@ dependencies {
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
   testRuntimeOnly 'org.objenesis:objenesis:3.2'
   testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
-  testImplementation 'io.grpc:grpc-protobuf:1.51.0'
+  testImplementation 'io.grpc:grpc-protobuf:1.66.0'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }
