@@ -358,7 +358,7 @@ open class MockHttpServer(pact: BasePact, config: MockProviderConfig) :
       when (val p = pact.asV4Pact()) {
         is Result.Ok -> {
           for (interaction in p.value.interactions) {
-            interaction.asV4Interaction().transport = "https"
+            interaction.asV4Interaction().transport = "http"
           }
           p.value
         }
