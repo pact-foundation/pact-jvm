@@ -35,6 +35,13 @@ interface IHttpPart {
   fun setupGenerators(category: Category, context: Map<String, Any>): Map<String, Generator>
 
   fun hasHeader(name: String): Boolean
+
+  /**
+   * Allows the part of the interaction to transform the config so that it is keyed correctly. For instance,
+   * an HTTP interaction may have both a request and response body from a plugin. This allows the request and
+   * response parts to set the config for the correct part of the interaction.
+   */
+  fun transformConfig(config: MutableMap<String, JsonValue>): Map<String, JsonValue> = config
 }
 
 /**

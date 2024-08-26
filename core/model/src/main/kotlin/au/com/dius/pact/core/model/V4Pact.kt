@@ -180,7 +180,7 @@ sealed class V4Interaction(
    */
   fun addPluginConfiguration(plugin: String, config: Map<String, JsonValue>) {
     if (pluginConfiguration.containsKey(plugin)) {
-      pluginConfiguration[plugin]!!.deepMerge(config)
+      pluginConfiguration[plugin] = pluginConfiguration[plugin]!!.deepMerge(config)
     } else {
       pluginConfiguration[plugin] = config.toMutableMap()
     }

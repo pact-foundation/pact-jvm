@@ -97,6 +97,10 @@ data class HttpRequest @JvmOverloads constructor(
 
   override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
 
+  override fun transformConfig(config: MutableMap<String, JsonValue>): Map<String, JsonValue> {
+    return mapOf("request" to JsonValue.Object(config))
+  }
+
   companion object {
     @JvmStatic
     fun fromJson(json: JsonValue): HttpRequest {
@@ -226,6 +230,10 @@ data class HttpResponse @JvmOverloads constructor(
   override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
 
   override fun copyResponse() = this.copy()
+
+  override fun transformConfig(config: MutableMap<String, JsonValue>): Map<String, JsonValue> {
+    return mapOf("response" to JsonValue.Object(config))
+  }
 
   companion object {
     fun fromJson(json: JsonValue): HttpResponse {

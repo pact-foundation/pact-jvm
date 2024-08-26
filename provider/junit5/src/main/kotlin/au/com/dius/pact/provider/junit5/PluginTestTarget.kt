@@ -110,7 +110,13 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
     return false
   }
 
-  override fun supportsInteraction(interaction: Interaction) = interaction.isV4()
+  override fun supportsInteraction(interaction: Interaction): Boolean {
+    return interaction.isV4() &&
+      (
+        !config.containsKey("transport") ||
+        config["transport"] == interaction.asV4Interaction().transport
+      )
+  }
 
   override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
     return ProviderResponse()

@@ -23,9 +23,10 @@ open class PactVerificationSpring6Extension(
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
+    val target = testContext.currentTarget()
     return when (parameterContext.parameter.type) {
-      MockHttpServletRequestBuilder::class.java -> testContext.target is Spring6MockMvcTestTarget
-      WebTestClient.RequestHeadersSpec::class.java -> testContext.target is WebFluxSpring6Target
+      MockHttpServletRequestBuilder::class.java -> target is Spring6MockMvcTestTarget
+      WebTestClient.RequestHeadersSpec::class.java -> target is WebFluxSpring6Target
       else -> super.supportsParameter(parameterContext, extensionContext)
     }
   }
