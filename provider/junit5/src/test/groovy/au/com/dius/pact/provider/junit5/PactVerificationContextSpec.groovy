@@ -39,6 +39,7 @@ class PactVerificationContextSpec extends Specification {
     }
     TestTarget target = Stub {
       executeInteraction(_, _) >> { throw new IOException('Boom!') }
+      supportsInteraction(_) >> true
     }
     IProviderVerifier verifier = Stub()
     ValueResolver valueResolver = Stub()
@@ -65,6 +66,46 @@ class PactVerificationContextSpec extends Specification {
     context.testExecutionResult[0].failures['12345'][0] instanceof VerificationFailureType.ExceptionFailure
   }
 
+  @SuppressWarnings('LineLength')
+  def 'sets the test result to an error result if no test target is found to execute the interaction'() {
+    given:
+    PactVerificationContext context
+    ExtensionContext.Store store = Stub {
+      get(_) >> { args ->
+        if (args[0] == 'interactionContext') {
+          context
+        }
+      }
+    }
+    ExtensionContext extContext = Stub {
+      getStore(_) >> store
+    }
+    TestTarget target = Stub {
+      supportsInteraction(_) >> false
+    }
+    IProviderVerifier verifier = Stub()
+    ValueResolver valueResolver = Stub()
+    IProviderInfo provider = Stub {
+      getName() >> 'Stub'
+    }
+    IConsumerInfo consumer = new ConsumerInfo('Test')
+    Interaction interaction = new RequestResponseInteraction('Test Interaction', [], new Request(),
+      new Response(), '12345')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction ])
+    List<VerificationResult> testResults = []
+
+    context = new PactVerificationContext(store, extContext, target, verifier, valueResolver,
+      provider, consumer, interaction, pact, testResults)
+
+    when:
+    context.verifyInteraction()
+
+    then:
+    thrown(AssertionError)
+    context.testExecutionResult[0] instanceof VerificationResult.Failed
+    context.testExecutionResult[0].description == "Did not find a test target to execute for the interaction transport 'http'"
+  }
+
   def 'only throw an exception if there are non-pending failures'() {
     given:
     PactVerificationContext context
@@ -80,6 +121,7 @@ class PactVerificationContextSpec extends Specification {
     }
     TestTarget target = Stub {
       executeInteraction(_, _) >> { throw new IOException('Boom!') }
+      supportsInteraction(_) >> true
     }
     IProviderVerifier verifier = Stub()
     ValueResolver valueResolver = Stub()
@@ -125,6 +167,7 @@ class PactVerificationContextSpec extends Specification {
     }
     TestTarget target = Stub {
       executeInteraction(_, _) >> { throw new IOException('Boom!') }
+      supportsInteraction(_) >> true
     }
     IProviderVerifier verifier = Mock()
     ValueResolver valueResolver = Stub()

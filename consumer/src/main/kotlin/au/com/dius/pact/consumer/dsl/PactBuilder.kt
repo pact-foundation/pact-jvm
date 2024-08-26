@@ -315,7 +315,7 @@ open class PactBuilder(
 
   override fun addPluginConfiguration(matcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>) {
     if (pluginConfiguration.containsKey(matcher.pluginName)) {
-      pluginConfiguration[matcher.pluginName].deepMerge(pactConfiguration)
+      pluginConfiguration[matcher.pluginName] = pluginConfiguration[matcher.pluginName].deepMerge(pactConfiguration)
     } else {
       pluginConfiguration[matcher.pluginName] = pactConfiguration.toMutableMap()
     }
@@ -392,7 +392,7 @@ open class PactBuilder(
         logger.debug { "Plugin config: $config" }
 
         if (config.interactionConfiguration.isNotEmpty()) {
-          interaction.addPluginConfiguration(matcher.pluginName, config.interactionConfiguration)
+          interaction.addPluginConfiguration(matcher.pluginName, part.transformConfig(config.interactionConfiguration))
         }
         if (config.pactConfiguration.isNotEmpty()) {
           addPluginConfiguration(matcher, config.pactConfiguration)

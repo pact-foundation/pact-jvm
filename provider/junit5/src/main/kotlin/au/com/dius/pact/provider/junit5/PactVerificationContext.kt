@@ -93,6 +93,23 @@ data class PactVerificationContext @JvmOverloads constructor(
       interactionMessage += " [PENDING]"
     }
 
+    val targetForInteraction = currentTarget()
+    if (targetForInteraction == null) {
+      val transport = interaction.asV4Interaction().transport ?: "http"
+      val message = "Did not find a test target to execute for the interaction transport '" +
+        transport + "'"
+      return listOf(
+        VerificationResult.Failed(
+          message, interactionMessage,
+          mapOf(
+            interaction.interactionId.orEmpty() to
+              listOf(VerificationFailureType.InvalidInteractionFailure(message))
+          ),
+          consumer.pending
+        )
+      )
+    }
+
     when (providerInfo.verificationType) {
       null, PactVerification.REQUEST_RESPONSE -> {
         return try {
@@ -104,7 +121,7 @@ data class PactVerificationContext @JvmOverloads constructor(
           val pactPluginData = pact.asV4Pact().get()?.pluginData() ?: emptyList()
           val expectedResponse = DefaultResponseGenerator.generateResponse(reqResInteraction.response, context,
             GeneratorTestMode.Provider, pactPluginData, pluginData)
-          val actualResponse = target.executeInteraction(client, request)
+          val actualResponse = targetForInteraction.executeInteraction(client, request)
 
           listOf(
             verifier!!.verifyRequestResponsePact(
@@ -148,7 +165,7 @@ data class PactVerificationContext @JvmOverloads constructor(
           )
         }
         return listOf(verifier!!.verifyInteractionViaPlugin(providerInfo, consumer, v4pact, interaction.asV4Interaction(),
-          client, request, context + ("userConfig" to target.userConfig)))
+          client, request, context + ("userConfig" to targetForInteraction.userConfig)))
       }
       else -> {
         return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,

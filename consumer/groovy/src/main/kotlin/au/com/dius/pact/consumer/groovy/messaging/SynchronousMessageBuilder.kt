@@ -120,7 +120,7 @@ open class SynchronousMessageBuilder(
 
   override fun addPluginConfiguration(matcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>) {
     if (pluginConfiguration.containsKey(matcher.pluginName)) {
-      pluginConfiguration[matcher.pluginName].deepMerge(pactConfiguration)
+      pluginConfiguration[matcher.pluginName] = pluginConfiguration[matcher.pluginName].deepMerge(pactConfiguration)
     } else {
       pluginConfiguration[matcher.pluginName] = pactConfiguration.toMutableMap()
     }

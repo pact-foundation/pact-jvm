@@ -30,6 +30,19 @@ class PluginTestTargetSpec extends Specification {
     new V4Interaction.SynchronousHttp('test')     | true
   }
 
+  def 'only supports interactions that have a matching transport'() {
+    given:
+    def interaction1 = new V4Interaction.SynchronousHttp('test')
+    interaction1.transport = 'http'
+    def interaction2 = new V4Interaction.SynchronousHttp('test')
+    interaction2.transport = 'xttp'
+    def pluginTarget = new PluginTestTarget([transport: 'xttp'])
+
+    expect:
+    !pluginTarget.supportsInteraction(interaction1)
+    pluginTarget.supportsInteraction(interaction2)
+  }
+
   def 'when calling a plugin, prepareRequest must merge the provider state test context config'() {
     given:
     def config = [
