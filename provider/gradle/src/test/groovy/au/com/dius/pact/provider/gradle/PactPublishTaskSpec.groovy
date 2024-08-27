@@ -191,4 +191,44 @@ class PactPublishTaskSpec extends Specification {
     then:
     1 * brokerClient.uploadPactFile(_, new PublishConfiguration('1.2.3')) >> new Result.Ok(null)
   }
+
+  def 'allows insecure TLS to be set'() {
+    given:
+    project.pact {
+      publish {
+        pactBrokerToken = 'token1234'
+        pactBrokerUrl = 'pactBrokerUrl'
+        pactBrokerInsecureTLS = true
+      }
+    }
+    project.evaluate()
+
+    when:
+    project.tasks.pactPublish.publishPacts()
+
+    then:
+    1 * new PactBrokerClient(_, _, { it.insecureTLS == true }) >> brokerClient
+    1 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null)
+  }
+
+  def 'allows insecure TLS to be set on the broker block'() {
+    given:
+    project.pact {
+      broker {
+        pactBrokerInsecureTLS = true
+      }
+      publish {
+        pactBrokerToken = 'token1234'
+        pactBrokerUrl = 'pactBrokerUrl'
+      }
+    }
+    project.evaluate()
+
+    when:
+    project.tasks.pactPublish.publishPacts()
+
+    then:
+    1 * new PactBrokerClient(_, _, { it.insecureTLS == true }) >> brokerClient
+    1 * brokerClient.uploadPactFile(_, _) >> new Result.Ok(null)
+  }
 }

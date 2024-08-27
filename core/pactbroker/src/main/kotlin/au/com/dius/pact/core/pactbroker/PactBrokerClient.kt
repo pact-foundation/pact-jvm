@@ -415,7 +415,7 @@ interface IPactBrokerClient {
 data class PactBrokerClientConfig @JvmOverloads constructor(
   val retryCountWhileUnknown: Int = 0,
   val retryWhileUnknownInterval: Int = 10,
-  val insecureTLS: Boolean = false
+  var insecureTLS: Boolean = false
 )
 
 /**

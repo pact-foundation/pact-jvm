@@ -13,7 +13,8 @@ data class Broker(
   var pactBrokerAuthenticationScheme: String? = null,
   var pactBrokerAuthenticationHeader: String = Auth.DEFAULT_AUTH_HEADER,
   var retryCountWhileUnknown: Int? = null,
-  var retryWhileUnknownInterval: Int? = null
+  var retryWhileUnknownInterval: Int? = null,
+  var pactBrokerInsecureTLS: Boolean? = null
 ) {
   override fun toString(): String {
     val password = if (pactBrokerPassword != null) "".padEnd(pactBrokerPassword!!.length, '*') else null
@@ -21,6 +22,8 @@ data class Broker(
       "pactBrokerUsername=$pactBrokerUsername, pactBrokerPassword=$password, " +
       "pactBrokerAuthenticationScheme=$pactBrokerAuthenticationScheme, " +
       "pactBrokerAuthenticationHeader=$pactBrokerAuthenticationHeader, " +
-      "retryCountWhileUnknown=$retryCountWhileUnknown, retryWhileUnknownInterval=$retryWhileUnknownInterval)"
+      "pactBrokerInsecureTLS=$pactBrokerInsecureTLS, " +
+      "retryCountWhileUnknown=$retryCountWhileUnknown, " +
+      "retryWhileUnknownInterval=$retryWhileUnknownInterval)"
   }
 }
