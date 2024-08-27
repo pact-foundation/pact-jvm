@@ -70,7 +70,9 @@ abstract class PactPublishTask extends DefaultTask {
 
         def publishConfig = new PublishConfiguration(version.toString(), pactPublish.tags, pactPublish.consumerBranch,
           pactPublish.consumerBuildUrl)
-        def brokerClient = new PactBrokerClient(brokerConfig.pactBrokerUrl, options, new PactBrokerClientConfig())
+
+        PactBrokerClientConfig brokerClientConfig = configureBrokerClient(pactPublish, broker)
+        def brokerClient = new PactBrokerClient(brokerConfig.pactBrokerUrl, options, brokerClientConfig)
 
         File pactDirectory = pactPublish.pactDirectory as File
         boolean anyFailed = false
@@ -101,6 +103,16 @@ abstract class PactPublishTask extends DefaultTask {
           throw new GradleScriptException('One or more of the pact files were rejected by the pact broker', null)
         }
     }
+
+  private static PactBrokerClientConfig configureBrokerClient(PactPublish pactPublish, Broker broker) {
+    def brokerClientConfig = new PactBrokerClientConfig()
+    if (pactPublish.pactBrokerInsecureTLS != null) {
+      brokerClientConfig.insecureTLS = pactPublish.pactBrokerInsecureTLS
+    } else if (broker?.pactBrokerInsecureTLS != null) {
+      brokerClientConfig.insecureTLS = broker.pactBrokerInsecureTLS
+    }
+    brokerClientConfig
+  }
 
   static boolean pactFileIsExcluded(PactPublish pactPublish, File pactFile) {
     pactPublish.excludes.any {
