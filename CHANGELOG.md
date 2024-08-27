@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.13 - Bugfix Release
+
+* c87dadeab - chore: Fix build after merge from master (Ronald Holshausen, Tue Aug 27 17:07:13 2024 +1000)
+* fe7128d28 - fix: Allow the Pact publish task to set insecure TLS flag #1817 (Ronald Holshausen, Tue Aug 27 16:22:48 2024 +1000)
+* 1b0d5e7fe - fix: Support provider tests with multiple targets using different transports #1819 (Ronald Holshausen, Mon Aug 26 14:41:47 2024 +1000)
+* 23ef5649f - chore: Upgrade plugin driver to 0.5.1 which upgrades gRPC libs to 1.66.0 #1816 (Ronald Holshausen, Mon Aug 26 14:38:25 2024 +1000)
+* 87f85782d - fix(V4): Http mock server was incorrectly setting the trasnport to https (Ronald Holshausen, Thu Aug 22 15:37:09 2024 +1000)
+* 20618d960 - chore: Upgrade plugin driver to 0.5.0 (Ronald Holshausen, Wed Aug 21 16:37:51 2024 +1000)
+* 71a4d0693 - bump version to 4.5.13 (Ronald Holshausen, Fri Aug 9 12:06:54 2024 +1000)
+
 # 4.5.12 - Bugfix Release
 
 * 17ab6d4ba - feat: Update the matching rule expression parser to support values from provider states (Ronald Holshausen, Mon Aug 5 17:38:19 2024 +1000)
