@@ -28,8 +28,8 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 dependencies {
     constraints {
         // Define dependency versions as constraints
-        api 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
-        api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.2.1'
+        api 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
+        api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.3.1'
         api 'org.json:json:20240205'
         api 'io.pact.plugin.driver:core:0.5.1'
         api 'org.apache.tika:tika-core:2.9.1'
