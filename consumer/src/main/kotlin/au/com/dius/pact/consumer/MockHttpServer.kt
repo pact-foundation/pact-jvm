@@ -273,7 +273,9 @@ abstract class BaseJdkMockServer(
 
   private fun pactResponseToHttpExchange(response: IResponse, exchange: HttpExchange) {
     val headers = response.headers
-    exchange.responseHeaders.putAll(headers)
+    if (headers.isNotEmpty()) {
+      exchange.responseHeaders.putAll(headers)
+    }
     if (config.addCloseHeader) {
       exchange.responseHeaders.add("Connection", "close")
     }
@@ -283,7 +285,7 @@ abstract class BaseJdkMockServer(
       exchange.sendResponseHeaders(response.status, bytes.size.toLong())
       exchange.responseBody.write(bytes)
     } else {
-      exchange.sendResponseHeaders(response.status, 0)
+      exchange.sendResponseHeaders(response.status, -1)
     }
     exchange.close()
   }
