@@ -10,8 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.Json
-import com.mifmif.common.regex.Generex
-import org.json.JSONArray
+import au.com.dius.pact.core.support.Random
 
 class ArrayOfPrimitivesBuilder {
 
@@ -62,7 +61,7 @@ class ArrayOfPrimitivesBuilder {
   fun thatMatchRegex(regex: String): ArrayOfPrimitivesBuilder {
     this.matcher = RegexMatcher(regex)
     this.generator = RegexGenerator(regex)
-    this.value = Generex(regex).random()
+    this.value = Random.generateRandomString(regex)
     return this
   }
 

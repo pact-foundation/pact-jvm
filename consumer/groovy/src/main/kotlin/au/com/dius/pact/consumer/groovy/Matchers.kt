@@ -23,8 +23,8 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.isNotEmpty
-import com.mifmif.common.regex.Generex
 import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.DateUtils
@@ -69,7 +69,7 @@ class RegexpMatcher @JvmOverloads constructor(
   value: String? = null
 ) : Matcher(value, RegexMatcher(regex, value), if (value == null) RegexGenerator(regex) else null) {
   override val value: Any?
-    get() = super.value ?: Generex(regex).random()
+    get() = super.value ?: Random.generateRandomString(regex)
 }
 
 class HexadecimalMatcher @JvmOverloads constructor(

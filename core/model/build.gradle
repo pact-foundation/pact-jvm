@@ -14,7 +14,6 @@ dependencies {
     implementation 'org.apache.commons:commons-collections4'
     implementation 'commons-codec:commons-codec'
     implementation 'org.slf4j:slf4j-api'
-    implementation 'com.github.mifmif:generex:1.0.2'
     implementation 'javax.mail:mail:1.5.0-b01'
     implementation 'io.ktor:ktor-http-jvm'
     implementation 'commons-beanutils:commons-beanutils:1.9.4'

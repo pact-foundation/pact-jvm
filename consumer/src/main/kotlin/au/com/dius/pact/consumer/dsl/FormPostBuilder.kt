@@ -13,8 +13,8 @@ import au.com.dius.pact.core.model.generators.RegexGenerator
 import au.com.dius.pact.core.model.generators.TimeGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType
-import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.FastDateFormat
 import java.net.URLEncoder
@@ -100,7 +100,7 @@ class FormPostBuilder(
    */
   fun stringMatcher(name: String, regex: String): FormPostBuilder {
     generators.addGenerator(Category.BODY, name, RegexGenerator(regex))
-    return stringMatcher(name, regex, Generex(regex).random())
+    return stringMatcher(name, regex, Random.generateRandomString(regex))
   }
 
   /**

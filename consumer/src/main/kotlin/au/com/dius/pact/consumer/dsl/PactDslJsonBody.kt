@@ -31,10 +31,10 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.matchingrules.expressions.MatchingRuleDefinition
 import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType.Companion.from
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.padTo
-import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.FastDateFormat
@@ -795,7 +795,7 @@ open class PactDslJsonBody : DslPart {
    */
   fun stringMatcher(name: String, regex: String): PactDslJsonBody {
     generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RegexGenerator(regex))
-    stringMatcher(name, regex, *examples(Generex(regex).random()))
+    stringMatcher(name, regex, *examples(Random.generateRandomString(regex)))
     return this
   }
 

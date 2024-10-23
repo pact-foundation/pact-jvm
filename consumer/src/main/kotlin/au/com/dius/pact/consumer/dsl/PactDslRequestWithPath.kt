@@ -17,9 +17,9 @@ import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.queryStringToMap
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.json.JsonValue
-import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.apache.hc.core5.http.ContentType
@@ -397,7 +397,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    * @param pathRegex regular expression to use to match paths
    */
   @JvmOverloads
-  fun matchPath(pathRegex: String, path: String = Generex(pathRegex).random()): PactDslRequestWithPath {
+  fun matchPath(pathRegex: String, path: String = Random.generateRandomString(pathRegex)): PactDslRequestWithPath {
     val re = Regex(pathRegex)
     if (!path.matches(re)) {
       throw InvalidMatcherException("Example \"$path\" does not match regular expression \"$pathRegex\"")
@@ -420,7 +420,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   fun matchHeader(
     header: String,
     regex: String,
-    headerExample: String = Generex(regex).random()
+    headerExample: String = Random.generateRandomString(regex)
   ): PactDslRequestWithPath {
     val re = Regex(regex)
     if (!headerExample.matches(re)) {
@@ -462,7 +462,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
   fun matchQuery(
     parameter: String,
     regex: String,
-    example: String = Generex(regex).random()
+    example: String = Random.generateRandomString(regex)
   ): PactDslRequestWithPath {
     val re = Regex(regex)
     if (!example.matches(re)) {

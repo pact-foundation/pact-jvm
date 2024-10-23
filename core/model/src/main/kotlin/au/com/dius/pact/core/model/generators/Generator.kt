@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
@@ -11,7 +12,6 @@ import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.getOr
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
-import com.mifmif.common.regex.Generex
 import io.github.oshai.kotlinlogging.KLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -264,7 +264,7 @@ data class RegexGenerator(val regex: String) : Generator {
 
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any {
     logger.debug { "Applying Generator $this" }
-    return Generex(regex).random()
+    return Random.generateRandomString(regex)
   }
 
   companion object: KLogging() {

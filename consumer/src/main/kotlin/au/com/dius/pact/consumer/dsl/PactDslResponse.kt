@@ -29,10 +29,10 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonArray
-import com.mifmif.common.regex.Generex
 import org.apache.hc.core5.http.ContentType
 import org.json.JSONObject
 import org.w3c.dom.Document
@@ -298,7 +298,7 @@ open class PactDslResponse @JvmOverloads constructor(
    * @param headerExample Example value to use
    */
   @JvmOverloads
-  fun matchHeader(header: String, regexp: String?, headerExample: String = Generex(regexp).random()): PactDslResponse {
+  fun matchHeader(header: String, regexp: String?, headerExample: String = Random.generateRandomString(regexp.orEmpty())): PactDslResponse {
     responseMatchers.addCategory("header").setRule(header, RegexMatcher(regexp!!))
     responseHeaders[header] = listOf(headerExample)
     return this

@@ -10,9 +10,9 @@ import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.queryStringToMap
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.json.JsonValue
-import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
@@ -337,7 +337,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
    * @param pathRegex string path regular expression to match with
    */
   @JvmOverloads
-  fun matchPath(pathRegex: String, path: String = Generex(pathRegex).random()): PactDslRequestWithPath {
+  fun matchPath(pathRegex: String, path: String = Random.generateRandomString(pathRegex)): PactDslRequestWithPath {
     val re = Regex(pathRegex)
     if (!path.matches(re)) {
       throw InvalidMatcherException("Example \"$path\" does not match regular expression \"$pathRegex\"")
@@ -359,7 +359,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
   @JvmOverloads
   inline fun matchPath(
     pathRegex: String,
-    path: String = Generex(pathRegex).random(),
+    path: String = Random.generateRandomString(pathRegex),
     addRequestMatchers: PactDslRequestWithPath.() -> PactDslRequestWithPath
   ): PactDslRequestWithPath = addRequestMatchers(matchPath(pathRegex, path))
 

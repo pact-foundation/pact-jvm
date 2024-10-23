@@ -11,7 +11,6 @@ dependencies {
   implementation 'org.apache.groovy:groovy'
   implementation 'org.apache.groovy:groovy-json'
   implementation 'org.apache.httpcomponents.client5:httpclient5'
-  implementation 'com.github.mifmif:generex:1.0.2'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'org.apache.commons:commons-collections4'
   implementation('io.pact.plugin.driver:core') {

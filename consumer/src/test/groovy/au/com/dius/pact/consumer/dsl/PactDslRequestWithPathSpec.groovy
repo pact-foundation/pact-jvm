@@ -289,4 +289,19 @@ class PactDslRequestWithPathSpec extends Specification {
       '$': [matchers: [[match: 'contentType', value: 'image/gif']], combine: 'AND']
     ]
   }
+
+  @Issue('#1826')
+  def 'matchPath handles regular expressions with anchors'() {
+    given:
+    def request = ConsumerPactBuilder.consumer('spec')
+      .hasPactWith('provider')
+      .uponReceiving('request with a regex path')
+      .path('/')
+
+    when:
+    def result = request.matchPath('/pet/[0-9]+$')
+
+    then:
+    result.path ==~ /\/pet\/[0-9]+/
+  }
 }

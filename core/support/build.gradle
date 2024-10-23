@@ -12,6 +12,7 @@ dependencies {
 
     implementation 'org.apache.commons:commons-text'
     implementation 'commons-codec:commons-codec'
+    implementation 'com.github.mifmif:generex:1.0.2'
 
     testImplementation 'org.apache.groovy:groovy'
     testImplementation 'org.hamcrest:hamcrest'

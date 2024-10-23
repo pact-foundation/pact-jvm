@@ -21,9 +21,9 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.support.Json.toJson
+import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType.Companion.from
 import au.com.dius.pact.core.support.json.JsonValue
-import com.mifmif.common.regex.Generex
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.FastDateFormat
@@ -612,7 +612,7 @@ open class PactDslJsonRootValue : DslPart("", "") {
     fun stringMatcher(regex: String): PactDslJsonRootValue {
       val rootValue = PactDslJsonRootValue()
       rootValue.generators.addGenerator(Category.BODY, "", RegexGenerator(regex))
-      rootValue.value = Generex(regex).random()
+      rootValue.value = Random.generateRandomString(regex)
       rootValue.setMatcher(rootValue.regexp(regex))
       return rootValue
     }
