@@ -8,6 +8,7 @@ import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.InvalidNavigationRequest
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import au.com.dius.pact.core.pactbroker.RequestFailedException
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -1366,6 +1367,17 @@ class PactBrokerLoaderSpec extends Specification {
       throw new InvalidNavigationRequest('PKIX path building failed', new SSLHandshakeException('PKIX path building failed'))
     }
     thrown(InvalidNavigationRequest)
+  }
+
+  @Issue('#1830')
+  def 'Handles error responses from the broker'() {
+    when:
+    pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumersWithSelectorsV2('test', [], [], '', false, '') >>
+      new Result.Err(new RequestFailedException(400, '{"error": "selectors are invalid"}', 'Request to broker failed'))
+    thrown(RequestFailedException)
   }
 
   void 'Does not enable insecure TLS when not set in PactBroker annotation and not using the fallback system property'() {

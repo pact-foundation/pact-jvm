@@ -210,7 +210,7 @@ open class HalClient @JvmOverloads constructor(
         if (handler != null) {
           handler(it.code, it)
         } else if (it.code >= 300) {
-          logger.error { "PUT JSON request failed with status ${it.code} ${it.reasonPhrase}" }
+          logger.error { "POST JSON request failed with status ${it.code} ${it.reasonPhrase}" }
           Result.Err(RequestFailedException(it.code, if (it.entity != null) EntityUtils.toString(it.entity) else null))
         } else {
           true
@@ -343,12 +343,36 @@ open class HalClient @JvmOverloads constructor(
       when (response.code) {
         404 -> Result.Err(NotFoundHalResponse("No HAL document found at path '$path'"))
         else -> {
-          val body = if (response.entity != null) EntityUtils.toString(response.entity) else null
+          val body = handleResponseBody(response, path)
           Result.Err(RequestFailedException(response.code, body,
-            "Request to path '$path' failed with response ${response.code}"))
+            "Request to path '$path' failed with HTTP response ${response.code}"))
         }
       }
     }
+  }
+
+  private fun handleResponseBody(response: ClassicHttpResponse, path: String): String? {
+    var body: String? = null
+    if (response.entity != null) {
+      body = EntityUtils.toString(response.entity)
+      val contentType = ContentType.parseLenient(response.entity.contentType)
+      if (isJsonResponse(contentType)) {
+        val json = handleWith<JsonValue> { JsonParser.parseString(body) }
+        when (json) {
+          is Result.Ok -> {
+            logger.error { "Request to path '$path' failed with HTTP response ${response.code}" }
+            logger.error { "JSON Response:\n${json.value.prettyPrint()}" }
+          }
+
+          is Result.Err -> {
+            logger.error { "Request to path '$path' failed with HTTP response ${response.code}: $body" }
+          }
+        }
+      } else {
+        logger.error { "Request to path '$path' failed with HTTP response ${response.code}: $body" }
+      }
+    }
+    return body
   }
 
   private fun fetchLink(link: String, options: Map<String, Any>): JsonValue.Object {

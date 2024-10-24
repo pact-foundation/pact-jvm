@@ -289,7 +289,7 @@ class HalClientSpec extends Specification {
 
   @Unroll
   @SuppressWarnings('UnnecessaryGetter')
-  def 'post URL returns #success if the response is #status'() {
+  def 'post to URL returns #success if the response is #status'() {
     given:
     def mockClient = Mock(CloseableHttpClient)
     client.httpClient = mockClient
@@ -308,7 +308,7 @@ class HalClientSpec extends Specification {
     'failure' | 400    | Result.Err
   }
 
-  def 'post URL returns a failure result if an exception is thrown'() {
+  def 'post to URL returns a failure result if an exception is thrown'() {
     given:
     def mockClient = Mock(CloseableHttpClient)
     client.httpClient = mockClient
@@ -322,7 +322,7 @@ class HalClientSpec extends Specification {
   }
 
   @SuppressWarnings('UnnecessaryGetter')
-  def 'post URL delegates to a handler if one is supplied'() {
+  def 'post to URL delegates to a handler if one is supplied'() {
     given:
     def mockClient = Mock(CloseableHttpClient)
     client.httpClient = mockClient
@@ -522,5 +522,24 @@ class HalClientSpec extends Specification {
       assert req.uri.toString() == 'http://localhost:1234/subpath/one/two/'
       handler.handleResponse(mockResponse)
     }
+  }
+
+  @Issue('1830')
+  def 'post to URL handles any error responses'() {
+    given:
+    def mockClient = Mock(CloseableHttpClient)
+    client.httpClient = mockClient
+    def mockResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 400
+      getEntity() >> new StringEntity('{"error": ["it went bang!"]}', ContentType.APPLICATION_JSON)
+    }
+    client.pathInfo = JsonParser.INSTANCE.parseString('{"_links":{"path":{"href":"http://localhost:8080/"}}}')
+
+    when:
+    def result = client.postJson('path', [:], '"body"')
+
+    then:
+    1 * mockClient.execute(_, _, _) >> { req, c, handler -> handler.handleResponse(mockResponse) }
+    result instanceof Result.Err
   }
 }

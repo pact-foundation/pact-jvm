@@ -12,6 +12,7 @@ import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
+import au.com.dius.pact.core.pactbroker.RequestFailedException
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils.permutations
 import au.com.dius.pact.core.support.expressions.DataType
@@ -249,7 +250,24 @@ open class PactBrokerLoader(
               providerBranch, pending, wipSinceDate)
       var consumers = when (result) {
         is Result.Ok -> result.value
-        is Result.Err -> throw result.error
+        is Result.Err -> {
+          when (val exception = result.error) {
+            is RequestFailedException -> {
+              logger.error(exception) {
+                if (exception.body.isNotEmpty()) {
+                  "Failed to load Pacts from the Pact broker: ${exception.message} (HTTP Status ${exception.status})" +
+                    "\nResponse: ${exception.body}"
+                } else {
+                  "Failed to load Pacts from the Pact broker: ${exception.message} (HTTP Status ${exception.status})"
+                }
+              }
+            }
+            else -> {
+              logger.error(exception) { "Failed to load Pacts from the Pact broker " }
+            }
+          }
+          throw result.error
+        }
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {

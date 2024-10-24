@@ -473,6 +473,10 @@ open class PactBrokerClient(
     }
   }
 
+  @Deprecated(
+    "use version that takes a list of ConsumerVersionSelectors",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectorsV2")
+  )
   override fun fetchConsumersWithSelectors(
     providerName: String,
     selectors: List<ConsumerVersionSelector>,
