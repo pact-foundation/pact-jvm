@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.15 - Maintenance Release
+
+* 93fe19637 - fix: Log the error response bodies from the Pact Broker #1830 (Ronald Holshausen, Thu Oct 24 11:41:59 2024 +1100)
+* 3b2519972 - fix(mock-server): Setting content length == 0 causes the HTTP exchange to use chunked encoding #1828 (Ronald Holshausen, Wed Oct 23 16:00:35 2024 +1100)
+* ec066a031 - fix: Trim regex anchors before generating random strings from the regex #1826 (Ronald Holshausen, Wed Oct 23 14:27:53 2024 +1100)
+* 0554c1a96 - Merge pull request #1831 from timvahlbrock/patch-1 (Ronald Holshausen, Fri Oct 11 08:59:24 2024 +1100)
+* 62f40d5da - Document usage of pactbroker.providerBranch with the matching branch selector (Tim Vahlbrock, Mon Oct 7 09:30:56 2024 +0200)
+* 883f3e577 - chore: add JSON parser test for Windows #1827 (Ronald Holshausen, Thu Sep 26 11:03:22 2024 +1000)
+* ab4c88c34 - Merge pull request #1825 from pact-foundation/docs/links (Ronald Holshausen, Thu Sep 26 10:29:23 2024 +1000)
+* 43655c82d - docs: update obsolete links [ci skip] (Yousaf Nabi, Fri Sep 6 13:05:08 2024 +0100)
+* 5e9ac00ec - fix: faiing test after merging PR (Ronald Holshausen, Thu Aug 29 09:38:17 2024 +1000)
+* 122db092c - Merge pull request #1823 from huehnerlady/update-httpclient5 (Ronald Holshausen, Thu Aug 29 09:11:00 2024 +1000)
+* 7a28b1e19 - Merge pull request #1822 from huehnerlady/update-plugin-driver (Ronald Holshausen, Thu Aug 29 09:09:48 2024 +1000)
+* 0c2fe9a47 - Update httpclient5 (Ruth Bassindale, Wed Aug 28 11:34:38 2024 +0200)
+* 67d957660 - Make plugindriver version consistent (Ruth Bassindale, Wed Aug 28 09:49:35 2024 +0200)
+* f5ee0eb0a - bump version to 4.6.15 (Ronald Holshausen, Tue Aug 27 16:49:49 2024 +1000)
+
 # 4.6.14 - Bugfix Release
 
 * 4cf45a1a0 - fix: Allow the Pact publish task to set insecure TLS flag #1817 (Ronald Holshausen, Tue Aug 27 16:22:48 2024 +1000)
