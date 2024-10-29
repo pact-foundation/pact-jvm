@@ -47,23 +47,23 @@ dependencies {
         implementation 'io.ktor:ktor-network-tls-certificates:2.3.8'
         implementation 'io.ktor:ktor-server-call-logging:2.3.8'
         implementation 'io.netty:netty-handler:4.1.108.Final'
-        implementation 'org.apache.groovy:groovy:4.0.18'
-        implementation 'org.apache.groovy:groovy-json:4.0.18'
-        implementation 'org.apache.groovy:groovy-xml:4.0.18'
+        implementation 'org.apache.groovy:groovy:4.0.23'
+        implementation 'org.apache.groovy:groovy-json:4.0.23'
+        implementation 'org.apache.groovy:groovy-xml:4.0.23'
         implementation 'io.pact.plugin.driver:core:0.5.1'  //remember to also update under api
         implementation 'commons-codec:commons-codec:1.15'
         implementation 'io.github.oshai:kotlin-logging-jvm:5.1.4'
 
-        testImplementation 'org.apache.groovy:groovy:4.0.18'
-        testImplementation 'org.apache.groovy:groovy-json:4.0.18'
-        testImplementation 'org.apache.groovy:groovy-datetime:4.0.18'
-        testImplementation 'org.apache.groovy:groovy-xml:4.0.18'
-        testImplementation 'org.apache.groovy:groovy-nio:4.0.18'
+        testImplementation 'org.apache.groovy:groovy:4.0.23'
+        testImplementation 'org.apache.groovy:groovy-json:4.0.23'
+        testImplementation 'org.apache.groovy:groovy-datetime:4.0.23'
+        testImplementation 'org.apache.groovy:groovy-xml:4.0.23'
+        testImplementation 'org.apache.groovy:groovy-nio:4.0.23'
         testImplementation 'org.hamcrest:hamcrest:2.2'
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'ch.qos.logback:logback-classic:1.4.5'
         testImplementation 'ch.qos.logback:logback-core:1.4.5'
-        testImplementation 'net.bytebuddy:byte-buddy:1.12.21'
+        testImplementation 'net.bytebuddy:byte-buddy:1.15.7'
         testImplementation 'com.github.tomakehurst:wiremock-jre8:2.34.0'
         testImplementation 'org.junit.vintage:junit-vintage-engine:5.9.2'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
@@ -77,6 +77,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
     codenarc('org.codenarc:CodeNarc:3.5.0-groovy-4.0')
+    codenarc('org.apache.groovy:groovy:4.0.23')
 }
 
 testing {
