@@ -48,8 +48,8 @@ and in the [Pact-JVM wiki](https://github.com/pact-foundation/pact-jvm/wiki). [S
 
 | Branch                                                                 | Specification | JDK        | Kotlin Version | Latest Version | Notes |
 |------------------------------------------------------------------------|---------------|------------|----------------|----------------|-------|
-| [4.6.x](https://github.com/pact-foundation/pact-jvm/blob/v4.6.x/README.md) master | V4 + plugins  | 17+        | 1.8.22         | 4.6.13         |       |
-| [4.5.x](https://github.com/pact-foundation/pact-jvm/blob/v4.5.x/README.md)        | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.12         |       |
+| [4.6.x](https://github.com/pact-foundation/pact-jvm/blob/v4.6.x/README.md) master | V4 + plugins  | 17+        | 1.8.22         | 4.6.15         |       |
+| [4.5.x](https://github.com/pact-foundation/pact-jvm/blob/v4.5.x/README.md)        | V4 + plugins  | 11+/17+(1) | 1.7.20         | 4.5.13         |       |
 | [4.1.x](https://github.com/pact-foundation/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12       | 1.3.72         | 4.1.43         |       |
 
 **Notes:**
