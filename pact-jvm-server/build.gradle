@@ -26,6 +26,7 @@ dependencies {
   implementation 'org.apache.commons:commons-lang3'
 
   testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.apache.groovy:groovy-json'
   testImplementation platform("org.spockframework:spock-bom:2.3-groovy-4.0")
   testImplementation 'org.spockframework:spock-core'
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
@@ -39,6 +40,11 @@ jar {
 java {
   withJavadocJar()
   withSourcesJar()
+}
+
+test {
+  dependsOn(':pact-jvm-server:assembleDist')
+  systemProperty('appExecutable', (new File(buildDir, 'install/pact-jvm-server/bin/pact-jvm-server')).path)
 }
 
 publishing {
