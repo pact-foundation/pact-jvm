@@ -16,14 +16,14 @@ object Create extends StrictLogging {
     val pact = DefaultPactReader.INSTANCE.loadPact(requestBody).asInstanceOf[RequestResponsePact]
 
     val mockConfig : MockProviderConfig = {
-      if(!config.keystorePath.isEmpty) {
+      if (config.getKeystorePath.nonEmpty) {
         MockHttpsKeystoreProviderConfig
-          .httpsKeystoreConfig(config.host, config.sslPort, config.keystorePath, config.keystorePassword,
-            PactSpecVersion.fromInt(config.pactVersion))
+          .httpsKeystoreConfig(config.getHost, config.getSslPort, config.getKeystorePath, config.getKeystorePassword,
+            PactSpecVersion.fromInt(config.getPactVersion))
       }
       else {
-        new MockProviderConfig(config.host, randomPort(config.portLowerBound, config.portUpperBound),
-          PactSpecVersion.fromInt(config.pactVersion))
+        new MockProviderConfig(config.getHost, randomPort(config.getPortLowerBound, config.getPortUpperBound),
+          PactSpecVersion.fromInt(config.getPactVersion))
       }
     }
     val server = DefaultMockProvider.apply(mockConfig)

@@ -42,6 +42,11 @@ java {
   withSourcesJar()
 }
 
+compileScala {
+  dependsOn compileKotlin
+  classpath = classpath.plus(files(compileKotlin.destinationDirectory))
+}
+
 test {
   dependsOn(':pact-jvm-server:assembleDist')
   systemProperty('appExecutable', (new File(buildDir, 'install/pact-jvm-server/bin/pact-jvm-server')).path)

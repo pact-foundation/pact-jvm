@@ -17,7 +17,7 @@ object Publish extends StrictLogging {
     val provider: Option[String] = getVarFromJson("provider", jsonBody)
     val tags: Option[::[String]] = getListFromJson("tags", jsonBody)
     val broker: Option[String] = getBrokerUrlFromConfig(config)
-    val authToken: Option[String] = getVarFromConfig(config.authToken)
+    val authToken: Option[String] = getVarFromConfig(config.getAuthToken)
 
     var response = new Response(500, ResponseUtils.CrossSiteHeaders.asJava)
     if (broker.isDefined) {
@@ -86,7 +86,7 @@ object Publish extends StrictLogging {
   }
 
   def getBrokerUrlFromConfig(config: Config): Option[String] = {
-    if (!config.broker.isEmpty && config.broker.startsWith("http")) Some(config.broker)
+    if (config.getBroker.nonEmpty && config.getBroker.startsWith("http")) Some(config.getBroker)
     else None
   }
 
