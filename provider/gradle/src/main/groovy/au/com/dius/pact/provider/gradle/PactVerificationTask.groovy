@@ -29,7 +29,7 @@ abstract class PactVerificationTask extends PactVerificationBaseTask {
 
   @Input
   @Optional
-  abstract ListProperty<URL> getTestClasspathURL()
+  abstract ListProperty<URI> getTestClasspathURL()
 
   @Input
   abstract SetProperty<Task> getTaskContainer()
@@ -56,7 +56,7 @@ abstract class PactVerificationTask extends PactVerificationBaseTask {
       }
       executeBuildSpecificTask = this.&executeStateChangeTask
       projectClasspath = {
-        testClasspathURL.get()
+        testClasspathURL.get()*.toURL()
       }
         providerVersion = providerToVerify.providerVersion ?: { projectVersion.get() }
       if (providerToVerify.providerTags) {

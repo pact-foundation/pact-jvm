@@ -129,7 +129,7 @@ class PactPlugin extends PactPluginBase {
   private void setupPactConsumersFromBroker(GradleProviderInfo provider, Project project, PactPluginExtension ext) {
     if (ext.broker && project.gradle.startParameter.taskNames.any {
       it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
-      def options = [:]
+      Map<String, Object> options = [:]
       if (ext.broker.pactBrokerUsername) {
         options.authentication = ['basic', ext.broker.pactBrokerUsername, ext.broker.pactBrokerPassword]
       } else if (ext.broker.pactBrokerToken) {
