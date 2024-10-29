@@ -2,9 +2,9 @@ name: Pact-JVM Compatibility Suite
 
 on:
   push:
-    branches: [ master, v4.1.x, v4.4.x, v4.5.x ]
+    branches: [ master, v4.1.x, v4.5.x, v4.6.x, v4.7.x ]
   pull_request:
-    branches: [ master, v4.1.x, v4.4.x, v4.5.x ]
+    branches: [ master, v4.1.x, v4.5.x, v4.6.x, v4.7.x ]
 
 jobs:
   v1:
