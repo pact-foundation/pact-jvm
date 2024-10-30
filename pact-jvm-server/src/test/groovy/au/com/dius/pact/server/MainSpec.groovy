@@ -4,10 +4,12 @@ import groovy.json.JsonSlurper
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpResponse
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
+@IgnoreIf({ os.windows })
 class MainSpec extends Specification {
   def 'application command line args'() {
     when:
@@ -71,11 +73,17 @@ class MainSpec extends Specification {
     def result2 = getRoot('31311')
 
     then:
-    result2 ==~ /\{"ports": \[\d+], "paths": \["any"]}/
+    result2 ==~ /\{"ports": \[\d+], "paths": \["\/data"]}/
 
     when:
     def mockJson = new JsonSlurper().parseText(result2)
     def result3 = getData(mockJson.ports[0])
+
+    then:
+    result3.code == 204
+
+    when:
+    result3 = getDataByPath('31311')
 
     then:
     result3.code == 204
@@ -112,7 +120,7 @@ class MainSpec extends Specification {
   }
 
   String createMock(String port, String pact) {
-    Request.post("http://127.0.0.1:$port/create?state=any&path=any")
+    Request.post("http://127.0.0.1:$port/create?state=any&path=%2Fdata")
       .bodyString(pact, ContentType.APPLICATION_JSON)
       .execute()
       .returnContent()
@@ -128,6 +136,12 @@ class MainSpec extends Specification {
   }
 
   HttpResponse getData(port) {
+    Request.get("http://127.0.0.1:$port/data")
+      .execute()
+      .returnResponse()
+  }
+
+  HttpResponse getDataByPath(port) {
     Request.get("http://127.0.0.1:$port/data")
       .execute()
       .returnResponse()
