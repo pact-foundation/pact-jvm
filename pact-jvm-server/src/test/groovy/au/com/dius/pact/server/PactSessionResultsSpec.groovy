@@ -5,8 +5,6 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import spock.lang.Specification
 
-import static scala.collection.JavaConverters.iterableAsScalaIterable
-
 class PactSessionResultsSpec extends Specification {
   def 'empty state'() {
     given:
@@ -75,8 +73,8 @@ class PactSessionResultsSpec extends Specification {
     def interaction3 = new RequestResponseInteraction('test3')
 
     when:
-    state = state.addMissing(iterableAsScalaIterable([interaction1]))
-    state = state.addMissing(iterableAsScalaIterable([interaction2, interaction3]))
+    state = state.addMissing([interaction1])
+    state = state.addMissing([interaction2, interaction3])
 
     then:
     !state.allMatched()

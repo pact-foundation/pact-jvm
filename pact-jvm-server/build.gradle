@@ -22,8 +22,9 @@ dependencies {
     exclude module: 'netty-transport-native-epoll'
   }
   implementation 'org.apache.commons:commons-io:1.3.2'
-  implementation 'org.apache.tika:tika-core'
   implementation 'org.apache.commons:commons-lang3'
+  implementation 'org.apache.commons:commons-text'
+  implementation 'org.apache.tika:tika-core'
 
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.apache.groovy:groovy-json'

@@ -1,7 +1,7 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.consumer.model.{MockHttpsKeystoreProviderConfig, MockHttpsProviderConfig, MockProviderConfig}
-import au.com.dius.pact.core.model.{PactSpecVersion, Request, Response, Pact => PactModel}
+import au.com.dius.pact.core.model.{IResponse, PactSpecVersion, Request, Response, Pact => PactModel}
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.util.Try
@@ -32,7 +32,7 @@ object DefaultMockProvider {
 
 // TODO: eliminate horrid state mutation and synchronisation.  Reactive stuff to the rescue?
 abstract class StatefulMockProvider extends MockProvider with StrictLogging {
-  private var sessionVar = PactSession.empty
+  private var sessionVar = PactSession.getEmpty
   private var pactVar: Option[PactModel] = None
 
   private def waitForRequestsToFinish() = Thread.sleep(100)
@@ -69,9 +69,11 @@ abstract class StatefulMockProvider extends MockProvider with StrictLogging {
     }
   }
 
-  final def handleRequest(req: Request): Response = synchronized {
+  final def handleRequest(req: Request): IResponse = synchronized {
     logger.debug("Received request: " + req)
-    val (response, newSession) = session.receiveRequest(req)
+    val result = session.receiveRequest(req)
+    val response = result.getFirst
+    val newSession = result.getSecond
     logger.debug("Generating response: " + response)
     sessionVar = newSession
     response

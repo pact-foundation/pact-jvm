@@ -3,7 +3,7 @@ package au.com.dius.pact.server
 import _root_.unfiltered.netty.{SslEngineProvider, cycle => unettyc}
 import _root_.unfiltered.{netty => unetty, request => ureq, response => uresp}
 import au.com.dius.pact.consumer.model.MockHttpsKeystoreProviderConfig
-import au.com.dius.pact.core.model.{Request, Response}
+import au.com.dius.pact.core.model.{IResponse, Request}
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.handler.codec.{http => netty}
 
@@ -26,7 +26,7 @@ class UnfilteredHttpsKeystoreMockProvider(val config: MockHttpsKeystoreProviderC
 
     def convertRequest(nr: UnfilteredRequest): Request = Conversions.unfilteredRequestToPactRequest(nr)
 
-    def convertResponse(response: Response): UnfilteredResponse = Conversions.pactToUnfilteredResponse(response)
+    def convertResponse(response: IResponse): UnfilteredResponse = Conversions.pactToUnfilteredResponse(response)
   }
 
   def start(): Unit = server.start()

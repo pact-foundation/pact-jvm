@@ -2,8 +2,7 @@ package au.com.dius.pact.server
 
 import java.net.URI
 import java.util.zip.GZIPInputStream
-
-import au.com.dius.pact.core.model.{OptionalBody, ContentType, Request, Response}
+import au.com.dius.pact.core.model.{ContentType, IResponse, OptionalBody, Request}
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import unfiltered.netty.ReceivedMessage
@@ -22,7 +21,7 @@ object Conversions extends StrictLogging {
     }
   }
 
-  def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
+  def pactToUnfilteredResponse(response: IResponse): ResponseFunction[NHttpResponse] = {
     val headers = response.getHeaders
     if (response.getBody.isPresent) {
       Status(response.getStatus) ~> Headers(headers) ~> ResponseString(response.getBody.valueAsString)

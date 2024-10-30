@@ -1,6 +1,6 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.core.model.{OptionalBody, Response}
+import au.com.dius.pact.core.model.{IResponse, OptionalBody, Response}
 import ch.qos.logback.classic.Level
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -16,7 +16,7 @@ object ListServers {
   }
 }
 
-case class Result(response: Response, newState: ServerState)
+case class Result(response: IResponse, newState: ServerState)
 
 object Server extends App {
 

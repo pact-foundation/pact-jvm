@@ -13,7 +13,7 @@ object RequestRouter {
       pact <- oldState.get(k)
     } yield pact).headOption
 
-  def handlePactRequest(request: Request, oldState: ServerState): Option[Response] =
+  def handlePactRequest(request: Request, oldState: ServerState): Option[IResponse] =
     for {
       pact <- matchPath(request, oldState)
     } yield pact.handleRequest(request)
@@ -23,7 +23,7 @@ object RequestRouter {
 
   val EMPTY_MAP: util.Map[String, util.List[String]] = Map[String, util.List[String]]().asJava
 
-  def pactDispatch(request: Request, oldState: ServerState): Response =
+  def pactDispatch(request: Request, oldState: ServerState): IResponse =
     handlePactRequest(request, oldState) getOrElse new Response(404, EMPTY_MAP,
       OptionalBody.body(state404(request, oldState).getBytes))
 
