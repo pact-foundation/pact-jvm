@@ -4,28 +4,10 @@ import au.com.dius.pact.core.matchers.{FullRequestMatch, PartialRequestMatch, Re
 import au.com.dius.pact.core.model.{Interaction, OptionalBody, Request, RequestResponseInteraction, Response, Pact => PactModel}
 import org.apache.commons.lang3.StringEscapeUtils
 
-object PactSessionResults {
-  val empty = PactSessionResults(Nil, Nil, Nil, Nil)
-}
-
-case class PactSessionResults(
-                               matched: List[Interaction],
-                               almostMatched: List[PartialRequestMatch],
-                               missing: List[Interaction],
-                               unexpected: List[Request]) {
-
-  def addMatched(inter: Interaction) = copy(matched = inter :: matched)
-  def addUnexpected(request: Request) = copy(unexpected = request :: unexpected)
-  def addMissing(inters: Iterable[Interaction]) = copy(missing = inters ++: missing)
-  def addAlmostMatched(partial: PartialRequestMatch) = copy(almostMatched = partial :: almostMatched)
-
-  def allMatched: Boolean = missing.isEmpty && unexpected.isEmpty
-}
-
 object PactSession {
-  val empty = PactSession(None, PactSessionResults.empty)
+  val empty = PactSession(None, PactSessionResults.getEmpty)
 
-  def forPact(pact: PactModel) = PactSession(Some(pact), PactSessionResults.empty)
+  def forPact(pact: PactModel) = PactSession(Some(pact), PactSessionResults.getEmpty)
 }
 
 case class PactSession(expected: Option[PactModel], results: PactSessionResults) {
@@ -67,5 +49,5 @@ case class PactSession(expected: Option[PactModel], results: PactSessionResults)
 
   def withTheRestMissing: PactSession = PactSession(None, remainingResults)
 
-  def remainingResults: PactSessionResults = results.addMissing(expected.get.getInteractions.asScala diff results.matched)
+  def remainingResults: PactSessionResults = results.addMissing(expected.get.getInteractions.asScala diff results.getMatched.asScala)
 }
