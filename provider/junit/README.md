@@ -616,7 +616,8 @@ JUnit mechanism. Additional reports can be generated from the tests.
 ## Enabling additional reports via annotations on the test classes
 
 A `@VerificationReports` annotation can be added to any pact test class which will control the verification output. The
-annotation takes a list report types and an optional report directory (defaults to "target/pact/reports").
+annotation takes a list report types and an optional report directory (defaults to "target/pact/reports" for Maven
+builds and "build/pact/reports" with Gradle).
 The currently supported report types are `console`, `markdown` and `json`.
 
 For example:

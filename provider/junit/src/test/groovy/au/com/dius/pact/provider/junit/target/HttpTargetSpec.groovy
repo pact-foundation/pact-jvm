@@ -44,7 +44,10 @@ class HttpTargetSpec extends Specification {
     httpTarget.setupReporters(verifier)
 
     then:
-    1 * verifier.setReporters { r ->  r*.class*.simpleName == ['AnsiConsoleReporter', 'MarkdownReporter'] }
+    1 * verifier.setReporters { r ->
+      r*.class*.simpleName == ['AnsiConsoleReporter', 'MarkdownReporter']
+      r*.reportDir == ['build/pacts/reports' as File, 'build/pacts/reports' as File]
+    }
   }
 
   @SuppressWarnings('ClosureStatementOnOpeningLineOfMultipleLineClosure')
