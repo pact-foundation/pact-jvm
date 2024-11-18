@@ -1,6 +1,7 @@
 package au.com.dius.pact.server
 
-import scala.collection.JavaConverters
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Request
 import spock.lang.Specification
 
 import java.nio.file.Paths
@@ -15,7 +16,7 @@ class CreateSpec extends Specification {
     when:
     def result = Create.create(
       'test state',
-      JavaConverters.asScalaBuffer(['/data']).toList(),
+      ['/data'],
       pact,
       new ServerState(),
       new Config(4444, 'localhost', false, 20000, 40000, true,
@@ -43,10 +44,10 @@ class CreateSpec extends Specification {
 
     when:
     def result = Create.create('test state',
-      JavaConverters.asScalaBuffer([]).toList(),
+      [],
       pact,
       new ServerState(),
-      new au.com.dius.pact.server.Config(4444, 'localhost', false, 20000, 40000, true,
+      new Config(4444, 'localhost', false, 20000, 40000, true,
               2, keystorePath, password, 8444, '', ''))
 
     then:
@@ -59,5 +60,70 @@ class CreateSpec extends Specification {
         it.stop()
       }
     }
+  }
+
+  def 'apply returns an error if there is no query parameters'() {
+    given:
+    def request = new Request()
+    def serverState = new ServerState()
+    def config = new Config()
+
+    when:
+    def result = Create.apply(request, serverState, config)
+
+    then:
+    result.response.status == 400
+  }
+
+  def 'apply returns an error if there is no state query parameter'() {
+    given:
+    def request = new Request('GET', '/path', [qp: ['some value']])
+    def serverState = new ServerState()
+    def config = new Config()
+
+    when:
+    def result = Create.apply(request, serverState, config)
+
+    then:
+    result.response.status == 400
+  }
+
+  def 'apply returns an error if the state query parameter is empty'() {
+    given:
+    def request = new Request('GET', '/path', [qp: []])
+    def serverState = new ServerState()
+    def config = new Config()
+
+    when:
+    def result = Create.apply(request, serverState, config)
+
+    then:
+    result.response.status == 400
+  }
+
+  def 'apply returns an error if there is no path query parameter'() {
+    given:
+    def request = new Request('GET', '/path', [state: ['test']])
+    def serverState = new ServerState()
+    def config = new Config()
+
+    when:
+    def result = Create.apply(request, serverState, config)
+
+    then:
+    result.response.status == 400
+  }
+
+  def 'apply returns an error if the request body is empty'() {
+    given:
+    def request = new Request('GET', '/path', [state: ['test'], path: ['/test']], [:], OptionalBody.empty())
+    def serverState = new ServerState()
+    def config = new Config()
+
+    when:
+    def result = Create.apply(request, serverState, config)
+
+    then:
+    result.response.status == 400
   }
 }

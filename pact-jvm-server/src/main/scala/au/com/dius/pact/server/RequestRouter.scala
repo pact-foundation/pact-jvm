@@ -31,7 +31,7 @@ object RequestRouter extends StrictLogging {
     val urlPattern ="/(\\w*)\\?{0,1}.*".r
     val urlPattern(action) = request.getPath
     action match {
-      case "create" => Create(request, oldState, config)
+      case "create" => Create.apply(request, oldState, config)
       case "complete" => Complete(request, oldState)
       case "publish" => Publish(request, oldState, config)
       case "" => ListServers(oldState)
