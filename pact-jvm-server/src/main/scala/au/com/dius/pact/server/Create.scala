@@ -1,13 +1,13 @@
 package au.com.dius.pact.server
 
-import java.io.IOException
+import java.io.{File, IOException}
 import java.net.ServerSocket
-
-import au.com.dius.pact.consumer.model.{MockHttpsKeystoreProviderConfig, MockProviderConfig}
+import au.com.dius.pact.consumer.model.{MockHttpsProviderConfig, MockProviderConfig}
 import au.com.dius.pact.core.model._
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.commons.lang3.RandomUtils
 
+import java.security.KeyStore
 import scala.collection.JavaConverters._
 
 object Create extends StrictLogging {
@@ -17,18 +17,25 @@ object Create extends StrictLogging {
 
     val mockConfig : MockProviderConfig = {
       if (config.getKeystorePath.nonEmpty) {
-        MockHttpsKeystoreProviderConfig
-          .httpsKeystoreConfig(config.getHost, config.getSslPort, config.getKeystorePath, config.getKeystorePassword,
-            PactSpecVersion.fromInt(config.getPactVersion))
+        val ks = KeyStore.getInstance(new File(config.getKeystorePath), config.getKeystorePassword.toCharArray)
+        new MockHttpsProviderConfig(
+          config.getHost,
+          config.getSslPort,
+          PactSpecVersion.fromInt(config.getPactVersion),
+          ks,
+          "localhost",
+          config.getKeystorePassword,
+          config.getKeystorePassword
+        )
       }
       else {
         new MockProviderConfig(config.getHost, randomPort(config.getPortLowerBound, config.getPortUpperBound),
           PactSpecVersion.fromInt(config.getPactVersion))
       }
     }
-    val server = DefaultMockProvider.apply(mockConfig)
+    val server = DefaultMockProvider.INSTANCE.apply(mockConfig)
 
-    val port = server.config.getPort
+    val port = server.getConfig.getPort
     val portEntry = port.toString -> server
 
     // Not very scala...

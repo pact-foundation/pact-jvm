@@ -60,7 +60,7 @@ class MainSpec extends Specification {
   def 'create mock server test'() {
     given:
     def pact = MainSpec.getResourceAsStream('/create-pact.json').text
-    def process = invokeApp('--daemon', '--debug', '31311')
+    def process = invokeApp(true, '--daemon', '--debug', '31311')
 
     when:
     process.waitFor(500, TimeUnit.MILLISECONDS)
@@ -104,11 +104,14 @@ class MainSpec extends Specification {
     process.destroyForcibly()
   }
 
-  Process invokeApp(String... args) {
+  Process invokeApp(boolean inheritIO = false, String... args) {
     def exec = System.getProperty('appExecutable')
     List<String> command = [exec]
     command.addAll(args)
     ProcessBuilder pb = new ProcessBuilder(command)
+    if (inheritIO) {
+      pb.inheritIO()
+    }
     pb.start()
   }
 

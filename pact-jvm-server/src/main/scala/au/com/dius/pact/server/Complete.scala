@@ -1,13 +1,13 @@
 package au.com.dius.pact.server
 
 import java.io.File
-
 import au.com.dius.pact.core.model._
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConverters._
 import scala.util.Success
 
-object Complete {
+object Complete extends StrictLogging  {
 
   def getPort(j: Any): Option[String] = j match {
     case map: Map[AnyRef, AnyRef] => {
@@ -32,17 +32,17 @@ object Complete {
     val result = for {
       port <- getPort(JsonUtils.parseJsonString(request.getBody.valueAsString()))
       mockProvider <- oldState.get(port)
-      sessionResults = mockProvider.session.remainingResults
-      pact <- mockProvider.pact
+      sessionResults = mockProvider.getSession.remainingResults
+      pact <- Option(mockProvider.getPact)
     } yield {
       mockProvider.stop()
 
-      writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
+      writeIfMatching(pact, sessionResults, mockProvider.getConfig.getPactVersion) match {
         case PactVerified => pactWritten(new Response(200, ResponseUtils.CrossSiteHeaders.asJava),
-          mockProvider.config.getPort.toString)
+          mockProvider.getConfig.getPort.toString)
         case error => pactWritten(new Response(400,
           Map("Content-Type" -> List("application/json").asJava).asJava, toJson(error)),
-          mockProvider.config.getPort.toString)
+          mockProvider.getConfig.getPort.toString)
       }
     }
 

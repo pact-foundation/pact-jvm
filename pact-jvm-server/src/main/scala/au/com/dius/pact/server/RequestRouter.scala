@@ -1,12 +1,12 @@
 package au.com.dius.pact.server
 
 import java.util
-
 import au.com.dius.pact.core.model.{Request, Response, _}
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConverters._
 
-object RequestRouter {
+object RequestRouter extends StrictLogging {
   def matchPath(request: Request, oldState: ServerState): Option[StatefulMockProvider] =
     (for {
       k <- oldState.keys if request.getPath.startsWith(k)

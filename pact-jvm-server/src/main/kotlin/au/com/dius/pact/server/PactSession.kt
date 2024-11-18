@@ -10,7 +10,10 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.text.StringEscapeUtils
+
+private val logger = KotlinLogging.logger {}
 
 data class PactSession(
   val expected: Pact?,
@@ -32,6 +35,7 @@ data class PactSession(
           (invalidResponse to recordUnexpected(req))
       }
     } else {
+      logger.warn { "Expected Pact is not set!" }
       invalidResponse to this
     }
   }
