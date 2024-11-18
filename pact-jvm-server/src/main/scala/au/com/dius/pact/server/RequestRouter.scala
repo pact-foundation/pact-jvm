@@ -9,8 +9,8 @@ import scala.collection.JavaConverters._
 object RequestRouter extends StrictLogging {
   def matchPath(request: Request, oldState: ServerState): Option[StatefulMockProvider] =
     (for {
-      k <- oldState.keys if request.getPath.startsWith(k)
-      pact <- oldState.get(k)
+      k <- oldState.getState.asScala.keys if request.getPath.startsWith(k)
+      pact <- oldState.getState.asScala.get(k)
     } yield pact).headOption
 
   def handlePactRequest(request: Request, oldState: ServerState): Option[IResponse] =
@@ -19,7 +19,7 @@ object RequestRouter extends StrictLogging {
     } yield pact.handleRequest(request)
 
   def state404(request: Request, oldState: ServerState): String =
-    (oldState + ("path" -> request.getPath)).mkString(",\n")
+    (oldState.getState.asScala + ("path" -> request.getPath)).mkString(",\n")
 
   val EMPTY_MAP: util.Map[String, util.List[String]] = Map[String, util.List[String]]().asJava
 
@@ -35,7 +35,7 @@ object RequestRouter extends StrictLogging {
       case "complete" => Complete(request, oldState)
       case "publish" => Publish(request, oldState, config)
       case "" => ListServers(oldState)
-      case _ => Result(pactDispatch(request, oldState), oldState)
+      case _ => new Result(pactDispatch(request, oldState), oldState)
     }
   }
 }

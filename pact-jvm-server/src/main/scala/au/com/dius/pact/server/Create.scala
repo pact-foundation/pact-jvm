@@ -39,7 +39,7 @@ object Create extends StrictLogging {
     val portEntry = port.toString -> server
 
     // Not very scala...
-    val newState = (oldState + portEntry) ++
+    val newState = (oldState.getState.asScala + portEntry) ++
       (for (
         pathValue <- path
       ) yield (pathValue -> server))
@@ -48,12 +48,12 @@ object Create extends StrictLogging {
 
     server.start(pact)
 
-    Result(new Response(201, (ResponseUtils.CrossSiteHeaders ++ Map("Content-Type" -> List("application/json").asJava)).asJava, body), newState)
+    new Result(new Response(201, (ResponseUtils.CrossSiteHeaders ++ Map("Content-Type" -> List("application/json").asJava)).asJava, body), new ServerState(newState.asJava))
   }
 
   def apply(request: Request, oldState: ServerState, config: Config): Result = {
     def errorJson = OptionalBody.body("{\"error\": \"please provide state param and path param and pact body\"}".getBytes)
-    def clientError = Result(new Response(400, ResponseUtils.CrossSiteHeaders.asJava, errorJson),
+    def clientError = new Result(new Response(400, ResponseUtils.CrossSiteHeaders.asJava, errorJson),
       oldState)
 
     logger.debug(s"path=${request.getPath}")

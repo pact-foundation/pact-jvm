@@ -33,7 +33,7 @@ object Publish extends StrictLogging {
       def body: OptionalBody = OptionalBody.body(errorJson.getBytes())
       response = new Response(500, ResponseUtils.CrossSiteHeaders.asJava, body)
     }
-    Result(response, oldState)
+    new Result(response, oldState)
   }
 
   private def publishPact(consumer: String, consumerVersion: String, provider: String, broker: String, authToken: Option[String], tags: Option[::[String]]) = {

@@ -22,16 +22,16 @@ object Complete extends StrictLogging  {
   }
 
   def apply(request: Request, oldState: ServerState): Result = {
-    def clientError = Result(new Response(400), oldState)
+    def clientError = new Result(new Response(400), oldState)
     def pactWritten(response: Response, port: String) = {
-      val server = oldState(port)
-      val newState = oldState.filter(p => p._2 != server)
-      Result(response, newState)
+      val server = oldState.getState.asScala(port)
+      val newState = new ServerState(oldState.getState.asScala.filter(p => p._2 != server).asJava)
+      new Result(response, newState)
     }
 
     val result = for {
       port <- getPort(JsonUtils.parseJsonString(request.getBody.valueAsString()))
-      mockProvider <- oldState.get(port)
+      mockProvider <- oldState.getState.asScala.get(port)
       sessionResults = mockProvider.getSession.remainingResults
       pact <- Option(mockProvider.getPact)
     } yield {

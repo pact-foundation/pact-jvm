@@ -13,21 +13,23 @@ class CreateSpec extends Specification {
     def pact = CreateSpec.getResourceAsStream('/create-pact.json').text
 
     when:
-    def result = Create.create('test state',
+    def result = Create.create(
+      'test state',
       JavaConverters.asScalaBuffer(['/data']).toList(),
-      pact, new scala.collection.immutable.HashMap(),
+      pact,
+      new ServerState(),
       new Config(4444, 'localhost', false, 20000, 40000, true,
               2, '', '', 8444, '', ''))
 
     then:
-    result.response().status == 201
-    result.response().body.value != '{"port": 8444}'
+    result.response.status == 201
+    result.response.body.value != '{"port": 8444}'
 
     cleanup:
     if (result != null) {
-      def state = result.newState()
-      def values = state.values()
-      JavaConverters.asJavaCollection(values).each {
+      def state = result.newState
+      def values = state.state.values()
+      values.each {
         it.stop()
       }
     }
@@ -42,20 +44,20 @@ class CreateSpec extends Specification {
     when:
     def result = Create.create('test state',
       JavaConverters.asScalaBuffer([]).toList(),
-      pact, new scala.collection.immutable.HashMap(),
+      pact,
+      new ServerState(),
       new au.com.dius.pact.server.Config(4444, 'localhost', false, 20000, 40000, true,
               2, keystorePath, password, 8444, '', ''))
 
     then:
-    result.response().status == 201
-    result.response().body.valueAsString() == '{"port": 8444}'
+    result.response.status == 201
+    result.response.body.valueAsString() == '{"port": 8444}'
 
     cleanup:
     if (result != null) {
-      JavaConverters.asJavaCollection(result.newState().values()).each {
+      result.newState.state.values().each {
         it.stop()
       }
     }
   }
-
 }
