@@ -34,7 +34,7 @@ object RequestRouter extends StrictLogging {
       case "create" => Create.apply(request, oldState, config)
       case "complete" => Complete.apply(request, oldState)
       case "publish" => Publish(request, oldState, config)
-      case "" => ListServers(oldState)
+      case "" => ListServers.apply(oldState)
       case _ => new Result(pactDispatch(request, oldState), oldState)
     }
   }

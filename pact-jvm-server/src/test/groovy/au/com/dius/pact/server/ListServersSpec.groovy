@@ -58,6 +58,6 @@ class ListServersSpec extends Specification {
 
     then:
     result.response.status == 200
-    result.response.body.valueAsString() == '{"ports": [8765, 1234], "paths": ["/other-path", "/path"]}'
+    result.response.body.valueAsString() == '{"ports": [1234, 8765], "paths": ["/path", "/other-path"]}'
   }
 }

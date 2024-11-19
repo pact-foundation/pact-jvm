@@ -1,20 +1,7 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.core.model.{OptionalBody, Response}
 import ch.qos.logback.classic.Level
 import org.slf4j.{Logger, LoggerFactory}
-
-import scala.collection.JavaConverters._
-
-object ListServers {
-
-  def apply(oldState: ServerState): Result = {
-    val ports = oldState.getState.keySet.asScala.filter(p => p.matches("\\d+")).mkString(", ")
-    val paths = oldState.getState.keySet.asScala.filter(p => !p.matches("\\d+")).map("\"" + _ + "\"").mkString(", ")
-    val body = OptionalBody.body(("{\"ports\": [" + ports + "], \"paths\": [" + paths + "]}").getBytes)
-    new Result(new Response(200, Map("Content-Type" -> List("application/json").asJava).asJava, body), oldState)
-  }
-}
 
 object Server extends App {
 
