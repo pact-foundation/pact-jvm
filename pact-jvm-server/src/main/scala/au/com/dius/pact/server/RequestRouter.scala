@@ -32,7 +32,7 @@ object RequestRouter extends StrictLogging {
     val urlPattern(action) = request.getPath
     action match {
       case "create" => Create.apply(request, oldState, config)
-      case "complete" => Complete(request, oldState)
+      case "complete" => Complete.apply(request, oldState)
       case "publish" => Publish(request, oldState, config)
       case "" => ListServers(oldState)
       case _ => new Result(pactDispatch(request, oldState), oldState)

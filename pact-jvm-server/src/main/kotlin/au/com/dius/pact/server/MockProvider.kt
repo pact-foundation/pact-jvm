@@ -45,7 +45,7 @@ abstract class StatefulMockProvider: MockProvider {
 
   override val session: PactSession
     get() = sessionVar
-  val pact: Pact?
+  open val pact: Pact?
     get() = pactVar
 
   abstract fun start()
