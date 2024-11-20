@@ -9,12 +9,13 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import spock.lang.Specification
 
 class PactSessionSpec extends Specification {
+  @SuppressWarnings('LineLength')
   def 'invalid request returns JSON response with details about the request'() {
     given:
     def session = PactSession.empty
 
     when:
-    def response = session.invalidRequest(new Request("GET", "/test"))
+    def response = session.invalidRequest(new Request('GET', '/test'))
 
     then:
     response.status == 500

@@ -3,6 +3,7 @@ package au.com.dius.pact.server
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
@@ -189,7 +190,7 @@ class PublishSpec extends Specification {
     def result = Publish.INSTANCE.publishPact(consumer, consumerVersion, provider, broker, client, tags)
 
     then:
-    1 * client.uploadPactFile(_, 'version', []) >> new au.com.dius.pact.core.support.Result.Ok('OK')
+    1 * client.uploadPactFile(_, 'version', []) >> new Result.Ok('OK')
     result.status == 200
     result.body.valueAsString() == 'OK'
   }
@@ -209,7 +210,7 @@ class PublishSpec extends Specification {
     Publish.INSTANCE.publishPact(consumer, consumerVersion, provider, broker, client, tags)
 
     then:
-    1 * client.uploadPactFile(_, 'version', []) >> new au.com.dius.pact.core.support.Result.Ok('OK')
+    1 * client.uploadPactFile(_, 'version', []) >> new Result.Ok('OK')
     !pactFile.exists()
   }
 
@@ -226,7 +227,7 @@ class PublishSpec extends Specification {
     def result = Publish.INSTANCE.publishPact(consumer, consumerVersion, provider, broker, client, tags)
 
     then:
-    1 * client.uploadPactFile(_, 'version', []) >> new au.com.dius.pact.core.support.Result.Err(new RuntimeException('Boom'))
+    1 * client.uploadPactFile(_, 'version', []) >> new Result.Err(new RuntimeException('Boom'))
     result.status == 500
     result.body.valueAsString() == 'Boom'
   }
@@ -246,7 +247,7 @@ class PublishSpec extends Specification {
     Publish.INSTANCE.publishPact(consumer, consumerVersion, provider, broker, client, tags)
 
     then:
-    1 * client.uploadPactFile(_, 'version', []) >> new au.com.dius.pact.core.support.Result.Err(new RuntimeException('Boom'))
+    1 * client.uploadPactFile(_, 'version', []) >> new Result.Err(new RuntimeException('Boom'))
     pactFile.exists()
   }
 
@@ -263,7 +264,7 @@ class PublishSpec extends Specification {
     Publish.INSTANCE.publishPact(consumer, consumerVersion, provider, broker, client, tags)
 
     then:
-    1 * client.uploadPactFile(_, 'version', ['a', 'b', 'c']) >> new au.com.dius.pact.core.support.Result.Ok('OK')
+    1 * client.uploadPactFile(_, 'version', ['a', 'b', 'c']) >> new Result.Ok('OK')
   }
 
   def 'publishPact handles any IO exception'() {
@@ -279,7 +280,7 @@ class PublishSpec extends Specification {
     def result = Publish.INSTANCE.publishPact(consumer, consumerVersion, provider, broker, client, tags)
 
     then:
-    1 * client.uploadPactFile(_, 'version', []) >> { throw new IOException("Boom!") }
+    1 * client.uploadPactFile(_, 'version', []) >> { throw new IOException('Boom!') }
     result.status == 500
   }
 }

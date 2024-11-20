@@ -20,11 +20,11 @@ class CompleteSpec extends Specification {
 
     input          | result
     null           | null
-    "null"         | null
+    'null'         | null
     [:]            | null
-    [a: "b"]       | null
-    [port: "1234"] | "1234"
-    [port: 1234]   | "1234"
+    [a: 'b']       | null
+    [port: '1234'] | '1234'
+    [port: 1234]   | '1234'
   }
 
   def 'apply returns an error if the port is not in the request body'() {
@@ -43,7 +43,7 @@ class CompleteSpec extends Specification {
     given:
     def request = new Request()
     request.body = OptionalBody.body('{"port": "1234"}')
-    def state = new ServerState(["45454": Mock(StatefulMockProvider)])
+    def state = new ServerState(['45454': Mock(StatefulMockProvider)])
 
     when:
     def result = Complete.apply(request, state)
@@ -60,7 +60,7 @@ class CompleteSpec extends Specification {
       getPact() >> null
       getSession() >> PactSession.empty
     }
-    def state = new ServerState(["1234": mockProvider])
+    def state = new ServerState(['1234': mockProvider])
 
     when:
     def result = Complete.apply(request, state)
@@ -79,7 +79,7 @@ class CompleteSpec extends Specification {
       getSession() >> PactSession.empty
       getConfig() >> new MockProviderConfig('localhost', 1234)
     }
-    def state = new ServerState(["1234": mockProvider])
+    def state = new ServerState(['1234': mockProvider])
 
     when:
     Complete.apply(request, state)
@@ -102,7 +102,7 @@ class CompleteSpec extends Specification {
       getSession() >> session
       getConfig() >> new MockProviderConfig('localhost', 1234)
     }
-    def state = new ServerState(["1234": mockProvider])
+    def state = new ServerState(['1234': mockProvider])
     def mockWriter = Mock(PactWriter)
     Complete.INSTANCE.pactWriter = mockWriter
 
@@ -112,7 +112,7 @@ class CompleteSpec extends Specification {
     then:
     1 * mockWriter.writePact(_, pact, _)
     result.response.status == 200
-    result.newState.state.isEmpty()
+    result.newState.state.empty
 
     cleanup:
     Complete.INSTANCE.pactWriter = DefaultPactWriter.INSTANCE
@@ -132,7 +132,7 @@ class CompleteSpec extends Specification {
       getSession() >> session
       getConfig() >> new MockProviderConfig('localhost', 1234)
     }
-    def state = new ServerState(["1234": mockProvider])
+    def state = new ServerState(['1234': mockProvider])
     def mockWriter = Mock(PactWriter)
     Complete.INSTANCE.pactWriter = mockWriter
 
@@ -142,7 +142,7 @@ class CompleteSpec extends Specification {
     then:
     0 * mockWriter.writePact(_, pact, _)
     result.response.status == 400
-    result.newState.state.isEmpty()
+    result.newState.state.empty
 
     cleanup:
     Complete.INSTANCE.pactWriter = DefaultPactWriter.INSTANCE

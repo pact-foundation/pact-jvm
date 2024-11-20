@@ -255,6 +255,7 @@ class RequestRouterSpec extends Specification {
     response.response.status == 200
   }
 
+  @SuppressWarnings('LineLength')
   def 'dispatch sends /publish requests to the Publish controller'() {
     given:
     def request = new Request('GET', '/publish')
@@ -279,6 +280,7 @@ class RequestRouterSpec extends Specification {
     response.response.body.valueAsString() == '{"error" : "Broker url not correctly configured please run server with -b or --broker \'http://pact-broker.adomain.com\' option" }'
   }
 
+  @SuppressWarnings('LineLength')
   def 'dispatch sends /publish/* requests to the Publish controller'() {
     given:
     def request = new Request('GET', '/publish/other')
