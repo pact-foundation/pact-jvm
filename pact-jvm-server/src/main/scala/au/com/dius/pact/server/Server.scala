@@ -29,18 +29,17 @@ object Server extends App {
       } else {
         logger.setLevel(Level.INFO)
       }
-      val server = _root_.unfiltered.netty.Server.http(config.getPort, config.getHost)
-        .handler(RequestHandler(new ServerStateStore(), config))
+      val mainServer = new MainServer(new ServerStateStore(), config)
 
       if (config.getKeystorePath.nonEmpty) {
         println(s"Using keystore '${config.getKeystorePath}' for mock https server")
       }
 
-      println(s"starting unfiltered app at ${config.getHost} on port ${config.getPort}")
-      server.start()
+      println(s"starting main server at ${config.getHost} on port ${config.getPort}")
+      mainServer.getServer.start(true)
       if (!config.getDaemon) {
         readLine("press enter to stop server:\n")
-        server.stop()
+        mainServer.getServer.stop(100, 1000)
       }
 
     case None =>
