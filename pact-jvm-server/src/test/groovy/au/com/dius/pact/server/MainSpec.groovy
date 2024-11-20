@@ -19,26 +19,28 @@ class MainSpec extends Specification {
 
     then:
     result == 0
-    out == '''Usage: pact-jvm-server [options] [port]
+    out == '''Usage: pact-jvm-server [<options>] [<port>]
     |
-    |  port                     port to run on (defaults to 29999)
-    |  --help                   prints this usage text
-    |  -h, --host <value>       host to bind to (defaults to localhost)
-    |  -l, --mock-port-lower <value>
-    |                           lower bound to allocate mock ports (defaults to 20000)
-    |  -u, --mock-port-upper <value>
-    |                           upper bound to allocate mock ports (defaults to 40000)
-    |  -d, --daemon             run as a daemon process
-    |  --debug                  run with debug logging
-    |  -v, --pact-version <value>
-    |                           pact version to generate for (2 or 3)
-    |  -k, --keystore-path <value>
-    |                           Path to keystore
-    |  -p, --keystore-password <value>
-    |                           Keystore password
-    |  -s, --ssl-port <value>   Ssl port the mock server should run on. lower and upper bounds are ignored
-    |  -b, --broker <value>     URL of broker where to publish contracts to
-    |  -t, --token <value>      Auth token for publishing the pact to broker
+    |Options:
+    |  -h, --host=<text>            host to bind to (defaults to localhost)
+    |  -l, --mock-port-lower=<int>  lower bound to allocate mock ports (defaults to
+    |                               20000)
+    |  -u, --mock-port-upper=<int>  upper bound to allocate mock ports (defaults to
+    |                               40000)
+    |  -d, --daemon                 run as a daemon process
+    |  --debug                      run with debug logging
+    |  -v, --pact-version=<int>     pact version to generate for (2 or 3)
+    |  -k, --keystore-path=<text>   Path to keystore
+    |  -p, --keystore-password=<text>
+    |                               Keystore password
+    |  -s, --ssl-port=<int>         Ssl port the mock server should run on. lower
+    |                               and upper bounds are ignored
+    |  -b, --broker=<text>          URL of broker where to publish contracts to
+    |  -t, --token=<text>           Auth token for publishing the pact to broker
+    |  --help                       Show this message and exit
+    |
+    |Arguments:
+    |  <port>  port to run on (defaults to 29999)
     |'''.stripMargin('|')
   }
 

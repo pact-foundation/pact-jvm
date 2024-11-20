@@ -26,7 +26,7 @@ if (System.getenv('GITHUB_WORKFLOW') == null) {
 }
 
 // Scala does not support JDK 20+
-//include 'pact-jvm-server'
+include 'pact-jvm-server'
 include 'pact-specification-test'
 include 'pact-publish'
 include 'compatibility-suite'

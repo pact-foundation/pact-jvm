@@ -1,7 +1,6 @@
 package au.com.dius.pact.server
 
 import spock.lang.Specification
-import static scala.collection.JavaConverters.mapAsScalaMap
 
 class ListServersSpec extends Specification {
   def 'empty state'() {

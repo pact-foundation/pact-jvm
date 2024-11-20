@@ -14,7 +14,7 @@ data class Config @JvmOverloads constructor(
   val broker: String = "",
   val authToken: String = ""
 ) {
-  // Scala can't access the copy method correctly
+  // Scala/Groovy can't access the copy method correctly
   fun copyPort(port: Int) = this.copy(port = port)
   fun copyHost(host: String) = this.copy(host = host)
   fun copyDaemon(daemon: Boolean) = this.copy(daemon = daemon)
