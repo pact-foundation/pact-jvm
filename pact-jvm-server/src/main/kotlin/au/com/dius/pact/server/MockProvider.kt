@@ -79,7 +79,7 @@ abstract class StatefulMockProvider: MockProvider {
   }
 
   @Synchronized
-  fun handleRequest(req: Request): IResponse {
+  open fun handleRequest(req: Request): IResponse {
     logger.debug { "Received request: $req" }
     val (response, newSession) = session.receiveRequest(req)
     logger.debug { "Generating response: $response" }

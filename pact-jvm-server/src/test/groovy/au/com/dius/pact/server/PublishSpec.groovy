@@ -3,9 +3,6 @@ package au.com.dius.pact.server
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
-import scala.Option
-import scala.collection.JavaConverters
-import scala.collection.immutable.List
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
