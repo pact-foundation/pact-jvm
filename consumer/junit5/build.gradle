@@ -7,7 +7,7 @@ group = 'au.com.dius.pact.consumer'
 
 dependencies {
   api project(":consumer")
-  api 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+  api 'org.junit.jupiter:junit-jupiter-api:5.11.3'
 
   implementation 'org.slf4j:slf4j-api'
 
