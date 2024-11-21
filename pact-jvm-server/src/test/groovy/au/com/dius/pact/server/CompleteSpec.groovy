@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.PactWriter
 import au.com.dius.pact.core.model.Pact
 import spock.lang.Specification
 
+@SuppressWarnings('UnnecessaryGetter')
 class CompleteSpec extends Specification {
   def 'getPort'() {
     expect:
@@ -112,7 +113,7 @@ class CompleteSpec extends Specification {
     then:
     1 * mockWriter.writePact(_, pact, _)
     result.response.status == 200
-    result.newState.state.empty
+    result.newState.state.isEmpty()
 
     cleanup:
     Complete.INSTANCE.pactWriter = DefaultPactWriter.INSTANCE
@@ -142,7 +143,7 @@ class CompleteSpec extends Specification {
     then:
     0 * mockWriter.writePact(_, pact, _)
     result.response.status == 400
-    result.newState.state.empty
+    result.newState.state.isEmpty()
 
     cleanup:
     Complete.INSTANCE.pactWriter = DefaultPactWriter.INSTANCE
