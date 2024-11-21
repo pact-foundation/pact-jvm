@@ -53,7 +53,7 @@ import java.util.regex.Pattern
  */
 @Suppress("LargeClass", "TooManyFunctions", "SpreadOperator")
 open class PactDslJsonBody : DslPart {
-  override var body: JsonValue
+  override var body: JsonValue = JsonValue.Object()
 
   /**
    * Constructs a new body as a root
@@ -176,10 +176,14 @@ open class PactDslJsonBody : DslPart {
     require(values.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && values.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < values.size) {
-      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(values.size == 1) {
+        "You provided multiple example values (${values.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= values.size) {
+        "You provided ${values.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -214,10 +218,14 @@ open class PactDslJsonBody : DslPart {
     require(values.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && values.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < values.size) {
-      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(values.size == 1) {
+        "You provided multiple example values (${values.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= values.size) {
+        "You provided ${values.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -245,10 +253,14 @@ open class PactDslJsonBody : DslPart {
     require(values.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && values.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < values.size) {
-      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(values.size == 1) {
+        "You provided multiple example values (${values.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= values.size) {
+        "You provided ${values.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -272,12 +284,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException(
-        "You provided multiple example examples (${examples.size}) but only one was expected"
-      )
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -337,12 +351,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException(
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
         "You provided multiple example values (${examples.size}) but only one was expected"
-      )
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -398,10 +414,14 @@ open class PactDslJsonBody : DslPart {
     require(numbers.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && numbers.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < numbers.size) {
-      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(numbers.size == 1) {
+        "You provided multiple example values (${numbers.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= numbers.size) {
+        "You provided ${numbers.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -457,10 +477,14 @@ open class PactDslJsonBody : DslPart {
     require(numbers.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && numbers.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < numbers.size) {
-      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(numbers.size == 1) {
+        "You provided multiple example values (${numbers.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= numbers.size) {
+        "You provided ${numbers.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -490,10 +514,14 @@ open class PactDslJsonBody : DslPart {
     require(numbers.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && numbers.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < numbers.size) {
-      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(numbers.size == 1) {
+        "You provided multiple example values (${numbers.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= numbers.size) {
+        "You provided ${numbers.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -549,10 +577,14 @@ open class PactDslJsonBody : DslPart {
     require(numbers.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && numbers.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < numbers.size) {
-      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(numbers.size == 1) {
+        "You provided multiple example values (${numbers.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= numbers.size) {
+        "You provided ${numbers.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -582,10 +614,14 @@ open class PactDslJsonBody : DslPart {
     require(numbers.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && numbers.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${numbers.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < numbers.size) {
-      throw IllegalArgumentException("You provided ${numbers.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(numbers.size == 1) {
+        "You provided multiple example values (${numbers.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= numbers.size) {
+        "You provided ${numbers.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -721,12 +757,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException(
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
         "You provided multiple example values (${examples.size}) but only one was expected"
-      )
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -758,10 +796,14 @@ open class PactDslJsonBody : DslPart {
     require(values.none { it == null }) {
       "Example values can not be null"
     }
-    if (body is JsonValue.Object && values.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values (${values.size}) but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < values.size) {
-      throw IllegalArgumentException("You provided ${values.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(values.size == 1) {
+        "You provided multiple example values (${values.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= values.size) {
+        "You provided ${values.size} example values but ${body.size()} was expected"
+      }
     }
 
     val re = Regex(regex)
@@ -880,10 +922,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     val formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId())
@@ -936,10 +982,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     val formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId())
@@ -1038,10 +1088,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     val instance = FastDateFormat.getInstance(format, timeZone)
@@ -1070,10 +1124,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     val formatter = DateTimeFormatter.ofPattern(format)
@@ -1176,10 +1234,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     val instance = FastDateFormat.getInstance(format, timeZone)
@@ -1604,10 +1666,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -1643,10 +1709,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -1701,10 +1771,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {
@@ -1915,10 +1989,14 @@ open class PactDslJsonBody : DslPart {
     require(examples.isNotEmpty()) {
       "At least one example value is required"
     }
-    if (body is JsonValue.Object && examples.size > 1) {
-      throw IllegalArgumentException("You provided multiple example values ${examples.size} but only one was expected")
-    } else if (body is JsonValue.Array && body.size() < examples.size) {
-      throw IllegalArgumentException("You provided ${examples.size} example values but ${body.size()} was expected")
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
     }
 
     when (val body = body) {

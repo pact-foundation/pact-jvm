@@ -24,7 +24,8 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
-import au.com.dius.pact.core.support.Result.*
+import au.com.dius.pact.core.support.Result.Ok
+import au.com.dius.pact.core.support.Result.Err
 import au.com.dius.pact.core.support.deepMerge
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
