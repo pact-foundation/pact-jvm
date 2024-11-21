@@ -6,10 +6,10 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.support.json.JsonParser
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
-import com.github.michaelbull.result.Ok
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import spock.lang.Specification
@@ -126,7 +126,7 @@ class JsonReporterSpec extends Specification {
       new HeaderMismatch('HEADER-X', 'Y', '', "Expected a header 'HEADER-X' but was missing")
     ])
     reporter.bodyComparisonFailed(
-      new Ok(new BodyComparisonResult([
+      new Result.Ok(new BodyComparisonResult([
         '$.0': [
           new BodyMismatch(
             JsonParser.INSTANCE.parseString('{"doesNotExist":"Test","documentId":0}'),

@@ -18,7 +18,6 @@ dependencies {
   }
 
   implementation 'org.slf4j:slf4j-api'
-  implementation 'com.michael-bull.kotlin-result:kotlin-result:1.1.14'
 
   testRuntimeOnly 'ch.qos.logback:logback-classic'
   testImplementation 'ru.lanwen.wiremock:wiremock-junit5:1.3.1'

@@ -11,13 +11,12 @@ import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.property
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ext.tables.TableBlock
 import com.vladsch.flexmark.ext.tables.TableBody
@@ -424,12 +423,12 @@ class MarkdownReporter(
     pw.write("&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:red'>FAILED</span>)  \n\n")
 
     when (comparison) {
-      is Err<*> -> {
-        comparison as Err<BodyTypeMismatch>
+      is Result.Err<*> -> {
+        comparison as Result.Err<BodyTypeMismatch>
         pw.write("```\n${comparison.error.description()}\n```\n")
       }
-      is Ok<*> -> {
-        comparison as Ok<BodyComparisonResult>
+      is Result.Ok<*> -> {
+        comparison as Result.Ok<BodyComparisonResult>
         pw.write("| Path | Failure |\n")
         pw.write("| ---- | ------- |\n")
         comparison.value.mismatches.forEach { (path, mismatches) ->

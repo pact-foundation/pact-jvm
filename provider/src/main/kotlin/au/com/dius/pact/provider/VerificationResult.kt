@@ -11,8 +11,6 @@ import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.ajalt.mordant.TermColors
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.getError
 
 private fun padLines(str: String, indent: Int): String {
   val pad = " ".repeat(indent)

@@ -19,13 +19,12 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
 import au.com.dius.pact.core.support.property
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
 import java.time.ZonedDateTime
@@ -242,8 +241,8 @@ class JsonReporter(
       .asObject()!!
     verification["result"] = FAILED
     verification["body"] = when (comparison) {
-      is Err<*> -> Json.toJson((comparison as Err<BodyTypeMismatch>).error.description())
-      is Ok<*> -> (comparison as Ok<BodyComparisonResult>).value.toJson()
+      is Result.Err<*> -> Json.toJson((comparison as Result.Err<BodyTypeMismatch>).error.description())
+      is Result.Ok<*> -> (comparison as Result.Ok<BodyComparisonResult>).value.toJson()
       else -> Json.toJson(comparison)
     }
   }
