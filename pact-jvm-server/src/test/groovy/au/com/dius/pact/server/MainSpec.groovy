@@ -10,7 +10,7 @@ import spock.lang.Specification
 import java.util.concurrent.TimeUnit
 
 @IgnoreIf({ os.windows })
-@IgnoreIf({ System.getenv("CI") != null })
+@IgnoreIf({ System.getenv('CI') != null })
 class MainSpec extends Specification {
   def 'application command line args'() {
     when:
