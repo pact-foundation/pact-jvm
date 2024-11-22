@@ -11,8 +11,10 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.orNull
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.Locale
+
+private val logger = KotlinLogging.logger {}
 
 enum class Category {
   METHOD, PATH, HEADER, QUERY, BODY, STATUS, METADATA, CONTENT
@@ -76,7 +78,7 @@ enum class GeneratorTestMode {
 
 data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = mutableMapOf()) {
 
-  companion object : KLogging() {
+  companion object {
 
     @JvmStatic fun fromJson(json: JsonValue?): Generators {
       val generators = Generators()

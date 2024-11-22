@@ -1,14 +1,16 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.isNotEmpty
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.tika.mime.MediaType
 import org.apache.tika.mime.MediaTypeRegistry
 import org.apache.tika.mime.MimeTypes
 import java.nio.charset.Charset
+import java.util.Locale
 
 private val jsonRegex = Regex(".*json")
 private val xmlRegex = Regex(".*xml")
+private val logger = KotlinLogging.logger {}
 
 class ContentType(val contentType: MediaType?) {
 
@@ -21,7 +23,7 @@ class ContentType(val contentType: MediaType?) {
         else -> {
           if ("vnd.schemaregistry.v1+json" == contentType.subtype)
             false
-          else if (jsonRegex.matches(contentType.subtype.toLowerCase())) {
+          else if (jsonRegex.matches(contentType.subtype.lowercase(Locale.getDefault()))) {
             true
           } else {
             val superType = registry.getSupertype(contentType)
@@ -35,7 +37,7 @@ class ContentType(val contentType: MediaType?) {
   fun isXml(): Boolean = if (contentType != null) {
     when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
       "xml" -> true
-      else -> xmlRegex.matches(contentType.subtype.toLowerCase())
+      else -> xmlRegex.matches(contentType.subtype.lowercase(Locale.getDefault()))
     }
   } else false
 
@@ -134,7 +136,7 @@ class ContentType(val contentType: MediaType?) {
     }
   }
 
-  companion object : KLogging() {
+  companion object {
     @JvmStatic
     fun fromString(contentType: String?) = if (contentType.isNullOrEmpty()) {
       UNKNOWN

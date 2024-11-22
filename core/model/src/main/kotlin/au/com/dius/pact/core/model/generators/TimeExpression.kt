@@ -7,15 +7,17 @@ import au.com.dius.pact.core.support.generators.expressions.TimeBase
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionLexer
 import au.com.dius.pact.core.support.generators.expressions.TimeExpressionParser
 import au.com.dius.pact.core.support.generators.expressions.TimeOffsetType
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
+private val logger = KotlinLogging.logger {}
+
 data class ParsedTimeExpression(val base: TimeBase, val adjustments: MutableList<Adjustment<TimeOffsetType>>)
 
-object TimeExpression : KLogging() {
+object TimeExpression {
   @Suppress("ComplexMethod")
   fun executeTimeExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {

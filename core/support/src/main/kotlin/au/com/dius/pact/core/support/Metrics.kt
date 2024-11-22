@@ -128,7 +128,7 @@ object Metrics {
             .execute()
             .returnResponse()
           if (response.code > 299) {
-            logger.debug("Got response from metrics: ${response.code} ${response.reasonPhrase}")
+            logger.debug { "Got response from metrics: ${response.code} ${response.reasonPhrase}" }
           }
         } catch (ex: Exception) {
           logger.debug(ex) { "Failed to send plugin load metrics" }

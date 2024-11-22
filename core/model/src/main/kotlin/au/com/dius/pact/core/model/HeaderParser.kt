@@ -6,6 +6,7 @@ import io.ktor.http.HeaderValue
 import io.ktor.http.HeaderValueParam
 import io.ktor.http.HeaderValueWithParameters
 import io.ktor.http.parseHeaderValue
+import java.util.Locale
 
 class HeaderWithParameters(
   content: String,
@@ -19,7 +20,7 @@ object HeaderParser {
   fun fromJson(key: String, value: JsonValue): List<String> {
     return when {
       value is JsonValue.Array -> value.values.map { Json.toString(it).trim() }
-      SINGLE_VALUE_HEADERS.contains(key.toLowerCase()) -> listOf(Json.toString(value).trim())
+      SINGLE_VALUE_HEADERS.contains(key.lowercase(Locale.getDefault())) -> listOf(Json.toString(value).trim())
       else -> {
         val sval = Json.toString(value).trim()
         parseHeaderValue(sval).map { hvToString(it) }

@@ -7,15 +7,17 @@ import au.com.dius.pact.core.support.generators.expressions.DateExpressionLexer
 import au.com.dius.pact.core.support.generators.expressions.DateExpressionParser
 import au.com.dius.pact.core.support.generators.expressions.DateOffsetType
 import au.com.dius.pact.core.support.generators.expressions.Operation
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.DayOfWeek
 import java.time.Month
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
+private val logger = KotlinLogging.logger {}
+
 data class ParsedDateExpression(val base: DateBase, val adjustments: MutableList<Adjustment<DateOffsetType>>)
 
-object DateExpression : KLogging() {
+object DateExpression {
   @Suppress("NestedBlockDepth")
   fun executeDateExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {

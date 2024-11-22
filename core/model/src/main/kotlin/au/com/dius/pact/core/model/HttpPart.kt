@@ -6,9 +6,11 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.nio.charset.Charset
 import java.util.Base64
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * object that represents part of an http message
@@ -90,7 +92,7 @@ abstract class HttpPart: IHttpPart {
     return generators + matchingRuleGenerators
   }
 
-  companion object : KLogging() {
+  companion object {
     const val CONTENT_TYPE = "Content-Type"
 
     @JvmStatic

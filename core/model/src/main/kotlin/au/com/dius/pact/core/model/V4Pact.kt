@@ -14,7 +14,6 @@ import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonObject
-import io.github.oshai.kotlinlogging.KLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import java.util.Base64
@@ -115,7 +114,7 @@ data class InteractionMarkup(
     }
   }
 
-  companion object : KLogging() {
+  companion object {
     fun fromJson(json: JsonValue): InteractionMarkup {
       return when (json) {
         is JsonValue.Object -> InteractionMarkup(Json.toString(json["markup"]), Json.toString(json["markupType"]))
@@ -554,7 +553,7 @@ sealed class V4Interaction(
     }
   }
 
-  companion object : KLogging() {
+  companion object {
     fun interactionFromJson(index: Int, json: JsonValue, source: PactSource): Result<V4Interaction, String> {
       return if (json.has("type")) {
         val type = Json.toString(json["type"])
@@ -627,13 +626,13 @@ sealed class V4Interaction(
           }
           is Result.Err -> {
             val message = "Interaction $index has invalid type attribute '$type'. It will be ignored. Source: $source"
-            logger.warn(message)
+            logger.warn { message }
             Result.Err(message)
           }
         }
       } else {
         val message = "Interaction $index has no type attribute. It will be ignored. Source: $source"
-        logger.warn(message)
+        logger.warn { message }
         Result.Err(message)
       }
     }

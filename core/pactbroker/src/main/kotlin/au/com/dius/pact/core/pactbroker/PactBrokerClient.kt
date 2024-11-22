@@ -16,12 +16,14 @@ import au.com.dius.pact.core.support.mapOk
 import au.com.dius.pact.core.support.mapError
 import au.com.dius.pact.core.support.toJson
 import com.google.common.net.UrlEscapers.urlFormParameterEscaper
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 import java.io.IOException
 import java.net.URLDecoder
 import java.util.Base64
 import java.util.function.Consumer
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Wraps the response for a Pact from the broker with the link data associated with the Pact document.
@@ -619,11 +621,13 @@ open class PactBrokerClient(
   /**
    * Uploads the given pact file to the broker, and optionally applies any tags
    */
+  @Deprecated("Replaced with version that takes a configuration object")
   override fun uploadPactFile(pactFile: File, version: String) = uploadPactFile(pactFile, version, emptyList())
 
   /**
    * Uploads the given pact file to the broker, and optionally applies any tags
    */
+  @Deprecated("Replaced with version that takes a configuration object")
   override fun uploadPactFile(pactFile: File, version: String, tags: List<String>) =
     uploadPactFile(pactFile, PublishConfiguration(version, tags))
 
@@ -751,11 +755,11 @@ open class PactBrokerClient(
             else -> logger.debug { "notice: $text" }
           }
         } else {
-          logger.error("Got an invalid notice value from the Pact Broker: Expected an object, got ${notices.name}")
+          logger.error { "Got an invalid notice value from the Pact Broker: Expected an object, got ${notices.name}" }
         }
       }
     } else {
-      logger.error("Got an invalid notices value from the Pact Broker: Expected an array, got ${notices.name}")
+      logger.error { "Got an invalid notices value from the Pact Broker: Expected an array, got ${notices.name}" }
     }
   }
 
@@ -765,10 +769,10 @@ open class PactBrokerClient(
       for ((key, errorJson) in errors.entries) {
         if (errorJson.isArray) {
           for (error in errorJson.asArray()!!.values) {
-            logger.error("$key: $error")
+            logger.error { "$key: $error" }
           }
         } else {
-          logger.error("$key: $errorJson")
+          logger.error { "$key: $errorJson" }
         }
       }
     }
@@ -919,15 +923,16 @@ open class PactBrokerClient(
       val halClient = newHalClient()
       val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS_WITH_NO_TAG)
-        .forAll(PACTS, Consumer { pact ->
+        .forAll(PACTS) { pact ->
           val href = URLDecoder.decode(pact["href"].toString(), UTF8)
           val name = pact["name"].toString()
-          if (options.containsKey("authentication")) {
-            consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          val authentication = options["authentication"]
+          if (authentication is List<*>) {
+            consumers.add(PactBrokerResult(name, href, pactBrokerUrl, authentication.map { it.toString() }))
           } else {
             consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList()))
           }
-        })
+        }
       consumers
     } catch (_: NotFoundHalResponse) {
       // This means the provider is not defined in the broker, so fail gracefully.
@@ -1076,7 +1081,7 @@ open class PactBrokerClient(
           listOf(tag)
       )
 
-  companion object : KLogging() {
+  companion object {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"
     const val LATEST_PROVIDER_PACTS_WITH_TAG = "pb:latest-provider-pacts-with-tag"
@@ -1165,12 +1170,12 @@ open class PactBrokerClient(
 
       if (to != null) {
         if (to.environment.isNotEmpty()) {
-          params.add("environment" to escaper.escape(to.environment))
+          params.add("environment" to escaper.escape(to.environment!!))
         }
 
         if (to.tag.isNotEmpty()) {
           params.add("latest" to "true")
-          params.add("tag" to escaper.escape(to.tag))
+          params.add("tag" to escaper.escape(to.tag!!))
         }
 
         if (to.mainBranch == true) {
@@ -1188,7 +1193,7 @@ open class PactBrokerClient(
           if (key.isNotEmpty()) {
             params.add("ignore[][pacticipant]" to key)
             if (value.isNotEmpty()) {
-              params.add("ignore[][version]" to escaper.escape(value))
+              params.add("ignore[][version]" to escaper.escape(value!!))
             }
           }
         }

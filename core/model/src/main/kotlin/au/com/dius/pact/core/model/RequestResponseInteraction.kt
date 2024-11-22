@@ -2,8 +2,11 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.net.URLEncoder
+import java.util.Locale
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Interaction between a consumer and a provider
@@ -83,13 +86,13 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     description, providerStates, request.copy(), response.copyResponse(), interactionId
   )
 
-  companion object : KLogging() {
+  companion object {
     const val COMMA = ", "
 
     @JvmStatic
     fun requestToMap(request: Request, pactSpecVersion: PactSpecVersion?): Map<String, Any?> {
       val map = mutableMapOf<String, Any?>(
-        "method" to request.method.toUpperCase(),
+        "method" to request.method.uppercase(Locale.getDefault()),
         "path" to request.path
       )
       if (request.headers.isNotEmpty()) {

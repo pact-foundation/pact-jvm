@@ -8,8 +8,11 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.beanutils.BeanUtils
+import java.util.Locale
+
+private val logger = KotlinLogging.logger {}
 
 private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
   return if (json.has("headers") && json["headers"] is JsonValue.Object) {
@@ -33,7 +36,7 @@ data class HttpRequest @JvmOverloads constructor(
   override var body: OptionalBody = OptionalBody.missing(),
   override val matchingRules: MatchingRules = MatchingRulesImpl(),
   override val generators: Generators = Generators()
-): IRequest, IHttpPart, KLogging() {
+): IRequest, IHttpPart {
   fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     val errors = mutableListOf<String>()
     errors.addAll(matchingRules.validateForVersion(pactVersion))
@@ -47,7 +50,7 @@ data class HttpRequest @JvmOverloads constructor(
 
   fun toMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>(
-      "method" to method.toUpperCase(),
+      "method" to method.uppercase(Locale.getDefault()),
       "path" to path
     )
     if (headers.isNotEmpty()) {
@@ -70,7 +73,7 @@ data class HttpRequest @JvmOverloads constructor(
   }
 
   override fun cookies(): List<String> {
-    val cookieEntry = headers.entries.find { (k, _) -> k.toLowerCase() == Request.COOKIE_KEY }
+    val cookieEntry = headers.entries.find { (k, _) -> k.lowercase(Locale.getDefault()) == Request.COOKIE_KEY }
     return if (cookieEntry != null) {
       cookieEntry.value.flatMap {
         it.split(';')
@@ -83,7 +86,7 @@ data class HttpRequest @JvmOverloads constructor(
   override fun asHttpPart() = toV3Request()
 
   override fun headersWithoutCookie(): Map<String, List<String>> {
-    return headers.filter { (k, _) -> k.toLowerCase() != Request.COOKIE_KEY }
+    return headers.filter { (k, _) -> k.lowercase(Locale.getDefault()) != Request.COOKIE_KEY }
   }
 
   override fun generatedRequest(context: MutableMap<String, Any>, mode: GeneratorTestMode): IRequest {
@@ -104,7 +107,7 @@ data class HttpRequest @JvmOverloads constructor(
   companion object {
     @JvmStatic
     fun fromJson(json: JsonValue): HttpRequest {
-      val method = if (json.has("method")) Json.toString(json["method"]).toUpperCase() else Request.DEFAULT_METHOD
+      val method = if (json.has("method")) Json.toString(json["method"]).uppercase(Locale.getDefault()) else Request.DEFAULT_METHOD
       val path = if (json.has("path")) Json.toString(json["path"]) else Request.DEFAULT_PATH
       val query = BaseRequest.parseQueryParametersToMap(json["query"])
       val headers = headersFromJson(json)
@@ -199,6 +202,7 @@ data class HttpResponse @JvmOverloads constructor(
     return map
   }
 
+  @Deprecated("Replaced with response generator class", replaceWith = ReplaceWith("ResponseGenerator"))
   override fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse {
     return this.toV3Response().generatedResponse(context, mode)
   }
@@ -206,7 +210,7 @@ data class HttpResponse @JvmOverloads constructor(
   override fun asHttpPart() = toV3Response()
 
   fun updateProperties(values: Map<String, Any?>) {
-    V4Interaction.logger.debug { "updateProperties(values=$values)" }
+    logger.debug { "updateProperties(values=$values)" }
     values.forEach { (key, value) ->
       when (key) {
         "headers" -> when (value) {

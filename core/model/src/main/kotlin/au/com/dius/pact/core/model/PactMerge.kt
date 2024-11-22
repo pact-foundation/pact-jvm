@@ -1,14 +1,16 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Result
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 data class MergeResult(val ok: Boolean, val message: String, val result: Pact? = null)
 
 /**
  * Utility class for merging two pacts together, checking for conflicts
  */
-object PactMerge : KLogging() {
+object PactMerge {
 
   @JvmStatic
   fun merge(newPact: Pact, existing: Pact): MergeResult {

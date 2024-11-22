@@ -2,11 +2,13 @@ package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.mapError
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.lang.Integer.parseInt
 import java.time.OffsetDateTime
 
-object DateTimeExpression : KLogging() {
+private val logger = KotlinLogging.logger {}
+
+object DateTimeExpression {
   fun executeExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {
       val split = expression.split("@", limit = 2)

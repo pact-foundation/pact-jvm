@@ -6,12 +6,14 @@ import au.com.dius.pact.core.model.ContentType.Companion.UNKNOWN
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
 import au.com.dius.pact.core.support.json.JsonParser
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.codec.binary.Hex
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
 import java.util.Base64
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * If the content type should be overridden
@@ -206,7 +208,7 @@ data class OptionalBody @JvmOverloads constructor(
     }
   }
 
-  companion object : KLogging() {
+  companion object {
 
     @JvmStatic fun missing(): OptionalBody {
       return OptionalBody(State.MISSING)

@@ -19,8 +19,6 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
-import au.com.dius.pact.core.support.unwrap
-import io.github.oshai.kotlinlogging.KLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
@@ -41,6 +39,7 @@ import java.io.Reader
 import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
+import java.util.Locale
 import kotlin.collections.set
 
 private val logger = KotlinLogging.logger {}
@@ -83,19 +82,20 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
         httpGet.addHeader("Content-Type", "application/json")
         httpGet.addHeader("Accept", "application/hal+json, application/json")
 
-        val response = http.execute(httpGet)
-        if (response.code < 300) {
-          val contentType = ContentType.parseLenient(response.entity.contentType)
-          if (isJsonResponse(contentType)) {
-            JsonParser.parseString(EntityUtils.toString(response.entity)) to source
+        http.execute(httpGet) { response ->
+          if (response.code < 300) {
+            val contentType = ContentType.parseLenient(response.entity.contentType)
+            if (isJsonResponse(contentType)) {
+              JsonParser.parseString(EntityUtils.toString(response.entity)) to source
+            } else {
+              throw InvalidHttpResponseException("Expected a JSON response, but got '$contentType'")
+            }
           } else {
-            throw InvalidHttpResponseException("Expected a JSON response, but got '$contentType'")
-          }
-        } else {
-          when (response.code) {
-            404 -> throw InvalidHttpResponseException("No JSON document found at source '$source'")
-            else -> throw InvalidHttpResponseException("Request to source '$source' failed with response " +
-              "${response.code}")
+            when (response.code) {
+              404 -> throw InvalidHttpResponseException("No JSON document found at source '$source'")
+              else -> throw InvalidHttpResponseException("Request to source '$source' failed with response " +
+                "${response.code}")
+            }
           }
         }
       }
@@ -120,7 +120,7 @@ fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClie
     }
     options["authentication"] is List<*> -> {
       val authentication = options["authentication"] as List<*>
-      when (val scheme = authentication.first().toString().toLowerCase()) {
+      when (val scheme = authentication.first().toString().lowercase(Locale.getDefault())) {
         "basic" -> {
           if (authentication.size > 2) {
             basicAuth(baseUrl, authentication[1].toString(), authentication[2].toString(), builder)
@@ -203,7 +203,7 @@ interface PactReader {
 /**
  * Default implementation of PactReader
  */
-object DefaultPactReader : PactReader, KLogging() {
+object DefaultPactReader : PactReader {
 
   private const val CLASSPATH_URI_START = "classpath:"
 
@@ -421,10 +421,10 @@ object DefaultPactReader : PactReader, KLogging() {
     } else if (source is URL || source is UrlPactSource) {
       val urlSource = if (source is URL) UrlSource(source.toString()) else source as UrlPactSource
       return loadPactFromUrl(urlSource, options, newHttpClient(urlSource.url, options))
-    } else if (source is String && source.toLowerCase().matches(Regex("(https?|file)://?.*"))) {
+    } else if (source is String && source.lowercase(Locale.getDefault()).matches(Regex("(https?|file)://?.*"))) {
       val urlSource = UrlSource(source)
       return loadPactFromUrl(urlSource, options, newHttpClient(urlSource.url, options))
-    } else if (source is String && source.toLowerCase().matches(Regex("s3://.*"))) {
+    } else if (source is String && source.lowercase(Locale.getDefault()).matches(Regex("s3://.*"))) {
       return loadPactFromS3Bucket(source)
     } else if (source is String && source.startsWith(CLASSPATH_URI_START)) {
       return loadPactFromClasspath(source.substring(CLASSPATH_URI_START.length))

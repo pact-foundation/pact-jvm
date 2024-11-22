@@ -42,7 +42,7 @@ object Json {
    * Converts a JSON object to the Map of values
    */
   fun toMap(json: JsonValue?) = when (json) {
-    is JsonValue.Object -> fromJson(json) as Map<String, Any?>
+    is JsonValue.Object -> json.entries.entries.associate { it.key to fromJson(it.value) }
     else -> emptyMap()
   }
 
@@ -50,7 +50,7 @@ object Json {
    * Converts a JSON object to the List of values
    */
   fun toList(json: JsonValue?) = when (json) {
-    is JsonValue.Array -> fromJson(json) as List<Any?>
+    is JsonValue.Array -> json.values.map { fromJson(it) }
     else -> emptyList()
   }
 

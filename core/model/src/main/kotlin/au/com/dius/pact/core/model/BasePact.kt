@@ -4,11 +4,13 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils
 import au.com.dius.pact.core.support.json.JsonValue
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 import java.util.Collections
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.memberProperties
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Base Pact class
@@ -64,7 +66,7 @@ abstract class BasePact @JvmOverloads constructor(
 
   override fun isV4Pact() = false
 
-  companion object : KLogging() {
+  companion object {
     @JvmStatic
     val DEFAULT_METADATA: Map<String, Map<String, Any?>> by lazy {
       Collections.unmodifiableMap(mapOf(

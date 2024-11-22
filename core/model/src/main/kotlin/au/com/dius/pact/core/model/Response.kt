@@ -6,7 +6,10 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.json.JsonValue
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import java.util.Locale
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Response from a provider to a consumer
@@ -49,6 +52,7 @@ class Response @JvmOverloads constructor(
   override fun copyResponse() =
     Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
 
+  @Deprecated("Replaced with response generator class", replaceWith = ReplaceWith("ResponseGenerator"))
   override fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse {
     val r = this.copyResponse()
     val statusGenerators = r.setupGenerators(Category.STATUS, context)
@@ -102,7 +106,7 @@ class Response @JvmOverloads constructor(
 
   override fun hasHeader(name: String) = headers.any { (key, _) -> key.lowercase() == name }
 
-  companion object : KLogging() {
+  companion object {
     const val DEFAULT_STATUS = 200
 
     @JvmStatic
@@ -111,7 +115,7 @@ class Response @JvmOverloads constructor(
       val headers = headersFromJson(json)
 
       var contentType = ContentType.UNKNOWN
-      val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+      val contentTypeEntry = headers.entries.find { it.key.uppercase(Locale.getDefault()) == "CONTENT-TYPE" }
       if (contentTypeEntry != null) {
         contentType = ContentType(contentTypeEntry.value.first())
       }

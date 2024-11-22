@@ -12,7 +12,6 @@ import au.com.dius.pact.core.support.expressions.MapValueResolver
 import au.com.dius.pact.core.support.getOr
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
-import io.github.oshai.kotlinlogging.KLogging
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
@@ -124,7 +123,7 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
     return RandomUtils.nextInt(min, max)
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): RandomIntGenerator {
       val min = if (json["min"].isNumber) {
         json["min"].asNumber()!!.toInt()
@@ -180,7 +179,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
     }
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): RandomDecimalGenerator {
       val digits = if (json["digits"].isNumber) {
         json["digits"].asNumber()!!.toInt()
@@ -209,7 +208,7 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
     return RandomStringUtils.random(digits, "0123456789abcdef")
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): RandomHexadecimalGenerator {
       val digits = if (json["digits"].isNumber) {
         json["digits"].asNumber()!!.toInt()
@@ -238,7 +237,7 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
     return RandomStringUtils.randomAlphanumeric(size)
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): RandomStringGenerator {
       val size = if (json["size"].isNumber) {
         json["size"].asNumber()!!.toInt()
@@ -267,7 +266,7 @@ data class RegexGenerator(val regex: String) : Generator {
     return Random.generateRandomString(regex)
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object) = RegexGenerator(Json.toString(json["regex"]))
   }
 }
@@ -302,7 +301,7 @@ enum class UuidFormat {
     }
   }
 
-  companion object : KLogging() {
+  companion object {
     fun fromString(s: String?): Result<UuidFormat, String> {
       return when(s) {
         "simple" -> Result.Ok(Simple)
@@ -344,7 +343,7 @@ data class UuidGenerator @JvmOverloads constructor(val format: UuidFormat? = nul
     }
   }
 
-  companion object: KLogging() {
+  companion object {
     @JvmStatic
     fun fromJson(json: JsonValue.Object): UuidGenerator {
       val format = if (json["format"].isString) UuidFormat.fromString(json["format"].asString()) else null
@@ -387,7 +386,7 @@ data class DateGenerator @JvmOverloads constructor(
     }
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): DateGenerator {
       val format = if (json["format"].isString) json["format"].asString() else null
       val expression = if (json["expression"].isString) json["expression"].asString() else null
@@ -429,7 +428,7 @@ data class TimeGenerator @JvmOverloads constructor(
     }
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): TimeGenerator {
       val format = if (json["format"].isString) json["format"].asString() else null
       val expression = if (json["expression"].isString) json["expression"].asString() else null
@@ -472,7 +471,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
     }
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): DateTimeGenerator {
       val format = if (json["format"].isString) json["format"].asString() else null
       val expression = if (json["expression"].isString) json["expression"].asString() else null
@@ -485,7 +484,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
  * Generates a random boolean value
  */
 @SuppressWarnings("EqualsWithHashCodeExist")
-object RandomBooleanGenerator : Generator, KLogging() {
+object RandomBooleanGenerator : Generator {
   override val type: String
     get() = "RandomBoolean"
 
@@ -543,7 +542,7 @@ data class ProviderStateGenerator @JvmOverloads constructor (
 
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
-  companion object: KLogging() {
+  companion object {
     @JvmStatic
     fun fromJson(json: JsonValue.Object) = ProviderStateGenerator(
       ExpressionParser().correctExpressionMarkers(Json.toString(json["expression"])),
@@ -609,7 +608,7 @@ data class MockServerURLGenerator(
     }
   }
 
-  companion object: KLogging() {
+  companion object {
     fun fromJson(json: JsonValue.Object): MockServerURLGenerator {
       return MockServerURLGenerator(Json.toString(json["example"]), Json.toString(json["regex"]))
     }

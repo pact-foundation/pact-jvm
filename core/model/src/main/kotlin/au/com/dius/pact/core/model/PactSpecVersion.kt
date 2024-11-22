@@ -1,7 +1,9 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Pact Specification Version
@@ -34,7 +36,7 @@ enum class PactSpecVersion {
     }
   }
 
-  companion object: KLogging() {
+  companion object {
     @JvmStatic
     fun fromInt(version: Int): PactSpecVersion {
       return when (version) {

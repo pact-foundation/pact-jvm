@@ -13,9 +13,8 @@ import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.get
 import au.com.dius.pact.core.support.jsonObject
-import au.com.dius.pact.core.support.unwrap
 import com.google.common.net.UrlEscapers
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.hc.client5.http.auth.AuthScope
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpPost
@@ -33,6 +32,8 @@ import org.apache.hc.core5.http.io.entity.StringEntity
 import java.net.URI
 import java.util.function.BiFunction
 import java.util.function.Consumer
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Interface to a HAL Client
@@ -275,11 +276,11 @@ open class HalClient @JvmOverloads constructor(
     logger.debug { "Fetching: $path" }
     return when (val result = getJson(path, encodePath)) {
       is Result.Ok -> when (result.value) {
-        is JsonValue.Object -> Result.Ok(result.value)
+        is JsonValue.Object -> Result.Ok(result.value as JsonValue.Object)
         else -> Result.Err(RuntimeException("Expected a JSON document, but found a ${result.value}"))
       }
       is Result.Err -> result
-    } as Result<JsonValue.Object, Exception>
+    }
   }
 
   override fun withDocContext(docAttributes: Map<String, Any?>): IHalClient {
@@ -550,7 +551,7 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  companion object : KLogging() {
+  companion object {
     const val ROOT = "/"
     const val LINKS = "_links"
     const val PREEMPTIVE_AUTHENTICATION = "pact.pactbroker.httpclient.usePreemptiveAuthentication"

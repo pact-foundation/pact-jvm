@@ -14,16 +14,17 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder
-import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy
+import org.apache.hc.client5.http.ssl.TrustAllStrategy
 import org.apache.hc.core5.http.HttpRequest
 import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.http.message.BasicHeader
 import org.apache.hc.core5.ssl.SSLContexts
 import org.apache.hc.core5.util.TimeValue
 import java.net.URI
+import java.util.Locale
 
 private val logger = KotlinLogging.logger {}
 
@@ -112,7 +113,7 @@ object HttpClient {
         }
       }
       is List<*> -> {
-        when (val scheme = authentication.first().toString().toLowerCase()) {
+        when (val scheme = authentication.first().toString().lowercase(Locale.getDefault())) {
           "basic" -> {
             if (authentication.size > 2) {
               basicAuth(uri, authentication[1].toString(), authentication[2].toString(), builder)
@@ -172,16 +173,10 @@ object HttpClient {
       """
     }
 
-    val sslcontext = SSLContexts.custom().loadTrustMaterial(TrustSelfSignedStrategy()).build()
-    val sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
-      .setSslContext(sslcontext).build()
-    builder.setConnectionManager(
-        BasicHttpClientConnectionManager(
-          RegistryBuilder.create<ConnectionSocketFactory>()
-            .register("http", PlainConnectionSocketFactory.getSocketFactory())
-            .register("https", sslSocketFactory)
-            .build()
-        )
-      )
+    val sslContext = SSLContexts.custom().loadTrustMaterial(TrustAllStrategy()).build()
+    val registry = RegistryBuilder.create<TlsSocketStrategy>()
+      .register("https", DefaultClientTlsStrategy(sslContext, NoopHostnameVerifier.INSTANCE))
+    val connectionManager = BasicHttpClientConnectionManager.create(registry.build())
+    builder.setConnectionManager(connectionManager)
   }
 }

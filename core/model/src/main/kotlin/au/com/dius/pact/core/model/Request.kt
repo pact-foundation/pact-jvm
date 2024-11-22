@@ -8,7 +8,10 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import java.util.Locale
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Request made by a consumer to a provider
@@ -88,14 +91,14 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
   }
 
   override fun headersWithoutCookie(): Map<String, List<String>> {
-    return headers.filter { (k, _) -> k.toLowerCase() != COOKIE_KEY }
+    return headers.filter { (k, _) -> k.lowercase(Locale.getDefault()) != COOKIE_KEY }
   }
 
   @Deprecated("use cookies()", ReplaceWith("cookies()"))
   fun cookie() = cookies()
 
   override fun cookies(): List<String> {
-    val cookieEntry = headers.entries.find { (k, _) -> k.toLowerCase() == COOKIE_KEY }
+    val cookieEntry = headers.entries.find { (k, _) -> k.lowercase(Locale.getDefault()) == COOKIE_KEY }
     return if (cookieEntry != null) {
       cookieEntry.value.flatMap {
         it.split(';')
@@ -139,7 +142,7 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
     return HttpRequest(method, path, query, headers, body, matchingRules, generators)
   }
 
-  companion object : KLogging() {
+  companion object {
     const val COOKIE_KEY = "cookie"
     const val DEFAULT_METHOD = "GET"
     const val DEFAULT_PATH = "/"
