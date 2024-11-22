@@ -5,7 +5,10 @@ plugins {
 }
 
 group = 'au.com.dius.pact'
-mainClassName = 'au.com.dius.pact.server.PactJvmServer'
+
+application {
+  mainClass.set('au.com.dius.pact.server.PactJvmServer')
+}
 
 dependencies {
   implementation project(':consumer')
@@ -33,7 +36,7 @@ dependencies {
 }
 
 jar {
-    manifest.attributes 'Main-Class': mainClassName,
+    manifest.attributes 'Main-Class': application.mainClass.get(),
             'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' ')
 }
 
