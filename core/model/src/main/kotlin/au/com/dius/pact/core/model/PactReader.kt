@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClientConfig
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
-import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.HttpClientUtils
 import au.com.dius.pact.core.support.HttpClientUtils.isJsonResponse
@@ -20,18 +19,10 @@ import au.com.dius.pact.core.support.json.map
 import au.com.dius.pact.core.support.jsonArray
 import au.com.dius.pact.core.support.jsonObject
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.apache.hc.client5.http.auth.AuthScope
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials
 import org.apache.hc.client5.http.classic.methods.HttpGet
-import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
-import org.apache.hc.core5.http.message.BasicHeader
-import org.apache.hc.core5.util.TimeValue
 import java.io.File
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -101,51 +92,6 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
       }
     }
   }
-}
-
-@Deprecated("Use HttpClient.newHttpClient instead")
-fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClient {
-  val builder = HttpClients.custom().useSystemProperties()
-    .setRetryStrategy(DefaultHttpRequestRetryStrategy(5, TimeValue.ofMilliseconds(3000)))
-
-  when {
-    options["authentication"] is Auth -> {
-      when (val auth = options["authentication"] as Auth) {
-        is Auth.BasicAuthentication -> basicAuth(baseUrl, auth.username, auth.password, builder)
-        is Auth.BearerAuthentication -> {
-          builder.setDefaultHeaders(listOf(BasicHeader(auth.headerName, "Bearer " + auth.token)))
-        }
-        else -> {}
-      }
-    }
-    options["authentication"] is List<*> -> {
-      val authentication = options["authentication"] as List<*>
-      when (val scheme = authentication.first().toString().lowercase(Locale.getDefault())) {
-        "basic" -> {
-          if (authentication.size > 2) {
-            basicAuth(baseUrl, authentication[1].toString(), authentication[2].toString(), builder)
-          } else {
-            logger.warn { "Basic authentication requires a username and password, ignoring." }
-          }
-        }
-        else -> logger.warn { "Only supports basic authentication, got '$scheme', ignoring." }
-      }
-    }
-    options.containsKey("authentication") -> {
-      logger.warn { "Authentication options needs to be a Auth class or a list of values, " +
-        "got '${options["authentication"]}', ignoring." }
-    }
-  }
-
-  return builder.build()
-}
-
-private fun basicAuth(baseUrl: String, username: String, password: String, builder: HttpClientBuilder) {
-  val credsProvider = BasicCredentialsProvider()
-  val uri = URI(baseUrl)
-  credsProvider.setCredentials(AuthScope(uri.host, uri.port),
-    UsernamePasswordCredentials(username, password.toCharArray()))
-  builder.setDefaultCredentialsProvider(credsProvider)
 }
 
 /**
@@ -383,7 +329,7 @@ object DefaultPactReader : PactReader {
         when (k) {
           "responseMatchingRules" -> "matchingRules" to v
           "requestMatchingRules" -> "matchingRules" to v
-          "method" -> "method" to Json.toString(v).toUpperCase()
+          "method" -> "method" to Json.toString(v).uppercase(Locale.getDefault())
           else -> k to v
         }
       })
@@ -420,10 +366,10 @@ object DefaultPactReader : PactReader {
       }
     } else if (source is URL || source is UrlPactSource) {
       val urlSource = if (source is URL) UrlSource(source.toString()) else source as UrlPactSource
-      return loadPactFromUrl(urlSource, options, newHttpClient(urlSource.url, options))
+      return loadPactFromUrl(urlSource, options, HttpClient.newHttpClient(options["authentication"], URI(urlSource.url)).first)
     } else if (source is String && source.lowercase(Locale.getDefault()).matches(Regex("(https?|file)://?.*"))) {
       val urlSource = UrlSource(source)
-      return loadPactFromUrl(urlSource, options, newHttpClient(urlSource.url, options))
+      return loadPactFromUrl(urlSource, options, HttpClient.newHttpClient(options["authentication"], URI(urlSource.url)).first)
     } else if (source is String && source.lowercase(Locale.getDefault()).matches(Regex("s3://.*"))) {
       return loadPactFromS3Bucket(source)
     } else if (source is String && source.startsWith(CLASSPATH_URI_START)) {

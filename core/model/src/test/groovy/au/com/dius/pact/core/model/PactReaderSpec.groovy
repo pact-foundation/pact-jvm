@@ -11,9 +11,6 @@ import au.com.dius.pact.core.support.json.JsonParser
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider
-import org.apache.hc.client5.http.impl.classic.RedirectExec
-import org.apache.hc.client5.http.protocol.RedirectStrategy
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -181,33 +178,6 @@ class PactReaderSpec extends Specification {
     then:
     pact instanceof RequestResponsePact
     pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
-  }
-
-  @SuppressWarnings('UnnecessaryGetter')
-  def 'if authentication is set, sets up the http client with auth'() {
-    given:
-    def pactUrl = new UrlSource('http://url.that.requires.auth:8080/')
-
-    when:
-    def client = PactReaderKt.newHttpClient(pactUrl.url, [authentication: ['basic', 'user', 'pwd']])
-    def creds = client.credentialsProvider.credMap.entrySet().first().getValue()
-
-    then:
-    client.credentialsProvider instanceof BasicCredentialsProvider
-    creds.principal.username == 'user'
-    creds.password == 'pwd'.toCharArray()
-  }
-
-  def 'custom retry strategy is added to execution chain of client'() {
-    given:
-    def pactUrl = new UrlSource('http://some.url/')
-
-    when:
-    def client = PactReaderKt.newHttpClient(pactUrl.url, [:])
-
-    then:
-    client.execChain.handler instanceof RedirectExec
-    client.execChain.handler.redirectStrategy instanceof RedirectStrategy
   }
 
   def 'correctly loads V2 pact query strings'() {

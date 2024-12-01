@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.support
 
+import org.apache.hc.client5.http.auth.AuthScope
+import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
 import org.apache.hc.client5.http.impl.classic.HttpRequestRetryExec
 import org.apache.hc.client5.http.impl.classic.MainClientExec
 import org.apache.hc.client5.http.protocol.RequestDefaultHeaders
@@ -54,5 +56,22 @@ class HttpClientSpec extends Specification {
 
     where:
     method << Method.values()
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'if authentication is set, sets up the http client with auth'() {
+    given:
+    URI uri = new URI('http://localhost')
+    def authentication = ['basic', 'user', 'pwd']
+    def authScope = new AuthScope(uri.host, uri.port)
+
+    when:
+    def client = HttpClient.INSTANCE.newHttpClient(authentication, uri, 1, 1, false)
+    def creds = client.second.getCredentials(authScope, null)
+
+    then:
+    client.second instanceof SystemDefaultCredentialsProvider
+    creds.principal.username == 'user'
+    creds.password == 'pwd'.toCharArray()
   }
 }
