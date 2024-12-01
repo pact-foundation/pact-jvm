@@ -202,11 +202,6 @@ data class HttpResponse @JvmOverloads constructor(
     return map
   }
 
-  @Deprecated("Replaced with response generator class", replaceWith = ReplaceWith("ResponseGenerator"))
-  override fun generatedResponse(context: MutableMap<String, Any>, mode: GeneratorTestMode): IResponse {
-    return this.toV3Response().generatedResponse(context, mode)
-  }
-
   override fun asHttpPart() = toV3Response()
 
   fun updateProperties(values: Map<String, Any?>) {

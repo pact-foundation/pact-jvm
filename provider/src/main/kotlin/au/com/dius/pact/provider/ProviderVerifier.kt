@@ -7,6 +7,7 @@ import au.com.dius.pact.core.matchers.MatchingConfig
 import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
+import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
 import au.com.dius.pact.core.matchers.interactionCatalogueEntries
 import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.BrokerUrlSource
@@ -1136,7 +1137,9 @@ open class ProviderVerifier @JvmOverloads constructor (
   ): VerificationResult {
     currentInteraction = interaction
     return try {
-      val expectedResponse = interaction.response.generatedResponse(context, GeneratorTestMode.Provider)
+      // TODO: Pass any plugin config in here
+      val expectedResponse = DefaultResponseGenerator.generateResponse(interaction.response, context,
+        GeneratorTestMode.Provider, emptyList(), emptyMap())
       val actualResponse = client.makeRequest(interaction.request.generatedRequest(context, GeneratorTestMode.Provider))
 
       verifyRequestResponsePact(

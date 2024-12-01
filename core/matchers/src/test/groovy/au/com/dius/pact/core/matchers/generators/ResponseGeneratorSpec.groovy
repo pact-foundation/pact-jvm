@@ -1,5 +1,7 @@
-package au.com.dius.pact.core.model
+package au.com.dius.pact.core.matchers.generators
 
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
@@ -10,7 +12,7 @@ import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import spock.lang.Specification
 
-class GeneratedResponseSpec extends Specification {
+class ResponseGeneratorSpec extends Specification {
   private Generators generators
   private Response response
 
@@ -27,7 +29,8 @@ class GeneratedResponseSpec extends Specification {
     response.status = 200
 
     when:
-    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
+    def generated = DefaultResponseGenerator.INSTANCE.generateResponse(response, [:],
+      GeneratorTestMode.Provider, [], [:])
 
     then:
     generated.status >= 400 && generated.status < 500
@@ -38,7 +41,8 @@ class GeneratedResponseSpec extends Specification {
     response.headers = [A: 'a', B: 'b']
 
     when:
-    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
+    def generated = DefaultResponseGenerator.INSTANCE.generateResponse(response, [:],
+      GeneratorTestMode.Provider, [], [:])
 
     then:
     generated.headers.A != 'a'
@@ -51,12 +55,13 @@ class GeneratedResponseSpec extends Specification {
     response.body = OptionalBody.body(Json.INSTANCE.prettyPrint(body).bytes)
 
     when:
-    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
-    def generatedBody = Json.INSTANCE.toMap(JsonParser.INSTANCE.parseString(generated.body.valueAsString()))
+    def generated = DefaultResponseGenerator.INSTANCE.generateResponse(response, [:],
+      GeneratorTestMode.Provider, [], [:])
+    def generatedBody = Json.INSTANCE.toMap(
+      JsonParser.INSTANCE.parseString(generated.body.valueAsString()))
 
     then:
     generatedBody.a != 'A'
     generatedBody.b == 'B'
   }
-
 }

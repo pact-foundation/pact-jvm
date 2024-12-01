@@ -1,5 +1,6 @@
 package steps.v3
 
+import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.Request
@@ -89,7 +90,8 @@ class Generators {
 
   @When('the response is prepared for use')
   void the_response_is_prepared_for_use() {
-    generatedResponse = response.generatedResponse(context, testMode)
+    generatedResponse = DefaultResponseGenerator.INSTANCE.generateResponse(response, context, testMode.Provider,
+      [], [:])
     originalJson = response.body.present ? JsonParser.INSTANCE.parseString(response.body.valueAsString()) : null
     generatedJson = generatedResponse.body.present ?
       JsonParser.INSTANCE.parseString(generatedResponse.body.valueAsString()) : null
