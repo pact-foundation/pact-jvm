@@ -8,11 +8,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.install
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.application.serverConfig
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.request.receiveStream
@@ -26,12 +26,7 @@ import java.util.zip.GZIPInputStream
 data class ServerStateStore(var state: ServerState = ServerState())
 
 class MainServer(val store: ServerStateStore, val serverConfig: Config) {
-  private val env = applicationEngineEnvironment {
-    connector {
-      host = serverConfig.host
-      port = serverConfig.port
-    }
-
+  private val serverProperties = serverConfig {
     module {
       install(CallLogging)
       intercept(ApplicationCallPipeline.Call) {
@@ -43,7 +38,12 @@ class MainServer(val store: ServerStateStore, val serverConfig: Config) {
     }
   }
 
-  val server = embeddedServer(Netty, environment = env, configure = {})
+  var server = embeddedServer(Netty, serverProperties) {
+    connector {
+      host = serverConfig.host
+      port = serverConfig.port
+    }
+  }
 
   suspend fun toPactRequest(call: ApplicationCall): Request {
     val request = call.request

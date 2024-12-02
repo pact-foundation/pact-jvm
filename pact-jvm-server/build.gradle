@@ -21,7 +21,7 @@ dependencies {
   implementation 'org.apache.commons:commons-text'
   implementation 'org.apache.tika:tika-core'
   implementation('io.netty:netty-handler') {
-    exclude module: 'netty-transport-native-kqueue'
+//    exclude module: 'netty-transport-native-kqueue'
   }
   implementation 'io.ktor:ktor-server-netty'
   implementation 'io.ktor:ktor-network-tls-certificates'

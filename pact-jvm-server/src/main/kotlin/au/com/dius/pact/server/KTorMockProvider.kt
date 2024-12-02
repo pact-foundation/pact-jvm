@@ -12,19 +12,23 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.install
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.application.serverConfig
+import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.EngineConnectorConfig
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
-import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.request.receiveStream
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.zip.DeflaterInputStream
 import java.util.zip.GZIPInputStream
@@ -33,7 +37,8 @@ private val logger = KotlinLogging.logger {}
 
 abstract class BaseKTorMockProvider(override val config: MockProviderConfig): StatefulMockProvider() {
 
-  lateinit var server: NettyApplicationEngine
+  open lateinit var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>
+  private lateinit var localAddress: EngineConnectorConfig
 
   suspend fun toPactRequest(call: ApplicationCall): Request {
     val request = call.request
@@ -77,8 +82,13 @@ abstract class BaseKTorMockProvider(override val config: MockProviderConfig): St
 
   override fun start() {
     logger.debug { "Starting mock server" }
+
+    CoroutineScope(server.application.coroutineContext).launch {
+      localAddress = server.engine.resolvedConnectors().first()
+    }
+
     server.start()
-    logger.debug { "Mock server started: ${server.environment.connectors}" }
+    logger.debug { "Mock server started: $localAddress" }
   }
 
   override fun stop() {
@@ -92,15 +102,7 @@ abstract class BaseKTorMockProvider(override val config: MockProviderConfig): St
 }
 
 class KTorMockProvider(override val config: MockProviderConfig): BaseKTorMockProvider(config) {
-  private val serverHostname = config.hostname
-  private val serverPort = config.port
-
-  private val env = applicationEngineEnvironment {
-    connector {
-      host = serverHostname
-      port = serverPort
-    }
-
+  private val serverProperties = serverConfig {
     module {
       install(CallLogging)
       intercept(ApplicationCallPipeline.Call) {
@@ -123,7 +125,10 @@ class KTorMockProvider(override val config: MockProviderConfig): BaseKTorMockPro
     }
   }
 
-  init {
-    server = embeddedServer(Netty, environment = env, configure = {})
+  override var server = embeddedServer(Netty, serverProperties) {
+    connector {
+      host = config.hostname
+      port = config.port
+    }
   }
 }

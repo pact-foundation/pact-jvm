@@ -10,55 +10,43 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.support.Result
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.install
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.application.serverConfig
+import io.ktor.server.engine.EngineConnectorConfig
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
-import io.ktor.server.netty.NettyApplicationEngine
-import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.request.receiveStream
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
-import io.ktor.util.network.hostname
-import io.ktor.util.network.port
-import io.netty.channel.Channel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import io.github.oshai.kotlinlogging.KLogging
-import java.net.SocketAddress
+import java.net.URI
 import java.util.zip.DeflaterInputStream
 import java.util.zip.GZIPInputStream
+
+private val logger = KotlinLogging.logger {}
 
 class KTorMockServer @JvmOverloads constructor(
   pact: BasePact,
   config: MockProviderConfig,
   private val stopTimeout: Long = 20000
 ) : BaseMockServer(pact, config) {
+  private var localAddress: EngineConnectorConfig? = null
 
-  private val env = applicationEngineEnvironment {
-    if (config is MockHttpsProviderConfig) {
-      sslConnector(keyStore = config.keyStore!!, keyAlias = config.keyStoreAlias,
-        keyStorePassword = { config.keystorePassword.toCharArray() },
-        privateKeyPassword = { config.privateKeyPassword.toCharArray() }) {
-        host = config.hostname
-        port = config.port
-      }
-    } else {
-      connector {
-        host = config.hostname
-        port = config.port
-      }
-    }
-
+  private val serverProperties = serverConfig {
     module {
       install(CallLogging)
       intercept(ApplicationCallPipeline.Call) {
@@ -81,8 +69,21 @@ class KTorMockServer @JvmOverloads constructor(
       }
     }
   }
-
-  private var server: NettyApplicationEngine = embeddedServer(Netty, environment = env, configure = {})
+  private var server = embeddedServer(Netty, serverProperties) {
+    if (config is MockHttpsProviderConfig) {
+      sslConnector(keyStore = config.keyStore!!, keyAlias = config.keyStoreAlias,
+        keyStorePassword = { config.keystorePassword.toCharArray() },
+        privateKeyPassword = { config.privateKeyPassword.toCharArray() }) {
+        host = config.hostname
+        port = config.port
+      }
+    } else {
+      connector {
+        host = config.hostname
+        port = config.port
+      }
+    }
+  }
 
   private suspend fun pactResponseToKTorResponse(response: IResponse, call: ApplicationCall) {
     response.headers.forEach { entry ->
@@ -121,29 +122,28 @@ class KTorMockServer @JvmOverloads constructor(
   }
 
   override fun getUrl(): String {
-    val address = socketAddress()
-    return if (address != null) {
+    val connectorConfig = server.engine.configuration.connectors.first()
+    return if (localAddress != null) {
       // Stupid GitHub Windows agents
-      val host = if (address.hostname.lowercase() == "miningmadness.com") {
-        config.hostname
+      val host = if (localAddress!!.host.lowercase() == "miningmadness.com") {
+        connectorConfig.host
       } else {
-        address.hostname
+        localAddress!!.host
       }
-      "${config.scheme}://$host:${address.port}"
+      URI(config.scheme, null, host, localAddress!!.port, null, null, null).toString()
     } else {
-      val connectorConfig = server.environment.connectors.first()
-      "${config.scheme}://${connectorConfig.host}:${connectorConfig.port}"
+      URI(config.scheme, null, connectorConfig.host, connectorConfig.port, null, null, null).toString()
     }
   }
 
-  private fun socketAddress(): SocketAddress? {
-    val field = server.javaClass.getDeclaredField("channels")
-    field.isAccessible = true
-    val channels = field.get(server) as List<Channel>?
-    return channels?.first()?.localAddress()
+  override fun getPort(): Int {
+    return if (localAddress != null) {
+      localAddress!!.port
+    } else {
+      val connectorConfig = server.engine.configuration.connectors.first()
+      connectorConfig.port
+    }
   }
-
-  override fun getPort() = socketAddress()?.port ?: server.environment.connectors.first().port
 
   override fun updatePact(pact: Pact): Pact {
     return if (pact.isV4Pact()) {
@@ -163,14 +163,17 @@ class KTorMockServer @JvmOverloads constructor(
 
   override fun start() {
     logger.debug { "Starting mock server" }
+
+    CoroutineScope(server.application.coroutineContext).launch {
+      localAddress = server.engine.resolvedConnectors().first()
+    }
+
     server.start()
-    logger.debug { "Mock server started: ${server.environment.connectors}" }
+    logger.debug { "Mock server started: $localAddress" }
   }
 
   override fun stop() {
     server.stop(100, stopTimeout)
     logger.debug { "Mock server shutdown" }
   }
-
-  companion object : KLogging()
 }

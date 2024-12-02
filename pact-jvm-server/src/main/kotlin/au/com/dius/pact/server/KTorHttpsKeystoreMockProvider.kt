@@ -9,11 +9,11 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.install
-import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.application.serverConfig
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.request.httpMethod
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
@@ -21,22 +21,7 @@ import io.ktor.server.response.respond
 private val logger = KotlinLogging.logger {}
 
 class KTorHttpsKeystoreMockProvider(override val config: MockHttpsProviderConfig): BaseKTorMockProvider(config) {
-  private val serverHostname = config.hostname
-  private val serverPort = config.port
-  private val keyStore = config.keyStore!!
-  private val keyStoreAlias = config.keyStoreAlias
-  private val password = config.keystorePassword
-  private val privateKeyPassword = config.privateKeyPassword
-
-  private val env = applicationEngineEnvironment {
-    sslConnector(keyStore = keyStore,
-      keyAlias = keyStoreAlias,
-      keyStorePassword = { password.toCharArray() },
-      privateKeyPassword = { privateKeyPassword.toCharArray() }) {
-      host = serverHostname
-      port = serverPort
-    }
-
+  private val serverProperties = serverConfig {
     module {
       install(CallLogging)
       intercept(ApplicationCallPipeline.Call) {
@@ -59,7 +44,13 @@ class KTorHttpsKeystoreMockProvider(override val config: MockHttpsProviderConfig
     }
   }
 
-  init {
-    server = embeddedServer(Netty, environment = env, configure = {})
+  override var server = embeddedServer(Netty, serverProperties) {
+    sslConnector(keyStore = config.keyStore!!,
+      keyAlias = config.keyStoreAlias,
+      keyStorePassword = { config.keystorePassword.toCharArray() },
+      privateKeyPassword = { config.privateKeyPassword.toCharArray() }) {
+      host = config.hostname
+      port = config.port
+    }
   }
 }

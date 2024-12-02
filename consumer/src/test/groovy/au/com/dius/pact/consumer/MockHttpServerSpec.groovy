@@ -94,6 +94,7 @@ class MockHttpServerSpec extends Specification {
 
     then:
     mockServer.url ==~ /http:\/\/[a-z0-9\-]+\:\d+/
+    mockServer.port > 0
 
     cleanup:
     mockServer.stop()
@@ -113,11 +114,36 @@ class MockHttpServerSpec extends Specification {
     MockHttpsServer | '::1'           | 1238
     MockHttpsServer | 'ip6-localhost' | 0
     MockHttpsServer | 'ip6-localhost' | 1239
+//    KTorMockServer  | '[::1]'         | 0     // KTor server does not do reverse lookups of the bound host
+//    KTorMockServer  | '[::1]'         | 2234
+//    KTorMockServer  | '::1'           | 0
+//    KTorMockServer  | '::1'           | 2235
+    KTorMockServer  | 'ip6-localhost' | 0
+    KTorMockServer  | 'ip6-localhost' | 2236
+  }
+
+  def 'KTor IP6 test'() {
+    given:
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [])
+    def config = new MockProviderConfig(hostname, port)
+
+    when:
+    def mockServer = mockServerClass.newInstance(pact, config)
+    mockServer.start()
+
+    then:
+    mockServer.url ==~ /http:\/\/\[::1]:\d+/
+    mockServer.port > 0
+
+    cleanup:
+    mockServer.stop()
+
+    where:
+
+    mockServerClass | hostname        | port
     KTorMockServer  | '[::1]'         | 0
     KTorMockServer  | '[::1]'         | 2234
     KTorMockServer  | '::1'           | 0
     KTorMockServer  | '::1'           | 2235
-    KTorMockServer  | 'ip6-localhost' | 0
-    KTorMockServer  | 'ip6-localhost' | 2236
   }
 }
