@@ -32,6 +32,7 @@ import io.ktor.server.response.respondBytes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.net.URI
 import java.util.zip.DeflaterInputStream
@@ -163,14 +164,14 @@ class KTorMockServer @JvmOverloads constructor(
 
   override fun start() {
     logger.debug { "Starting mock server" }
-
-    CoroutineScope(server.application.coroutineContext).launch {
-      localAddress = server.engine.resolvedConnectors().first()
+    runBlocking {
+      val startJob = CoroutineScope(server.application.coroutineContext).launch {
+        localAddress = server.engine.resolvedConnectors().first()
+      }
+      server.start()
+      startJob.join()
+      logger.debug { "Mock server started: $localAddress" }
     }
-
-    server.start()
-    waitForServer()
-    logger.debug { "Mock server started: $localAddress" }
   }
 
   override fun stop() {
