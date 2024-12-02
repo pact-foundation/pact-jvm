@@ -169,6 +169,7 @@ class KTorMockServer @JvmOverloads constructor(
     }
 
     server.start()
+    waitForServer()
     logger.debug { "Mock server started: $localAddress" }
   }
 
