@@ -1,11 +1,14 @@
 package au.com.dius.pact.core.model.matchingrules
 
-import au.com.dius.pact.core.model.*
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.atLeast
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.support.json.JsonValue
-import io.github.oshai.kotlinlogging.KLogging
-import java.util.Comparator
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.function.Predicate
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Matching rules category
@@ -14,9 +17,6 @@ data class MatchingRuleCategory @JvmOverloads constructor(
   val name: String,
   var matchingRules: MutableMap<String, MatchingRuleGroup> = mutableMapOf()
 ) {
-
-  companion object : KLogging()
-
   /**
    * Add a rule by key to the given category
    */
