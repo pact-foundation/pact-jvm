@@ -7,15 +7,21 @@ import org.springframework.core.env.Environment
 class SpringEnvironmentResolver(private val environment: Environment) : ValueResolver {
   override fun resolveValue(property: String?): String? {
     val tuple = SystemPropertyResolver.PropertyValueTuple(property).invoke()
-    return environment.getProperty(tuple.propertyName, tuple.defaultValue)
+    return if (tuple.propertyName != null)
+      environment.getProperty(tuple.propertyName!!, tuple.defaultValue.orEmpty())
+      else null
   }
 
   override fun resolveValue(property: String?, default: String?): String? {
-    return environment.getProperty(property, default)
+    return if (property != null)
+      environment.getProperty(property, default.orEmpty())
+      else null
   }
 
   override fun propertyDefined(property: String): Boolean {
     val tuple = SystemPropertyResolver.PropertyValueTuple(property).invoke()
-    return environment.containsProperty(tuple.propertyName)
+    return if (tuple.propertyName != null)
+      environment.containsProperty(tuple.propertyName!!)
+      else false
   }
 }

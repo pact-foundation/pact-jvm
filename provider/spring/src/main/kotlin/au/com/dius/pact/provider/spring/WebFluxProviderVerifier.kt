@@ -30,7 +30,7 @@ import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 
-val logger = KotlinLogging.logger {}
+private val logger = KotlinLogging.logger {}
 
 class WebFluxProviderVerifier : ProviderVerifier() {
 

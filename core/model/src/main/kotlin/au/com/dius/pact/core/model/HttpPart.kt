@@ -114,7 +114,7 @@ abstract class HttpPart: IHttpPart {
         contentType.isBinaryType() || contentType.isMultipart() -> try {
           OptionalBody.body(decoder.decode(body), contentType)
         } catch (ex: IllegalArgumentException) {
-          logger.warn(ex) { "Expected body for content type $contentType to be base64 encoded" }
+          logger.warn { "Expected body for content type $contentType to be base64 encoded: ${ex.message}" }
           OptionalBody.body(body.toByteArray(contentType.asCharset()), contentType)
         }
         else -> OptionalBody.body(body.toByteArray(contentType.asCharset()), contentType)

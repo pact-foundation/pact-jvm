@@ -13,7 +13,7 @@ import au.com.dius.pact.provider.VerificationResult
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.hamcrest.Matchers.anything
 import org.springframework.http.HttpHeaders
@@ -39,6 +39,8 @@ import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 
+private val logger = KotlinLogging.logger {}
+
 /**
  * Verifies the providers against the defined consumers using Spring MockMvc
  */
@@ -60,8 +62,9 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       val expectedResponse = interaction.response
       val actualResponse = handleResponse(mvcResult.response)
 
+      // TODO: Add any plugin configuration here
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
-        interaction.interactionId.orEmpty(), false)
+        interaction.interactionId.orEmpty(), false, emptyMap())
     } catch (e: Exception) {
       failures[interactionMessage] = e
       reporters.forEach {
@@ -98,7 +101,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       } else {
         MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
           .headers(mapHeaders(request, true))
-          .content(body.value)
+          .content(body.value ?: ByteArray(0))
       }
     } else {
       MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
@@ -188,13 +191,16 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
 
     val headers = mutableMapOf<String, List<String>>()
     httpResponse.headerNames.forEach { headerName ->
-      headers[headerName] = listOf(httpResponse.getHeader(headerName))
+      val header = httpResponse.getHeader(headerName)
+      if (header != null) {
+        headers[headerName] = listOf(header)
+      }
     }
 
     val contentType = if (httpResponse.contentType.isNullOrEmpty()) {
       ContentType.JSON
     } else {
-      ContentType.fromString(httpResponse.contentType.toString())
+      ContentType.fromString(httpResponse.contentType!!.toString())
     }
 
     val response = ProviderResponse(httpResponse.status, headers, contentType,
@@ -204,6 +210,4 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
 
     return response
   }
-
-  companion object : KLogging()
 }
