@@ -15,6 +15,7 @@ class Consumer(
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
+  @Deprecated("replaced with auth")
   override var pactFileAuthentication: List<Any?> = emptyList()
 ) : ConsumerInfo(name, stateChange, stateChangeUsesBody, packagesToScan, verificationType, pactSource, pactFileAuthentication) {
 

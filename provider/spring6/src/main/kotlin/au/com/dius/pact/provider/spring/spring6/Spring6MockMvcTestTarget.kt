@@ -13,7 +13,7 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderResponse
 import au.com.dius.pact.provider.junit5.TestTarget
 import jakarta.servlet.http.Cookie
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.hamcrest.core.IsAnything
 import org.springframework.http.HttpHeaders
@@ -38,6 +38,8 @@ import java.net.URI
 import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Test target for tests using Spring MockMvc.
@@ -85,7 +87,7 @@ class Spring6MockMvcTestTarget @JvmOverloads constructor(
 
         val requestBuilder = MockMvcRequestBuilders.get("/")
         if (!servletPath.isNullOrEmpty()) {
-            requestBuilder.servletPath(servletPath)
+            requestBuilder.servletPath(servletPath!!)
         }
 
         return MockMvcBuilders.standaloneSetup(*controllers.toTypedArray())
@@ -120,7 +122,7 @@ class Spring6MockMvcTestTarget @JvmOverloads constructor(
       } else {
         MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
           .headers(mapHeaders(request, true))
-          .content(body.value)
+          .content(body.value!!)
       }
     } else {
       MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
@@ -196,7 +198,10 @@ class Spring6MockMvcTestTarget @JvmOverloads constructor(
 
       val headers = mutableMapOf<String, List<String>>()
       httpResponse.headerNames.forEach { headerName ->
-          headers[headerName] = listOf(httpResponse.getHeader(headerName))
+          val header = httpResponse.getHeader(headerName)
+        if (header != null) {
+          headers[headerName] = listOf(header)
+        }
       }
 
       val contentType = if (httpResponse.contentType.isNullOrEmpty()) {
@@ -218,6 +223,4 @@ class Spring6MockMvcTestTarget @JvmOverloads constructor(
     }
 
   override fun supportsInteraction(interaction: Interaction)  = interaction is SynchronousRequestResponse
-
-  companion object : KLogging()
 }

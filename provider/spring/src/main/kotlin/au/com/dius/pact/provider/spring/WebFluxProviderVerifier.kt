@@ -50,8 +50,9 @@ class WebFluxProviderVerifier : ProviderVerifier() {
       val expectedResponse = interaction.response
       val actualResponse = handleResponse(clientResponse)
 
+      // TODO: Add plugin config here
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
-        interaction.interactionId.orEmpty(), false)
+        interaction.interactionId.orEmpty(), false, emptyMap())
     } catch (e: Exception) {
       logger.error(e) { "Request to provider method failed" }
 

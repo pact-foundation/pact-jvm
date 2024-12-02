@@ -26,12 +26,12 @@ open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner(clazz) {
 
   override fun withBeforeClasses(statement: Statement?): Statement {
     val withBeforeClasses = super.withBeforeClasses(statement)
-    return RunBeforeTestClassCallbacks(withBeforeClasses, testContextManager)
+    return RunBeforeTestClassCallbacks(withBeforeClasses, testContextManager!!)
   }
 
   override fun withAfterClasses(statement: Statement?): Statement {
     val withAfterClasses = super.withAfterClasses(statement)
-    return RunAfterTestClassCallbacks(withAfterClasses, testContextManager)
+    return RunAfterTestClassCallbacks(withAfterClasses, testContextManager!!)
   }
 
   private fun initTestContextManager(clazz: Class<*>): TestContextManager {

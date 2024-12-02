@@ -23,52 +23,57 @@ dependencies {
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
-def isWindows() {
+
+static def isWindows() {
     Os.isFamily(Os.FAMILY_WINDOWS)
 }
 
-task generatePom(type: GenerateMavenPom, dependsOn: [":provider:publishToMavenLocal",
-                                                     ':core:model:publishToMavenLocal',
-                                                     ':core:matchers:publishToMavenLocal',
-                                                     ':core:pactbroker:publishToMavenLocal',
-                                                     ':core:support:publishToMavenLocal']) {
-    destination = file("${buildDir}/poms/pom.xml")
-    pom = publishMavenPublicationPublicationToMavenLocal.publication.pom
-    pom.packaging = 'maven-plugin'
-    pom.withXml {
-        def buildNode = asNode().appendNode('build')
-        buildNode.appendNode('directory', buildDir)
-        buildNode.appendNode('outputDirectory', "$buildDir/classes/kotlin/main")
-        //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
-        //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
-        def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
-        pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
-        pluginNode.appendNode('version', '3.5')
-        pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
-    }
+tasks.register('generatePom', GenerateMavenPom) {
+  dependsOn ":provider:publishToMavenLocal",
+    ':core:model:publishToMavenLocal',
+    ':core:matchers:publishToMavenLocal',
+    ':core:pactbroker:publishToMavenLocal',
+    ':core:support:publishToMavenLocal'
+  destination = file("${buildDir}/poms/pom.xml")
+  pom = publishMavenPublicationPublicationToMavenLocal.publication.pom
+  pom.packaging = 'maven-plugin'
+  pom.withXml {
+    def buildNode = asNode().appendNode('build')
+    buildNode.appendNode('directory', buildDir)
+    buildNode.appendNode('outputDirectory', "$buildDir/classes/kotlin/main")
+    //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
+    //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
+    def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
+    pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
+    pluginNode.appendNode('version', '3.5')
+    pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
+  }
 }
 
 if (System.env.CI != 'true') {
-  task pluginDescriptor(type: Exec, dependsOn: generatePom) {
+  tasks.register('pluginDescriptor', Exec) {
+    dependsOn generatePom
+
+    def pomFile = layout.buildDirectory.file("poms/pom.xml").get().asFile.path
     if (isWindows()) {
       try {
         // check if mvn.bat exists
         def proc = new ProcessBuilder('mvn.bat', '-v')
         proc.start().waitFor()
 
-        commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
-      } catch(Exception e) {
-        commandLine 'mvn.cmd', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+        commandLine 'mvn.bat', '-f', pomFile, '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
+      } catch (Exception e) {
+        commandLine 'mvn.cmd', '-f', pomFile, '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor'
       }
     } else {
-      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
+      commandLine 'sh', '-c', "mvn -f ${pomFile} -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.1:descriptor"
     }
 
-      doLast {
-        final dir = project.compileKotlin.destinationDirectory.dir('META-INF/maven').get()
-        final pluginDescriptor = dir.file('plugin.xml').getAsFile()
-        assert pluginDescriptor.exists(), "[$pluginDescriptor.canonicalPath] was not created"
-      }
+    doLast {
+      final dir = project.compileKotlin.destinationDirectory.dir('META-INF/maven').get()
+      final pluginDescriptor = dir.file('plugin.xml').getAsFile()
+      assert pluginDescriptor.exists(), "[$pluginDescriptor.canonicalPath] was not created"
+    }
   }
 
   pluginDescriptor.shouldRunAfter project.jar

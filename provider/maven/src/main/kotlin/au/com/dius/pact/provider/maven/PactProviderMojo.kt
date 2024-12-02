@@ -152,7 +152,7 @@ open class PactProviderMojo : PactBaseMojo() {
         verifier.displayFailures(failures)
         val nonPending = failures.filterNot { it.pending }
         if (nonPending.isNotEmpty()) {
-          throw MojoFailureException("There were ${nonPending.sumBy { it.failures.size }} non-pending pact failures")
+          throw MojoFailureException("There were ${nonPending.sumOf { it.failures.size }} non-pending pact failures")
         }
       }
     } finally {
