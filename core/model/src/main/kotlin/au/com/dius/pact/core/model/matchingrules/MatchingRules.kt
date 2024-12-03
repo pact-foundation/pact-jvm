@@ -14,10 +14,8 @@ import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
-import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.KLogging
 import java.lang.RuntimeException
-
-private val logger = KotlinLogging.logger {}
 
 /**
  * Logic to use to combine rules
@@ -65,7 +63,7 @@ interface MatchingRule {
    */
   val attributes: Map<String, JsonValue>
 
-  companion object {
+  companion object : KLogging() {
     private const val MATCH = "match"
     private const val MIN = "min"
     private const val MAX = "max"
@@ -87,12 +85,12 @@ interface MatchingRule {
           j.has(TIME) -> TimeMatcher(j[TIME].asString()!!)
           j.has(DATE) -> DateMatcher(j[DATE].asString()!!)
           else -> {
-            logger.warn { "Unrecognised matcher definition $j, defaulting to equality matching" }
+            MatchingRuleGroup.logger.warn { "Unrecognised matcher definition $j, defaulting to equality matching" }
             EqualsMatcher
           }
         }
       } else {
-        logger.warn { "Unrecognised matcher definition $json, defaulting to equality matching" }
+        MatchingRuleGroup.logger.warn { "Unrecognised matcher definition $json, defaulting to equality matching" }
         EqualsMatcher
       }
     }
@@ -110,7 +108,7 @@ interface MatchingRule {
         "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
         "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
         "real" -> {
-          logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
+          MatchingRuleGroup.logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
           NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
         }
         MIN -> MinTypeMatcher(values[MIN].asNumber()!!.toInt())
@@ -196,7 +194,7 @@ interface MatchingRule {
           EachValueMatcher(definition)
         }
         else -> {
-          logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
+          MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
           EqualsMatcher
         }
       }
@@ -678,7 +676,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     return rules.any { matchers.contains(it.javaClass) }
   }
 
-  companion object {
+  companion object : KLogging() {
     @JvmStatic
     fun fromJson(json: JsonValue): MatchingRuleGroup {
       var ruleLogic = RuleLogic.AND
@@ -693,7 +691,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
               ruleLogic = RuleLogic.valueOf(value)
             }
           } catch (e: IllegalArgumentException) {
-            logger.warn { "${groupJson["combine"]} is not a valid matcher rule logic value: ${e.message}" }
+            logger.warn { "${groupJson["combine"]} is not a valid matcher rule logic value" }
           }
         }
 

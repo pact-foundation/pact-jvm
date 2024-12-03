@@ -169,7 +169,6 @@ class Message @JvmOverloads constructor(
     }
   }
 
-  @Suppress("SwallowedException")
   private fun tryParseKafkaSchemaRegistryMagicBytes(): String {
     return try {
         parseKafkaSchemaRegistryMagicBytes()

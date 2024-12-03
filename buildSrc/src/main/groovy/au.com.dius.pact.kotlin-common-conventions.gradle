@@ -3,8 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 
     id 'groovy'
-    // TODO: Detekt does not support JDK 23 yet
-    id "io.gitlab.arturbosch.detekt" apply false
+    // id "io.gitlab.arturbosch.detekt" TODO: Detekt does not support JDK 23 yet
     id 'codenarc'
 }
 
@@ -113,8 +112,6 @@ codenarcTest {
 }
 
 // TODO: Detekt does not support JDK 23 yet
-if (System.getenv('CI') == null) {
-    detekt {
-        config = files(rootProject.file("config/detekt-config.yml"))
-    }
-}
+//detekt {
+//    config = files(rootProject.file("config/detekt-config.yml"))
+//}
