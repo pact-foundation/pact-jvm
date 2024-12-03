@@ -13,7 +13,7 @@ import au.com.dius.pact.provider.junitsupport.IgnoreMissingStateChange
 import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -21,6 +21,8 @@ import org.junit.platform.commons.support.AnnotationSupport
 import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
 import java.lang.reflect.Method
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * JUnit 5 test extension class for executing state change callbacks
@@ -151,6 +153,4 @@ class PactVerificationStateChangeExtension(
   private fun ignoreMissingStateChangeMethod(testClass: Class<*>): Boolean {
     return ProviderUtils.findAnnotation(testClass, IgnoreMissingStateChange::class.java) != null
   }
-
-  companion object : KLogging()
 }

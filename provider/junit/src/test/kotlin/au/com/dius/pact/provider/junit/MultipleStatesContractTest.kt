@@ -9,7 +9,7 @@ import au.com.dius.pact.provider.junitsupport.StateChangeAction
 import com.github.restdriver.clientdriver.ClientDriverRule
 import com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse
 import com.github.restdriver.clientdriver.RestClientDriver.onRequestTo
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.equalTo
@@ -18,6 +18,8 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.ClassRule
 import org.junit.runner.RunWith
+
+private val logger = KotlinLogging.logger {}
 
 @RunWith(PactRunner::class)
 @Provider("providerMultipleStates")
@@ -40,7 +42,7 @@ class MultipleStatesContractTest {
   fun state1() {
     // Prepare service before interaction that require "default" state
     // ...
-    logger.info("Now service in state1")
+    logger.info { { "Now service in state1" } }
     executedStates.add("state 1")
   }
 
@@ -48,25 +50,25 @@ class MultipleStatesContractTest {
   fun toSecondState(params: Map<*, *>) {
     // Prepare service before interaction that require "state 2" state
     // ...
-    logger.info("Now service in 'state 2' state: $params")
+    logger.info { "Now service in 'state 2' state: $params" }
     executedStates.add("state 2")
   }
 
   @State("a gateway account with external id exists")
   fun gatewayAccount(params: Map<*, *>) {
-    logger.info("Now service in 'gateway account' state: $params")
+    logger.info { "Now service in 'gateway account' state: $params" }
     executedStates.add("a gateway account with external id exists")
   }
 
   @State("a confirmed mandate exists")
   fun confirmedMandate(params: Map<*, *>) {
-    logger.info("Now service in 'confirmed mandate' state: $params")
+    logger.info { "Now service in 'confirmed mandate' state: $params" }
     executedStates.add("a confirmed mandate exists")
   }
 
   @State("something else exists")
   fun somethingElse() {
-    logger.info("Now service in 'somethingElse' state")
+    logger.info { "Now service in 'somethingElse' state" }
     executedStates.add("something else exists")
   }
 
@@ -74,7 +76,7 @@ class MultipleStatesContractTest {
   fun state1Teardown() {
     // Prepare service before interaction that require "default" state
     // ...
-    logger.info("Now service in state1 Teardown")
+    logger.info { "Now service in state1 Teardown" }
     executedStates.add("state 1 Teardown")
   }
 
@@ -82,29 +84,29 @@ class MultipleStatesContractTest {
   fun toSecondStateTeardown(params: Map<*, *>) {
     // Prepare service before interaction that require "state 2" state
     // ...
-    logger.info("Now service in 'state 2' Teardown state: $params")
+    logger.info { "Now service in 'state 2' Teardown state: $params" }
     executedStates.add("state 2 Teardown")
   }
 
   @State("a gateway account with external id exists", action = StateChangeAction.TEARDOWN)
   fun gatewayAccountTeardown(params: Map<*, *>) {
-    logger.info("Now service in 'gateway account' Teardown state: $params")
+    logger.info { "Now service in 'gateway account' Teardown state: $params" }
     executedStates.add("a gateway account with external id exists Teardown")
   }
 
   @State("a confirmed mandate exists", action = StateChangeAction.TEARDOWN)
   fun confirmedMandateTeardown(params: Map<*, *>) {
-    logger.info("Now service in 'confirmed mandate' Teardown state: $params")
+    logger.info { "Now service in 'confirmed mandate' Teardown state: $params" }
     executedStates.add("a confirmed mandate exists Teardown")
   }
 
   @State("something else exists", action = StateChangeAction.TEARDOWN)
   fun somethingElseTeardown() {
-    logger.info("Now service in 'somethingElse' Teardown state")
+    logger.info { "Now service in 'somethingElse' Teardown state" }
     executedStates.add("something else exists Teardown")
   }
 
-  companion object : KLogging() {
+  companion object {
     @ClassRule
     @JvmField
     val embeddedService = ClientDriverRule(8332)

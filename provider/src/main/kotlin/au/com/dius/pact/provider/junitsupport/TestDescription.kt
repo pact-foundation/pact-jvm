@@ -10,8 +10,7 @@ import au.com.dius.pact.core.support.isNotEmpty
 class TestDescription(
   val interaction: Interaction,
   val pactSource: PactSource?,
-  val consumerName: String?,
-  val consumer: Consumer?
+  val consumerName: String?
 ) {
   fun generateDescription(): String {
     val messagePrefix = if (interaction.isAsynchronousMessage()) {
@@ -24,9 +23,8 @@ class TestDescription(
 
   private fun consumerName(): String {
     val name = when {
-      pactSource is BrokerUrlSource -> pactSource.result?.name ?: consumer?.name
-      consumerName.isNotEmpty() -> consumerName
-      else -> consumer?.name
+      pactSource is BrokerUrlSource -> pactSource.result?.name ?: consumerName
+      else -> consumerName
     }
     return name ?: "Unknown consumer"
   }

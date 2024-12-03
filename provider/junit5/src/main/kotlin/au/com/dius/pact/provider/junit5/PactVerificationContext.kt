@@ -71,7 +71,7 @@ data class PactVerificationContext @JvmOverloads constructor(
           } else {
             UnknownPactSource
           }
-          val description = TestDescription(interaction, source, null, consumer.toPactConsumer())
+          val description = TestDescription(interaction, source, consumer.name)
           throw AssertionError(description.generateDescription() +
             verifier!!.generateErrorStringFromVerificationResult(testExecutionResult))
         }

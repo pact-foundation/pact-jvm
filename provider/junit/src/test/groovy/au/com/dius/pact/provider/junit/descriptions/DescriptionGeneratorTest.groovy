@@ -1,13 +1,10 @@
 package au.com.dius.pact.provider.junit.descriptions
 
 import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.Response
-import au.com.dius.pact.core.model.Provider
-import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.provider.junit.target.HttpTarget
@@ -34,16 +31,10 @@ class DescriptionGeneratorTest extends Specification {
   def 'when BrokerUrlSource tests description includes tag if present'() {
     def interaction = new RequestResponseInteraction('Interaction 1',
             [ new ProviderState('Test State') ], new Request(), new Response())
-    def pact = new RequestResponsePact(
-            new Provider(),
-            new Consumer('the-consumer-name'),
-            [ interaction ],
-            [:],
-            new BrokerUrlSource('url', 'url', [:], [:], tag)
-    )
+    def source = new BrokerUrlSource('url', 'url', [:], [:], tag)
 
     expect:
-    def generator = new DescriptionGenerator(clazz, pact, null, null)
+    def generator = new DescriptionGenerator(clazz, source, 'the-consumer-name')
     description == generator.generate(interaction).methodName
 
     where:
@@ -56,15 +47,10 @@ class DescriptionGeneratorTest extends Specification {
   def 'when non broker pact source tests name are built correctly'() {
     def interaction = new RequestResponseInteraction('Interaction 1',
             [ new ProviderState('Test State') ], new Request(), new Response())
-    def pact = new RequestResponsePact(new Provider(),
-            new Consumer(),
-            [ interaction ],
-            [:],
-            new DirectorySource(Mock(File))
-    )
+    def source = new DirectorySource(Mock(File))
 
     expect:
-    def generator = new DescriptionGenerator(clazz, pact, null, null)
+    def generator = new DescriptionGenerator(clazz, source, 'consumer')
     'consumer - Upon Interaction 1 ' == generator.generate(interaction).methodName
   }
 
@@ -75,9 +61,7 @@ class DescriptionGeneratorTest extends Specification {
       [ new ProviderState('Test State') ], new Request(), new Response())
     def pactSource =  new BrokerUrlSource('url', 'url', [:], [:], 'master',
       new PactBrokerResult('test', 'test', 'test', [], [], pending == 'enabled', null, false, true))
-    def pact = new RequestResponsePact(new Provider(), new Consumer('the-consumer-name'), [ interaction ],
-      [:], pactSource)
-    def generator = new DescriptionGenerator(clazz, pact, null, null)
+    def generator = new DescriptionGenerator(clazz, pactSource, 'the-consumer-name')
 
     expect:
     description == generator.generate(interaction).methodName

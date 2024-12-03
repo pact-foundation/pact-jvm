@@ -15,10 +15,12 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
 import au.com.dius.pact.provider.junitsupport.Provider
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.net.URLClassLoader
 import java.util.function.Function
 import java.util.function.Supplier
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Out-of-the-box implementation of [Target], that run [Interaction] against message pact and verify response
@@ -43,13 +45,13 @@ open class MessageTarget @JvmOverloads constructor(
   ) {
     // TODO: Require the plugin config here
     val result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
-      interaction.description, mutableMapOf(), false)
+      interaction.description, mutableMapOf(), false, emptyMap())
     reportTestResult(result, verifier)
 
     try {
       if (result is VerificationResult.Failed) {
         verifier.displayFailures(listOf(result))
-        val descriptionGenerator = DescriptionGenerator(testClass, null, source, consumerName)
+        val descriptionGenerator = DescriptionGenerator(testClass, source, consumerName)
         val description = descriptionGenerator.generate(interaction).methodName
         throw AssertionError(description + verifier.generateErrorStringFromVerificationResult(listOf(result)))
       }
@@ -116,6 +118,4 @@ open class MessageTarget @JvmOverloads constructor(
   }
 
   override fun validForInteraction(interaction: Interaction) = interaction.isAsynchronousMessage()
-
-  companion object : KLogging()
 }

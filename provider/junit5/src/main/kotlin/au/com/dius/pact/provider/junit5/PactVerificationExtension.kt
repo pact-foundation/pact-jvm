@@ -21,7 +21,7 @@ import au.com.dius.pact.provider.VerificationFailureType
 import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.hc.core5.http.ClassicHttpRequest
 import org.apache.hc.core5.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -34,6 +34,8 @@ import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 import org.junit.platform.commons.support.AnnotationSupport
 import java.io.File
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * JUnit 5 test extension class used to inject parameters and execute the test for a Pact interaction.
@@ -243,6 +245,4 @@ open class PactVerificationExtension(
       }
     }
   }
-
-  companion object : KLogging()
 }

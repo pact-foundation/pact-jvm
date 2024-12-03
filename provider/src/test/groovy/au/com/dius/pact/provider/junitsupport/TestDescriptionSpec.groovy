@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import spock.lang.Specification
@@ -15,16 +14,10 @@ class TestDescriptionSpec extends Specification {
   def 'when BrokerUrlSource tests description includes tag if present'() {
     def interaction = new RequestResponseInteraction('Interaction 1',
       [ new ProviderState('Test State') ], new Request(), new Response())
-    def pact = new RequestResponsePact(
-      new au.com.dius.pact.core.model.Provider(),
-      new au.com.dius.pact.core.model.Consumer('the-consumer-name'),
-      [ interaction ],
-      [:],
-      new BrokerUrlSource('url', 'url', [:], [:], tag)
-    )
+    def source = new BrokerUrlSource('url', 'url', [:], [:], tag)
 
     expect:
-    def generator = new TestDescription(interaction, pact.source, null, pact.consumer)
+    def generator = new TestDescription(interaction, source, 'the-consumer-name')
     description == generator.generateDescription()
 
     where:
@@ -37,15 +30,10 @@ class TestDescriptionSpec extends Specification {
   def 'when non broker pact source tests name are built correctly'() {
     def interaction = new RequestResponseInteraction('Interaction 1',
       [ new ProviderState('Test State') ], new Request(), new Response())
-    def pact = new RequestResponsePact(new au.com.dius.pact.core.model.Provider(),
-      new au.com.dius.pact.core.model.Consumer(),
-      [ interaction ],
-      [:],
-      new DirectorySource(Mock(File))
-    )
+    def source = new DirectorySource(Mock(File))
 
     expect:
-    def generator = new TestDescription(interaction, pact.source, null, pact.consumer)
+    def generator = new TestDescription(interaction, source, 'consumer')
     'consumer - Upon Interaction 1 ' == generator.generateDescription()
   }
 
@@ -57,10 +45,7 @@ class TestDescriptionSpec extends Specification {
     def pactSource =  new BrokerUrlSource('url', 'url', [:], [:], 'master',
       new PactBrokerResult('test', 'test', 'test', [], [],
         pending == 'enabled', null, false, true, null))
-    def pact = new RequestResponsePact(new au.com.dius.pact.core.model.Provider(),
-      new au.com.dius.pact.core.model.Consumer('the-consumer-name'), [interaction ],
-      [:], pactSource)
-    def generator = new TestDescription(interaction, pact.source, null, pact.consumer)
+    def generator = new TestDescription(interaction, pactSource, 'the-consumer-name')
 
     expect:
     description == generator.generateDescription()

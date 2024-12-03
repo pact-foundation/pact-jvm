@@ -21,7 +21,7 @@ import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider
@@ -31,6 +31,7 @@ import java.io.IOException
 import java.util.stream.Stream
 
 val namespace: ExtensionContext.Namespace = ExtensionContext.Namespace.create("pact-jvm")
+private val logger = KotlinLogging.logger {}
 
 /**
  * Main TestTemplateInvocationContextProvider for JUnit 5 Pact verification tests. This class needs to be applied to
@@ -152,7 +153,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     return AnnotationSupport.isAnnotated(context.requiredTestClass, Provider::class.java)
   }
 
-  companion object : KLogging() {
+  companion object {
     fun lookupConsumerName(context: ExtensionContext, ep: ExpressionParser): String? {
       val consumerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Consumer::class.java)
       return ep.parseExpression(consumerInfo.orElse(null)?.value, DataType.STRING)?.toString()

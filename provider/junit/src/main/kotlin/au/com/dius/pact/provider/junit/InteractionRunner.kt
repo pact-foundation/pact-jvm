@@ -76,7 +76,7 @@ open class InteractionRunner(
   private val results = ConcurrentHashMap<String, Pair<VerificationResult, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
-  private val descriptionGenerator = DescriptionGenerator(testClass, pact)
+  private val descriptionGenerator = DescriptionGenerator(testClass, pactSource, pact.consumer.name)
   protected var propertyResolver: ValueResolver = SystemPropertyResolver
 
   var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator

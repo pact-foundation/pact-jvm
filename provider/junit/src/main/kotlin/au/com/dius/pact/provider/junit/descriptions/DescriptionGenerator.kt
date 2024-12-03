@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider.junit.descriptions
 
 import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.junitsupport.TestDescription
 import org.junit.runner.Description
@@ -12,8 +11,6 @@ import org.junit.runners.model.TestClass
  */
 class DescriptionGenerator(
   private val testClass: TestClass,
-  @Deprecated("Pass the pact source and consumer name in")
-  private val pact: Pact?,
   private val pactSource: PactSource? = null,
   private val consumerName: String? = null
 ) {
@@ -26,7 +23,7 @@ class DescriptionGenerator(
    * @param interaction the Interaction under test
    */
   fun generate(interaction: Interaction): Description {
-    val generator = TestDescription(interaction, pactSource ?: pact?.source, consumerName, pact?.consumer)
+    val generator = TestDescription(interaction, pactSource, consumerName)
     return Description.createTestDescription(testClass.javaClass, generator.generateDescription())
   }
 }
