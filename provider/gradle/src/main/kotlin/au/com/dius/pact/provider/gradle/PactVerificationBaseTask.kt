@@ -15,7 +15,7 @@ open class PactVerificationBaseTask : DefaultTask() {
         val nonPending = failures.filterNot { it.pending }
         if (nonPending.isNotEmpty()) {
           throw GradleScriptException(
-            "There were ${nonPending.sumBy { it.failures.size }} non-pending pact failures for provider ${providerToVerify.name}", null)
+            "There were ${nonPending.sumOf { it.failures.size }} non-pending pact failures for provider ${providerToVerify.name}", null)
         }
       }
     } finally {

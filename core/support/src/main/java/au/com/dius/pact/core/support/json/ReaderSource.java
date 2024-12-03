@@ -3,6 +3,9 @@ package au.com.dius.pact.core.support.json;
 import java.io.IOException;
 import java.io.Reader;
 
+/**
+ * JSON source from a Reader
+ */
 public class ReaderSource extends JsonSource {
   private Reader reader;
   private Character buffer = null;

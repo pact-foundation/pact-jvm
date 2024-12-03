@@ -15,6 +15,7 @@ open class GradleConsumerInfo(
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
+  @Deprecated("Replaced with auth")
   override var pactFileAuthentication: List<Any?> = emptyList(),
   override val notices: List<VerificationNotice> = mutableListOf(),
   override val pending: Boolean = false,

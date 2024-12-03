@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.support.json;
 
+/**
+ * Abstract class that represents the source of a JSON document
+ */
 public abstract class JsonSource {
   public abstract Character nextChar();
   public abstract Character peekNextChar();

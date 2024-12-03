@@ -4,11 +4,13 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
 import java.util.function.Supplier
 import kotlin.reflect.full.isSubclassOf
+
+private val logger = KotlinLogging.logger {}
 
 data class StateChangeCallbackFailed(
   override val message: String,
@@ -67,6 +69,4 @@ class RunStateChanges(
       }
     }
   }
-
-  companion object : KLogging()
 }

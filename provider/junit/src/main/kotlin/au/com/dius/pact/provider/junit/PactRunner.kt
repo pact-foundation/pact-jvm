@@ -24,13 +24,15 @@ import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.Ignore
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.ParentRunner
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.TestClass
 import java.io.IOException
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * JUnit Runner runs pacts against provider
@@ -70,7 +72,7 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
     }
 
     if (clazz.getAnnotation(Ignore::class.java) != null) {
-      logger.info("Ignore annotation detected, exiting")
+      logger.info { "Ignore annotation detected, exiting" }
     } else {
       val (providerInfo, serviceName) = lookupProviderInfo()
       val (consumerInfo, consumerName) = lookupConsumerInfo()
@@ -206,7 +208,7 @@ open class PactRunner(private val clazz: Class<*>) : ParentRunner<InteractionRun
     }
   }
 
-  companion object : KLogging() {
+  companion object {
     const val WARNING_ON_IGNORED_IOERROR = """
          ---------------------------------------------------------------------------
          | WARNING! Ignoring IO Exception received when loading Pact files as      |

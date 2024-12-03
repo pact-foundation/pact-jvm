@@ -27,7 +27,7 @@ import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junitsupport.target.TestTarget
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -61,6 +61,8 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.kotlinProperty
 import kotlin.to
 import org.apache.commons.lang3.tuple.Pair as TuplePair
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Internal class to support pact test running
@@ -228,7 +230,7 @@ open class InteractionRunner(
   }
 
   protected open fun createTest(): Any {
-    return testClass.javaClass.newInstance()
+    return testClass.javaClass.getDeclaredConstructor().newInstance()
   }
 
   protected fun interactionBlock(
@@ -359,7 +361,7 @@ open class InteractionRunner(
     return if (testRules.isEmpty()) statement else RunRules(statement, testRules, describeChild(interaction))
   }
 
-  companion object : KLogging() {
+  companion object {
 
     private fun validateStateChangeMethods(testClass: TestClass, errors: MutableList<Throwable>) {
       getAnnotatedMethods(testClass, State::class.java).forEach { method ->
@@ -411,6 +413,4 @@ class MissingStateChangeMethodStatement(
       "for Interaction (\"${interaction.description}\") " +
       "and Consumer $consumerName" }
   }
-
-  companion object : KLogging()
 }

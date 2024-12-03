@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.support.json;
 
+/**
+ * JSON source from a String
+ */
 public class StringSource extends JsonSource {
   private char[] json;
   private int index = 0;

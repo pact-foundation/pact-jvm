@@ -12,13 +12,14 @@ import au.com.dius.pact.provider.gradle.PactPluginBase.Companion.PACT_VERIFY
 import groovy.lang.Closure
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gradle.api.GradleScriptException
-import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import java.io.File
 import java.net.URL
 import javax.inject.Inject
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Extends the provider info to be setup in a gradle build
@@ -197,6 +198,4 @@ open class GradleProviderInfo @Inject constructor(
         """.trimMargin("|"), null)
     }
   }
-
-  companion object : KLogging()
 }

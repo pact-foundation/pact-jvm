@@ -5,6 +5,9 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.function.Predicate;
 
+/**
+ * Base Lexer for tokenising a JSON document
+ */
 public class BaseJsonLexer {
   protected JsonSource json;
 

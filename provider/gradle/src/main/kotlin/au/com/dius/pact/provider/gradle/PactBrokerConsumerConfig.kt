@@ -2,10 +2,12 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelectors
 import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import javax.inject.Inject
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Config for pact broker
@@ -32,7 +34,7 @@ open class PactBrokerConsumerConfig @Inject constructor(
     selectors!!.addAll(config.selectors)
   }
 
-  companion object : KLogging() {
+  companion object {
     @JvmStatic
     @JvmOverloads
     @Deprecated(message = "Assigning selectors with latestTags is deprecated, use withSelectors instead")
