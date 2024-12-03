@@ -43,7 +43,7 @@ java {
 }
 
 test {
-  dependsOn(':pact-jvm-server:assembleDist')
+  dependsOn(':pact-jvm-server:installDist')
   systemProperty('appExecutable', (new File(buildDir, 'install/pact-jvm-server/bin/pact-jvm-server')).path)
 }
 

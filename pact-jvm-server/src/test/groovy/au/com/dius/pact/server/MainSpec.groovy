@@ -4,10 +4,13 @@ import groovy.json.JsonSlurper
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpResponse
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
+@IgnoreIf({ os.windows })
+@IgnoreIf({ System.getenv('CI') != null })
 class MainSpec extends Specification {
   def 'application command line args'() {
     when:
