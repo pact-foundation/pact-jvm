@@ -41,7 +41,7 @@ void ask(String prompt, String defaultValue = 'Y', Closure cl) {
 executeOnShell 'git pull'
 
 def javaVersion
-executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") {
+executeOnShell("./gradlew --version 2>/dev/null | awk '/^Launcher JVM:/ { print \$3 }'") {
   javaVersion = new Semver(it.trim().replace('_', '+b'), Semver.SemverType.NPM)
 }
 
