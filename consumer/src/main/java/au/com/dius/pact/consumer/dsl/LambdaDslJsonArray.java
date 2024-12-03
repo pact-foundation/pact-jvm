@@ -304,8 +304,7 @@ public class LambdaDslJsonArray {
      */
     @Deprecated
     public LambdaDslJsonArray timestamp() {
-        pactArray.datetime();
-        return this;
+        return datetime();
     }
 
     /**
@@ -316,8 +315,7 @@ public class LambdaDslJsonArray {
      */
     @Deprecated
     public LambdaDslJsonArray timestamp(final String format) {
-        pactArray.datetime(format);
-        return this;
+        return datetime(format);
     }
 
     /**
@@ -329,8 +327,7 @@ public class LambdaDslJsonArray {
      */
     @Deprecated
     public LambdaDslJsonArray timestamp(final String format, final Date example) {
-        pactArray.datetime(format, example);
-        return this;
+        return datetime(format, example);
     }
 
     /**
@@ -342,9 +339,48 @@ public class LambdaDslJsonArray {
      */
     @Deprecated
     public LambdaDslJsonArray timestamp(final String format, final Instant example) {
-        pactArray.datetime(format, example);
-        return this;
+        return datetime(format, example);
     }
+
+  /**
+   * Element that must be an ISO formatted date/time
+   */
+  public LambdaDslJsonArray datetime() {
+    pactArray.datetime();
+    return this;
+  }
+
+  /**
+   * Element that must match the given date/time format
+   *
+   * @param format date/time format
+   */
+  public LambdaDslJsonArray datetime(final String format) {
+    pactArray.datetime(format);
+    return this;
+  }
+
+  /**
+   * Element that must match the given date/time format
+   *
+   * @param format  date/time format
+   * @param example example date and time to use for generated bodies
+   */
+  public LambdaDslJsonArray datetime(final String format, final Date example) {
+    pactArray.datetime(format, example);
+    return this;
+  }
+
+  /**
+   * Element that must match the given date/time format
+   *
+   * @param format  date/time format
+   * @param example example date and time to use for generated bodies
+   */
+  public LambdaDslJsonArray datetime(final String format, final Instant example) {
+    pactArray.datetime(format, example);
+    return this;
+  }
 
     /**
      * Element that must be a numeric identifier
