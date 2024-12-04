@@ -41,7 +41,7 @@ dependencies {
         implementation 'org.apache.commons:commons-collections4:4.4'
         implementation 'org.apache.tika:tika-core:2.9.1'
         implementation 'com.google.guava:guava:31.1-jre'
-        implementation 'org.slf4j:slf4j-api:1.7.36'
+        implementation 'org.slf4j:slf4j-api:2.0.4'
         implementation 'io.ktor:ktor-http-jvm:3.0.1'
         implementation 'io.ktor:ktor-server-netty:3.0.1'
         implementation 'io.ktor:ktor-network-tls-certificates:3.0.1'

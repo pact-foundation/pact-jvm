@@ -25,6 +25,18 @@ public class LambdaDsl {
     }
 
     /**
+     * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonArray}.
+     * @param examples Number of examples to populate the array with
+     */
+    public static LambdaDslJsonArray newJsonArray(Integer examples, Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
+        pactDslJsonArray.setNumberExamples(examples);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
+    /**
      * DSL function to simplify creating a {@link DslPart} generated from a {@link LambdaDslJsonArray} where a minimum base array size is specified
      */
     public static LambdaDslJsonArray newJsonArrayMinLike(Integer size, Consumer<LambdaDslJsonArray> array) {

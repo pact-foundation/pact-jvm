@@ -764,4 +764,21 @@ public class LambdaDslJsonArrayTest {
         assertThat(lambdaPactDsl.getMatchers(), is(pactDslJson.getMatchers()));
     }
 
+  @Test
+  public void arrayEachLike() {
+    // Old DSL
+    final DslPart pactDslJson = PactDslJsonArray
+      .arrayEachLike(2)
+        .stringType("name", "Berlin")
+      .close();
+
+    // Lambda DSL
+    final DslPart lambdaPactDsl = LambdaDsl.newJsonArray(2, array ->
+      array.object(obj ->
+        obj.stringType("name", "Berlin")
+      )
+    ).build().close();
+
+    assertThat(lambdaPactDsl.getBody().toString(), is(pactDslJson.getBody().toString()));
+  }
 }

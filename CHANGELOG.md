@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.16 - Maintenance Release
+
+* 2d2016317 - fix: Dependency conflict with org.slf4j:slf4j-api was causing Spring tests to fail (Ronald Holshausen, Wed Dec 4 14:21:15 2024 +1100)
+* 38c0d27b8 - feat: Update LambdaDsl.newJsonArray to allow setting the number of examples (Ronald Holshausen, Wed Dec 4 10:59:23 2024 +1100)
+* 19c663c8c - chore: The pact-jvm-server main spec was not configured correctly (Ronald Holshausen, Wed Dec 4 10:24:23 2024 +1100)
+* 147a2a661 - fix:  LambdaDslJsonArray has no datetime function #1839 (Ronald Holshausen, Wed Dec 4 10:23:10 2024 +1100)
+* c7911705b - chore: Update readme (Ronald Holshausen, Wed Dec 4 09:59:01 2024 +1100)
+* 7229244f6 - Merge pull request #1837 from cburgmer/patch-1 (Ronald Holshausen, Fri Nov 15 10:03:21 2024 +1100)
+* e95461a6a - Fix path to Clojure example (Christoph Burgmer, Thu Nov 14 14:21:10 2024 +0100)
+* 9f6b209e2 - chore: Add a test + update docs on JUnit 4 report dir default #1836 (Ronald Holshausen, Thu Nov 14 15:58:48 2024 +1100)
+* 3e501f58e - chore: Add a test for pact-jvm-server (Ronald Holshausen, Tue Oct 29 17:40:28 2024 +1100)
+* 85c92365e - Update README.md (Ronald Holshausen, Tue Oct 29 11:32:02 2024 +1100)
+* 5c41e17fc - bump version to 4.6.16 (Ronald Holshausen, Tue Oct 29 10:38:07 2024 +1100)
+
 # 4.7.0-beta.0 - First beta release
 
 * 2d69044ca - chore: Correct release script for Gradle 8.11 (Ronald Holshausen, Wed Dec 4 09:29:37 2024 +1100)
