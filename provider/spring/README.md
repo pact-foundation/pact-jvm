@@ -198,7 +198,7 @@ public class PactVerificationTest {
 ```
 
 #### JUnit5
-You actually don't need to dependend on `pact-jvm-provider-spring` for this. It's sufficient to depend on `pact-jvm-provider-junit5`. 
+You actually don't need to depend on `pact-jvm-provider-spring` for this. It's sufficient to depend on `pact-jvm-provider-junit5`. 
 
 You can set the port to the `HttpTestTarget` object in the before method.
 

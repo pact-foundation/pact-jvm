@@ -5,7 +5,6 @@ import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvide
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 @WebMvcTest
 @Provider("myAwesomeService")
 @PactFolder("pacts")
-@Disabled // TODO: this fails with NoClassDefFoundError: org/slf4j/impl/StaticLoggerBinder
 class MockMvcTestTargetWebMvcTestJava {
 
     @Autowired
