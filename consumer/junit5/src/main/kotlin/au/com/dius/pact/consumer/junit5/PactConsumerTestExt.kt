@@ -33,6 +33,15 @@ import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KLogging
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.condition.DisabledForJreRange
+import org.junit.jupiter.api.condition.DisabledIf
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariables
+import org.junit.jupiter.api.condition.DisabledIfSystemProperties
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty
+import org.junit.jupiter.api.condition.DisabledInNativeImage
+import org.junit.jupiter.api.condition.DisabledOnJre
+import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
@@ -713,13 +722,27 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
         HierarchyTraversalMode.TOP_DOWN)
       if (executedFragments.size < methods.size) {
-        val nonExecutedMethods = (methods - executedFragments).filter {
-          !isAnnotated(it, Disabled::class.java)
+        val disabledAnnotations = listOf(
+          Disabled::class.java,
+          DisabledForJreRange::class.java,
+          DisabledIf::class.java,
+          DisabledIfEnvironmentVariable::class.java,
+          DisabledIfEnvironmentVariables::class.java,
+          DisabledIfSystemProperties::class.java,
+          DisabledIfSystemProperty::class.java,
+          DisabledInNativeImage::class.java,
+          DisabledOnJre::class.java,
+          DisabledOnOs::class.java
+        )
+
+        val nonExecutedMethods = (methods - executedFragments).filter { method ->
+          !disabledAnnotations.any { disabledAnnotation -> isAnnotated(method, disabledAnnotation) }
         }.joinToString(", ") { it.declaringClass.simpleName + "." + it.name }
         if (nonExecutedMethods.isNotEmpty()) {
           throw AssertionError(
             "The following methods annotated with @Pact were not executed during the test: $nonExecutedMethods" +
-              "\nIf these are currently a work in progress, add a @Disabled annotation to the method\n")
+              "\nIf these are currently a work in progress, add JUnit's @Disabled annotation " +
+              "(or one of the @DisabledIf/@DisabledFor/@DisabledOn annotations) to the method\n")
         }
       }
     }
