@@ -42,7 +42,7 @@ enum class MockServerImplementation {
 /**
  * Configuration of the Pact Mock Server.
  *
- * By default this class will setup the configuration for a http mock server running on
+ * By default, this class will set up the configuration for a http mock server running on
  * local host and a random port
  */
 open class MockProviderConfig @JvmOverloads constructor (
@@ -52,7 +52,8 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val scheme: String = HTTP,
   open val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default,
   open val addCloseHeader: Boolean = false,
-  open val transportRegistryEntry: String = ""
+  open val transportRegistryEntry: String = "",
+  val transportConfig: Map<String, String> = emptyMap()
 ) {
 
   fun url(): String {
@@ -90,7 +91,8 @@ open class MockProviderConfig @JvmOverloads constructor (
           config.mockServerImplementation
         else mockServerImplementation,
         addCloseHeader,
-        transportRegistryEntry.ifEmpty { config.transportRegistryEntry }
+        transportRegistryEntry.ifEmpty { config.transportRegistryEntry },
+        transportConfig + config.transportConfig
       )
     }
   }
@@ -132,7 +134,8 @@ open class MockProviderConfig @JvmOverloads constructor (
           if (annotation.tls) "https" else HTTP,
           annotation.implementation,
           System.getProperty("pact.mockserver.addCloseHeader") == "true",
-          annotation.registryEntry
+          annotation.registryEntry,
+          annotation.transportConfig.associate { it.key to it.value }
         )
       } else {
         null

@@ -4,6 +4,11 @@ import au.com.dius.pact.consumer.model.MockServerImplementation
 import java.lang.annotation.Inherited
 
 /**
+ * Key/Value pair for a Transport Configuration Entry
+ */
+annotation class TransportConfigurationEntry(val key: String, val value: String)
+
+/**
  * Annotation to configure the mock server for a consumer test
  */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
@@ -62,7 +67,13 @@ annotation class MockServerConfig(
   /**
    * Provider name this mock server is associated with. This is only needed when there are multiple for the same test
    */
-  val providerName: String = ""
+  val providerName: String = "",
+
+  /**
+   * Configuration required for the transport used. This is mostly used where plugins provide things like mock servers
+   * and require additional configuration.
+   */
+  val transportConfig: Array<TransportConfigurationEntry> = []
 )
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
