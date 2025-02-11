@@ -184,7 +184,7 @@ public class LambdaDslObjectTest {
         final PactDslJsonBody actualPactDsl = new PactDslJsonBody();
         final LambdaDslObject object = new LambdaDslObject(actualPactDsl);
         object
-                .stringType(new String[]{"foo", "bar"});
+                .stringTypes(new String[]{"foo", "bar"});
         actualPactDsl.close();
 
         String actualJson = actualPactDsl.getBody().toString();

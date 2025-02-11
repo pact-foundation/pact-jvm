@@ -98,4 +98,21 @@ class LambdaDslJsonBodySpec extends Specification {
       ])
     ]
   }
+
+  @Issue('#1850')
+  def 'multiple example values'() {
+    when:
+    def oldDsl = new PactDslJsonBody()
+      .minArrayLike('features', 1, 2)
+      .stringType('name', 'FEATURE', 'FEATURE_2')
+      .close()
+    def newDsl = newJsonBody { o ->
+      o.minArrayLike('features', 1, 2) { feature ->
+        feature.stringType('name', 'FEATURE', 'FEATURE_2')
+      }
+    }.build()
+
+    then:
+    oldDsl.body.toString() == newDsl.body.toString()
+  }
 }
