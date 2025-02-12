@@ -98,4 +98,40 @@ class LambdaDslJsonBodySpec extends Specification {
       ])
     ]
   }
+
+  @Issue('#1850')
+  def 'multiple example values'() {
+    when:
+    def oldDsl = new PactDslJsonBody()
+      .minArrayLike('features', 1, 2)
+      .stringType('name', 'FEATURE', 'FEATURE_2')
+      .close()
+    def newDsl = newJsonBody { o ->
+      o.minArrayLike('features', 1, 2) { feature ->
+        feature.stringType('name', 'FEATURE', 'FEATURE_2')
+      }
+    }.build()
+
+    then:
+    oldDsl.body.toString() == newDsl.body.toString()
+  }
+
+  @Issue('#1851')
+  def 'body with keys with only digits'() {
+    when:
+    def result = newJsonBody(o -> {
+      o.object('1234567890', o2 -> {
+        o2.eachLike('name', a -> {
+          a.stringType('@class', 'Test')
+        })
+      })
+    }).build()
+
+    then:
+    result.body.toString() == '{"1234567890":{"name":[{"@class":"Test"}]}}'
+    result.matchers.matchingRules == [
+      "\$.1234567890.name": new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
+      "\$.1234567890.name[*].@class": new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
+    ]
+  }
 }

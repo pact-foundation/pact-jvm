@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
+import au.com.dius.pact.consumer.Headers.headerToString
+import au.com.dius.pact.consumer.Headers.isKnowMultiValueHeader
 import au.com.dius.pact.consumer.InvalidMatcherException
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.Consumer
@@ -20,6 +22,7 @@ import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.json.JsonValue
+import io.ktor.http.parseHeaderValue
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.apache.hc.core5.http.ContentType
@@ -133,10 +136,19 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     require(headerNameValuePairs.size % 2 == 0) {
       "Pair key value should be provided, but there is one key without value."
     }
-    requestHeaders[firstHeaderName] = listOf(firstHeaderValue)
+    requestHeaders[firstHeaderName] = if (isKnowMultiValueHeader(firstHeaderName)) {
+      parseHeaderValue(firstHeaderValue).map { headerToString(it) }
+    } else {
+      listOf(firstHeaderValue)
+    }
     var i = 0
     while (i < headerNameValuePairs.size) {
-      requestHeaders[headerNameValuePairs[i]] = listOf(headerNameValuePairs[i + 1])
+      val key = headerNameValuePairs[i]
+      requestHeaders[key] = if (isKnowMultiValueHeader(key)) {
+        parseHeaderValue(headerNameValuePairs[i + 1]).map { headerToString(it) }
+      } else {
+        listOf(headerNameValuePairs[i + 1])
+      }
       i += 2
     }
     return this
@@ -149,7 +161,11 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    */
   fun headers(headers: Map<String, String>): PactDslRequestWithPath {
     for ((key, value) in headers) {
-      requestHeaders[key] = listOf(value)
+      requestHeaders[key] = if (isKnowMultiValueHeader(key)) {
+        parseHeaderValue(value).map { headerToString(it) }
+      } else {
+        listOf(value)
+      }
     }
     return this
   }

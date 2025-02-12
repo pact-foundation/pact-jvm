@@ -10,6 +10,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.support.json.JsonValue
 import io.pact.plugin.Plugin
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
@@ -55,7 +56,7 @@ class PluginMockServerSpec extends Specification {
     mockServer.start()
 
     then:
-    1 * pluginManager.startMockServer(expectedEntry, mockServerConfig, pact)
+    1 * pluginManager.startMockServer(expectedEntry, mockServerConfig, pact, [:])
     mockServer.transportEntry == expectedEntry
   }
 
@@ -73,7 +74,26 @@ class PluginMockServerSpec extends Specification {
     mockServer.start()
 
     then:
-    1 * pluginManager.startMockServer(expectedEntry, mockServerConfig, pact)
+    1 * pluginManager.startMockServer(expectedEntry, mockServerConfig, pact, [:])
+    mockServer.transportEntry == expectedEntry
+  }
+
+  def 'start - passes any transport configuration to the plugin'() {
+    given:
+    config = new MockProviderConfig('127.0.0.1', 0, PactSpecVersion.V3, 'http', MockServerImplementation.JavaHttpServer,
+      false, 'test', [replicationTopic: 'test/RP'])
+    def mockServerConfig = new MockServerConfig('127.0.0.1', 0, false)
+    def expectedEntry = new CatalogueEntry(CatalogueEntryType.TRANSPORT, CatalogueEntryProviderType.PLUGIN,
+      'test', 'test')
+    mockServer = new PluginMockServer(pact, config)
+    mockServer.pluginManager = pluginManager
+    def configJson = new JsonValue.Object([replicationTopic: new JsonValue.StringValue('test/RP')])
+
+    when:
+    mockServer.start()
+
+    then:
+    1 * pluginManager.startMockServer(expectedEntry, mockServerConfig, pact, [transport_config: configJson])
     mockServer.transportEntry == expectedEntry
   }
 

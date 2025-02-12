@@ -139,3 +139,5 @@ fun jsonObject(pairs: List<Pair<String, Any?>>) = JsonValue.Object(
 public fun String.toJson() = JsonValue.StringValue(this)
 
 public fun String?.toJson() = if (this == null) JsonValue.Null else JsonValue.StringValue(this)
+
+public fun Map<String, Any?>.toJson() = jsonObject(this.toList())

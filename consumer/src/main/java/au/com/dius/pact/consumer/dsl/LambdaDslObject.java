@@ -59,11 +59,21 @@ public class LambdaDslObject {
     }
 
     /**
+     * Attribute that can be any string
+     * @param name attribute name
+     * @param examples example values to use for generated bodies
+     */
+    public LambdaDslObject stringType(final String name, final String... examples) {
+        object.stringType(name, examples);
+        return this;
+    }
+
+    /**
      * Attributes that can be any string
      *
      * @param names attribute names
      */
-    public LambdaDslObject stringType(final String... names) {
+    public LambdaDslObject stringTypes(final String... names) {
         object.stringTypes(names);
         return this;
     }

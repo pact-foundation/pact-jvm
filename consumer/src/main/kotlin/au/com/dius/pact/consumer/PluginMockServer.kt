@@ -8,6 +8,8 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.contains
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.toJson
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
@@ -17,7 +19,8 @@ import io.pact.plugins.jvm.core.PluginManager
 import io.github.oshai.kotlinlogging.KLogging
 
 /**
- * Mock server provided by a plugin
+ * Mock server provided by a plugin. Any additional transport configuration will be passed to the plugin
+ * mock server in the test context under the "transport_config" key.
  */
 @Suppress("TooGenericExceptionThrown")
 class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockServer(pact, config) {
@@ -40,9 +43,13 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
     if (entry == null) {
       throw InvalidMockServerRegistryEntry(config.transportRegistryEntry)
     }
+    val testContext = mutableMapOf<String, JsonValue>()
+    if (config.transportConfig.isNotEmpty()) {
+      testContext["transport_config"] = config.transportConfig.toJson()
+    }
 
     transportEntry = entry
-    mockServerDetails = pluginManager.startMockServer(transportEntry, config.toPluginMockServerConfig(), pact)
+    mockServerDetails = pluginManager.startMockServer(transportEntry, config.toPluginMockServerConfig(), pact, testContext)
   }
 
   @Suppress("EmptyFunctionBlock")
