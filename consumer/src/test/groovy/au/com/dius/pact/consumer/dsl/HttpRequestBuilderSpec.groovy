@@ -66,6 +66,7 @@ class HttpRequestBuilderSpec extends Specification {
       .header('A', 'B')
       .header('B', ['B', 'C', 'D'])
       .header('OPTIONS', 'GET, POST, HEAD')
+      .header('Accept', 'application/json, application/hal+json')
       .header('content-type', 'application/x;charset=UTF-8')
       .header('date', 'Fri, 13 Jan 2023 04:39:16 GMT')
       .headers([x: 'y', y: ['a', 'b', 'c']])
@@ -77,7 +78,8 @@ class HttpRequestBuilderSpec extends Specification {
     request.headers == [
       'A': ['B'],
       'B': ['B', 'C', 'D'],
-      'OPTIONS': ['GET', 'POST', 'HEAD'],
+      'OPTIONS': ['GET, POST, HEAD'],
+      'Accept': ['application/json', 'application/hal+json'],
       'content-type': ['application/x;charset=UTF-8'],
       'date': ['Fri, 13 Jan 2023 04:39:16 GMT'],
       'x': ['y'],

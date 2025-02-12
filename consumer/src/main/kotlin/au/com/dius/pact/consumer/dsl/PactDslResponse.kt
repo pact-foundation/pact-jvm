@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
+import au.com.dius.pact.consumer.Headers.headerToString
+import au.com.dius.pact.consumer.Headers.isKnowMultiValueHeader
 import au.com.dius.pact.consumer.xml.PactXmlBuilder
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.BasePact.Companion.DEFAULT_METADATA
@@ -33,6 +35,7 @@ import au.com.dius.pact.core.support.Random
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.jsonArray
+import io.ktor.http.parseHeaderValue
 import org.apache.hc.core5.http.ContentType
 import org.json.JSONObject
 import org.w3c.dom.Document
@@ -90,7 +93,11 @@ open class PactDslResponse @JvmOverloads constructor(
    */
   fun headers(headers: Map<String, String>): PactDslResponse {
     for ((key, value) in headers) {
-      responseHeaders[key] = listOf(value)
+      responseHeaders[key] = if (isKnowMultiValueHeader(key)) {
+        parseHeaderValue(value).map { headerToString(it) }
+      } else {
+        listOf(value)
+      }
     }
     return this
   }

@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.consumer.Headers.headerToString
+import au.com.dius.pact.consumer.Headers.isKnowMultiValueHeader
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.ContentType.Companion.JSON
@@ -43,10 +45,10 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
         }
         listOf(value.value.toString())
       }
-      else -> if (isKnowSingleValueHeader(key)) {
-        listOf(value.toString())
-      } else {
+      else -> if (isKnowMultiValueHeader(key)) {
         parseHeaderValue(value.toString()).map { headerToString(it) }
+      } else {
+        listOf(value.toString())
       }
     }
     part.headers[key] = headValues
@@ -65,17 +67,17 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
       "Pairs of key/values should be provided, but there is one key without a value."
     }
 
-    val headValue = if (isKnowSingleValueHeader(key)) {
-      mutableListOf(value)
-    } else {
+    val headValue = if (isKnowMultiValueHeader(key)) {
       parseHeaderValue(value).map { headerToString(it) }.toMutableList()
+    } else {
+      mutableListOf(value)
     }
     val headersMap = nameValuePairs.toList().chunked(2).fold(mutableMapOf(key to headValue)) { acc, values ->
       val k = values[0]
-      val v = if (isKnowSingleValueHeader(k)) {
-        listOf(values[1])
-      } else {
+      val v = if (isKnowMultiValueHeader(k)) {
         parseHeaderValue(values[1]).map { headerToString(it) }
+      } else {
+        listOf(values[1])
       }
       if (acc.containsKey(k)) {
         acc[k]!!.addAll(v)
@@ -109,10 +111,10 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
           part.generators.addGenerator(Category.HEADER, k, matcher.generator!!)
         }
         listOf(matcher.value.toString())
-      } else if (isKnowSingleValueHeader(k)) {
-        listOf(value.second.toString())
-      } else {
+      } else if (isKnowMultiValueHeader(k)) {
         parseHeaderValue(value.second.toString()).map { headerToString(it) }
+      } else {
+        listOf(value.second.toString())
       }
       if (acc.containsKey(k)) {
         acc[k]!!.addAll(v)
@@ -163,10 +165,10 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
             v.toString()
           }
         }
-      } else if (isKnowSingleValueHeader(k)) {
-        listOf(entry.value.toString())
-      } else {
+      } else if (isKnowMultiValueHeader(k)) {
         parseHeaderValue(entry.value.toString()).map { headerToString(it) }
+      } else {
+        listOf(entry.value.toString())
       }
     }
 
@@ -297,22 +299,5 @@ abstract class HttpPartBuilder(private val part: IHttpPart) {
   open fun bodyMatchingContentType(contentType: String, exampleContents: String): HttpPartBuilder {
     val ct = ContentType(contentType)
     return bodyMatchingContentType(contentType, exampleContents.toByteArray(ct.asCharset()))
-  }
-
-  private fun isKnowSingleValueHeader(key: String): Boolean {
-    return SINGLE_VALUE_HEADERS.contains(key.lowercase())
-  }
-
-  private fun headerToString(headerValue: HeaderValue): String {
-    return if (headerValue.params.isNotEmpty()) {
-      val params = headerValue.params.joinToString(";") { "${it.name}=${it.value}" }
-      "${headerValue.value};$params"
-    } else {
-      headerValue.value
-    }
-  }
-
-  companion object {
-    val SINGLE_VALUE_HEADERS = setOf("date")
   }
 }

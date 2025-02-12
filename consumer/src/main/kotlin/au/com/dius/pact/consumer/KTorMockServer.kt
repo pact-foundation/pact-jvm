@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.consumer.Headers.headerToString
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.BasePact
@@ -34,6 +35,7 @@ import io.netty.channel.Channel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import io.github.oshai.kotlinlogging.KLogging
+import io.ktor.http.parseHeaderValue
 import java.net.SocketAddress
 import java.util.zip.DeflaterInputStream
 import java.util.zip.GZIPInputStream
@@ -101,10 +103,16 @@ class KTorMockServer @JvmOverloads constructor(
 
   private suspend fun toPactRequest(call: ApplicationCall): Request {
     val request = call.request
-    val headers = request.headers
+    val headers = request.headers.entries().associate { entry ->
+      if (entry.value.size == 1 && Headers.isKnowMultiValueHeader(entry.key)) {
+        entry.key to parseHeaderValue(entry.value[0]).map { headerToString(it) }
+      } else {
+        entry.key to entry.value
+      }
+    }
     val bodyContents = withContext(Dispatchers.IO) {
       val stream = call.receiveStream()
-      when (bodyIsCompressed(headers["Content-Encoding"])) {
+      when (bodyIsCompressed(request.headers["Content-Encoding"])) {
         "gzip" -> GZIPInputStream(stream).readBytes()
         "deflate" -> DeflaterInputStream(stream).readBytes()
         else -> stream.readBytes()
@@ -113,11 +121,11 @@ class KTorMockServer @JvmOverloads constructor(
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents, ContentType.fromString(headers["Content-Type"]).or(ContentType.JSON))
+      OptionalBody.body(bodyContents, ContentType.fromString(request.headers["Content-Type"]).or(ContentType.JSON))
     }
     return Request(request.httpMethod.value, request.path(),
       request.queryParameters.entries().associate { it.toPair() }.toMutableMap(),
-      headers.entries().associate { it.toPair() }.toMutableMap(), body)
+      headers.toMutableMap(), body)
   }
 
   override fun getUrl(): String {

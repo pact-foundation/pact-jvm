@@ -1,13 +1,14 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.consumer.Headers.headerToString
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.model.MockServerImplementation
-import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
 import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
 import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
+import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.DefaultPactWriter
 import au.com.dius.pact.core.model.IRequest
@@ -20,16 +21,12 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.support.Result
-import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
-import io.ktor.util.network.hostname
-import io.pact.plugins.jvm.core.CatalogueEntry
-import io.pact.plugins.jvm.core.CatalogueEntryProviderType
-import io.pact.plugins.jvm.core.CatalogueEntryType
 import io.github.oshai.kotlinlogging.KLogging
+import io.ktor.http.parseHeaderValue
 import org.apache.commons.text.StringEscapeUtils
 import org.apache.hc.client5.http.classic.methods.HttpOptions
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
@@ -45,6 +42,7 @@ import org.apache.hc.core5.ssl.SSLContexts
 import org.apache.hc.core5.util.TimeValue
 import java.lang.Thread.sleep
 import java.nio.charset.Charset
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.zip.DeflaterInputStream
@@ -291,9 +289,15 @@ abstract class BaseJdkMockServer(
   }
 
   fun toPactRequest(exchange: HttpExchange): Request {
-    val headers = exchange.requestHeaders
-    val contentType = contentType(headers)
-    val bodyContents = when (bodyIsCompressed(headers.getFirst("Content-Encoding"))) {
+    val headers = exchange.requestHeaders.mapValues { entry ->
+      if (entry.value.size == 1 && Headers.isKnowMultiValueHeader(entry.key)) {
+        parseHeaderValue(entry.value[0]).map { headerToString(it) }
+      } else {
+        entry.value
+      }
+    }
+    val contentType = contentType(exchange.requestHeaders)
+    val bodyContents = when (bodyIsCompressed(exchange.requestHeaders.getFirst("Content-Encoding"))) {
       "gzip" -> GZIPInputStream(exchange.requestBody).readBytes()
       "deflate" -> DeflaterInputStream(exchange.requestBody).readBytes()
       else -> exchange.requestBody.readBytes()
@@ -307,8 +311,8 @@ abstract class BaseJdkMockServer(
       queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers.toMutableMap(), body)
   }
 
-  private fun contentType(headers: Headers): au.com.dius.pact.core.model.ContentType {
-    val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+  private fun contentType(headers: com.sun.net.httpserver.Headers): au.com.dius.pact.core.model.ContentType {
+    val contentType = headers.entries.find { it.key.uppercase(Locale.getDefault()) == "CONTENT-TYPE" }
     return if (contentType != null && contentType.value.isNotEmpty()) {
       au.com.dius.pact.core.model.ContentType(contentType.value.first())
     } else {

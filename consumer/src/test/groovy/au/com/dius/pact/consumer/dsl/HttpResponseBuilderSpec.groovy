@@ -38,6 +38,7 @@ class HttpResponseBuilderSpec extends Specification {
       .header('A', 'B')
       .header('B', ['B', 'C', 'D'])
       .header('OPTIONS', 'GET, POST, HEAD')
+      .header('access-control-allow-methods', 'GET, POST, HEAD')
       .headers([x: 'y', y: ['a', 'b', 'c']])
       .headers('x1', 'y', 'y1', 'a', 'y1', 'b', 'y1', 'c')
       .headers(new Pair('x2', 'y'), new Pair('y2', 'a'), new Pair('y2', 'b'), new Pair('y2', 'c'))
@@ -47,7 +48,8 @@ class HttpResponseBuilderSpec extends Specification {
     response.headers == [
       A: ['B'],
       B: ['B', 'C', 'D'],
-      OPTIONS: ['GET', 'POST', 'HEAD'],
+      OPTIONS: ['GET, POST, HEAD'],
+      'access-control-allow-methods': ['GET', 'POST', 'HEAD'],
       x: ['y'],
       y: ['a', 'b', 'c'],
       x1: ['y'],
