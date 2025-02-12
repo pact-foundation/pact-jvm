@@ -9,7 +9,7 @@ Feature: HTTP provider
 
   Scenario: Verifying a pending HTTP interaction
     Given a provider is started that returns the response from interaction 1, with the following changes:
-      | body              |
+      | response body              |
       | file: basic2.json |
     And a Pact file for interaction 1 is to be verified, but is marked pending
     When the verification is run
