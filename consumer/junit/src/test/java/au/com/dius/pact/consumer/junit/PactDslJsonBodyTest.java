@@ -54,8 +54,8 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
             "$.numbers[4].id",
             "$.numbers[4].timestamp",
             "$.numbers[4].date_of_birth",
-            "$[2].id",
-            "$[2].v1"
+            "$.2.id",
+            "$.2.v1"
         );
 
         return pact;

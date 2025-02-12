@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -169,7 +170,7 @@ class PathExpressionsSpec extends Specification {
   @Unroll
   def 'Constructing valid path expressions'() {
     expect:
-    PathExpressionsKt.constructValidPath(segment, root) == result
+    PathExpressionsKt.constructValidPath(segment, root, true) == result
 
     where:
 
@@ -184,6 +185,13 @@ class PathExpressionsSpec extends Specification {
     'a b'   | 'a.b' || "a.b['a b']"
     '$a.b'  | 'a.b' || "a.b['\$a.b']"
     '*'     | 'a.b' || 'a.b.*'
+    '1234'  | 'a.b' || 'a.b[1234]'
+  }
+
+  @Issue('#1851')
+  def 'Constructing valid path expressions where numbers are not considered indices'() {
+    expect:
+    PathExpressionsKt.constructValidPath('1234', 'a.b', false) == 'a.b.1234'
   }
 
   def 'construct path from tokens'() {

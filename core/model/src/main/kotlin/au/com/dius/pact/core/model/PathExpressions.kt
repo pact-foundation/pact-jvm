@@ -202,13 +202,13 @@ fun parsePath(path: String): List<PathToken> {
 /**
  * This will combine the root path and the path segment to make a valid resulting path
  */
-fun constructValidPath(segment: String, rootPath: String): String {
+fun constructValidPath(segment: String, rootPath: String, numbersAreIndices: Boolean = true): String {
   return when {
     rootPath.isEmpty() -> segment
     segment.isEmpty() -> rootPath
     else -> {
       val root = StringUtils.stripEnd(rootPath, ".")
-      if (segment.all { it.isDigit() }) {
+      if (numbersAreIndices && segment.all { it.isDigit() }) {
         "$root[$segment]"
       } else if (segment != "*" && segment.any { !validPathCharacter(it) }) {
         "$root['$segment']"

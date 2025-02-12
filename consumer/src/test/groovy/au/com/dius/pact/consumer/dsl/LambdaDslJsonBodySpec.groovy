@@ -115,4 +115,23 @@ class LambdaDslJsonBodySpec extends Specification {
     then:
     oldDsl.body.toString() == newDsl.body.toString()
   }
+
+  @Issue('#1851')
+  def 'body with keys with only digits'() {
+    when:
+    def result = newJsonBody(o -> {
+      o.object('1234567890', o2 -> {
+        o2.eachLike('name', a -> {
+          a.stringType('@class', 'Test')
+        })
+      })
+    }).build()
+
+    then:
+    result.body.toString() == '{"1234567890":{"name":[{"@class":"Test"}]}}'
+    result.matchers.matchingRules == [
+      "\$.1234567890.name": new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
+      "\$.1234567890.name[*].@class": new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
+    ]
+  }
 }
