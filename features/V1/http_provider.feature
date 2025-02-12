@@ -118,16 +118,16 @@ Feature: Basic HTTP provider
 
   Scenario: Verifies the response status code
     Given a provider is started that returns the response from interaction 1, with the following changes:
-      | status |
-      | 400    |
+      | response |
+      | 400      |
     And a Pact file for interaction 1 is to be verified
     When the verification is run
     Then the verification will NOT be successful
     And the verification results will contain a "Response status did not match" error
 
   Scenario: Verifies the response headers
-    Given a provider is started that returns the response from interaction 1, with the following changes:
-      | headers                 |
+    Given a provider is started that returns the response from interaction 5, with the following changes:
+      | response headers        |
       | 'X-TEST: Compatibility' |
     And a Pact file for interaction 5 is to be verified
     When the verification is run
@@ -142,7 +142,7 @@ Feature: Basic HTTP provider
 
   Scenario: Response with plain text body (negative case)
     Given a provider is started that returns the response from interaction 6, with the following changes:
-      | body                       |
+      | response body              |
       | Hello Compatibility Suite! |
     And a Pact file for interaction 6 is to be verified
     When the verification is run
@@ -157,7 +157,7 @@ Feature: Basic HTTP provider
 
   Scenario: Response with JSON body (negative case)
     Given a provider is started that returns the response from interaction 1, with the following changes:
-      | body                             |
+      | response body                    |
       | JSON: { "one": 100, "two": "b" } |
     And a Pact file for interaction 1 is to be verified
     When the verification is run
@@ -172,7 +172,7 @@ Feature: Basic HTTP provider
 
   Scenario: Response with XML body (negative case)
     Given a provider is started that returns the response from interaction 7, with the following changes:
-      | body                                                                      |
+      | response body                                                             |
       | XML: <?xml version="1.0" encoding="UTF-8" ?><values><one>A</one></values> |
     And a Pact file for interaction 7 is to be verified
     When the verification is run
@@ -187,7 +187,7 @@ Feature: Basic HTTP provider
 
   Scenario: Response with binary body (negative case)
     Given a provider is started that returns the response from interaction 8, with the following changes:
-      | body             |
+      | response body    |
       | file: spider.jpg |
     And a Pact file for interaction 8 is to be verified
     When the verification is run
@@ -202,7 +202,7 @@ Feature: Basic HTTP provider
 
   Scenario: Response with form post body (negative case)
     Given a provider is started that returns the response from interaction 9, with the following changes:
-      | body             |
+      | response body    |
       | a=1&b=2&c=33&d=4 |
     And a Pact file for interaction 9 is to be verified
     When the verification is run
@@ -217,7 +217,7 @@ Feature: Basic HTTP provider
 
   Scenario: Response with multipart body (negative case)
     Given a provider is started that returns the response from interaction 10, with the following changes:
-      | body                      |
+      | response body             |
       | file: multipart2-body.xml |
     And a Pact file for interaction 10 is to be verified
     When the verification is run

@@ -10,15 +10,15 @@ Feature: Basic HTTP provider
 
   Scenario: Supports matching rules for the response headers (positive case)
     Given a provider is started that returns the response from interaction 1, with the following changes:
-      | headers        |
-      | 'X-TEST: 1000' |
+      | response headers |
+      | 'X-TEST: 1000'   |
     And a Pact file for interaction 1 is to be verified
     When the verification is run
     Then the verification will be successful
 
   Scenario: Supports matching rules for the response headers (negative case)
     Given a provider is started that returns the response from interaction 1, with the following changes:
-      | headers          |
+      | response headers |
       | 'X-TEST: 123ABC' |
     And a Pact file for interaction 1 is to be verified
     When the verification is run
@@ -27,7 +27,7 @@ Feature: Basic HTTP provider
 
   Scenario: Verifies the response body (positive case)
     Given a provider is started that returns the response from interaction 2, with the following changes:
-      | body                             |
+      | response body                      |
       | JSON: { "one": "100", "two": "b" } |
     And a Pact file for interaction 2 is to be verified
     When the verification is run
@@ -35,7 +35,7 @@ Feature: Basic HTTP provider
 
   Scenario: Verifies the response body (negative case)
     Given a provider is started that returns the response from interaction 2, with the following changes:
-      | body                             |
+      | response body                    |
       | JSON: { "one": 100, "two": "b" } |
     And a Pact file for interaction 2 is to be verified
     When the verification is run
