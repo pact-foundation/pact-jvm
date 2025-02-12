@@ -21,7 +21,7 @@ jobs:
     - name: Archive cucumber results
       uses: actions/upload-artifact@v4
       with:
-        name: cucumber-report
+        name: cucumber-report-v1
         path: compatibility-suite/build/cucumber-report-v1.html
       if: always()
   v2:
@@ -38,7 +38,7 @@ jobs:
       - name: Archive cucumber results
         uses: actions/upload-artifact@v4
         with:
-          name: cucumber-report
+          name: cucumber-report-v2
           path: compatibility-suite/build/cucumber-report-v2.html
         if: always()
   v3:
@@ -55,7 +55,7 @@ jobs:
       - name: Archive cucumber results
         uses: actions/upload-artifact@v4
         with:
-          name: cucumber-report
+          name: cucumber-report-v3
           path: compatibility-suite/build/cucumber-report-v3.html
         if: always()
   v4:
@@ -72,6 +72,6 @@ jobs:
       - name: Archive cucumber results
         uses: actions/upload-artifact@v4
         with:
-          name: cucumber-report
+          name: cucumber-report-v4
           path: compatibility-suite/build/cucumber-report-v4.html
         if: always()
