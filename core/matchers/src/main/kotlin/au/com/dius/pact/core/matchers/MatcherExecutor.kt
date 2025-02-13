@@ -118,10 +118,11 @@ fun <M : Mismatch> domatch(
   path: List<String>,
   expected: Any?,
   actual: Any?,
-  mismatchFn: MismatchFactory<M>
+  mismatchFn: MismatchFactory<M>,
+  context: MatchingContext? = null
 ): List<M> {
   val result = matchers.rules.map { matchingRule ->
-    domatch(matchingRule, path, expected, actual, mismatchFn, matchers.cascaded)
+    domatch(matchingRule, path, expected, actual, mismatchFn, matchers.cascaded, context)
   }
 
   return if (matchers.ruleLogic == RuleLogic.AND) {
@@ -142,13 +143,14 @@ fun <M : Mismatch> domatch(
   expected: Any?,
   actual: Any?,
   mismatchFn: MismatchFactory<M>,
-  cascaded: Boolean
+  cascaded: Boolean,
+  context: MatchingContext? = null
 ): List<M> {
   logger.debug { "Matching value $actual at $path with $matcher" }
   return when (matcher) {
     is RegexMatcher -> matchRegex(matcher.regex, path, expected, actual, mismatchFn)
     is TypeMatcher -> matchType(path, expected, actual, mismatchFn, true)
-    is NumberTypeMatcher -> matchNumber(matcher.numberType, path, expected, actual, mismatchFn)
+    is NumberTypeMatcher -> matchNumber(matcher.numberType, path, expected, actual, mismatchFn, context)
     is DateMatcher -> matchDate(matcher.format, path, expected, actual, mismatchFn)
     is TimeMatcher -> matchTime(matcher.format, path, expected, actual, mismatchFn)
     is TimestampMatcher -> matchDateTime(matcher.format, path, expected, actual, mismatchFn)
@@ -315,7 +317,8 @@ fun <M : Mismatch> matchNumber(
   path: List<String>,
   expected: Any?,
   actual: Any?,
-  mismatchFactory: MismatchFactory<M>
+  mismatchFactory: MismatchFactory<M>,
+  context: MatchingContext? = null
 ): List<M> {
   if (expected == null && actual != null) {
     return listOf(mismatchFactory.create(expected, actual,
@@ -324,22 +327,21 @@ fun <M : Mismatch> matchNumber(
   when (numberType) {
     NumberTypeMatcher.NumberType.NUMBER -> {
       logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to a number at $path" }
-      if (actual is JsonValue && !actual.isNumber || actual is Attr && actual.nodeValue.matches(decimalRegex) ||
-        actual !is JsonValue && actual !is Node && actual !is Number) {
+      if (!matchInteger(actual, context) && !matchDecimal(actual, context)) {
         return listOf(mismatchFactory.create(expected, actual,
           "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a number", path))
       }
     }
     NumberTypeMatcher.NumberType.INTEGER -> {
       logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to an integer at $path" }
-      if (!matchInteger(actual)) {
+      if (!matchInteger(actual, context)) {
         return listOf(mismatchFactory.create(expected, actual,
           "Expected ${valueOf(actual)} (${typeOf(actual)}) to be an integer", path))
       }
     }
     NumberTypeMatcher.NumberType.DECIMAL -> {
       logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to a decimal at $path" }
-      if (!matchDecimal(actual)) {
+      if (!matchDecimal(actual, context)) {
         return listOf(mismatchFactory.create(expected, actual,
           "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a decimal number",
           path))
@@ -349,7 +351,7 @@ fun <M : Mismatch> matchNumber(
   return emptyList()
 }
 
-fun matchDecimal(actual: Any?): Boolean {
+fun matchDecimal(actual: Any?, context: MatchingContext? = null): Boolean {
   val result = when {
     actual == 0 -> true
     actual is Float -> true
@@ -360,15 +362,15 @@ fun matchDecimal(actual: Any?): Boolean {
       bigDecimal == BigDecimal.ZERO || bigDecimal.scale() > 0
     }
     actual is JsonValue.Integer -> decimalRegex.matches(actual.toString())
-    isString(actual) -> decimalRegex.matches(actual.toString())
-    actual is Attr -> decimalRegex.matches(actual.nodeValue)
+    isString(actual) && context?.coerceNumbers ?: false -> decimalRegex.matches(actual.toString())
+    actual is Node -> decimalRegex.matches(actual.nodeValue)
     else -> false
   }
   logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches decimal number -> $result" }
   return result
 }
 
-fun matchInteger(actual: Any?): Boolean {
+fun matchInteger(actual: Any?, context: MatchingContext? = null): Boolean {
   val result = when {
     actual is Int -> true
     actual is Long -> true
@@ -376,8 +378,8 @@ fun matchInteger(actual: Any?): Boolean {
     actual is JsonValue.Integer -> true
     actual is BigDecimal && actual.scale() == 0 -> true
     actual is JsonValue.Decimal -> integerRegex.matches(actual.toString())
-    isString(actual) -> integerRegex.matches(actual.toString())
-    actual is Attr -> integerRegex.matches(actual.nodeValue)
+    isString(actual) && context?.coerceNumbers ?: false -> integerRegex.matches(actual.toString())
+    actual is Node -> integerRegex.matches(actual.nodeValue)
     else -> false
   }
   logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches integer -> $result" }

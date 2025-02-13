@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class MinEqualsIgnoreOrderMatcherSpec extends Specification {
 
   def mismatchFactory
@@ -18,7 +19,7 @@ class MinEqualsIgnoreOrderMatcherSpec extends Specification {
   def 'with an array match if the actual #condition'() {
     when:
     def mismatches =
-        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory, false)
+        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory, false, null)
 
     then:
     mismatches.empty == match
@@ -36,7 +37,7 @@ class MinEqualsIgnoreOrderMatcherSpec extends Specification {
   def 'with a non array default to a equality matcher'() {
     when:
     def mismatches =
-        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory, false)
+        MatcherExecutorKt.domatch(new MinEqualsIgnoreOrderMatcher(2), path, expected, actual, mismatchFactory, false, null)
 
     then:
     mismatches.empty == match

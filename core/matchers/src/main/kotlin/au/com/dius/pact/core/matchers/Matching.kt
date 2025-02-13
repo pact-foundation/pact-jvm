@@ -25,7 +25,8 @@ import org.apache.commons.codec.binary.Hex
 data class MatchingContext @JvmOverloads constructor(
   val matchers: MatchingRuleCategory,
   val allowUnexpectedKeys: Boolean,
-  val pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
+  val pluginConfiguration: Map<String, PluginConfiguration> = mapOf(),
+  val coerceNumbers: Boolean = false
 ) {
   @JvmOverloads
   fun matcherDefined(path: List<String>, pathComparator: Comparator<String> = Comparator.naturalOrder()): Boolean {

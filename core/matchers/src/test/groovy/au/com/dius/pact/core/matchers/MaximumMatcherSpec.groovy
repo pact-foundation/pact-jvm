@@ -4,7 +4,7 @@ import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@SuppressWarnings('UnnecessaryBooleanExpression')
+@SuppressWarnings(['UnnecessaryBooleanExpression', 'LineLength'])
 class MaximumMatcherSpec extends Specification {
 
   def mismatchFactory
@@ -18,7 +18,7 @@ class MaximumMatcherSpec extends Specification {
   @Unroll
   def 'with an array match if the array #condition'() {
     expect:
-    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, false).empty
+    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, false, null).empty
 
     where:
     condition             | expected | actual
@@ -29,7 +29,7 @@ class MaximumMatcherSpec extends Specification {
   @Unroll
   def 'with an array not match if the array #condition'() {
     expect:
-    !MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, false).empty
+    !MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, false, null).empty
 
     where:
     condition   | expected | actual
@@ -39,7 +39,7 @@ class MaximumMatcherSpec extends Specification {
   @Unroll
   def 'with a non array default to a type matcher'() {
     expect:
-    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, false).empty == beEmpty
+    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, false, null).empty == beEmpty
 
     where:
     expected | actual   || beEmpty
@@ -53,6 +53,6 @@ class MaximumMatcherSpec extends Specification {
     def actual = [1, 2, 3]
 
     expect:
-    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, true).empty
+    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory, true, null).empty
   }
 }

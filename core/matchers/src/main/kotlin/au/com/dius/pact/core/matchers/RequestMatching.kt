@@ -126,8 +126,8 @@ class RequestMatching(private val expectedPact: Pact) {
 
       val pathContext = MatchingContext(expected.matchingRules.rulesForCategory("path"), false, pluginConfiguration)
       val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), false, pluginConfiguration)
-      val queryContext = MatchingContext(expected.matchingRules.rulesForCategory("query"), false, pluginConfiguration)
-      val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), false, pluginConfiguration)
+      val queryContext = MatchingContext(expected.matchingRules.rulesForCategory("query"), false, pluginConfiguration, true)
+      val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), false, pluginConfiguration, true)
 
       return RequestMatchResult(Matching.matchMethod(expected.method, actual.method),
         Matching.matchPath(expected, actual, pathContext),
