@@ -65,18 +65,31 @@ Feature: V3 era Matching Rules
     When the requests are compared to the expected one
     Then the comparison should be OK
 
+  Scenario: Supports a number type matcher where it is acceptable to coerce values from string form
+    Given an expected request configured with the following:
+      | query  | headers     | matching rules              |
+      | a=1234 | 'X-A: 1234' | number-type-matcher-v3.json |
+    And the following requests are received:
+      | query   | headers      | desc                  |
+      | a=100   | 'X-A: 100'   | Integer number        |
+      | a=100.2 | 'X-A: 100.4' | Floating point number |
+    When the requests are compared to the expected one
+    Then the comparison should be OK
+
   Scenario: Supports a number type matcher (negative case)
     Given an expected request configured with the following:
       | body             | matching rules              |
       | file: basic.json | number-type-matcher-v3.json |
     And the following requests are received:
-      | body                                  | desc    |
-      | JSON: { "one": true, "two": "b" }     | Boolean |
-      | JSON: { "one": "100X01", "two": "b" } | String  |
+      | body                                  | desc                                              |
+      | JSON: { "one": true, "two": "b" }     | Boolean                                           |
+      | JSON: { "one": "100X01", "two": "b" } | String                                            |
+      | JSON: { "one": "100", "two": "b" }    | Number in string form is not acceptable in bodies |
     When the requests are compared to the expected one
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one" -> "Expected true (Boolean) to be a number"
     And the mismatches will contain a mismatch with error "$.one" -> "Expected '100X01' (String) to be a number"
+    And the mismatches will contain a mismatch with error "$.one" -> "Expected '100' (String) to be a number"
 
   Scenario: Supports an integer type matcher, no digits after the decimal point (positive case)
     Given an expected request configured with the following:
@@ -85,7 +98,16 @@ Feature: V3 era Matching Rules
     And the following requests are received:
       | body                                  | desc                                |
       | JSON: { "one": 100, "two": "b" }      | Integer number                      |
-      | JSON: { "one": "100", "two": "b" }    | String representation of an integer |
+    When the requests are compared to the expected one
+    Then the comparison should be OK
+
+  Scenario: Supports an integer type matcher where it is acceptable to coerce values from string form
+    Given an expected request configured with the following:
+      | query  | headers     | matching rules              |
+      | a=1234 | 'X-A: 1234' | number-type-matcher-v3.json |
+    And the following requests are received:
+      | query   | headers      | desc                  |
+      | a=100   | 'X-A: 100'   | Integer number        |
     When the requests are compared to the expected one
     Then the comparison should be OK
 
@@ -94,15 +116,17 @@ Feature: V3 era Matching Rules
       | body             | matching rules               |
       | file: basic.json | integer-type-matcher-v3.json |
     And the following requests are received:
-      | body                                  | desc                                      |
-      | JSON: { "one": [], "two": "b" }       | Array                                     |
-      | JSON: { "one": 100.1, "two": "b" }    | Floating point number                     |
-      | JSON: { "one": "100X01", "two": "b" } | Not a string representation of an integer |
+      | body                                  | desc                                                            |
+      | JSON: { "one": [], "two": "b" }       | Array                                                           |
+      | JSON: { "one": 100.1, "two": "b" }    | Floating point number                                           |
+      | JSON: { "one": "100X01", "two": "b" } | String                                                          |
+      | JSON: { "one": "100", "two": "b" }    | String representation of an integer is not acceptable in bodies |
     When the requests are compared to the expected one
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one" -> "Expected [] (Array) to be an integer"
     And the mismatches will contain a mismatch with error "$.one" -> "Expected 100.1 (Decimal) to be an integer"
     And the mismatches will contain a mismatch with error "$.one" -> "Expected '100X01' (String) to be an integer"
+    And the mismatches will contain a mismatch with error "$.one" -> "Expected '100' (String) to be an integer"
 
   Scenario: Supports an decimal type matcher, must have significant digits after the decimal point (positive case)
     Given an expected request configured with the following:
@@ -111,7 +135,6 @@ Feature: V3 era Matching Rules
     And the following requests are received:
       | body                                    | desc                                             |
       | JSON: { "one": 100.1234, "two": "b" }   | Floating point number                            |
-      | JSON: { "one": "100.1234", "two": "b" } | String representation of a floating point number |
     When the requests are compared to the expected one
     Then the comparison should be OK
 
@@ -120,15 +143,27 @@ Feature: V3 era Matching Rules
       | body             | matching rules               |
       | file: basic.json | decimal-type-matcher-v3.json |
     And the following requests are received:
-      | body                                  | desc                                             |
-      | JSON: { "one": null, "two": "b" }     | Null                                             |
-      | JSON: { "one": 100, "two": "b" }      | Integer number                                   |
-      | JSON: { "one": "100X01", "two": "b" } | Not a string representation of an decimal number |
+      | body                                    | desc                                                                         |
+      | JSON: { "one": null, "two": "b" }       | Null                                                                         |
+      | JSON: { "one": 100, "two": "b" }        | Integer number                                                               |
+      | JSON: { "one": "100X01", "two": "b" }   | String value                                                                 |
+      | JSON: { "one": "100.1234", "two": "b" } | String representation of a floating point number is not acceptable in bodies |
     When the requests are compared to the expected one
     Then the comparison should NOT be OK
     And the mismatches will contain a mismatch with error "$.one" -> "Expected null (Null) to be a decimal number"
     And the mismatches will contain a mismatch with error "$.one" -> "Expected 100 (Integer) to be a decimal number"
     And the mismatches will contain a mismatch with error "$.one" -> "Expected '100X01' (String) to be a decimal number"
+    And the mismatches will contain a mismatch with error "$.one" -> "Expected '100.1234' (String) to be a decimal number"
+
+  Scenario: Supports a decimal type matcher where it is acceptable to coerce values from string form
+    Given an expected request configured with the following:
+      | query    | headers       | matching rules              |
+      | a=1234.0 | 'X-A: 1234.0' | number-type-matcher-v3.json |
+    And the following requests are received:
+      | query   | headers      | desc                  |
+      | a=100.2 | 'X-A: 100.4' | Floating point number |
+    When the requests are compared to the expected one
+    Then the comparison should be OK
 
   Scenario: Supports a null matcher (positive case)
     Given an expected request configured with the following:

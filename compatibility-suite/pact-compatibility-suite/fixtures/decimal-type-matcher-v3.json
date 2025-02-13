@@ -8,5 +8,25 @@
         }
       ]
     }
+  },
+  "query": {
+    "a": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "decimal"
+        }
+      ]
+    }
+  },
+  "header": {
+    "X-A": {
+      "combine": "AND",
+      "matchers": [
+        {
+          "match": "decimal"
+        }
+      ]
+    }
   }
 }

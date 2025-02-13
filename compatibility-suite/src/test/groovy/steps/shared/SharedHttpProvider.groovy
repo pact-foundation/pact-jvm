@@ -78,12 +78,12 @@ class SharedHttpProvider {
   ) {
     def interaction = world.interactions[num - 1].copy()
     def entry = dataTable.entries().first()
-    if (entry['status']) {
-      interaction.response.status = entry['status'].toInteger()
+    if (entry['response']) {
+      interaction.response.status = entry['response'].toInteger()
     }
 
-    if (entry['headers']) {
-      entry['headers'].split(',').collect {
+    if (entry['response headers']) {
+      entry['response headers'].split(',').collect {
         it.trim()[1..-2].split(':')
       }.collect {
         [it[0].trim(), parseHeaderValue(it[1].trim()).collect { HeaderParser.INSTANCE.hvToString(it) }]
@@ -97,8 +97,8 @@ class SharedHttpProvider {
       }
     }
 
-    if (entry['body']) {
-      def part = configureBody(entry['body'], determineContentType(entry['body'],
+    if (entry['response body']) {
+      def part = configureBody(entry['response body'], determineContentType(entry['response body'],
         interaction.response.contentTypeHeader()))
       interaction.response.body = part.body
       interaction.response.headers.putAll(part.headers)

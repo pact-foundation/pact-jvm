@@ -9,7 +9,6 @@ import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
-import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.SemverMatcher
 import au.com.dius.pact.core.model.matchingrules.StatusCodeMatcher
@@ -20,10 +19,6 @@ import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.DECIMAL
-import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.INTEGER
-import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.NUMBER
 
 @SuppressWarnings(['UnnecessaryBooleanExpression', 'CyclomaticComplexity'])
 class MatcherExecutorSpec extends Specification {
@@ -47,7 +42,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'equals matcher matches using equals'() {
     expect:
-    MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+    MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory, false, null).empty ==
       mustBeEmpty
 
     where:
@@ -77,7 +72,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'regex matcher matches using the provided regex'() {
     expect:
-    MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory, false).empty ==
+    MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory, false, null).empty ==
       mustBeEmpty
 
     where:
@@ -94,7 +89,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'type matcher matches on types'() {
     expect:
-    MatcherExecutorKt.domatch(TypeMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+    MatcherExecutorKt.domatch(TypeMatcher.INSTANCE, path, expected, actual, mismatchFactory, false, null).empty ==
       mustBeEmpty
 
     where:
@@ -127,46 +122,10 @@ class MatcherExecutorSpec extends Specification {
   }
 
   @Unroll
-  def 'number type matcher matches on types'() {
-    expect:
-    MatcherExecutorKt.domatch(new NumberTypeMatcher(numberType), path, expected, actual, mismatchFactory,
-      false).empty == mustBeEmpty
-
-    where:
-    numberType | expected | actual                             || mustBeEmpty
-    INTEGER    | 100      | 'Some other string'                || false
-    DECIMAL    | 100.0    | 'Some other string'                || false
-    NUMBER     | 100      | 'Some other string'                || false
-    INTEGER    | 100      | 200.3                              || false
-    NUMBER     | 100      | 200.3                              || true
-    DECIMAL    | 100.0    | 200.3                              || true
-    INTEGER    | 100      | 200                                || true
-    INTEGER    | 100      | new JsonValue.Integer('200'.chars) || true
-    NUMBER     | 100      | 200                                || true
-    DECIMAL    | 100.0    | 200                                || false
-    INTEGER    | 100      | false                              || false
-    DECIMAL    | 100.0    | false                              || false
-    NUMBER     | 100      | false                              || false
-    INTEGER    | 100      | null                               || false
-    DECIMAL    | 100.0    | null                               || false
-    NUMBER     | 100      | null                               || false
-    INTEGER    | 100      | [200.3]                            || false
-    DECIMAL    | 100.0    | [200.3]                            || false
-    NUMBER     | 100      | [200.3]                            || false
-    INTEGER    | 100      | [a: 200.3, b: 200, c: 300]         || false
-    DECIMAL    | 100.0    | [a: 200.3, b: 200, c: 300]         || false
-    NUMBER     | 100      | [a: 200.3, b: 200, c: 300]         || false
-    NUMBER     | 100      | 2.300g                             || true
-    NUMBER     | 100      | 2.300d                             || true
-    DECIMAL    | 100      | 2.300g                             || true
-    DECIMAL    | 100      | 2.300d                             || true
-  }
-
-  @Unroll
   @SuppressWarnings('LineLength')
   def 'timestamp matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false, null).empty == mustBeEmpty
 
     where:
     expected                                      | actual                                  | pattern                           || mustBeEmpty
@@ -194,7 +153,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'time matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false, null).empty == mustBeEmpty
 
     where:
     expected         | actual       | pattern       || mustBeEmpty
@@ -209,7 +168,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'date matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false, null).empty == mustBeEmpty
 
     where:
     expected     | actual       | pattern      || mustBeEmpty
@@ -224,7 +183,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'include matcher matches if the expected is included in the actual'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, false, null).empty == mustBeEmpty
 
     where:
     expected | actual           || mustBeEmpty
@@ -254,7 +213,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'list type matcher matches on array sizes - #matcher'() {
     expect:
-    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, cascaded).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory, cascaded, null).empty == mustBeEmpty
 
     where:
     matcher                     | expected | actual    | cascaded || mustBeEmpty
@@ -270,49 +229,6 @@ class MatcherExecutorSpec extends Specification {
     new MinMaxTypeMatcher(1, 2) | [0, 1]   | [1, 1]    | false    || true
     new MinMaxTypeMatcher(1, 2) | [0]      | [1, 1, 2] | false    || false
     new MinMaxTypeMatcher(1, 2) | [0]      | [1, 1, 2] | true     || true
-  }
-
-  @Unroll
-  @SuppressWarnings('UnnecessaryCast')
-  def 'matching integer values'() {
-    expect:
-    MatcherExecutorKt.matchInteger(value) == result
-
-    where:
-
-    value             | result
-    '100'             | true
-    '100x'            | false
-    100               | true
-    100.0             | false
-    100i              | true
-    100l              | true
-    100 as BigInteger | true
-    100g              | true
-    BigInteger.ZERO   | true
-    BigDecimal.ZERO   | true
-  }
-
-  @Unroll
-  @SuppressWarnings('UnnecessaryCast')
-  def 'matching decimal number values'() {
-    expect:
-    MatcherExecutorKt.matchDecimal(value) == result
-
-    where:
-
-    value                            | result
-    new JsonValue.Decimal('0'.chars) | true
-    '100'                            | false
-    100                              | false
-    100.0                            | true
-    100.0f                           | true
-    100.0d                           | true
-    100i                             | false
-    100l                             | false
-    100 as BigInteger                | false
-    BigInteger.ZERO                  | false
-    BigDecimal.ZERO                  | true
   }
 
   @Unroll
@@ -337,7 +253,7 @@ class MatcherExecutorSpec extends Specification {
   def 'boolean matcher test - #expected -> #actual'() {
     expect:
     MatcherExecutorKt.domatch(BooleanMatcher.INSTANCE, path, expected, actual, mismatchFactory,
-      false).empty == mustBeEmpty
+      false, null).empty == mustBeEmpty
 
     where:
     expected        | actual                                            || mustBeEmpty
@@ -365,7 +281,7 @@ class MatcherExecutorSpec extends Specification {
   def 'status code matcher test - #expected -> #actual'() {
     expect:
     MatcherExecutorKt.domatch(new StatusCodeMatcher(status, statusCodes), path, expected, actual,
-      mismatchFactory, false).empty == mustBeEmpty
+      mismatchFactory, false, null).empty == mustBeEmpty
 
     where:
     status                 | statusCodes | expected | actual || mustBeEmpty
@@ -390,7 +306,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'notEmpty matcher test'() {
     expect:
-    MatcherExecutorKt.domatch(NotEmptyMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+    MatcherExecutorKt.domatch(NotEmptyMatcher.INSTANCE, path, expected, actual, mismatchFactory, false, null).empty ==
       mustBeEmpty
 
     where:
@@ -424,7 +340,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'semver matcher test'() {
     expect:
-    MatcherExecutorKt.domatch(SemverMatcher.INSTANCE, path, expected, actual, mismatchFactory, false).empty ==
+    MatcherExecutorKt.domatch(SemverMatcher.INSTANCE, path, expected, actual, mismatchFactory, false, null).empty ==
       mustBeEmpty
 
     where:

@@ -70,7 +70,7 @@ object Matchers : KLogging() {
     pathComparator: Comparator<String> = Comparator.naturalOrder()
   ): List<M> {
     val matcherDef = context.selectBestMatcher(path, pathComparator)
-    return domatch(matcherDef, path, expected, actual, mismatchFn)
+    return domatch(matcherDef, path, expected, actual, mismatchFn, context)
   }
 
   /**
