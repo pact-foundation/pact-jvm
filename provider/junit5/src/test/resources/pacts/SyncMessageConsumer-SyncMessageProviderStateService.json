@@ -1,0 +1,97 @@
+{
+  "consumer": {
+    "name": "SyncMessageConsumer"
+  },
+  "interactions": [
+    {
+      "description": "State has been inserted in request message",
+      "key": "",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the provider injects a 'stateValue'"
+        }
+      ],
+      "request": {
+        "contents": {
+          "content": {
+            "state": "ExampleValue"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.state": {
+              "dataType": "STRING",
+              "expression": "stateValue",
+              "type": "ProviderState"
+            }
+          }
+        },
+        "matchingRules": {
+          "body": {
+            "$.state": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "metadata": {
+          "contentType": "application/json"
+        }
+      },
+      "response": [
+        {
+          "contents": {
+            "content": {
+              "state": "ExampleValue"
+            },
+            "contentType": "application/json",
+            "encoded": false
+          },
+          "generators": {
+            "body": {
+              "$.state": {
+                "dataType": "STRING",
+                "expression": "stateValue",
+                "type": "ProviderState"
+              }
+            }
+          },
+          "matchingRules": {
+            "body": {
+              "$.state": {
+                "combine": "AND",
+                "matchers": [
+                  {
+                    "match": "type"
+                  }
+                ]
+              }
+            }
+          },
+          "metadata": {
+            "contentType": "application/json"
+          }
+        }
+      ],
+      "type": "Synchronous/Messages"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.17"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "SyncMessageProviderStateService"
+  }
+}

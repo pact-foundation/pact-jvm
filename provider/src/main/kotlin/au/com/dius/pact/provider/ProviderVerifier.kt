@@ -1451,6 +1451,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           m.invoke(instance)
         }
       } catch (e: Throwable) {
+        logger.warn(e) { "Failed to invoke provider method '${m.name}'" }
         throw RuntimeException("Failed to invoke provider method '${m.name}'", e)
       }
     }
