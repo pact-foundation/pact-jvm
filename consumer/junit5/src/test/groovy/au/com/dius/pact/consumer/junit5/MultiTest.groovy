@@ -13,6 +13,7 @@ import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledIf
 import org.junit.jupiter.api.extension.ExtendWith
 
 @SuppressWarnings(['PublicInstanceField', 'JUnitPublicNonTestMethod', 'FactoryMethodName'])
@@ -152,5 +153,21 @@ class MultiTest {
       .willRespondWith()
       .status(404)
       .toPact()
+  }
+
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
+  @DisabledIf('shouldBeDisabled')
+  RequestResponsePact getAnotherUsersFragment3(PactDslWithProvider builder) {
+    builder
+      .uponReceiving('get all users')
+      .path('/idm/user')
+      .method('GET')
+      .willRespondWith()
+      .status(404)
+      .toPact()
+  }
+
+  boolean shouldBeDisabled() {
+    true
   }
 }
