@@ -28,45 +28,45 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 dependencies {
     constraints {
         // Define dependency versions as constraints
-        api 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
-        api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.4.1'
-        api 'org.json:json:20240205'
+        api 'org.apache.httpcomponents.client5:httpclient5:5.4.4'
+        api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.4.4'
+        api 'org.json:json:20250517'
         api 'io.pact.plugin.driver:core:0.5.1' // remember also to update implementation
-        api 'org.apache.tika:tika-core:2.9.1'
-        api 'io.github.oshai:kotlin-logging-jvm:5.1.4'
+        api 'org.apache.tika:tika-core:2.9.4'
+        api 'io.github.oshai:kotlin-logging-jvm:7.0.7'
 
         implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.21'
-        implementation 'org.apache.commons:commons-lang3:3.12.0'
-        implementation 'org.apache.commons:commons-text:1.10.0'
-        implementation 'org.apache.commons:commons-collections4:4.4'
-        implementation 'org.apache.tika:tika-core:2.9.1'
-        implementation 'com.google.guava:guava:31.1-jre'
-        implementation 'org.slf4j:slf4j-api:2.0.4'
+        implementation 'org.apache.commons:commons-lang3:3.17.0'
+        implementation 'org.apache.commons:commons-text:1.13.1'
+        implementation 'org.apache.commons:commons-collections4:4.5.0'
+        implementation 'org.apache.tika:tika-core:2.9.4'
+        implementation 'com.google.guava:guava:33.4.8-jre'
+        implementation 'org.slf4j:slf4j-api:2.0.17'
         implementation 'io.ktor:ktor-http-jvm:3.0.1'
         implementation 'io.ktor:ktor-server-netty:3.0.1'
         implementation 'io.ktor:ktor-network-tls-certificates:3.0.1'
         implementation 'io.ktor:ktor-server-call-logging:3.0.1'
-        implementation 'io.netty:netty-handler:4.1.108.Final'
-        implementation 'org.apache.groovy:groovy:4.0.23'
-        implementation 'org.apache.groovy:groovy-json:4.0.23'
-        implementation 'org.apache.groovy:groovy-xml:4.0.23'
+        implementation 'io.netty:netty-handler:4.2.1.Final'
+        implementation 'org.apache.groovy:groovy:4.0.26'
+        implementation 'org.apache.groovy:groovy-json:4.0.26'
+        implementation 'org.apache.groovy:groovy-xml:4.0.26'
         implementation 'io.pact.plugin.driver:core:0.5.1'  //remember to also update under api
-        implementation 'commons-codec:commons-codec:1.15'
-        implementation 'io.github.oshai:kotlin-logging-jvm:5.1.4'
+        implementation 'commons-codec:commons-codec:1.18.0'
+        implementation 'io.github.oshai:kotlin-logging-jvm:7.0.7'
 
-        testImplementation 'org.apache.groovy:groovy:4.0.23'
-        testImplementation 'org.apache.groovy:groovy-json:4.0.23'
-        testImplementation 'org.apache.groovy:groovy-datetime:4.0.23'
-        testImplementation 'org.apache.groovy:groovy-xml:4.0.23'
-        testImplementation 'org.apache.groovy:groovy-nio:4.0.23'
-        testImplementation 'org.hamcrest:hamcrest:2.2'
+        testImplementation 'org.apache.groovy:groovy:4.0.26'
+        testImplementation 'org.apache.groovy:groovy-json:4.0.26'
+        testImplementation 'org.apache.groovy:groovy-datetime:4.0.26'
+        testImplementation 'org.apache.groovy:groovy-xml:4.0.26'
+        testImplementation 'org.apache.groovy:groovy-nio:4.0.26'
+        testImplementation 'org.hamcrest:hamcrest:3.0'
         testImplementation 'junit:junit:4.13.2'
-        testImplementation 'ch.qos.logback:logback-classic:1.4.5'
-        testImplementation 'ch.qos.logback:logback-core:1.4.5'
-        testImplementation 'net.bytebuddy:byte-buddy:1.15.7'
-        testImplementation 'com.github.tomakehurst:wiremock-jre8:2.34.0'
-        testImplementation 'org.junit.vintage:junit-vintage-engine:5.11.3'
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+        testImplementation 'ch.qos.logback:logback-classic:1.4.14'
+        testImplementation 'ch.qos.logback:logback-core:1.4.14'
+        testImplementation 'net.bytebuddy:byte-buddy:1.17.5'
+        testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.2'
+        testImplementation 'org.junit.vintage:junit-vintage-engine:5.12.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.2'
     }
 
     // Align versions of all Kotlin components
@@ -77,7 +77,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-reflect:2.1.21'
 
     codenarc('org.codenarc:CodeNarc:3.5.0-groovy-4.0')
-    codenarc('org.apache.groovy:groovy:4.0.23')
+    codenarc('org.apache.groovy:groovy:4.0.26')
 }
 
 testing {
@@ -85,7 +85,7 @@ testing {
         // Configure the built-in test suite
         test {
             // Use JUnit Jupiter test framework
-            useJUnitJupiter('5.11.3')
+            useJUnitJupiter('5.12.2')
         }
     }
 }
