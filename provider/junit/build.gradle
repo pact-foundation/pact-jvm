@@ -14,12 +14,12 @@ dependencies {
     api 'org.apache.httpcomponents.client5:httpclient5'
 
     implementation 'org.apache.commons:commons-lang3'
-    implementation 'org.jooq:jool:0.9.14'
+    implementation 'org.jooq:jool:0.9.15'
     implementation 'org.apache.httpcomponents.client5:httpclient5-fluent'
     implementation 'org.slf4j:slf4j-api'
     implementation 'com.github.rholder:guava-retrying:2.0.0'
     implementation 'javax.mail:mail:1.5.0-b01'
-    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-io:commons-io'
 
     testImplementation 'com.github.rest-driver:rest-client-driver:2.0.1'
     testImplementation 'com.github.tomakehurst:wiremock-jre8'
@@ -32,7 +32,7 @@ dependencies {
 
     testImplementation 'org.apache.groovy:groovy'
     testRuntimeOnly 'net.bytebuddy:byte-buddy'
-    testRuntimeOnly 'org.objenesis:objenesis:3.1'
+    testRuntimeOnly 'org.objenesis:objenesis:3.4'
 }
 
 test {

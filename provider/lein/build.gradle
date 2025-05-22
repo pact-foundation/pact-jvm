@@ -5,14 +5,14 @@ buildscript {
     mavenLocal()
   }
   dependencies {
-    classpath 'org.apache.commons:commons-lang3:3.10'
-    classpath 'org.clojure:clojure:1.10.1'
+    classpath 'org.apache.commons:commons-lang3:3.17.0'
+    classpath 'org.clojure:clojure:1.12.0'
   }
 }
 
 plugins {
   id 'au.com.dius.pact.kotlin-library-conventions'
-  id "com.netflix.nebula.clojure" version "14.2.1"
+  id "com.netflix.nebula.clojure" version "14.2.2"
 }
 
 description = 'Pact-JVM - Leiningen Provider test support library'
@@ -22,11 +22,11 @@ import org.apache.commons.lang3.RandomStringUtils
 
 dependencies {
   api project(":provider")
-  implementation 'org.clojure:clojurescript:1.11.132'
+  implementation 'org.clojure:clojurescript:1.12.42'
   implementation 'org.clojure:core.match:1.1.0'
   implementation 'org.clojure:core.rrb-vector:0.2.0'
   implementation 'leiningen-core:leiningen-core:2.9.10'
-  implementation 'org.apache.maven:maven-aether-provider:3.0.5'
+  implementation 'org.apache.maven:maven-aether-provider:3.3.9'
   implementation 'org.sonatype.aether:aether-connector-file:1.13.1'
   implementation 'org.sonatype.aether:aether-connector-wagon:1.13.1'
   implementation 'org.apache.httpcomponents.client5:httpclient5'
@@ -34,7 +34,7 @@ dependencies {
 
   testImplementation 'org.clojure:tools.nrepl:0.2.13'
 
-  groovyDoc 'org.apache.groovy:groovy-all:4.0.11'
+  groovyDoc 'org.apache.groovy:groovy-all:4.0.26'
 }
 
 clojure.aotCompile = true

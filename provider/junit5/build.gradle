@@ -10,7 +10,7 @@ dependencies {
   api project(':core:support')
   api project(':core:pactbroker')
   api project(':core:model')
-  api 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+  api 'org.junit.jupiter:junit-jupiter-api:5.12.2'
 
   implementation 'org.slf4j:slf4j-api'
   implementation('io.pact.plugin.driver:core') {
@@ -28,7 +28,7 @@ dependencies {
   testImplementation('com.github.javafaker:javafaker:1.0.2') {
     exclude group: 'org.yaml'
   }
-  testImplementation 'org.yaml:snakeyaml:1.33'
-  testImplementation 'org.mockito:mockito-core:2.28.2'
-  testImplementation 'org.mockito:mockito-inline:2.28.2'
+  testImplementation 'org.yaml:snakeyaml:2.4'
+  testImplementation 'org.mockito:mockito-core:5.18.0'
+  testImplementation 'org.mockito:mockito-inline:5.2.0'
 }
