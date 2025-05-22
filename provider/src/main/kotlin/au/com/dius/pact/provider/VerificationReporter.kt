@@ -11,6 +11,7 @@ import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.mapError
 import io.github.oshai.kotlinlogging.KLogging
+import java.util.Locale
 
 /**
  * Interface to the reporter that published the verification results
@@ -136,6 +137,6 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
 
   override fun publishingResultsDisabled(resolver: ValueResolver): Boolean {
     val property = resolver.resolveValue(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS, "false")
-    return property?.toLowerCase() != "true"
+    return property?.lowercase(Locale.getDefault()) != "true"
   }
 }

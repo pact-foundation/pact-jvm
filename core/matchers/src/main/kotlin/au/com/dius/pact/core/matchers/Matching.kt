@@ -21,6 +21,7 @@ import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.PluginConfiguration
 import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.codec.binary.Hex
+import java.util.Locale
 
 data class MatchingContext @JvmOverloads constructor(
   val matchers: MatchingRuleCategory,
@@ -351,7 +352,7 @@ object Matching : KLogging() {
         val actual = a[value.key]
         val compare = MetadataMatcher.compare(value.key, value.value, actual, context)
         if (compare != null) list + compare else list
-      } else if (value.key.toLowerCase() != "contenttype" && value.key.toLowerCase() != "content-type") {
+      } else if (value.key.lowercase(Locale.getDefault()) != "contenttype" && value.key.lowercase(Locale.getDefault()) != "content-type") {
         list + MetadataMismatch(value.key, value.value, null,
           "Expected metadata '${value.key}' but was missing")
       } else {

@@ -201,29 +201,33 @@ class SLF4JReporter(
 
   override fun displayFailures(failures: Map<String, Any>) {
     val result = StringBuilder()
-    result.appendln("Failures:")
+    result.appendLine("Failures:")
     failures.entries.forEachIndexed { i, err ->
-      result.appendln("$i) ${err.key}")
+      result.appendLine("$i) ${err.key}")
       when {
         err.value is Throwable -> {
-          result.appendln(prepareError(err.value as Throwable))
+          result.appendLine(prepareError(err.value as Throwable))
         }
+
         err.value is Map<*, *> &&
           (err.value as Map<*, *>).containsKey("comparison") &&
           (err.value as Map<*, *>)["comparison"] is Map<*, *>
         -> {
-          result.appendln(prepareDiff(err.value as Map<String, Any>))
+          result.appendLine(prepareDiff(err.value as Map<String, Any>))
         }
+
         err.value is String -> {
-          result.appendln("      ${err.value}")
+          result.appendLine("      ${err.value}")
         }
+
         err.value is Map<*, *> -> {
           for ((key, message) in err.value as Map<*, *>) {
-            result.appendln("      $key -> $message")
+            result.appendLine("      $key -> $message")
           }
         }
+
         else -> {
-          result.appendln(Json.toJson(err.value).serialise().prependIndent("      "))
+          result.appendLine(Json.toJson(err.value).serialise().prependIndent("      "))
         }
       }
     }
@@ -265,8 +269,8 @@ class SLF4JReporter(
     notices: List<VerificationNotice>
   ) {
     val result = StringBuilder()
-    result.appendln("  Notices:")
-    notices.forEachIndexed { i, notice -> result.appendln("    ${i + 1}) ${notice.text}") }
+    result.appendLine("  Notices:")
+    notices.forEachIndexed { i, notice -> result.appendLine("    ${i + 1}) ${notice.text}") }
 
     log.info(result.toString())
   }
@@ -285,7 +289,7 @@ class SLF4JReporter(
     val comparison = diff["comparison"] as Map<String, List<Map<String, Any>>>
     for ((key, messageAndDiff) in comparison) {
       for (mismatch in messageAndDiff) {
-        result.appendln("      $key -> ${mismatch["mismatch"]}")
+        result.appendLine("      $key -> ${mismatch["mismatch"]}")
 
         val mismatchDiff = if (mismatch["diff"] is List<*>) {
           mismatch["diff"] as List<String>
@@ -297,18 +301,18 @@ class SLF4JReporter(
           continue
         }
 
-        result.appendln("        Diff:")
+        result.appendLine("        Diff:")
         mismatchDiff
           .asSequence()
           .filter { it.isNotEmpty() }
-          .forEach { result.appendln("        $it") }
+          .forEach { result.appendLine("        $it") }
       }
     }
 
     if (displayFullDiff) {
-      result.appendln("      Full Diff:")
+      result.appendLine("      Full Diff:")
       for (delta in diff["diff"] as List<String>) {
-        result.appendln("      $delta")
+        result.appendLine("      $delta")
       }
     }
 
@@ -341,6 +345,7 @@ class SLF4JReporter(
         is JsonValue.Array -> for (value in text.values) {
           result.appendLine("    " + value.asString())
         }
+
         else -> result.appendLine("    $text")
       }
     }

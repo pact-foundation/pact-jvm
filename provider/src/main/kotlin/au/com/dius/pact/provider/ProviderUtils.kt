@@ -11,6 +11,7 @@ import io.pact.plugins.jvm.core.PluginConfiguration
 import io.github.oshai.kotlinlogging.KLogging
 import org.apache.commons.io.FilenameUtils
 import java.io.File
+import java.util.Locale
 import kotlin.reflect.KClass
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.createInstance
@@ -77,7 +78,7 @@ object ProviderUtils : KLogging() {
   }
 
   fun isS3Url(pactFile: Any?): Boolean {
-    return pactFile is String && pactFile.toLowerCase().startsWith("s3://")
+    return pactFile is String && pactFile.lowercase(Locale.getDefault()).startsWith("s3://")
   }
 
   @JvmStatic
