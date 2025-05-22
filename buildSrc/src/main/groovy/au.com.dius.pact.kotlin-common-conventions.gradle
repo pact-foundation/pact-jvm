@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 
     id 'groovy'
-    // id "io.gitlab.arturbosch.detekt" TODO: Detekt does not support JDK 23 yet
+    id "io.gitlab.arturbosch.detekt"
     id 'codenarc'
 }
 
@@ -76,7 +76,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.21'
     implementation 'org.jetbrains.kotlin:kotlin-reflect:2.1.21'
 
-    codenarc('org.codenarc:CodeNarc:3.5.0-groovy-4.0')
+    codenarc('org.codenarc:CodeNarc:3.6.0-groovy-4.0')
     codenarc('org.apache.groovy:groovy:4.0.26')
 }
 
@@ -111,7 +111,6 @@ codenarcTest {
     configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
 }
 
-// TODO: Detekt does not support JDK 23 yet
-//detekt {
-//    config = files(rootProject.file("config/detekt-config.yml"))
-//}
+detekt {
+    config = files(rootProject.file("config/detekt-config.yml"))
+}

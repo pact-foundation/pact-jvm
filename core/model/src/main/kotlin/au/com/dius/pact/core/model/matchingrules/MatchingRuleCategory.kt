@@ -1,10 +1,11 @@
 package au.com.dius.pact.core.model.matchingrules
 
-import au.com.dius.pact.core.model.*
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.atLeast
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.support.json.JsonValue
 import io.github.oshai.kotlinlogging.KLogging
-import java.util.Comparator
 import java.util.function.Predicate
 
 /**

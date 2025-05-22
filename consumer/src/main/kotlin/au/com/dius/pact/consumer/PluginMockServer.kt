@@ -49,7 +49,8 @@ class PluginMockServer(pact: BasePact, config: MockProviderConfig) : BaseMockSer
     }
 
     transportEntry = entry
-    mockServerDetails = pluginManager.startMockServer(transportEntry, config.toPluginMockServerConfig(), pact, testContext)
+    mockServerDetails = pluginManager.startMockServer(transportEntry, config.toPluginMockServerConfig(), pact,
+      testContext)
   }
 
   @Suppress("EmptyFunctionBlock")

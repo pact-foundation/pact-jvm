@@ -615,7 +615,7 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
     }
   }
 
-  @Suppress("ComplexMethod", "LongMethod")
+  @Suppress("ComplexMethod", "LongMethod", "ReturnCount")
   fun processRawString(rawString: String): Result<String, String> {
     val buffer = StringBuilder(rawString.length)
     val chars = rawString.chars().iterator()

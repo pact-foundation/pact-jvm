@@ -719,10 +719,6 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     private const val TIMESTAMP = "timestamp"
     private const val TIME = "time"
     private const val DATE = "date"
-
-    private fun mapEntryToInt(map: Map<String, Any?>, field: String) =
-      if (map[field] is Int) map[field] as Int
-      else Integer.parseInt(map[field]!!.toString())
   }
 }
 
