@@ -9,8 +9,8 @@ configurations {
 }
 
 dependencies {
-  testImplementation 'io.cucumber:cucumber-java:7.12.0'
-  testImplementation 'io.cucumber:cucumber-picocontainer:7.12.0'
+  testImplementation 'io.cucumber:cucumber-java:7.22.2'
+  testImplementation 'io.cucumber:cucumber-picocontainer:7.22.2'
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.apache.groovy:groovy-json'
   testImplementation 'org.apache.groovy:groovy-xml'
