@@ -1,5 +1,41 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.0-beta.1 - Upgrade Kotlin to 2.1 and update all dependencies
+
+* 7d50d9891 - chore: Upgrade KTor to 3.1.3 #1863 (Ronald Holshausen, Thu May 22 16:35:07 2025 +1000)
+* d17e61280 - chore(compatibility-suite): Upgrade cucumber to latest (Ronald Holshausen, Thu May 22 16:21:44 2025 +1000)
+* d015fa1bc - chore: Update dependencies for all provider modules (Ronald Holshausen, Thu May 22 16:16:36 2025 +1000)
+* 2fd11abf4 - chore: Update dependencies for all consumer modules (Ronald Holshausen, Thu May 22 15:36:30 2025 +1000)
+* abe80d778 - chore: Update dependencies for all core modules (Ronald Holshausen, Thu May 22 12:08:03 2025 +1000)
+* 52f0e8f10 - chore: Update codenarc and re-enable detekt (Ronald Holshausen, Thu May 22 11:29:51 2025 +1000)
+* b0901431a - chore: Upgrade all core dependencies #1863 (Ronald Holshausen, Thu May 22 11:08:26 2025 +1000)
+* 751614ff7 - chore: Correct CI build (Ronald Holshausen, Thu May 22 10:35:25 2025 +1000)
+* 62ca919c2 - chore: Upgrade Kotlin to 2.1.21 #1863 (Ronald Holshausen, Thu May 22 10:29:28 2025 +1000)
+* a73996ad5 - Merge branch 'master' into v4.7.x (Ronald Holshausen, Fri Feb 14 10:42:47 2025 +1100)
+* b3656418f - fix: Only coerce strings to numbers when comparing headers and query parameters (Ronald Holshausen, Fri Feb 14 10:27:01 2025 +1100)
+* 00e4b409f - Merge commit '8cb9773b51dc729c4d03414bcb8bc0a8843662a1' (Ronald Holshausen, Fri Feb 14 10:24:30 2025 +1100)
+* 8cb9773b5 - Squashed 'compatibility-suite/pact-compatibility-suite/' changes from cc76eac3c..1acfa1ecb (Ronald Holshausen, Fri Feb 14 10:24:30 2025 +1100)
+* 1b1cf8432 - chore(compatibility-suite): Correct the shared steps after updating the compatibility suite (Ronald Holshausen, Thu Feb 13 10:23:52 2025 +1100)
+* f6fa6e3fe - Squashed 'compatibility-suite/pact-compatibility-suite/' changes from 416f3a64d..cc76eac3c (Ronald Holshausen, Thu Feb 13 10:06:48 2025 +1100)
+* 878949219 - Merge commit 'f6fa6e3fe1da4c8fa8a7285f844c3187252365b3' (Ronald Holshausen, Thu Feb 13 10:06:48 2025 +1100)
+* c68941ac6 - Merge branch 'master' into v4.7.x (Ronald Holshausen, Thu Feb 13 09:48:32 2025 +1100)
+* c3938b4c8 - chore: Fix compatibility-suite CI build (Ronald Holshausen, Thu Feb 13 09:34:10 2025 +1100)
+* dea8fb762 - chore: Fix compatibility-suite CI build (Ronald Holshausen, Thu Feb 13 09:15:34 2025 +1100)
+* 8c5b0b1da - fix: Only split values of known multi-value headers #1852 (Ronald Holshausen, Wed Feb 12 16:01:17 2025 +1100)
+* d7d30304c - fix: Matching rule paths for fields with only digits should not be written as indices #1851 (Ronald Holshausen, Wed Feb 12 11:21:26 2025 +1100)
+* 5dba442e2 - fix: Lambda based DSL stringType method did not match the old DSL #1850 (Ronald Holshausen, Wed Feb 12 10:27:13 2025 +1100)
+* 287b16c44 - feat: Pass any transport config to the plugin in the test context under the transport_config key (Ronald Holshausen, Mon Dec 16 10:34:56 2024 +1100)
+* 80d8a8779 - chore: Add example of a test with a pending interaction (Ronald Holshausen, Fri Dec 6 09:38:52 2024 +1100)
+* c8dc88e9e - Merge branch 'master' into v4.7.x (Ronald Holshausen, Thu Dec 5 09:56:57 2024 +1100)
+* 8b09520f2 - bump version to 4.6.17 (Ronald Holshausen, Thu Dec 5 09:50:10 2024 +1100)
+* 47039f3df - update changelog for release 4.6.16 (Ronald Holshausen, Thu Dec 5 09:38:43 2024 +1100)
+* 2d2016317 - fix: Dependency conflict with org.slf4j:slf4j-api was causing Spring tests to fail (Ronald Holshausen, Wed Dec 4 14:21:15 2024 +1100)
+* 38c0d27b8 - feat: Update LambdaDsl.newJsonArray to allow setting the number of examples (Ronald Holshausen, Wed Dec 4 10:59:23 2024 +1100)
+* 19c663c8c - chore: The pact-jvm-server main spec was not configured correctly (Ronald Holshausen, Wed Dec 4 10:24:23 2024 +1100)
+* 147a2a661 - fix:  LambdaDslJsonArray has no datetime function #1839 (Ronald Holshausen, Wed Dec 4 10:23:10 2024 +1100)
+* c7911705b - chore: Update readme (Ronald Holshausen, Wed Dec 4 09:59:01 2024 +1100)
+* d6242dd97 - bump version to 4.7.0-beta.1 (Ronald Holshausen, Wed Dec 4 09:52:10 2024 +1100)
+
 # 4.6.16 - Maintenance Release
 
 * 2d2016317 - fix: Dependency conflict with org.slf4j:slf4j-api was causing Spring tests to fail (Ronald Holshausen, Wed Dec 4 14:21:15 2024 +1100)
