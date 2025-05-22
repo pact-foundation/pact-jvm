@@ -24,7 +24,7 @@ dependencies {
   implementation 'org.springframework:spring-web:6.0.4'
   implementation 'org.springframework:spring-webflux:6.0.4'
   implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-  implementation 'org.hamcrest:hamcrest:2.2'
+  implementation 'org.hamcrest:hamcrest:3.0'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'javax.mail:mail:1.5.0-b01'
 
