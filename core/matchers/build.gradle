@@ -11,6 +11,7 @@ dependencies {
 
   implementation 'org.apache.commons:commons-lang3'
   implementation 'org.apache.commons:commons-collections4'
+  implementation 'org.apache.commons:commons-text'
   implementation 'commons-codec:commons-codec'
   implementation 'org.slf4j:slf4j-api'
   implementation 'com.github.mifmif:generex:1.0.2'

@@ -29,59 +29,59 @@ class MatchingEngineSpec extends Specification {
     def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context).unwrap()
 
     then:
-    //  assert_eq!(r#"(
-    //  :request (
-    //    :method (
-    //      #{'method == POST'},
-    //      %match:equality (
-    //        'POST',
-    //        %upper-case (
-    //          $.method
-    //        ),
-    //        NULL
-    //      )
-    //    ),
-    //    :path (
-    //      #{"path == '/test'"},
-    //      %match:equality (
-    //        '/test',
-    //        $.path,
-    //        NULL
-    //      )
-    //    ),
-    //    :"query parameters" (
-    //      %expect:empty (
-    //        $.query,
-    //        %join (
-    //          'Expected no query parameters but got ',
-    //          $.query
-    //        )
-    //      )
-    //    ),
-    //    :body (
-    //      %if (
-    //        %match:equality (
-    //          'text/plain',
-    //          $.content-type,
-    //          NULL,
-    //          %error (
-    //            'Body type error - ',
-    //            %apply ()
-    //          )
-    //        ),
-    //        %match:equality (
-    //          'Some nice bit of text',
-    //          %convert:UTF8 (
-    //            $.body
-    //          ),
-    //          NULL
-    //        )
-    //      )
-    //    )
-    //  )
-    //)
-    //"#, plan.pretty_form());
-    //
+    plan.prettyForm() ==
+      '''(
+        :request (
+          :method (
+            #{'method == POST'},
+            %match:equality (
+              'POST',
+              %upper-case (
+                $.method
+              ),
+              NULL
+            )
+          ),
+          :path (
+            #{"path == '/test'"},
+            %match:equality (
+              '/test',
+              $.path,
+              NULL
+            )
+          ),
+          :"query parameters" (
+            %expect:empty (
+              $.query,
+              %join (
+                'Expected no query parameters but got ',
+                $.query
+              )
+            )
+          ),
+          :body (
+            %if (
+              %match:equality (
+                'text/plain',
+                $.content-type,
+                NULL,
+                %error (
+                  'Body type error - ',
+                  %apply ()
+                )
+              ),
+              %match:equality (
+                'Some nice bit of text',
+                %convert:UTF8 (
+                  $.body
+                ),
+                NULL
+              )
+            )
+          )
+        )
+      )'''
+
     //  let executed_plan = execute_request_plan(&plan, &request, &mut context)?;
     //  assert_eq!(r#"(
     //  :request (
@@ -155,6 +155,5 @@ class MatchingEngineSpec extends Specification {
     //    query: hashmap!{},
     //    body: BodyMatchResult::Ok,
     //  }, mismatches);
-    false
   }
 }
