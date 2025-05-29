@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 
     id 'groovy'
+    id "io.gitlab.arturbosch.detekt"
     id 'codenarc'
 }
 
@@ -34,7 +35,7 @@ dependencies {
         api 'org.apache.httpcomponents.client5:httpclient5:5.4.4'
         api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.4.4'
         api 'org.json:json:20250517'
-        api 'io.pact.plugin.driver:core:0.5.1' // remember also to update implementation
+        api 'io.pact.plugin.driver:core:0.5.2' // remember also to update implementation
         api 'org.apache.tika:tika-core:2.9.4'
         api 'io.github.oshai:kotlin-logging-jvm:7.0.7'
 
@@ -55,7 +56,7 @@ dependencies {
         implementation 'org.apache.groovy:groovy:4.0.26'
         implementation 'org.apache.groovy:groovy-json:4.0.26'
         implementation 'org.apache.groovy:groovy-xml:4.0.26'
-        implementation 'io.pact.plugin.driver:core:0.5.1'  //remember to also update under api
+        implementation 'io.pact.plugin.driver:core:0.5.2'  //remember to also update under api
         implementation 'io.github.oshai:kotlin-logging-jvm:7.0.7'
 
         testImplementation 'org.apache.groovy:groovy:4.0.26'
