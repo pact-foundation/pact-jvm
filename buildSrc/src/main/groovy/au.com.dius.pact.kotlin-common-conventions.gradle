@@ -31,7 +31,7 @@ dependencies {
         api 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
         api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.3.1'
         api 'org.json:json:20240205'
-        api 'io.pact.plugin.driver:core:0.5.1' // remember also to update implementation
+        api 'io.pact.plugin.driver:core:0.5.2' // remember also to update implementation
         api 'org.apache.tika:tika-core:2.9.1'
         api 'io.github.oshai:kotlin-logging-jvm:5.1.4'
 
@@ -50,7 +50,7 @@ dependencies {
         implementation 'org.apache.groovy:groovy:4.0.18'
         implementation 'org.apache.groovy:groovy-json:4.0.18'
         implementation 'org.apache.groovy:groovy-xml:4.0.18'
-        implementation 'io.pact.plugin.driver:core:0.5.1'  //remember to also update under api
+        implementation 'io.pact.plugin.driver:core:0.5.2'  //remember to also update under api
         implementation 'commons-codec:commons-codec:1.15'
         implementation 'io.github.oshai:kotlin-logging-jvm:5.1.4'
 
