@@ -1,6 +1,8 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HttpRequest
+import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.support.Result
 
 interface MatchingEngine {
@@ -31,11 +33,11 @@ object V2MatchingEngine: MatchingEngine {
 
     val matchMethod = ExecutionPlanNode.action("match:equality")
     val expectedMethod = expected.method.uppercase()
-//    match_method
-//      .add(ExecutionPlanNode::value_node(expected_method.clone()))
-//      .add(ExecutionPlanNode::action("upper-case")
-//        .add(ExecutionPlanNode::resolve_value(DocPath::new("$.method")?)))
-//      .add(ExecutionPlanNode::value_node(NodeValue::NULL));
+    matchMethod
+      .add(ExecutionPlanNode.valueNode(expectedMethod))
+      .add(ExecutionPlanNode.action("upper-case")
+        .add(ExecutionPlanNode.resolveValue(DocPath("$.method"))))
+      .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
 
     methodContainer.add(ExecutionPlanNode.annotation(Into { "method == $expectedMethod" }))
     methodContainer.add(matchMethod);

@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.model.DocPath
+import au.com.dius.pact.core.model.Into
 import org.apache.commons.text.StringEscapeUtils.escapeJson
 
 //  /// Clones this node, replacing the value with the given one
@@ -238,14 +240,14 @@ data class ExecutionPlanNode(
           buffer.append(result.toString())
         }
       }
-//      is PlanNodeType.RESOLVE => {
-//        buffer.push_str(str.to_string().as_str());
-//
-//        if let Some(result) = &self.result {
-//          buffer.push_str("=>");
-//          buffer.push_str(result.to_string().as_str());
-//        }
-//      }
+      is PlanNodeType.RESOLVE -> {
+        buffer.append(n.path.toString())
+
+        if (result != null) {
+          buffer.append("=>")
+          buffer.append(result.toString())
+        }
+      }
       is PlanNodeType.PIPELINE -> {
         buffer.append("->")
         buffer.append('(')
@@ -257,15 +259,15 @@ data class ExecutionPlanNode(
           buffer.append(result.toString())
         }
       }
-//      is PlanNodeType.RESOLVE_CURRENT -> {
-//        buffer.push_str("~>");
-//        buffer.push_str(str.to_string().as_str());
-//
-//        if let Some(result) = &self.result {
-//          buffer.push_str("=>");
-//          buffer.push_str(result.to_string().as_str());
-//        }
-//      }
+      is PlanNodeType.RESOLVE_CURRENT -> {
+        buffer.append("~>")
+        buffer.append(n.path.toString())
+
+        if (result != null) {
+          buffer.append("=>")
+          buffer.append(result.toString())
+        }
+      }
       is PlanNodeType.SPLAT -> {
         buffer.append("**")
         buffer.append('(')
@@ -357,15 +359,15 @@ data class ExecutionPlanNode(
           buffer.append(result.toString())
         }
       }
-//      is PlanNodeType.RESOLVE(str) => {
-//        buffer.append(pad.as_str());
-//        buffer.append(str.to_string().as_str());
-//
-//        if let Some(result) = &self.result {
-//          buffer.append(" => ");
-//          buffer.append(result.to_string().as_str());
-//        }
-//      }
+      is PlanNodeType.RESOLVE -> {
+        buffer.append(pad)
+        buffer.append(n.path.toString())
+
+        if (result != null) {
+          buffer.append("=>")
+          buffer.append(result.toString())
+        }
+      }
       is PlanNodeType.PIPELINE -> {
         buffer.append(pad)
         buffer.append("->")
@@ -383,16 +385,16 @@ data class ExecutionPlanNode(
           buffer.append(result.toString())
         }
       }
-//      is PlanNodeType.RESOLVE_CURRENT(str) => {
-//        buffer.append(pad.as_str());
-//        buffer.append("~>");
-//        buffer.append(str.to_string().as_str());
-//
-//        if let Some(result) = &self.result {
-//          buffer.append(" => ");
-//          buffer.append(result.to_string().as_str());
-//        }
-//      }
+      is PlanNodeType.RESOLVE_CURRENT -> {
+        buffer.append(pad)
+        buffer.append("~>")
+        buffer.append(n.path.toString())
+
+        if (result != null) {
+          buffer.append("=>")
+          buffer.append(result.toString())
+        }
+      }
       is PlanNodeType.SPLAT -> {
         buffer.append(pad)
         buffer.append("**")
@@ -572,14 +574,13 @@ data class ExecutionPlanNode(
       is PlanNodeType.CONTAINER -> String.format(":%s", n.label) == identifier
       is PlanNodeType.ACTION -> String.format("%%%s", n.value) == identifier
       is PlanNodeType.VALUE -> false
-//      is PlanNodeType.RESOLVE(exp) => exp.to_string() == identifier,
+      is PlanNodeType.RESOLVE -> n.toString() == identifier
       is PlanNodeType.PIPELINE -> "->" == identifier
-//      is PlanNodeType.RESOLVE_CURRENT(exp) => format!("~>{}", exp) == identifier,
+      is PlanNodeType.RESOLVE_CURRENT -> "~>${n.path}" == identifier
       is PlanNodeType.SPLAT -> "**" == identifier
       is PlanNodeType.ANNOTATION -> false
     }
   }
-
 
   companion object {
     /** Constructor for a container node */
@@ -600,7 +601,7 @@ data class ExecutionPlanNode(
       )
     }
 
-    /// Constructor for a value node
+    /** Constructor for a value node */
     fun <T> valueNode(value: T): ExecutionPlanNode where T: Into<NodeValue> {
       return ExecutionPlanNode(
         PlanNodeType.VALUE(value.into()),
@@ -609,24 +610,27 @@ data class ExecutionPlanNode(
       )
     }
 
-    //  /// Constructor for a resolve node
-//  pub fn resolve_value<T: Into<DocPath>>(resolve_str: T) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::RESOLVE(resolve_str.into()),
-//      result: None,
-//      children: vec![]
-//    }
-//  }
-//
-//  /// Constructor for a resolve current node
-//  pub fn resolve_current_value<T: Into<DocPath>>(resolve_str: T) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::RESOLVE_CURRENT(resolve_str.into()),
-//      result: None,
-//      children: vec![]
-//    }
-//  }
-//
+    /** Constructor for a value node */
+    fun valueNode(value: String) = valueNode(Into { NodeValue.STRING(value) })
+
+    /** Constructor for a resolve node */
+    fun <T> resolveValue(resolveStr: T): ExecutionPlanNode where T: Into<DocPath> {
+      return ExecutionPlanNode(
+        PlanNodeType.RESOLVE(resolveStr.into()),
+        null,
+        mutableListOf()
+      )
+    }
+
+    /** Constructor for a resolve current node */
+    fun <T> resolveCurrentValue(resolveStr: T): ExecutionPlanNode where T: Into<DocPath> {
+      return ExecutionPlanNode(
+        PlanNodeType.RESOLVE_CURRENT(resolveStr.into()),
+        null,
+        mutableListOf()
+      )
+    }
+
 //  /// Constructor for an apply node
 //  pub fn apply() -> ExecutionPlanNode {
 //    ExecutionPlanNode {

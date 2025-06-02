@@ -1,11 +1,12 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.support.json.JsonValue
 import org.apache.commons.text.StringEscapeUtils.escapeJson
 import java.util.Base64
 
 /** Enum for the value stored in a leaf node */
-sealed class NodeValue {
+sealed class NodeValue: Into<NodeValue> {
   /** Default is no value */
   data object NULL: NodeValue()
 
@@ -389,6 +390,8 @@ sealed class NodeValue {
 //  }
 //}
 
+  override fun into() = this
+
   companion object {
     @JvmStatic
     fun escape(value: String): String {
@@ -397,7 +400,7 @@ sealed class NodeValue {
       } else if (value.any { it == '\'' || it.isWhitespace() }) {
         "'${escapeJson(value).replace("'", "\\'")}'"
       } else {
-        value
+        "'$value'"
       }
     }
   }

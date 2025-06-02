@@ -10,6 +10,9 @@ import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import spock.lang.Specification
 
+import static com.github.difflib.DiffUtils.diffInline
+import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
+
 @SuppressWarnings('MethodSize')
 class MatchingEngineSpec extends Specification {
 
@@ -28,60 +31,62 @@ class MatchingEngineSpec extends Specification {
 
     when:
     def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context).unwrap()
+    def pretty = plan.prettyForm()
+    def diff = generateUnifiedDiff("", "", pretty.split('\n') as List<String>, diffInline(pretty,
+      '''(
+      |  :request (
+      |    :method (
+      |      #{'method == POST'},
+      |      %match:equality (
+      |        'POST',
+      |        %upper-case (
+      |          $.method
+      |        ),
+      |        NULL
+      |      )
+      |    ),
+      |    :path (
+      |      #{"path == '/test'"},
+      |      %match:equality (
+      |        '/test',
+      |        $.path,
+      |        NULL
+      |      )
+      |    ),
+      |    :"query parameters" (
+      |      %expect:empty (
+      |        $.query,
+      |        %join (
+      |          'Expected no query parameters but got ',
+      |          $.query
+      |        )
+      |      )
+      |    ),
+      |    :body (
+      |      %if (
+      |        %match:equality (
+      |          'text/plain',
+      |          $.content-type,
+      |          NULL,
+      |          %error (
+      |            'Body type error - ',
+      |            %apply ()
+      |          )
+      |        ),
+      |        %match:equality (
+      |          'Some nice bit of text',
+      |          %convert:UTF8 (
+      |            $.body
+      |          ),
+      |          NULL
+      |        )
+      |      )
+      |    )
+      |  )
+      |)'''.stripMargin('|')), 0).join('\n')
 
     then:
-    plan.prettyForm() ==
-      '''(
-        :request (
-          :method (
-            #{'method == POST'},
-            %match:equality (
-              'POST',
-              %upper-case (
-                $.method
-              ),
-              NULL
-            )
-          ),
-          :path (
-            #{"path == '/test'"},
-            %match:equality (
-              '/test',
-              $.path,
-              NULL
-            )
-          ),
-          :"query parameters" (
-            %expect:empty (
-              $.query,
-              %join (
-                'Expected no query parameters but got ',
-                $.query
-              )
-            )
-          ),
-          :body (
-            %if (
-              %match:equality (
-                'text/plain',
-                $.content-type,
-                NULL,
-                %error (
-                  'Body type error - ',
-                  %apply ()
-                )
-              ),
-              %match:equality (
-                'Some nice bit of text',
-                %convert:UTF8 (
-                  $.body
-                ),
-                NULL
-              )
-            )
-          )
-        )
-      )'''
+    diff == ''
 
     //  let executed_plan = execute_request_plan(&plan, &request, &mut context)?;
     //  assert_eq!(r#"(
