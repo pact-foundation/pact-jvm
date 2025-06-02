@@ -105,7 +105,8 @@ object DefaultResponseGenerator: ResponseGenerator, MessageContentsGenerator, KL
           logger.debug {
             "Either no content generator was found, or is a core one, will use the internal implementation"
           }
-          copy.copy(contents = Generators.applyBodyGenerators(bodyGenerators, copy.contents, contentType, context, testMode))
+          copy.copy(contents = Generators.applyBodyGenerators(bodyGenerators, copy.contents, contentType,
+            context, testMode))
         } else {
           logger.debug { "Plugin content generator, will get the plugin to generate the content" }
           copy.copy(contents = contentHandler.generateContent(contentType, bodyGenerators, copy.contents, testMode,

@@ -69,7 +69,7 @@ class MultipartMessageContentMatcher : ContentMatcher {
           }
         }
 
-        val headerResult = compareHeaders(path, expectedPart, actualPart, context)
+        val headerResult = compareHeaders(path, expectedPart, actualPart)
         logger.debug { "Comparing part $i: header mismatches ${headerResult.size}" }
         val bodyMismatches = compareContents(path, expectedPart, actualPart, context)
         logger.debug { "Comparing part $i: content mismatches ${bodyMismatches.size}" }
@@ -100,7 +100,9 @@ class MultipartMessageContentMatcher : ContentMatcher {
   ): List<BodyMismatch> {
     val expected = bodyPartTpHttpPart(expectedMultipart)
     val actual = bodyPartTpHttpPart(actualMultipart)
-    logger.debug { "Comparing multipart contents: ${expected.determineContentType()} -> ${actual.determineContentType()}" }
+    logger.debug {
+      "Comparing multipart contents: ${expected.determineContentType()} -> ${actual.determineContentType()}"
+    }
     val result = Matching.matchBody(expected, actual, context.extractPath("\$.$path"))
     return result.bodyResults.flatMap { matchResult ->
       matchResult.result.map {
@@ -117,8 +119,7 @@ class MultipartMessageContentMatcher : ContentMatcher {
   private fun compareHeaders(
     path: String,
     expectedMultipart: BodyPart,
-    actualMultipart: BodyPart,
-    context: MatchingContext
+    actualMultipart: BodyPart
   ): List<BodyMismatch> {
     val mismatches = mutableListOf<BodyMismatch>()
     (expectedMultipart.allHeaders as Enumeration<Header>).asSequence().forEach {

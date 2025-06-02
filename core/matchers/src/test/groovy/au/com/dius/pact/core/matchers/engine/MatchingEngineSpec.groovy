@@ -7,21 +7,22 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import spock.lang.Specification
 
+@SuppressWarnings('MethodSize')
 class MatchingEngineSpec extends Specification {
 
   def 'simple match request test'() {
     given:
-    def request = new HttpRequest('put', '/test', [:], [:],
-      OptionalBody.body('Some nice bit of text', ContentType.TEXT_PLAIN))
+//    def request = new HttpRequest('put', '/test', [:], [:],
+//      OptionalBody.body('Some nice bit of text', ContentType.TEXT_PLAIN))
     def expectedRequest = new HttpRequest('POST', '/test', [:], [:],
       OptionalBody.body('Some nice bit of text', ContentType.TEXT_PLAIN))
 
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRulesImpl()
+    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration()
     def context = new PlanMatchingContext(pact, interaction, matchingRules, config)
 

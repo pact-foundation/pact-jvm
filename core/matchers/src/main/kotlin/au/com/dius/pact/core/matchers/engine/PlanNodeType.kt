@@ -11,7 +11,7 @@ sealed class PlanNodeType {
   /** Action node with a function reference */
   data class ACTION(val value: String): PlanNodeType()
   /** Leaf node that contains a value */
-//  data class VALUE(val value: NodeValue): PlanNodeType()
+  data class VALUE(val value: NodeValue): PlanNodeType()
   /** Leaf node that stores an expression to resolve against the test context */
 //  data class RESOLVE(val path: DocPath): PlanNodeType()
   /** Pipeline node (apply), which applies each node to the next as a pipeline returning the last */

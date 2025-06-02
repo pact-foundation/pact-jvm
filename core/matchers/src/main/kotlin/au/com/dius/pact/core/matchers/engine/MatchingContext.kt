@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 
 /** Configuration for driving behaviour of the execution */
@@ -62,10 +63,10 @@ open class PlanMatchingContext(
   /** Interaction that the plan id for */
   val interaction: V4Interaction,
   /** Matching rules to use */
-  val matchingRules: MatchingRules,
+  val matchingRules: MatchingRuleCategory,
   /** Configuration */
   val config: MatchingConfiguration
-)
+) {
 
 //impl PlanMatchingContext {
 //  /// If there is a matcher defined at the path in this context
@@ -88,23 +89,21 @@ open class PlanMatchingContext(
 //    let path_slice = path.iter().map(|p| p.as_str()).collect_vec();
 //    self.matching_rules.resolve_matchers_for_path(path_slice.as_slice()).type_matcher_defined()
 //  }
-//
-//  /// Creates a clone of this context, but with the matching rules set for the Request Method
-//  pub fn for_method(&self) -> Self {
-//    let matching_rules = if let Some(req_res) = self.interaction.as_v4_http() {
-//      req_res.request.matching_rules.rules_for_category("method").unwrap_or_default()
-//    } else {
-//      MatchingRuleCategory::default()
-//    };
-//
-//    PlanMatchingContext {
-//      pact: self.pact.clone(),
-//      interaction: self.interaction.boxed_v4(),
-//      matching_rules,
-//      config: self.config
-//    }
-//  }
-//
+
+  /** Creates a clone of this context, but with the matching rules set for the Request Method */
+  fun forMethod(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.request?.matchingRules?.rulesForCategory("method")
+      ?: MatchingRuleCategory("method")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      matchingRules,
+      config
+    )
+  }
+
 //  /// Creates a clone of this context, but with the matching rules set for the Request Path
 //  pub fn for_path(&self) -> Self {
 //    let matching_rules = if let Some(req_res) = self.interaction.as_v4_http() {
@@ -169,3 +168,5 @@ open class PlanMatchingContext(
 //    }
 //  }
 //}
+
+}

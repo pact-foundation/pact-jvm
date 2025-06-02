@@ -86,7 +86,8 @@ data class MatchingContext @JvmOverloads constructor(
 
     val result = mutableListOf<BodyItemMatchResult>()
 
-    if (!directMatcherDefined(path, listOf(EachKeyMatcher::class.java, EachValueMatcher::class.java, ValuesMatcher::class.java))) {
+    val collectionMatchers = listOf(EachKeyMatcher::class.java, EachValueMatcher::class.java, ValuesMatcher::class.java)
+    if (!directMatcherDefined(path, collectionMatchers)) {
       if (allowUnexpectedKeys && missingKeys.isNotEmpty()) {
         result.add(
           BodyItemMatchResult(
@@ -281,15 +282,18 @@ object Matching : KLogging() {
         val actualContentType = actual.determineContentType()
         val actualBody = actual.body.unwrap()
         val actualDisplay = if (actualContentType.isBinaryType()) {
-          "$actualContentType, ${actualBody.size} bytes, starting with ${Hex.encodeHexString(actual.body.slice(32))}"
+          "$actualContentType, ${actualBody.size} bytes, starting with " +
+            Hex.encodeHexString(actual.body.slice(32))
         } else {
-          "$actualContentType, ${actualBody.size} bytes, starting with ${actual.body.slice(32).toString(actual.body.contentType.asCharset())}"
+          "$actualContentType, ${actualBody.size} bytes, starting with " +
+            actual.body.slice(32).toString(actual.body.contentType.asCharset())
         }
         val expectedBody = expected.body.unwrap()
         val expectedDisplay = if (contentType.isBinaryType()) {
           "$contentType, ${expectedBody.size} bytes, starting with ${Hex.encodeHexString(expected.body.slice(32))}"
         } else {
-          "$contentType, ${expectedBody.size} bytes, starting with ${expected.body.slice(32).toString(expected.body.contentType.asCharset())}"
+          "$contentType, ${expectedBody.size} bytes, starting with " +
+            expected.body.slice(32).toString(expected.body.contentType.asCharset())
         }
         BodyMatchResult(null, listOf(BodyItemMatchResult("$",
           listOf(BodyMismatch(

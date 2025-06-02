@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.matchers.engine
 
-import org.apache.commons.text.StringEscapeUtils.escapeXSI
+import org.apache.commons.text.StringEscapeUtils.escapeJson
 
 //  /// Clones this node, replacing the value with the given one
 //  pub fn clone_with_value(&self, value: NodeValue) -> ExecutionPlanNode {
@@ -194,6 +194,7 @@ data class ExecutionPlanNode(
   override fun into() = this
 
   /** Returns the serialised text form of the node */
+  @Suppress("LongMethod")
   fun strForm(buffer: StringBuilder): String {
     buffer.append('(')
 
@@ -229,14 +230,14 @@ data class ExecutionPlanNode(
           buffer.append(result.toString())
         }
       }
-//      is PlanNodeType.VALUE -> {
-//        buffer.push_str(value.str_form().as_str());
-//
-//        if let Some(result) = &self.result {
-//          buffer.push_str("=>");
-//          buffer.push_str(result.to_string().as_str());
-//        }
-//      }
+      is PlanNodeType.VALUE -> {
+        buffer.append(n.value.strForm())
+
+        if (result != null) {
+          buffer.append("=>")
+          buffer.append(result.toString())
+        }
+      }
 //      is PlanNodeType.RESOLVE => {
 //        buffer.push_str(str.to_string().as_str());
 //
@@ -278,7 +279,7 @@ data class ExecutionPlanNode(
       }
       is PlanNodeType.ANNOTATION -> {
         buffer.append("#{");
-        buffer.append(escapeXSI(n.label))
+        buffer.append(escape(n.label))
         buffer.append('}')
       }
     }
@@ -299,6 +300,7 @@ data class ExecutionPlanNode(
   }
 
   /** Returns the human-readable text from of the node */
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
   fun prettyForm(buffer: StringBuilder, indent: Int) {
     val pad = " ".repeat(indent)
 
@@ -346,15 +348,15 @@ data class ExecutionPlanNode(
           buffer.append(result.toString())
         }
       }
-//      is PlanNodeType.VALUE -> {
-//        buffer.append(pad))
-//        buffer.append(n.value.str_form().as_str());
-//
-//        if let Some(result) = &self.result {
-//          buffer.append(" => ");
-//          buffer.append(result.to_string().as_str());
-//        }
-//      }
+      is PlanNodeType.VALUE -> {
+        buffer.append(pad)
+        buffer.append(n.value.strForm());
+
+        if (result != null) {
+          buffer.append("=>")
+          buffer.append(result.toString())
+        }
+      }
 //      is PlanNodeType.RESOLVE(str) => {
 //        buffer.append(pad.as_str());
 //        buffer.append(str.to_string().as_str());
@@ -411,7 +413,7 @@ data class ExecutionPlanNode(
       is PlanNodeType.ANNOTATION -> {
         buffer.append(pad)
         buffer.append("#{")
-        buffer.append(escapeXSI(n.label))
+        buffer.append(escape(n.label))
         buffer.append('}')
       }
     }
@@ -569,7 +571,7 @@ data class ExecutionPlanNode(
       is PlanNodeType.EMPTY -> false
       is PlanNodeType.CONTAINER -> String.format(":%s", n.label) == identifier
       is PlanNodeType.ACTION -> String.format("%%%s", n.value) == identifier
-//      is PlanNodeType.VALUE(_) => false,
+      is PlanNodeType.VALUE -> false
 //      is PlanNodeType.RESOLVE(exp) => exp.to_string() == identifier,
       is PlanNodeType.PIPELINE -> "->" == identifier
 //      is PlanNodeType.RESOLVE_CURRENT(exp) => format!("~>{}", exp) == identifier,
@@ -589,24 +591,23 @@ data class ExecutionPlanNode(
       )
     }
 
-//  /// Constructor for an action node
-//  pub fn action(value: &str) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::ACTION(value.to_string()),
-//      result: None,
-//      children: vec![],
-//    }
-//  }
-//
-//  /// Constructor for a value node
-//  pub fn value_node<T: Into<NodeValue>>(value: T) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::VALUE(value.into()),
-//      result: None,
-//      children: vec![]
-//    }
-//  }
-//
+    /** Constructor for an action node */
+    fun action(value: String): ExecutionPlanNode {
+      return ExecutionPlanNode(
+        PlanNodeType.ACTION(value),
+        null,
+        mutableListOf()
+      )
+    }
+
+    /// Constructor for a value node
+    fun <T> valueNode(value: T): ExecutionPlanNode where T: Into<NodeValue> {
+      return ExecutionPlanNode(
+        PlanNodeType.VALUE(value.into()),
+        null,
+        mutableListOf()
+      )
+    }
 
     //  /// Constructor for a resolve node
 //  pub fn resolve_value<T: Into<DocPath>>(resolve_str: T) -> ExecutionPlanNode {
@@ -643,14 +644,37 @@ data class ExecutionPlanNode(
 //      children: vec![]
 //    }
 //  }
-//
-//  fn annotation<S: Into<String>>(description: S) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::ANNOTATION(description.into()),
-//      result: None,
-//      children: vec![]
-//    }
-//  }
-//
+
+    fun <S> annotation(description: S): ExecutionPlanNode where S: Into<String> {
+      return ExecutionPlanNode(
+        PlanNodeType.ANNOTATION(description.into()),
+        null,
+        mutableListOf()
+      )
+    }
+
+    @JvmStatic
+    fun escape(value: String): String {
+      var qoutes = false
+      var doubleQuotes = false
+      for (ch in value) {
+        if (ch == '\'') {
+          doubleQuotes = true
+          break
+        } else if (!qoutes && ch.isWhitespace()) {
+          qoutes = true
+        }
+      }
+
+      return if (value.isEmpty()) {
+        value
+      } else if (doubleQuotes) {
+        "\"${escapeJson(value)}\""
+      } else if (qoutes) {
+        "'$value'"
+      } else {
+        escapeJson(value)
+      }
+    }
   }
 }
