@@ -1,13 +1,5 @@
 package au.com.dius.pact.core.model
 
-//  /// Infallible construction for when the expression is statically known,
-//  /// intended for unit tests.
-//  ///
-//  /// Invalid expressions will still cause panics.
-//  pub fn new_unwrap(expr: &'static str) -> Self {
-//    Self::new(expr).unwrap()
-//  }
-//
 //  /// Construct a new DocPath with an empty expression.
 //  ///
 //  /// Warning: do not call any of the `push_*` methods on this DocPath,
@@ -234,11 +226,6 @@ package au.com.dius.pact.core.model
 //    self
 //  }
 //
-//  /// Convert this path to a vector of strings
-//  pub fn to_vec(&self) -> Vec<String> {
-//    self.path_tokens.iter().map(|t| t.to_string()).collect()
-//  }
-//
 //  /// Return the parent path from this one
 //  pub fn parent(&self) -> Option<Self> {
 //    if self.path_tokens.len() <= 1 {
@@ -429,7 +416,7 @@ data class DocPath(
   /** Construct a new document path from the provided string path */
   constructor(expression: String): this(parsePath(expression), expression)
 
-  override fun into() = this
+  override fun into() = this.copy()
 
   override fun toString() = this.expr
 
@@ -445,4 +432,6 @@ data class DocPath(
   override fun hashCode(): Int {
     return expr.hashCode()
   }
+
+  fun asList() = pathTokens.map { it.rawString() }
 }

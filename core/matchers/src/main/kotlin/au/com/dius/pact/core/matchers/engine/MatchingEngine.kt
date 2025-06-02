@@ -3,29 +3,28 @@ package au.com.dius.pact.core.matchers.engine
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.Into
-import au.com.dius.pact.core.support.Result
 
 interface MatchingEngine {
   /**
    * Constructs an execution plan for the HTTP request part.
    */
-  fun buildRequestPlan(expectedRequest: HttpRequest, context: PlanMatchingContext): Result<ExecutionPlan, Exception>
+  fun buildRequestPlan(expectedRequest: HttpRequest, context: PlanMatchingContext): ExecutionPlan
 }
 
 object V2MatchingEngine: MatchingEngine {
   override fun buildRequestPlan(
     expectedRequest: HttpRequest,
     context: PlanMatchingContext
-  ): Result<ExecutionPlan, Exception> {
+  ): ExecutionPlan {
     val plan = ExecutionPlan("request")
 
     plan.add(setupMethodPlan(expectedRequest, context.forMethod()))
-    //  plan.add(setup_path_plan(expectedRequest, &context.for_path())?);
+    plan.add(setupPathPlan(expectedRequest, context.forPath()))
     //  plan.add(setup_query_plan(expectedRequest, &context.for_query())?);
     //  plan.add(setup_header_plan(expectedRequest, &context.for_headers())?);
     //  plan.add(setup_body_plan(expectedRequest, &context.for_body())?);
 
-    return Result.Ok(plan)
+    return plan
   }
 
   fun setupMethodPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
@@ -45,31 +44,30 @@ object V2MatchingEngine: MatchingEngine {
     return methodContainer
   }
 
-  //fn setup_path_plan(
-  //  expected: &HttpRequest,
-  //  context: &PlanMatchingContext
-  //) -> anyhow::Result<ExecutionPlanNode> {
-  //  let mut plan_node = ExecutionPlanNode::container("path");
-  //  let expected_node = ExecutionPlanNode::value_node(expected.path.as_str());
-  //  let doc_path = DocPath::new("$.path")?;
-  //  let actual_node = ExecutionPlanNode::resolve_value(doc_path.clone());
-  //  if context.matcher_is_defined(&doc_path) {
-  //    let matchers = context.select_best_matcher(&doc_path);
-  //    plan_node.add(ExecutionPlanNode::annotation(format!("path {}", matchers.generate_description(false))));
-  //    plan_node.add(build_matching_rule_node(&expected_node, &actual_node, &matchers, false));
-  //  } else {
-  //    plan_node.add(ExecutionPlanNode::annotation(format!("path == '{}'", expected.path)));
-  //    plan_node
-  //      .add(
-  //        ExecutionPlanNode::action("match:equality")
-  //          .add(expected_node)
-  //          .add(ExecutionPlanNode::resolve_value(doc_path))
-  //          .add(ExecutionPlanNode::value_node(NodeValue::NULL))
-  //      );
-  //  }
-  //  Ok(plan_node)
-  //}
-  //
+  fun setupPathPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+    val planNode = ExecutionPlanNode.container("path")
+
+    val expectedNode = ExecutionPlanNode.valueNode(expected.path)
+    val docPath = DocPath("$.path")
+    val actualNode = ExecutionPlanNode.resolveValue(docPath)
+    if (context.matcherIsDefined(docPath)) {
+      val matchers = context.selectBestMatcher(docPath)
+//      planNode.add(ExecutionPlanNode.annotation(Into { "path ${matchers.generateDescription(false)}" }))
+//      planNode.add(buildMatchingRuleNode(expectedNode, actualNode, matchers, false))
+    } else {
+      planNode.add(ExecutionPlanNode.annotation(Into { "path == '${expected.path}'" }))
+      planNode
+        .add(
+          ExecutionPlanNode.action("match:equality")
+            .add(expectedNode)
+            .add(ExecutionPlanNode.resolveValue(docPath))
+            .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+        )
+    }
+
+    return planNode
+  }
+
   //fn build_matching_rule_node(
   //  expected_node: &ExecutionPlanNode,
   //  actual_node: &ExecutionPlanNode,

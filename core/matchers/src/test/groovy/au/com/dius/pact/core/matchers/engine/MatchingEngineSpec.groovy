@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.HttpRequest
@@ -26,11 +27,11 @@ class MatchingEngineSpec extends Specification {
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
     def matchingRules = new MatchingRuleCategory('test')
-    def config = new MatchingConfiguration()
-    def context = new PlanMatchingContext(pact, interaction, matchingRules, config)
+    def config = new MatchingConfiguration(false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
 
     when:
-    def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context).unwrap()
+    def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context)
     def pretty = plan.prettyForm()
     def diff = generateUnifiedDiff("", "", pretty.split('\n') as List<String>, diffInline(pretty,
       '''(

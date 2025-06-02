@@ -1,14 +1,15 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.MatchingContext
+import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
-import au.com.dius.pact.core.model.matchingrules.MatchingRules
 
 /** Configuration for driving behaviour of the execution */
-class MatchingConfiguration(
-//  /// If extra keys/values are allowed (and ignored)
-//  pub allow_unexpected_entries: bool,
+data class MatchingConfiguration(
+  /** If extra keys/values are allowed (and ignored) */
+  val allowUnexpectedEntries: Boolean,
 //  /// If the executed plan should be logged
 //  pub log_executed_plan: bool,
 //  /// If the executed plan summary should be logged
@@ -63,26 +64,17 @@ open class PlanMatchingContext(
   /** Interaction that the plan id for */
   val interaction: V4Interaction,
   /** Matching rules to use */
-  val matchingRules: MatchingRuleCategory,
+  val matchingContext: MatchingContext,
   /** Configuration */
   val config: MatchingConfiguration
 ) {
 
-//impl PlanMatchingContext {
-//  /// If there is a matcher defined at the path in this context
-//  pub fn matcher_is_defined(&self, path: &DocPath) -> bool {
-//    let path = path.to_vec();
-//    let path_slice = path.iter().map(|p| p.as_str()).collect_vec();
-//    self.matching_rules.matcher_is_defined(path_slice.as_slice())
-//  }
-//
-//  /// Select the best matcher to use for the given path
-//  pub fn select_best_matcher(&self, path: &DocPath) -> RuleList {
-//    let path = path.to_vec();
-//    let path_slice = path.iter().map(|p| p.as_str()).collect_vec();
-//    self.matching_rules.select_best_matcher(path_slice.as_slice())
-//  }
-//
+  /** If there is a matcher defined at the path in this context */
+  fun matcherIsDefined(path: DocPath) = matchingContext.matcherDefined(path.asList())
+
+  /** Select the best matcher to use for the given path */
+  fun selectBestMatcher(path: DocPath) = matchingContext.selectBestMatcher(path.asList())
+
 //  /// If there is a type matcher defined at the path in this context
 //  pub fn type_matcher_defined(&self, path: &DocPath) -> bool {
 //    let path = path.to_vec();
@@ -99,27 +91,25 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      matchingRules,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries),
       config
     )
   }
 
-//  /// Creates a clone of this context, but with the matching rules set for the Request Path
-//  pub fn for_path(&self) -> Self {
-//    let matching_rules = if let Some(req_res) = self.interaction.as_v4_http() {
-//      req_res.request.matching_rules.rules_for_category("path").unwrap_or_default()
-//    } else {
-//      MatchingRuleCategory::default()
-//    };
-//
-//    PlanMatchingContext {
-//      pact: self.pact.clone(),
-//      interaction: self.interaction.boxed_v4(),
-//      matching_rules,
-//      config: self.config
-//    }
-//  }
-//
+  /** Creates a clone of this context, but with the matching rules set for the Request Path */
+  fun forPath(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.request?.matchingRules?.rulesForCategory("path")
+      ?: MatchingRuleCategory("path")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries),
+      config
+    )
+  }
+
 //  /// Creates a clone of this context, but with the matching rules set for the Request Query Parameters
 //  pub fn for_query(&self) -> Self {
 //    let matching_rules = if let Some(req_res) = self.interaction.as_v4_http() {
