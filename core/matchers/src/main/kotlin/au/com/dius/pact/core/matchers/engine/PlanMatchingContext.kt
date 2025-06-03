@@ -9,13 +9,13 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 /** Configuration for driving behaviour of the execution */
 data class MatchingConfiguration(
   /** If extra keys/values are allowed (and ignored) */
-  val allowUnexpectedEntries: Boolean,
-//  /// If the executed plan should be logged
-//  pub log_executed_plan: bool,
-//  /// If the executed plan summary should be logged
-//  pub log_plan_summary: bool,
-//  /// If output should be coloured
-//  pub coloured_output: bool
+  val allowUnexpectedEntries: Boolean = false,
+  /** If the executed plan should be logged */
+  val logExecutedPlan: Boolean = false,
+  /** If the executed plan summary should be logged */
+  val logPlanSummary: Boolean = true,
+  /** If output should be coloured */
+  val colouredOutput: Boolean = true
 )
 
 //impl MatchingConfiguration {
@@ -44,17 +44,6 @@ data class MatchingConfiguration(
 //  std::env::var(name)
 //    .ok()
 //    .map(|v| ["true", "1"].contains(&v.to_lowercase().as_str()))
-//}
-//
-//impl Default for MatchingConfiguration {
-//  fn default() -> Self {
-//    MatchingConfiguration {
-//      allow_unexpected_entries: false,
-//      log_executed_plan: false,
-//      log_plan_summary: true,
-//      coloured_output: true
-//    }
-//  }
 //}
 
 /** Context to store data for use in executing an execution plan. */
@@ -110,53 +99,45 @@ open class PlanMatchingContext(
     )
   }
 
-//  /// Creates a clone of this context, but with the matching rules set for the Request Query Parameters
-//  pub fn for_query(&self) -> Self {
-//    let matching_rules = if let Some(req_res) = self.interaction.as_v4_http() {
-//      req_res.request.matching_rules.rules_for_category("query").unwrap_or_default()
-//    } else {
-//      MatchingRuleCategory::default()
-//    };
-//
-//    PlanMatchingContext {
-//      pact: self.pact.clone(),
-//      interaction: self.interaction.boxed_v4(),
-//      matching_rules,
-//      config: self.config
-//    }
-//  }
-//
-//  /// Creates a clone of this context, but with the matching rules set for the Request Headers
-//  pub fn for_headers(&self) -> Self {
-//    let matching_rules = if let Some(req_res) = self.interaction.as_v4_http() {
-//      req_res.request.matching_rules.rules_for_category("header").unwrap_or_default()
-//    } else {
-//      MatchingRuleCategory::default()
-//    };
-//
-//    PlanMatchingContext {
-//      pact: self.pact.clone(),
-//      interaction: self.interaction.boxed_v4(),
-//      matching_rules,
-//      config: self.config
-//    }
-//  }
-//
-//  /// Creates a clone of this context, but with the matching rules set for the Request Body
-//  pub fn for_body(&self) -> Self {
-//    let matching_rules = if let Some(req_res) = self.interaction.as_v4_http() {
-//      req_res.request.matching_rules.rules_for_category("body").unwrap_or_default()
-//    } else {
-//      MatchingRuleCategory::default()
-//    };
-//
-//    PlanMatchingContext {
-//      pact: self.pact.clone(),
-//      interaction: self.interaction.boxed_v4(),
-//      matching_rules,
-//      config: self.config
-//    }
-//  }
-//}
+  /** Creates a clone of this context, but with the matching rules set for the Request Query Parameters */
+  fun forQuery(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.request?.matchingRules?.rulesForCategory("query")
+      ?: MatchingRuleCategory("query")
 
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries),
+      config
+    )
+  }
+
+  /** Creates a clone of this context, but with the matching rules set for the Request Headers */
+  fun forHeaders(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.request?.matchingRules?.rulesForCategory("header")
+      ?: MatchingRuleCategory("header")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries),
+      config
+    )
+  }
+
+  /** Creates a clone of this context, but with the matching rules set for the Request Body */
+  fun forBody(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.request?.matchingRules?.rulesForCategory("body")
+      ?: MatchingRuleCategory("body")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries),
+      config
+    )
+  }
 }

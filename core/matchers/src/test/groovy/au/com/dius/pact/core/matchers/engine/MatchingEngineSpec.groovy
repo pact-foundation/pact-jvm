@@ -27,14 +27,10 @@ class MatchingEngineSpec extends Specification {
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
     def matchingRules = new MatchingRuleCategory('test')
-    def config = new MatchingConfiguration(false)
+    def config = new MatchingConfiguration(false, false, true, false)
     def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
 
-    when:
-    def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context)
-    def pretty = plan.prettyForm()
-    def diff = generateUnifiedDiff("", "", pretty.split('\n') as List<String>, diffInline(pretty,
-      '''(
+    def expected = '''(
       |  :request (
       |    :method (
       |      #{'method == POST'},
@@ -47,7 +43,7 @@ class MatchingEngineSpec extends Specification {
       |      )
       |    ),
       |    :path (
-      |      #{"path == '/test'"},
+      |      #{"path == '\\/test'"},
       |      %match:equality (
       |        '/test',
       |        $.path,
@@ -66,7 +62,7 @@ class MatchingEngineSpec extends Specification {
       |    :body (
       |      %if (
       |        %match:equality (
-      |          'text/plain',
+      |          'text\\/plain; charset=ISO-8859-1',
       |          $.content-type,
       |          NULL,
       |          %error (
@@ -84,7 +80,14 @@ class MatchingEngineSpec extends Specification {
       |      )
       |    )
       |  )
-      |)'''.stripMargin('|')), 0).join('\n')
+      |)
+      |'''.stripMargin('|')
+
+    when:
+    def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context)
+    def pretty = plan.prettyForm()
+    def diff = generateUnifiedDiff("", "", pretty.split('\n') as List<String>, diffInline(pretty,
+      expected), 0).join('\n')
 
     then:
     diff == ''

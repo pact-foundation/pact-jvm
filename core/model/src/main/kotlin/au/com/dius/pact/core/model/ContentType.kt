@@ -34,6 +34,20 @@ class ContentType(val contentType: MediaType?) {
     } else false
   }
 
+  fun isText(): Boolean {
+    return if (contentType != null) {
+      when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
+        "text" -> true
+        else -> {
+          val superType = registry.getSupertype(contentType) ?: MediaType.OCTET_STREAM
+          val type = contentType.type
+          val baseType = superType.type
+          type == "text" || baseType == "text"
+        }
+      }
+    } else false
+  }
+
   fun isXml(): Boolean = if (contentType != null) {
     when (System.getProperty("pact.content_type.override.${contentType.baseType}")) {
       "xml" -> true

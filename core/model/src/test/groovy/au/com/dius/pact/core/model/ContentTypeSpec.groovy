@@ -41,6 +41,30 @@ class ContentTypeSpec extends Specification {
   }
 
   @Unroll
+  def '"#value" is text -> #result'() {
+    expect:
+    result == contentType.text
+
+    where:
+
+    value                                    || result
+    ''                                       || false
+    'text/plain'                             || true
+    'application/pdf'                        || false
+    'application/json'                       || false
+    'application/hal+json'                   || false
+    'application/x-thrift'                   || false
+    'application/x-other'                    || true
+    'application/graphql'                    || false
+    'application/vnd.siren+json'             || false
+    'image/jpeg'                             || false
+    'video/H264'                             || false
+    'audio/aac'                              || false
+
+    contentType = new ContentType(value)
+  }
+
+  @Unroll
   def '"#value" is kafka schema registry -> #result'() {
     expect:
     result == contentType.kafkaSchemaRegistryJson

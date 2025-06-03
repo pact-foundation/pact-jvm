@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.engine.bodies.PlainTextBuilder
+import au.com.dius.pact.core.matchers.engine.bodies.getBodyPlanBuilder
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.Into
@@ -20,9 +22,9 @@ object V2MatchingEngine: MatchingEngine {
 
     plan.add(setupMethodPlan(expectedRequest, context.forMethod()))
     plan.add(setupPathPlan(expectedRequest, context.forPath()))
-    //  plan.add(setup_query_plan(expectedRequest, &context.for_query())?);
-    //  plan.add(setup_header_plan(expectedRequest, &context.for_headers())?);
-    //  plan.add(setup_body_plan(expectedRequest, &context.for_body())?);
+    plan.add(setupQueryPlan(expectedRequest, context.forQuery()))
+    plan.add(setupHeaderPlan(expectedRequest, context.forHeaders()))
+    plan.add(setupBodyPlan(expectedRequest, context.forBody()))
 
     return plan
   }
@@ -108,15 +110,12 @@ object V2MatchingEngine: MatchingEngine {
   //    logic_node
   //  }
   //}
-  //
-  //fn setup_query_plan(
-  //  expected: &HttpRequest,
-  //  context: &PlanMatchingContext
-  //) -> anyhow::Result<ExecutionPlanNode> {
-  //  let mut plan_node = ExecutionPlanNode::container("query parameters");
-  //  let doc_path = DocPath::new("$.query")?;
-  //
-  //  if let Some(query) = &expected.query {
+
+  fun setupQueryPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+    val planNode = ExecutionPlanNode.container("query parameters")
+    val docPath = DocPath("$.query")
+
+    if (expected.query.isNotEmpty()) {
   //    if query.is_empty() {
   //      plan_node
   //        .add(
@@ -202,29 +201,26 @@ object V2MatchingEngine: MatchingEngine {
   //          )
   //      );
   //    }
-  //  } else {
-  //    plan_node
-  //      .add(
-  //        ExecutionPlanNode::action("expect:empty")
-  //          .add(ExecutionPlanNode::resolve_value(doc_path.clone()))
-  //          .add(
-  //            ExecutionPlanNode::action("join")
-  //              .add(ExecutionPlanNode::value_node("Expected no query parameters but got "))
-  //              .add(ExecutionPlanNode::resolve_value(doc_path))
-  //          )
-  //      );
-  //  }
-  //
-  //  Ok(plan_node)
-  //}
-  //
-  //fn setup_header_plan(
-  //  expected: &HttpRequest,
-  //  context: &PlanMatchingContext
-  //) -> anyhow::Result<ExecutionPlanNode> {
-  //  let mut plan_node = ExecutionPlanNode::container("headers");
-  //  let doc_path = DocPath::new("$.headers")?;
-  //
+    } else {
+      planNode
+        .add(
+          ExecutionPlanNode.action("expect:empty")
+            .add(ExecutionPlanNode.resolveValue(docPath))
+            .add(
+              ExecutionPlanNode.action("join")
+                .add(ExecutionPlanNode.valueNode("Expected no query parameters but got "))
+                .add(ExecutionPlanNode.resolveValue(docPath))
+            )
+        )
+    }
+
+    return planNode
+  }
+
+  fun setupHeaderPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+    val planNode = ExecutionPlanNode.container("headers")
+    val docPath = DocPath("$.headers")
+
   //  if let Some(headers) = &expected.headers {
   //    if !headers.is_empty() {
   //      let keys = headers.keys().cloned().sorted().collect_vec();
@@ -299,10 +295,10 @@ object V2MatchingEngine: MatchingEngine {
   //      );
   //    }
   //  }
-  //
-  //  Ok(plan_node)
-  //}
-  //
+
+    return planNode
+  }
+
   //fn build_parameterised_header_plan(doc_path: &DocPath, val: &str) -> ExecutionPlanNode {
   //  let values: Vec<&str> = strip_whitespace(val, ";");
   //  let (header_value, header_params) = values.as_slice()
@@ -345,45 +341,46 @@ object V2MatchingEngine: MatchingEngine {
   //  }
   //  apply_node
   //}
-  //
-  //fn setup_body_plan(
-  //  expected: &HttpRequest,
-  //  context: &PlanMatchingContext
-  //) -> anyhow::Result<ExecutionPlanNode> {
-  //  // TODO: Look at the matching rules and generators here
-  //  let mut plan_node = ExecutionPlanNode::container("body");
-  //
-  //  match &expected.body {
-  //    OptionalBody::Missing => {}
-  //    OptionalBody::Empty | OptionalBody::Null => {
-  //      plan_node.add(ExecutionPlanNode::action("expect:empty")
-  //        .add(ExecutionPlanNode::resolve_value(DocPath::new("$.body")?)));
-  //    }
-  //    OptionalBody::Present(content, _, _) => {
-  //      let content_type = expected.content_type().unwrap_or_else(|| TEXT.clone());
-  //      let mut content_type_check_node = ExecutionPlanNode::action("if");
-  //      content_type_check_node
-  //        .add(
-  //          ExecutionPlanNode::action("match:equality")
-  //            .add(ExecutionPlanNode::value_node(content_type.to_string()))
-  //            .add(ExecutionPlanNode::resolve_value(DocPath::new("$.content-type")?))
-  //            .add(ExecutionPlanNode::value_node(NodeValue::NULL))
-  //            .add(
-  //              ExecutionPlanNode::action("error")
-  //                .add(ExecutionPlanNode::value_node(NodeValue::STRING("Body type error - ".to_string())))
-  //                .add(ExecutionPlanNode::action("apply"))
-  //            )
-  //        );
-  //      if let Some(plan_builder) = get_body_plan_builder(&content_type) {
-  //        content_type_check_node.add(plan_builder.build_plan(content, context)?);
-  //      } else {
-  //        let plan_builder = PlainTextBuilder::new();
-  //        content_type_check_node.add(plan_builder.build_plan(content, context)?);
-  //      }
-  //      plan_node.add(content_type_check_node);
-  //    }
-  //  }
-  //
-  //  Ok(plan_node)
-  //}
+
+  fun setupBodyPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+    // TODO: Look at the matching rules and generators here
+    val planNode = ExecutionPlanNode.container("body")
+
+    when {
+      expected.body.isMissing() -> {}
+      expected.body.isNull() || expected.body.isEmpty() -> {
+        planNode.add(
+          ExecutionPlanNode.action("expect:empty")
+            .add(ExecutionPlanNode.resolveValue(DocPath("$.body")))
+        )
+      }
+      expected.body.isPresent() -> {
+        val contentType = expected.determineContentType()
+        val contentTypeCheckNode = ExecutionPlanNode.action("if")
+        contentTypeCheckNode
+          .add(
+            ExecutionPlanNode.action("match:equality")
+              .add(ExecutionPlanNode.valueNode(contentType.toString()))
+              .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
+              .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+              .add(
+                ExecutionPlanNode.action("error")
+                  .add(ExecutionPlanNode.valueNode(NodeValue.STRING("Body type error - ")))
+                  .add(ExecutionPlanNode.action("apply"))
+              )
+          )
+
+        val planBuilder = getBodyPlanBuilder(contentType)
+        if (planBuilder != null) {
+          contentTypeCheckNode.add(planBuilder.buildPlan(expected.body.unwrap(), context))
+        } else {
+          val builder = PlainTextBuilder
+          contentTypeCheckNode.add(builder.buildPlan(expected.body.unwrap(), context))
+        }
+        planNode.add(contentTypeCheckNode)
+      }
+    }
+
+    return planNode
+  }
 }
