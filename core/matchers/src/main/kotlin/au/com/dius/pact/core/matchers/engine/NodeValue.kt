@@ -6,7 +6,7 @@ import org.apache.commons.text.StringEscapeUtils.escapeJson
 import java.util.Base64
 
 /** Enum for the value stored in a leaf node */
-sealed class NodeValue: Into<NodeValue> {
+sealed class              NodeValue: Into<NodeValue> {
   /** Default is no value */
   data object NULL: NodeValue()
 
@@ -17,7 +17,7 @@ sealed class NodeValue: Into<NodeValue> {
   data class BOOL(val bool: Boolean): NodeValue()
 
   /** Multi-string map (String key to one or more string values) */
-  data class MMAP(val entries: HashMap<String, List<String>>): NodeValue()
+  data class MMAP(val entries: Map<String, List<String>>): NodeValue()
 
   /** List of String values */
   data class SLIST(val items: List<String>): NodeValue()
@@ -58,6 +58,7 @@ sealed class NodeValue: Into<NodeValue> {
 //  XML(XmlValue)
 
   /** Returns the encoded string form of the node value */
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
   fun strForm(): String {
     return when (this) {
       is NULL -> "NULL"
@@ -209,39 +210,39 @@ sealed class NodeValue: Into<NodeValue> {
 //      _ => None
 //    }
 //  }
-//
-//  /// Calculates an AND of two values
-//  pub fn and(&self, other: &Self) -> Self {
-//    match self {
-//      NodeValue::NULL => other.clone(),
-//      NodeValue::BOOL(b) => NodeValue::BOOL(*b && other.truthy()),
-//      _ => NodeValue::BOOL(self.truthy() && other.truthy())
-//    }
-//  }
-//
-//  /// Calculates an OR of two values
-//  pub fn or(&self, other: &Self) -> Self {
-//    match self {
-//      NodeValue::NULL => other.clone(),
-//      NodeValue::BOOL(b) => NodeValue::BOOL(*b || other.truthy()),
-//      _ => NodeValue::BOOL(self.truthy() || other.truthy())
-//    }
-//  }
-//
-//  /// Convert this value into a boolean using a "truthy" test
-//  pub fn truthy(&self) -> bool {
-//    match self {
-//      NodeValue::STRING(s) => !s.is_empty(),
-//      NodeValue::BOOL(b) => *b,
-//      NodeValue::MMAP(m) => !m.is_empty(),
-//      NodeValue::SLIST(s) => !s.is_empty(),
-//      NodeValue::BARRAY(b) => !b.is_empty(),
-//      NodeValue::UINT(u) => *u != 0,
-//      NodeValue::LIST(l) => !l.is_empty(),
-//      _ => false
-//    }
-//  }
-//
+
+  /** Calculates an AND of two values */
+  fun and(other: NodeValue): NodeValue {
+    return when (this) {
+      is BOOL -> BOOL(this.bool && other.truthy())
+      NULL -> other
+      else -> BOOL(truthy() && other.truthy())
+    }
+  }
+
+  /** Calculates an OR of two values */
+  fun or(other: NodeValue): NodeValue {
+    return when (this) {
+      is BOOL -> BOOL(this.bool || other.truthy())
+      NULL -> other
+      else -> BOOL(truthy() || other.truthy())
+    }
+  }
+
+  /** Convert this value into a boolean using a "truthy" test */
+  fun truthy(): Boolean {
+    return when (this) {
+      is BARRAY -> this.bytes.isNotEmpty()
+      is BOOL -> this.bool
+      is LIST -> this.items.isNotEmpty()
+      is MMAP -> this.entries.isNotEmpty()
+      is SLIST -> this.items.isNotEmpty()
+      is STRING -> this.string.isNotEmpty()
+      is UINT -> this.uint != 0.toUInt()
+      else -> false
+    }
+  }
+
 //  /// Converts this value into a list of values
 //  pub fn to_list(&self) -> Vec<NodeValue> {
 //    match self {

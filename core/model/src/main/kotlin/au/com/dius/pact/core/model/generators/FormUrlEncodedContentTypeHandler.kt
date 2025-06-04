@@ -34,7 +34,11 @@ object FormUrlEncodedContentTypeHandler : ContentTypeHandler {
   }
 }
 
-class FormQueryResult(var body: MutableList<NameValuePair>, override val key: Any? = null) : QueryResult {
+class FormQueryResult(
+  var body: MutableList<NameValuePair>,
+  override val key: Any? = null,
+  override val path: List<String> = emptyList()
+) : QueryResult {
   override var value: Any?
     get() = body
     set(value) {

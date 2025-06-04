@@ -1,19 +1,3 @@
-//! Structs and traits to resolve values required while executing a plan
-
-use anyhow::anyhow;
-use itertools::Itertools;
-
-use pact_models::bodies::OptionalBody;
-use pact_models::path_exp::{DocPath, PathToken};
-use pact_models::v4::http_parts::HttpRequest;
-
-use crate::engine::{NodeValue, PlanMatchingContext};
-
-/// Value resolver
-pub trait ValueResolver {
-  /// Resolve the path expression against the test context
-  fn resolve(&self, path: &DocPath, context: &PlanMatchingContext) -> anyhow::Result<NodeValue>;
-}
 
 /// Value resolver for an HTTP request
 #[derive(Clone, Debug, Default)]

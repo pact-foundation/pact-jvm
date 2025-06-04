@@ -2,6 +2,8 @@ package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.matchers.engine.bodies.PlainTextBuilder
 import au.com.dius.pact.core.matchers.engine.bodies.getBodyPlanBuilder
+import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterpreter
+import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.Into
@@ -11,6 +13,9 @@ interface MatchingEngine {
    * Constructs an execution plan for the HTTP request part.
    */
   fun buildRequestPlan(expectedRequest: HttpRequest, context: PlanMatchingContext): ExecutionPlan
+
+  /** Executes the request plan against the actual request. */
+  fun executeRequestPlan(plan: ExecutionPlan, actual: HttpRequest, context: PlanMatchingContext): ExecutionPlan
 }
 
 object V2MatchingEngine: MatchingEngine {
@@ -27,6 +32,18 @@ object V2MatchingEngine: MatchingEngine {
     plan.add(setupBodyPlan(expectedRequest, context.forBody()))
 
     return plan
+  }
+
+  override fun executeRequestPlan(
+    plan: ExecutionPlan,
+    actual: HttpRequest,
+    context: PlanMatchingContext
+  ): ExecutionPlan {
+    val valueResolver = HttpRequestValueResolver(actual)
+    val interpreter = ExecutionPlanInterpreter(context)
+    val path = listOf<String>()
+    val executedTree = interpreter.walkTree(path, plan.planRoot, valueResolver)
+    return ExecutionPlan(executedTree)
   }
 
   fun setupMethodPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {

@@ -4,6 +4,7 @@ import au.com.dius.pact.core.matchers.util.IndicesCombination
 import au.com.dius.pact.core.matchers.util.LargestKeyValue
 import au.com.dius.pact.core.matchers.util.memoizeFixed
 import au.com.dius.pact.core.matchers.util.padTo
+import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
@@ -20,23 +21,14 @@ import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Either
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.math.BigInteger
 import java.util.Comparator
 
-@Suppress("TooManyFunctions")
-object Matchers : KLogging() {
+private val logger = KotlinLogging.logger {}
 
-  private fun matchesToken(pathElement: String, token: PathToken): Int {
-    return when (token) {
-      is PathToken.Root -> if (pathElement == "$") 2 else 0
-      is PathToken.Field -> if (pathElement == token.name) 2 else 0
-      is PathToken.Index -> if (pathElement.toIntOrNull() == token.index) 2 else 0
-      is PathToken.StarIndex -> if (pathElement.toIntOrNull() != null) 1 else 0
-      is PathToken.Star -> 1
-      else -> 0
-    }
-  }
+@Suppress("TooManyFunctions")
+object Matchers {
 
   fun matchesPath(pathExp: String, path: List<String>): Int {
     return matchesPath(parsePath(pathExp), path)
@@ -44,7 +36,7 @@ object Matchers : KLogging() {
 
   private fun matchesPath(pathTokens: List<PathToken>, path: List<String>): Int {
     val matchesPath = pathTokens.size <= path.size && pathTokens.indices
-        .none { index -> matchesToken(path[index], pathTokens[index]) == 0 }
+        .none { index -> DocPath.matchesToken(path[index], pathTokens[index]) == 0 }
     return if (matchesPath) pathTokens.size else 0
   }
 
@@ -52,9 +44,10 @@ object Matchers : KLogging() {
     return calculatePathWeight(parsePath(pathExp), path)
   }
 
+  // TODO: Use method from DocPath
   fun calculatePathWeight(pathTokens: List<PathToken>, path: List<String>): Int {
     return path
-      .zip(pathTokens) { pathElement, pathToken -> matchesToken(pathElement, pathToken) }
+      .zip(pathTokens) { pathElement, pathToken -> DocPath.matchesToken(pathElement, pathToken) }
       .reduce { acc, i -> acc * i }
   }
 

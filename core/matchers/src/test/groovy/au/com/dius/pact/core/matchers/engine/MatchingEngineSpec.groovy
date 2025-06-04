@@ -19,8 +19,8 @@ class MatchingEngineSpec extends Specification {
 
   def 'simple match request test'() {
     given:
-//    def request = new HttpRequest('put', '/test', [:], [:],
-//      OptionalBody.body('Some nice bit of text', ContentType.TEXT_PLAIN))
+    def request = new HttpRequest('put', '/test', [:], [:],
+      OptionalBody.body('Some nice bit of text', ContentType.TEXT_PLAIN))
     def expectedRequest = new HttpRequest('POST', '/test', [:], [:],
       OptionalBody.body('Some nice bit of text', ContentType.TEXT_PLAIN))
 
@@ -83,69 +83,77 @@ class MatchingEngineSpec extends Specification {
       |)
       |'''.stripMargin('|')
 
+      def expectedExecutedPlan = '''(
+      |  :request (
+      |    :method (
+      |      #{'method == POST'},
+      |      %match:equality (
+      |        'POST' => 'POST',
+      |        %upper-case (
+      |          $.method => 'put'
+      |        ) => 'PUT',
+      |        NULL => NULL
+      |      ) => ERROR(Expected 'PUT' to be equal to 'POST')
+      |    ) => BOOL(false),
+      |    :path (
+      |      #{"path == '/test'"},
+      |      %match:equality (
+      |        '/test' => '/test',
+      |        $.path => '/test',
+      |        NULL => NULL
+      |      ) => BOOL(true)
+      |    ) => BOOL(true),
+      |    :"query parameters" (
+      |      %expect:empty (
+      |        $.query => {},
+      |        %join (
+      |          'Expected no query parameters but got ',
+      |          $.query
+      |        )
+      |      ) => BOOL(true)
+      |    ) => BOOL(true),
+      |    :body (
+      |      %if (
+      |        %match:equality (
+      |          'text/plain' => 'text/plain',
+      |          $.content-type => 'text/plain',
+      |          NULL => NULL,
+      |          %error (
+      |            'Body type error - ',
+      |            %apply ()
+      |          )
+      |        ) => BOOL(true),
+      |        %match:equality (
+      |          'Some nice bit of text' => 'Some nice bit of text',
+      |          %convert:UTF8 (
+      |            $.body => BYTES(21, U29tZSBuaWNlIGJpdCBvZiB0ZXh0)
+      |          ) => 'Some nice bit of text',
+      |          NULL => NULL
+      |        ) => BOOL(true)
+      |      ) => BOOL(true)
+      |    ) => BOOL(true)
+      |  ) => BOOL(false)
+      |)
+      |'''.stripMargin('|')
+
     when:
     def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context)
     def pretty = plan.prettyForm()
-    def diff = generateUnifiedDiff("", "", pretty.split('\n') as List<String>, diffInline(pretty,
+    def diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, diffInline(pretty,
       expected), 0).join('\n')
 
     then:
     diff == ''
 
-    //  let executed_plan = execute_request_plan(&plan, &request, &mut context)?;
-    //  assert_eq!(r#"(
-    //  :request (
-    //    :method (
-    //      #{'method == POST'},
-    //      %match:equality (
-    //        'POST' => 'POST',
-    //        %upper-case (
-    //          $.method => 'put'
-    //        ) => 'PUT',
-    //        NULL => NULL
-    //      ) => ERROR(Expected 'PUT' to be equal to 'POST')
-    //    ) => BOOL(false),
-    //    :path (
-    //      #{"path == '/test'"},
-    //      %match:equality (
-    //        '/test' => '/test',
-    //        $.path => '/test',
-    //        NULL => NULL
-    //      ) => BOOL(true)
-    //    ) => BOOL(true),
-    //    :"query parameters" (
-    //      %expect:empty (
-    //        $.query => {},
-    //        %join (
-    //          'Expected no query parameters but got ',
-    //          $.query
-    //        )
-    //      ) => BOOL(true)
-    //    ) => BOOL(true),
-    //    :body (
-    //      %if (
-    //        %match:equality (
-    //          'text/plain' => 'text/plain',
-    //          $.content-type => 'text/plain',
-    //          NULL => NULL,
-    //          %error (
-    //            'Body type error - ',
-    //            %apply ()
-    //          )
-    //        ) => BOOL(true),
-    //        %match:equality (
-    //          'Some nice bit of text' => 'Some nice bit of text',
-    //          %convert:UTF8 (
-    //            $.body => BYTES(21, U29tZSBuaWNlIGJpdCBvZiB0ZXh0)
-    //          ) => 'Some nice bit of text',
-    //          NULL => NULL
-    //        ) => BOOL(true)
-    //      ) => BOOL(true)
-    //    ) => BOOL(true)
-    //  ) => BOOL(false)
-    //)
-    //"#, executed_plan.pretty_form());
-    //
+    when:
+    def executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
+    pretty = executedPlan.prettyForm()
+    diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, diffInline(pretty,
+      expectedExecutedPlan), 0).join('\n')
+
+    then:
+    diff == ''
+
     //  assert_eq!(r#"request:
     //  method: method == POST - ERROR Expected 'PUT' to be equal to 'POST'
     //  path: path == '/test' - OK

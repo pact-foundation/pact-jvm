@@ -4,15 +4,6 @@ import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.Into
 import org.apache.commons.text.StringEscapeUtils.escapeJson
 
-//  /// Clones this node, replacing the value with the given one
-//  pub fn clone_with_value(&self, value: NodeValue) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: self.node_type.clone(),
-//      result: Some(NodeResult::VALUE(value)),
-//      children: self.children.clone()
-//    }
-//  }
-//
 //  /// Clones this node, replacing the result with the given one
 //  pub fn clone_with_result(&self, result: NodeResult) -> ExecutionPlanNode {
 //    ExecutionPlanNode {
@@ -36,15 +27,7 @@ import org.apache.commons.text.StringEscapeUtils.escapeJson
 //  pub fn push_node(&mut self, node: ExecutionPlanNode) {
 //    self.children.insert(0, node.into());
 //  }
-//
-//  /// If the node is a splat node
-//  pub fn is_splat(&self) -> bool {
-//    match self.node_type {
-//      PlanNodeType::SPLAT => true,
-//      _ => false
-//    }
-//  }
-//
+
 //  /// Returns the value for the node
 //  pub fn value(&self) -> Option<NodeResult> {
 //    self.result.clone()
@@ -168,7 +151,7 @@ data class ExecutionPlanNode(
   /** Any result associated with the node */
   var result: NodeResult?,
   /** Child nodes */
-  val children: MutableList<ExecutionPlanNode>
+  val children: MutableList<ExecutionPlanNode> = mutableListOf()
 ): Into<ExecutionPlanNode> {
 
   /** Adds the node as a child */
@@ -196,7 +179,7 @@ data class ExecutionPlanNode(
   override fun into() = this
 
   /** Returns the serialised text form of the node */
-  @Suppress("LongMethod")
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
   fun strForm(buffer: StringBuilder): String {
     buffer.append('(')
 
@@ -222,7 +205,7 @@ data class ExecutionPlanNode(
       }
       is PlanNodeType.ACTION -> {
         buffer.append('%')
-        buffer.append(n.value)
+        buffer.append(n.action)
         buffer.append('(')
         strFormChildren(buffer)
         buffer.append(')')
@@ -335,7 +318,7 @@ data class ExecutionPlanNode(
       is PlanNodeType.ACTION -> {
         buffer.append(pad)
         buffer.append('%')
-        buffer.append(n.value)
+        buffer.append(n.action)
         if (isEmpty()) {
           buffer.append(" ()")
         } else {
@@ -572,7 +555,7 @@ data class ExecutionPlanNode(
     return when(val n = nodeType) {
       is PlanNodeType.EMPTY -> false
       is PlanNodeType.CONTAINER -> String.format(":%s", n.label) == identifier
-      is PlanNodeType.ACTION -> String.format("%%%s", n.value) == identifier
+      is PlanNodeType.ACTION -> String.format("%%%s", n.action) == identifier
       is PlanNodeType.VALUE -> false
       is PlanNodeType.RESOLVE -> n.toString() == identifier
       is PlanNodeType.PIPELINE -> "->" == identifier
@@ -581,6 +564,10 @@ data class ExecutionPlanNode(
       is PlanNodeType.ANNOTATION -> false
     }
   }
+
+
+  /** If the node is a splat node */
+  fun isSplat() = this.nodeType == PlanNodeType.SPLAT
 
   companion object {
     /** Constructor for a container node */

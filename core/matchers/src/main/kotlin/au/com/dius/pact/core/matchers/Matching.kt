@@ -356,7 +356,8 @@ object Matching : KLogging() {
         val actual = a[value.key]
         val compare = MetadataMatcher.compare(value.key, value.value, actual, context)
         if (compare != null) list + compare else list
-      } else if (value.key.lowercase(Locale.getDefault()) != "contenttype" && value.key.lowercase(Locale.getDefault()) != "content-type") {
+      } else if (value.key.lowercase(Locale.getDefault()) != "contenttype" &&
+        value.key.lowercase(Locale.getDefault()) != "content-type") {
         list + MetadataMismatch(value.key, value.value, null,
           "Expected metadata '${value.key}' but was missing")
       } else {

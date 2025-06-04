@@ -47,4 +47,19 @@ class NodeValueSpec extends Specification {
     new NodeValue.ENTRY('key', new NodeValue.STRING('A'))                     | "'key' -> 'A'"
     new NodeValue.ENTRY('a key', new NodeValue.BOOL(false))                   | "'a key' -> BOOL(false)"
   }
+
+  def 'str form escapes strings'() {
+    expect:
+    new NodeValue.STRING(value).strForm() == result
+
+    where:
+
+    value               | result
+    ''                  | "''"
+    'simple'            | "'simple'"
+    'simple sentence'   | "'simple sentence'"
+    '"quoted sentence"' | "'\\\"quoted sentence\\\"'"
+    "'quoted sentence'" | "'\\\'quoted sentence\\\''"
+    'new\nline'         | "'new\\nline'"
+  }
 }

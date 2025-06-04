@@ -1,25 +1,9 @@
 package au.com.dius.pact.core.model
 
-//  /// Construct a new DocPath with an empty expression.
-//  ///
-//  /// Warning: do not call any of the `push_*` methods on this DocPath,
-//  /// as that would create an expression with invalid syntax
-//  /// (because it would be missing the Root token).
-//  pub fn empty() -> Self {
-//    Self {
-//      path_tokens: vec![],
-//      expr: "".into(),
-//    }
-//  }
-//
-//  /// Construct a new DocPath with the Root token.
-//  pub fn root() -> Self {
-//    Self {
-//      path_tokens: vec![PathToken::Root],
-//      expr: "$".into(),
-//    }
-//  }
-//
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
+
 //  /// Construct a new DocPath from a list of tokens
 //  pub fn from_tokens<I>(tokens: I) -> Self
 //    where I: IntoIterator<Item = PathToken> {
@@ -30,86 +14,7 @@ package au.com.dius.pact.core.model
 //    path.expr = path.build_expr();
 //    path
 //  }
-//
-//  /// Return the list of tokens that comprise this path.
-//  pub fn tokens(&self) -> &Vec<PathToken> {
-//    &self.path_tokens
-//  }
-//
-//  /// Return the length, in parsed tokens.
-//  pub fn len(&self) -> usize {
-//    self.path_tokens.len()
-//  }
-//
-//  /// Returns the last item in the path. Will panic if the path is empty.
-//  pub fn last(&self) -> Option<PathToken> {
-//    self.path_tokens.last().cloned()
-//  }
-//
-//  /// Extract the string contents of the first Field token.
-//  /// For use with Header and Query DocPaths.
-//  pub fn first_field(&self) -> Option<&str> {
-//    for token in self.path_tokens.iter() {
-//      if let PathToken::Field(field) = token {
-//        return Some(field);
-//      }
-//    }
-//    return None;
-//  }
-//
-//  /// Extract the string contents of the last Field token.
-//  pub fn last_field(&self) -> Option<&str> {
-//    for token in self.path_tokens.iter().rev() {
-//      if let PathToken::Field(field) = token {
-//        return Some(field);
-//      }
-//    }
-//    return None;
-//  }
-//
-//  /// If this path is the root path (it has only one element, the root token `$`).
-//  pub fn is_root(&self) -> bool {
-//    &self.path_tokens == &[PathToken::Root]
-//  }
-//
-//  /// The path is a wildcard path if it ends in a star (`*`)
-//  pub fn is_wildcard(&self) -> bool {
-//    self.path_tokens.last() == Some(&PathToken::Star)
-//  }
-//
-//  /// Calculates the path weight for this path expression and a given path.
-//  /// Returns a tuple of the calculated weight and the number of path tokens matched.
-//  pub fn path_weight(&self, path: &[&str]) -> (usize, usize) {
-//    trace!("Calculating weight for path tokens '{:?}' and path '{:?}'",
-//           self.path_tokens, path);
-//    let weight = {
-//      if path.len() >= self.len() {
-//        (
-//          self.path_tokens.iter().zip(path.iter())
-//          .fold(1, |acc, (token, fragment)| acc * matches_token(fragment, token)),
-//          self.len()
-//        )
-//      } else {
-//        (0, self.len())
-//      }
-//    };
-//    trace!("Calculated weight {:?} for path '{}' and '{:?}'",
-//           weight, self, path);
-//    weight
-//  }
-//
-//  /// If this path matches the given path. It will match if the calculated path weight is greater
-//  /// than zero (which means at least one token matched).
-//  pub fn matches_path(&self, path: &[&str]) -> bool {
-//    self.path_weight(path).0 > 0
-//  }
-//
-//  /// If the path matches the given path (the calculated path weight is greater than zero) and
-//  /// both paths have the same length.
-//  pub fn matches_path_exactly(&self, path: &[&str]) -> bool {
-//     self.len() == path.len() && self.matches_path(path)
-//  }
-//
+
 //  /// Creates a new path by cloning this one and pushing the string onto the end
 //  pub fn join(&self, part: impl Into<String>) -> Self {
 //    let part = part.into();
@@ -434,4 +339,101 @@ data class DocPath(
   }
 
   fun asList() = pathTokens.map { it.rawString() }
+
+  /** If this path is the root path (it has only one element, the root token `$`). */
+  fun isRoot() = pathTokens == listOf(PathToken.Root)
+
+  /** The path is a wildcard path if it ends in a star (`*`) */
+  fun isWildcard() = pathTokens.lastOrNull() == PathToken.Star
+
+  /** Return the length, in parsed tokens. */
+  fun len() = pathTokens.size
+
+  /**
+   * Calculates the path weight for this path expression and a given path.
+   * Returns a tuple of the calculated weight and the number of path tokens matched.
+   */
+  fun pathWeight(path: List<String>): Pair<Int, Int> {
+    logger.trace { "Calculating weight for path tokens '$pathTokens' and path '$path'" }
+    val weight = if (path.size >= len()) {
+      calculatePathWeight(pathTokens, path) to len()
+    } else {
+      0 to len()
+    }
+    logger.trace { "Calculated weight $weight for path '$path' and '$expr'" }
+    return weight
+  }
+
+  /**
+   * If this path matches the given path. It will match if the calculated path weight is greater
+   * than zero (which means at least one token matched).
+   */
+  fun matchesPath(path: List<String>) = pathWeight(path).first > 0
+
+  /**
+   * If the path matches the given path (the calculated path weight is greater than zero) and
+   * both paths have the same length.
+   */
+  fun matchesPathExactly(path: List<String>) = len() == path.size && matchesPath(path)
+
+  /** Return the list of tokens that comprise this path. */
+  fun tokens() = pathTokens
+
+  /** Returns the last item in the path, or null if empty. */
+  fun last() = pathTokens.lastOrNull()
+
+  /** Extract the string contents of the first Field token. For use with Header and Query DocPaths. */
+  fun firstField(): String? {
+    val result = pathTokens.firstOrNull { it is PathToken.Field }
+    return if (result is PathToken.Field) {
+      result.name
+    } else {
+      null
+    }
+  }
+
+  /** Extract the string contents of the last Field token. */
+  fun lastField(): String? {
+    val result = pathTokens.lastOrNull { it is PathToken.Field }
+    return if (result is PathToken.Field) {
+      result.name
+    } else {
+      null
+    }
+  }
+
+  companion object {
+    /**
+     *  Construct a new DocPath with an empty expression.
+     *
+     * Warning: do not call any of the `push*` methods on this DocPath,
+     * as that would create an expression with invalid syntax
+     * (because it would be missing the Root token).
+     */
+    @JvmStatic
+    fun empty() = DocPath(emptyList(), "")
+
+    /**
+     *  Construct a new DocPath with the Root token.
+     */
+    @JvmStatic
+    fun root() = DocPath(listOf(PathToken.Root), "$")
+
+    fun calculatePathWeight(pathTokens: List<PathToken>, path: List<String>): Int {
+      return path
+        .zip(pathTokens) { pathElement, pathToken -> matchesToken(pathElement, pathToken) }
+        .reduce { acc, i -> acc * i }
+    }
+
+    fun matchesToken(pathElement: String, token: PathToken): Int {
+      return when (token) {
+        is PathToken.Root -> if (pathElement == "$") 2 else 0
+        is PathToken.Field -> if (pathElement == token.name) 2 else 0
+        is PathToken.Index -> if (pathElement.toIntOrNull() == token.index) 2 else 0
+        is PathToken.StarIndex -> if (pathElement.toIntOrNull() != null) 1 else 0
+        is PathToken.Star -> 1
+        else -> 0
+      }
+    }
+  }
 }

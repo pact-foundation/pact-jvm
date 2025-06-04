@@ -11,7 +11,7 @@ sealed class PlanNodeType {
   /** Container node with a label */
   data class CONTAINER(val label: String): PlanNodeType()
   /** Action node with a function reference */
-  data class ACTION(val value: String): PlanNodeType()
+  data class ACTION(val action: String): PlanNodeType()
   /** Leaf node that contains a value */
   data class VALUE(val value: NodeValue): PlanNodeType()
   /** Leaf node that stores an expression to resolve against the test context */

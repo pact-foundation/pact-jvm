@@ -718,7 +718,10 @@ fun <M : Mismatch> matchContentType(
   } else {
     binaryData
   }
-  logger.debug { "matchContentType: $path, $contentType, ${binaryData.size} bytes starting with ${Hex.encodeHexString(slice)}...)" }
+  logger.debug {
+    "matchContentType: $path, $contentType, ${binaryData.size} bytes starting with " +
+      "${Hex.encodeHexString(slice)}...)"
+  }
 
   val metadata = Metadata()
   val stream = TikaInputStream.get(binaryData)

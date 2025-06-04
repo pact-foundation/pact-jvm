@@ -28,9 +28,12 @@ object ResponseMatching : KLogging() {
     actual: IResponse,
     pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
   ): List<Mismatch> {
-    val statusContext = MatchingContext(expected.matchingRules.rulesForCategory("status"), true, pluginConfiguration)
-    val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"), true, pluginConfiguration)
-    val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"), true, pluginConfiguration, true)
+    val statusContext = MatchingContext(expected.matchingRules.rulesForCategory("status"),
+      true, pluginConfiguration)
+    val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"),
+      true, pluginConfiguration)
+    val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"),
+      true, pluginConfiguration, true)
 
     val bodyResults = Matching.matchBody(expected.asHttpPart(), actual.asHttpPart(), bodyContext)
     val typeResult = if (bodyResults.typeMismatch != null) {

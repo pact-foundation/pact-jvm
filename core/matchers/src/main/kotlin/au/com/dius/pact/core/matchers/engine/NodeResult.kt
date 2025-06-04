@@ -1,38 +1,5 @@
 package au.com.dius.pact.core.matchers.engine
 
-//#[derive(Clone, Debug, Default, PartialEq)]
-//pub enum NodeResult {
-//  /// Default value to make a node as successfully executed
-//  #[default]
-//  OK,
-//  /// Marks a node as successfully executed with a result
-//  VALUE(NodeValue),
-//  /// Marks a node as unsuccessfully executed with an error
-//  ERROR(String)
-//}
-//
-//impl NodeResult {
-//  /// Return the AND of this result with the given one
-//  pub fn and(&self, option: &Option<NodeResult>) -> NodeResult {
-//    if let Some(result) = option {
-//      match self {
-//        NodeResult::OK => match result {
-//          NodeResult::OK => NodeResult::OK,
-//          NodeResult::VALUE(_) => result.clone(),
-//          NodeResult::ERROR(_) => result.clone()
-//        }
-//        NodeResult::VALUE(v1) => match result {
-//          NodeResult::OK => self.clone(),
-//          NodeResult::VALUE(v2) => NodeResult::VALUE(v1.and(v2)),
-//          NodeResult::ERROR(_) => result.clone()
-//        }
-//        NodeResult::ERROR(_) => self.clone()
-//      }
-//    } else {
-//      self.clone()
-//    }
-//  }
-//
 //  /// Converts the result value to a string
 //  pub fn as_string(&self) -> Option<String> {
 //    match self {
@@ -89,29 +56,6 @@ package au.com.dius.pact.core.matchers.engine
 //    }
 //  }
 //
-//  /// If this value represents a truthy value (not NULL, false ot empty)
-//  pub fn is_truthy(&self) -> bool {
-//    match self {
-//      NodeResult::OK => true,
-//      NodeResult::VALUE(v) => match v {
-//        NodeValue::STRING(s) => !s.is_empty(),
-//        NodeValue::BOOL(b) => *b,
-//        NodeValue::MMAP(m) => !m.is_empty(),
-//        NodeValue::SLIST(l) => !l.is_empty(),
-//        NodeValue::BARRAY(b) => !b.is_empty(),
-//        NodeValue::UINT(ui) => *ui != 0,
-//        NodeValue::LIST(l) => !l.is_empty(),
-//        _ => false
-//      }
-//      NodeResult::ERROR(_) => false
-//    }
-//  }
-//
-//  /// Converts this node result into a truthy value
-//  pub fn truthy(&self) -> NodeResult {
-//    NodeResult::VALUE(NodeValue::BOOL(self.is_truthy()))
-//  }
-//
 //  /// Unwraps the result into a value, or returns the error results as an error
 //  pub fn value_or_error(&self) -> anyhow::Result<NodeValue> {
 //    match self {
@@ -150,4 +94,54 @@ package au.com.dius.pact.core.matchers.engine
 
 /** Enum to store the result of executing a node */
 sealed class NodeResult {
+  /** Default value to make a node as successfully executed */
+  data object OK: NodeResult()
+
+  /** Marks a node as successfully executed with a result */
+  data class VALUE(val value: NodeValue): NodeResult()
+
+  /** Marks a node as unsuccessfully executed with an error */
+  data class ERROR(val message: String): NodeResult()
+
+  /** If this value represents a truthy value (not NULL, false ot empty) */
+  fun isTruthy(): Boolean {
+    return when (this) {
+      is OK -> true
+      is VALUE -> when (this.value) {
+        is NodeValue.BARRAY -> this.value.bytes.isNotEmpty()
+        is NodeValue.BOOL -> this.value.bool
+        is NodeValue.LIST -> this.value.items.isNotEmpty()
+        is NodeValue.MMAP -> this.value.entries.isNotEmpty()
+        is NodeValue.SLIST -> this.value.items.isNotEmpty()
+        is NodeValue.STRING -> this.value.string.isNotEmpty()
+        is NodeValue.UINT -> this.value.uint.toInt() != 0
+        else -> false
+      }
+      is ERROR -> false
+    }
+  }
+
+  /** Converts this node result into a truthy value */
+  fun truthy() = VALUE(NodeValue.BOOL(isTruthy()))
+
+  /** Return the AND of this result with the given one */
+  fun and(result: NodeResult?): NodeResult {
+    return if (result != null) {
+      when (this) {
+        is ERROR -> this
+        OK -> when (result) {
+          is ERROR -> result
+          OK -> OK
+          is VALUE -> result
+        }
+        is VALUE -> when (result) {
+          is ERROR -> result
+          OK -> this
+          is VALUE -> VALUE(this.value.and(result.value))
+        }
+      }
+    } else {
+      this
+    }
+  }
 }

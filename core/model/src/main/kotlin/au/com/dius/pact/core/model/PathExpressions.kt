@@ -46,6 +46,8 @@ sealed class PathToken {
 
     override fun rawString() = "[*]"
   }
+
+  fun isIndex() = this is Index
 }
 
 // string_path -> [^']+

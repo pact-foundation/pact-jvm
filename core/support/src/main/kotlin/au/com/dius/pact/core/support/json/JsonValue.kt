@@ -56,12 +56,19 @@ sealed class JsonValue {
 
   class Array @JvmOverloads constructor (val values: MutableList<JsonValue> = mutableListOf()) : JsonValue() {
     fun find(function: (JsonValue) -> Boolean) = values.find(function)
+
     operator fun get(i: Int): JsonValue {
-      return values[i]
+      return if (i < values.size) {
+        values[i]
+      } else {
+        Null
+      }
     }
+
     operator fun set(i: Int, value: JsonValue) {
       values[i] = value
     }
+
     val size: Int
       get() = values.size
 
@@ -337,6 +344,34 @@ sealed class JsonValue {
    * Makes a copy of this JSON value
    */
   abstract fun copy(): JsonValue
+
+  /**
+   * Looks up a value by a JSON Pointer (RFC6901).
+   */
+  fun pointer(pointer: String): JsonValue {
+    return if (pointer.isEmpty()) {
+      this
+    } else if (pointer.startsWith('/')) {
+      val parts = pointer.split('/')
+        .drop(1)
+        .map { it.replace("~1", "/").replace("~0", "~") }
+        .iterator()
+
+      var cursor: JsonValue = this
+      while (parts.hasNext() && cursor != Null) {
+        val next = parts.next()
+        cursor = when (cursor) {
+          is Array -> cursor[next.toInt()]
+          is Object -> cursor[next]
+          else -> Null
+        }
+      }
+
+      cursor
+    } else {
+      Null
+    }
+  }
 }
 
 fun <R> JsonValue?.map(transform: (JsonValue) -> R): List<R> = when {

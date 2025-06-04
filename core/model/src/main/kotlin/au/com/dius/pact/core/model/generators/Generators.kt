@@ -39,11 +39,13 @@ fun setupDefaultContentTypeHandlers() {
 interface QueryResult {
   var value: Any?
   val key: Any?
+  val path: List<String>
 }
 data class JsonQueryResult(
   var jsonValue: JsonValue?,
   override val key: Any? = null,
-  val parent: JsonValue? = null
+  val parent: JsonValue? = null,
+  override val path: List<String> = emptyList()
 ): QueryResult {
   override var value: Any?
     get() = jsonValue

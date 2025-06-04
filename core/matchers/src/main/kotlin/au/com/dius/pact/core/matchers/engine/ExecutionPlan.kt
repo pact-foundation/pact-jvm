@@ -5,7 +5,7 @@ package au.com.dius.pact.core.matchers.engine
  */
 open class ExecutionPlan(
   /** Root node for the plan tree */
-  private val planRoot: ExecutionPlanNode
+  val planRoot: ExecutionPlanNode
 ) {
   /** Creates a new empty execution plan with a single root container */
   constructor(label: String) : this(ExecutionPlanNode.container(label))
