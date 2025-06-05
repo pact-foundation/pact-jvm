@@ -9,9 +9,9 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import com.github.difflib.DiffUtils
 import spock.lang.Specification
 
-import static com.github.difflib.DiffUtils.diffInline
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
 @SuppressWarnings('MethodSize')
@@ -93,10 +93,10 @@ class MatchingEngineSpec extends Specification {
       |          $.method => 'put'
       |        ) => 'PUT',
       |        NULL => NULL
-      |      ) => ERROR(Expected 'PUT' to be equal to 'POST')
+      |      ) => ERROR(Expected 'PUT' (String) to be equal to 'POST' (String))
       |    ) => BOOL(false),
       |    :path (
-      |      #{"path == '/test'"},
+      |      #{"path == '\\/test'"},
       |      %match:equality (
       |        '/test' => '/test',
       |        $.path => '/test',
@@ -139,8 +139,8 @@ class MatchingEngineSpec extends Specification {
     when:
     def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context)
     def pretty = plan.prettyForm()
-    def diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, diffInline(pretty,
-      expected), 0).join('\n')
+    def patch = DiffUtils.diff(pretty, expected, null)
+    def diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, patch, 0).join('\n')
 
     then:
     diff == ''
@@ -148,8 +148,8 @@ class MatchingEngineSpec extends Specification {
     when:
     def executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
     pretty = executedPlan.prettyForm()
-    diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, diffInline(pretty,
-      expectedExecutedPlan), 0).join('\n')
+    patch = DiffUtils.diff(pretty, expectedExecutedPlan, null)
+    diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, patch, 0).join('\n')
 
     then:
     diff == ''

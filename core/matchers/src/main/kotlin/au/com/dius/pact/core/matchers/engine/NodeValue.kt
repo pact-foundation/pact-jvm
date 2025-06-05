@@ -1,12 +1,16 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.BodyMismatchFactory
+import au.com.dius.pact.core.matchers.domatch
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import org.apache.commons.text.StringEscapeUtils.escapeJson
 import java.util.Base64
 
 /** Enum for the value stored in a leaf node */
-sealed class              NodeValue: Into<NodeValue> {
+sealed class NodeValue: Into<NodeValue> {
   /** Default is no value */
   data object NULL: NodeValue()
 
@@ -161,14 +165,7 @@ sealed class              NodeValue: Into<NodeValue> {
 //      NodeValue::XML(_) => "XML"
 //    }
 //  }
-//
-//  /// If this value is a JSON value, returns it, otherwise returns None
-//  pub fn as_json(&self) -> Option<Value> {
-//    match self {
-//      NodeValue::JSON(json) => Some(json.clone()),
-//      _ => None
-//    }
-//  }
+
 //
 //  /// If this value is an XML value, returns it, otherwise returns None
 //  #[cfg(feature = "xml")]
@@ -178,15 +175,7 @@ sealed class              NodeValue: Into<NodeValue> {
 //      _ => None
 //    }
 //  }
-//
-//  /// If this value is a String value, returns it, otherwise returns None
-//  pub fn as_string(&self) -> Option<String> {
-//    match self {
-//      NodeValue::STRING(s) => Some(s.clone()),
-//      _ => None
-//    }
-//  }
-//
+
 //  /// If this value is a bool value, returns it, otherwise returns None
 //  pub fn as_bool(&self) -> Option<bool> {
 //    match self {
@@ -338,58 +327,23 @@ sealed class              NodeValue: Into<NodeValue> {
 //    NodeValue::XML(XmlValue::Element(value.clone()))
 //  }
 //}
-//
-//impl Matches<NodeValue> for NodeValue {
-//  fn matches_with(&self, actual: NodeValue, matcher: &MatchingRule, cascaded: bool) -> anyhow::Result<()> {
-//    match self {
-//      NodeValue::NULL => Value::Null.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
-//      NodeValue::STRING(s) => if let Some(actual_str) = actual.as_string() {
-//        s.matches_with(actual_str, matcher, cascaded)
-//      } else if let Some(list) = actual.as_slist() {
-//        let result = list.iter()
-//          .map(|item| s.matches_with(item, matcher, cascaded))
-//          .filter_map(|r| match r {
-//            Ok(_) => None,
-//            Err(err) => Some(err.to_string())
-//          })
-//          .collect_vec();
-//        if result.is_empty() {
-//          Ok(())
-//        } else {
-//          Err(anyhow!(result.join(", ")))
-//        }
-//      } else {
-//        s.matches_with(actual.to_string(), matcher, cascaded)
-//      },
-//      NodeValue::BOOL(b) => b.matches_with(actual.as_bool().unwrap_or_default(), matcher, cascaded),
-//      NodeValue::UINT(u) => u.matches_with(actual.as_uint().unwrap_or_default(), matcher, cascaded),
-//      NodeValue::JSON(json) => json.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
-//      NodeValue::SLIST(list) => if let Some(actual_list) = actual.as_slist() {
-//        list.matches_with(&actual_list, matcher, cascaded)
-//      } else {
-//        let actual_str = if let Some(actual_str) = actual.as_string() {
-//          actual_str
-//        } else {
-//          actual.to_string()
-//        };
-//        list.matches_with(&vec![actual_str], matcher, cascaded)
-//      }
-//      #[cfg(feature = "xml")]
-//      NodeValue::XML(xml_value) => if let Some(actual) = actual.as_xml() {
-//        xml_value.matches_with(actual, matcher, cascaded)
-//      } else {
-//        Err(anyhow!("Was expecting an XML value but got {}", actual))
-//      },
-//      _ => Err(anyhow!("Matching rules can not be applied to {} values", self.str_form()))
-//    }
-//  }
-//}
-//
-//impl Display for NodeValue {
-//  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-//    write!(f, "{}", self.str_form())
-//  }
-//}
+  /** If this value is a JSON value, returns it, otherwise returns null */
+  fun asJson(): JsonValue? {
+    return if (this is JSON) {
+      json
+    } else {
+      null
+    }
+  }
+
+  /** If this value is a String value, returns it, otherwise returns null */
+  fun asString(): String? {
+    return if (this is STRING) {
+      string
+    } else {
+      null
+    }
+  }
 
   override fun into() = this
 
@@ -402,6 +356,83 @@ sealed class              NodeValue: Into<NodeValue> {
         "'${escapeJson(value).replace("'", "\\'")}'"
       } else {
         "'$value'"
+      }
+    }
+
+    fun doMatch(
+      expected: NodeValue,
+      actual: NodeValue,
+      matcher: MatchingRule,
+      cascaded: Boolean,
+      actionPath: List<String>
+    ): String? {
+    //    match self {
+    //      NodeValue::NULL => Value::Null.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
+    //      NodeValue::STRING(s) => if let Some(actual_str) = actual.as_string() {
+    //        s.matches_with(actual_str, matcher, cascaded)
+    //      } else if let Some(list) = actual.as_slist() {
+    //        let result = list.iter()
+    //          .map(|item| s.matches_with(item, matcher, cascaded))
+    //          .filter_map(|r| match r {
+    //            Ok(_) => None,
+    //            Err(err) => Some(err.to_string())
+    //          })
+    //          .collect_vec();
+    //        if result.is_empty() {
+    //          Ok(())
+    //        } else {
+    //          Err(anyhow!(result.join(", ")))
+    //        }
+    //      } else {
+    //        s.matches_with(actual.to_string(), matcher, cascaded)
+    //      },
+    //      NodeValue::BOOL(b) => b.matches_with(actual.as_bool().unwrap_or_default(), matcher, cascaded),
+    //      NodeValue::UINT(u) => u.matches_with(actual.as_uint().unwrap_or_default(), matcher, cascaded),
+    //      NodeValue::JSON(json) => json.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
+    //      NodeValue::SLIST(list) => if let Some(actual_list) = actual.as_slist() {
+    //        list.matches_with(&actual_list, matcher, cascaded)
+    //      } else {
+    //        let actual_str = if let Some(actual_str) = actual.as_string() {
+    //          actual_str
+    //        } else {
+    //          actual.to_string()
+    //        };
+    //        list.matches_with(&vec![actual_str], matcher, cascaded)
+    //      }
+    //      #[cfg(feature = "xml")]
+    //      NodeValue::XML(xml_value) => if let Some(actual) = actual.as_xml() {
+    //        xml_value.matches_with(actual, matcher, cascaded)
+    //      } else {
+    //        Err(anyhow!("Was expecting an XML value but got {}", actual))
+    //      },
+    //      _ => Err(anyhow!("Matching rules can not be applied to {} values", self.str_form()))
+    //    }
+    //  }
+      return when (expected) {
+        is BARRAY -> TODO()
+        is BOOL -> TODO()
+        is ENTRY -> TODO()
+        is JSON -> TODO()
+        is LIST -> TODO()
+        is MMAP -> TODO()
+        is NAMESPACED -> TODO()
+        NULL -> TODO()
+        is SLIST -> TODO()
+        is STRING -> {
+          if (actual is STRING) {
+            val result = domatch(matcher, actionPath, expected.string, actual.string, BodyMismatchFactory, cascaded)
+            if (result.isNotEmpty()) {
+              result.joinToString(", ") { it.mismatch }
+            } else {
+              null
+            }
+          } else if (actual is SLIST) {
+            TODO()
+          } else {
+            TODO()
+          }
+        }
+        is UINT -> TODO()
       }
     }
   }

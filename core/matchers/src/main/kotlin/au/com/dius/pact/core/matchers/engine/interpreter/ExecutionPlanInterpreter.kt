@@ -5,13 +5,17 @@ import au.com.dius.pact.core.matchers.engine.NodeResult
 import au.com.dius.pact.core.matchers.engine.NodeValue
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
 import au.com.dius.pact.core.matchers.engine.PlanNodeType
+import au.com.dius.pact.core.matchers.engine.orDefault
 import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.JsonUtils
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.json.orNull
+import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -115,9 +119,12 @@ class ExecutionPlanInterpreter(
       is PlanNodeType.RESOLVE -> {
         logger.trace { "walk_tree ==> Resolve node, path = $path, resolve_path = ${node.nodeType.path}" }
         when (val result = valueResolver.resolve(node.nodeType.path, context)) {
-          is Result.Ok -> node.copy(result = NodeResult.VALUE(result.value))
+          is Result.Ok -> {
+            logger.debug { "Resolved ${node.nodeType.path} -> ${result.value}" }
+            node.copy(result = NodeResult.VALUE(result.value))
+          }
           is Result.Err -> {
-            logger.trace {
+            logger.debug {
               "Resolve node failed, path = $path, resolve_path = ${node.nodeType.path}, error = ${result.error}"
             }
             node.copy(result = NodeResult.ERROR(result.error))
@@ -210,44 +217,80 @@ class ExecutionPlanInterpreter(
       }
     } else {
       when (action) {
+        "upper-case" -> executeChangeCase(action, valueResolver, node, actionPath, true)
+        "lower-case" -> executeChangeCase(action, valueResolver, node, actionPath, false)
+        //        "to-string" => self.execute_to_string(action, valueResolver, node, actionPath),
+        //        "length" => self.execute_length(action, valueResolver, node, actionPath),
+        "expect:empty" -> executeExpectEmpty(action, valueResolver, node, actionPath)
+        //        "convert:UTF8" => self.execute_convert_utf8(action, valueResolver, node, actionPath),
+        //        "if" => self.execute_if(valueResolver, node, actionPath),
+        //        "and" => self.execute_and(valueResolver, node, actionPath),
+        //        "or" => self.execute_or(valueResolver, node, actionPath),
+        //        "tee" => self.execute_tee(valueResolver, node, actionPath),
+        //        "apply" => self.execute_apply(node),
+        //        "push" => self.execute_push(node),
+        //        "pop" => self.execute_pop(node),
+        //        "json:parse" => self.execute_json_parse(action, valueResolver, node, actionPath),
+        //        #[cfg(feature = "xml")]
+        //        "xml:parse" => self.execute_xml_parse(action, valueResolver, node, actionPath),
+        //        #[cfg(feature = "xml")]
+        //        "xml:tag-name" => self.execute_xml_tag_name(action, valueResolver, node, actionPath),
+        //        #[cfg(feature = "xml")]
+        //        "xml:value" => self.execute_xml_value(action, valueResolver, node, actionPath),
+        //        #[cfg(feature = "xml")]
+        //        "xml:attributes" => self.execute_xml_attributes(action, valueResolver, node, actionPath),
+        //        "json:expect:empty" => self.execute_json_expect_empty(action, valueResolver, node, actionPath),
+        //        "json:match:length" => self.execute_json_match_length(action, valueResolver, node, actionPath),
+        //        "json:expect:entries" => self.execute_json_expect_entries(action, valueResolver, node, actionPath),
+        //        "check:exists" => self.execute_check_exists(action, valueResolver, node, actionPath),
+        //        "expect:entries" => self.execute_check_entries(action, valueResolver, node, actionPath),
+        //        "expect:only-entries" => self.execute_check_entries(action, valueResolver, node, actionPath),
+        //        "expect:count" => self.execute_expect_count(action, valueResolver, node, actionPath),
+        //        "join" => self.execute_join(action, valueResolver, node, actionPath),
+        //        "join-with" => self.execute_join(action, valueResolver, node, actionPath),
+        //        "error" => self.execute_error(action, valueResolver, node, actionPath),
+        //        "header:parse" => self.execute_header_parse(action, valueResolver, node, actionPath),
+        //        "for-each" => self.execute_for_each(valueResolver, node, actionPath),
         else -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
       }
-    //      match action {
-    //        "upper-case" => self.execute_change_case(action, value_resolver, node, &action_path, true),
-    //        "lower-case" => self.execute_change_case(action, value_resolver, node, &action_path, false),
-    //        "to-string" => self.execute_to_string(action, value_resolver, node, &action_path),
-    //        "length" => self.execute_length(action, value_resolver, node, &action_path),
-    //        "expect:empty" => self.execute_expect_empty(action, value_resolver, node, &action_path),
-    //        "convert:UTF8" => self.execute_convert_utf8(action, value_resolver, node, &action_path),
-    //        "if" => self.execute_if(value_resolver, node, &action_path),
-    //        "and" => self.execute_and(value_resolver, node, &action_path),
-    //        "or" => self.execute_or(value_resolver, node, &action_path),
-    //        "tee" => self.execute_tee(value_resolver, node, &action_path),
-    //        "apply" => self.execute_apply(node),
-    //        "push" => self.execute_push(node),
-    //        "pop" => self.execute_pop(node),
-    //        "json:parse" => self.execute_json_parse(action, value_resolver, node, &action_path),
-    //        #[cfg(feature = "xml")]
-    //        "xml:parse" => self.execute_xml_parse(action, value_resolver, node, &action_path),
-    //        #[cfg(feature = "xml")]
-    //        "xml:tag-name" => self.execute_xml_tag_name(action, value_resolver, node, &action_path),
-    //        #[cfg(feature = "xml")]
-    //        "xml:value" => self.execute_xml_value(action, value_resolver, node, &action_path),
-    //        #[cfg(feature = "xml")]
-    //        "xml:attributes" => self.execute_xml_attributes(action, value_resolver, node, &action_path),
-    //        "json:expect:empty" => self.execute_json_expect_empty(action, value_resolver, node, &action_path),
-    //        "json:match:length" => self.execute_json_match_length(action, value_resolver, node, &action_path),
-    //        "json:expect:entries" => self.execute_json_expect_entries(action, value_resolver, node, &action_path),
-    //        "check:exists" => self.execute_check_exists(action, value_resolver, node, &action_path),
-    //        "expect:entries" => self.execute_check_entries(action, value_resolver, node, &action_path),
-    //        "expect:only-entries" => self.execute_check_entries(action, value_resolver, node, &action_path),
-    //        "expect:count" => self.execute_expect_count(action, value_resolver, node, &action_path),
-    //        "join" => self.execute_join(action, value_resolver, node, &action_path),
-    //        "join-with" => self.execute_join(action, value_resolver, node, &action_path),
-    //        "error" => self.execute_error(action, value_resolver, node, &action_path),
-    //        "header:parse" => self.execute_header_parse(action, value_resolver, node, &action_path),
-    //        "for-each" => self.execute_for_each(value_resolver, node, &action_path),
     }
+  }
+
+  private fun executeChangeCase(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>,
+    uppercase: Boolean
+  ): ExecutionPlanNode {
+    val (children, values) = when (val result = evaluateChildren(valueResolver, node, actionPath)) {
+      is Result.Ok -> result.value
+      is Result.Err -> return result.error
+    }
+
+    val results = values.map { value ->
+      when (value) {
+        is NodeValue.JSON -> when (val json = value.json) {
+          is JsonValue.StringValue -> NodeValue.STRING(
+            if (uppercase) json.value.toString().uppercase()
+            else json.value.toString().lowercase())
+          else -> NodeValue.STRING(value.json.serialise())
+        }
+        is NodeValue.SLIST -> NodeValue.SLIST(value.items.map {
+          if (uppercase) it.uppercase() else it.lowercase()
+        })
+        is NodeValue.STRING -> NodeValue.STRING(
+          if (uppercase) value.string.uppercase() else value.string.lowercase())
+        else -> value
+      }
+    }
+
+    val result = if (results.size == 1) {
+      results[0]
+    } else {
+      NodeValue.LIST(results)
+    }
+    return node.copy(result = NodeResult.VALUE(result), children = children.toMutableList())
   }
 
   private fun executeMatch(
@@ -257,7 +300,201 @@ class ExecutionPlanInterpreter(
     node: ExecutionPlanNode,
     actionPath: List<String>
   ): ExecutionPlanNode {
-    return node
+    when (val result = validateArgs(3, 1, node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, optional) = result.value
+        val firstNode = args[0]
+        val secondNode = args[1]
+        val thirdNode = args[2]
+
+        val expectedValue = when(val v = firstNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error),
+            children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
+        }
+        val actualValue = when(val v = secondNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error),
+            children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
+        }
+        val matcherParams = when(val v = thirdNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value.asJson().orNull()
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error),
+            children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
+        }
+
+        when (val result = handleWith<MatchingRule> { MatchingRule.create(matcher, matcherParams) }) {
+          is Result.Ok -> {
+            val matchResult = NodeValue.doMatch(expectedValue, actualValue, result.value, false, actionPath)
+            if (matchResult == null) {
+              return node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)),
+                children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
+            } else {
+              val errorNode = optional.firstOrNull()
+              if (errorNode != null) {
+                pushResult(NodeResult.ERROR(matchResult))
+
+                val errorNodeResult = walkTree(actionPath, errorNode, valueResolver)
+                val message = errorNodeResult.value()?.asString()
+                return if (message.isNotEmpty()) {
+                  node.copy(result = NodeResult.ERROR(message!!),
+                    children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
+                } else {
+                  // There was an error generating the optional message, so just return the original error
+                  node.copy(result = NodeResult.ERROR(matchResult),
+                    children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
+                }
+              } else {
+                return node.copy(result = NodeResult.ERROR(matchResult),
+                  children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
+              }
+            }
+          }
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(result.error.message!!))
+        }
+      }
+      is Result.Err -> return node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeExpectEmpty(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(1, 1, node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, optional) = result.value
+
+        val firstArg = args[0].value().orDefault()
+        if (firstArg is NodeResult.ERROR) {
+          node.copy(result = NodeResult.ERROR(firstArg.message),
+            children = (args + optional).toMutableList())
+        } else {
+          val argValue = firstArg.asValue()
+          val result = if (argValue != null) {
+            when (argValue) {
+              is NodeValue.BARRAY -> {
+                if (argValue.bytes.isEmpty()) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected byte array (${argValue.bytes.size} bytes) to be empty")
+                }
+              }
+              is NodeValue.BOOL -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(argValue.bool)))
+              is NodeValue.ENTRY -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(false)))
+              is NodeValue.JSON -> {
+                when (argValue.json) {
+                  is JsonValue.Array -> {
+                    if (argValue.json.values.isEmpty()) {
+                      Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                    } else {
+                      Result.Err("Expected JSON Array ${argValue.json.values} to be empty")
+                    }
+                  }
+                  JsonValue.Null -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  is JsonValue.Object -> {
+                    if (argValue.json.entries.isEmpty()) {
+                      Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                    } else {
+                      Result.Err("Expected JSON Object ${argValue.json.entries} to be empty")
+                    }
+                  }
+                  is JsonValue.StringValue -> {
+                    if (argValue.json.value.chars.isEmpty()) {
+                      Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                    } else {
+                      Result.Err("Expected JSON String ${argValue.json.value} to be empty")
+                    }
+                  }
+                  else -> Result.Err("Expected json (${argValue.json.serialise()}) to be empty")
+                }
+              }
+              is NodeValue.LIST -> {
+                if (argValue.items.isEmpty()) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected ${argValue.items} to be empty")
+                }
+              }
+              is NodeValue.MMAP -> {
+                if (argValue.entries.isEmpty()) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected ${argValue.entries} to be empty")
+                }
+              }
+              is NodeValue.NAMESPACED -> TODO("Not Implemented: Need a way to resolve NodeValue::NAMESPACED")
+              NodeValue.NULL -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+              is NodeValue.SLIST -> {
+                if (argValue.items.isEmpty()) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected ${argValue.items} to be empty")
+                }
+              }
+              is NodeValue.STRING -> {
+                if (argValue.string.isEmpty()) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected '${argValue.string}' to be empty")
+                }
+              }
+              is NodeValue.UINT -> {
+                if (argValue.uint.toInt() == 0) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected ${argValue.uint} to be empty")
+                }
+              }
+              //              #[cfg(feature = "xml")]
+              //              NodeValue::XML(xml) => match xml {
+              //                XmlValue::Element(element) => if element.child_elements().next().is_none() {
+              //                  Ok(NodeResult::VALUE(NodeValue::BOOL(true)))
+              //                } else {
+              //                  Err(anyhow!("Expected {} to be empty", element))
+              //                }
+              //                XmlValue::Text(text) => if text.is_empty() {
+              //                  Ok(NodeResult::VALUE(NodeValue::BOOL(true)))
+              //                } else {
+              //                  Err(anyhow!("Expected {:?} to be empty", value))
+              //                }
+              //                XmlValue::Attribute(name, value) => if value.is_empty() {
+              //                  Ok(NodeResult::VALUE(NodeValue::BOOL(true)))
+              //                } else {
+              //                  Err(anyhow!("Expected {}={} to be empty", name, value))
+              //                }
+              //              }
+            }
+          } else {
+            Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+          }
+
+          when (result) {
+            is Result.Ok -> node.copy(result = result.value, children = (args + optional).toMutableList())
+            is Result.Err -> {
+              logger.debug { "expect:empty failed with an error: ${result.error}" }
+              val errorNode = optional.firstOrNull()
+              if (errorNode != null) {
+                val errorNodeResult = walkTree(actionPath, errorNode, valueResolver)
+                val message = errorNodeResult.value()?.asString()
+                return if (message.isNotEmpty()) {
+                  node.copy(result = NodeResult.ERROR(message!!),
+                    children = (args + optional).toMutableList())
+                } else {
+                  // There was an error generating the optional message, so just return the original error
+                  node.copy(result = NodeResult.ERROR(result.error), children = (args + optional).toMutableList())
+                }
+              } else {
+                node.copy(result = NodeResult.ERROR(result.error), children = (args + optional).toMutableList())
+              }
+            }
+          }
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
   }
 
   /** Push a result value onto the value stack */
@@ -353,6 +590,72 @@ class ExecutionPlanInterpreter(
       }
 
       else -> Result.Err("Can not resolve '$path', current stack value does not contain a value")
+    }
+  }
+
+  private fun evaluateChildren(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    path: List<String>
+  ): Result<Pair<List<ExecutionPlanNode>, List<NodeValue>>, ExecutionPlanNode> {
+    val children = mutableListOf<ExecutionPlanNode>()
+    val values = mutableListOf<NodeValue>()
+    val loopItems = ArrayDeque(node.children)
+
+    while (loopItems.isNotEmpty()) {
+      val child = loopItems.removeFirst()
+
+      var nodeResult = child.value()
+      if (nodeResult == null) {
+        val result = walkTree(path, child, valueResolver)
+        when (result.result) {
+          is NodeResult.ERROR -> {
+            children.add(result)
+            children.addAll(loopItems)
+            return Result.Err(node.copy(result = result.result, children = children))
+          }
+          else -> {
+            if (result.isSplat()) {
+              children.add(result)
+              for (splatChild in result.children.reversed()) {
+                loopItems.addFirst(splatChild)
+              }
+              nodeResult = NodeResult.OK
+            } else {
+              children.add(result)
+              nodeResult = result.result ?: NodeResult.OK
+            }
+          }
+        }
+      }
+
+      if (nodeResult is NodeResult.VALUE) {
+        values.add(nodeResult.value)
+      }
+    }
+
+    return Result.Ok(children to values)
+  }
+
+  private fun validateArgs(
+    required: Int,
+    optional: Int,
+    node: ExecutionPlanNode,
+    action: String,
+    valueResolver: ValueResolver,
+    path: List<String>
+  ): Result<Pair<List<ExecutionPlanNode>, List<ExecutionPlanNode>>, String> {
+    return if (node.children.size < required) {
+      Result.Err("$action requires $required arguments, got ${node.children.size}")
+    } else if (node.children.size > required + optional) {
+      Result.Err("$action supports at most ${required + optional} arguments, got ${node.children.size}")
+    } else {
+      val requiredArgs = mutableListOf<ExecutionPlanNode>()
+      for (child in node.children.take(required)) {
+        val value = walkTree(path, child, valueResolver)
+        requiredArgs.add(value)
+      }
+      Result.Ok(requiredArgs to node.children.drop(required))
     }
   }
 }

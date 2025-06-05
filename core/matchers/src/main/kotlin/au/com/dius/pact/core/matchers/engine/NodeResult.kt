@@ -1,28 +1,8 @@
 package au.com.dius.pact.core.matchers.engine
 
-//  /// Converts the result value to a string
-//  pub fn as_string(&self) -> Option<String> {
-//    match self {
-//      NodeResult::OK => None,
-//      NodeResult::VALUE(val) => match val {
-//        NodeValue::NULL => Some("".to_string()),
-//        NodeValue::STRING(s) => Some(s.clone()),
-//        NodeValue::BOOL(b) => Some(b.to_string()),
-//        NodeValue::MMAP(m) => Some(format!("{:?}", m)),
-//        NodeValue::SLIST(list) => Some(format!("{:?}", list)),
-//        NodeValue::BARRAY(bytes) => Some(BASE64.encode(bytes)),
-//        NodeValue::NAMESPACED(name, value) => Some(format!("{}:{}", name, value)),
-//        NodeValue::UINT(ui) => Some(ui.to_string()),
-//        NodeValue::JSON(json) => Some(json.to_string()),
-//        NodeValue::ENTRY(k, v) => Some(format!("{} -> {}", k, v)),
-//        NodeValue::LIST(list) => Some(format!("{:?}", list)),
-//        #[cfg(feature = "xml")]
-//        NodeValue::XML(node) => Some(node.to_string())
-//      }
-//      NodeResult::ERROR(_) => None
-//    }
-//  }
-//
+import au.com.dius.pact.core.support.Result
+import java.util.Base64
+
 //  /// If the result is a number, returns it
 //  pub fn as_number(&self) -> Option<u64> {
 //    match self {
@@ -31,15 +11,6 @@ package au.com.dius.pact.core.matchers.engine
 //        NodeValue::UINT(ui) => Some(*ui),
 //        _ => None
 //      }
-//      NodeResult::ERROR(_) => None
-//    }
-//  }
-//
-//  /// Returns the associated value if there is one
-//  pub fn as_value(&self) -> Option<NodeValue> {
-//    match self {
-//      NodeResult::OK => None,
-//      NodeResult::VALUE(val) => Some(val.clone()),
 //      NodeResult::ERROR(_) => None
 //    }
 //  }
@@ -55,16 +26,6 @@ package au.com.dius.pact.core.matchers.engine
 //      NodeResult::ERROR(_) => None
 //    }
 //  }
-//
-//  /// Unwraps the result into a value, or returns the error results as an error
-//  pub fn value_or_error(&self) -> anyhow::Result<NodeValue> {
-//    match self {
-//      NodeResult::OK => Ok(NodeValue::BOOL(true)),
-//      NodeResult::VALUE(v) => Ok(v.clone()),
-//      NodeResult::ERROR(err) => Err(anyhow!(err.clone()))
-//    }
-//  }
-//
 //  /// If the result is an error result
 //  pub fn is_err(&self) -> bool {
 //    match self {
@@ -81,27 +42,23 @@ package au.com.dius.pact.core.matchers.engine
 //    }
 //  }
 //}
-//
-//impl Display for NodeResult {
-//  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-//    match self {
-//      NodeResult::OK => write!(f, "OK"),
-//      NodeResult::VALUE(val) => write!(f, "{}", val.str_form()),
-//      NodeResult::ERROR(err) => write!(f, "ERROR({})", err),
-//    }
-//  }
-//}
 
 /** Enum to store the result of executing a node */
 sealed class NodeResult {
   /** Default value to make a node as successfully executed */
-  data object OK: NodeResult()
+  data object OK: NodeResult() {
+    override fun toString() = "OK"
+  }
 
   /** Marks a node as successfully executed with a result */
-  data class VALUE(val value: NodeValue): NodeResult()
+  data class VALUE(val value: NodeValue): NodeResult() {
+    override fun toString() = value.strForm()
+  }
 
   /** Marks a node as unsuccessfully executed with an error */
-  data class ERROR(val message: String): NodeResult()
+  data class ERROR(val message: String): NodeResult() {
+    override fun toString() = "ERROR($message)"
+  }
 
   /** If this value represents a truthy value (not NULL, false ot empty) */
   fun isTruthy(): Boolean {
@@ -144,4 +101,68 @@ sealed class NodeResult {
       this
     }
   }
+
+  /** Return the OR of this result with the given one */
+  fun or(result: NodeResult?): NodeResult {
+    return if (result != null) {
+      when (this) {
+        OK -> this
+        is ERROR -> result
+        is VALUE -> when (result) {
+          is ERROR -> this
+          OK -> this
+          is VALUE -> VALUE(this.value.or(result.value))
+        }
+      }
+    } else {
+      this
+    }
+  }
+
+
+  /** Unwraps the result into a value, or returns the error result as an error */
+  fun valueOrError(): Result<NodeValue, String> {
+    return when (this) {
+      is ERROR -> Result.Err(message)
+      OK -> Result.Ok(NodeValue.BOOL(true))
+      is VALUE -> Result.Ok(value)
+    }
+  }
+
+  /** Converts the result value to a string */
+  fun asString(): String? {
+    return when (this) {
+      OK -> null
+      is VALUE -> {
+        when (val v = value) {
+          is NodeValue.BARRAY -> Base64.getEncoder().encodeToString(v.bytes)
+          is NodeValue.BOOL -> v.bool.toString()
+          is NodeValue.ENTRY -> "${v.key} -> ${v.value}"
+          is NodeValue.JSON -> v.json.serialise()
+          is NodeValue.LIST -> v.items.toString()
+          is NodeValue.MMAP -> v.entries.toString()
+          is NodeValue.NAMESPACED -> "${v.name}:${v.value}"
+          NodeValue.NULL -> ""
+          is NodeValue.SLIST -> v.items.toString()
+          is NodeValue.STRING -> v.string
+          is NodeValue.UINT -> v.uint.toString()
+          //#[cfg(feature = "xml")]
+          //NodeValue::XML(node) => Some(node.to_string())
+        }
+      }
+      is ERROR -> null
+    }
+  }
+
+  /** Returns the associated value if there is one */
+  fun asValue(): NodeValue? {
+    return if (this is VALUE) {
+      value
+    } else {
+      null
+    }
+  }
 }
+
+public fun NodeResult?.or(result: NodeResult) = this?.or(result) ?: result
+public fun NodeResult?.orDefault() = this ?: NodeResult.OK

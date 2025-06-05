@@ -28,11 +28,6 @@ import org.apache.commons.text.StringEscapeUtils.escapeJson
 //    self.children.insert(0, node.into());
 //  }
 
-//  /// Returns the value for the node
-//  pub fn value(&self) -> Option<NodeResult> {
-//    self.result.clone()
-//  }
-//
 //  fn annotation_node(&self) -> Option<String> {
 //    self.children.iter().find_map(|child| {
 //      if let PlanNodeType::ANNOTATION(annotation) = &child.node_type {
@@ -127,20 +122,6 @@ import org.apache.commons.text.StringEscapeUtils.escapeJson
 //    acc_cell.into_inner()
 //  }
 //}
-//
-//impl From<&mut ExecutionPlanNode> for ExecutionPlanNode {
-//  fn from(value: &mut ExecutionPlanNode) -> Self {
-//    value.clone()
-//  }
-//}
-//
-//impl From<anyhow::Error> for ExecutionPlanNode {
-//  fn from(value: anyhow::Error) -> Self {
-//    ExecutionPlanNode {
-//      result: Some(NodeResult::ERROR(value.to_string())),
-//      .. ExecutionPlanNode::default()
-//    }
-//  }
 
 /**
  * Node in an executable plan tree
@@ -311,7 +292,7 @@ data class ExecutionPlanNode(
         }
 
         if (result != null) {
-          buffer.append("=>")
+          buffer.append(" => ")
           buffer.append(result.toString())
         }
       }
@@ -329,7 +310,7 @@ data class ExecutionPlanNode(
         }
 
         if (result != null) {
-          buffer.append("=>")
+          buffer.append(" => ")
           buffer.append(result.toString())
         }
       }
@@ -338,7 +319,7 @@ data class ExecutionPlanNode(
         buffer.append(n.value.strForm());
 
         if (result != null) {
-          buffer.append("=>")
+          buffer.append(" => ")
           buffer.append(result.toString())
         }
       }
@@ -347,7 +328,7 @@ data class ExecutionPlanNode(
         buffer.append(n.path.toString())
 
         if (result != null) {
-          buffer.append("=>")
+          buffer.append(" => ")
           buffer.append(result.toString())
         }
       }
@@ -364,7 +345,7 @@ data class ExecutionPlanNode(
         }
 
         if (result != null) {
-          buffer.append("=>")
+          buffer.append(" => ")
           buffer.append(result.toString())
         }
       }
@@ -374,7 +355,7 @@ data class ExecutionPlanNode(
         buffer.append(n.path.toString())
 
         if (result != null) {
-          buffer.append("=>")
+          buffer.append(" => ")
           buffer.append(result.toString())
         }
       }
@@ -391,7 +372,7 @@ data class ExecutionPlanNode(
         }
 
         if (result != null) {
-          buffer.append("=>")
+          buffer.append(" => ")
           buffer.append(result.toString())
         }
       }
@@ -568,6 +549,9 @@ data class ExecutionPlanNode(
 
   /** If the node is a splat node */
   fun isSplat() = this.nodeType == PlanNodeType.SPLAT
+
+  /** Returns the value for the node */
+  fun value() = this.result
 
   companion object {
     /** Constructor for a container node */
