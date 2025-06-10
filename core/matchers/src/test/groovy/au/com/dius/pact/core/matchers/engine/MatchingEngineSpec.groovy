@@ -1,6 +1,9 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.BodyMatchResult
 import au.com.dius.pact.core.matchers.MatchingContext
+import au.com.dius.pact.core.matchers.MethodMismatch
+import au.com.dius.pact.core.matchers.RequestMatchResult
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.HttpRequest
@@ -136,6 +139,15 @@ class MatchingEngineSpec extends Specification {
       |)
       |'''.stripMargin('|')
 
+    def expectedMatchResult = new RequestMatchResult(
+      new MethodMismatch('', '', "Expected 'PUT' (String) to be equal to 'POST' (String)"),
+      null,
+      [],
+      null,
+      [],
+      new BodyMatchResult(null, [])
+    )
+
     when:
     def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context)
     def pretty = plan.prettyForm()
@@ -165,17 +177,10 @@ class MatchingEngineSpec extends Specification {
     |  body: - OK
     |'''.stripMargin('|')
 
-    //  let mismatches: RequestMatchResult = executed_plan.into();
-    //  assert_eq!(RequestMatchResult {
-    //    method: Some(MethodMismatch {
-    //      expected: "".to_string(),
-    //      actual: "".to_string(),
-    //      mismatch: "Expected 'PUT' to be equal to 'POST'".to_string()
-    //    }),
-    //    path: None,
-    //    headers: hashmap!{},
-    //    query: hashmap!{},
-    //    body: BodyMatchResult::Ok,
-    //  }, mismatches);
+    when:
+    def mismatches = executedPlan.intoRequestMatchResult()
+
+    then:
+    mismatches == expectedMatchResult
   }
 }

@@ -47,9 +47,14 @@ data class StatusMismatch(
   override fun type() = "status"
 }
 
-data class BodyTypeMismatch(val expected: String?, val actual: String?) : Mismatch() {
-  override fun description() = "Expected a body of '$expected' " +
-    "but the actual content type was '$actual'"
+data class BodyTypeMismatch(
+  val expected: String?,
+  val actual: String?,
+  val mismatch: String? = null
+) : Mismatch() {
+  override fun description() = if (mismatch.isNullOrEmpty()) {
+    "Expected a body of '$expected' but the actual content type was '$actual'"
+  } else mismatch
   override fun description(t: TermColors) =
     "Expected a body of ${t.bold("'$expected'")} but the actual content type was ${t.bold("'$actual'")}"
   fun toMap(): Map<String, Any?> {
@@ -82,7 +87,14 @@ object StatusMismatchFactory : MismatchFactory<StatusMismatch> {
     StatusMismatch(expected as Int, actual as Int)
 }
 
-data class MethodMismatch(val expected: String, val actual: String) : Mismatch() {
+data class MethodMismatch(
+  val expected: String,
+  val actual: String,
+  val mismatch: String? = null
+) : Mismatch() {
+  override fun description() = if (mismatch.isNullOrEmpty())
+    "expected method '$expected' but received '$actual'"
+  else mismatch
   override fun type() = "method"
 }
 

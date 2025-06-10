@@ -20,7 +20,7 @@ class RequestMatchResultSpec extends Specification {
   private static BodyItemMatchResult bodyMismatch
 
   def setupSpec() {
-    methodMismatch = new MethodMismatch('GET', 'POST')
+    methodMismatch = new MethodMismatch('GET', 'POST', null)
     pathMismatch = new PathMismatch('/', '/1')
     queryMismatch = new QueryMatchResult('a', [new QueryMismatch('a', '1', '2', '', '')])
     cookieMismatch = new CookieMismatch([], [])

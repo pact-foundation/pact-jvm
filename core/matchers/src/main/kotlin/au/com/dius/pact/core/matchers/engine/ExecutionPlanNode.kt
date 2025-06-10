@@ -37,46 +37,6 @@ enum class Terminator {
 //    self.children.insert(0, node.into());
 //  }
 
-//  /// Returns the first error found from this node stopping at child containers
-//  pub fn error(&self) -> Option<String> {
-//    if let Some(NodeResult::ERROR(err)) = &self.result {
-//      Some(err.clone())
-//    } else {
-//      self.child_errors(Terminator::CONTAINERS).first().cloned()
-//    }
-//  }
-//
-//  /// Returns all the errors found from this node
-//  pub fn errors(&self) -> Vec<String> {
-//    let mut errors = vec![];
-//    if let Some(NodeResult::ERROR(err)) = &self.result {
-//      errors.push(err.clone());
-//    }
-//    errors.extend_from_slice(&self.child_errors(Terminator::ALL));
-//    errors
-//  }
-//
-//  /// This a fold operation over the depth-first transversal of the containers in the tree
-//  /// from this node.
-//  pub fn traverse_containers<ACC, F>(&self, acc: ACC, mut callback: F) -> ACC
-//    where F: FnMut(ACC, String, &ExecutionPlanNode) -> ACC + Clone,
-//          ACC: Default
-//  {
-//    let acc_cell = Cell::new(acc);
-//    for child in &self.children {
-//      if let PlanNodeType::CONTAINER(label) = &child.node_type {
-//        let acc = acc_cell.take();
-//        let result = callback(acc, label.clone(), child);
-//        acc_cell.set(result);
-//      }
-//      let acc = acc_cell.take();
-//      let result = child.traverse_containers(acc, callback.clone());
-//      acc_cell.set(result);
-//    }
-//    acc_cell.into_inner()
-//  }
-//}
-
 /**
  * Node in an executable plan tree
  */
@@ -544,6 +504,45 @@ data class ExecutionPlanNode(
       }
     }
     return errors
+  }
+
+  /** Returns the first error found from this node stopping at child containers */
+  fun error(): String? {
+    return if (result is NodeResult.ERROR) {
+      result.message
+    } else {
+      childErrors(Terminator.CONTAINERS).firstOrNull()
+    }
+  }
+
+  /** Returns all the errors found from this node */
+  fun errors(): List<String> {
+    val errors = mutableListOf<String>()
+    if (result is NodeResult.ERROR) {
+      errors.add(result.message)
+    }
+    errors.addAll(childErrors(Terminator.ALL))
+    return errors
+  }
+
+  /**
+   * This a fold operation over the depth-first transversal of the containers in the tree
+   * from this node.
+   */
+  fun <ACC> traverseContainers(
+    initial: ACC,
+    callback: (ACC, String, ExecutionPlanNode) -> ACC
+  ): ACC {
+    var accValue = initial
+
+    for (child in children) {
+      if (child.nodeType is PlanNodeType.CONTAINER) {
+        accValue = callback(accValue, child.nodeType.label, child)
+      }
+      accValue = child.traverseContainers(accValue, callback)
+    }
+
+    return accValue
   }
 
   companion object {
