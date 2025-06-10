@@ -564,96 +564,6 @@
     }
   }
 
-  fn execute_if(
-    &mut self,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    action_path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    if let Some(first_node) = node.children.first() {
-      match self.walk_tree(action_path.as_slice(), first_node, value_resolver) {
-        Ok(first) => {
-          let node_result = first.value().unwrap_or_default();
-          let mut children = node.children.clone();
-          children[0] = first.clone();
-          if !node_result.is_truthy() {
-            if node.children.len() > 2 {
-              match self.walk_tree(action_path.as_slice(), &node.children[2], value_resolver) {
-                Ok(else_node) => {
-                  children[2] = else_node.clone();
-                  ExecutionPlanNode {
-                    node_type: node.node_type.clone(),
-                    result: else_node.result.clone(),
-                    children
-                  }
-                }
-                Err(err) => {
-                  ExecutionPlanNode {
-                    node_type: node.node_type.clone(),
-                    result: Some(NodeResult::ERROR(err.to_string())),
-                    children
-                  }
-                }
-              }
-            } else {
-              ExecutionPlanNode {
-                node_type: node.node_type.clone(),
-                result: Some(NodeResult::VALUE(NodeValue::BOOL(false))),
-                children
-              }
-            }
-          } else if let Some(second_node) = node.children.get(1) {
-            match self.walk_tree(action_path.as_slice(), second_node, value_resolver) {
-              Ok(second) => {
-                let second_result = second.value().unwrap_or_default();
-                ExecutionPlanNode {
-                  node_type: node.node_type.clone(),
-                  result: Some(second_result.truthy()),
-                  children: vec![first, second].iter()
-                    .chain(node.children.iter().dropping(2))
-                    .cloned()
-                    .collect()
-                }
-              }
-              Err(err) => {
-                error!("Failed to evaluate the second child - {}", err);
-                ExecutionPlanNode {
-                  node_type: node.node_type.clone(),
-                  result: Some(NodeResult::VALUE(NodeValue::BOOL(false))),
-                  children: vec![first, second_node.clone()].iter()
-                    .chain(node.children.iter().dropping(2))
-                    .cloned()
-                    .collect()
-                }
-              }
-            }
-          } else {
-            ExecutionPlanNode {
-              node_type: node.node_type.clone(),
-              result: Some(node_result),
-              children: vec![first].iter().chain(node.children.iter().dropping(1))
-                .cloned()
-                .collect()
-            }
-          }
-        }
-        Err(err) => {
-          ExecutionPlanNode {
-            node_type: node.node_type.clone(),
-            result: Some(NodeResult::ERROR(err.to_string())),
-            children: node.children.clone()
-          }
-        }
-      }
-    } else {
-      ExecutionPlanNode {
-        node_type: node.node_type.clone(),
-        result: Some(NodeResult::ERROR("'if' action requires at least one argument".to_string())),
-        children: node.children.clone()
-      }
-    }
-  }
-
   fn execute_tee(
     &mut self,
     value_resolver: &dyn ValueResolver,
@@ -700,53 +610,6 @@
       }
     } else {
       node.clone_with_result(NodeResult::OK)
-    }
-  }
-
-  fn execute_convert_utf8(
-    &mut self,
-    action: &str,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    action_path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    match self.validate_one_arg(node, action, value_resolver, &action_path) {
-      Ok(value) => {
-        let arg_value = value.value().unwrap_or_default().as_value();
-        let result = if let Some(value) = &arg_value {
-          match value {
-            NodeValue::NULL => Ok(NodeResult::VALUE(NodeValue::STRING("".to_string()))),
-            NodeValue::STRING(s) => Ok(NodeResult::VALUE(NodeValue::STRING(s.clone()))),
-            NodeValue::BARRAY(b) => Ok(NodeResult::VALUE(NodeValue::STRING(String::from_utf8_lossy(b).to_string()))),
-            _ => Err(anyhow!("convert:UTF8 can not be used with {}", value.value_type()))
-          }
-        } else {
-          Ok(NodeResult::VALUE(NodeValue::STRING("".to_string())))
-        };
-        match result {
-          Ok(result) => {
-            ExecutionPlanNode {
-              node_type: node.node_type.clone(),
-              result: Some(result),
-              children: vec![value]
-            }
-          }
-          Err(err) => {
-            ExecutionPlanNode {
-              node_type: node.node_type.clone(),
-              result: Some(NodeResult::ERROR(err.to_string())),
-              children: vec![value]
-            }
-          }
-        }
-      }
-      Err(err) => {
-        ExecutionPlanNode {
-          node_type: node.node_type.clone(),
-          result: Some(NodeResult::ERROR(err.to_string())),
-          children: node.children.clone()
-        }
-      }
     }
   }
 
@@ -874,55 +737,6 @@
           children: node.children.clone()
         }
       }
-    }
-  }
-
-  fn validate_one_arg(
-    &mut self,
-    node: &ExecutionPlanNode,
-    action: &str,
-    value_resolver: &dyn ValueResolver,
-    path: &Vec<String>
-  ) -> anyhow::Result<ExecutionPlanNode> {
-    if node.children.len() > 1 {
-      Err(anyhow!("{} takes only one argument, got {}", action, node.children.len()))
-    } else if let Some(argument) = node.children.first() {
-      self.walk_tree(path.as_slice(), argument, value_resolver)
-    } else {
-      Err(anyhow!("{} requires one argument, got none", action))
-    }
-  }
-
-  fn validate_two_args(
-    &mut self,
-    node: &ExecutionPlanNode,
-    action: &str,
-    value_resolver: &dyn ValueResolver,
-    path: &Vec<String>
-  ) -> anyhow::Result<(ExecutionPlanNode, ExecutionPlanNode)> {
-    if node.children.len() == 2 {
-      let first = self.walk_tree(path.as_slice(), &node.children[0], value_resolver)?;
-      let second = self.walk_tree(path.as_slice(), &node.children[1], value_resolver)?;
-      Ok((first, second))
-    } else {
-      Err(anyhow!("Action '{}' requires two arguments, got {}", action, node.children.len()))
-    }
-  }
-
-  fn validate_three_args(
-    &mut self,
-    node: &ExecutionPlanNode,
-    action: &str,
-    value_resolver: &dyn ValueResolver,
-    path: &Vec<String>
-  ) -> anyhow::Result<(ExecutionPlanNode, ExecutionPlanNode, ExecutionPlanNode)> {
-    if node.children.len() == 3 {
-      let first = self.walk_tree(path.as_slice(), &node.children[0], value_resolver)?;
-      let second = self.walk_tree(path.as_slice(), &node.children[1], value_resolver)?;
-      let third = self.walk_tree(path.as_slice(), &node.children[2], value_resolver)?;
-      Ok((first, second, third))
-    } else {
-      Err(anyhow!("Action '{}' requires three arguments, got {}", action, node.children.len()))
     }
   }
 

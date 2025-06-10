@@ -222,8 +222,8 @@ class ExecutionPlanInterpreter(
         //        "to-string" => self.execute_to_string(action, valueResolver, node, actionPath),
         //        "length" => self.execute_length(action, valueResolver, node, actionPath),
         "expect:empty" -> executeExpectEmpty(action, valueResolver, node, actionPath)
-        //        "convert:UTF8" => self.execute_convert_utf8(action, valueResolver, node, actionPath),
-        //        "if" => self.execute_if(valueResolver, node, actionPath),
+        "convert:UTF8" -> executeConvertUtf8(action, valueResolver, node, actionPath)
+        "if" -> executeIf(valueResolver, node, actionPath)
         //        "and" => self.execute_and(valueResolver, node, actionPath),
         //        "or" => self.execute_or(valueResolver, node, actionPath),
         //        "tee" => self.execute_tee(valueResolver, node, actionPath),
@@ -497,6 +497,74 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  fun executeIf(valueResolver: ValueResolver, node: ExecutionPlanNode, actionPath: List<String>): ExecutionPlanNode {
+    val firstNode = node.children.firstOrNull()
+    return if (firstNode != null) {
+      val result = walkTree(actionPath, firstNode, valueResolver)
+      when (result.result) {
+        is NodeResult.ERROR -> node.copy(result = result.result,
+          children = (listOf(result) + node.children.drop(1)).toMutableList())
+        else -> {
+          val nodeResult = result.value().orDefault()
+          val children = mutableListOf(result)
+          if (!nodeResult.isTruthy()) {
+            val thirdNode = node.children.getOrNull(2)
+            if (thirdNode != null) {
+              val elseResult = walkTree(actionPath, thirdNode, valueResolver)
+              children.add(node.children[1])
+              children.add(elseResult)
+              node.copy(result = elseResult.result, children = children)
+            } else {
+              node.copy(result = NodeResult.VALUE(NodeValue.BOOL(false)),
+                children = (listOf(result) + node.children.drop(1)).toMutableList())
+            }
+          } else {
+            val secondNode = node.children.getOrNull(1)
+            if (secondNode != null) {
+              val ifResult = walkTree(actionPath, secondNode, valueResolver)
+              children.add(ifResult)
+              children.addAll(node.children.drop(2))
+              node.copy(result = ifResult.result, children = children)
+            } else {
+              node.copy(result = result.result,
+                children = (listOf(result) + node.children.drop(1)).toMutableList())
+            }
+          }
+        }
+      }
+    } else {
+      node.copy(result = NodeResult.ERROR("'if' action requires at least one argument"))
+    }
+  }
+
+  fun executeConvertUtf8(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.BARRAY -> Result.Ok(NodeResult.VALUE(NodeValue.STRING(argValue.bytes.decodeToString())))
+            NodeValue.NULL -> Result.Ok(NodeResult.VALUE(NodeValue.STRING("")))
+            is NodeValue.STRING -> Result.Ok(NodeResult.VALUE(NodeValue.STRING(argValue.string)))
+            else -> Result.Err("convert:UTF8 can not be used with ${argValue.valueType()}")
+          }
+        } else {
+          Result.Ok(NodeResult.VALUE(NodeValue.STRING("")))
+        }
+        when (result) {
+          is Result.Ok -> node.copy(result = result.value, children = mutableListOf(resultNode.value))
+          is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
   /** Push a result value onto the value stack */
   fun pushResult(value: NodeResult?) {
     valueStack.add(value)
@@ -658,4 +726,52 @@ class ExecutionPlanInterpreter(
       Result.Ok(requiredArgs to node.children.drop(required))
     }
   }
+
+  private fun validateOneArg(
+    node: ExecutionPlanNode,
+    action: String,
+    valueResolver: ValueResolver,
+    path: List<String>
+  ): Result<ExecutionPlanNode, String> {
+    return if (node.children.size > 1) {
+      Result.Err("$action takes only one argument, got ${node.children.size}")
+    } else if (node.children.isEmpty()) {
+      Result.Err("$action requires one argument, got none")
+    } else {
+      Result.Ok(walkTree(path, node.children[0], valueResolver))
+    }
+  }
+
+  //  fn validate_two_args(
+  //    &mut self,
+  //    node: &ExecutionPlanNode,
+  //    action: &str,
+  //    value_resolver: &dyn ValueResolver,
+  //    path: &Vec<String>
+  //  ) -> anyhow::Result<(ExecutionPlanNode, ExecutionPlanNode)> {
+  //    if node.children.len() == 2 {
+  //      let first = self.walk_tree(path.as_slice(), &node.children[0], value_resolver)?;
+  //      let second = self.walk_tree(path.as_slice(), &node.children[1], value_resolver)?;
+  //      Ok((first, second))
+  //    } else {
+  //      Err(anyhow!("Action '{}' requires two arguments, got {}", action, node.children.len()))
+  //    }
+  //  }
+  //
+  //  fn validate_three_args(
+  //    &mut self,
+  //    node: &ExecutionPlanNode,
+  //    action: &str,
+  //    value_resolver: &dyn ValueResolver,
+  //    path: &Vec<String>
+  //  ) -> anyhow::Result<(ExecutionPlanNode, ExecutionPlanNode, ExecutionPlanNode)> {
+  //    if node.children.len() == 3 {
+  //      let first = self.walk_tree(path.as_slice(), &node.children[0], value_resolver)?;
+  //      let second = self.walk_tree(path.as_slice(), &node.children[1], value_resolver)?;
+  //      let third = self.walk_tree(path.as_slice(), &node.children[2], value_resolver)?;
+  //      Ok((first, second, third))
+  //    } else {
+  //      Err(anyhow!("Action '{}' requires three arguments, got {}", action, node.children.len()))
+  //    }
+  //  }
 }

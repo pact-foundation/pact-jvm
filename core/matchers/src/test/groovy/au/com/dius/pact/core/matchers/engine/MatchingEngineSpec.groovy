@@ -115,8 +115,8 @@ class MatchingEngineSpec extends Specification {
       |    :body (
       |      %if (
       |        %match:equality (
-      |          'text/plain' => 'text/plain',
-      |          $.content-type => 'text/plain',
+      |          'text\\/plain; charset=ISO-8859-1' => 'text\\/plain; charset=ISO-8859-1',
+      |          $.content-type => 'text\\/plain; charset=ISO-8859-1',
       |          NULL => NULL,
       |          %error (
       |            'Body type error - ',

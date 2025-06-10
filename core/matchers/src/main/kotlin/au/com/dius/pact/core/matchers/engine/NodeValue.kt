@@ -147,24 +147,24 @@ sealed class NodeValue: Into<NodeValue> {
     }
   }
 
-//  /// Returns the type of the value
-//  pub fn value_type(&self) -> &str {
-//    match self {
-//      NodeValue::NULL => "NULL",
-//      NodeValue::STRING(_) => "String",
-//      NodeValue::BOOL(_) => "Boolean",
-//      NodeValue::MMAP(_) => "Multi-Value String Map",
-//      NodeValue::SLIST(_) => "String List",
-//      NodeValue::BARRAY(_) => "Byte Array",
-//      NodeValue::NAMESPACED(_, _) => "Namespaced Value",
-//      NodeValue::UINT(_) => "Unsigned Integer",
-//      NodeValue::JSON(_) => "JSON",
-//      NodeValue::ENTRY(_, _) => "Entry",
-//      NodeValue::LIST(_) => "List",
+  /** Returns the type of the value */
+  fun valueType(): String {
+    return when (this) {
+      is BARRAY -> "Byte Array"
+      is BOOL -> "Boolean"
+      is ENTRY -> "Entry"
+      is JSON -> "JSON"
+      is LIST -> "List"
+      is MMAP -> "Multi-Value String Map"
+      is NAMESPACED -> "Namespaced Value"
+      NULL -> "NULL"
+      is SLIST -> "String List"
+      is STRING -> "String"
+      is UINT -> "Unsigned Integer"
 //      #[cfg(feature = "xml")]
 //      NodeValue::XML(_) => "XML"
-//    }
-//  }
+    }
+  }
 
 //
 //  /// If this value is an XML value, returns it, otherwise returns None
