@@ -154,13 +154,17 @@ class MatchingEngineSpec extends Specification {
     then:
     diff == ''
 
-    //  assert_eq!(r#"request:
-    //  method: method == POST - ERROR Expected 'PUT' to be equal to 'POST'
-    //  path: path == '/test' - OK
-    //  query parameters: - OK
-    //  body: - OK
-    //"#, executed_plan.generate_summary(false));
-    //
+    when:
+    def summary = executedPlan.generateSummary(false)
+
+    then:
+    summary == '''request:
+    |  method: method == POST - ERROR Expected 'PUT' (String) to be equal to 'POST' (String)
+    |  path: path == '/test' - OK
+    |  query parameters: - OK
+    |  body: - OK
+    |'''.stripMargin('|')
+
     //  let mismatches: RequestMatchResult = executed_plan.into();
     //  assert_eq!(RequestMatchResult {
     //    method: Some(MethodMismatch {

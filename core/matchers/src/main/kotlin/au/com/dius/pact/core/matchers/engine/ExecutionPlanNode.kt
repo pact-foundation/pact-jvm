@@ -2,7 +2,16 @@ package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.Into
+import com.github.ajalt.mordant.TermColors
 import org.apache.commons.text.StringEscapeUtils.escapeJson
+
+/** Terminator for tree transversal */
+enum class Terminator {
+  /** No termination */
+  ALL,
+  /** Terminate at containers */
+  CONTAINERS
+}
 
 //  /// Clones this node, replacing the result with the given one
 //  pub fn clone_with_result(&self, result: NodeResult) -> ExecutionPlanNode {
@@ -28,61 +37,6 @@ import org.apache.commons.text.StringEscapeUtils.escapeJson
 //    self.children.insert(0, node.into());
 //  }
 
-//  fn annotation_node(&self) -> Option<String> {
-//    self.children.iter().find_map(|child| {
-//      if let PlanNodeType::ANNOTATION(annotation) = &child.node_type {
-//        Some(annotation.clone())
-//      } else {
-//        None
-//      }
-//    })
-//  }
-//
-//  /// If this node has no children
-//  pub fn is_leaf_node(&self) -> bool {
-//    self.children.is_empty()
-//  }
-//
-//  /// If this node is a container and there are no more containers in the subtree
-//  pub fn is_terminal_container(&self) -> bool {
-//    self.is_container() && !self.has_child_containers()
-//  }
-//
-//  /// If this node is a container
-//  pub fn is_container(&self) -> bool {
-//    if let PlanNodeType::CONTAINER(_) = &self.node_type {
-//      true
-//    } else {
-//      false
-//    }
-//  }
-//
-//  /// If this node has any containers in the subtree
-//  pub fn has_child_containers(&self) -> bool {
-//    self.children.iter().any(|child| {
-//      if let PlanNodeType::CONTAINER(_) = &child.node_type {
-//        true
-//      } else {
-//        child.has_child_containers()
-//      }
-//    })
-//  }
-//
-//  /// Returns all the errors from the child nodes, either terminating at any child containers
-//  /// ot just returning all errors.
-//  pub fn child_errors(&self, terminator: Terminator) -> Vec<String> {
-//    let mut errors = vec![];
-//    for child in &self.children {
-//      if child.is_container() && terminator == Terminator::ALL || !child.is_container() {
-//        if let Some(NodeResult::ERROR(error)) = &child.result {
-//          errors.push(error.clone());
-//        }
-//        errors.extend_from_slice(child.child_errors(terminator).as_slice());
-//      }
-//    }
-//    errors
-//  }
-//
 //  /// Returns the first error found from this node stopping at child containers
 //  pub fn error(&self) -> Option<String> {
 //    if let Some(NodeResult::ERROR(err)) = &self.result {
@@ -130,7 +84,7 @@ data class ExecutionPlanNode(
   /** Type of the node */
   val nodeType: PlanNodeType,
   /** Any result associated with the node */
-  var result: NodeResult?,
+  val result: NodeResult?,
   /** Child nodes */
   val children: MutableList<ExecutionPlanNode> = mutableListOf()
 ): Into<ExecutionPlanNode> {
@@ -399,123 +353,121 @@ data class ExecutionPlanNode(
 
   /** Return a summary of the execution to display in a console */
   fun generateSummary(ansiColor: Boolean, buffer: StringBuilder, indent: Int) {
-//    let pad = " ".repeat(indent);
-//
-//    match &self.node_type {
-//      PlanNodeType::CONTAINER(label) => {
-//        buffer.push_str(pad.as_str());
-//        buffer.push_str(label.as_str());
-//        buffer.push(':');
-//
-//        if let Some(annotation) = self.annotation_node() {
-//          buffer.push(' ');
-//          buffer.push_str(annotation.as_str());
-//        }
-//
-//        if let Some(result) = &self.result {
-//          if self.is_leaf_node() || self.is_terminal_container() {
-//            if result.is_truthy() {
-//              if ansi_color {
-//                buffer.push_str(format!(" - {}", Green.paint("OK")).as_str());
-//              } else {
-//                buffer.push_str(" - OK");
-//              }
-//            } else {
-//              let errors = self.child_errors(Terminator::ALL);
-//              if let NodeResult::ERROR(err) = result {
-//                if ansi_color {
-//                  buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(err)).as_str());
-//                } else {
-//                  buffer.push_str(format!(" - ERROR {}", err).as_str());
-//                }
-//                let error_pad = " ".repeat(indent + label.len() + 2);
-//                for error in errors {
-//                  buffer.push('\n');
-//                  buffer.push_str(error_pad.as_str());
-//                  if ansi_color {
-//                    buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(error)).as_str());
-//                  } else {
-//                    buffer.push_str(format!(" - ERROR {}", error).as_str());
-//                  }
-//                }
-//              } else if errors.len() == 1 {
-//                if ansi_color {
-//                  buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(errors[0].as_str())).as_str());
-//                } else {
-//                  buffer.push_str(format!(" - ERROR {}", errors[0]).as_str())
-//                }
-//              } else if errors.is_empty() {
-//                if ansi_color {
-//                  buffer.push_str(format!(" - {}", Red.paint("FAILED")).as_str());
-//                } else {
-//                  buffer.push_str(" - FAILED")
-//                }
-//              } else {
-//                let error_pad = " ".repeat(indent + label.len() + 2);
-//                for error in errors {
-//                  buffer.push('\n');
-//                  buffer.push_str(error_pad.as_str());
-//                  if ansi_color {
-//                    buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(error)).as_str());
-//                  } else {
-//                    buffer.push_str(format!(" - ERROR {}", error).as_str());
-//                  }
-//                }
-//              }
-//            }
-//          } else {
-//            let errors = self.child_errors(Terminator::CONTAINERS);
-//            if let NodeResult::ERROR(err) = result {
-//              if ansi_color {
-//                buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(err)).as_str());
-//              } else {
-//                buffer.push_str(format!(" - ERROR {}", err).as_str());
-//              }
-//              let error_pad = " ".repeat(indent + label.len() + 2);
-//              for error in errors {
-//                buffer.push('\n');
-//                buffer.push_str(error_pad.as_str());
-//                if ansi_color {
-//                  buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(error)).as_str());
-//                } else {
-//                  buffer.push_str(format!(" - ERROR {}", error).as_str());
-//                }
-//              }
-//            } else if errors.len() == 1 {
-//              if ansi_color {
-//                buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(errors[0].as_str())).as_str());
-//              } else {
-//                buffer.push_str(format!(" - ERROR {}", errors[0]).as_str())
-//              }
-//            } else if !errors.is_empty() {
-//              let error_pad = " ".repeat(indent + label.len() + 2);
-//              for error in errors {
-//                buffer.push('\n');
-//                buffer.push_str(error_pad.as_str());
-//                if ansi_color {
-//                  buffer.push_str(format!(" - {} {}", Red.paint("ERROR"), Red.paint(error)).as_str());
-//                } else {
-//                  buffer.push_str(format!(" - ERROR {}", error).as_str());
-//                }
-//              }
-//            }
-//          }
-//        }
-//
-//        buffer.push('\n');
-//
-//        self.generate_children_summary(ansi_color, buffer, indent + 2);
-//      }
-//      _ => self.generate_children_summary(ansi_color, buffer, indent)
-//    }
+    val pad = " ".repeat(indent)
+    if (nodeType is PlanNodeType.CONTAINER) {
+      buffer.append(pad)
+      buffer.append(nodeType.label)
+      buffer.append(':')
+
+      val annotation = annotationNode()
+      if (annotation != null) {
+        buffer.append(' ')
+        buffer.append(annotation)
+      }
+
+      if (result != null) {
+        val t = TermColors()
+        if (isLeafNode() || isTerminalContainer()) {
+          if (result.isTruthy()) {
+            if (ansiColor) {
+              buffer.append(" - ${t.green("OK")}")
+            } else {
+              buffer.append(" - OK")
+            }
+          } else {
+            val errors = childErrors(Terminator.ALL)
+            if (result is NodeResult.ERROR) {
+              if (ansiColor) {
+                buffer.append(" - ${t.red("ERROR")} ${t.red(result.message)}")
+              } else {
+                buffer.append(" - ERROR ${result.message}")
+              }
+              val errorPad = " ".repeat(indent + nodeType.label.length + 2)
+              for (error in errors) {
+                buffer.append('\n')
+                buffer.append(errorPad)
+                if (ansiColor) {
+                  buffer.append(" - ${t.red("ERROR")} ${t.red(error)}")
+                } else {
+                  buffer.append(" - ERROR $error")
+                }
+              }
+            } else if (errors.size == 1) {
+              if (ansiColor) {
+                buffer.append(" - ${t.red("ERROR")} ${t.red(errors[0])}")
+              } else {
+                buffer.append(" - ERROR ${errors[0]}")
+              }
+            } else if (errors.isEmpty()) {
+              if (ansiColor) {
+                buffer.append(" - ${t.red("FAILED")}")
+              } else {
+                buffer.append(" - FAILED")
+              }
+            } else {
+              val errorPad = " ".repeat(indent + nodeType.label.length + 2)
+              for (error in errors) {
+                buffer.append('\n')
+                buffer.append(errorPad)
+                if (ansiColor) {
+                  buffer.append(" - ${t.red("ERROR")} ${t.red(error)}")
+                } else {
+                  buffer.append(" - ERROR $error")
+                }
+              }
+            }
+          }
+        } else {
+          val errors = childErrors(Terminator.CONTAINERS)
+          if (result is NodeResult.ERROR) {
+            if (ansiColor) {
+              buffer.append(" - ${t.red("ERROR")} ${t.red(result.message)}")
+            } else {
+              buffer.append(" - ERROR ${result.message}")
+            }
+            val errorPad = " ".repeat(indent + nodeType.label.length + 2)
+            for (error in errors) {
+              buffer.append('\n')
+              buffer.append(errorPad)
+              if (ansiColor) {
+                buffer.append(" - ${t.red("ERROR")} ${t.red(error)}")
+              } else {
+                buffer.append(" - ERROR $error")
+              }
+            }
+          } else if (errors.size == 1) {
+            if (ansiColor) {
+              buffer.append(" - ${t.red("ERROR")} ${t.red(errors[0])}")
+            } else {
+              buffer.append(" - ERROR ${errors[0]}")
+            }
+          } else if (errors.isNotEmpty()) {
+            val errorPad = " ".repeat(indent + nodeType.label.length + 2)
+            for (error in errors) {
+              buffer.append('\n')
+              buffer.append(errorPad)
+              if (ansiColor) {
+                buffer.append(" - ${t.red("ERROR")} ${t.red(error)}")
+              } else {
+                buffer.append(" - ERROR $error")
+              }
+            }
+          }
+        }
+      }
+
+      buffer.append('\n')
+      generateChildrenSummary(ansiColor, buffer, indent + 2)
+    } else {
+      generateChildrenSummary(ansiColor, buffer, indent)
+    }
   }
 
-//  fn generate_children_summary(&self, ansi_color: bool, buffer: &mut String, indent: usize) {
-//    for child in &self.children {
-//      child.generate_summary(ansi_color, buffer, indent);
-//    }
-//  }
-//
+  fun generateChildrenSummary(ansiColor: Boolean, buffer: StringBuilder, indent: Int) {
+    for (child in children) {
+      child.generateSummary(ansiColor, buffer, indent)
+    }
+  }
 
   /** Walks the tree to return any node that matches the given path */
   fun fetchNode(path: List<String>): ExecutionPlanNode? {
@@ -546,12 +498,53 @@ data class ExecutionPlanNode(
     }
   }
 
-
   /** If the node is a splat node */
-  fun isSplat() = this.nodeType == PlanNodeType.SPLAT
+  fun isSplat() = nodeType == PlanNodeType.SPLAT
+
+  /** If this node is a container */
+  fun isContainer() = nodeType is PlanNodeType.CONTAINER
+
+  /** If this node has no children */
+  fun isLeafNode() = children.isEmpty()
+
+  /** If this node is a container and there are no more containers in the subtree */
+  fun isTerminalContainer() = isContainer() && !hasChildContainers()
+
+  /** If this node has any containers in the subtree */
+  fun hasChildContainers(): Boolean = children.any {
+    it.isContainer() || it.hasChildContainers()
+  }
 
   /** Returns the value for the node */
   fun value() = this.result
+
+  fun annotationNode(): String? {
+    return children.firstNotNullOfOrNull {
+      if (it.nodeType is PlanNodeType.ANNOTATION) {
+        it.nodeType.label
+      } else {
+        null
+      }
+    }
+  }
+
+  /**
+   * Returns all the errors from the child nodes, either terminating at any child containers
+   * or just returning all errors.
+   */
+
+  fun childErrors(terminator: Terminator): List<String> {
+    val errors = mutableListOf<String>()
+    for (child in children) {
+      if (child.isContainer() && terminator == Terminator.ALL || !child.isContainer()) {
+        if (child.result is NodeResult.ERROR) {
+          errors.add(child.result.message)
+        }
+        errors.addAll(child.childErrors(terminator))
+      }
+    }
+    return errors
+  }
 
   companion object {
     /** Constructor for a container node */
