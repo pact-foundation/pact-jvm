@@ -10,7 +10,7 @@ class FormUrlEncodedContentTypeHandlerSpec extends Specification {
     given:
     def body = 'a=A&b=B&c=C'
     def charset = Charset.defaultCharset()
-    def queryResult = new FormQueryResult(WWWFormCodec.parse(body, charset), null)
+    def queryResult = new FormQueryResult(WWWFormCodec.parse(body, charset), null, [])
     def key = '$.b'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -26,7 +26,7 @@ class FormUrlEncodedContentTypeHandlerSpec extends Specification {
   def 'does not apply the generator when field is not in the body'() {
     def body = 'a=A&b=B&c=C'
     def charset = Charset.defaultCharset()
-    def queryResult = new FormQueryResult(WWWFormCodec.parse(body, charset), null)
+    def queryResult = new FormQueryResult(WWWFormCodec.parse(body, charset), null, [])
     def key = '$.d'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -41,7 +41,7 @@ class FormUrlEncodedContentTypeHandlerSpec extends Specification {
 
   def 'does not apply the generator to empty body'() {
     given:
-    def body = new FormQueryResult([], null)
+    def body = new FormQueryResult([], null, [])
     def key = '$.d'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -58,7 +58,7 @@ class FormUrlEncodedContentTypeHandlerSpec extends Specification {
     given:
     def body = 'a=A&b=B&c=C'
     def charset = Charset.defaultCharset()
-    def queryResult = new FormQueryResult(WWWFormCodec.parse(body, charset), null)
+    def queryResult = new FormQueryResult(WWWFormCodec.parse(body, charset), null, [])
     def key = '$.*'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'

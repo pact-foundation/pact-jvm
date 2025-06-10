@@ -8,7 +8,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'applies the generator to a map entry'() {
     given:
     def map = [a: 'A', b: 'B', c: 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(map), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(map), null, null, [])
     def key = '$.b'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -24,7 +24,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'does not apply the generator when field is not in map'() {
     given:
     def map = [a: 'A', b: 'B', c: 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(map), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(map), null, null, [])
     def key = '$.d'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -39,7 +39,7 @@ class JsonContentTypeHandlerSpec extends Specification {
 
   def 'does not apply the generator when not a map'() {
     given:
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(100), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(100), null, null, [])
     def key = '$.d'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -55,7 +55,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'applies the generator to a list item'() {
     given:
     def list = ['A', 'B', 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(list), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(list), null, null, [])
     def key = '$[1]'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -71,7 +71,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'does not apply the generator if the index is not in the list'() {
     given:
     def list = ['A', 'B', 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(list), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(list), null, null, [])
     def key = '$[3]'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -86,7 +86,7 @@ class JsonContentTypeHandlerSpec extends Specification {
 
   def 'does not apply the generator when not a list'() {
     given:
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(100), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(100), null, null, [])
     def key = '$[3]'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -102,7 +102,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'applies the generator to the root'() {
     given:
     def bodyValue = 100
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(bodyValue), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(bodyValue), null, null, [])
     def key = '$'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -118,7 +118,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'applies the generator to the object graph'() {
     given:
     def graph = [a: ['A', [a: 'A', b: ['1': '1', '2': '2'], c: 'C'], 'C'], b: 'B', c: 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(graph), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(graph), null, null, [])
     def key = '$.a[1].b[\'2\']'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -134,7 +134,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'does not apply the generator to the object graph when the expression does not match'() {
     given:
     def graph = [d: 'A', b: 'B', c: 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(graph), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(graph), null, null, [])
     def key = '$.a[1].b[\'2\']'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -150,7 +150,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'applies the generator to all map entries'() {
     given:
     def map = [a: 'A', b: 'B', c: 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(map), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(map), null, null, [])
     def key = '$.*'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -166,7 +166,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'applies the generator to all list items'() {
     given:
     def list = ['A', 'B', 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(list), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(list), null, null, [])
     def key = '$[*]'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'
@@ -182,7 +182,7 @@ class JsonContentTypeHandlerSpec extends Specification {
   def 'applies the generator to the object graph with wildcard'() {
     given:
     def graph = [a: ['A', [a: 'A', b: ['1', '2'], c: 'C'], 'C'], b: 'B', c: 'C']
-    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(graph), null, null)
+    JsonQueryResult body = new JsonQueryResult(Json.INSTANCE.toJson(graph), null, null, [])
     def key = '$.*[1].b[*]'
     def generator = Mock(Generator) {
       generate(_, _) >> 'X'

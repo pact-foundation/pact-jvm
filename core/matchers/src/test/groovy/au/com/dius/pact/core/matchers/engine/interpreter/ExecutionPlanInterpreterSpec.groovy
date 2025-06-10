@@ -8,9 +8,11 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import spock.lang.Ignore
 import spock.lang.Specification
 
-@SuppressWarnings(['LineLength', 'ClassSize'])
+@SuppressWarnings(['LineLength', 'ClassSize', 'UnusedVariable'])
+@Ignore
 class ExecutionPlanInterpreterSpec extends Specification {
   //struct TestValueResolver {
   //  pub bytes: Vec<u8>

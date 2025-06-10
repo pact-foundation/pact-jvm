@@ -15,10 +15,10 @@ class DocPathSpec extends Specification {
 
   def 'wildcard'() {
     expect:
-    !new DocPath('').isWildcard()
-    !new DocPath('$.path').isWildcard()
-    new DocPath('$.*').isWildcard()
-    new DocPath('$.pat.*').isWildcard()
+    !new DocPath('').wildcard
+    !new DocPath('$.path').wildcard
+    new DocPath('$.*').wildcard
+    new DocPath('$.pat.*').wildcard
   }
 
   def 'matches path - matches root path element'() {

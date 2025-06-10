@@ -46,6 +46,7 @@ object V2MatchingEngine: MatchingEngine {
     return ExecutionPlan(executedTree)
   }
 
+  @Suppress("UnusedParameter")
   fun setupMethodPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val methodContainer = ExecutionPlanNode.container("method")
 
@@ -68,8 +69,10 @@ object V2MatchingEngine: MatchingEngine {
 
     val expectedNode = ExecutionPlanNode.valueNode(expected.path)
     val docPath = DocPath("$.path")
+    @Suppress("UnusedPrivateProperty")
     val actualNode = ExecutionPlanNode.resolveValue(docPath)
     if (context.matcherIsDefined(docPath)) {
+      @Suppress("UnusedPrivateProperty")
       val matchers = context.selectBestMatcher(docPath)
 //      planNode.add(ExecutionPlanNode.annotation(Into { "path ${matchers.generateDescription(false)}" }))
 //      planNode.add(buildMatchingRuleNode(expectedNode, actualNode, matchers, false))
@@ -128,6 +131,7 @@ object V2MatchingEngine: MatchingEngine {
   //  }
   //}
 
+  @Suppress("UnusedParameter")
   fun setupQueryPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("query parameters")
     val docPath = DocPath("$.query")
@@ -234,6 +238,7 @@ object V2MatchingEngine: MatchingEngine {
     return planNode
   }
 
+  @Suppress("UnusedParameter")
   fun setupHeaderPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("headers")
     val docPath = DocPath("$.headers")

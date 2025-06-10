@@ -256,6 +256,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("UnusedParameter")
   private fun executeChangeCase(
     action: String,
     valueResolver: ValueResolver,
@@ -293,6 +294,7 @@ class ExecutionPlanInterpreter(
     return node.copy(result = NodeResult.VALUE(result), children = children.toMutableList())
   }
 
+  @Suppress("ReturnCount")
   private fun executeMatch(
     action: String,
     matcher: String,

@@ -92,10 +92,10 @@ class RequestMatchResultSpec extends Specification {
 
     body                                                                                                                                                        || score
     new BodyMatchResult(null, [])                                                                                                                               || 3
-    new BodyMatchResult(new BodyTypeMismatch('', ''), [])                                                                                                       || 2
-    new BodyMatchResult(new BodyTypeMismatch('', ''), [new BodyItemMatchResult('a', [])])                                                                       || 2
-    new BodyMatchResult(new BodyTypeMismatch('', ''), [new BodyItemMatchResult('a', [new BodyMismatch('a', 'b', '')])])                                         || 2
-    new BodyMatchResult(new BodyTypeMismatch('', ''), [new BodyItemMatchResult('a', []), new BodyItemMatchResult('b', [])])                                     || 2
+    new BodyMatchResult(new BodyTypeMismatch('', '', null), [])                                                                                                 || 2
+    new BodyMatchResult(new BodyTypeMismatch('', '', null), [new BodyItemMatchResult('a', [])])                                                                 || 2
+    new BodyMatchResult(new BodyTypeMismatch('', '', null), [new BodyItemMatchResult('a', [new BodyMismatch('a', 'b', '')])])                                   || 2
+    new BodyMatchResult(new BodyTypeMismatch('', '', null), [new BodyItemMatchResult('a', []), new BodyItemMatchResult('b', [])])                               || 2
     new BodyMatchResult(null, [new BodyItemMatchResult('a', [new BodyMismatch('a', 'b', '')])])                                                                 || 2
     new BodyMatchResult(null, [new BodyItemMatchResult('a', [])])                                                                                               || 4
     new BodyMatchResult(null, [new BodyItemMatchResult('a', [new BodyMismatch('a', 'b', '')]), new BodyItemMatchResult('b', [new BodyMismatch('a', 'b', '')])]) || 1

@@ -4,6 +4,7 @@ import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class JsonUtilsSpec extends Specification {
   def 'throws an exception if given an invalid path'() {
     when:
@@ -57,7 +58,6 @@ class JsonUtilsSpec extends Specification {
     JsonUtils.INSTANCE.resolvePath(JsonParser.parseString('[{"a": 100, "b": 200}]'), path) == ['/0']
     JsonUtils.INSTANCE.resolvePath(JsonParser.parseString('[{"a": 100, "b": 200}]'), new DocPath('$[0].b')) == ['/0/b']
   }
-
 
   def 'resolve path - with star'() {
     given:

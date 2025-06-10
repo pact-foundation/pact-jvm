@@ -5,6 +5,7 @@ import spock.lang.Specification
 
 class JsonValueSpec extends Specification {
 
+  @SuppressWarnings('JUnitPublicField')
   public static final String JSON_POINTER_EXAMPLE = '''{
       "foo": ["bar", "baz"],
       "": 0,

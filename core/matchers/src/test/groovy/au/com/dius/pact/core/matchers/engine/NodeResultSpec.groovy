@@ -2,7 +2,7 @@ package au.com.dius.pact.core.matchers.engine
 
 import spock.lang.Specification
 
-@SuppressWarnings(['LineLength', 'AbcMetric', 'ExplicitCallToAndMethod', 'ExplicitCallTOrMethod'])
+@SuppressWarnings(['LineLength', 'AbcMetric', 'ExplicitCallToAndMethod', 'ExplicitCallToOrMethod'])
 class NodeResultSpec extends Specification {
   def 'node result and'() {
     expect:
