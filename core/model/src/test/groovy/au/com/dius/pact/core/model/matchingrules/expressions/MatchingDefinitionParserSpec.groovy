@@ -37,7 +37,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse type matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition('Name', TypeMatcher.INSTANCE, generator)
+      new MatchingRuleDefinition('Name', TypeMatcher.INSTANCE, generator, expression.trim())
 
     where:
 
@@ -50,7 +50,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse equal to matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, EqualsMatcher.INSTANCE, generator)
+      new MatchingRuleDefinition(value, EqualsMatcher.INSTANCE, generator, expression.trim())
 
     where:
 
@@ -63,7 +63,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse number matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, new NumberTypeMatcher(matcher), generator)
+      new MatchingRuleDefinition(value, new NumberTypeMatcher(matcher), generator, expression.trim())
 
     where:
 
@@ -91,7 +91,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse datetime matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, matcherClass.newInstance(format), generator)
+      new MatchingRuleDefinition(value, matcherClass.newInstance(format), generator, expression.trim())
 
     where:
 
@@ -108,7 +108,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse regex matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, new RegexMatcher(regex), null)
+      new MatchingRuleDefinition(value, new RegexMatcher(regex), null, expression.trim())
 
     where:
 
@@ -129,7 +129,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse include matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, new IncludeMatcher(value), null)
+      new MatchingRuleDefinition(value, new IncludeMatcher(value), null, expression.trim())
 
     where:
 
@@ -141,7 +141,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse boolean matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, BooleanMatcher.INSTANCE, null)
+      new MatchingRuleDefinition(value, BooleanMatcher.INSTANCE, null, expression.trim())
 
     where:
 
@@ -150,17 +150,63 @@ class MatchingDefinitionParserSpec extends Specification {
     'matching( boolean , false )' | 'false'
   }
 
+  def 'each key'() {
+    given:
+    def expression = "eachKey(matching(regex, '\$(\\.\\w+)+', '\$.test.one'))"
+    def value = [
+      Either.a(new EachKeyMatcher(
+        new MatchingRuleDefinition('$.test.one',
+          new RegexMatcher('$(\\.\\w+)+'), null, 'matching(regex, \'$(\\.\\w+)+\', \'$.test.one\')'))
+      )
+    ]
+
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
+
+    then:
+    result == new MatchingRuleDefinition(null, ValueType.Unknown, value, null, expression)
+  }
+
+  def 'each value with reference'() {
+    given:
+    def expression = "eachValue(matching(\$'items'))"
+    def value = [
+      Either.a(
+        new EachValueMatcher(
+          new MatchingRuleDefinition(
+            null,
+            ValueType.Unknown,
+            [ Either.b(new MatchingReference('items')) ],
+            null,
+            "matching(\$'items')"
+          )
+        )
+      )
+    ]
+
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
+
+    then:
+    result.value == null
+    result.valueType == ValueType.Unknown
+    result.rules == value
+    result.generator == null
+    result.expression == expression
+  }
+
   def 'each key and value'() {
-    expect:
-    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(null, ValueType.Unknown, value, null)
+    def expression = "eachKey(notEmpty('\$.test')), eachValue(matching(number, 100))"
+    def value = [
+      Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test', ValueType.String, [ Either.a(NotEmptyMatcher.INSTANCE) ], null, "notEmpty('\$.test')"))),
+      Either.a(new EachValueMatcher(new MatchingRuleDefinition('100', new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), null, 'matching(number, 100)')))
+    ]
 
-    where:
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
 
-    expression                                                       | value
-    "eachKey(matching(regex, '\$(\\.\\w+)+', '\$.test.one'))"        | [Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test.one', new RegexMatcher('$(\\.\\w+)+'), null)))]
-    "eachKey(notEmpty('\$.test')), eachValue(matching(number, 100))" | [Either.a(new EachKeyMatcher(new MatchingRuleDefinition('$.test', ValueType.String, [ Either.a(NotEmptyMatcher.INSTANCE) ], null))), Either.a(new EachValueMatcher(new MatchingRuleDefinition('100', new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER), null)))]
-    "eachValue(matching(\$'items'))"                                 | [Either.a(new EachValueMatcher(new MatchingRuleDefinition(null, ValueType.Unknown, [Either.b(new MatchingReference('items'))], null)))]
+    then:
+    result == new MatchingRuleDefinition(null, ValueType.Unknown, value, null, expression)
   }
 
   def 'invalid each key and value'() {
@@ -178,7 +224,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse notEmpty matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition(value, type, [ Either.a(NotEmptyMatcher.INSTANCE) ], generator)
+      new MatchingRuleDefinition(value, type, [ Either.a(NotEmptyMatcher.INSTANCE) ], generator, expression.trim())
 
     where:
 
@@ -243,7 +289,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse atLeast matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition("", ValueType.Unknown, [ Either.a(new MinTypeMatcher(value)) ], null)
+      new MatchingRuleDefinition("", ValueType.Unknown, [ Either.a(new MinTypeMatcher(value)) ], null, expression.trim())
 
     where:
 
@@ -270,7 +316,7 @@ class MatchingDefinitionParserSpec extends Specification {
   def 'parse atMost matcher'() {
     expect:
     MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value ==
-      new MatchingRuleDefinition("", ValueType.Unknown, [ Either.a(new MaxTypeMatcher(value)) ], null)
+      new MatchingRuleDefinition("", ValueType.Unknown, [ Either.a(new MaxTypeMatcher(value)) ], null, expression.trim())
 
     where:
 

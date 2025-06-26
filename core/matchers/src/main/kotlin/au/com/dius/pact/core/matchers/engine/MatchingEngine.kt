@@ -7,6 +7,9 @@ import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.support.json.JsonValue
 
 interface MatchingEngine {
   /**
@@ -89,47 +92,6 @@ object V2MatchingEngine: MatchingEngine {
 
     return planNode
   }
-
-  //fn build_matching_rule_node(
-  //  expected_node: &ExecutionPlanNode,
-  //  actual_node: &ExecutionPlanNode,
-  //  matchers: &RuleList,
-  //  for_collection: bool
-  //) -> ExecutionPlanNode {
-  //  if matchers.rules.len() == 1 {
-  //    let matcher = if for_collection {
-  //      matchers.rules[0].clone()
-  //    } else {
-  //      matchers.rules[0].for_single_item()
-  //    };
-  //    let mut plan_node = ExecutionPlanNode::action(format!("match:{}", matcher.name()).as_str());
-  //    plan_node
-  //      .add(expected_node.clone())
-  //      .add(actual_node.clone())
-  //      .add(ExecutionPlanNode::value_node(matcher.values()));
-  //    plan_node
-  //  } else {
-  //    let mut logic_node = match matchers.rule_logic {
-  //      RuleLogic::And => ExecutionPlanNode::action("and"),
-  //      RuleLogic::Or => ExecutionPlanNode::action("or")
-  //    };
-  //    for rule in &matchers.rules {
-  //      let matcher = if for_collection {
-  //        rule.clone()
-  //      } else {
-  //        rule.for_single_item()
-  //      };
-  //      logic_node
-  //        .add(
-  //          ExecutionPlanNode::action(format!("match:{}", matcher.name()).as_str())
-  //            .add(expected_node.clone())
-  //            .add(actual_node.clone())
-  //            .add(ExecutionPlanNode::value_node(matcher.values()))
-  //        );
-  //    }
-  //    logic_node
-  //  }
-  //}
 
   @Suppress("UnusedParameter")
   fun setupQueryPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
@@ -404,5 +366,50 @@ object V2MatchingEngine: MatchingEngine {
     }
 
     return planNode
+  }
+}
+
+fun buildMatchingRuleNode(
+  expectedNode: ExecutionPlanNode,
+  actualNode: ExecutionPlanNode,
+  matchers: MatchingRuleGroup,
+  forCollection: Boolean
+): ExecutionPlanNode {
+  return if (matchers.rules.size == 1) {
+    val matcher = if (forCollection) {
+      matchers.rules[0]
+    } else {
+      matchers.rules[0].forSingleItem()
+    }
+    val planNode = ExecutionPlanNode.action("match:${matcher.name}")
+    planNode
+      .add(expectedNode)
+      .add(actualNode)
+      .add(ExecutionPlanNode.valueNode(Into {
+        NodeValue.JSON(JsonValue.Object(matcher.attributes.toMutableMap()))
+      }))
+    planNode
+  } else {
+    val logicNode = when (matchers.ruleLogic) {
+      RuleLogic.AND -> ExecutionPlanNode.action("and")
+      RuleLogic.OR -> ExecutionPlanNode.action("or")
+    }
+    for (rule in matchers.rules) {
+      val matcher = if (forCollection) {
+        rule
+      } else {
+        rule.forSingleItem()
+      };
+      logicNode
+        .add(
+          ExecutionPlanNode.action("match:${matcher.name}")
+            .add(expectedNode)
+            .add(actualNode)
+            .add(ExecutionPlanNode.valueNode(Into {
+              NodeValue.JSON(JsonValue.Object(matcher.attributes.toMutableMap()))
+            }))
+        )
+    }
+    logicNode
   }
 }

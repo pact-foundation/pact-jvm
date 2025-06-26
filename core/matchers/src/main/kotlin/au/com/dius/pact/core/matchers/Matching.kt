@@ -57,7 +57,7 @@ data class MatchingContext @JvmOverloads constructor(
           .maxWithOrNull(compareBy<BestMatcherResult> { it.pathWeight }.thenBy { it.pathExp.length })
       result?.ruleGroup?.copy(cascaded = result.pathTokens.size < path.size) ?: MatchingRuleGroup()
     } else {
-      matcherCategory.matchingRules.values.first()
+      matcherCategory.matchingRules.values.firstOrNull() ?: MatchingRuleGroup()
     }
   }
 

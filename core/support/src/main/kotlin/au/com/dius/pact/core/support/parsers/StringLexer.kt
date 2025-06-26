@@ -15,6 +15,8 @@ open class StringLexer(val buffer: String) {
   var lastMatch: String? = null
     private set
 
+  var markedIndex: MutableList<Int> = mutableListOf()
+
   fun nextChar(): Char? {
     val c = peekNextChar()
     if (c != null) {
@@ -88,6 +90,21 @@ open class StringLexer(val buffer: String) {
         lastMatch = result
         Result.Ok(result.toInt())
       }
+    }
+  }
+
+  fun <T> mark(fn: () -> T): T {
+    markedIndex.add(index)
+    val result = fn()
+    markedIndex.removeLast()
+    return result
+  }
+
+  fun fromMark(): String {
+    return if (markedIndex.isEmpty()) {
+      buffer.substring(0, index)
+    } else {
+      buffer.substring(markedIndex.last(),  index)
     }
   }
 

@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.Into
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -13,95 +14,6 @@ private val logger = KotlinLogging.logger {}
 //    };
 //    path.expr = path.build_expr();
 //    path
-//  }
-
-//  /// Creates a new path by cloning this one and pushing the string onto the end
-//  pub fn join(&self, part: impl Into<String>) -> Self {
-//    let part = part.into();
-//    let mut path = self.clone();
-//    if part == "*" {
-//      path.push_star();
-//    } else if part == "[*]" {
-//      path.push_star_index();
-//    } else if let Ok(index) = part.parse() {
-//      path.push_index(index);
-//    } else {
-//      path.push_field(part);
-//    }
-//    path
-//  }
-//
-//  /// Creates a new path by cloning this one and joining the index onto the end. Paths that end
-//  /// with `*` will have the `*` replaced with the index.
-//  pub fn join_index(&self, index: usize) -> Self {
-//    let mut path = self.clone();
-//    match self.path_tokens.last() {
-//      Some(PathToken::Root) => { path.push_index(index); }
-//      Some(PathToken::Field(_)) => { path.push_index(index); }
-//      Some(PathToken::Index(_)) => { path.push_index(index); }
-//      Some(PathToken::Star) | Some(PathToken::StarIndex) => {
-//        if let Some(part) = path.path_tokens.last_mut() {
-//          *part = PathToken::Index(index);
-//          path.expr = path.build_expr();
-//        } else {
-//          path.push_index(index);
-//        }
-//      }
-//      None => { path.push_index(index); }
-//    }
-//    path
-//  }
-//
-//  /// Creates a new path by cloning this one and joining the field onto the end. Paths that end
-//  /// with `*` will have the `*` replaced with the field.
-//  pub fn join_field<S: Into<String>>(&self, name: S) -> Self {
-//    let mut path = self.clone();
-//    match self.path_tokens.last() {
-//      Some(PathToken::Root) => { path.push_field(name.into()); }
-//      Some(PathToken::Field(_)) => { path.push_field(name.into()); }
-//      Some(PathToken::Index(_)) => { path.push_field(name.into()); }
-//      Some(PathToken::Star) => {
-//        if let Some(part) = path.path_tokens.last_mut() {
-//          *part = PathToken::Field(name.into());
-//          path.expr = path.build_expr();
-//        } else {
-//          path.push_field(name.into());
-//        }
-//      }
-//      Some(PathToken::StarIndex) => { path.push_field(name.into()); }
-//      None => { path.push_field(name.into()); }
-//    }
-//    path
-//  }
-//
-//  /// Mutates this path by pushing a field value onto the end.
-//  pub fn push_field(&mut self, field: impl Into<String>) -> &mut Self {
-//    let field = field.into();
-//    write_obj_key_for_path(&mut self.expr, &field);
-//    self.path_tokens.push(PathToken::Field(field));
-//    self
-//  }
-//
-//  /// Mutates this path by pushing an index value onto the end.
-//  pub fn push_index(&mut self, index: usize) -> &mut Self {
-//    self.path_tokens.push(PathToken::Index(index));
-//    // unwrap is safe, as write! is infallible for String
-//    let _ = write!(self.expr, "[{}]", index);
-//    self
-//  }
-//
-//  /// Mutates this path by pushing a star value onto the end.
-//  pub fn push_star(&mut self) -> &mut Self {
-//    self.path_tokens.push(PathToken::Star);
-//    self.expr.push_str(".*");
-//    self
-//  }
-//
-//  /// Mutates this path by pushing a star index value onto the end.
-//  pub fn push_star_index(&mut self) -> &mut Self {
-//    self.path_tokens.push(PathToken::StarIndex);
-//    self.expr.push_str("[*]");
-//    self
 //  }
 //
 //  /// Mutates this path by pushing a path token onto the end.
@@ -237,29 +149,6 @@ private val logger = KotlinLogging.logger {}
 //  }
 //}
 //
-///// Format a JSON object key for use in a JSON path expression. If we were
-///// more concerned about performance, we might try to come up with a scheme
-///// to minimize string allocation here.
-//fn write_obj_key_for_path(mut out: impl Write, key: &str) {
-//  // unwrap is safe, as write! is infallible for String
-//  let _ = if IDENT.is_match(key) {
-//    write!(out, ".{}", key)
-//  } else {
-//    write!(
-//      out,
-//      "['{}']",
-//      ESCAPE.replace_all(key, |caps: &Captures| format!(r#"\{}"#, &caps[0]))
-//    )
-//  };
-//}
-//
-//#[cfg(test)]
-//fn obj_key_for_path(key: &str) -> String {
-//  let mut out = String::new();
-//  write_obj_key_for_path(&mut out, key);
-//  out
-//}
-//
 //impl From<DocPath> for String {
 //  fn from(doc_path: DocPath) -> String {
 //    doc_path.expr
@@ -314,6 +203,7 @@ private val logger = KotlinLogging.logger {}
 //  }
 //}
 
+@Suppress("TooManyFunctions")
 data class DocPath(
   val pathTokens: List<PathToken>,
   val expr: String
@@ -402,7 +292,108 @@ data class DocPath(
     }
   }
 
+  /**
+   * Creates a new path by cloning this one and pushing the string onto the end
+   */
+  fun <S> join(part: S): DocPath where S: Into<String> {
+    return when (val part = part.into()) {
+      "*" -> pushStar()
+      "[*]" -> pushStarIndex()
+      else -> {
+        try {
+          val index = part.toInt()
+          pushIndex(index)
+        } catch (_ex: NumberFormatException) {
+          pushField(Into { part })
+        }
+      }
+    }
+  }
+
+  /**
+   * Pushes a field value onto the end of the path
+   */
+  fun <S> pushField(field: S): DocPath where S: Into<String> {
+    val field = field.into()
+    val expr = writeObjKeyForPath(expr, field)
+    val pathTokens = pathTokens + PathToken.Field(field)
+    return DocPath(pathTokens, expr)
+  }
+
+  /**
+   * Pushes an index value onto the end of the path
+   */
+  fun pushIndex(index: Int): DocPath {
+    val pathTokens = pathTokens + PathToken.Index(index)
+    val expr = "$expr[$index]"
+    return DocPath(pathTokens, expr)
+  }
+
+  /**
+   * Pushes a star value onto the end of the path
+   */
+  fun pushStar(): DocPath {
+    val pathTokens = pathTokens + PathToken.Star
+    val expr = "$expr.*"
+    return DocPath(pathTokens, expr)
+  }
+
+  /**
+   * Pushes a star index value onto the end of the path
+   */
+  fun pushStarIndex(): DocPath {
+    val pathTokens = pathTokens + PathToken.Star
+    val expr = "$expr[*]"
+    return DocPath(pathTokens, expr)
+  }
+
+//  /// Creates a new path by cloning this one and joining the index onto the end. Paths that end
+//  /// with `*` will have the `*` replaced with the index.
+//  pub fn join_index(&self, index: usize) -> Self {
+//    let mut path = self.clone();
+//    match self.path_tokens.last() {
+//      Some(PathToken::Root) => { path.push_index(index); }
+//      Some(PathToken::Field(_)) => { path.push_index(index); }
+//      Some(PathToken::Index(_)) => { path.push_index(index); }
+//      Some(PathToken::Star) | Some(PathToken::StarIndex) => {
+//        if let Some(part) = path.path_tokens.last_mut() {
+//          *part = PathToken::Index(index);
+//          path.expr = path.build_expr();
+//        } else {
+//          path.push_index(index);
+//        }
+//      }
+//      None => { path.push_index(index); }
+//    }
+//    path
+//  }
+//
+//  /// Creates a new path by cloning this one and joining the field onto the end. Paths that end
+//  /// with `*` will have the `*` replaced with the field.
+//  pub fn join_field<S: Into<String>>(&self, name: S) -> Self {
+//    let mut path = self.clone();
+//    match self.path_tokens.last() {
+//      Some(PathToken::Root) => { path.push_field(name.into()); }
+//      Some(PathToken::Field(_)) => { path.push_field(name.into()); }
+//      Some(PathToken::Index(_)) => { path.push_field(name.into()); }
+//      Some(PathToken::Star) => {
+//        if let Some(part) = path.path_tokens.last_mut() {
+//          *part = PathToken::Field(name.into());
+//          path.expr = path.build_expr();
+//        } else {
+//          path.push_field(name.into());
+//        }
+//      }
+//      Some(PathToken::StarIndex) => { path.push_field(name.into()); }
+//      None => { path.push_field(name.into()); }
+//    }
+//    path
+//  }
+//
+
   companion object {
+    val IDENT = Regex("^[_A-Za-z][_A-Za-z0-9]*$")
+
     /**
      *  Construct a new DocPath with an empty expression.
      *
@@ -434,6 +425,34 @@ data class DocPath(
         is PathToken.Star -> 1
         else -> 0
       }
+    }
+
+    /**
+     * Format a JSON object key for use in a JSON path expression. If we were
+     * more concerned about performance, we might try to come up with a scheme
+     * to minimize string allocation here.
+     */
+    @JvmStatic
+    fun writeObjKeyForPath(expr: String, key: String): String {
+      return expr + if (IDENT.matches(key)) {
+        ".${key}"
+      } else {
+        "['${escape(key)}']"
+      }
+    }
+
+    private fun escape(key: String): String {
+      val buffer = StringBuilder()
+      for (ch in key) {
+        when (ch) {
+          '\\', '\'', '|' -> {
+            buffer.append('\\')
+            buffer.append(ch)
+          }
+          else -> buffer.append(ch)
+        }
+      }
+      return buffer.toString()
     }
   }
 }

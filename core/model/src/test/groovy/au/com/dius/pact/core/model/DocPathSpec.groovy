@@ -58,31 +58,34 @@ class DocPathSpec extends Specification {
     !new DocPath('$[*]').matchesPath(['$', 'name'])
   }
 
-  //  #[test]
-  //  fn obj_key_for_path_quotes_keys_when_necessary() {
-  //    assert_eq!(obj_key_for_path("foo"), ".foo");
-  //    assert_eq!(obj_key_for_path("_foo"), "._foo");
-  //    assert_eq!(obj_key_for_path("["), "['[']");
-  //
-  //    // I don't actually know how the JSON Path specification wants us to handle
-  //    // these cases, but we need to _something_ to avoid panics or passing
-  //    // `Result` around everywhere, so let's go with JavaScript string escape
-  //    // syntax.
-  //    assert_eq!(obj_key_for_path(r#"''"#), r#"['\'\'']"#);
-  //    assert_eq!(obj_key_for_path(r#"a'"#), r#"['a\'']"#);
-  //    assert_eq!(obj_key_for_path(r#"\"#), r#"['\\']"#);
-  //  }
-  //
-  //  #[test]
-  //  fn path_join() {
-  //    let something = DocPath::root().join("something");
-  //    expect!(something.to_string()).to(be_equal_to("$.something"));
-  //    expect!(DocPath::root().join("something else").to_string()).to(be_equal_to("$['something else']"));
-  //    expect!(something.join("else").to_string()).to(be_equal_to("$.something.else"));
-  //    expect!(something.join("*").to_string()).to(be_equal_to("$.something.*"));
-  //    expect!(something.join("101").to_string()).to(be_equal_to("$.something[101]"));
-  //  }
-  //
+  def 'writeObjKeyForPath quotes keys when necessary'() {
+    expect:
+    DocPath.writeObjKeyForPath('', path) == result
+
+    where:
+
+    path   | result
+    'foo'  | '.foo'
+    '_foo' | '._foo'
+    '['    | "['[']"
+    "''"   | "['\\'\\'']"
+    "a'"   | "['a\\'']"
+    '\\'   | "['\\\\']"
+  }
+
+  def join() {
+    expect:
+    path.join({ part } as Into<String>).expr == result
+
+    where:
+
+    path                       | part             | result
+    DocPath.root()             | 'something'      | '$.something'
+    DocPath.root()             | 'something else' | "\$['something else']"
+    new DocPath('$.something') | 'else'           | '$.something.else'
+    new DocPath('$.something') | '101'            | '$.something[101]'
+  }
+
   //  #[test]
   //  fn path_push() {
   //    let mut root = DocPath::root();

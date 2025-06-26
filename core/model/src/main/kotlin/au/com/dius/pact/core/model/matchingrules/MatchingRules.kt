@@ -14,8 +14,10 @@ import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.lang.RuntimeException
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Logic to use to combine rules
@@ -54,6 +56,19 @@ interface MatchingRule {
   fun hasGenerators(): Boolean = false
 
   /**
+   * Generates a description of the matching rule that can be used in a test report.
+   * @param forCollection Set true if the description is for a collection, otherwise it is for a single item
+   */
+  fun generateDescription(forCollection: Boolean): String
+
+  /**
+   * Returns this matching rule, downgrading it if it doesn't correspond to a matching rule that
+   * can be applied to single values. Examples are the Min/Max type matchers, which just apply
+   * basic type matchers to single values.
+   */
+  fun forSingleItem(): MatchingRule = this
+
+  /**
    * Returns the type name of the matching rule
    */
   val name: String
@@ -63,7 +78,7 @@ interface MatchingRule {
    */
   val attributes: Map<String, JsonValue>
 
-  companion object : KLogging() {
+  companion object {
     private const val MATCH = "match"
     private const val MIN = "min"
     private const val MAX = "max"
@@ -85,12 +100,12 @@ interface MatchingRule {
           j.has(TIME) -> TimeMatcher(j[TIME].asString()!!)
           j.has(DATE) -> DateMatcher(j[DATE].asString()!!)
           else -> {
-            MatchingRuleGroup.logger.warn { "Unrecognised matcher definition $j, defaulting to equality matching" }
+            logger.warn { "Unrecognised matcher definition $j, defaulting to equality matching" }
             EqualsMatcher
           }
         }
       } else {
-        MatchingRuleGroup.logger.warn { "Unrecognised matcher definition $json, defaulting to equality matching" }
+        logger.warn { "Unrecognised matcher definition $json, defaulting to equality matching" }
         EqualsMatcher
       }
     }
@@ -108,7 +123,7 @@ interface MatchingRule {
         "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
         "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
         "real" -> {
-          MatchingRuleGroup.logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
+          logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
           NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
         }
         MIN -> MinTypeMatcher(values[MIN].asNumber()!!.toInt())
@@ -173,7 +188,9 @@ interface MatchingRule {
             ValueType.Unknown,
             values["rules"].asArray()!!.map {
               Either.A(fromJson(it))
-            }, generator)
+            },
+            generator,
+            "")
           EachKeyMatcher(definition)
         }
         "eachValue", "each-value" -> {
@@ -189,12 +206,13 @@ interface MatchingRule {
             values["rules"].asArray()!!.map {
               Either.A(fromJson(it))
             },
-            generator
+            generator,
+            ""
           )
           EachValueMatcher(definition)
         }
         else -> {
-          MatchingRuleGroup.logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
+          logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
           EqualsMatcher
         }
       }
@@ -239,6 +257,7 @@ interface MatchingRule {
  */
 data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd") : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "date", "format" to format)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Date matchers can only be used with Pact specification versions >= V3")
@@ -246,6 +265,8 @@ data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-d
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must match the date format '${format}'"
 
   override val name: String
     get() = "date"
@@ -258,8 +279,12 @@ data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-d
  */
 object EqualsMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "equality")
+
   override fun canMatch(contentType: ContentType) = true
+
   override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
+
+  override fun generateDescription(forCollection: Boolean) = "must be equal to the expected value"
 
   override val name: String
     get() = "equality"
@@ -272,7 +297,9 @@ object EqualsMatcher : MatchingRule {
  */
 data class IncludeMatcher(val value: String) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "include", "value" to value)
+
   override fun canMatch(contentType: ContentType) = true
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Include matchers can only be used with Pact specification versions >= V3")
@@ -280,6 +307,8 @@ data class IncludeMatcher(val value: String) : MatchingRule {
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must include the string '${value}'"
 
   override val name: String
     get() = "include"
@@ -292,7 +321,16 @@ data class IncludeMatcher(val value: String) : MatchingRule {
  */
 data class MaxTypeMatcher(val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type", "max" to max)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
+
+  override fun generateDescription(forCollection: Boolean) = if (forCollection) {
+    "must match by type and have at most $max item${if (max == 1) "" else "s"}"
+  } else {
+    "must match by type"
+  }
+
+  override fun forSingleItem() = TypeMatcher
 
   override val name: String
     get() = "max-type"
@@ -305,7 +343,16 @@ data class MaxTypeMatcher(val max: Int) : MatchingRule {
  */
 data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type", "min" to min, "max" to max)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
+
+  override fun generateDescription(forCollection: Boolean) = if (forCollection) {
+    "must match by type and have  $min..$max items"
+  } else {
+    "must match by type"
+  }
+
+  override fun forSingleItem() = TypeMatcher
 
   override val name: String
     get() = "min-max-type"
@@ -318,7 +365,16 @@ data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
  */
 data class MinTypeMatcher(val min: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type", "min" to min)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
+
+  override fun generateDescription(forCollection: Boolean) = if (forCollection) {
+    "must match by type and have at least $min item${if (min == 1) "" else "s"}"
+  } else {
+    "must match by type"
+  }
+
+  override fun forSingleItem() = TypeMatcher
 
   override val name: String
     get() = "min-type"
@@ -350,6 +406,8 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
     }
   }
 
+  override fun generateDescription(forCollection: Boolean) = "must be a number"
+
   override val name: String
     get() = "number"
   override val attributes: Map<String, JsonValue>
@@ -367,6 +425,8 @@ object BooleanMatcher : MatchingRule {
 
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> = listOf()
 
+  override fun generateDescription(forCollection: Boolean) = "must be a boolean"
+
   override val name: String
     get() = "boolean"
   override val attributes: Map<String, JsonValue>
@@ -378,7 +438,10 @@ object BooleanMatcher : MatchingRule {
  */
 data class RegexMatcher @JvmOverloads constructor (val regex: String, val example: String? = null) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "regex", "regex" to regex)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
+
+  override fun generateDescription(forCollection: Boolean) = "must match the regular expression /${regex}/"
 
   override val name: String
     get() = "regex"
@@ -391,6 +454,7 @@ data class RegexMatcher @JvmOverloads constructor (val regex: String, val exampl
  */
 data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss") : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "time", "format" to format)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Time matchers can only be used with Pact specification versions >= V3")
@@ -398,6 +462,8 @@ data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must match the time format '${format}'"
 
   override val name: String
     get() = "time"
@@ -410,6 +476,7 @@ data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"
  */
 data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZZZ") : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "timestamp", "format" to format)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("DateTime matchers can only be used with Pact specification versions >= V3")
@@ -417,6 +484,8 @@ data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must match the date-time format '${format}'"
 
   override val name: String
     get() = "datetime"
@@ -429,7 +498,10 @@ data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy
  */
 object TypeMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "type")
+
   override fun validateForVersion(pactVersion: PactSpecVersion?) = emptyList<String>()
+
+  override fun generateDescription(forCollection: Boolean) = "must match by type"
 
   override val name: String
     get() = "type"
@@ -442,6 +514,7 @@ object TypeMatcher : MatchingRule {
  */
 object NullMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "null")
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Null matchers can only be used with Pact specification versions >= V3")
@@ -449,6 +522,8 @@ object NullMatcher : MatchingRule {
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must be null"
 
   override val name: String
     get() = "null"
@@ -461,6 +536,7 @@ object NullMatcher : MatchingRule {
  */
 object ValuesMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "values")
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Values matchers can only be used with Pact specification versions >= V3")
@@ -468,6 +544,8 @@ object ValuesMatcher : MatchingRule {
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must have values that match"
 
   override val name: String
     get() = "values"
@@ -480,7 +558,9 @@ object ValuesMatcher : MatchingRule {
  */
 data class ContentTypeMatcher(val contentType: String) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "contentType", "value" to contentType)
+
   override fun canMatch(contentType: ContentType) = true
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V3)) {
       listOf("Content Type matchers can only be used with Pact specification versions >= V3")
@@ -488,6 +568,8 @@ data class ContentTypeMatcher(val contentType: String) : MatchingRule {
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "the content type must be '${contentType}'"
 
   override val name: String
     get() = "content-type"
@@ -502,6 +584,7 @@ data class ContentTypeMatcher(val contentType: String) : MatchingRule {
  */
 object EqualsIgnoreOrderMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order")
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
@@ -509,6 +592,8 @@ object EqualsIgnoreOrderMatcher : MatchingRule {
       listOf()
     }
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must be equal to the expected value (ignoring order)"
 
   override val name: String
     get() = "ignore-order"
@@ -523,12 +608,19 @@ object EqualsIgnoreOrderMatcher : MatchingRule {
  */
 data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order", "min" to min)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
     }
+  }
+
+  override fun generateDescription(forCollection: Boolean) = if (forCollection) {
+    "must be equal to the expected value (ignoring order) and have at least $min item${if (min == 1) "" else "s"}"
+  } else {
+    "must be equal to the expected value (ignoring order)"
   }
 
   override val name: String
@@ -544,12 +636,19 @@ data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
  */
 data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order", "max" to max)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
     }
+  }
+
+  override fun generateDescription(forCollection: Boolean) = if (forCollection) {
+    "must be equal to the expected value (ignoring order) and have at most $max item${if (max == 1) "" else "s"}"
+  } else {
+    "must be equal to the expected value (ignoring order)"
   }
 
   override val name: String
@@ -565,12 +664,19 @@ data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
  */
 data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : MatchingRule {
   override fun toMap(spec: PactSpecVersion?) = mapOf("match" to "ignore-order", "min" to min, "max" to max)
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.lessThan(PactSpecVersion.V4)) {
       listOf("Ignore Order matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
     }
+  }
+
+  override fun generateDescription(forCollection: Boolean) = if (forCollection) {
+    "must be equal to the expected value (ignoring order) and have  $min..$max items"
+  } else {
+    "must be equal to the expected value (ignoring order)"
   }
 
   override val name: String
@@ -596,6 +702,7 @@ data class ArrayContainsMatcher(
   }
 
   override fun canMatch(contentType: ContentType) = true
+
   override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
     return if (pactVersion.atLeast(PactSpecVersion.V3)) {
       listOf()
@@ -609,6 +716,8 @@ data class ArrayContainsMatcher(
   override fun buildGenerators(context: Map<String, Any>): List<Generator> {
     return listOf(ArrayContainsGenerator(variants))
   }
+
+  override fun generateDescription(forCollection: Boolean) = "must be a list/array that has at least one matching item"
 
   override val name: String
     get() = "array-contains"
@@ -638,6 +747,19 @@ data class StatusCodeMatcher(val statusType: HttpStatus, val values: List<Int> =
       listOf("Status code matchers can only be used with Pact specification versions >= V4")
     } else {
       listOf()
+    }
+  }
+
+  override fun generateDescription(forCollection: Boolean): String {
+    return when (statusType) {
+      HttpStatus.Information -> "must be an Information (10x) status"
+      HttpStatus.Success -> "must be a Success (20x) status"
+      HttpStatus.Redirect -> "must be a redirect (30x) status"
+      HttpStatus.ClientError -> "must be a Client Error (40x) status"
+      HttpStatus.ServerError -> "must be an Server Error (50x) status"
+      HttpStatus.StatusCodes -> "must be a status code of ${values.joinToString(", ")}"
+      HttpStatus.NonError -> "must not be an Error (40x/50x) status"
+      HttpStatus.Error -> "must be an Error (40x/50x) status"
     }
   }
 
@@ -676,7 +798,19 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     return rules.any { matchers.contains(it.javaClass) }
   }
 
-  companion object : KLogging() {
+  /**
+   * Generates a description of the matching rules that can be displayed in a test report.
+   * @param forCollection Changes the description for collections or single items.
+   */
+  fun generateDescription(forCollection: Boolean): String {
+    return when (rules.size) {
+      0 -> "no-op"
+      1 -> rules[0].generateDescription(forCollection)
+      else -> rules.joinToString { rule -> rule.generateDescription(forCollection) }
+    }
+  }
+
+  companion object {
     @JvmStatic
     fun fromJson(json: JsonValue): MatchingRuleGroup {
       var ruleLogic = RuleLogic.AND

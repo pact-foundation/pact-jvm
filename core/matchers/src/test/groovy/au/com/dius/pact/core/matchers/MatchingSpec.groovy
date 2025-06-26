@@ -228,7 +228,7 @@ class MatchingSpec extends Specification {
   def 'each value matcher applying a regex to a list of strings'() {
     given:
     def eachValueMatcher = new EachValueMatcher(new MatchingRuleDefinition('00000000000000000000000000000000',
-      new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'), null))
+      new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'), null, ''))
     bodyContext.matchers
       .addRule('$', eachValueMatcher)
     def callback = { List<String> p, String a, String b, MatchingContext c ->

@@ -31,6 +31,8 @@ data class EachValueMatcher(val definition: MatchingRuleDefinition) : MatchingRu
     }
   }
 
+  override fun generateDescription(forCollection: Boolean) = "each value must match '${definition.expression}'"
+
   override val name: String
     get() = "each-value"
   override val attributes: Map<String, JsonValue>

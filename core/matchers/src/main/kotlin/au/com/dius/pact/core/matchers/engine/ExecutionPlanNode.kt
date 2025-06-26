@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.support.json.JsonValue
 import com.github.ajalt.mordant.TermColors
 import org.apache.commons.text.StringEscapeUtils.escapeJson
 
@@ -575,6 +576,10 @@ data class ExecutionPlanNode(
 
     /** Constructor for a value node */
     fun valueNode(value: String) = valueNode(Into { NodeValue.STRING(value) })
+    /** Constructor for a value node */
+    fun valueNode(value: UInt) = valueNode(Into { NodeValue.UINT(value) })
+    /** Constructor for a value node */
+    fun valueNode(value: JsonValue) = valueNode(Into { NodeValue.JSON(value) })
 
     /** Constructor for a resolve node */
     fun <T> resolveValue(resolveStr: T): ExecutionPlanNode where T: Into<DocPath> {

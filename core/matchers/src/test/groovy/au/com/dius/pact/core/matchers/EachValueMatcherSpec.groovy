@@ -19,11 +19,11 @@ class EachValueMatcherSpec extends Specification {
 
   def 'matching json bodies - return no mismatches - with each like matcher on unequal lists'() {
     given:
-    def eachValue = new EachValueMatcher(new MatchingRuleDefinition('foo', TypeMatcher.INSTANCE, null))
+    def eachValue = new EachValueMatcher(new MatchingRuleDefinition('foo', TypeMatcher.INSTANCE, null, ''))
     def eachValueGroups = new EachValueMatcher(new MatchingRuleDefinition(
       '00000000000000000000000000000000',
       new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\\*'),
-      null))
+      null, ''))
     context.matchers.addRule('$.resource_permissions', ValuesMatcher.INSTANCE)
     context.matchers.addRule('$.resource_permissions.*', TypeMatcher.INSTANCE)
     context.matchers.addRule('$.resource_permissions.*.resource.application_resource', TypeMatcher.INSTANCE)

@@ -6,7 +6,9 @@ import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.isNotEmpty
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 data class MatchingReference(
   val name: String
@@ -68,28 +70,33 @@ data class MatchingRuleDefinition(
   val value: String?,
   val valueType: ValueType,
   val rules: List<Either<MatchingRule, MatchingReference>>,
-  val generator: Generator?
+  val generator: Generator?,
+  val expression: String
 ) {
   constructor(
     value: String?,
     rule: MatchingRule?,
-    generator: Generator?
+    generator: Generator?,
+    expression: String
   ): this(
     value,
     ValueType.Unknown,
     if (rule != null) listOf(Either.A(rule)) else emptyList(),
-    generator
+    generator,
+    expression
   )
 
   constructor(
     value: String?,
     rule: MatchingReference,
-    generator: Generator?
+    generator: Generator?,
+    expression: String
   ): this(
     value,
     ValueType.Unknown,
     listOf(Either.B(rule)),
-    generator
+    generator,
+    expression
   )
 
   /**
@@ -116,7 +123,15 @@ data class MatchingRuleDefinition(
         if (value.isNotEmpty()) value else other.value,
         valueType.merge(other.valueType),
         rules + other.rules,
-        generator ?: other.generator)
+        generator ?: other.generator,
+        if (expression.isEmpty()) {
+          other.expression
+        } else if (other.expression.isEmpty() || expression == other.expression) {
+          expression
+        } else {
+          "${expression}, ${other.expression}"
+        }
+      )
     } else {
       return this
     }
@@ -126,7 +141,7 @@ data class MatchingRuleDefinition(
     return copy(valueType = valueType)
   }
 
-  companion object: KLogging() {
+  companion object {
     /**
      * Parse the matching rule expression into a matching rule definition
      */
