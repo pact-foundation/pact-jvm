@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 
     id 'groovy'
-    id "io.gitlab.arturbosch.detekt"
+    id "io.gitlab.arturbosch.detekt" apply(false)
     id 'codenarc'
 }
 
