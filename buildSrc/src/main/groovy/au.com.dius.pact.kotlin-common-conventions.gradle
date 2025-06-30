@@ -41,7 +41,7 @@ dependencies {
 
         implementation 'commons-codec:commons-codec:1.18.0'
         implementation 'commons-io:commons-io:2.19.0'
-        implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.21'
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.0'
         implementation 'org.apache.commons:commons-lang3:3.17.0'
         implementation 'org.apache.commons:commons-text:1.13.1'
         implementation 'org.apache.commons:commons-collections4:4.5.0'
@@ -75,11 +75,11 @@ dependencies {
     }
 
     // Align versions of all Kotlin components
-    implementation platform('org.jetbrains.kotlin:kotlin-bom:2.1.21')
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:2.2.0')
 
     // Use the Kotlin JDK 8 standard library.
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.21'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:2.1.21'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.0'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:2.2.0'
 
     codenarc('org.codenarc:CodeNarc:3.6.0-groovy-4.0')
     codenarc('org.apache.groovy:groovy:4.0.26')

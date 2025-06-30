@@ -103,12 +103,12 @@ object ProviderUtils : KLogging() {
   fun findAllPactSources(clazz: KClass<*>): List<Pair<PactSource, Annotation?>> {
     val result = mutableListOf<Pair<PactSource, Annotation?>>()
 
-    (listOf(clazz) + clazz.allSuperclasses).forEach {
-      val annotationOnClass = it.annotations.find { annotation -> annotation is PactSource }
+    for (cl in listOf(clazz) + clazz.allSuperclasses) {
+      val annotationOnClass = cl.java.declaredAnnotations.find { annotation -> annotation is PactSource }
       if (annotationOnClass is PactSource) {
         result.add(annotationOnClass to null)
       }
-      for (anno in it.annotations) {
+      for (anno in cl.java.declaredAnnotations) {
         result.addAll(findPactSourceOnAnnotations(anno, null))
       }
     }
@@ -126,10 +126,11 @@ object ProviderUtils : KLogging() {
       result.add(annotation to parent)
     }
 
-    for (anno in annotation.annotationClass.annotations) {
+    for (anno in annotation.annotationClass.java.declaredAnnotations) {
       val annotationClass = anno.annotationClass
-      if (!annotationClass.qualifiedName.toString().startsWith("java.lang.annotation.") &&
-        !annotationClass.qualifiedName.toString().startsWith("kotlin.annotation.") &&
+      val name = annotationClass.qualifiedName.toString()
+      if (!name.startsWith("java.lang.annotation.") &&
+        !name.startsWith("kotlin.annotation.") &&
         anno != annotation) {
         result.addAll(findPactSourceOnAnnotations(anno, annotation))
       }
