@@ -3,10 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 
     id 'groovy'
-    id "io.gitlab.arturbosch.detekt" apply(false)
     id 'codenarc'
 }
 
+// Detekt blows up on JDK 23
 if (JavaVersion.current() < JavaVersion.VERSION_23) {
     project.plugins.apply('io.gitlab.arturbosch.detekt')
 }
