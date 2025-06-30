@@ -1,9 +1,14 @@
 package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.matchers.BodyMismatchFactory
+import au.com.dius.pact.core.matchers.JsonContentMatcher
+import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.domatch
+import au.com.dius.pact.core.matchers.matchType
 import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import org.apache.commons.text.StringEscapeUtils.escapeJson
@@ -412,7 +417,23 @@ sealed class NodeValue: Into<NodeValue> {
         is BARRAY -> TODO()
         is BOOL -> TODO()
         is ENTRY -> TODO()
-        is JSON -> TODO()
+        is JSON -> {
+          if (actual is JSON) {
+            // TODO: need a way to pass allowUnexpectedKeys here
+            val context = MatchingContext(MatchingRuleCategory("body",
+              mutableMapOf("$" to MatchingRuleGroup(mutableListOf(matcher)))), true)
+            val result = JsonContentMatcher.compare(listOf("$"), expected.json, actual.json, context)
+            if (result.any { it.result.isNotEmpty() }) {
+              result.joinToString(", ") { mismatches ->
+                mismatches.result.joinToString { it.mismatch  }
+              }
+            } else {
+              null
+            }
+          } else {
+            "Expected a value of type '${expected.valueType()}' but got '${actual.valueType()}'"
+          }
+        }
         is LIST -> TODO()
         is MMAP -> TODO()
         is NAMESPACED -> TODO()
@@ -429,7 +450,7 @@ sealed class NodeValue: Into<NodeValue> {
           } else if (actual is SLIST) {
             TODO()
           } else {
-            TODO()
+            "Expected a value of type '${expected.valueType()}' but got '${actual.valueType()}'"
           }
         }
         is UINT -> TODO()

@@ -17,12 +17,14 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.orNull
 import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.io.ByteArrayInputStream
 
 private val logger = KotlinLogging.logger {}
 
 /**
  * Main interpreter for the matching plan AST
  */
+@Suppress("LargeClass", "TooManyFunctions")
 class ExecutionPlanInterpreter(
   /** Context to use to execute the plan */
   val context: PlanMatchingContext
@@ -201,6 +203,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("CyclomaticComplexMethod")
   private fun executeAction(
     action: String,
     valueResolver: ValueResolver,
@@ -210,7 +213,7 @@ class ExecutionPlanInterpreter(
     logger.trace { "Executing action, action=$action" }
 
     val actionPath = path + action
-    return if (action.startsWith("match:")) {
+    val result = if (action.startsWith("match:")) {
       when (val matcher = action.removePrefix("match:")) {
         "" -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
         else -> executeMatch(action, matcher, valueResolver, node, actionPath)
@@ -226,11 +229,11 @@ class ExecutionPlanInterpreter(
         "if" -> executeIf(valueResolver, node, actionPath)
         //        "and" => self.execute_and(valueResolver, node, actionPath),
         //        "or" => self.execute_or(valueResolver, node, actionPath),
-        //        "tee" => self.execute_tee(valueResolver, node, actionPath),
+        "tee" -> executeTee(valueResolver, node, actionPath)
         //        "apply" => self.execute_apply(node),
         //        "push" => self.execute_push(node),
         //        "pop" => self.execute_pop(node),
-        //        "json:parse" => self.execute_json_parse(action, valueResolver, node, actionPath),
+        "json:parse" -> executeJsonParse(action, valueResolver, node, actionPath)
         //        #[cfg(feature = "xml")]
         //        "xml:parse" => self.execute_xml_parse(action, valueResolver, node, actionPath),
         //        #[cfg(feature = "xml")]
@@ -239,10 +242,10 @@ class ExecutionPlanInterpreter(
         //        "xml:value" => self.execute_xml_value(action, valueResolver, node, actionPath),
         //        #[cfg(feature = "xml")]
         //        "xml:attributes" => self.execute_xml_attributes(action, valueResolver, node, actionPath),
-        //        "json:expect:empty" => self.execute_json_expect_empty(action, valueResolver, node, actionPath),
-        //        "json:match:length" => self.execute_json_match_length(action, valueResolver, node, actionPath),
+        "json:expect:empty" -> executeJsonExpectEmpty(action, valueResolver, node, actionPath)
+        "json:match:length" -> executeJsonMatchLength(action, valueResolver, node, actionPath)
         //        "json:expect:entries" => self.execute_json_expect_entries(action, valueResolver, node, actionPath),
-        //        "check:exists" => self.execute_check_exists(action, valueResolver, node, actionPath),
+        "check:exists" -> executeCheckExists(action, valueResolver, node, actionPath)
         //        "expect:entries" => self.execute_check_entries(action, valueResolver, node, actionPath),
         //        "expect:only-entries" => self.execute_check_entries(action, valueResolver, node, actionPath),
         //        "expect:count" => self.execute_expect_count(action, valueResolver, node, actionPath),
@@ -254,6 +257,9 @@ class ExecutionPlanInterpreter(
         else -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
       }
     }
+
+    logger.trace { "Executing $action -> ${result.result}" }
+    return result
   }
 
   @Suppress("UnusedParameter")
@@ -359,6 +365,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("LongMethod", "CyclomaticComplexMethod", "NestedBlockDepth")
   private fun executeExpectEmpty(
     action: String,
     valueResolver: ValueResolver,
@@ -499,7 +506,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  fun executeIf(valueResolver: ValueResolver, node: ExecutionPlanNode, actionPath: List<String>): ExecutionPlanNode {
+  private fun executeIf(valueResolver: ValueResolver, node: ExecutionPlanNode, actionPath: List<String>): ExecutionPlanNode {
     val firstNode = node.children.firstOrNull()
     return if (firstNode != null) {
       val result = walkTree(actionPath, firstNode, valueResolver)
@@ -526,7 +533,7 @@ class ExecutionPlanInterpreter(
               val ifResult = walkTree(actionPath, secondNode, valueResolver)
               children.add(ifResult)
               children.addAll(node.children.drop(2))
-              node.copy(result = ifResult.result, children = children)
+              node.copy(result = ifResult.result.orDefault().truthy(), children = children)
             } else {
               node.copy(result = result.result,
                 children = (listOf(result) + node.children.drop(1)).toMutableList())
@@ -539,7 +546,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  fun executeConvertUtf8(
+  private fun executeConvertUtf8(
     action: String,
     valueResolver: ValueResolver,
     node: ExecutionPlanNode,
@@ -562,6 +569,218 @@ class ExecutionPlanInterpreter(
           is Result.Ok -> node.copy(result = result.value, children = mutableListOf(resultNode.value))
           is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
         }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeTee(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    val firstChild = node.children.firstOrNull()
+    return if (firstChild != null) {
+      val firstResult = walkTree(actionPath, firstChild, valueResolver)
+      when (firstResult.result) {
+        is NodeResult.ERROR -> node.copy(result = firstResult.result,
+          children = (listOf(firstResult) + node.children.drop(1)).toMutableList())
+        else -> {
+          pushResult(firstResult.result)
+          var result: NodeResult = NodeResult.OK
+          val childResults = mutableListOf(firstResult)
+          for (child in node.children.drop(1)) {
+            val childResult = walkTree(actionPath, child, valueResolver)
+            result = result.and(childResult.result)
+            childResults.add(childResult)
+          }
+
+          popResult()
+          node.copy(result = result.truthy(), children = childResults)
+        }
+      }
+    } else {
+      node.copy(result = NodeResult.OK)
+    }
+  }
+
+  private fun executeJsonParse(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.BARRAY -> {
+              val jsonResult = handleWith<JsonValue> {
+                JsonParser.parseStream(ByteArrayInputStream(argValue.bytes))
+              }
+              when (jsonResult) {
+                is Result.Ok -> Result.Ok(NodeResult.VALUE(NodeValue.JSON(jsonResult.value)))
+                is Result.Err -> Result.Err("json parse error: ${jsonResult.error.message}")
+              }
+            }
+            NodeValue.NULL -> Result.Ok(NodeResult.VALUE(NodeValue.NULL))
+            is NodeValue.STRING -> {
+              val jsonResult = handleWith<JsonValue> {
+                JsonParser.parseString(argValue.string)
+              }
+              when (jsonResult) {
+                is Result.Ok -> Result.Ok(NodeResult.VALUE(NodeValue.JSON(jsonResult.value)))
+                is Result.Err -> Result.Err("json parse error: ${jsonResult.error.message}")
+              }
+            }
+            else -> Result.Err("json:parse can not be used with ${argValue.valueType()}")
+          }
+        } else {
+          Result.Ok(NodeResult.VALUE(NodeValue.NULL))
+        }
+        when (result) {
+          is Result.Ok -> node.copy(result = result.value, children = mutableListOf(resultNode.value))
+          is Result.Err -> node.copy(result = NodeResult.ERROR(result.error),
+            children = mutableListOf(resultNode.value))
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  @Suppress("CyclomaticComplexMethod")
+  private fun executeJsonExpectEmpty(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateTwoArgs(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (first, second) = result.value
+
+        val result1 = first.value().orDefault()
+        val expectedJsonType = result1.asString()
+        if (expectedJsonType == null) {
+          return node.copy(result = NodeResult.ERROR("'${result1}' is not a valid JSON type"),
+            children = mutableListOf(first, second))
+        }
+
+        val result2 = second.value().orDefault()
+        val value = result2.asValue()
+        if (value == null) {
+          return node.copy(result = NodeResult.ERROR("Was expecting a JSON value, but got '${result2}'"),
+            children = mutableListOf(first, second))
+        }
+        val jsonValue = value.asJson()
+        if (jsonValue == null) {
+          return node.copy(result = NodeResult.ERROR("Was expecting a JSON value, but got '${value}'"),
+            children = mutableListOf(first, second))
+        }
+
+        val checkResult = jsonCheckType(expectedJsonType, jsonValue)
+        if (checkResult != null) {
+          return node.copy(result = NodeResult.ERROR(checkResult),
+            children = mutableListOf(first, second))
+        }
+
+        val error = when (jsonValue) {
+          is JsonValue.Array -> if (jsonValue.values.isEmpty()) null
+            else "Expected JSON Array (${jsonValue}) to be empty"
+          JsonValue.Null -> null
+          is JsonValue.Object -> if (jsonValue.entries.isEmpty()) null
+            else "Expected JSON Object (${jsonValue}) to be empty"
+          is JsonValue.StringValue -> if (jsonValue.value.chars.isEmpty()) null
+            else "Expected JSON String (${jsonValue}) to be empty"
+          else -> "Expected json (${jsonValue}) to be empty"
+        }
+        if (error == null) {
+          node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)),
+            children = mutableListOf(first, second))
+        } else {
+          node.copy(result = NodeResult.ERROR(error),
+            children = mutableListOf(first, second))
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeJsonMatchLength(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateThreeArgs(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (first, second, third) = result.value
+
+        val result1 = first.value().orDefault()
+        val expectedJsonType = result1.asString()
+        if (expectedJsonType == null) {
+          return node.copy(result = NodeResult.ERROR("'${result1}' is not a valid JSON type"),
+            children = mutableListOf(first, second, third))
+        }
+
+        val result2 = second.value().orDefault()
+        val expectedLength = result2.asNumber()
+        if (expectedLength == null) {
+          return node.copy(result = NodeResult.ERROR("'${result1}' is not a valid number"),
+            children = mutableListOf(first, second, third))
+        }
+
+        val result3 = third.value().orDefault()
+        val value = result3.asValue()
+        if (value == null) {
+          return node.copy(result = NodeResult.ERROR("Was expecting a JSON value, but got '${result3}'"),
+            children = mutableListOf(first, second, third))
+        }
+        val jsonValue = value.asJson()
+        if (jsonValue == null) {
+          return node.copy(result = NodeResult.ERROR("Was expecting a JSON value, but got '${value}'"),
+            children = mutableListOf(first, second, third))
+        }
+
+        val checkResult = jsonCheckType(expectedJsonType, jsonValue)
+        if (checkResult != null) {
+          return node.copy(result = NodeResult.ERROR(checkResult),
+            children = mutableListOf(first, second, third))
+        }
+
+        val checkLengthResult = jsonCheckLength(expectedLength.toInt(), jsonValue)
+        if (checkLengthResult != null) {
+          node.copy(result = NodeResult.ERROR(checkLengthResult),
+            children = mutableListOf(first, second, third))
+        } else {
+          node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)),
+            children = mutableListOf(first, second, third))
+        }
+      }
+
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeCheckExists(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            NodeValue.NULL -> NodeResult.VALUE(NodeValue.BOOL(false))
+            else -> NodeResult.VALUE(NodeValue.BOOL(true))
+          }
+        } else {
+          NodeResult.VALUE(NodeValue.BOOL(false))
+        }
+        node.copy(result = result, children = mutableListOf(resultNode.value))
       }
       is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
     }
@@ -707,6 +926,7 @@ class ExecutionPlanInterpreter(
     return Result.Ok(children to values)
   }
 
+  @Suppress("LongParameterList")
   private fun validateArgs(
     required: Int,
     optional: Int,
@@ -744,36 +964,62 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  //  fn validate_two_args(
-  //    &mut self,
-  //    node: &ExecutionPlanNode,
-  //    action: &str,
-  //    value_resolver: &dyn ValueResolver,
-  //    path: &Vec<String>
-  //  ) -> anyhow::Result<(ExecutionPlanNode, ExecutionPlanNode)> {
-  //    if node.children.len() == 2 {
-  //      let first = self.walk_tree(path.as_slice(), &node.children[0], value_resolver)?;
-  //      let second = self.walk_tree(path.as_slice(), &node.children[1], value_resolver)?;
-  //      Ok((first, second))
-  //    } else {
-  //      Err(anyhow!("Action '{}' requires two arguments, got {}", action, node.children.len()))
-  //    }
-  //  }
-  //
-  //  fn validate_three_args(
-  //    &mut self,
-  //    node: &ExecutionPlanNode,
-  //    action: &str,
-  //    value_resolver: &dyn ValueResolver,
-  //    path: &Vec<String>
-  //  ) -> anyhow::Result<(ExecutionPlanNode, ExecutionPlanNode, ExecutionPlanNode)> {
-  //    if node.children.len() == 3 {
-  //      let first = self.walk_tree(path.as_slice(), &node.children[0], value_resolver)?;
-  //      let second = self.walk_tree(path.as_slice(), &node.children[1], value_resolver)?;
-  //      let third = self.walk_tree(path.as_slice(), &node.children[2], value_resolver)?;
-  //      Ok((first, second, third))
-  //    } else {
-  //      Err(anyhow!("Action '{}' requires three arguments, got {}", action, node.children.len()))
-  //    }
-  //  }
+  private fun validateTwoArgs(
+    node: ExecutionPlanNode,
+    action: String,
+    valueResolver: ValueResolver,
+    path: List<String>
+  ): Result<Pair<ExecutionPlanNode, ExecutionPlanNode>, String> {
+    return if (node.children.size == 2) {
+      val first = walkTree(path, node.children[0], valueResolver)
+      val second = walkTree(path, node.children[1], valueResolver)
+      Result.Ok(first to second)
+    } else {
+      Result.Err("$action requires two arguments, got ${node.children.size}")
+    }
+  }
+
+  private fun validateThreeArgs(
+    node: ExecutionPlanNode,
+    action: String,
+    valueResolver: ValueResolver,
+    path: List<String>
+  ): Result<Triple<ExecutionPlanNode, ExecutionPlanNode, ExecutionPlanNode>, String> {
+    return if (node.children.size == 3) {
+      val first = walkTree(path, node.children[0], valueResolver)
+      val second = walkTree(path, node.children[1], valueResolver)
+      val third = walkTree(path, node.children[2], valueResolver)
+      Result.Ok(Triple(first, second, third))
+    } else {
+      Result.Err("$action requires three arguments, got ${node.children.size}")
+    }
+  }
+
+  private fun jsonCheckType(expectedType: String, jsonValue: JsonValue): String? {
+    return when (expectedType) {
+      "NULL" -> if (jsonValue.isNull) null
+        else "Was expecting a JSON NULL but got a ${jsonValue.type()}"
+      "BOOL" -> if (jsonValue.isBoolean) null
+        else "Was expecting a JSON Boolean but got a ${jsonValue.type()}"
+      "NUMBER" -> if (jsonValue.isNumber) null
+        else "Was expecting a JSON Number but got a ${jsonValue.type()}"
+      "STRING" -> if (jsonValue.isString) null
+        else "Was expecting a JSON String but got a ${jsonValue.type()}"
+      "ARRAY" -> if (jsonValue.isArray) null
+        else "Was expecting a JSON Array but got a ${jsonValue.type()}"
+      "OBJECT" -> if (jsonValue.isObject) null
+        else "Was expecting a JSON Object but got a ${jsonValue.type()}"
+      else -> "'${expectedType}' is not a valid JSON type"
+    }
+  }
+
+  private fun jsonCheckLength(length: Int, json: JsonValue): String? {
+    return when (json) {
+      is JsonValue.Array -> if (json.values.size == length) null
+        else "Was expecting a length of ${length}, but actual length is ${json.values.size}"
+      is JsonValue.Object -> if (json.entries.size == length) null
+        else "Was expecting a length of ${length}, but actual length is ${json.entries.size}"
+      else -> null
+    }
+  }
 }

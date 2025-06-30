@@ -1,466 +1,658 @@
 package au.com.dius.pact.core.matchers.engine.interpreter
 
 import au.com.dius.pact.core.matchers.MatchingContext
+import au.com.dius.pact.core.matchers.engine.ExecutionPlanNode
 import au.com.dius.pact.core.matchers.engine.MatchingConfiguration
+import au.com.dius.pact.core.matchers.engine.NodeResult
+import au.com.dius.pact.core.matchers.engine.NodeValue
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
+import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
+import au.com.dius.pact.core.matchers.engine.bodies.JsonPlanBuilder
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
-import spock.lang.Ignore
+import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.json.JsonValue
+import com.github.difflib.DiffUtils
 import spock.lang.Specification
 
-@SuppressWarnings(['LineLength', 'ClassSize', 'UnusedVariable'])
-@Ignore
-class ExecutionPlanInterpreterSpec extends Specification {
-  //struct TestValueResolver {
-  //  pub bytes: Vec<u8>
-  //}
-  //
-  //impl ValueResolver for TestValueResolver {
-  //  fn resolve(&self, path: &DocPath, _context: &PlanMatchingContext) -> anyhow::Result<NodeValue> {
-  //    trace!(%path, "resolve called");
-  //    Ok(NodeValue::BARRAY(self.bytes.clone()))
-  //  }
-  //}
+import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
+@SuppressWarnings(['LineLength', 'ClassSize', 'UnusedVariable', 'UnnecessaryParenthesesForMethodCallWithClosure'])
+class ExecutionPlanInterpreterSpec extends Specification {
   def 'json with null'() {
     given:
-    def path = ['$']
-//    def builder = new JsonPlanBuilder()
-    //  let context = PlanMatchingContext::default();
-    //  let content = Bytes::copy_from_slice(Value::Null.to_string().as_bytes());
-    //  let node = builder.build_plan(&content, &context).unwrap();
-    //
-    //  let resolver = TestValueResolver {
-    //    bytes: content.to_vec()
-    //  };
+    List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
     def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
     def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
-    def interpreter = new ExecutionPlanInterpreter(context)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    def content = JsonValue.Null.INSTANCE.serialise().bytes
+    ExecutionPlanNode node = builder.buildPlan(content, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY(content))
+    }
 
     when:
     def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
 
     then:
-    //  let mut buffer = String::new();
-    //  result.pretty_form(&mut buffer, 2);
-    //  assert_eq!("  %tee (
-    //    %json:parse (
-    //      $.body => BYTES(4, bnVsbA==)
-    //    ) => json:null,
-    //    :$ (
-    //      %match:equality (
-    //        json:null => json:null,
-    //        ~>$ => json:null,
-    //        NULL => NULL
-    //      ) => BOOL(true)
-    //    ) => BOOL(true)
-    //  ) => BOOL(true)", buffer);
-    false
+    result.result.value.bool == true
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(4, bnVsbA==)
+    |  ) => json:null,
+    |  :$ (
+    |    %match:equality (
+    |      json:null => json:null,
+    |      ~>$ => json:null,
+    |      NULL => NULL
+    |    ) => BOOL(true)
+    |  ) => BOOL(true)
+    |) => BOOL(true)'''.stripMargin('|')
   }
 
-  //  let content = Bytes::copy_from_slice(Value::Bool(true).to_string().as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(4, dHJ1ZQ==)
-  //    ) => json:true,
-  //    :$ (
-  //      %match:equality (
-  //        json:null => json:null,
-  //        ~>$ => json:true,
-  //        NULL => NULL
-  //      ) => ERROR(Expected true (Boolean) to be equal to null (Null))
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)", buffer);
-  //
-  //  let content = Bytes::copy_from_slice("{".as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(1, ew==)
-  //    ) => ERROR(json parse error - EOF while parsing an object at line 1 column 1),
-  //    :$ (
-  //      %match:equality (
-  //        json:null,
-  //        ~>$,
-  //        NULL
-  //      )
-  //    )
-  //  ) => ERROR(json parse error - EOF while parsing an object at line 1 column 1)", buffer);
-  //}
-  //
-  //#[test_log::test]
-  //fn json_with_boolean() {
-  //  let path = vec!["$".to_string()];
-  //  let builder = JsonPlanBuilder::new();
-  //  let context = PlanMatchingContext::default();
-  //  let content = Bytes::copy_from_slice(Value::Bool(true).to_string().as_bytes());
-  //  let node = builder.build_plan(&content, &context).unwrap();
-  //
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(4, dHJ1ZQ==)
-  //    ) => json:true,
-  //    :$ (
-  //      %match:equality (
-  //        json:true => json:true,
-  //        ~>$ => json:true,
-  //        NULL => NULL
-  //      ) => BOOL(true)
-  //    ) => BOOL(true)
-  //  ) => BOOL(true)", buffer);
-  //
-  //  let content = Bytes::copy_from_slice(Value::Bool(false).to_string().as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(5, ZmFsc2U=)
-  //    ) => json:false,
-  //    :$ (
-  //      %match:equality (
-  //        json:true => json:true,
-  //        ~>$ => json:false,
-  //        NULL => NULL
-  //      ) => ERROR(Expected false (Boolean) to be equal to true (Boolean))
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)", buffer);
-  //}
-  //
-  //#[test_log::test]
-  //fn json_with_empty_array() {
-  //  let path = vec!["$".to_string()];
-  //  let builder = JsonPlanBuilder::new();
-  //  let context = PlanMatchingContext::default();
-  //  let content = Bytes::copy_from_slice(Value::Array(vec![]).to_string().as_bytes());
-  //  let node = builder.build_plan(&content, &context).unwrap();
-  //
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(2, W10=)
-  //    ) => json:[],
-  //    :$ (
-  //      %json:expect:empty (
-  //        'ARRAY' => 'ARRAY',
-  //        ~>$ => json:[]
-  //      ) => BOOL(true)
-  //    ) => BOOL(true)
-  //  ) => BOOL(true)", buffer);
-  //
-  //  let content = Bytes::copy_from_slice(Value::Bool(false).to_string().as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(5, ZmFsc2U=)
-  //    ) => json:false,
-  //    :$ (
-  //      %json:expect:empty (
-  //        'ARRAY' => 'ARRAY',
-  //        ~>$ => json:false
-  //      ) => ERROR(Was expecting a JSON Array but got a Boolean)
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)", buffer);
-  //
-  //  let content = Bytes::copy_from_slice(Value::Array(vec![Value::Bool(true)]).to_string().as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(6, W3RydWVd)
-  //    ) => json:[true],
-  //    :$ (
-  //      %json:expect:empty (
-  //        'ARRAY' => 'ARRAY',
-  //        ~>$ => json:[true]
-  //      ) => ERROR(Expected JSON Array ([true]) to be empty)
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)", buffer);
-  //}
-  //
-  //#[test_log::test]
-  //fn json_with_array() {
-  //  let path = vec!["$".to_string()];
-  //  let builder = JsonPlanBuilder::new();
-  //  let context = PlanMatchingContext::default();
-  //  let content = Bytes::copy_from_slice(json!([1, 2, 3]).to_string().as_bytes());
-  //  let node = builder.build_plan(&content, &context).unwrap();
-  //
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(7, WzEsMiwzXQ==)
-  //    ) => json:[1,2,3],
-  //    :$ (
-  //      %json:match:length (
-  //        'ARRAY' => 'ARRAY',
-  //        UINT(3) => UINT(3),
-  //        ~>$ => json:[1,2,3]
-  //      ) => BOOL(true),
-  //      :$[0] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[0] => json:1
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            json:1 => json:1,
-  //            ~>$[0] => json:1,
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      :$[1] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[1] => json:2
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            json:2 => json:2,
-  //            ~>$[1] => json:2,
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      :$[2] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[2] => json:3
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            json:3 => json:3,
-  //            ~>$[2] => json:3,
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true)
-  //    ) => BOOL(true)
-  //  ) => BOOL(true)", buffer);
-  //
-  //  let content = Bytes::copy_from_slice(Value::Bool(false).to_string().as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(5, ZmFsc2U=)
-  //    ) => json:false,
-  //    :$ (
-  //      %json:match:length (
-  //        'ARRAY' => 'ARRAY',
-  //        UINT(3) => UINT(3),
-  //        ~>$ => json:false
-  //      ) => ERROR(Was expecting a JSON Array but got a Boolean),
-  //      :$[0] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[0] => NULL
-  //          ) => BOOL(false),
-  //          %match:equality (
-  //            json:1,
-  //            ~>$[0],
-  //            NULL
-  //          )
-  //        ) => BOOL(false)
-  //      ) => BOOL(false),
-  //      :$[1] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[1] => NULL
-  //          ) => BOOL(false),
-  //          %match:equality (
-  //            json:2,
-  //            ~>$[1],
-  //            NULL
-  //          )
-  //        ) => BOOL(false)
-  //      ) => BOOL(false),
-  //      :$[2] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[2] => NULL
-  //          ) => BOOL(false),
-  //          %match:equality (
-  //            json:3,
-  //            ~>$[2],
-  //            NULL
-  //          )
-  //        ) => BOOL(false)
-  //      ) => BOOL(false)
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)", buffer);
-  //
-  //  let content = Bytes::copy_from_slice(Value::Array(vec![Value::Bool(true)]).to_string().as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(6, W3RydWVd)
-  //    ) => json:[true],
-  //    :$ (
-  //      %json:match:length (
-  //        'ARRAY' => 'ARRAY',
-  //        UINT(3) => UINT(3),
-  //        ~>$ => json:[true]
-  //      ) => ERROR(Was expecting a length of 3, but actual length is 1),
-  //      :$[0] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[0] => json:true
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            json:1 => json:1,
-  //            ~>$[0] => json:true,
-  //            NULL => NULL
-  //          ) => ERROR(Expected true (Boolean) to be equal to 1 (Integer))
-  //        ) => BOOL(false)
-  //      ) => BOOL(false),
-  //      :$[1] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[1] => NULL
-  //          ) => BOOL(false),
-  //          %match:equality (
-  //            json:2,
-  //            ~>$[1],
-  //            NULL
-  //          )
-  //        ) => BOOL(false)
-  //      ) => BOOL(false),
-  //      :$[2] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[2] => NULL
-  //          ) => BOOL(false),
-  //          %match:equality (
-  //            json:3,
-  //            ~>$[2],
-  //            NULL
-  //          )
-  //        ) => BOOL(false)
-  //      ) => BOOL(false)
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)", buffer);
-  //
-  //  let content = Bytes::copy_from_slice(json!([1, 3, 3]).to_string().as_bytes());
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
-  //  assert_eq!("  %tee (
-  //    %json:parse (
-  //      $.body => BYTES(7, WzEsMywzXQ==)
-  //    ) => json:[1,3,3],
-  //    :$ (
-  //      %json:match:length (
-  //        'ARRAY' => 'ARRAY',
-  //        UINT(3) => UINT(3),
-  //        ~>$ => json:[1,3,3]
-  //      ) => BOOL(true),
-  //      :$[0] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[0] => json:1
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            json:1 => json:1,
-  //            ~>$[0] => json:1,
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      :$[1] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[1] => json:3
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            json:2 => json:2,
-  //            ~>$[1] => json:3,
-  //            NULL => NULL
-  //          ) => ERROR(Expected 3 (Integer) to be equal to 2 (Integer))
-  //        ) => BOOL(false)
-  //      ) => BOOL(false),
-  //      :$[2] (
-  //        %if (
-  //          %check:exists (
-  //            ~>$[2] => json:3
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            json:3 => json:3,
-  //            ~>$[2] => json:3,
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true)
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)", buffer);
-  //}
-  //
+  def 'json with null mismatch'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    def content = JsonValue.Null.INSTANCE.serialise().bytes
+    ExecutionPlanNode node = builder.buildPlan(content, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('true'.bytes))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result.value.bool == false
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(4, dHJ1ZQ==)
+    |  ) => json:true,
+    |  :$ (
+    |    %match:equality (
+    |      json:null => json:null,
+    |      ~>$ => json:true,
+    |      NULL => NULL
+    |    ) => ERROR(Expected true (Boolean) to be equal to null (Null))
+    |  ) => BOOL(false)
+    |) => BOOL(false)'''.stripMargin('|')
+  }
+
+  def 'invalid json'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    def content = JsonValue.Null.INSTANCE.serialise().bytes
+    ExecutionPlanNode node = builder.buildPlan(content, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('{'.bytes))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result instanceof NodeResult.ERROR
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(1, ew==)
+    |  ) => ERROR(json parse error: Invalid Json document (1:2) - found end of document while parsing object),
+    |  :$ (
+    |    %match:equality (
+    |      json:null,
+    |      ~>$,
+    |      NULL
+    |    )
+    |  )
+    |) => ERROR(json parse error: Invalid Json document (1:2) - found end of document while parsing object)'''
+      .stripMargin('|')
+  }
+
+  def 'json with boolean'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    def content = JsonValue.True.INSTANCE.serialise().bytes
+    ExecutionPlanNode node = builder.buildPlan(content, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY(content))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result.value.bool == true
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(4, dHJ1ZQ==)
+    |  ) => json:true,
+    |  :$ (
+    |    %match:equality (
+    |      json:true => json:true,
+    |      ~>$ => json:true,
+    |      NULL => NULL
+    |    ) => BOOL(true)
+    |  ) => BOOL(true)
+    |) => BOOL(true)'''.stripMargin('|')
+  }
+
+  def 'json with boolean mismatch'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    def content = JsonValue.True.INSTANCE.serialise().bytes
+    ExecutionPlanNode node = builder.buildPlan(content, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('false'.bytes))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result.value.bool == false
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(5, ZmFsc2U=)
+    |  ) => json:false,
+    |  :$ (
+    |    %match:equality (
+    |      json:true => json:true,
+    |      ~>$ => json:false,
+    |      NULL => NULL
+    |    ) => ERROR(Expected false (Boolean) to be equal to true (Boolean))
+    |  ) => BOOL(false)
+    |) => BOOL(false)'''.stripMargin('|')
+  }
+
+  def 'json with empty array with incorrect type'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    ExecutionPlanNode node = builder.buildPlan('[]'.bytes, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('false'.bytes))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result.value.bool == false
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(5, ZmFsc2U=)
+    |  ) => json:false,
+    |  :$ (
+    |    %json:expect:empty (
+    |      'ARRAY' => 'ARRAY',
+    |      ~>$ => json:false
+    |    ) => ERROR(Was expecting a JSON Array but got a Boolean)
+    |  ) => BOOL(false)
+    |) => BOOL(false)'''.stripMargin('|')
+  }
+
+  def 'json with empty array'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    ExecutionPlanNode node = builder.buildPlan('[]'.bytes, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('[]'.bytes))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result.value.bool == true
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(2, W10=)
+    |  ) => json:[],
+    |  :$ (
+    |    %json:expect:empty (
+    |      'ARRAY' => 'ARRAY',
+    |      ~>$ => json:[]
+    |    ) => BOOL(true)
+    |  ) => BOOL(true)
+    |) => BOOL(true)'''.stripMargin('|')
+  }
+
+  def 'json with empty array mismatch'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    ExecutionPlanNode node = builder.buildPlan('[]'.bytes, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('[true]'.bytes))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result.value.bool == false
+    prettyResult == '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(6, W3RydWVd)
+    |  ) => json:[true],
+    |  :$ (
+    |    %json:expect:empty (
+    |      'ARRAY' => 'ARRAY',
+    |      ~>$ => json:[true]
+    |    ) => ERROR(Expected JSON Array ([true]) to be empty)
+    |  ) => BOOL(false)
+    |) => BOOL(false)'''.stripMargin('|')
+  }
+
+  def 'json with array'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    ExecutionPlanNode node = builder.buildPlan('[1, 2, 3]'.bytes, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('[1,2,3]'.bytes))
+    }
+
+    def expected = '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(7, WzEsMiwzXQ==)
+    |  ) => json:[1,2,3],
+    |  :$ (
+    |    %json:match:length (
+    |      'ARRAY' => 'ARRAY',
+    |      UINT(3) => UINT(3),
+    |      ~>$ => json:[1,2,3]
+    |    ) => BOOL(true),
+    |    :$[0] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[0] => json:1
+    |        ) => BOOL(true),
+    |        %match:equality (
+    |          json:1 => json:1,
+    |          ~>$[0] => json:1,
+    |          NULL => NULL
+    |        ) => BOOL(true)
+    |      ) => BOOL(true)
+    |    ) => BOOL(true),
+    |    :$[1] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[1] => json:2
+    |        ) => BOOL(true),
+    |        %match:equality (
+    |          json:2 => json:2,
+    |          ~>$[1] => json:2,
+    |          NULL => NULL
+    |        ) => BOOL(true)
+    |      ) => BOOL(true)
+    |    ) => BOOL(true),
+    |    :$[2] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[2] => json:3
+    |        ) => BOOL(true),
+    |        %match:equality (
+    |          json:3 => json:3,
+    |          ~>$[2] => json:3,
+    |          NULL => NULL
+    |        ) => BOOL(true)
+    |      ) => BOOL(true)
+    |    ) => BOOL(true)
+    |  ) => BOOL(true)
+    |) => BOOL(true)'''.stripMargin('|')
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+    def patch = DiffUtils.diff(prettyResult, expected, null)
+    def diff = generateUnifiedDiff('', '', prettyResult.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    result.result.value.bool == true
+    diff == ''
+  }
+
+  def 'json with array with incorrect type'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    ExecutionPlanNode node = builder.buildPlan('[1, 2, 3]'.bytes, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('false'.bytes))
+    }
+
+    def expected = '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(5, ZmFsc2U=)
+    |  ) => json:false,
+    |  :$ (
+    |    %json:match:length (
+    |      'ARRAY' => 'ARRAY',
+    |      UINT(3) => UINT(3),
+    |      ~>$ => json:false
+    |    ) => ERROR(Was expecting a JSON Array but got a Boolean),
+    |    :$[0] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[0] => NULL
+    |        ) => BOOL(false),
+    |        %match:equality (
+    |          json:1,
+    |          ~>$[0],
+    |          NULL
+    |        )
+    |      ) => BOOL(false)
+    |    ) => BOOL(false),
+    |    :$[1] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[1] => NULL
+    |        ) => BOOL(false),
+    |        %match:equality (
+    |          json:2,
+    |          ~>$[1],
+    |          NULL
+    |        )
+    |      ) => BOOL(false)
+    |    ) => BOOL(false),
+    |    :$[2] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[2] => NULL
+    |        ) => BOOL(false),
+    |        %match:equality (
+    |          json:3,
+    |          ~>$[2],
+    |          NULL
+    |        )
+    |      ) => BOOL(false)
+    |    ) => BOOL(false)
+    |  ) => BOOL(false)
+    |) => BOOL(false)'''.stripMargin('|')
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+    def patch = DiffUtils.diff(prettyResult, expected, null)
+    def diff = generateUnifiedDiff('', '', prettyResult.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    result.result.value.bool == false
+    diff == ''
+  }
+
+  def 'json with array mismatch with length and type'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    ExecutionPlanNode node = builder.buildPlan('[1, 2, 3]'.bytes, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('[true]'.bytes))
+    }
+
+    def expected = '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(6, W3RydWVd)
+    |  ) => json:[true],
+    |  :$ (
+    |    %json:match:length (
+    |      'ARRAY' => 'ARRAY',
+    |      UINT(3) => UINT(3),
+    |      ~>$ => json:[true]
+    |    ) => ERROR(Was expecting a length of 3, but actual length is 1),
+    |    :$[0] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[0] => json:true
+    |        ) => BOOL(true),
+    |        %match:equality (
+    |          json:1 => json:1,
+    |          ~>$[0] => json:true,
+    |          NULL => NULL
+    |        ) => ERROR(Expected true (Boolean) to be equal to 1 (Integer))
+    |      ) => BOOL(false)
+    |    ) => BOOL(false),
+    |    :$[1] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[1] => NULL
+    |        ) => BOOL(false),
+    |        %match:equality (
+    |          json:2,
+    |          ~>$[1],
+    |          NULL
+    |        )
+    |      ) => BOOL(false)
+    |    ) => BOOL(false),
+    |    :$[2] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[2] => NULL
+    |        ) => BOOL(false),
+    |        %match:equality (
+    |          json:3,
+    |          ~>$[2],
+    |          NULL
+    |        )
+    |      ) => BOOL(false)
+    |    ) => BOOL(false)
+    |  ) => BOOL(false)
+    |) => BOOL(false)'''.stripMargin('|')
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+    def patch = DiffUtils.diff(prettyResult, expected, null)
+    def diff = generateUnifiedDiff('', '', prettyResult.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    result.result.value.bool == false
+    diff == ''
+  }
+
+  def 'json with array mismatch with value'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def matchingRules = new MatchingRuleCategory('test')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = JsonPlanBuilder.INSTANCE
+    ExecutionPlanNode node = builder.buildPlan('[1, 2, 3]'.bytes, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY('[1,3,3]'.bytes))
+    }
+
+    def expected = '''%tee (
+    |  %json:parse (
+    |    $.body => BYTES(7, WzEsMywzXQ==)
+    |  ) => json:[1,3,3],
+    |  :$ (
+    |    %json:match:length (
+    |      'ARRAY' => 'ARRAY',
+    |      UINT(3) => UINT(3),
+    |      ~>$ => json:[1,3,3]
+    |    ) => BOOL(true),
+    |    :$[0] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[0] => json:1
+    |        ) => BOOL(true),
+    |        %match:equality (
+    |          json:1 => json:1,
+    |          ~>$[0] => json:1,
+    |          NULL => NULL
+    |        ) => BOOL(true)
+    |      ) => BOOL(true)
+    |    ) => BOOL(true),
+    |    :$[1] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[1] => json:3
+    |        ) => BOOL(true),
+    |        %match:equality (
+    |          json:2 => json:2,
+    |          ~>$[1] => json:3,
+    |          NULL => NULL
+    |        ) => ERROR(Expected 3 (Integer) to be equal to 2 (Integer))
+    |      ) => BOOL(false)
+    |    ) => BOOL(false),
+    |    :$[2] (
+    |      %if (
+    |        %check:exists (
+    |          ~>$[2] => json:3
+    |        ) => BOOL(true),
+    |        %match:equality (
+    |          json:3 => json:3,
+    |          ~>$[2] => json:3,
+    |          NULL => NULL
+    |        ) => BOOL(true)
+    |      ) => BOOL(true)
+    |    ) => BOOL(true)
+    |  ) => BOOL(false)
+    |) => BOOL(false)'''.stripMargin('|')
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+    def patch = DiffUtils.diff(prettyResult, expected, null)
+    def diff = generateUnifiedDiff('', '', prettyResult.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    result.result.value.bool == false
+    diff == ''
+  }
+
   //#[test_log::test]
   //fn very_simple_xml() {
   //  let path = vec!["$".to_string()];

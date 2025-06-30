@@ -3,18 +3,6 @@ package au.com.dius.pact.core.matchers.engine
 import au.com.dius.pact.core.support.Result
 import java.util.Base64
 
-//  /// If the result is a number, returns it
-//  pub fn as_number(&self) -> Option<u64> {
-//    match self {
-//      NodeResult::OK => None,
-//      NodeResult::VALUE(val) => match val {
-//        NodeValue::UINT(ui) => Some(*ui),
-//        _ => None
-//      }
-//      NodeResult::ERROR(_) => None
-//    }
-//  }
-//
 //  /// If the result is a list of Strings, returns it
 //  pub fn as_slist(&self) -> Option<Vec<String>> {
 //    match self {
@@ -158,6 +146,19 @@ sealed class NodeResult {
   fun asValue(): NodeValue? {
     return if (this is VALUE) {
       value
+    } else {
+      null
+    }
+  }
+
+  /** If the result is a number, returns it */
+  fun asNumber(): UInt? {
+    return if (this is VALUE) {
+      if (this.value is NodeValue.UINT) {
+        this.value.uint
+      } else {
+        null
+      }
     } else {
       null
     }
