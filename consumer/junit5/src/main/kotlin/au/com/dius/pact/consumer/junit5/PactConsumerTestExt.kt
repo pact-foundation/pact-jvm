@@ -24,13 +24,12 @@ import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
-import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.MetricEvent
 import au.com.dius.pact.core.support.Metrics
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser
 import au.com.dius.pact.core.support.isNotEmpty
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.extension.AfterAllCallback
@@ -41,6 +40,7 @@ import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.extension.TestWatcher
 import org.junit.platform.commons.support.AnnotationSupport
 import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
@@ -50,10 +50,13 @@ import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.full.findAnnotation
 
+private val logger = KotlinLogging.logger {}
+
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver,
-  AfterTestExecutionCallback, AfterAllCallback {
+  AfterTestExecutionCallback, AfterAllCallback, TestWatcher {
 
   private val ep: ExpressionParser = ExpressionParser()
+  private val disabledTestMethods = mutableSetOf<String>()
 
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val providers = lookupProviderInfo(extensionContext)
@@ -364,7 +367,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     val providerInfo = when {
       store["providers"] != null -> store["providers"] as List<Pair<ProviderInfo, List<String>>>
       else -> {
-        val methodAnnotation = pactTestForTestMethod(context)
+        val methodAnnotation = pactTestForTestMethod(context.testMethod)
         val classAnnotation = pactTestForClass(context)
 
         var providerInfo = when {
@@ -473,12 +476,16 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       null
     }
 
-  private fun pactTestForTestMethod(context: ExtensionContext) =
-    if (context.testMethod.isPresent &&
-      AnnotationSupport.isAnnotated(context.testMethod.get(), PactTestFor::class.java)) {
-      val testMethod = context.testMethod.get()
-      logger.debug { "Found @PactTestFor annotation on test method $testMethod" }
-      AnnotationSupport.findAnnotation(testMethod, PactTestFor::class.java).get()
+  private fun pactTestForTestMethod(method: Optional<Method>) =
+    if (method.isPresent) {
+      val testMethod = method.get()
+      val annotation = AnnotationSupport.findAnnotation(testMethod, PactTestFor::class.java)
+      if (annotation.isPresent) {
+        logger.debug { "Found @PactTestFor annotation on test method $testMethod" }
+        annotation.get()
+      } else {
+        null
+      }
     } else {
       null
     }
@@ -714,7 +721,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         HierarchyTraversalMode.TOP_DOWN)
       if (executedFragments.size < methods.size) {
         val nonExecutedMethods = (methods - executedFragments).filter {
-          !isAnnotated(it, Disabled::class.java)
+          !isDisabled(it, context)
         }.joinToString(", ") { it.declaringClass.simpleName + "." + it.name }
         if (nonExecutedMethods.isNotEmpty()) {
           throw AssertionError(
@@ -725,7 +732,40 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     }
   }
 
-  companion object : KLogging() {
+  private fun isDisabled(method: Method, context: ExtensionContext): Boolean {
+    return isAnnotated(method, Disabled::class.java) ||
+      isTestMethodsDisabled(method, context)
+  }
+
+  private fun isTestMethodsDisabled(
+    pactMethod: Method,
+    context: ExtensionContext
+  ): Boolean {
+    val testMethod = context.requiredTestClass.declaredMethods
+      .find { method ->
+        val annotation = pactTestForTestMethod(Optional.of(method))
+        if (annotation != null) {
+          annotation.pactMethod == pactMethod.name || annotation.pactMethods.contains(pactMethod.name)
+        } else {
+          false
+        }
+      }
+    return if (testMethod != null) {
+      disabledTestMethods.contains(testMethod.name)
+    } else false
+  }
+
+  override fun testDisabled(
+    context: ExtensionContext?,
+    reason: Optional<String?>?
+  ) {
+    if (context != null && context.testMethod.isPresent) {
+      disabledTestMethods.add(context.testMethod.get().name)
+    }
+    super.testDisabled(context, reason)
+  }
+
+  companion object {
     val NAMESPACE: ExtensionContext.Namespace = ExtensionContext.Namespace.create("pact-jvm")
   }
 }
