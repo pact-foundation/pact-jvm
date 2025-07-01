@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.BuiltToolConfig
 import groovy.json.JsonSlurper
 import kotlin.Pair
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.mockito.Mockito
@@ -537,5 +538,106 @@ class PactConsumerTestExtSpec extends Specification {
     expect:
     testExt.setupPactForTest(provider, ['pactMethod1', 'pactMethod2'], mockContext).interactions*.description ==
       ['interaction 1', 'interaction 2']
+  }
+
+  static class TestSetupDisabled {
+    @Pact(consumer = 'consumer1')
+    RequestResponsePact method1(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 1')
+        .path('/one')
+        .willRespondWith()
+        .toPact()
+    }
+
+    @Pact(consumer = 'consumer1')
+    @Disabled
+    RequestResponsePact method2(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 2')
+        .path('/two')
+        .willRespondWith()
+        .toPact()
+    }
+
+    @Pact(consumer = 'consumer1')
+    RequestResponsePact method3(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 3')
+        .path('/three')
+        .willRespondWith()
+        .toPact()
+    }
+
+    @Pact(consumer = 'consumer1')
+    RequestResponsePact method4(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 4')
+        .path('/')
+        .willRespondWith()
+        .toPact()
+    }
+
+    @Pact(consumer = 'consumer1')
+    RequestResponsePact method5(PactDslWithProvider builder) {
+      builder
+        .uponReceiving('interaction 5')
+        .path('/')
+        .willRespondWith()
+        .toPact()
+    }
+
+    @PactTestFor(pactMethod = 'method4')
+    def testMethod1() { }
+
+    @PactTestFor(pactMethod = 'method5')
+    def testMethod2() { }
+  }
+
+  def 'isDisabled - is false for unannotated methods'() {
+    given:
+    requiredTestClass = TestSetupDisabled
+    testMethod = TestSetupDisabled.declaredMethods.find { it.name == 'method1' }
+
+    expect:
+    !testExt.isDisabled(testMethod, mockContext)
+  }
+
+  def 'isDisabled - is true if the method is annotated with @Disable'() {
+    given:
+    requiredTestClass = TestSetupDisabled
+    testMethod = TestSetupDisabled.declaredMethods.find { it.name == 'method2' }
+
+    expect:
+    testExt.isDisabled(testMethod, mockContext)
+  }
+
+  def 'isDisabled - is false if there is no associated test method'() {
+    given:
+    requiredTestClass = TestSetupDisabled
+    testMethod = TestSetupDisabled.declaredMethods.find { it.name == 'method3' }
+
+    expect:
+    !testExt.isDisabled(testMethod, mockContext)
+  }
+
+  def 'isDisabled - is true if the associated test method was disabled'() {
+    given:
+    requiredTestClass = TestSetupDisabled
+    testMethod = TestSetupDisabled.declaredMethods.find { it.name == 'method4' }
+    testExt.disabledTestMethods << 'testMethod1'
+
+    expect:
+    testExt.isDisabled(testMethod, mockContext)
+  }
+
+  def 'isDisabled - is false if the associated test method was not disabled'() {
+    given:
+    requiredTestClass = TestSetupDisabled
+    testMethod = TestSetupDisabled.declaredMethods.find { it.name == 'method5' }
+    testExt.disabledTestMethods.clear()
+
+    expect:
+    !testExt.isDisabled(testMethod, mockContext)
   }
 }
