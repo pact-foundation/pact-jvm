@@ -1,6 +1,5 @@
 package au.com.dius.pact.core.matchers.engine.interpreter
 
-import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.engine.ExecutionPlanNode
 import au.com.dius.pact.core.matchers.engine.MatchingConfiguration
 import au.com.dius.pact.core.matchers.engine.NodeResult
@@ -27,9 +26,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -67,9 +65,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -107,9 +104,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -148,9 +144,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -188,9 +183,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -228,9 +222,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -266,9 +259,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -304,9 +296,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -342,9 +333,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -421,9 +411,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -500,9 +489,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE
@@ -581,7 +569,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
     def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
 
     def builder = JsonPlanBuilder.INSTANCE

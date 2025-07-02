@@ -47,15 +47,15 @@ data class MatchingConfiguration(
 //}
 
 /** Context to store data for use in executing an execution plan. */
-open class PlanMatchingContext(
+open class PlanMatchingContext @JvmOverloads constructor(
   /** Pact the plan is for */
   val pact: V4Pact,
   /** Interaction that the plan id for */
   val interaction: V4Interaction,
-  /** Matching rules to use */
-  val matchingContext: MatchingContext,
   /** Configuration */
-  val config: MatchingConfiguration
+  val config: MatchingConfiguration,
+  /** Matching rules to use */
+  private val matchingContext: MatchingContext = MatchingContext(MatchingRuleCategory(""), config.allowUnexpectedEntries)
 ) {
 
   /** If there is a matcher defined at the path in this context */
@@ -80,8 +80,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 
@@ -94,8 +94,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 
@@ -108,8 +108,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 
@@ -122,8 +122,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 
@@ -136,8 +136,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 }

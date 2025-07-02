@@ -72,13 +72,11 @@ object V2MatchingEngine: MatchingEngine {
 
     val expectedNode = ExecutionPlanNode.valueNode(expected.path)
     val docPath = DocPath("$.path")
-    @Suppress("UnusedPrivateProperty")
     val actualNode = ExecutionPlanNode.resolveValue(docPath)
     if (context.matcherIsDefined(docPath)) {
-      @Suppress("UnusedPrivateProperty")
       val matchers = context.selectBestMatcher(docPath)
-//      planNode.add(ExecutionPlanNode.annotation(Into { "path ${matchers.generateDescription(false)}" }))
-//      planNode.add(buildMatchingRuleNode(expectedNode, actualNode, matchers, false))
+      planNode.add(ExecutionPlanNode.annotation(Into { "path ${matchers.generateDescription(false)}" }))
+      planNode.add(buildMatchingRuleNode(expectedNode, actualNode, matchers, false))
     } else {
       planNode.add(ExecutionPlanNode.annotation(Into { "path == '${expected.path}'" }))
       planNode
