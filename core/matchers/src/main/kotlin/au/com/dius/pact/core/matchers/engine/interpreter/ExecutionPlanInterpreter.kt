@@ -244,10 +244,10 @@ class ExecutionPlanInterpreter(
         //        "xml:attributes" => self.execute_xml_attributes(action, valueResolver, node, actionPath),
         "json:expect:empty" -> executeJsonExpectEmpty(action, valueResolver, node, actionPath)
         "json:match:length" -> executeJsonMatchLength(action, valueResolver, node, actionPath)
-        //        "json:expect:entries" => self.execute_json_expect_entries(action, valueResolver, node, actionPath),
+        "json:expect:entries" -> executeJsonExpectEntries(action, valueResolver, node, actionPath)
         "check:exists" -> executeCheckExists(action, valueResolver, node, actionPath)
-        //        "expect:entries" => self.execute_check_entries(action, valueResolver, node, actionPath),
-        //        "expect:only-entries" => self.execute_check_entries(action, valueResolver, node, actionPath),
+        "expect:entries" -> executeCheckEntries(action, valueResolver, node, actionPath)
+        "expect:only-entries" -> executeCheckEntries(action, valueResolver, node, actionPath)
         //        "expect:count" => self.execute_expect_count(action, valueResolver, node, actionPath),
         //        "join" => self.execute_join(action, valueResolver, node, actionPath),
         //        "join-with" => self.execute_join(action, valueResolver, node, actionPath),
@@ -763,6 +763,73 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  private fun executeJsonExpectEntries(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateThreeArgs(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (first, second, third) = result.value
+
+        val result1 = first.value().orDefault()
+        val expectedJsonType = result1.asString()
+        if (expectedJsonType == null) {
+          return node.copy(result = NodeResult.ERROR("'${result1}' is not a valid JSON type"),
+            children = mutableListOf(first, second, third))
+        }
+
+        val result2 = second.value().orDefault()
+        val keys = result2.asSList()
+        if (keys == null) {
+          return node.copy(result = NodeResult.ERROR("'${result1}' is not a list of strings"),
+            children = mutableListOf(first, second, third))
+        }
+        val expectedKeys = keys.toSet()
+
+        val result3 = third.value().orDefault()
+        val value = result3.asValue()
+        if (value == null) {
+          return node.copy(result = NodeResult.ERROR("Was expecting a JSON value, but got '${result3}'"),
+            children = mutableListOf(first, second, third))
+        }
+        val jsonValue = value.asJson()
+        if (jsonValue == null) {
+          return node.copy(result = NodeResult.ERROR("Was expecting a JSON value, but got '${value}'"),
+            children = mutableListOf(first, second, third))
+        }
+
+        val checkResult = jsonCheckType(expectedJsonType, jsonValue)
+        if (checkResult != null) {
+          return node.copy(result = NodeResult.ERROR(checkResult),
+            children = mutableListOf(first, second, third))
+        }
+
+        when (val obj = jsonValue.asObject()) {
+          is JsonValue.Object -> {
+            val actualKeys = obj.entries.keys
+            val diff = expectedKeys - actualKeys
+            if (diff.isEmpty()) {
+              node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)),
+                children = mutableListOf(first, second, third))
+            } else {
+              node.copy(result = NodeResult.ERROR(
+                "The following expected entries were missing from the actual object: ${diff.joinToString(", ")}"),
+                children = mutableListOf(first, second, third))
+            }
+          }
+          else -> {
+            node.copy(result = NodeResult.ERROR("Was expecting a JSON Object, but got ${jsonValue}"),
+              children = mutableListOf(first, second, third))
+          }
+        }
+      }
+
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
   private fun executeCheckExists(
     action: String,
     valueResolver: ValueResolver,
@@ -783,6 +850,89 @@ class ExecutionPlanInterpreter(
         node.copy(result = result, children = mutableListOf(resultNode.value))
       }
       is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
+  private fun executeCheckEntries(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(2, 1, node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val expectedKeys = result.value.first[0].value()
+          .orDefault()
+          .asValue()
+          .orDefault()
+          .asSList()
+          ?.toSet()
+          ?: emptySet()
+
+        val second = result.value.first[1].value()
+          .orDefault()
+          .asValue()
+          .orDefault()
+
+        val actionResult = when (second) {
+          is NodeValue.JSON -> {
+            when (second.json) {
+              is JsonValue.Array -> checkDiff(action, expectedKeys, second.json.values.
+                map { it.toString() }.toSet())
+              is JsonValue.Object -> checkDiff(action, expectedKeys, second.json.entries.keys)
+              else -> "'$action' can't be used with a $second node" to null
+            }
+          }
+          is NodeValue.MMAP -> checkDiff(action, expectedKeys, second.entries.keys)
+          is NodeValue.SLIST -> checkDiff(action, expectedKeys, second.items.toSet())
+          is NodeValue.STRING -> checkDiff(action, expectedKeys, setOf(second.string))
+          //          #[cfg(feature = "xml")]
+          //          NodeValue::XML(xml) => match xml {
+          //            XmlValue::Element(element) => {
+          //              let actual_keys = element.child_elements()
+          //                .map(|child| child.name())
+          //                .collect::<HashSet<_>>();
+          //              Self::check_diff(action, &expected_keys, &actual_keys)
+          //            }
+          //            _ => Err((format!("'{}' can't be used with a {:?} node", action, second), None))
+          //          }
+          else -> "'$action' can't be used with a $second node" to null
+        }
+
+        if (actionResult == null) {
+          node.copy(result = NodeResult.OK, children = (result.value.first + result.value.second).toMutableList())
+        } else {
+          logger.debug { "expect:empty failed with an error: ${actionResult.first}" }
+          if (result.value.second.isNotEmpty()) {
+            if (actionResult.second != null) {
+              pushResult(NodeResult.VALUE(NodeValue.SLIST(actionResult.second!!.toList())))
+              val errorNodeResult = walkTree(actionPath, result.value.second[0], valueResolver)
+              when (val messageValue = errorNodeResult.value().orDefault()) {
+                is NodeResult.VALUE -> {
+                  val message = messageValue.orDefault().asString() ?: ""
+                  node.copy(result = NodeResult.ERROR(message),
+                    children = (result.value.first + result.value.second).toMutableList())
+                }
+                else -> {
+                  // There was an error generating the optional message, so just return the
+                  // original error
+                  popResult()
+                  node.copy(result = NodeResult.ERROR(actionResult.first),
+                    children = (result.value.first + result.value.second).toMutableList())
+                }
+              }
+            } else {
+              node.copy(result = NodeResult.ERROR(actionResult.first),
+                children = (result.value.first + result.value.second).toMutableList())
+            }
+          } else {
+            node.copy(result = NodeResult.ERROR(actionResult.first),
+              children = (result.value.first + result.value.second).toMutableList())
+          }
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
     }
   }
 
@@ -1022,4 +1172,33 @@ class ExecutionPlanInterpreter(
       else -> null
     }
   }
+
+  private fun checkDiff(
+    action: String,
+    expectedKeys: Set<String>,
+    actualKeys: Set<String>
+  ): Pair<String, Set<String>?>? {
+    return when (action) {
+      "expect:entries" -> {
+        val diff = expectedKeys - actualKeys
+        if (diff.isEmpty()) {
+          null
+        } else {
+          val keys = NodeValue.SLIST(diff.toList())
+          "The following expected entries were missing: $keys" to diff
+        }
+      }
+      "expect:only-entries" -> {
+        val diff = actualKeys - expectedKeys
+        if (diff.isEmpty()) {
+          null
+        } else {
+          val keys = NodeValue.SLIST(diff.toList())
+          "The following unexpected entries were received: $keys" to diff
+        }
+      }
+      else -> "'$action' is not a valid action" to null
+    }
+  }
 }
+

@@ -171,40 +171,6 @@ sealed class NodeValue: Into<NodeValue> {
     }
   }
 
-//
-//  /// If this value is an XML value, returns it, otherwise returns None
-//  #[cfg(feature = "xml")]
-//  pub fn as_xml(&self) -> Option<XmlValue> {
-//    match self {
-//      NodeValue::XML(xml) => Some(xml.clone()),
-//      _ => None
-//    }
-//  }
-
-//  /// If this value is a bool value, returns it, otherwise returns None
-//  pub fn as_bool(&self) -> Option<bool> {
-//    match self {
-//      NodeValue::BOOL(b) => Some(*b),
-//      _ => None
-//    }
-//  }
-//
-//  /// If this value is an UInt value, returns it, otherwise returns None
-//  pub fn as_uint(&self) -> Option<u64> {
-//    match self {
-//      NodeValue::UINT(u) => Some(*u),
-//      _ => None
-//    }
-//  }
-//
-//  /// If this value is a string value, returns it, otherwise returns None
-//  pub fn as_slist(&self) -> Option<Vec<String>> {
-//    match self {
-//      NodeValue::SLIST(list) => Some(list.clone()),
-//      _ => None
-//    }
-//  }
-
   /** Calculates an AND of two values */
   fun and(other: NodeValue): NodeValue {
     return when (this) {
@@ -332,6 +298,7 @@ sealed class NodeValue: Into<NodeValue> {
 //    NodeValue::XML(XmlValue::Element(value.clone()))
 //  }
 //}
+
   /** If this value is a JSON value, returns it, otherwise returns null */
   fun asJson(): JsonValue? {
     return if (this is JSON) {
@@ -345,6 +312,42 @@ sealed class NodeValue: Into<NodeValue> {
   fun asString(): String? {
     return if (this is STRING) {
       string
+    } else {
+      null
+    }
+  }
+
+//  /// If this value is an XML value, returns it, otherwise returns None
+//  #[cfg(feature = "xml")]
+//  pub fn as_xml(&self) -> Option<XmlValue> {
+//    match self {
+//      NodeValue::XML(xml) => Some(xml.clone()),
+//      _ => None
+//    }
+//  }
+
+  /** If this value is a bool value, returns it, otherwise returns null */
+  fun asBool(): Boolean? {
+    return if (this is BOOL) {
+      bool
+    } else {
+      null
+    }
+  }
+
+  /** If this value is an UInt value, returns it, otherwise returns null */
+  fun asUInt(): UInt? {
+    return if (this is UINT) {
+      uint
+    } else {
+      null
+    }
+  }
+
+  /** If this value is a string list, returns it, otherwise returns null */
+  fun asSList(): List<String>? {
+    return if (this is SLIST) {
+      items
     } else {
       null
     }
@@ -418,11 +421,16 @@ sealed class NodeValue: Into<NodeValue> {
         is BOOL -> TODO()
         is ENTRY -> TODO()
         is JSON -> {
-          if (actual is JSON) {
+          if (actual is NULL || actual is JSON) {
             // TODO: need a way to pass allowUnexpectedKeys here
             val context = MatchingContext(MatchingRuleCategory("body",
               mutableMapOf("$" to MatchingRuleGroup(mutableListOf(matcher)))), true)
-            val result = JsonContentMatcher.compare(listOf("$"), expected.json, actual.json, context)
+            val actualJson = if (actual is JSON) {
+              actual.json
+            } else {
+              JsonValue.Null
+            }
+            val result = JsonContentMatcher.compare(listOf("$"), expected.json, actualJson, context)
             if (result.any { it.result.isNotEmpty() }) {
               result.joinToString(", ") { mismatches ->
                 mismatches.result.joinToString { it.mismatch  }
@@ -458,3 +466,5 @@ sealed class NodeValue: Into<NodeValue> {
     }
   }
 }
+
+fun NodeValue?.orDefault() = this ?: NodeValue.NULL

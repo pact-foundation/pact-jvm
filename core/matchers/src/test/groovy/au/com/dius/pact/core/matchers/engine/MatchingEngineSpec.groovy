@@ -1,6 +1,8 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.BodyItemMatchResult
 import au.com.dius.pact.core.matchers.BodyMatchResult
+import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.MethodMismatch
 import au.com.dius.pact.core.matchers.RequestMatchResult
@@ -13,12 +15,11 @@ import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import com.github.difflib.DiffUtils
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
-@SuppressWarnings('MethodSize')
+@SuppressWarnings(['MethodSize', 'AbcMetric'])
 class MatchingEngineSpec extends Specification {
 
   def 'simple match request test'() {
@@ -185,130 +186,6 @@ class MatchingEngineSpec extends Specification {
     mismatches == expectedMatchResult
   }
 
-  /*
-      let executed_plan = execute_request_plan(&plan, &request, &mut context)?;
-      assert_eq!(r#"(
-      :request (
-        :method (
-          #{'method == POST'},
-          %match:equality (
-            'POST' => 'POST',
-            %upper-case (
-              $.method => 'POST'
-            ) => 'POST',
-            NULL => NULL
-          ) => BOOL(true)
-        ) => BOOL(true),
-        :path (
-          #{"path == '/test'"},
-          %match:equality (
-            '/test' => '/test',
-            $.path => '/test',
-            NULL => NULL
-          ) => BOOL(true)
-        ) => BOOL(true),
-        :"query parameters" (
-          %expect:empty (
-            $.query => {},
-            %join (
-              'Expected no query parameters but got ',
-              $.query
-            )
-          ) => BOOL(true)
-        ) => BOOL(true),
-        :body (
-          %if (
-            %match:equality (
-              'application/json;charset=utf-8' => 'application/json;charset=utf-8',
-              $.content-type => 'application/json;charset=utf-8',
-              NULL => NULL,
-              %error (
-                'Body type error - ',
-                %apply ()
-              )
-            ) => BOOL(true),
-            %tee (
-              %json:parse (
-                $.body => BYTES(10, eyJiIjoiMjIifQ==)
-              ) => json:{"b":"22"},
-              :$ (
-                %json:expect:entries (
-                  'OBJECT' => 'OBJECT',
-                  ['a', 'b'] => ['a', 'b'],
-                  ~>$ => json:{"b":"22"}
-                ) => ERROR(The following expected entries were missing from the actual Object: a),
-                %expect:only-entries (
-                  ['a', 'b'] => ['a', 'b'],
-                  ~>$ => json:{"b":"22"}
-                ) => OK,
-                :$.a (
-                  %match:equality (
-                    json:100 => json:100,
-                    ~>$.a => NULL,
-                    NULL => NULL
-                  ) => ERROR(Expected null (Null) to be equal to 100 (Integer))
-                ) => BOOL(false),
-                :$.b (
-                  %match:equality (
-                    json:200.1 => json:200.1,
-                    ~>$.b => json:"22",
-                    NULL => NULL
-                  ) => ERROR(Expected '22' (String) to be equal to 200.1 (Decimal))
-                ) => BOOL(false)
-              ) => BOOL(false)
-            ) => BOOL(false)
-          ) => BOOL(false)
-        ) => BOOL(false)
-      ) => BOOL(false)
-    )
-    "#, executed_plan.pretty_form());
-
-      assert_eq!(r#"request:
-      method: method == POST - OK
-      path: path == '/test' - OK
-      query parameters: - OK
-      body:
-        $: - ERROR The following expected entries were missing from the actual Object: a
-          $.a: - ERROR Expected null (Null) to be equal to 100 (Integer)
-          $.b: - ERROR Expected '22' (String) to be equal to 200.1 (Decimal)
-    "#, executed_plan.generate_summary(false));
-
-      let mismatches: RequestMatchResult = executed_plan.into();
-      assert_eq!(RequestMatchResult {
-        method: None,
-        path: None,
-        headers: hashmap!{},
-        query: hashmap!{},
-        body: BodyMatchResult::BodyMismatches(hashmap!{
-          "$.a".to_string() => vec![
-            BodyMismatch {
-              path: "$.a".to_string(),
-              expected: None,
-              actual: None,
-              mismatch: "Expected null (Null) to be equal to 100 (Integer)".to_string()
-            }
-          ],
-          "$.b".to_string() => vec![
-            BodyMismatch {
-              path: "$.b".to_string(),
-              expected: None,
-              actual: None,
-              mismatch: "Expected '22' (String) to be equal to 200.1 (Decimal)".to_string()
-            }
-          ],
-          "$".to_string() => vec![
-            BodyMismatch {
-              path: "$".to_string(),
-              expected: None,
-              actual: None,
-              mismatch: "The following expected entries were missing from the actual Object: a".to_string()
-            }
-          ]
-        })
-      }, mismatches);
-   */
-
-  @Ignore
   def 'simple json match request test'() {
     given:
     def request = new HttpRequest('POST', '/test', [:], [:],
@@ -405,11 +282,11 @@ class MatchingEngineSpec extends Specification {
       |      %match:equality (
       |        'POST' => 'POST',
       |        %upper-case (
-      |          $.method => 'put'
-      |        ) => 'PUT',
+      |          $.method => 'POST'
+      |        ) => 'POST',
       |        NULL => NULL
-      |      ) => ERROR(Expected 'PUT' (String) to be equal to 'POST' (String))
-      |    ) => BOOL(false),
+      |      ) => BOOL(true)
+      |    ) => BOOL(true),
       |    :path (
       |      #{"path == '\\/test'"},
       |      %match:equality (
@@ -430,35 +307,61 @@ class MatchingEngineSpec extends Specification {
       |    :body (
       |      %if (
       |        %match:equality (
-      |          'text\\/plain; charset=ISO-8859-1' => 'text\\/plain; charset=ISO-8859-1',
-      |          $.content-type => 'text\\/plain; charset=ISO-8859-1',
+      |          'application/json' => 'application/json',
+      |          $.content-type => 'application/json',
       |          NULL => NULL,
       |          %error (
       |            'Body type error - ',
       |            %apply ()
       |          )
       |        ) => BOOL(true),
-      |        %match:equality (
-      |          'Some nice bit of text' => 'Some nice bit of text',
-      |          %convert:UTF8 (
-      |            $.body => BYTES(21, U29tZSBuaWNlIGJpdCBvZiB0ZXh0)
-      |          ) => 'Some nice bit of text',
-      |          NULL => NULL
-      |        ) => BOOL(true)
-      |      ) => BOOL(true)
-      |    ) => BOOL(true)
+      |        %tee (
+      |          %json:parse (
+      |            $.body => BYTES(11, eyJiIjogIjIyIn0=)
+      |          ) => json:{"b":"22"},
+      |          :$ (
+      |            %json:expect:entries (
+      |              'OBJECT' => 'OBJECT',
+      |              ['a', 'b'] => ['a', 'b'],
+      |              ~>$ => json:{"b":"22"}
+      |            ) => ERROR(The following expected entries were missing from the actual object: a),
+      |            %expect:only-entries (
+      |              ['a', 'b'] => ['a', 'b'],
+      |              ~>$ => json:{"b":"22"}
+      |            ) => OK,
+      |            :$.a (
+      |              %match:equality (
+      |                json:100 => json:100,
+      |                ~>$.a => NULL,
+      |                NULL => NULL
+      |              ) => ERROR(Expected null (Null) to be equal to 100 (Integer))
+      |            ) => BOOL(false),
+      |            :$.b (
+      |              %match:equality (
+      |                json:200.1 => json:200.1,
+      |                ~>$.b => json:"22",
+      |                NULL => NULL
+      |              ) => ERROR(Expected '22' (String) to be equal to 200.1 (Decimal))
+      |            ) => BOOL(false)
+      |          ) => BOOL(false)
+      |        ) => BOOL(false)
+      |      ) => BOOL(false)
+      |    ) => BOOL(false)
       |  ) => BOOL(false)
       |)
       |'''.stripMargin('|')
 
-    def expectedMatchResult = new RequestMatchResult(
-      new MethodMismatch('', '', "Expected 'PUT' (String) to be equal to 'POST' (String)"),
-      null,
-      [],
-      null,
-      [],
-      new BodyMatchResult(null, [])
-    )
+    def expectedMatchResult = [
+      new BodyItemMatchResult('$', [
+        new BodyMismatch(null, null, 'The following expected entries were missing from the actual Object: a', '$')
+      ]),
+      new BodyItemMatchResult('$.a', [
+        new BodyMismatch(null, null, 'Expected null (Null) to be equal to 100 (Integer)', '$.a')
+      ]),
+      new BodyItemMatchResult('$.b', [
+        new BodyMismatch(null, null, "Expected '22' (String) to be equal to 200.1 (Decimal)", '$.b')
+      ])
+    ]
 
     when:
     def plan = V2MatchingEngine.INSTANCE.buildRequestPlan(expectedRequest, context)
@@ -483,16 +386,32 @@ class MatchingEngineSpec extends Specification {
 
     then:
     summary == '''request:
-    |  method: method == POST - ERROR Expected 'PUT' (String) to be equal to 'POST' (String)
+    |  method: method == POST - OK
     |  path: path == '/test' - OK
     |  query parameters: - OK
-    |  body: - OK
+    |  body:
+    |    $: - ERROR The following expected entries were missing from the actual object: a
+    |      $.a: - ERROR Expected null (Null) to be equal to 100 (Integer)
+    |      $.b: - ERROR Expected '22' (String) to be equal to 200.1 (Decimal)
     |'''.stripMargin('|')
 
     when:
     def mismatches = executedPlan.intoRequestMatchResult()
 
     then:
-    mismatches == expectedMatchResult
+    mismatches.method == null
+    mismatches.path == null
+    mismatches.query == []
+    mismatches.cookie == null
+    mismatches.headers == []
+    mismatches.body.typeMismatch == null
+    mismatches.body.bodyResults.size() == 3
+    mismatches.body.bodyResults[0].key == '$'
+    mismatches.body.bodyResults[0].result.size() == 1
+    mismatches.body.bodyResults[0].result[0].mismatch ==
+      'The following expected entries were missing from the actual object: a'
+    mismatches.body.bodyResults[0].result[0].path == '$'
+    mismatches.body.bodyResults[1] == expectedMatchResult[1]
+    mismatches.body.bodyResults[2] == expectedMatchResult[2]
   }
 }
