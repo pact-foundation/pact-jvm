@@ -23,9 +23,8 @@ class JsonPlanBuilderSpec extends Specification {
   def setup() {
     pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     config = new MatchingConfiguration(false, false, true, false)
-    context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    context = new PlanMatchingContext(pact, interaction, config)
   }
 
   def 'json plan builder with null'() {
@@ -331,7 +330,7 @@ class JsonPlanBuilderSpec extends Specification {
     def matchingRules = new MatchingRuleCategory('body', [
       '$.a': new MatchingRuleGroup([ new RegexMatcher('^[0-9]+$') ])
     ])
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config, new MatchingContext(matchingRules, false))
 
     when:
     def node = builder.buildPlan(content.bytes, context)
@@ -386,7 +385,7 @@ class JsonPlanBuilderSpec extends Specification {
     def matchingRules = new MatchingRuleCategory('body', [
       '$.item': new MatchingRuleGroup([ new MinTypeMatcher(2) ])
     ])
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config, new MatchingContext(matchingRules, false))
 
     when:
     def node = builder.buildPlan(content.bytes, context)

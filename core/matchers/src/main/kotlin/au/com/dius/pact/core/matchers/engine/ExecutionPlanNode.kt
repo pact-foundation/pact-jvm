@@ -77,7 +77,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ACTION -> {
@@ -89,7 +89,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.VALUE -> {
@@ -97,7 +97,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE -> {
@@ -105,7 +105,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.PIPELINE -> {
@@ -116,7 +116,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE_CURRENT -> {
@@ -125,7 +125,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.SPLAT -> {
@@ -136,7 +136,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ANNOTATION -> {
@@ -189,7 +189,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ACTION -> {
@@ -207,7 +207,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.VALUE -> {
@@ -216,7 +216,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE -> {
@@ -225,7 +225,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.PIPELINE -> {
@@ -242,7 +242,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE_CURRENT -> {
@@ -252,7 +252,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.SPLAT -> {
@@ -269,7 +269,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ANNOTATION -> {
@@ -294,6 +294,7 @@ data class ExecutionPlanNode(
   }
 
   /** Return a summary of the execution to display in a console */
+  @Suppress("LongMethod")
   fun generateSummary(ansiColor: Boolean, buffer: StringBuilder, indent: Int) {
     val pad = " ".repeat(indent)
     if (nodeType is PlanNodeType.CONTAINER) {

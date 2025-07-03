@@ -11,7 +11,6 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonValue
 import com.github.difflib.DiffUtils
@@ -94,7 +93,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |      json:null => json:null,
     |      ~>$ => json:true,
     |      NULL => NULL
-    |    ) => ERROR(Expected true (Boolean) to be equal to null (Null))
+    |    ) => ERROR(Expected true \\(Boolean\\) to be equal to null \\(Null\\))
     |  ) => BOOL(false)
     |) => BOOL(false)'''.stripMargin('|')
   }
@@ -127,7 +126,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     prettyResult == '''%tee (
     |  %json:parse (
     |    $.body => BYTES(1, ew==)
-    |  ) => ERROR(json parse error: Invalid Json document (1:2) - found end of document while parsing object),
+    |  ) => ERROR(json parse error: Invalid Json document \\(1:2\\) - found end of document while parsing object),
     |  :$ (
     |    %match:equality (
     |      json:null,
@@ -135,7 +134,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |      NULL
     |    )
     |  )
-    |) => ERROR(json parse error: Invalid Json document (1:2) - found end of document while parsing object)'''
+    |) => ERROR(json parse error: Invalid Json document \\(1:2\\) - found end of document while parsing object)'''
       .stripMargin('|')
   }
 
@@ -212,7 +211,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |      json:true => json:true,
     |      ~>$ => json:false,
     |      NULL => NULL
-    |    ) => ERROR(Expected false (Boolean) to be equal to true (Boolean))
+    |    ) => ERROR(Expected false \\(Boolean\\) to be equal to true \\(Boolean\\))
     |  ) => BOOL(false)
     |) => BOOL(false)'''.stripMargin('|')
   }
@@ -323,7 +322,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |    %json:expect:empty (
     |      'ARRAY' => 'ARRAY',
     |      ~>$ => json:[true]
-    |    ) => ERROR(Expected JSON Array ([true]) to be empty)
+    |    ) => ERROR(Expected JSON Array \\([true]\\) to be empty)
     |  ) => BOOL(false)
     |) => BOOL(false)'''.stripMargin('|')
   }
@@ -519,7 +518,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:1 => json:1,
     |          ~>$[0] => json:true,
     |          NULL => NULL
-    |        ) => ERROR(Expected true (Boolean) to be equal to 1 (Integer))
+    |        ) => ERROR(Expected true \\(Boolean\\) to be equal to 1 \\(Integer\\))
     |      ) => BOOL(false)
     |    ) => BOOL(false),
     |    :$[1] (
@@ -609,7 +608,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:2 => json:2,
     |          ~>$[1] => json:3,
     |          NULL => NULL
-    |        ) => ERROR(Expected 3 (Integer) to be equal to 2 (Integer))
+    |        ) => ERROR(Expected 3 \\(Integer\\) to be equal to 2 \\(Integer\\))
     |      ) => BOOL(false)
     |    ) => BOOL(false),
     |    :$[2] (

@@ -35,6 +35,9 @@ sealed class NodeResult {
   /** Marks a node as unsuccessfully executed with an error */
   data class ERROR(val message: String): NodeResult() {
     override fun toString() = "ERROR($message)"
+
+    override fun strForm() = "ERROR(${message.replace("(", "\\(")
+      .replace(")", "\\)")})"
   }
 
   /** If this value represents a truthy value (not NULL, false ot empty) */
@@ -165,6 +168,9 @@ sealed class NodeResult {
       null
     }
   }
+
+  /** Safe form to put in the plan output */
+  open fun strForm(): String = this.toString()
 }
 
 public fun NodeResult?.or(result: NodeResult) = this?.or(result) ?: result

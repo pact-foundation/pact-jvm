@@ -10,6 +10,7 @@ import spock.lang.Specification
 
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
+@SuppressWarnings(['LineLength', 'ClassSize', 'MethodSize'])
 class HeaderMatchingSpec extends Specification {
   def 'match headers where there are none'() {
     given:
@@ -252,7 +253,7 @@ class HeaderMatchingSpec extends Specification {
       |            'b' => 'b',
       |            $.headers['HEADER-X'] => 'C',
       |            NULL => NULL
-      |          ) => ERROR(Expected 'C' (String) to be equal to 'b' (String))
+      |          ) => ERROR(Expected 'C' \\(String\\) to be equal to 'b' \\(String\\))
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (

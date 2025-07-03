@@ -23,7 +23,7 @@ import spock.lang.Specification
 
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
-@SuppressWarnings(['MethodSize', 'AbcMetric'])
+@SuppressWarnings(['MethodSize', 'AbcMetric', 'LineLength'])
 class MatchingEngineSpec extends Specification {
 
   def 'simple match request test'() {
@@ -101,7 +101,7 @@ class MatchingEngineSpec extends Specification {
       |          $.method => 'put'
       |        ) => 'PUT',
       |        NULL => NULL
-      |      ) => ERROR(Expected 'PUT' (String) to be equal to 'POST' (String))
+      |      ) => ERROR(Expected 'PUT' \\(String\\) to be equal to 'POST' \\(String\\))
       |    ) => BOOL(false),
       |    :path (
       |      #{"path == '\\/test'"},
@@ -336,14 +336,14 @@ class MatchingEngineSpec extends Specification {
       |                json:100 => json:100,
       |                ~>$.a => NULL,
       |                NULL => NULL
-      |              ) => ERROR(Expected null (Null) to be equal to 100 (Integer))
+      |              ) => ERROR(Expected null \\(Null\\) to be equal to 100 \\(Integer\\))
       |            ) => BOOL(false),
       |            :$.b (
       |              %match:equality (
       |                json:200.1 => json:200.1,
       |                ~>$.b => json:"22",
       |                NULL => NULL
-      |              ) => ERROR(Expected '22' (String) to be equal to 200.1 (Decimal))
+      |              ) => ERROR(Expected '22' \\(String\\) to be equal to 200.1 \\(Decimal\\))
       |            ) => BOOL(false)
       |          ) => BOOL(false)
       |        ) => BOOL(false)
