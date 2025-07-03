@@ -203,29 +203,28 @@ object V2MatchingEngine: MatchingEngine {
     val planNode = ExecutionPlanNode.container("headers")
     val docPath = DocPath("$.headers")
 
-  //  if let Some(headers) = &expected.headers {
-  //    if !headers.is_empty() {
-  //      let keys = headers.keys().cloned().sorted().collect_vec();
-  //      for key in &keys {
-  //        let value = headers.get(key).unwrap();
-  //        let mut item_node = ExecutionPlanNode::container(key);
-  //
-  //        let mut presence_check = ExecutionPlanNode::action("if");
-  //        let item_value = if value.len() == 1 {
-  //          NodeValue::STRING(value[0].clone())
-  //        } else {
-  //          NodeValue::SLIST(value.clone())
-  //        };
-  //        presence_check
-  //          .add(
-  //            ExecutionPlanNode::action("check:exists")
-  //              .add(ExecutionPlanNode::resolve_value(doc_path.join(key)))
-  //          );
-  //
-  //        let item_path = DocPath::root().join(key);
-  //        let path = doc_path.join(key);
-  //        if context.matcher_is_defined(&item_path) {
-  //          let matchers = context.select_best_matcher(&item_path);
+    if (expected.headers.isNotEmpty()) {
+      val keys = expected.headers.keys.sorted()
+      for (key in keys) {
+        val value = expected.headers[key]!!
+        val itemNode = ExecutionPlanNode.container(key)
+        val path = docPath.join(Into { key })
+
+        val presenceCheck = ExecutionPlanNode.action("if")
+        val itemValue = if (value.size == 1) {
+          NodeValue.STRING(value[0])
+        } else {
+          NodeValue.SLIST(value)
+        }
+        presenceCheck
+          .add(
+            ExecutionPlanNode.action("check:exists")
+              .add(ExecutionPlanNode.resolveValue(path))
+          )
+
+        val itemPath = DocPath.root().join(Into { key })
+        if (context.matcherIsDefined(itemPath)) {
+          val matchers = context.selectBestMatcher(itemPath)
   //          item_node.add(ExecutionPlanNode::annotation(format!("{} {}", key, matchers.generate_description(true))));
   //          presence_check.add(build_matching_rule_node(&ExecutionPlanNode::value_node(item_value),
   //                                                      &ExecutionPlanNode::resolve_value(&path), &matchers, true));
@@ -244,39 +243,58 @@ object V2MatchingEngine: MatchingEngine {
   //              presence_check.add(item_node);
   //            }
   //          }
-  //        } else {
-  //          item_node.add(ExecutionPlanNode::annotation(format!("{}={}", key, item_value.to_string())));
-  //          let mut item_check = ExecutionPlanNode::action("match:equality");
-  //          item_check
-  //            .add(ExecutionPlanNode::value_node(item_value))
-  //            .add(ExecutionPlanNode::resolve_value(doc_path.join(key)))
-  //            .add(ExecutionPlanNode::value_node(NodeValue::NULL));
-  //          presence_check.add(item_check);
-  //        }
-  //
-  //        item_node.add(presence_check);
-  //        plan_node.add(item_node);
-  //      }
-  //
-  //      plan_node.add(
-  //        ExecutionPlanNode::action("expect:entries")
-  //          .add(ExecutionPlanNode::action("lower-case")
-  //            .add(ExecutionPlanNode::value_node(NodeValue::SLIST(keys.clone()))))
-  //          .add(ExecutionPlanNode::resolve_value(doc_path.clone()))
-  //          .add(
-  //            ExecutionPlanNode::action("join")
-  //              .add(ExecutionPlanNode::value_node("The following expected headers were missing: "))
-  //              .add(ExecutionPlanNode::action("join-with")
-  //                .add(ExecutionPlanNode::value_node(", "))
-  //                .add(
-  //                  ExecutionPlanNode::splat()
-  //                    .add(ExecutionPlanNode::action("apply"))
-  //                )
-  //              )
-  //          )
-  //      );
-  //    }
-  //  }
+        } else {
+          itemNode.add(ExecutionPlanNode.annotation(Into { "$key=${itemValue.strForm()}" }))
+          val itemCheck = ExecutionPlanNode.action("match:equality")
+          itemCheck
+            .add(ExecutionPlanNode.valueNode(itemValue))
+            .add(ExecutionPlanNode.resolveValue(path))
+            .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+          presenceCheck.add(itemCheck)
+        }
+
+        itemNode.add(presenceCheck)
+        planNode.add(itemNode)
+      }
+
+      planNode.add(
+        ExecutionPlanNode.action("expect:entries")
+          .add(ExecutionPlanNode.action("lower-case")
+            .add(ExecutionPlanNode.valueNode(Into { NodeValue.SLIST(keys) })))
+          .add(ExecutionPlanNode.resolveValue(docPath))
+          .add(
+            ExecutionPlanNode.action("join")
+              .add(ExecutionPlanNode.valueNode("The following expected headers were missing: "))
+              .add(ExecutionPlanNode.action("join-with")
+                .add(ExecutionPlanNode.valueNode(", "))
+                .add(
+                  ExecutionPlanNode.splat()
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+              )
+          )
+      )
+
+      if (!context.config.allowUnexpectedEntries) {
+        planNode.add(
+          ExecutionPlanNode.action("expect:only-entries")
+            .add(ExecutionPlanNode.action("lower-case")
+              .add(ExecutionPlanNode.valueNode(Into { NodeValue.SLIST(keys) })))
+            .add(ExecutionPlanNode.resolveValue(docPath))
+            .add(
+              ExecutionPlanNode.action("join")
+                .add(ExecutionPlanNode.valueNode("The following headers were unexpected: "))
+                .add(ExecutionPlanNode.action("join-with")
+                  .add(ExecutionPlanNode.valueNode(", "))
+                  .add(
+                    ExecutionPlanNode.splat()
+                      .add(ExecutionPlanNode.action("apply"))
+                  )
+                )
+            )
+        )
+      }
+    }
 
     return planNode
   }

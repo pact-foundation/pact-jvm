@@ -14,25 +14,6 @@ enum class Terminator {
   CONTAINERS
 }
 
-//  /// Clones this node, replacing the result with the given one
-//  pub fn clone_with_result(&self, result: NodeResult) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: self.node_type.clone(),
-//      result: Some(result),
-//      children: self.children.clone()
-//    }
-//  }
-//
-//  /// Clones this node, replacing the result with the given one
-//  pub fn clone_with_children<I>(&self, children: I) -> ExecutionPlanNode
-//    where I: IntoIterator<Item = ExecutionPlanNode> {
-//    ExecutionPlanNode {
-//      node_type: self.node_type.clone(),
-//      result: self.result.clone(),
-//      children: children.into_iter().collect()
-//    }
-//  }
-//
 //  /// Pushes the node onto the front of the list
 //  pub fn push_node(&mut self, node: ExecutionPlanNode) {
 //    self.children.insert(0, node.into());
@@ -607,17 +588,17 @@ data class ExecutionPlanNode(
 //      children: vec![],
 //    }
 //  }
-//
-//  /// Constructor for the splat node
-//  pub fn splat() -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::SPLAT,
-//      result: None,
-//      children: vec![]
-//    }
-//  }
 
-    fun <S> annotation(description: S): ExecutionPlanNode where S: Into<String> {
+    /** Constructor for the splat node */
+    fun splat(): ExecutionPlanNode {
+      return ExecutionPlanNode(
+        PlanNodeType.SPLAT,
+        null,
+        mutableListOf()
+      )
+    }
+
+    fun <S>  annotation(description: S): ExecutionPlanNode where S: Into<String> {
       return ExecutionPlanNode(
         PlanNodeType.ANNOTATION(description.into()),
         null,

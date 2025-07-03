@@ -230,7 +230,7 @@ class ExecutionPlanInterpreter(
         //        "and" => self.execute_and(valueResolver, node, actionPath),
         //        "or" => self.execute_or(valueResolver, node, actionPath),
         "tee" -> executeTee(valueResolver, node, actionPath)
-        //        "apply" => self.execute_apply(node),
+        "apply" -> executeApply(node)
         //        "push" => self.execute_push(node),
         //        "pop" => self.execute_pop(node),
         "json:parse" -> executeJsonParse(action, valueResolver, node, actionPath)
@@ -249,8 +249,8 @@ class ExecutionPlanInterpreter(
         "expect:entries" -> executeCheckEntries(action, valueResolver, node, actionPath)
         "expect:only-entries" -> executeCheckEntries(action, valueResolver, node, actionPath)
         //        "expect:count" => self.execute_expect_count(action, valueResolver, node, actionPath),
-        //        "join" => self.execute_join(action, valueResolver, node, actionPath),
-        //        "join-with" => self.execute_join(action, valueResolver, node, actionPath),
+        "join" -> executeJoin(action, valueResolver, node, actionPath)
+        "join-with" -> executeJoin(action, valueResolver, node, actionPath)
         //        "error" => self.execute_error(action, valueResolver, node, actionPath),
         //        "header:parse" => self.execute_header_parse(action, valueResolver, node, actionPath),
         //        "for-each" => self.execute_for_each(valueResolver, node, actionPath),
@@ -912,14 +912,14 @@ class ExecutionPlanInterpreter(
                 is NodeResult.VALUE -> {
                   val message = messageValue.orDefault().asString() ?: ""
                   node.copy(result = NodeResult.ERROR(message),
-                    children = (result.value.first + result.value.second).toMutableList())
+                    children = (result.value.first + errorNodeResult).toMutableList())
                 }
                 else -> {
                   // There was an error generating the optional message, so just return the
                   // original error
                   popResult()
                   node.copy(result = NodeResult.ERROR(actionResult.first),
-                    children = (result.value.first + result.value.second).toMutableList())
+                    children = (result.value.first + errorNodeResult).toMutableList())
                 }
               }
             } else {
@@ -933,6 +933,50 @@ class ExecutionPlanInterpreter(
         }
       }
       is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeJoin(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    val (children, values) = when (val result = evaluateChildren(valueResolver, node, actionPath)) {
+      is Result.Ok -> {
+        result.value.first to result.value.second.flatMap {
+          when (it) {
+            is NodeValue.BARRAY -> listOf(it.strForm())
+            is NodeValue.BOOL -> listOf(it.bool.toString())
+            is NodeValue.JSON -> listOf(it.json.toString())
+            is NodeValue.MMAP -> listOf(it.strForm())
+            is NodeValue.NAMESPACED -> listOf(it.strForm())
+            is NodeValue.SLIST -> it.items
+            is NodeValue.STRING -> listOf(it.string)
+            is NodeValue.UINT -> listOf(it.uint.toString())
+            else -> emptyList()
+          }
+        }
+      }
+      is Result.Err -> return result.error
+    }
+
+    val result = if (action == "join-with" && values.isNotEmpty()) {
+      val first = values[0]
+      values.drop(1).joinToString(first)
+    } else {
+      values.joinToString("")
+    }
+
+    return node.copy(result = NodeResult.VALUE(NodeValue.STRING(result)),
+      children = children.toMutableList())
+  }
+
+  private fun executeApply(node: ExecutionPlanNode): ExecutionPlanNode {
+    return if (valueStack.isNotEmpty()) {
+      node.copy(result = valueStack.last())
+    } else {
+      node.copy(result = NodeResult.ERROR("No value to apply (stack is empty)"))
     }
   }
 
@@ -1184,8 +1228,7 @@ class ExecutionPlanInterpreter(
         if (diff.isEmpty()) {
           null
         } else {
-          val keys = NodeValue.SLIST(diff.toList())
-          "The following expected entries were missing: $keys" to diff
+          "The following expected entries were missing: ${diff.joinToString(", ")}" to diff
         }
       }
       "expect:only-entries" -> {
@@ -1193,8 +1236,7 @@ class ExecutionPlanInterpreter(
         if (diff.isEmpty()) {
           null
         } else {
-          val keys = NodeValue.SLIST(diff.toList())
-          "The following unexpected entries were received: $keys" to diff
+          "The following unexpected entries were received: ${diff.joinToString(", ")}" to diff
         }
       }
       else -> "'$action' is not a valid action" to null

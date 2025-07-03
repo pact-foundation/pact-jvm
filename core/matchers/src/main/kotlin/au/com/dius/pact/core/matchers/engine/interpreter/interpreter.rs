@@ -214,22 +214,6 @@
     }
   }
 
-  fn execute_apply(&mut self, node: &ExecutionPlanNode) -> ExecutionPlanNode {
-    if let Some(value) = self.value_stack.last() {
-      ExecutionPlanNode {
-        node_type: node.node_type.clone(),
-        result: value.clone(),
-        children: node.children.clone()
-      }
-    } else {
-      ExecutionPlanNode {
-        node_type: node.node_type.clone(),
-        result: Some(NodeResult::ERROR("No value to apply (stack is empty)".to_string())),
-        children: node.children.clone()
-      }
-    }
-  }
-
   fn execute_to_string(
     &mut self,
     _action: &str,
@@ -321,46 +305,6 @@
           children: node.children.clone()
         }
       }
-    }
-  }
-
-  fn execute_join(
-    &mut self,
-    action: &str,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    let (children, str_values) = match self.evaluate_children(value_resolver, node, path) {
-      Ok((children, values)) => {
-        (children, values.iter().flat_map(|v| {
-          match v {
-            NodeValue::STRING(s) => vec![s.clone()],
-            NodeValue::BOOL(b) => vec![b.to_string()],
-            NodeValue::MMAP(_) => vec![v.str_form()],
-            NodeValue::SLIST(list) => list.clone(),
-            NodeValue::BARRAY(_) => vec![v.str_form()],
-            NodeValue::NAMESPACED(_, _) => vec![v.str_form()],
-            NodeValue::UINT(u) => vec![u.to_string()],
-            NodeValue::JSON(json) => vec![json.to_string()],
-            _ => vec![]
-          }
-        }).collect_vec())
-      },
-      Err(value) => return value
-    };
-
-    let result = if action == "join-with" && !str_values.is_empty() {
-      let first = &str_values[0];
-      str_values.iter().dropping(1).join(first.as_str())
-    } else {
-      str_values.iter().join("")
-    };
-
-    ExecutionPlanNode {
-      node_type: node.node_type.clone(),
-      result: Some(NodeResult::VALUE(NodeValue::STRING(result))),
-      children
     }
   }
 

@@ -122,7 +122,7 @@ open class PlanMatchingContext @JvmOverloads constructor(
     return PlanMatchingContext(
       pact,
       interaction,
-      config,
+      config.copy(allowUnexpectedEntries = true),
       MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
