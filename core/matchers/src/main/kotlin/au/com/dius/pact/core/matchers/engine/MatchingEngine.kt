@@ -222,12 +222,11 @@ object V2MatchingEngine: MatchingEngine {
               .add(ExecutionPlanNode.resolveValue(path))
           )
 
-        val itemPath = DocPath.root().join(Into { key })
-        if (context.matcherIsDefined(itemPath)) {
-          val matchers = context.selectBestMatcher(itemPath)
-  //          item_node.add(ExecutionPlanNode::annotation(format!("{} {}", key, matchers.generate_description(true))));
-  //          presence_check.add(build_matching_rule_node(&ExecutionPlanNode::value_node(item_value),
-  //                                                      &ExecutionPlanNode::resolve_value(&path), &matchers, true));
+        if (context.matcherIsDefined(path)) {
+          val matchers = context.selectBestMatcher(path)
+          itemNode.add(ExecutionPlanNode.annotation(Into { "$key ${matchers.generateDescription(true)}" }))
+          presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(itemValue),
+            ExecutionPlanNode.resolveValue(path), matchers, true))
   //        } else if PARAMETERISED_HEADERS.contains(&key.to_lowercase().as_str()) {
   //          item_node.add(ExecutionPlanNode::annotation(format!("{}={}", key, item_value.to_string())));
   //          if value.len() == 1 {
