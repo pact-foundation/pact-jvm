@@ -198,7 +198,7 @@ object V2MatchingEngine: MatchingEngine {
     return planNode
   }
 
-  @Suppress("UnusedParameter")
+  @Suppress("LongMethod")
   fun setupHeaderPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("headers")
     val docPath = DocPath("$.headers")

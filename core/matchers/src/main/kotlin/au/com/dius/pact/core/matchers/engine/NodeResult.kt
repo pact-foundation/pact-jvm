@@ -110,6 +110,7 @@ sealed class NodeResult {
   }
 
   /** Converts the result value to a string */
+  @Suppress("CyclomaticComplexMethod")
   fun asString(): String? {
     return when (this) {
       OK -> null

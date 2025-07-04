@@ -22,6 +22,7 @@ enum class Terminator {
 /**
  * Node in an executable plan tree
  */
+@Suppress("TooManyFunctions")
 data class ExecutionPlanNode(
   /** Type of the node */
   val nodeType: PlanNodeType,
@@ -294,7 +295,7 @@ data class ExecutionPlanNode(
   }
 
   /** Return a summary of the execution to display in a console */
-  @Suppress("LongMethod")
+  @Suppress("LongMethod", "CyclomaticComplexMethod", "NestedBlockDepth")
   fun generateSummary(ansiColor: Boolean, buffer: StringBuilder, indent: Int) {
     val pad = " ".repeat(indent)
     if (nodeType is PlanNodeType.CONTAINER) {

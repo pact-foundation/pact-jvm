@@ -449,9 +449,8 @@ sealed class NodeValue: Into<NodeValue> {
             }
             val result = JsonContentMatcher.compare(listOf("$"), expected.json, actualJson, context.matchingContext)
             if (result.any { it.result.isNotEmpty() }) {
-              result.joinToString(", ") { mismatches ->
-                mismatches.result.joinToString { it.mismatch  }
-              }
+              result.flatMap { mismatches -> mismatches.result }
+                .joinToString(", ") { it.mismatch }
             } else {
               null
             }

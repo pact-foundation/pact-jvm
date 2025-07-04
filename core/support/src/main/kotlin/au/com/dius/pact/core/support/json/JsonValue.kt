@@ -289,8 +289,8 @@ sealed class JsonValue {
         is Decimal -> "Decimal"
         is Integer -> "Integer"
         is StringValue -> "String"
-        is True -> "True"
-        is False -> "False"
+        is True -> "Boolean"
+        is False -> "Boolean"
         is Array -> "Array"
         is Object -> "Object"
       }
