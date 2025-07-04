@@ -1,11 +1,14 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.BodyItemMatchResult
 import au.com.dius.pact.core.matchers.BodyMismatchFactory
 import au.com.dius.pact.core.matchers.JsonContentMatcher
+import au.com.dius.pact.core.matchers.Matchers.compareLists
 import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.domatch
 import au.com.dius.pact.core.matchers.matchType
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
@@ -355,6 +358,25 @@ sealed class NodeValue: Into<NodeValue> {
 
   override fun into() = this
 
+  /**
+   * Returns the inner value if the NodeValue
+   */
+  fun unwrap(): Any? {
+    return when (this) {
+      is BARRAY -> this.bytes
+      is BOOL -> this.bool
+      is ENTRY -> Pair(this.key, this.value)
+      is JSON -> this.json
+      is LIST -> this.items.map { it.unwrap() }
+      is MMAP -> this.entries
+      is NAMESPACED -> Pair(this.name, this.value)
+      NULL -> null
+      is SLIST -> this.items
+      is STRING -> this.string
+      is UINT -> this.uint
+    }
+  }
+
   companion object {
     @JvmStatic
     fun escape(value: String): String {
@@ -416,15 +438,13 @@ sealed class NodeValue: Into<NodeValue> {
     //      _ => Err(anyhow!("Matching rules can not be applied to {} values", self.str_form()))
     //    }
     //  }
+      // TODO: Need to pass in the matching context here
+      val context = MatchingContext(MatchingRuleCategory("body",
+        mutableMapOf("$" to MatchingRuleGroup(mutableListOf(matcher)))), true)
       return when (expected) {
-        is BARRAY -> TODO()
-        is BOOL -> TODO()
-        is ENTRY -> TODO()
         is JSON -> {
           if (actual is NULL || actual is JSON) {
             // TODO: need a way to pass allowUnexpectedKeys here
-            val context = MatchingContext(MatchingRuleCategory("body",
-              mutableMapOf("$" to MatchingRuleGroup(mutableListOf(matcher)))), true)
             val actualJson = if (actual is JSON) {
               actual.json
             } else {
@@ -442,11 +462,43 @@ sealed class NodeValue: Into<NodeValue> {
             "Expected a value of type '${expected.valueType()}' but got '${actual.valueType()}'"
           }
         }
-        is LIST -> TODO()
+        is LIST -> {
+          val items = when (actual) {
+            is LIST -> actual.items.map { it.unwrap() }
+            is SLIST -> actual.items
+            else -> listOf(actual.unwrap())
+          }
+          // TODO: Need a way to pass cascaded value here
+          val result = compareLists(actionPath, matcher, expected.items, items, context, { "" }, false) {
+              p, expected, actual, context ->
+            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, false, context)
+            listOf(BodyItemMatchResult(constructPath(p), result))
+          }.flatMap { it.result }
+          if (result.isNotEmpty()) {
+            result.joinToString(", ") { it.mismatch }
+          } else {
+            null
+          }
+        }
         is MMAP -> TODO()
-        is NAMESPACED -> TODO()
-        NULL -> TODO()
-        is SLIST -> TODO()
+        is SLIST -> {
+          val items = when (actual) {
+            is LIST -> actual.items.map { it.unwrap() }
+            is SLIST -> actual.items
+            else -> listOf(actual.unwrap())
+          }
+          // TODO: Need a way to pass cascaded value here
+          val result = compareLists(actionPath, matcher, expected.items, items, context, { "" }, false) {
+              p, expected, actual, context ->
+            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, false, context)
+            listOf(BodyItemMatchResult(constructPath(p), result))
+          }.flatMap { it.result }
+          if (result.isNotEmpty()) {
+            result.joinToString(", ") { it.mismatch }
+          } else {
+            null
+          }
+        }
         is STRING -> {
           if (actual is STRING) {
             val result = domatch(matcher, actionPath, expected.string, actual.string, BodyMismatchFactory, cascaded)
@@ -456,12 +508,29 @@ sealed class NodeValue: Into<NodeValue> {
               null
             }
           } else if (actual is SLIST) {
-            TODO()
+            // TODO: Need a way to pass cascaded value here
+            val result = compareLists(actionPath, matcher, listOf(expected.string), actual.items, context, { "" }, false) {
+                p, expected, actual, context ->
+                  val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, false, context)
+                  listOf(BodyItemMatchResult(constructPath(p), result))
+            }
+            if (result.isNotEmpty()) {
+              result.flatMap { it.result }.joinToString(", ") { it.mismatch }
+            } else {
+              null
+            }
           } else {
             "Expected a value of type '${expected.valueType()}' but got '${actual.valueType()}'"
           }
         }
-        is UINT -> TODO()
+        else -> {
+          val result = domatch(matcher, actionPath, expected.unwrap(), actual.unwrap(), BodyMismatchFactory, cascaded)
+          if (result.isNotEmpty()) {
+            result.joinToString(", ") { it.mismatch }
+          } else {
+            null
+          }
+        }
       }
     }
   }
