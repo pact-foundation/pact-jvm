@@ -36,6 +36,8 @@ data class EachKeyMatcher(val definition: MatchingRuleDefinition) : MatchingRule
 
   override fun generateDescription(forCollection: Boolean) = "each key must match '${definition.expression}'"
 
+  override fun validForLists() = true
+
   override val name: String
     get() = "each-key"
   override val attributes: Map<String, JsonValue>

@@ -69,6 +69,11 @@ interface MatchingRule {
   fun forSingleItem(): MatchingRule = this
 
   /**
+   * If the matching rule can be applied to lists of values
+   */
+  fun validForLists(): Boolean = false
+
+  /**
    * Returns the type name of the matching rule
    */
   val name: String
@@ -286,6 +291,8 @@ object EqualsMatcher : MatchingRule {
 
   override fun generateDescription(forCollection: Boolean) = "must be equal to the expected value"
 
+  override fun validForLists() = true
+
   override val name: String
     get() = "equality"
   override val attributes: Map<String, JsonValue>
@@ -332,6 +339,8 @@ data class MaxTypeMatcher(val max: Int) : MatchingRule {
 
   override fun forSingleItem() = TypeMatcher
 
+  override fun validForLists() = true
+
   override val name: String
     get() = "max-type"
   override val attributes: Map<String, JsonValue>
@@ -354,6 +363,8 @@ data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
 
   override fun forSingleItem() = TypeMatcher
 
+  override fun validForLists() = true
+
   override val name: String
     get() = "min-max-type"
   override val attributes: Map<String, JsonValue>
@@ -375,6 +386,8 @@ data class MinTypeMatcher(val min: Int) : MatchingRule {
   }
 
   override fun forSingleItem() = TypeMatcher
+
+  override fun validForLists() = true
 
   override val name: String
     get() = "min-type"
@@ -409,7 +422,7 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
   override fun generateDescription(forCollection: Boolean) = "must be a number"
 
   override val name: String
-    get() = "number"
+    get() = numberType.name.lowercase()
   override val attributes: Map<String, JsonValue>
     get() = emptyMap()
 }
@@ -503,6 +516,8 @@ object TypeMatcher : MatchingRule {
 
   override fun generateDescription(forCollection: Boolean) = "must match by type"
 
+  override fun validForLists() = true
+
   override val name: String
     get() = "type"
   override val attributes: Map<String, JsonValue>
@@ -546,6 +561,8 @@ object ValuesMatcher : MatchingRule {
   }
 
   override fun generateDescription(forCollection: Boolean) = "must have values that match"
+
+  override fun validForLists() = true
 
   override val name: String
     get() = "values"
@@ -595,6 +612,8 @@ object EqualsIgnoreOrderMatcher : MatchingRule {
 
   override fun generateDescription(forCollection: Boolean) = "must be equal to the expected value (ignoring order)"
 
+  override fun validForLists() = true
+
   override val name: String
     get() = "ignore-order"
   override val attributes: Map<String, JsonValue>
@@ -622,6 +641,8 @@ data class MinEqualsIgnoreOrderMatcher(val min: Int) : MatchingRule {
   } else {
     "must be equal to the expected value (ignoring order)"
   }
+
+  override fun validForLists() = true
 
   override val name: String
     get() = "min-ignore-order"
@@ -651,6 +672,8 @@ data class MaxEqualsIgnoreOrderMatcher(val max: Int) : MatchingRule {
     "must be equal to the expected value (ignoring order)"
   }
 
+  override fun validForLists() = true
+
   override val name: String
     get() = "max-ignore-order"
   override val attributes: Map<String, JsonValue>
@@ -678,6 +701,8 @@ data class MinMaxEqualsIgnoreOrderMatcher(val min: Int, val max: Int) : Matching
   } else {
     "must be equal to the expected value (ignoring order)"
   }
+
+  override fun validForLists() = true
 
   override val name: String
     get() = "min-max-ignore-order"
@@ -718,6 +743,8 @@ data class ArrayContainsMatcher(
   }
 
   override fun generateDescription(forCollection: Boolean) = "must be a list/array that has at least one matching item"
+
+  override fun validForLists() = true
 
   override val name: String
     get() = "array-contains"

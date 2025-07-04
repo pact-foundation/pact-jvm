@@ -6,7 +6,6 @@ import au.com.dius.pact.core.matchers.JsonContentMatcher
 import au.com.dius.pact.core.matchers.Matchers.compareLists
 import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.domatch
-import au.com.dius.pact.core.matchers.matchType
 import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
@@ -394,7 +393,8 @@ sealed class NodeValue: Into<NodeValue> {
       actual: NodeValue,
       matcher: MatchingRule,
       cascaded: Boolean,
-      actionPath: List<String>
+      actionPath: List<String>,
+      context: PlanMatchingContext
     ): String? {
     //    match self {
     //      NodeValue::NULL => Value::Null.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
@@ -438,9 +438,6 @@ sealed class NodeValue: Into<NodeValue> {
     //      _ => Err(anyhow!("Matching rules can not be applied to {} values", self.str_form()))
     //    }
     //  }
-      // TODO: Need to pass in the matching context here
-      val context = MatchingContext(MatchingRuleCategory("body",
-        mutableMapOf("$" to MatchingRuleGroup(mutableListOf(matcher)))), true)
       return when (expected) {
         is JSON -> {
           if (actual is NULL || actual is JSON) {
@@ -450,7 +447,7 @@ sealed class NodeValue: Into<NodeValue> {
             } else {
               JsonValue.Null
             }
-            val result = JsonContentMatcher.compare(listOf("$"), expected.json, actualJson, context)
+            val result = JsonContentMatcher.compare(listOf("$"), expected.json, actualJson, context.matchingContext)
             if (result.any { it.result.isNotEmpty() }) {
               result.joinToString(", ") { mismatches ->
                 mismatches.result.joinToString { it.mismatch  }
@@ -468,10 +465,9 @@ sealed class NodeValue: Into<NodeValue> {
             is SLIST -> actual.items
             else -> listOf(actual.unwrap())
           }
-          // TODO: Need a way to pass cascaded value here
-          val result = compareLists(actionPath, matcher, expected.items, items, context, { "" }, false) {
+          val result = compareLists(actionPath, matcher, expected.items, items, context.matchingContext, { "" }, cascaded) {
               p, expected, actual, context ->
-            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, false, context)
+            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
             listOf(BodyItemMatchResult(constructPath(p), result))
           }.flatMap { it.result }
           if (result.isNotEmpty()) {
@@ -487,10 +483,9 @@ sealed class NodeValue: Into<NodeValue> {
             is SLIST -> actual.items
             else -> listOf(actual.unwrap())
           }
-          // TODO: Need a way to pass cascaded value here
-          val result = compareLists(actionPath, matcher, expected.items, items, context, { "" }, false) {
+          val result = compareLists(actionPath, matcher, expected.items, items, context.matchingContext, { "" }, cascaded) {
               p, expected, actual, context ->
-            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, false, context)
+            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
             listOf(BodyItemMatchResult(constructPath(p), result))
           }.flatMap { it.result }
           if (result.isNotEmpty()) {
@@ -501,21 +496,20 @@ sealed class NodeValue: Into<NodeValue> {
         }
         is STRING -> {
           if (actual is STRING) {
-            val result = domatch(matcher, actionPath, expected.string, actual.string, BodyMismatchFactory, cascaded)
+            val result = domatch(matcher, actionPath, expected.string, actual.string, BodyMismatchFactory, cascaded, context.matchingContext)
             if (result.isNotEmpty()) {
               result.joinToString(", ") { it.mismatch }
             } else {
               null
             }
           } else if (actual is SLIST) {
-            // TODO: Need a way to pass cascaded value here
-            val result = compareLists(actionPath, matcher, listOf(expected.string), actual.items, context, { "" }, false) {
+            val result = compareLists(actionPath, matcher, listOf(expected.string), actual.items, context.matchingContext, { "" }, cascaded) {
                 p, expected, actual, context ->
-                  val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, false, context)
+                  val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
                   listOf(BodyItemMatchResult(constructPath(p), result))
-            }
+            }.flatMap { it.result }
             if (result.isNotEmpty()) {
-              result.flatMap { it.result }.joinToString(", ") { it.mismatch }
+              result.joinToString(", ") { it.mismatch }
             } else {
               null
             }
@@ -524,7 +518,7 @@ sealed class NodeValue: Into<NodeValue> {
           }
         }
         else -> {
-          val result = domatch(matcher, actionPath, expected.unwrap(), actual.unwrap(), BodyMismatchFactory, cascaded)
+          val result = domatch(matcher, actionPath, expected.unwrap(), actual.unwrap(), BodyMismatchFactory, cascaded, context.matchingContext)
           if (result.isNotEmpty()) {
             result.joinToString(", ") { it.mismatch }
           } else {

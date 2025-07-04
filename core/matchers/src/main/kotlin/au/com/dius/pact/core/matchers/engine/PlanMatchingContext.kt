@@ -56,7 +56,7 @@ open class PlanMatchingContext @JvmOverloads constructor(
   /** Configuration */
   val config: MatchingConfiguration,
   /** Matching rules to use */
-  private val matchingContext: MatchingContext = MatchingContext(MatchingRuleCategory(""), config.allowUnexpectedEntries)
+  val matchingContext: MatchingContext = MatchingContext(MatchingRuleCategory(""), config.allowUnexpectedEntries)
 ) {
 
   /** If there is a matcher defined at the path in this context */
@@ -122,7 +122,7 @@ open class PlanMatchingContext @JvmOverloads constructor(
       pact,
       interaction,
       config,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries)
+      MatchingContext(matchingRules, config.allowUnexpectedEntries, mapOf(), true)
     )
   }
 
@@ -136,7 +136,7 @@ open class PlanMatchingContext @JvmOverloads constructor(
       pact,
       interaction,
       config.copy(allowUnexpectedEntries = true),
-      MatchingContext(matchingRules, config.allowUnexpectedEntries)
+      MatchingContext(matchingRules, config.allowUnexpectedEntries, mapOf(), true)
     )
   }
 

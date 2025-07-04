@@ -333,7 +333,7 @@ class ExecutionPlanInterpreter(
 
         when (val result = handleWith<MatchingRule> { MatchingRule.create(matcher, matcherParams) }) {
           is Result.Ok -> {
-            val matchResult = NodeValue.doMatch(expectedValue, actualValue, result.value, false, actionPath)
+            val matchResult = NodeValue.doMatch(expectedValue, actualValue, result.value, false, actionPath, context)
             if (matchResult == null) {
               return node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)),
                 children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())

@@ -145,9 +145,11 @@ object Matchers {
     callback: (List<String>, T, T, MatchingContext) -> List<BodyItemMatchResult>
   ): List<BodyItemMatchResult> {
     val result = mutableListOf<BodyItemMatchResult>()
-    val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory, cascaded)
-    if (matchResult.isNotEmpty()) {
-      result.add(BodyItemMatchResult(constructPath(path), matchResult))
+    if (matcher.validForLists()) {
+      val matchResult = domatch(matcher, path, expectedList, actualList, BodyMismatchFactory, cascaded)
+      if (matchResult.isNotEmpty()) {
+        result.add(BodyItemMatchResult(constructPath(path), matchResult))
+      }
     }
     if (expectedList.isNotEmpty()) {
       when (matcher) {

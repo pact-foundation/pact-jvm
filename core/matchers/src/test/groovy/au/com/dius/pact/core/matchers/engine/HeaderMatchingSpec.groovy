@@ -10,6 +10,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import com.github.difflib.DiffUtils
 import spock.lang.Specification
@@ -917,309 +918,372 @@ class HeaderMatchingSpec extends Specification {
     diff == ''
   }
 
-  //#[test]
-  //fn match_headers_with_number_type_matching_rule() {
-  //  let matching_rules = matchingrules! {
-  //    "header" => { "REF-ID" => [ MatchingRule::Integer ] }
-  //  };
-  //  let expected_request = HttpRequest {
-  //    headers: Some(hashmap!{
-  //      "REF-ID".to_string() => vec!["1234".to_string()],
-  //      "REF-CODE".to_string() => vec!["test".to_string()]
-  //    }),
-  //    matching_rules: matching_rules.clone(),
-  //    .. Default::default()
-  //  };
-  //  let expected_interaction = SynchronousHttp {
-  //    request: expected_request.clone(),
-  //    .. SynchronousHttp::default()
-  //  };
-  //  let mut context = PlanMatchingContext {
-  //    interaction: expected_interaction.boxed_v4(),
-  //    .. PlanMatchingContext::default()
-  //  };
-  //
-  //  let mut plan = ExecutionPlan::new("header-test");
-  //  plan.add(setup_header_plan(&expected_request, &context.for_headers()).unwrap());
-  //
-  //  pretty_assertions::assert_eq!(r#"(
-  //  :header-test (
-  //    :headers (
-  //      :REF-CODE (
-  //        #{"REF-CODE='test'"},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-CODE']
-  //          ),
-  //          %match:equality (
-  //            'test',
-  //            $.headers['REF-CODE'],
-  //            NULL
-  //          )
-  //        )
-  //      ),
-  //      :REF-ID (
-  //        #{'REF-ID must be an integer'},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-ID']
-  //          ),
-  //          %match:integer (
-  //            '1234',
-  //            $.headers['REF-ID'],
-  //            json:{}
-  //          )
-  //        )
-  //      ),
-  //      %expect:entries (
-  //        %lower-case (
-  //          ['REF-CODE', 'REF-ID']
-  //        ),
-  //        $.headers,
-  //        %join (
-  //          'The following expected headers were missing: ',
-  //          %join-with (
-  //            ', ',
-  //            ** (
-  //              %apply ()
-  //            )
-  //          )
-  //        )
-  //      )
-  //    )
-  //  )
-  //)
-  //"#, plan.pretty_form());
-  //
-  //  let request = HttpRequest {
-  //    headers: Some(hashmap!{
-  //      "REF-ID".to_string() => vec!["9023470945622".to_string()],
-  //      "REF-CODE".to_string() => vec!["test".to_string()]
-  //    }),
-  //    .. HttpRequest::default()
-  //  };
-  //  let executed_plan = execute_request_plan(&plan, &request, &mut context).unwrap();
-  //  pretty_assertions::assert_eq!(r#"(
-  //  :header-test (
-  //    :headers (
-  //      :REF-CODE (
-  //        #{"REF-CODE='test'"},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-CODE'] => 'test'
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            'test' => 'test',
-  //            $.headers['REF-CODE'] => 'test',
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      :REF-ID (
-  //        #{'REF-ID must be an integer'},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-ID'] => '9023470945622'
-  //          ) => BOOL(true),
-  //          %match:integer (
-  //            '1234' => '1234',
-  //            $.headers['REF-ID'] => '9023470945622',
-  //            json:{} => json:{}
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      %expect:entries (
-  //        %lower-case (
-  //          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
-  //        ) => ['ref-code', 'ref-id'],
-  //        $.headers => {'ref-code': 'test', 'ref-id': '9023470945622'},
-  //        %join (
-  //          'The following expected headers were missing: ',
-  //          %join-with (
-  //            ', ',
-  //            ** (
-  //              %apply ()
-  //            )
-  //          )
-  //        )
-  //      ) => OK
-  //    ) => BOOL(true)
-  //  ) => BOOL(true)
-  //)
-  //"#, executed_plan.pretty_form());
-  //
-  //  let request = HttpRequest {
-  //    headers: Some(hashmap!{
-  //      "REF-ID".to_string() => vec!["9023470X945622".to_string()],
-  //      "REF-CODE".to_string() => vec!["test".to_string()]
-  //    }),
-  //    .. HttpRequest::default()
-  //  };
-  //  let executed_plan = execute_request_plan(&plan, &request, &mut context).unwrap();
-  //  pretty_assertions::assert_eq!(r#"(
-  //  :header-test (
-  //    :headers (
-  //      :REF-CODE (
-  //        #{"REF-CODE='test'"},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-CODE'] => 'test'
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            'test' => 'test',
-  //            $.headers['REF-CODE'] => 'test',
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      :REF-ID (
-  //        #{'REF-ID must be an integer'},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-ID'] => '9023470X945622'
-  //          ) => BOOL(true),
-  //          %match:integer (
-  //            '1234' => '1234',
-  //            $.headers['REF-ID'] => '9023470X945622',
-  //            json:{} => json:{}
-  //          ) => ERROR(Expected '9023470X945622' to match an integer number)
-  //        ) => BOOL(false)
-  //      ) => BOOL(false),
-  //      %expect:entries (
-  //        %lower-case (
-  //          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
-  //        ) => ['ref-code', 'ref-id'],
-  //        $.headers => {'ref-code': 'test', 'ref-id': '9023470X945622'},
-  //        %join (
-  //          'The following expected headers were missing: ',
-  //          %join-with (
-  //            ', ',
-  //            ** (
-  //              %apply ()
-  //            )
-  //          )
-  //        )
-  //      ) => OK
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)
-  //)
-  //"#, executed_plan.pretty_form());
-  //
-  //  let request = HttpRequest {
-  //    headers: Some(hashmap!{
-  //      "REF-ID".to_string() => vec!["1111".to_string(), "2222".to_string()],
-  //      "REF-CODE".to_string() => vec!["test".to_string()]
-  //    }),
-  //    .. HttpRequest::default()
-  //  };
-  //  let executed_plan = execute_request_plan(&plan, &request, &mut context).unwrap();
-  //  pretty_assertions::assert_eq!(r#"(
-  //  :header-test (
-  //    :headers (
-  //      :REF-CODE (
-  //        #{"REF-CODE='test'"},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-CODE'] => 'test'
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            'test' => 'test',
-  //            $.headers['REF-CODE'] => 'test',
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      :REF-ID (
-  //        #{'REF-ID must be an integer'},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-ID'] => ['1111', '2222']
-  //          ) => BOOL(true),
-  //          %match:integer (
-  //            '1234' => '1234',
-  //            $.headers['REF-ID'] => ['1111', '2222'],
-  //            json:{} => json:{}
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      %expect:entries (
-  //        %lower-case (
-  //          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
-  //        ) => ['ref-code', 'ref-id'],
-  //        $.headers => {'ref-code': 'test', 'ref-id': ['1111', '2222']},
-  //        %join (
-  //          'The following expected headers were missing: ',
-  //          %join-with (
-  //            ', ',
-  //            ** (
-  //              %apply ()
-  //            )
-  //          )
-  //        )
-  //      ) => OK
-  //    ) => BOOL(true)
-  //  ) => BOOL(true)
-  //)
-  //"#, executed_plan.pretty_form());
-  //
-  //  let request = HttpRequest {
-  //    headers: Some(hashmap!{
-  //      "REF-ID".to_string() => vec!["1111".to_string(), "two".to_string()],
-  //      "REF-CODE".to_string() => vec!["test".to_string()]
-  //    }),
-  //    .. HttpRequest::default()
-  //  };
-  //  let executed_plan = execute_request_plan(&plan, &request, &mut context).unwrap();
-  //  pretty_assertions::assert_eq!(r#"(
-  //  :header-test (
-  //    :headers (
-  //      :REF-CODE (
-  //        #{"REF-CODE='test'"},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-CODE'] => 'test'
-  //          ) => BOOL(true),
-  //          %match:equality (
-  //            'test' => 'test',
-  //            $.headers['REF-CODE'] => 'test',
-  //            NULL => NULL
-  //          ) => BOOL(true)
-  //        ) => BOOL(true)
-  //      ) => BOOL(true),
-  //      :REF-ID (
-  //        #{'REF-ID must be an integer'},
-  //        %if (
-  //          %check:exists (
-  //            $.headers['REF-ID'] => ['1111', 'two']
-  //          ) => BOOL(true),
-  //          %match:integer (
-  //            '1234' => '1234',
-  //            $.headers['REF-ID'] => ['1111', 'two'],
-  //            json:{} => json:{}
-  //          ) => ERROR(Expected 'two' to match an integer number)
-  //        ) => BOOL(false)
-  //      ) => BOOL(false),
-  //      %expect:entries (
-  //        %lower-case (
-  //          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
-  //        ) => ['ref-code', 'ref-id'],
-  //        $.headers => {'ref-code': 'test', 'ref-id': ['1111', 'two']},
-  //        %join (
-  //          'The following expected headers were missing: ',
-  //          %join-with (
-  //            ', ',
-  //            ** (
-  //              %apply ()
-  //            )
-  //          )
-  //        )
-  //      ) => OK
-  //    ) => BOOL(false)
-  //  ) => BOOL(false)
-  //)
-  //"#, executed_plan.pretty_form());
-  //}
-  //
+  def 'match headers with number type matching rule'() {
+    given:
+    def matchingRulesForHeaders = new MatchingRuleCategory('header', [
+      'REF-ID': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)])
+    ])
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory(matchingRulesForHeaders)
+    def expectedRequest = new HttpRequest(
+      'get',
+      '/',
+      [:],
+      [
+        'REF-ID': ['1234'],
+        'REF-CODE': ['test']
+      ],
+      OptionalBody.missing(),
+      matchingRules,
+      new Generators()
+    )
+
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp(null, 'test interaction', [], expectedRequest)
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, config).forHeaders()
+
+    def expected = '''(
+      |  :header-test (
+      |    :headers (
+      |      :REF-CODE (
+      |        #{"REF-CODE='test'"},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-CODE']
+      |          ),
+      |          %match:equality (
+      |            'test',
+      |            $.headers['REF-CODE'],
+      |            NULL
+      |          )
+      |        )
+      |      ),
+      |      :REF-ID (
+      |        #{'REF-ID must be a number'},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-ID']
+      |          ),
+      |          %match:integer (
+      |            '1234',
+      |            $.headers['REF-ID'],
+      |            json:{}
+      |          )
+      |        )
+      |      ),
+      |      %expect:entries (
+      |        %lower-case (
+      |          ['REF-CODE', 'REF-ID']
+      |        ),
+      |        $.headers,
+      |        %join (
+      |          'The following expected headers were missing: ',
+      |          %join-with (
+      |            ', ',
+      |            ** (
+      |              %apply ()
+      |            )
+      |          )
+      |        )
+      |      )
+      |    )
+      |  )
+      |)
+      |'''.stripMargin('|')
+
+    def expectedExecutedPlan = '''(
+      |  :header-test (
+      |    :headers (
+      |      :REF-CODE (
+      |        #{"REF-CODE='test'"},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-CODE'] => 'test'
+      |          ) => BOOL(true),
+      |          %match:equality (
+      |            'test' => 'test',
+      |            $.headers['REF-CODE'] => 'test',
+      |            NULL => NULL
+      |          ) => BOOL(true)
+      |        ) => BOOL(true)
+      |      ) => BOOL(true),
+      |      :REF-ID (
+      |        #{'REF-ID must be a number'},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-ID'] => '9023470945622'
+      |          ) => BOOL(true),
+      |          %match:integer (
+      |            '1234' => '1234',
+      |            $.headers['REF-ID'] => '9023470945622',
+      |            json:{} => json:{}
+      |          ) => BOOL(true)
+      |        ) => BOOL(true)
+      |      ) => BOOL(true),
+      |      %expect:entries (
+      |        %lower-case (
+      |          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
+      |        ) => ['ref-code', 'ref-id'],
+      |        $.headers => {'ref-code': 'test', 'ref-id': '9023470945622'},
+      |        %join (
+      |          'The following expected headers were missing: ',
+      |          %join-with (
+      |            ', ',
+      |            ** (
+      |              %apply ()
+      |            )
+      |          )
+      |        )
+      |      ) => OK
+      |    ) => BOOL(true)
+      |  ) => BOOL(true)
+      |)
+      |'''.stripMargin('|')
+
+    when:
+    def plan = new ExecutionPlan('header-test')
+    plan.add(V2MatchingEngine.INSTANCE.setupHeaderPlan(expectedRequest, context))
+    def pretty = plan.prettyForm()
+    def patch = DiffUtils.diff(pretty, expected, null)
+    def diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    diff == ''
+
+    when:
+    def request = new HttpRequest()
+    request.headers = [
+      'REF-ID': ['9023470945622'],
+      'REF-CODE': ['test']
+    ]
+    def executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
+    pretty = executedPlan.prettyForm()
+    patch = DiffUtils.diff(pretty, expectedExecutedPlan, null)
+    diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    diff == ''
+
+    when:
+    request = new HttpRequest()
+    request.headers = [
+      'REF-ID': ['1111', '2222'],
+      'REF-CODE': ['test']
+    ]
+    executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
+    pretty = executedPlan.prettyForm()
+
+    expectedExecutedPlan = '''(
+      |  :header-test (
+      |    :headers (
+      |      :REF-CODE (
+      |        #{"REF-CODE='test'"},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-CODE'] => 'test'
+      |          ) => BOOL(true),
+      |          %match:equality (
+      |            'test' => 'test',
+      |            $.headers['REF-CODE'] => 'test',
+      |            NULL => NULL
+      |          ) => BOOL(true)
+      |        ) => BOOL(true)
+      |      ) => BOOL(true),
+      |      :REF-ID (
+      |        #{'REF-ID must be a number'},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-ID'] => ['1111', '2222']
+      |          ) => BOOL(true),
+      |          %match:integer (
+      |            '1234' => '1234',
+      |            $.headers['REF-ID'] => ['1111', '2222'],
+      |            json:{} => json:{}
+      |          ) => BOOL(true)
+      |        ) => BOOL(true)
+      |      ) => BOOL(true),
+      |      %expect:entries (
+      |        %lower-case (
+      |          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
+      |        ) => ['ref-code', 'ref-id'],
+      |        $.headers => {'ref-code': 'test', 'ref-id': ['1111', '2222']},
+      |        %join (
+      |          'The following expected headers were missing: ',
+      |          %join-with (
+      |            ', ',
+      |            ** (
+      |              %apply ()
+      |            )
+      |          )
+      |        )
+      |      ) => OK
+      |    ) => BOOL(true)
+      |  ) => BOOL(true)
+      |)
+      |'''.stripMargin('|')
+    patch = DiffUtils.diff(pretty, expectedExecutedPlan, null)
+    diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    diff == ''
+  }
+
+  def 'match headers with number type matching rule - mismatch'() {
+    given:
+    def matchingRulesForHeaders = new MatchingRuleCategory('header', [
+      'REF-ID': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)])
+    ])
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory(matchingRulesForHeaders)
+    def expectedRequest = new HttpRequest(
+      'get',
+      '/',
+      [:],
+      [
+        'REF-ID': ['1234'],
+        'REF-CODE': ['test']
+      ],
+      OptionalBody.missing(),
+      matchingRules,
+      new Generators()
+    )
+
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp(null, 'test interaction', [], expectedRequest)
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, config).forHeaders()
+
+    def expectedExecutedPlan = '''(
+      |  :header-test (
+      |    :headers (
+      |      :REF-CODE (
+      |        #{"REF-CODE='test'"},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-CODE'] => 'test'
+      |          ) => BOOL(true),
+      |          %match:equality (
+      |            'test' => 'test',
+      |            $.headers['REF-CODE'] => 'test',
+      |            NULL => NULL
+      |          ) => BOOL(true)
+      |        ) => BOOL(true)
+      |      ) => BOOL(true),
+      |      :REF-ID (
+      |        #{'REF-ID must be a number'},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-ID'] => '9023470X945622'
+      |          ) => BOOL(true),
+      |          %match:integer (
+      |            '1234' => '1234',
+      |            $.headers['REF-ID'] => '9023470X945622',
+      |            json:{} => json:{}
+      |          ) => ERROR(Expected '9023470X945622' \\(String\\) to be an integer)
+      |        ) => BOOL(false)
+      |      ) => BOOL(false),
+      |      %expect:entries (
+      |        %lower-case (
+      |          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
+      |        ) => ['ref-code', 'ref-id'],
+      |        $.headers => {'ref-code': 'test', 'ref-id': '9023470X945622'},
+      |        %join (
+      |          'The following expected headers were missing: ',
+      |          %join-with (
+      |            ', ',
+      |            ** (
+      |              %apply ()
+      |            )
+      |          )
+      |        )
+      |      ) => OK
+      |    ) => BOOL(false)
+      |  ) => BOOL(false)
+      |)
+      |'''.stripMargin('|')
+
+    when:
+    def plan = new ExecutionPlan('header-test')
+    plan.add(V2MatchingEngine.INSTANCE.setupHeaderPlan(expectedRequest, context))
+    def request = new HttpRequest()
+    request.headers = [
+      'REF-ID': ['9023470X945622'],
+      'REF-CODE': ['test']
+    ]
+    def executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
+    def pretty = executedPlan.prettyForm()
+    def patch = DiffUtils.diff(pretty, expectedExecutedPlan, null)
+    def diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    diff == ''
+
+    when:
+    plan = new ExecutionPlan('header-test')
+    plan.add(V2MatchingEngine.INSTANCE.setupHeaderPlan(expectedRequest, context))
+    request = new HttpRequest()
+    request.headers = [
+      'REF-ID': ['1111', 'two'],
+      'REF-CODE': ['test']
+    ]
+    executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
+    pretty = executedPlan.prettyForm()
+    expectedExecutedPlan = '''(
+      |  :header-test (
+      |    :headers (
+      |      :REF-CODE (
+      |        #{"REF-CODE='test'"},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-CODE'] => 'test'
+      |          ) => BOOL(true),
+      |          %match:equality (
+      |            'test' => 'test',
+      |            $.headers['REF-CODE'] => 'test',
+      |            NULL => NULL
+      |          ) => BOOL(true)
+      |        ) => BOOL(true)
+      |      ) => BOOL(true),
+      |      :REF-ID (
+      |        #{'REF-ID must be a number'},
+      |        %if (
+      |          %check:exists (
+      |            $.headers['REF-ID'] => ['1111', 'two']
+      |          ) => BOOL(true),
+      |          %match:integer (
+      |            '1234' => '1234',
+      |            $.headers['REF-ID'] => ['1111', 'two'],
+      |            json:{} => json:{}
+      |          ) => ERROR(Expected 'two' \\(String\\) to be an integer)
+      |        ) => BOOL(false)
+      |      ) => BOOL(false),
+      |      %expect:entries (
+      |        %lower-case (
+      |          ['REF-CODE', 'REF-ID'] => ['REF-CODE', 'REF-ID']
+      |        ) => ['ref-code', 'ref-id'],
+      |        $.headers => {'ref-code': 'test', 'ref-id': ['1111', 'two']},
+      |        %join (
+      |          'The following expected headers were missing: ',
+      |          %join-with (
+      |            ', ',
+      |            ** (
+      |              %apply ()
+      |            )
+      |          )
+      |        )
+      |      ) => OK
+      |    ) => BOOL(false)
+      |  ) => BOOL(false)
+      |)
+      |'''.stripMargin('|')
+    patch = DiffUtils.diff(pretty, expectedExecutedPlan, null)
+    diff = generateUnifiedDiff('', '', pretty.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    diff == ''
+  }
+
   //#[test]
   //fn match_headers_with_min_type_matching_rules() {
   //  let matching_rules = matchingrules! {
