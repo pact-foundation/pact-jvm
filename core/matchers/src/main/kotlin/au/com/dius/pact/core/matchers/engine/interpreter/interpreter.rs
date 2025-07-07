@@ -214,50 +214,6 @@
     }
   }
 
-  fn execute_to_string(
-    &mut self,
-    _action: &str,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    action_path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    let (children, values) = match self.evaluate_children(value_resolver, node, action_path) {
-      Ok(value) => value,
-      Err(value) => return value
-    };
-
-    let results = values.iter()
-      .map(|v| {
-        match v {
-          NodeValue::NULL => NodeValue::STRING(String::default()),
-          NodeValue::STRING(_) => v.clone(),
-          NodeValue::SLIST(_) => v.clone(),
-          NodeValue::JSON(json) => match json {
-            Value::String(s) => NodeValue::STRING(s.clone()),
-            _ => NodeValue::STRING(json.to_string())
-          }
-          #[cfg(feature = "xml")]
-          NodeValue::XML(xml) => match xml {
-            XmlValue::Element(element) => NodeValue::STRING(element.to_string()),
-            XmlValue::Text(text) => NodeValue::STRING(text.clone()),
-            XmlValue::Attribute(name, value) => NodeValue::STRING(format!("@{}='{}'", name, value))
-          }
-          _ => NodeValue::STRING(v.str_form())
-        }
-      })
-      .collect_vec();
-    let result = if results.len() == 1 {
-      results[0].clone()
-    } else {
-      NodeValue::LIST(results)
-    };
-    ExecutionPlanNode {
-      node_type: node.node_type.clone(),
-      result: Some(NodeResult::VALUE(result)),
-      children
-    }
-  }
-
   fn execute_length(
     &mut self,
     action: &str,
@@ -305,40 +261,6 @@
           children: node.children.clone()
         }
       }
-    }
-  }
-
-  fn execute_error(
-    &mut self,
-    _action: &str,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    let (children, str_values) = match self.evaluate_children(value_resolver, node, path) {
-      Ok((children, values)) => {
-        (children, values.iter().flat_map(|v| {
-          match v {
-            NodeValue::STRING(s) => vec![s.clone()],
-            NodeValue::BOOL(b) => vec![b.to_string()],
-            NodeValue::MMAP(_) => vec![v.str_form()],
-            NodeValue::SLIST(list) => list.clone(),
-            NodeValue::BARRAY(_) => vec![v.str_form()],
-            NodeValue::NAMESPACED(_, _) => vec![v.str_form()],
-            NodeValue::UINT(u) => vec![u.to_string()],
-            NodeValue::JSON(json) => vec![json.to_string()],
-            _ => vec![]
-          }
-        }).collect_vec())
-      },
-      Err(value) => return value
-    };
-
-    let result = str_values.iter().join("");
-    ExecutionPlanNode {
-      node_type: node.node_type.clone(),
-      result: Some(NodeResult::ERROR(result)),
-      children
     }
   }
 
@@ -505,44 +427,6 @@
         }
       }
       Err(err) => err
-    }
-  }
-
-  fn execute_header_parse(
-    &mut self,
-    action: &str,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    action_path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    match self.validate_one_arg(node, action, value_resolver, &action_path) {
-      Ok(value) => {
-        let arg_value = value.value()
-          .unwrap_or_default()
-          .as_string()
-          .unwrap_or_default();
-        let values: Vec<&str> = strip_whitespace(arg_value.as_str(), ";");
-        let (header_value, header_params) = values.as_slice()
-          .split_first()
-          .unwrap_or((&"", &[]));
-        let parameter_map = parse_charset_parameters(header_params);
-
-        ExecutionPlanNode {
-          node_type: node.node_type.clone(),
-          result: Some(NodeResult::VALUE(NodeValue::JSON(json!({
-            "value": header_value,
-            "parameters": parameter_map
-          })))),
-          children: vec![value]
-        }
-      }
-      Err(err) => {
-        ExecutionPlanNode {
-          node_type: node.node_type.clone(),
-          result: Some(NodeResult::ERROR(err.to_string())),
-          children: node.children.clone()
-        }
-      }
     }
   }
 

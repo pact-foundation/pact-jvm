@@ -388,6 +388,7 @@ sealed class NodeValue: Into<NodeValue> {
       }
     }
 
+    @Suppress("LongParameterList", "LongMethod", "CyclomaticComplexMethod")
     fun doMatch(
       expected: NodeValue,
       actual: NodeValue,
@@ -396,48 +397,12 @@ sealed class NodeValue: Into<NodeValue> {
       actionPath: List<String>,
       context: PlanMatchingContext
     ): String? {
-    //    match self {
-    //      NodeValue::NULL => Value::Null.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::STRING(s) => if let Some(actual_str) = actual.as_string() {
-    //        s.matches_with(actual_str, matcher, cascaded)
-    //      } else if let Some(list) = actual.as_slist() {
-    //        let result = list.iter()
-    //          .map(|item| s.matches_with(item, matcher, cascaded))
-    //          .filter_map(|r| match r {
-    //            Ok(_) => None,
-    //            Err(err) => Some(err.to_string())
-    //          })
-    //          .collect_vec();
-    //        if result.is_empty() {
-    //          Ok(())
-    //        } else {
-    //          Err(anyhow!(result.join(", ")))
-    //        }
-    //      } else {
-    //        s.matches_with(actual.to_string(), matcher, cascaded)
-    //      },
-    //      NodeValue::BOOL(b) => b.matches_with(actual.as_bool().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::UINT(u) => u.matches_with(actual.as_uint().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::JSON(json) => json.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::SLIST(list) => if let Some(actual_list) = actual.as_slist() {
-    //        list.matches_with(&actual_list, matcher, cascaded)
-    //      } else {
-    //        let actual_str = if let Some(actual_str) = actual.as_string() {
-    //          actual_str
-    //        } else {
-    //          actual.to_string()
-    //        };
-    //        list.matches_with(&vec![actual_str], matcher, cascaded)
-    //      }
     //      #[cfg(feature = "xml")]
     //      NodeValue::XML(xml_value) => if let Some(actual) = actual.as_xml() {
     //        xml_value.matches_with(actual, matcher, cascaded)
     //      } else {
     //        Err(anyhow!("Was expecting an XML value but got {}", actual))
     //      },
-    //      _ => Err(anyhow!("Matching rules can not be applied to {} values", self.str_form()))
-    //    }
-    //  }
       return when (expected) {
         is JSON -> {
           if (actual is NULL || actual is JSON) {

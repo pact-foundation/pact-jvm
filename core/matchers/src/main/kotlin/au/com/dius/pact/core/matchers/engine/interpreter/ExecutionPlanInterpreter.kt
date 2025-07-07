@@ -8,8 +8,10 @@ import au.com.dius.pact.core.matchers.engine.PlanNodeType
 import au.com.dius.pact.core.matchers.engine.orDefault
 import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.model.DocPath
+import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
 import au.com.dius.pact.core.model.JsonUtils
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.json.JsonParser
@@ -222,7 +224,7 @@ class ExecutionPlanInterpreter(
       when (action) {
         "upper-case" -> executeChangeCase(action, valueResolver, node, actionPath, true)
         "lower-case" -> executeChangeCase(action, valueResolver, node, actionPath, false)
-        //        "to-string" => self.execute_to_string(action, valueResolver, node, actionPath),
+        "to-string" -> executeToString(action, valueResolver, node, actionPath)
         //        "length" => self.execute_length(action, valueResolver, node, actionPath),
         "expect:empty" -> executeExpectEmpty(action, valueResolver, node, actionPath)
         "convert:UTF8" -> executeConvertUtf8(action, valueResolver, node, actionPath)
@@ -251,8 +253,8 @@ class ExecutionPlanInterpreter(
         //        "expect:count" => self.execute_expect_count(action, valueResolver, node, actionPath),
         "join" -> executeJoin(action, valueResolver, node, actionPath)
         "join-with" -> executeJoin(action, valueResolver, node, actionPath)
-        //        "error" => self.execute_error(action, valueResolver, node, actionPath),
-        //        "header:parse" => self.execute_header_parse(action, valueResolver, node, actionPath),
+        "error" -> executeError(action, valueResolver, node, actionPath)
+        "header:parse" -> executeHeaderParse(action, valueResolver, node, actionPath)
         //        "for-each" => self.execute_for_each(valueResolver, node, actionPath),
         else -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
       }
@@ -279,8 +281,8 @@ class ExecutionPlanInterpreter(
       when (value) {
         is NodeValue.JSON -> when (val json = value.json) {
           is JsonValue.StringValue -> NodeValue.STRING(
-            if (uppercase) json.value.toString().uppercase()
-            else json.value.toString().lowercase())
+            if (uppercase) json.toString().uppercase()
+            else json.toString().lowercase())
           else -> NodeValue.STRING(value.json.serialise())
         }
         is NodeValue.SLIST -> NodeValue.SLIST(value.items.map {
@@ -978,6 +980,96 @@ class ExecutionPlanInterpreter(
     } else {
       node.copy(result = NodeResult.ERROR("No value to apply (stack is empty)"))
     }
+  }
+
+  private fun executeHeaderParse(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asString() ?: ""
+        val (headerValue, headerParams) = headerValueToMap(argValue)
+        val result = NodeResult.VALUE(NodeValue.JSON(JsonValue.Object(mutableMapOf(
+          "value" to JsonValue.StringValue(headerValue),
+          "parameters" to Json.toJson(headerParams)
+        ))))
+        node.copy(result = result, children = mutableListOf(resultNode.value))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeToString(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    val (children, values) = when (val result = evaluateChildren(valueResolver, node, actionPath)) {
+      is Result.Ok -> {
+        result.value.first to result.value.second.map {
+          when (it) {
+            is NodeValue.JSON -> when (val json = it.json) {
+              is JsonValue.StringValue -> NodeValue.STRING(json.toString())
+              else -> NodeValue.STRING(json.serialise())
+            }
+            NodeValue.NULL -> NodeValue.STRING("")
+            is NodeValue.SLIST -> it
+            is NodeValue.STRING -> it
+            //          #[cfg(feature = "xml")]
+            //          NodeValue::XML(xml) => match xml {
+            //            XmlValue::Element(element) => NodeValue::STRING(element.to_string()),
+            //            XmlValue::Text(text) => NodeValue::STRING(text.clone()),
+            //            XmlValue::Attribute(name, value) => NodeValue::STRING(format!("@{}='{}'", name, value))
+            //          }
+            else -> NodeValue.STRING(it.strForm())
+          }
+        }
+      }
+      is Result.Err -> return result.error
+    }
+
+    val result = if (values.size == 1) {
+      values[0]
+    } else {
+      NodeValue.LIST(values)
+    }
+
+    return node.copy(result = NodeResult.VALUE(result),
+      children = children.toMutableList())
+  }
+
+  private fun executeError(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    path: List<String>
+  ): ExecutionPlanNode {
+    val (children, values) = when (val result = evaluateChildren(valueResolver, node, path)) {
+      is Result.Ok -> {
+        result.value.first to result.value.second.flatMap { it ->
+          when (it) {
+            is NodeValue.BARRAY -> listOf(it.strForm())
+            is NodeValue.BOOL -> listOf(it.bool.toString())
+            is NodeValue.JSON -> listOf(it.json.toString())
+            is NodeValue.LIST -> it.items.map { item -> item.toString() }
+            is NodeValue.MMAP -> listOf(it.strForm())
+            is NodeValue.NAMESPACED -> listOf(it.strForm())
+            is NodeValue.SLIST -> it.items
+            is NodeValue.STRING -> listOf(it.string)
+            is NodeValue.UINT -> listOf(it.uint.toString())
+            else -> emptyList()
+          }
+        }
+      }
+      is Result.Err -> return result.error
+    }
+
+    return node.copy(result = NodeResult.ERROR(values.joinToString()),
+      children = children.toMutableList())
   }
 
   /** Push a result value onto the value stack */

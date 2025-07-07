@@ -131,8 +131,8 @@ interface MatchingRule {
           logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
           NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
         }
-        MIN -> MinTypeMatcher(values[MIN].asNumber()!!.toInt())
-        MAX -> MaxTypeMatcher(values[MAX].asNumber()!!.toInt())
+        MIN, "min-type" -> MinTypeMatcher(values[MIN].asNumber()!!.toInt())
+        MAX, "max-type" -> MaxTypeMatcher(values[MAX].asNumber()!!.toInt())
         TIMESTAMP, "datetime" ->
           if (values.has("format")) TimestampMatcher(values["format"].toString())
           else if (values.has("timestamp")) TimestampMatcher(values["timestamp"].toString())

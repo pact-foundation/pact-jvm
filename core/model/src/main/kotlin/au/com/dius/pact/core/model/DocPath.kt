@@ -16,22 +16,6 @@ private val logger = KotlinLogging.logger {}
 //    path
 //  }
 //
-//  /// Mutates this path by pushing a path token onto the end.
-//  pub fn push(&mut self, path_token: PathToken) -> &mut Self {
-//    match &path_token {
-//      PathToken::Root => self.expr.push_str("$"),
-//      PathToken::Field(v) => {
-//        let s = &mut self.expr;
-//        write_obj_key_for_path(s, v.as_str())
-//      },
-//      PathToken::Index(i) => { let _ = write!(self.expr, "[{}]", i); },
-//      PathToken::Star => self.expr.push_str(".*"),
-//      PathToken::StarIndex => self.expr.push_str("[*]")
-//    };
-//    self.path_tokens.push(path_token);
-//    self
-//  }
-//
 //  /// Mutates this path by pushing another path onto the end. Will drop the root marker from the
 //  /// other path
 //  pub fn push_path(&mut self, path: &DocPath) -> &mut Self {
@@ -345,6 +329,18 @@ data class DocPath(
     val pathTokens = pathTokens + PathToken.Star
     val expr = "$expr[*]"
     return DocPath(pathTokens, expr)
+  }
+
+  /** Pushes a path token onto the end of the path */
+  fun push(pathToken: PathToken): DocPath {
+    val exp = when (pathToken) {
+      is PathToken.Field -> writeObjKeyForPath(expr, pathToken.name)
+      is PathToken.Index -> expr + "[${pathToken.index}]"
+      PathToken.Root -> "$expr$"
+      PathToken.Star -> "$expr.*"
+      PathToken.StarIndex -> "$expr[*]"
+    }
+    return DocPath(pathTokens + pathToken, exp)
   }
 
 //  /// Creates a new path by cloning this one and joining the index onto the end. Paths that end

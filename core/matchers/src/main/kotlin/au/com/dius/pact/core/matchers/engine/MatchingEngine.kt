@@ -5,11 +5,15 @@ import au.com.dius.pact.core.matchers.engine.bodies.getBodyPlanBuilder
 import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterpreter
 import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.model.DocPath
+import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.PARAMETERISED_HEADERS
+import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.support.json.JsonValue
+import kotlin.collections.map
 
 interface MatchingEngine {
   /**
@@ -227,21 +231,20 @@ object V2MatchingEngine: MatchingEngine {
           itemNode.add(ExecutionPlanNode.annotation(Into { "$key ${matchers.generateDescription(true)}" }))
           presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(itemValue),
             ExecutionPlanNode.resolveValue(path), matchers, true))
-  //        } else if PARAMETERISED_HEADERS.contains(&key.to_lowercase().as_str()) {
-  //          item_node.add(ExecutionPlanNode::annotation(format!("{}={}", key, item_value.to_string())));
-  //          if value.len() == 1 {
-  //            let apply_node = build_parameterised_header_plan(&path, value[0].as_str());
-  //            presence_check.add(apply_node);
-  //          } else {
-  //            for (index, item_value) in value.iter().enumerate() {
-  //              let item_path = doc_path.join(key).join_index(index);
-  //              let mut item_node = ExecutionPlanNode::container(index.to_string());
-  //              let apply_node = build_parameterised_header_plan(
-  //                &item_path, item_value.as_str());
-  //              item_node.add(apply_node);
-  //              presence_check.add(item_node);
-  //            }
-  //          }
+        } else if (PARAMETERISED_HEADERS.contains(key.lowercase())) {
+          itemNode.add(ExecutionPlanNode.annotation(Into { "$key=${itemValue.strForm()}" }))
+          if (value.size == 1) {
+            val applyNode = buildParameterisedHeaderPlan(path, value[0])
+            presenceCheck.add(applyNode)
+          } else {
+            for ((index, itemValue) in value.withIndex()) {
+              val itemPath = docPath.join(Into { key }).pushIndex(index)
+              val itemNode = ExecutionPlanNode.container(index.toString())
+              val applyNode = buildParameterisedHeaderPlan(itemPath, itemValue)
+              itemNode.add(applyNode)
+              presenceCheck.add(itemNode)
+            }
+          }
         } else {
           itemNode.add(ExecutionPlanNode.annotation(Into { "$key=${itemValue.strForm()}" }))
           val itemCheck = ExecutionPlanNode.action("match:equality")
@@ -298,48 +301,43 @@ object V2MatchingEngine: MatchingEngine {
     return planNode
   }
 
-  //fn build_parameterised_header_plan(doc_path: &DocPath, val: &str) -> ExecutionPlanNode {
-  //  let values: Vec<&str> = strip_whitespace(val, ";");
-  //  let (header_value, header_params) = values.as_slice()
-  //    .split_first()
-  //    .unwrap_or((&"", &[]));
-  //  let parameter_map = parse_charset_parameters(header_params);
-  //
-  //  let mut apply_node = ExecutionPlanNode::action("tee");
-  //  apply_node
-  //    .add(ExecutionPlanNode::action("header:parse")
-  //      .add(ExecutionPlanNode::resolve_value(doc_path)));
-  //  apply_node.add(
-  //    ExecutionPlanNode::action("match:equality")
-  //      .add(ExecutionPlanNode::value_node(*header_value))
-  //      .add(ExecutionPlanNode::action("to-string")
-  //        .add(ExecutionPlanNode::resolve_current_value(&DocPath::new_unwrap("value"))))
-  //      .add(ExecutionPlanNode::value_node(NodeValue::NULL))
-  //  );
-  //
-  //  if !parameter_map.is_empty() {
-  //    let parameter_path = DocPath::new_unwrap("parameters");
-  //    for (k, v) in &parameter_map {
-  //      let mut parameter_node = ExecutionPlanNode::container(k.as_str());
-  //      parameter_node.add(
-  //        ExecutionPlanNode::action("if")
-  //          .add(ExecutionPlanNode::action("check:exists")
-  //            .add(ExecutionPlanNode::resolve_current_value(&parameter_path.join(k.as_str()))))
-  //          .add(ExecutionPlanNode::action("match:equality")
-  //            .add(ExecutionPlanNode::value_node(v.to_lowercase()))
-  //            .add(ExecutionPlanNode::action("lower-case")
-  //              .add(ExecutionPlanNode::resolve_current_value(&parameter_path.join(k.as_str()))))
-  //            .add(ExecutionPlanNode::value_node(NodeValue::NULL)))
-  //          .add(ExecutionPlanNode::action("error")
-  //            .add(ExecutionPlanNode::value_node(
-  //              format!("Expected a {} value of '{}' but it was missing", k, v)))
-  //          )
-  //      );
-  //      apply_node.add(parameter_node);
-  //    }
-  //  }
-  //  apply_node
-  //}
+  private fun buildParameterisedHeaderPlan(docPath: DocPath, value: String): ExecutionPlanNode {
+    val (headerValue, headerParams) = headerValueToMap(value)
+
+    val applyNode = ExecutionPlanNode.action("tee")
+    applyNode
+      .add(ExecutionPlanNode.action("header:parse")
+        .add(ExecutionPlanNode.resolveValue(docPath)))
+    applyNode.add(
+      ExecutionPlanNode.action("match:equality")
+        .add(ExecutionPlanNode.valueNode(headerValue))
+        .add(ExecutionPlanNode.action("to-string")
+          .add(ExecutionPlanNode.resolveCurrentValue(Into { DocPath(listOf(PathToken.Field("value")), "value") })))
+        .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+    )
+
+    if (headerParams.isNotEmpty()) {
+      val parameterPath = DocPath(listOf(PathToken.Field("parameters")), "parameters")
+      for ((k, v) in headerParams) {
+        val parameterNode = ExecutionPlanNode.container(k)
+        parameterNode.add(
+          ExecutionPlanNode.action("if")
+            .add(ExecutionPlanNode.action("check:exists")
+              .add(ExecutionPlanNode.resolveCurrentValue(parameterPath.join(Into { k }))))
+            .add(ExecutionPlanNode.action("match:equality")
+              .add(ExecutionPlanNode.valueNode(v.lowercase()))
+              .add(ExecutionPlanNode.action("lower-case")
+                .add(ExecutionPlanNode.resolveCurrentValue(parameterPath.join(Into { k }))))
+              .add(ExecutionPlanNode.valueNode(NodeValue.NULL)))
+            .add(ExecutionPlanNode.action("error")
+              .add(ExecutionPlanNode.valueNode("Expected a $k value of '$v' but it was missing"))
+            )
+        )
+        applyNode.add(parameterNode);
+      }
+    }
+    return applyNode
+  }
 
   fun setupBodyPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
     // TODO: Look at the matching rules and generators here
