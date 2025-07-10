@@ -18,6 +18,7 @@ import spock.lang.Specification
 
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
+@SuppressWarnings(['LineLength', 'AbcMetric', 'ClassSize', 'MethodSize'])
 class QueryMatchingSpec extends Specification {
   def 'match query where none are expected'() {
     given:

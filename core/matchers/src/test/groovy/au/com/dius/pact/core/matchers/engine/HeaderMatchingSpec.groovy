@@ -961,7 +961,7 @@ class HeaderMatchingSpec extends Specification {
       |        )
       |      ),
       |      :REF-ID (
-      |        #{'REF-ID must be a number'},
+      |        #{'REF-ID must be an integer'},
       |        %if (
       |          %check:exists (
       |            $.headers['REF-ID']
@@ -1010,7 +1010,7 @@ class HeaderMatchingSpec extends Specification {
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
-      |        #{'REF-ID must be a number'},
+      |        #{'REF-ID must be an integer'},
       |        %if (
       |          %check:exists (
       |            $.headers['REF-ID'] => '9023470945622'
@@ -1092,7 +1092,7 @@ class HeaderMatchingSpec extends Specification {
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
-      |        #{'REF-ID must be a number'},
+      |        #{'REF-ID must be an integer'},
       |        %if (
       |          %check:exists (
       |            $.headers['REF-ID'] => ['1111', '2222']
@@ -1172,7 +1172,7 @@ class HeaderMatchingSpec extends Specification {
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
-      |        #{'REF-ID must be a number'},
+      |        #{'REF-ID must be an integer'},
       |        %if (
       |          %check:exists (
       |            $.headers['REF-ID'] => '9023470X945622'
@@ -1247,7 +1247,7 @@ class HeaderMatchingSpec extends Specification {
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
-      |        #{'REF-ID must be a number'},
+      |        #{'REF-ID must be an integer'},
       |        %if (
       |          %check:exists (
       |            $.headers['REF-ID'] => ['1111', 'two']

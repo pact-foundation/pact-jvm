@@ -14,7 +14,6 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.support.json.JsonValue
 import kotlin.collections.map
-import kotlin.math.exp
 
 interface MatchingEngine {
   /**
@@ -96,7 +95,7 @@ object V2MatchingEngine: MatchingEngine {
     return planNode
   }
 
-  @Suppress("UnusedParameter")
+  @Suppress("LongMethod")
   fun setupQueryPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("query parameters")
     val docPath = DocPath("$.query")
