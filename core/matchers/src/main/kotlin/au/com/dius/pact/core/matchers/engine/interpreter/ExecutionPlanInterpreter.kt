@@ -492,10 +492,10 @@ class ExecutionPlanInterpreter(
                 val message = errorNodeResult.value()?.asString()
                 return if (message.isNotEmpty()) {
                   node.copy(result = NodeResult.ERROR(message!!),
-                    children = (args + optional).toMutableList())
+                    children = (args + errorNodeResult).toMutableList())
                 } else {
                   // There was an error generating the optional message, so just return the original error
-                  node.copy(result = NodeResult.ERROR(result.error), children = (args + optional).toMutableList())
+                  node.copy(result = NodeResult.ERROR(result.error), children = (args + errorNodeResult).toMutableList())
                 }
               } else {
                 node.copy(result = NodeResult.ERROR(result.error), children = (args + optional).toMutableList())

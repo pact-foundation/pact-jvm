@@ -419,7 +419,13 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
     }
   }
 
-  override fun generateDescription(forCollection: Boolean) = "must be a number"
+  override fun generateDescription(forCollection: Boolean): String {
+    return when (numberType) {
+      NumberType.NUMBER -> "must be a number"
+      NumberType.INTEGER -> "must be an integer"
+      NumberType.DECIMAL -> "must be a decimal"
+    }
+  }
 
   override val name: String
     get() = numberType.name.lowercase()

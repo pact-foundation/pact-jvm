@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.support.json.JsonValue
 import kotlin.collections.map
+import kotlin.math.exp
 
 interface MatchingEngine {
   /**
@@ -101,91 +102,77 @@ object V2MatchingEngine: MatchingEngine {
     val docPath = DocPath("$.query")
 
     if (expected.query.isNotEmpty()) {
-  //    if query.is_empty() {
-  //      plan_node
-  //        .add(
-  //          ExecutionPlanNode::action("expect:empty")
-  //            .add(ExecutionPlanNode::resolve_value(doc_path.clone()))
-  //            .add(
-  //              ExecutionPlanNode::action("join")
-  //                .add(ExecutionPlanNode::value_node("Expected no query parameters but got "))
-  //                .add(ExecutionPlanNode::resolve_value(doc_path))
-  //            )
-  //        );
-  //    } else {
-  //      let keys = query.keys().cloned().sorted().collect_vec();
-  //      for key in &keys {
-  //        let value = query.get(key).unwrap();
-  //        let mut item_node = ExecutionPlanNode::container(key);
-  //
-  //        let mut presence_check = ExecutionPlanNode::action("if");
-  //        let item_value = if value.len() == 1 {
-  //          NodeValue::STRING(value[0].clone().unwrap_or_default())
-  //        } else {
-  //          NodeValue::SLIST(value.iter()
-  //            .map(|v| v.clone().unwrap_or_default()).collect())
-  //        };
-  //        presence_check
-  //          .add(
-  //            ExecutionPlanNode::action("check:exists")
-  //              .add(ExecutionPlanNode::resolve_value(doc_path.join(key)))
-  //          );
-  //
-  //        let item_path = DocPath::root().join(key);
-  //        let path = doc_path.join(key);
-  //        if context.matcher_is_defined(&item_path) {
-  //          let matchers = context.select_best_matcher(&item_path);
-  //          item_node.add(ExecutionPlanNode::annotation(format!("{} {}", key, matchers.generate_description(true))));
-  //          presence_check.add(build_matching_rule_node(&ExecutionPlanNode::value_node(item_value),
-  //                                                      &ExecutionPlanNode::resolve_value(&path), &matchers, true));
-  //        } else {
-  //          item_node.add(ExecutionPlanNode::annotation(format!("{}={}", key, item_value.to_string())));
-  //          let mut item_check = ExecutionPlanNode::action("match:equality");
-  //          item_check
-  //            .add(ExecutionPlanNode::value_node(item_value))
-  //            .add(ExecutionPlanNode::resolve_value(&path))
-  //            .add(ExecutionPlanNode::value_node(NodeValue::NULL));
-  //          presence_check.add(item_check);
-  //        }
-  //
-  //        item_node.add(presence_check);
-  //        plan_node.add(item_node);
-  //      }
-  //
-  //      plan_node.add(
-  //        ExecutionPlanNode::action("expect:entries")
-  //          .add(ExecutionPlanNode::value_node(NodeValue::SLIST(keys.clone())))
-  //          .add(ExecutionPlanNode::resolve_value(doc_path.clone()))
-  //          .add(
-  //            ExecutionPlanNode::action("join")
-  //              .add(ExecutionPlanNode::value_node("The following expected query parameters were missing: "))
-  //              .add(ExecutionPlanNode::action("join-with")
-  //                .add(ExecutionPlanNode::value_node(", "))
-  //                .add(
-  //                  ExecutionPlanNode::splat()
-  //                    .add(ExecutionPlanNode::action("apply"))
-  //                )
-  //              )
-  //          )
-  //      );
-  //
-  //      plan_node.add(
-  //        ExecutionPlanNode::action("expect:only-entries")
-  //          .add(ExecutionPlanNode::value_node(NodeValue::SLIST(keys.clone())))
-  //          .add(ExecutionPlanNode::resolve_value(doc_path.clone()))
-  //          .add(
-  //            ExecutionPlanNode::action("join")
-  //              .add(ExecutionPlanNode::value_node("The following query parameters were not expected: "))
-  //              .add(ExecutionPlanNode::action("join-with")
-  //                .add(ExecutionPlanNode::value_node(", "))
-  //                .add(
-  //                  ExecutionPlanNode::splat()
-  //                    .add(ExecutionPlanNode::action("apply"))
-  //                )
-  //              )
-  //          )
-  //      );
-  //    }
+      val keys = expected.query.keys.sorted()
+      for (key in keys) {
+        val value = expected.query[key]!!
+        val itemNode = ExecutionPlanNode.container(key)
+
+        val presenceCheck = ExecutionPlanNode.action("if")
+        val itemValue = if (value.size == 1) {
+          NodeValue.STRING(value[0].orEmpty())
+        } else {
+          NodeValue.SLIST(value.map { it.orEmpty() })
+        }
+        val path = docPath.join(Into { key })
+        presenceCheck
+          .add(
+            ExecutionPlanNode.action("check:exists")
+              .add(ExecutionPlanNode.resolveValue(path))
+          )
+
+        val itemPath = DocPath(listOf(PathToken.Field(key)), key)
+        if (context.matcherIsDefined(itemPath)) {
+          val matchers = context.selectBestMatcher(itemPath)
+          itemNode.add(ExecutionPlanNode.annotation(Into { "$key ${matchers.generateDescription(true)}" }))
+          presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(itemValue),
+            ExecutionPlanNode.resolveValue(path), matchers, true))
+        } else {
+          itemNode.add(ExecutionPlanNode.annotation(Into { "$key=${itemValue.strForm()}" }))
+          val itemCheck = ExecutionPlanNode.action("match:equality")
+          itemCheck
+            .add(ExecutionPlanNode.valueNode(itemValue))
+            .add(ExecutionPlanNode.resolveValue(path))
+            .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+          presenceCheck.add(itemCheck)
+        }
+
+        itemNode.add(presenceCheck)
+        planNode.add(itemNode)
+      }
+
+      planNode.add(
+        ExecutionPlanNode.action("expect:entries")
+          .add(ExecutionPlanNode.valueNode(NodeValue.SLIST(keys)))
+          .add(ExecutionPlanNode.resolveValue(docPath))
+          .add(
+            ExecutionPlanNode.action("join")
+              .add(ExecutionPlanNode.valueNode("The following expected query parameters were missing: "))
+              .add(ExecutionPlanNode.action("join-with")
+                .add(ExecutionPlanNode.valueNode(", "))
+                .add(
+                  ExecutionPlanNode.splat()
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+              )
+          )
+      )
+
+      planNode.add(
+        ExecutionPlanNode.action("expect:only-entries")
+          .add(ExecutionPlanNode.valueNode(NodeValue.SLIST(keys)))
+          .add(ExecutionPlanNode.resolveValue(docPath))
+          .add(
+            ExecutionPlanNode.action("join")
+              .add(ExecutionPlanNode.valueNode("The following query parameters were not expected: "))
+              .add(ExecutionPlanNode.action("join-with")
+                .add(ExecutionPlanNode.valueNode(", "))
+                .add(
+                  ExecutionPlanNode.splat()
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+              )
+          )
+      )
     } else {
       planNode
         .add(

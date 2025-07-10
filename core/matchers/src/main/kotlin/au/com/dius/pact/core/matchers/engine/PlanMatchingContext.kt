@@ -61,10 +61,9 @@ open class PlanMatchingContext @JvmOverloads constructor(
 
   /** If there is a matcher defined at the path in this context */
   fun matcherIsDefined(path: DocPath): Boolean {
-    return if (path.firstField() == "headers") {
-      matchingContext.matcherDefined(path.asList().drop(2))
-    } else {
-      matchingContext.matcherDefined(path.asList())
+    return when {
+      path.firstField() == "headers" -> matchingContext.matcherDefined(path.asList().drop(2))
+      else -> matchingContext.matcherDefined(path.asList())
     }
   }
 
