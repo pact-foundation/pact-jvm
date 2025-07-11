@@ -127,8 +127,7 @@ sealed class NodeResult {
           is NodeValue.SLIST -> v.items.toString()
           is NodeValue.STRING -> v.string
           is NodeValue.UINT -> v.uint.toString()
-          //#[cfg(feature = "xml")]
-          //NodeValue::XML(node) => Some(node.to_string())
+          is NodeValue.XML -> v.toString()
         }
       }
       is ERROR -> null

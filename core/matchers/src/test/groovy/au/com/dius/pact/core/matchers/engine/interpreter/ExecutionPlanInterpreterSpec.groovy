@@ -5,6 +5,7 @@ import au.com.dius.pact.core.matchers.engine.MatchingConfiguration
 import au.com.dius.pact.core.matchers.engine.NodeResult
 import au.com.dius.pact.core.matchers.engine.NodeValue
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
+import au.com.dius.pact.core.matchers.engine.bodies.XMLPlanBuilder
 import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.matchers.engine.bodies.JsonPlanBuilder
 import au.com.dius.pact.core.model.Consumer
@@ -639,21 +640,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
     diff == ''
   }
 
-  //#[test_log::test]
-  //fn very_simple_xml() {
-  //  let path = vec!["$".to_string()];
-  //  let builder = XMLPlanBuilder::new();
-  //  let context = PlanMatchingContext::default();
-  //  let content = Bytes::copy_from_slice("<foo>test</foo>".as_bytes());
-  //  let node = builder.build_plan(&content, &context).unwrap();
-  //
-  //  let resolver = TestValueResolver {
-  //    bytes: content.to_vec()
-  //  };
-  //  let mut interpreter = ExecutionPlanInterpreter::new_with_context(&context);
-  //  let result = interpreter.walk_tree(&path, &node, &resolver).unwrap();
-  //  let mut buffer = String::new();
-  //  result.pretty_form(&mut buffer, 2);
+  def 'very simple xml'() {
   //  assert_eq!("  %tee (
   //    %xml:parse (
   //      $.body => BYTES(15, PGZvbz50ZXN0PC9mb28+)
@@ -683,7 +670,59 @@ class ExecutionPlanInterpreterSpec extends Specification {
   //      ) => BOOL(true)
   //    ) => BOOL(true)
   //  ) => BOOL(true)", buffer);
-  //
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, config)
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = XMLPlanBuilder.INSTANCE
+    def content = '<foo>test</foo>'.bytes
+    ExecutionPlanNode node = builder.buildPlan(content, context)
+
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> new Result.Ok( new NodeValue.BARRAY(content))
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+
+    then:
+    result.result.value.bool == true
+    prettyResult == '''%tee (
+    |  %xml:parse (
+    |    $.body => BYTES(15, PGZvbz50ZXN0PC9mb28+)
+    |  ) => xml:'<foo>test</foo>',
+    |  :$ (
+    |    %if (
+    |      %check:exists (
+    |        ~>$.foo => xml:'<foo>test<\\/foo>\\n'
+    |      ) => BOOL(true),
+    |      :$.foo (
+    |        :#text (
+    |          %match:equality (
+    |            'test' => 'test',
+    |            %to-string (
+    |              ~>$.foo['#text'] => xml:text:test
+    |            ) => 'test',
+    |            NULL => NULL
+    |          ) => BOOL(true)
+    |        ) => BOOL(true),
+    |        %expect:empty (
+    |          ~>$.foo => xml:'<foo>test</foo>'
+    |        ) => BOOL(true)
+    |      ) => BOOL(true),
+    |      %error (
+    |        'Was expecting an XML element /foo but it was missing'
+    |      )
+    |    ) => BOOL(true)
+    |  ) => BOOL(true)
+    |) => BOOL(true)'''.stripMargin('|')
   //  let content = Bytes::copy_from_slice("<bar></bar>".as_bytes());
   //  let resolver = TestValueResolver {
   //    bytes: content.to_vec()
@@ -759,8 +798,8 @@ class ExecutionPlanInterpreterSpec extends Specification {
   //      )
   //    )
   //  ) => ERROR(XML parse error - ParsingError: root element not closed)", buffer);
-  //}
-  //
+  }
+
   //#[test_log::test]
   //fn simple_xml() {
   //  let path = vec!["$".to_string()];

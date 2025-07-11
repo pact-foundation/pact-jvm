@@ -4,13 +4,11 @@ import au.com.dius.pact.core.matchers.BodyItemMatchResult
 import au.com.dius.pact.core.matchers.BodyMismatchFactory
 import au.com.dius.pact.core.matchers.JsonContentMatcher
 import au.com.dius.pact.core.matchers.Matchers.compareLists
-import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.domatch
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.XmlUtils.renderXml
 import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
 import org.apache.commons.text.StringEscapeUtils.escapeJson
@@ -64,9 +62,8 @@ sealed class NodeValue: Into<NodeValue> {
   /** List of values */
   data class LIST(val items: List<NodeValue>): NodeValue()
 
-//  /// XML
-//  #[cfg(feature = "xml")]
-//  XML(XmlValue)
+  /** XML */
+  data class XML(val xml: XmlValue): NodeValue()
 
   /** Returns the encoded string form of the node value */
   @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -144,13 +141,13 @@ sealed class NodeValue: Into<NodeValue> {
         buffer.append(']')
         buffer.toString()
       }
-//      #[cfg(feature = "xml")]
-//      NodeValue::XML(node) -> match node {
-//        XmlValue::Element(element) -> format!("xml:{}", escape(element.to_string().as_str())),
-//        XmlValue::Text(text) -> format!("xml:text:{}", escape(text.as_str())),
-//        XmlValue::Attribute(name, value) -> format!("xml:attribute:{}={}",
-//          escape(name.as_str()), escape(value.as_str()))
-//      }
+      is XML -> {
+        when (val xml = this.xml) {
+          is XmlValue.Attribute -> "xml:attribute:${escape(xml.name)}=${escape(xml.value)}"
+          is XmlValue.Element -> "xml:${escape(renderXml(xml.element))}"
+          is XmlValue.Text -> "xml:text:${escape(xml.text)}"
+        }
+      }
     }
   }
 
@@ -168,8 +165,7 @@ sealed class NodeValue: Into<NodeValue> {
       is SLIST -> "String List"
       is STRING -> "String"
       is UINT -> "Unsigned Integer"
-//      #[cfg(feature = "xml")]
-//      NodeValue::XML(_) => "XML"
+      is XML -> "XML"
     }
   }
 
@@ -319,14 +315,14 @@ sealed class NodeValue: Into<NodeValue> {
     }
   }
 
-//  /// If this value is an XML value, returns it, otherwise returns None
-//  #[cfg(feature = "xml")]
-//  pub fn as_xml(&self) -> Option<XmlValue> {
-//    match self {
-//      NodeValue::XML(xml) => Some(xml.clone()),
-//      _ => None
-//    }
-//  }
+  /** If this value is an XML value, returns it, otherwise returns null */
+  fun asXml(): XmlValue? {
+    return if (this is XML) {
+      xml
+    } else {
+      null
+    }
+  }
 
   /** If this value is a bool value, returns it, otherwise returns null */
   fun asBool(): Boolean? {
@@ -373,6 +369,7 @@ sealed class NodeValue: Into<NodeValue> {
       is SLIST -> this.items
       is STRING -> this.string
       is UINT -> this.uint
+      is XML -> this.xml
     }
   }
 

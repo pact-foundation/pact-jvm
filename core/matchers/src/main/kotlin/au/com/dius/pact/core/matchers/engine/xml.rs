@@ -1,28 +1,3 @@
-//! Structs and functions for dealing with XML
-
-use std::fmt::{Display, Formatter};
-
-use anyhow::anyhow;
-use kiss_xml::dom::Element;
-use onig::Regex;
-use snailquote::escape;
-use tracing::debug;
-
-use pact_models::matchingrules::MatchingRule;
-use pact_models::xml_utils::XmlResult;
-
-use crate::matchers::Matches;
-
-/// Enum to store different XML nodes
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub enum XmlValue {
-  /// XML element
-  Element(Element),
-  /// XML text
-  Text(String),
-  /// Attribute
-  Attribute(String, String)
-}
 
 impl XmlValue {
   /// Returns the value if it is an XML element
@@ -50,15 +25,6 @@ impl XmlValue {
   }
 }
 
-impl Display for XmlValue {
-  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    match self {
-      XmlValue::Element(el) => write!(f, "{}", el),
-      XmlValue::Text(txt) => write!(f, "{}", escape(txt.as_str())),
-      XmlValue::Attribute(name, value) => write!(f, "@{}={}", name, escape(value.as_str()))
-    }
-  }
-}
 
 impl From<XmlResult> for XmlValue {
   fn from(value: XmlResult) -> Self {

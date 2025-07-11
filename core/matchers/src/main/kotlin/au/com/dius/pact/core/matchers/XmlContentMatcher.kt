@@ -2,23 +2,23 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.XmlUtils.parse
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.zipAll
 import io.pact.plugins.jvm.core.InteractionContents
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
 import org.w3c.dom.Node.CDATA_SECTION_NODE
 import org.w3c.dom.Node.ELEMENT_NODE
 import org.w3c.dom.Node.TEXT_NODE
 import org.w3c.dom.NodeList
-import org.xml.sax.InputSource
-import java.io.StringReader
 import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
+
+private val logger = KotlinLogging.logger {}
 
 @Suppress("LongMethod", "ComplexMethod", "TooManyFunctions")
-object XmlContentMatcher : ContentMatcher, KLogging() {
+object XmlContentMatcher : ContentMatcher {
 
   override fun matchBody(
     expected: OptionalBody,
@@ -48,26 +48,6 @@ object XmlContentMatcher : ContentMatcher, KLogging() {
         ContentType("application/xml")
       )
     )))
-  }
-
-  fun parse(xmlData: String): Node {
-    val dbFactory = DocumentBuilderFactory.newInstance()
-    if (System.getProperty("pact.matching.xml.validating") == "false") {
-      dbFactory.isValidating = false
-      dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
-      dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-    }
-    if (System.getProperty("pact.matching.xml.namespace-aware") != "false") {
-      dbFactory.isNamespaceAware = true
-    }
-    return if (xmlData.isEmpty()) {
-      dbFactory.newDocumentBuilder().newDocument()
-    } else {
-      val dBuilder = dbFactory.newDocumentBuilder()
-      val xmlInput = InputSource(StringReader(xmlData))
-      val doc = dBuilder.parse(xmlInput)
-      doc.documentElement
-    }
   }
 
   private fun appendAttribute(path: List<String>, attribute: QualifiedName): List<String> {
@@ -290,10 +270,9 @@ object XmlContentMatcher : ContentMatcher, KLogging() {
       emptyMap()
     } else {
       (0 until attributes.length)
-              .map { attributes.item(it) }
-              .filter { it.namespaceURI != XMLConstants.XMLNS_ATTRIBUTE_NS_URI }
-              .map { QualifiedName(it) to it }
-              .toMap()
+        .map { attributes.item(it) }
+        .filter { it.namespaceURI != XMLConstants.XMLNS_ATTRIBUTE_NS_URI }
+        .associateBy { QualifiedName(it) }
     }
   }
 }

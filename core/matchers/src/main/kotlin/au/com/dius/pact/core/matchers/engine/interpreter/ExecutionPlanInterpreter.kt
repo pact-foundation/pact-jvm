@@ -2,23 +2,30 @@ package au.com.dius.pact.core.matchers.engine.interpreter
 
 import au.com.dius.pact.core.matchers.engine.ExecutionPlanNode
 import au.com.dius.pact.core.matchers.engine.NodeResult
+import au.com.dius.pact.core.matchers.engine.NodeResult.*
 import au.com.dius.pact.core.matchers.engine.NodeValue
+import au.com.dius.pact.core.matchers.engine.NodeValue.*
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
 import au.com.dius.pact.core.matchers.engine.PlanNodeType
+import au.com.dius.pact.core.matchers.engine.XmlValue
 import au.com.dius.pact.core.matchers.engine.orDefault
 import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
 import au.com.dius.pact.core.model.JsonUtils
+import au.com.dius.pact.core.model.XmlUtils.parse
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
+import au.com.dius.pact.core.support.Result.*
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.orNull
 import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.w3c.dom.Element
+import org.w3c.dom.Node
 import java.io.ByteArrayInputStream
 
 private val logger = KotlinLogging.logger {}
@@ -236,8 +243,7 @@ class ExecutionPlanInterpreter(
         //        "push" => self.execute_push(node),
         //        "pop" => self.execute_pop(node),
         "json:parse" -> executeJsonParse(action, valueResolver, node, actionPath)
-        //        #[cfg(feature = "xml")]
-        //        "xml:parse" => self.execute_xml_parse(action, valueResolver, node, actionPath),
+        "xml:parse" -> executeXmlParse(action, valueResolver, node, actionPath)
         //        #[cfg(feature = "xml")]
         //        "xml:tag-name" => self.execute_xml_tag_name(action, valueResolver, node, actionPath),
         //        #[cfg(feature = "xml")]
@@ -388,95 +394,94 @@ class ExecutionPlanInterpreter(
             when (argValue) {
               is NodeValue.BARRAY -> {
                 if (argValue.bytes.isEmpty()) {
-                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  Ok(VALUE(BOOL(true)))
                 } else {
-                  Result.Err("Expected byte array (${argValue.bytes.size} bytes) to be empty")
+                  Err("Expected byte array (${argValue.bytes.size} bytes) to be empty")
                 }
               }
-              is NodeValue.BOOL -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(argValue.bool)))
-              is NodeValue.ENTRY -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(false)))
+              is NodeValue.BOOL -> Ok(VALUE(BOOL(argValue.bool)))
+              is NodeValue.ENTRY -> Ok(VALUE(BOOL(false)))
               is NodeValue.JSON -> {
                 when (argValue.json) {
                   is JsonValue.Array -> {
                     if (argValue.json.values.isEmpty()) {
-                      Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                      Ok(VALUE(BOOL(true)))
                     } else {
-                      Result.Err("Expected JSON Array ${argValue.json.values} to be empty")
+                      Err("Expected JSON Array ${argValue.json.values} to be empty")
                     }
                   }
-                  JsonValue.Null -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  JsonValue.Null -> Ok(VALUE(BOOL(true)))
                   is JsonValue.Object -> {
                     if (argValue.json.entries.isEmpty()) {
-                      Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                      Ok(VALUE(BOOL(true)))
                     } else {
-                      Result.Err("Expected JSON Object ${argValue.json.entries} to be empty")
+                      Err("Expected JSON Object ${argValue.json.entries} to be empty")
                     }
                   }
                   is JsonValue.StringValue -> {
                     if (argValue.json.value.chars.isEmpty()) {
-                      Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                      Ok(VALUE(BOOL(true)))
                     } else {
-                      Result.Err("Expected JSON String ${argValue.json.value} to be empty")
+                      Err("Expected JSON String ${argValue.json.value} to be empty")
                     }
                   }
-                  else -> Result.Err("Expected json (${argValue.json.serialise()}) to be empty")
+                  else -> Err("Expected json (${argValue.json.serialise()}) to be empty")
                 }
               }
               is NodeValue.LIST -> {
                 if (argValue.items.isEmpty()) {
-                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  Ok(VALUE(BOOL(true)))
                 } else {
-                  Result.Err("Expected ${argValue.items} to be empty")
+                  Err("Expected ${argValue.items} to be empty")
                 }
               }
               is NodeValue.MMAP -> {
                 if (argValue.entries.isEmpty()) {
-                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  Ok(VALUE(BOOL(true)))
                 } else {
-                  Result.Err("Expected ${argValue.entries} to be empty")
+                  Err("Expected ${argValue.entries} to be empty")
                 }
               }
               is NodeValue.NAMESPACED -> TODO("Not Implemented: Need a way to resolve NodeValue::NAMESPACED")
-              NodeValue.NULL -> Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+              NodeValue.NULL -> Ok(VALUE(BOOL(true)))
               is NodeValue.SLIST -> {
                 if (argValue.items.isEmpty()) {
-                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  Ok(VALUE(BOOL(true)))
                 } else {
-                  Result.Err("Expected ${argValue.items} to be empty")
+                  Err("Expected ${argValue.items} to be empty")
                 }
               }
               is NodeValue.STRING -> {
                 if (argValue.string.isEmpty()) {
-                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  Ok(VALUE(BOOL(true)))
                 } else {
-                  Result.Err("Expected '${argValue.string}' to be empty")
+                  Err("Expected '${argValue.string}' to be empty")
                 }
               }
               is NodeValue.UINT -> {
                 if (argValue.uint.toInt() == 0) {
-                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                  Ok(VALUE(BOOL(true)))
                 } else {
-                  Result.Err("Expected ${argValue.uint} to be empty")
+                  Err("Expected ${argValue.uint} to be empty")
                 }
               }
-              //              #[cfg(feature = "xml")]
-              //              NodeValue::XML(xml) => match xml {
-              //                XmlValue::Element(element) => if element.child_elements().next().is_none() {
-              //                  Ok(NodeResult::VALUE(NodeValue::BOOL(true)))
-              //                } else {
-              //                  Err(anyhow!("Expected {} to be empty", element))
-              //                }
-              //                XmlValue::Text(text) => if text.is_empty() {
-              //                  Ok(NodeResult::VALUE(NodeValue::BOOL(true)))
-              //                } else {
-              //                  Err(anyhow!("Expected {:?} to be empty", value))
-              //                }
-              //                XmlValue::Attribute(name, value) => if value.is_empty() {
-              //                  Ok(NodeResult::VALUE(NodeValue::BOOL(true)))
-              //                } else {
-              //                  Err(anyhow!("Expected {}={} to be empty", name, value))
-              //                }
-              //              }
+              is NodeValue.XML -> when (val xml = argValue.xml) {
+                is XmlValue.Attribute -> if (xml.value.isEmpty()) {
+                  Ok(VALUE(BOOL(true)))
+                } else {
+                  Err("Expected ${xml.name}=${xml.value} to be empty")
+                }
+                is XmlValue.Element -> if (!xml.element.hasChildNodes()) {
+                  Ok(VALUE(BOOL(true)))
+                } else {
+                  Err("Expected ${xml.element} to be empty")
+                }
+                is XmlValue.Text -> if (xml.text.isEmpty()) {
+                  Ok(VALUE(BOOL(true)))
+                } else {
+                  Err("Expected '${xml.text}' to be empty")
+                }
+              }
             }
           } else {
             Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
@@ -1070,6 +1075,49 @@ class ExecutionPlanInterpreter(
 
     return node.copy(result = NodeResult.ERROR(values.joinToString()),
       children = children.toMutableList())
+  }
+
+  private fun executeXmlParse(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.BARRAY -> {
+              when (val result = handleWith<Node> { parse(argValue.bytes) }) {
+                is Result.Ok -> if (result.value is Element) {
+                  NodeResult.VALUE(NodeValue.XML(XmlValue.Element(result.value as Element)))
+                } else {
+                  NodeResult.ERROR("XML parse error: was expecting a root XML element")
+                }
+                is Result.Err -> NodeResult.ERROR("XML parse error: ${result.error.message}")
+              }
+            }
+            NodeValue.NULL -> NodeResult.VALUE(NodeValue.NULL)
+            is NodeValue.STRING -> {
+              when (val result = handleWith<Node> { parse(argValue.string) }) {
+                is Result.Ok -> if (result.value is Element) {
+                  NodeResult.VALUE(NodeValue.XML(XmlValue.Element(result.value as Element)))
+                } else {
+                  NodeResult.ERROR("XML parse error: was expecting a root XML element")
+                }
+                is Result.Err -> NodeResult.ERROR("XML parse error: ${result.error.message}")
+              }
+            }
+            else -> NodeResult.ERROR("xml:parse can not be used with ${argValue.valueType()}")
+          }
+        } else {
+          NodeResult.VALUE(NodeValue.NULL)
+        }
+        node.copy(result = result, children = mutableListOf(resultNode.value))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
   }
 
   /** Push a result value onto the value stack */
