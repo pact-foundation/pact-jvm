@@ -1,30 +1,4 @@
 
-impl XmlValue {
-  /// Returns the value if it is an XML element
-  pub fn as_element(&self) -> Option<Element> {
-    match self {
-      XmlValue::Element(element) => Some(element.clone()),
-      _ => None
-    }
-  }
-
-  /// Returns the value if it is XML text
-  pub fn as_text(&self) -> Option<String> {
-    match self {
-      XmlValue::Text(text) => Some(text.clone()),
-      _ => None
-    }
-  }
-
-  /// Returns the value if it is an XML attribute
-  pub fn as_attribute(&self) -> Option<(String, String)> {
-    match self {
-      XmlValue::Attribute(name, value) => Some((name.clone(), value.clone())),
-      _ => None
-    }
-  }
-}
-
 
 impl From<XmlResult> for XmlValue {
   fn from(value: XmlResult) -> Self {

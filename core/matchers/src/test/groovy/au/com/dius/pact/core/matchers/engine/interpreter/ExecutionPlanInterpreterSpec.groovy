@@ -641,35 +641,6 @@ class ExecutionPlanInterpreterSpec extends Specification {
   }
 
   def 'very simple xml'() {
-  //  assert_eq!("  %tee (
-  //    %xml:parse (
-  //      $.body => BYTES(15, PGZvbz50ZXN0PC9mb28+)
-  //    ) => xml:'<foo>test</foo>',
-  //    :$ (
-  //      %if (
-  //        %check:exists (
-  //          ~>$.foo => xml:'<foo>test</foo>'
-  //        ) => BOOL(true),
-  //        :$.foo (
-  //          :#text (
-  //            %match:equality (
-  //              'test' => 'test',
-  //              %to-string (
-  //                ~>$.foo['#text'] => xml:text:test
-  //              ) => 'test',
-  //              NULL => NULL
-  //            ) => BOOL(true)
-  //          ) => BOOL(true),
-  //          %expect:empty (
-  //            ~>$.foo => xml:'<foo>test</foo>'
-  //          ) => BOOL(true)
-  //        ) => BOOL(true),
-  //        %error (
-  //          'Was expecting an XML element /foo but it was missing'
-  //        )
-  //      ) => BOOL(true)
-  //    ) => BOOL(true)
-  //  ) => BOOL(true)", buffer);
     given:
     List<String> path = ['$']
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
@@ -691,38 +662,42 @@ class ExecutionPlanInterpreterSpec extends Specification {
     def buffer = new StringBuilder()
     result.prettyForm(buffer, 0)
     def prettyResult = buffer.toString()
+    def expected = '''%tee (
+      |  %xml:parse (
+      |    $.body => BYTES(15, PGZvbz50ZXN0PC9mb28+)
+      |  ) => xml:'<foo>test</foo>',
+      |  :$ (
+      |    %if (
+      |      %check:exists (
+      |        ~>$.foo => xml:'<foo>test</foo>'
+      |      ) => BOOL(true),
+      |      :$.foo (
+      |        :#text (
+      |          %match:equality (
+      |            'test' => 'test',
+      |            %to-string (
+      |              ~>$.foo['#text'] => xml:text:'test'
+      |            ) => 'test',
+      |            NULL => NULL
+      |          ) => BOOL(true)
+      |        ) => BOOL(true),
+      |        %expect:empty (
+      |          ~>$.foo => xml:'<foo>test</foo>'
+      |        ) => BOOL(true)
+      |      ) => BOOL(true),
+      |      %error (
+      |        'Was expecting an XML element \\/foo but it was missing'
+      |      )
+      |    ) => BOOL(true)
+      |  ) => BOOL(true)
+      |) => BOOL(true)'''.stripMargin('|')
+    def patch = DiffUtils.diff(prettyResult, expected, null)
+    def diff = generateUnifiedDiff('', '', prettyResult.split('\n') as List<String>, patch, 0).join('\n')
 
     then:
     result.result.value.bool == true
-    prettyResult == '''%tee (
-    |  %xml:parse (
-    |    $.body => BYTES(15, PGZvbz50ZXN0PC9mb28+)
-    |  ) => xml:'<foo>test</foo>',
-    |  :$ (
-    |    %if (
-    |      %check:exists (
-    |        ~>$.foo => xml:'<foo>test<\\/foo>\\n'
-    |      ) => BOOL(true),
-    |      :$.foo (
-    |        :#text (
-    |          %match:equality (
-    |            'test' => 'test',
-    |            %to-string (
-    |              ~>$.foo['#text'] => xml:text:test
-    |            ) => 'test',
-    |            NULL => NULL
-    |          ) => BOOL(true)
-    |        ) => BOOL(true),
-    |        %expect:empty (
-    |          ~>$.foo => xml:'<foo>test</foo>'
-    |        ) => BOOL(true)
-    |      ) => BOOL(true),
-    |      %error (
-    |        'Was expecting an XML element /foo but it was missing'
-    |      )
-    |    ) => BOOL(true)
-    |  ) => BOOL(true)
-    |) => BOOL(true)'''.stripMargin('|')
+    diff == ''
+
   //  let content = Bytes::copy_from_slice("<bar></bar>".as_bytes());
   //  let resolver = TestValueResolver {
   //    bytes: content.to_vec()
