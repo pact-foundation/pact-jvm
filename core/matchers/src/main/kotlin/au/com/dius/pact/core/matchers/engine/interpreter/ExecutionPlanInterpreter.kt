@@ -12,6 +12,7 @@ import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
 import au.com.dius.pact.core.model.JsonUtils
+import au.com.dius.pact.core.model.XmlUtils.attributes
 import au.com.dius.pact.core.model.XmlUtils.childElements
 import au.com.dius.pact.core.model.XmlUtils.groupChildren
 import au.com.dius.pact.core.model.XmlUtils.parse
@@ -242,7 +243,7 @@ class ExecutionPlanInterpreter(
         "upper-case" -> executeChangeCase(action, valueResolver, node, actionPath, true)
         "lower-case" -> executeChangeCase(action, valueResolver, node, actionPath, false)
         "to-string" -> executeToString(action, valueResolver, node, actionPath)
-        //        "length" => self.execute_length(action, valueResolver, node, actionPath),
+        "length" -> executeLength(action, valueResolver, node, actionPath)
         "expect:empty" -> executeExpectEmpty(action, valueResolver, node, actionPath)
         "convert:UTF8" -> executeConvertUtf8(action, valueResolver, node, actionPath)
         "if" -> executeIf(valueResolver, node, actionPath)
@@ -256,17 +257,15 @@ class ExecutionPlanInterpreter(
         "xml:parse" -> executeXmlParse(action, valueResolver, node, actionPath)
         //        #[cfg(feature = "xml")]
         //        "xml:tag-name" => self.execute_xml_tag_name(action, valueResolver, node, actionPath),
-        //        #[cfg(feature = "xml")]
-        //        "xml:value" => self.execute_xml_value(action, valueResolver, node, actionPath),
-        //        #[cfg(feature = "xml")]
-        //        "xml:attributes" => self.execute_xml_attributes(action, valueResolver, node, actionPath),
+        "xml:value" -> executeXmlValue(action, valueResolver, node, actionPath)
+        "xml:attributes" -> executeXmlAttributes(action, valueResolver, node, actionPath)
         "json:expect:empty" -> executeJsonExpectEmpty(action, valueResolver, node, actionPath)
         "json:match:length" -> executeJsonMatchLength(action, valueResolver, node, actionPath)
         "json:expect:entries" -> executeJsonExpectEntries(action, valueResolver, node, actionPath)
         "check:exists" -> executeCheckExists(action, valueResolver, node, actionPath)
         "expect:entries" -> executeCheckEntries(action, valueResolver, node, actionPath)
         "expect:only-entries" -> executeCheckEntries(action, valueResolver, node, actionPath)
-        //        "expect:count" => self.execute_expect_count(action, valueResolver, node, actionPath),
+        "expect:count" -> executeExpectCount(action, valueResolver, node, actionPath)
         "join" -> executeJoin(action, valueResolver, node, actionPath)
         "join-with" -> executeJoin(action, valueResolver, node, actionPath)
         "error" -> executeError(action, valueResolver, node, actionPath)
@@ -924,6 +923,7 @@ class ExecutionPlanInterpreter(
             if (actionResult.second != null) {
               pushResult(NodeResult.VALUE(NodeValue.SLIST(actionResult.second!!.toList())))
               val errorNodeResult = walkTree(actionPath, result.value.second[0], valueResolver)
+              popResult()
               when (val messageValue = errorNodeResult.value().orDefault()) {
                 is NodeResult.VALUE -> {
                   val message = messageValue.orDefault().asString() ?: ""
@@ -933,7 +933,6 @@ class ExecutionPlanInterpreter(
                 else -> {
                   // There was an error generating the optional message, so just return the
                   // original error
-                  popResult()
                   node.copy(result = NodeResult.ERROR(actionResult.first),
                     children = (result.value.first + errorNodeResult).toMutableList())
                 }
@@ -1120,6 +1119,215 @@ class ExecutionPlanInterpreter(
               }
             }
             else -> NodeResult.ERROR("xml:parse can not be used with ${argValue.valueType()}")
+          }
+        } else {
+          NodeResult.VALUE(NodeValue.NULL)
+        }
+        node.copy(result = result, children = mutableListOf(resultNode.value))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeExpectCount(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(2, 1, node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val expectedLength = result.value.first[0].value()
+          .orDefault()
+          .asValue()
+          .orDefault()
+          .asUInt()
+          ?.toInt() ?: 0
+
+        val second = result.value.first[1].value()
+          .orDefault()
+          .asValue()
+          .orDefault()
+
+        val error = when (second) {
+          is NodeValue.JSON -> when (val json = second.json) {
+            is JsonValue.Array -> {
+              if (json.values.size != expectedLength) {
+                "Expected $expectedLength array items but there were ${json.values.size}"
+              } else {
+                null
+              }
+            }
+            is JsonValue.Object -> {
+              if (json.entries.size != expectedLength) {
+                "Expected $expectedLength object entries but there were ${json.entries.size}"
+              } else {
+                null
+              }
+            }
+            is JsonValue.StringValue -> {
+              if (json.size() != expectedLength) {
+                "Expected a JSON string with length of $expectedLength but was ${second.json.size()}"
+              } else {
+                null
+              }
+            }
+            else -> "'$action' can't be used with a $second node"
+          }
+          is NodeValue.LIST -> {
+            if (second.items.size != expectedLength) {
+              "Expected $expectedLength items but there were ${second.items.size}"
+            } else {
+              null
+            }
+          }
+          is NodeValue.MMAP -> {
+            if (second.entries.size != expectedLength) {
+              "Expected $expectedLength map entries but there were ${second.entries.size}"
+            } else {
+              null
+            }
+          }
+          is NodeValue.SLIST -> {
+            if (second.items.size != expectedLength) {
+              "Expected $expectedLength items but there were ${second.items.size}"
+            } else {
+              null
+            }
+          }
+          is NodeValue.STRING -> {
+            if (second.string.length != expectedLength) {
+              "Expected a string with a length of $expectedLength but it was ${second.string.length}"
+            } else {
+              null
+            }
+          }
+          is NodeValue.XML -> when (second.xml) {
+            is XmlValue.Element -> {
+              // If there is more than one child element, it will be stored as a List,
+              // so will not end up here
+              if (expectedLength > 1) {
+                "Expected $expectedLength child elements but there were 1"
+              } else {
+                null
+              }
+            }
+            else -> "'$action' can't be used with a $second node"
+          }
+          else -> "'$action' can't be used with a $second node"
+        }
+
+        if (error == null) {
+          node.copy(result = NodeResult.OK, children = (result.value.first + result.value.second).toMutableList())
+        } else {
+          logger.debug { "expect:empty failed with an error: $error" }
+          if (result.value.second.isNotEmpty()) {
+            val errorNodeResult = walkTree(actionPath, result.value.second[0], valueResolver)
+            when (val messageValue = errorNodeResult.value().orDefault()) {
+              is NodeResult.VALUE -> {
+                val message = messageValue.orDefault().asString() ?: ""
+                node.copy(result = NodeResult.ERROR(message),
+                  children = (result.value.first + errorNodeResult).toMutableList())
+              }
+              else -> {
+                // There was an error generating the optional message, so just return the
+                // original error
+                node.copy(result = NodeResult.ERROR(error),
+                  children = (result.value.first + errorNodeResult).toMutableList())
+              }
+            }
+          } else {
+            node.copy(result = NodeResult.ERROR(error),
+              children = (result.value.first + result.value.second).toMutableList())
+          }
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeLength(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.BARRAY -> NodeResult.VALUE(NodeValue.UINT(argValue.bytes.size.toUInt()))
+            is NodeValue.JSON -> when (val json = argValue.json) {
+              is JsonValue.Array -> NodeResult.VALUE(NodeValue.UINT(json.size().toUInt()))
+              is JsonValue.Object -> NodeResult.VALUE(NodeValue.UINT(json.size().toUInt()))
+              is JsonValue.StringValue -> NodeResult.VALUE(NodeValue.UINT(json.size().toUInt()))
+              else -> NodeResult.ERROR("'length' can't be used with a ${resultNode.value} node")
+            }
+            is NodeValue.LIST -> NodeResult.VALUE(NodeValue.UINT(argValue.items.size.toUInt()))
+            is NodeValue.MMAP -> NodeResult.VALUE(NodeValue.UINT(argValue.entries.size.toUInt()))
+            NodeValue.NULL -> NodeResult.VALUE(NodeValue.UINT(0.toUInt()))
+            is NodeValue.SLIST -> NodeResult.VALUE(NodeValue.UINT(argValue.items.size.toUInt()))
+            is NodeValue.STRING -> NodeResult.VALUE(NodeValue.UINT(argValue.string.length.toUInt()))
+            is NodeValue.XML -> when (val xml = argValue.xml) {
+              is XmlValue.Attribute -> NodeResult.VALUE(NodeValue.UINT(1.toUInt()))
+              is XmlValue.Element -> NodeResult.VALUE(NodeValue.UINT(1.toUInt()))
+              is XmlValue.Text -> NodeResult.VALUE(NodeValue.UINT(xml.text.length.toUInt()))
+            }
+            else -> NodeResult.ERROR("'length' can't be used with a ${resultNode.value} node")
+          }
+        } else {
+          NodeResult.VALUE(NodeValue.UINT(0.toUInt()))
+        }
+        node.copy(result = result, children = mutableListOf(resultNode.value))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeXmlValue(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.XML -> when (val xml = argValue.xml) {
+              is XmlValue.Attribute -> NodeResult.VALUE(NodeValue.STRING(xml.value))
+              else -> NodeResult.ERROR("'xml:value' can't be used with $xml")
+            }
+            else -> NodeResult.ERROR("'xml:value' can't be used with a ${argValue.valueType()} node")
+          }
+        } else {
+          NodeResult.VALUE(NodeValue.NULL)
+        }
+        node.copy(result = result, children = mutableListOf(resultNode.value))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeXmlAttributes(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.XML -> when (val xml = argValue.xml) {
+              is XmlValue.Attribute -> NodeResult.VALUE(NodeValue.ENTRY(xml.name, NodeValue.STRING(xml.value)))
+              is XmlValue.Element -> NodeResult.VALUE(NodeValue.MMAP(attributes(xml.element).mapValues { listOf(it.value) }))
+              else -> NodeResult.ERROR("'xml:attributes' can't be used with $xml")
+            }
+            else -> NodeResult.ERROR("'xml:attributes' can't be used with a ${argValue.valueType()} node")
           }
         } else {
           NodeResult.VALUE(NodeValue.NULL)

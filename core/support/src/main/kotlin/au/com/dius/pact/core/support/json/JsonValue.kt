@@ -208,6 +208,7 @@ sealed class JsonValue {
   fun size() = when (this) {
     is Array -> this.values.size
     is Object -> this.entries.size
+    is StringValue -> this.value.chars.size
     else -> 1
   }
 

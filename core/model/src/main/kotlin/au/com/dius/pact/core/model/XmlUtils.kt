@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.support.getOr
 import au.com.dius.pact.core.support.handleWith
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.w3c.dom.Attr
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.Text
@@ -153,6 +154,14 @@ object XmlUtils {
     return (0..<element.childNodes.length)
       .map { index -> element.childNodes.item(index) }
       .filter { it.nodeType == Node.ELEMENT_NODE } as List<Element>
+  }
+
+  /** Returns a Map of all the node's attributes */
+  fun attributes(node: Element): Map<String, String> {
+    val attr = node.attributes
+    return (0..<attr.length)
+      .map { index -> attr.item(index) as Attr }
+      .associate { it.name to it.value }
   }
 
   /** Resolve the path expression against the XML, returning a list of pointer values that match. */
