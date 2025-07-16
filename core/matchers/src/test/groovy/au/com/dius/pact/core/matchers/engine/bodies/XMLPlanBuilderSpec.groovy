@@ -6,6 +6,8 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import com.github.difflib.DiffUtils
 import spock.lang.Specification
 
@@ -376,5 +378,247 @@ class XMLPlanBuilderSpec extends Specification {
 
     then:
     diff == ''
+  }
+
+  def 'matching rule on element text'() {
+    given:
+    def builder = XMLPlanBuilder.INSTANCE
+    def content = '<?xml version="1.0" encoding="UTF-8"?> <values><value>100</value></values>'
+    interaction = new V4Interaction.SynchronousHttp('test interaction')
+    interaction.request.matchingRules
+      .addCategory('body')
+      .addRule('$.values.value', new RegexMatcher('\\d+'))
+    config = new MatchingConfiguration(false, false, true, false)
+    context = new PlanMatchingContext(pact, interaction, config).forBody()
+
+    when:
+    def node = builder.buildPlan(content.bytes, context)
+    def str = new StringBuilder()
+    node.prettyForm(str, 0)
+
+    then:
+    str.toString() == '''%tee (
+    |  %xml:parse (
+    |    $.body
+    |  ),
+    |  :$ (
+    |    %if (
+    |      %check:exists (
+    |        ~>$.values
+    |      ),
+    |      :$.values (
+    |        :#text (
+    |          %expect:empty (
+    |            %to-string (
+    |              ~>$.values['#text']
+    |            )
+    |          )
+    |        ),
+    |        %expect:only-entries (
+    |          ['value'],
+    |          ~>$.values
+    |        ),
+    |        %expect:count (
+    |          UINT(1),
+    |          ~>$.values.value,
+    |          %join (
+    |            'Expected 1 <value> child element but there were ',
+    |            %length (
+    |              ~>$.values.value
+    |            )
+    |          )
+    |        ),
+    |        %if (
+    |          %check:exists (
+    |            ~>$.values.value[0]
+    |          ),
+    |          :$.values.value[0] (
+    |            :#text (
+    |              #{'#text must match the regular expression /\\d+/'},
+    |              %match:regex (
+    |                '100',
+    |                %to-string (
+    |                  ~>$.values.value[0]['#text']
+    |                ),
+    |                json:{"regex":"\\\\d+"}
+    |              )
+    |            ),
+    |            %expect:empty (
+    |              ~>$.values.value[0]
+    |            )
+    |          ),
+    |          %error (
+    |            'Was expecting an XML element \\/values\\/value\\/0 but it was missing\'
+    |          )
+    |        )
+    |      ),
+    |      %error (
+    |        'Was expecting an XML element \\/values but it was missing\'
+    |      )
+    |    )
+    |  )
+    |)'''.stripMargin('|')
+  }
+
+  def 'matching rule on attribute'() {
+    given:
+    def builder = XMLPlanBuilder.INSTANCE
+    def content = '<?xml version="1.0" encoding="UTF-8"?> <value id="100"/>'
+    interaction = new V4Interaction.SynchronousHttp('test interaction')
+    interaction.request.matchingRules
+      .addCategory('body')
+      .addRule('$.value.@id', new RegexMatcher('\\d+'))
+    config = new MatchingConfiguration(false, false, true, false)
+    context = new PlanMatchingContext(pact, interaction, config).forBody()
+
+    when:
+    def node = builder.buildPlan(content.bytes, context)
+    def str = new StringBuilder()
+    node.prettyForm(str, 0)
+
+    then:
+    str.toString() == '''%tee (
+    |  %xml:parse (
+    |    $.body
+    |  ),
+    |  :$ (
+    |    %if (
+    |      %check:exists (
+    |        ~>$.value
+    |      ),
+    |      :$.value (
+    |        :attributes (
+    |          :$.value['@id'] (
+    |            #{'@id must match the regular expression /\\d+/'},
+    |            %if (
+    |              %check:exists (
+    |                ~>$.value['@id']
+    |              ),
+    |              %match:regex (
+    |                '100',
+    |                %xml:value (
+    |                  ~>$.value['@id']
+    |                ),
+    |                json:{"regex":"\\\\d+"}
+    |              )
+    |            )
+    |          ),
+    |          %expect:entries (
+    |            ['id'],
+    |            %xml:attributes (
+    |              ~>$.value
+    |            ),
+    |            %join (
+    |              'The following expected attributes were missing: ',
+    |              %join-with (
+    |                ', ',
+    |                ** (
+    |                  %apply ()
+    |                )
+    |              )
+    |            )
+    |          ),
+    |          %expect:only-entries (
+    |            ['id'],
+    |            %xml:attributes (
+    |              ~>$.value
+    |            )
+    |          )
+    |        ),
+    |        :#text (
+    |          %expect:empty (
+    |            %to-string (
+    |              ~>$.value['#text']
+    |            )
+    |          )
+    |        ),
+    |        %expect:empty (
+    |          ~>$.value
+    |        )
+    |      ),
+    |      %error (
+    |        'Was expecting an XML element \\/value but it was missing\'
+    |      )
+    |    )
+    |  )
+    |)'''.stripMargin('|')
+  }
+
+  def 'type matching rule on element'() {
+    given:
+    def builder = XMLPlanBuilder.INSTANCE
+    def content = '<?xml version="1.0" encoding="UTF-8"?> <values><value>100</value><value>300</value></values>'
+    interaction = new V4Interaction.SynchronousHttp('test interaction')
+    interaction.request.matchingRules
+      .addCategory('body')
+      .addRule('$.values', new MinTypeMatcher(2))
+    config = new MatchingConfiguration(false, false, true, false)
+    context = new PlanMatchingContext(pact, interaction, config).forBody()
+
+    when:
+    def node = builder.buildPlan(content.bytes, context)
+    def str = new StringBuilder()
+    node.prettyForm(str, 0)
+
+    then:
+    str.toString() == '''%tee (
+    |  %xml:parse (
+    |    $.body
+    |  ),
+    |  :$ (
+    |    %if (
+    |      %check:exists (
+    |        ~>$.values
+    |      ),
+    |      :$.values (
+    |        :#text (
+    |          %expect:empty (
+    |            %to-string (
+    |              ~>$.values['#text']
+    |            )
+    |          )
+    |        ),
+    |        %expect:only-entries (
+    |          ['value'],
+    |          ~>$.values
+    |        ),
+    |        #{'values must match by type and have at least 2 items'},
+    |        %match:min-type (
+    |          xml:'<value>100</value>',
+    |          ~>$.values,
+    |          json:{"min":2}
+    |        ),
+    |        %for-each (
+    |          ~>$.values.value,
+    |          %if (
+    |            %check:exists (
+    |              ~>$.values.value[*]
+    |            ),
+    |            :$.values.value[*] (
+    |              :#text (
+    |                %match:equality (
+    |                  '100',
+    |                  %to-string (
+    |                    ~>$.values.value[*]['#text']
+    |                  ),
+    |                  NULL
+    |                )
+    |              ),
+    |              %expect:empty (
+    |                ~>$.values.value[*]
+    |              )
+    |            ),
+    |            %error (
+    |              'Was expecting an XML element value but it was missing\'
+    |            )
+    |          )
+    |        )
+    |      ),
+    |      %error (
+    |        'Was expecting an XML element \\/values but it was missing\'
+    |      )
+    |    )
+    |  )
+    |)'''.stripMargin('|')
   }
 }

@@ -5,6 +5,7 @@ import au.com.dius.pact.core.matchers.engine.ExecutionPlanNode
 import au.com.dius.pact.core.matchers.engine.NodeValue
 import au.com.dius.pact.core.matchers.engine.NodeValue.Companion.escape
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
+import au.com.dius.pact.core.matchers.engine.buildMatchingRuleNode
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.Into
@@ -110,16 +111,16 @@ object XMLPlanBuilder: PlanBodyBuilder  {
         )
 
       val noIndices = dropIndices(p)
-      //      let matchers = context.select_best_matcher(&p)
-      //        .and_rules(&context.select_best_matcher(&no_indices))
-      //        .remove_duplicates();
-      //      if !matchers.is_empty() {
-      //        item_node.add(ExecutionPlanNode::annotation(format!("@{} {}", key, matchers.generate_description(true))));
-      //        presence_check.add(build_matching_rule_node(&ExecutionPlanNode::value_node(item_value),
-      //          ExecutionPlanNode::action("xml:value")
-      //            .add(ExecutionPlanNode::resolve_current_value(&p)),
-      //          &matchers, false));
-      //      } else {
+      val matchers = context.selectBestMatcher(p)
+        .andRules(context.selectBestMatcher(noIndices))
+        .removeDuplicates()
+      if (matchers.isNotEmpty()) {
+        itemNode.add(ExecutionPlanNode.annotation(Into { "@${key} ${matchers.generateDescription(true)}" }))
+        presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(itemValue),
+          ExecutionPlanNode.action("xml:value")
+            .add(ExecutionPlanNode.resolveCurrentValue(p)),
+          matchers, false))
+      } else {
           itemNode.add(ExecutionPlanNode.annotation(Into { "@${key}=${escape(value.nodeValue)}" }))
           val itemCheck = ExecutionPlanNode.action("match:equality")
           itemCheck
@@ -128,7 +129,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
               .add(ExecutionPlanNode.resolveCurrentValue(p)))
             .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
           presenceCheck.add(itemCheck)
-      //      }
+      }
 
       itemNode.add(presenceCheck)
       node.add(itemNode)
@@ -188,7 +189,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     for ((childName, elements) in children) {
       val p = path.join(childName)
 
-    //      if (!context.type_matcher_defined(&p)) {
+      if (!context.typeMatcherDefined(p)) {
         parentNode.add(
           ExecutionPlanNode.action("expect:count")
             .add(ExecutionPlanNode.valueNode(NodeValue.UINT(elements.size.toUInt())))
@@ -209,25 +210,25 @@ object XMLPlanBuilder: PlanBodyBuilder  {
             processElement(context, child, index, path, parentNode)
           }
         }
-    //      } else {
-    //        let rules = context.select_best_matcher(&p)
-    //          .filter(|m| m.is_length_type_matcher());
-    //        if !rules.is_empty() {
-    //          parent_node.add(ExecutionPlanNode::annotation(format!("{} {}",
-    //            path.last_field().unwrap_or_default(),
-    //            rules.generate_description(true))));
-    //          parent_node.add(build_matching_rule_node(&ExecutionPlanNode::value_node(elements[0]),
-    //            &ExecutionPlanNode::resolve_current_value(path), &rules, true));
-    //        }
+      } else {
+        val rules = context.selectBestMatcher(p)
+          .filter { it.isLengthTypeMatcher() }
+        if (rules.isNotEmpty()) {
+          parentNode.add(ExecutionPlanNode.annotation(Into {
+            "${path.lastField()} ${rules.generateDescription(true)}"
+          }))
+          parentNode.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(elements[0]),
+            ExecutionPlanNode.resolveCurrentValue(path), rules, true))
+        }
 
-//        val forEachNode = ExecutionPlanNode.action("for-each")
-//        forEachNode.add(ExecutionPlanNode.resolveCurrentValue(p))
-//        val itemPath = p.join("[*]")
-//
-//        processElement(context, elements[0], 0, itemPath, forEachNode)
-//
-//        parentNode.add(forEachNode)
-    //      }
+        val forEachNode = ExecutionPlanNode.action("for-each")
+        forEachNode.add(ExecutionPlanNode.resolveCurrentValue(p))
+        val itemPath = p.join("[*]")
+
+        processElement(context, elements[0], 0, itemPath, forEachNode)
+
+        parentNode.add(forEachNode)
+      }
     }
   }
 
@@ -240,19 +241,18 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     val text = textContent(element)
     val p = path.join("#text")
     val noIndices = dropIndices(p)
-    //    let matchers = context.select_best_matcher(&p)
-    //      .filter(|matcher| !matcher.is_type_matcher())
-    //      .and_rules(&context.select_best_matcher(&no_indices)
-    //        .filter(|matcher| !matcher.is_type_matcher())
-    //      ).remove_duplicates();
-    //    if !matchers.is_empty() {
-    //      node.add(ExecutionPlanNode::annotation(format!("{} {}", p.last_field().unwrap_or_default(),
-    //        matchers.generate_description(false))));
-    //      let mut current_value = ExecutionPlanNode::action("to-string");
-    //      current_value.add(ExecutionPlanNode::resolve_current_value(&p));
-    //      node.add(build_matching_rule_node(&ExecutionPlanNode::value_node(text_nodes.join("")),
-    //        &current_value, &matchers, false));
-    //    } else {
+    val matchers = context.selectBestMatcher(p)
+      .filter { matcher -> !matcher.isTypeMatcher() }
+      .andRules(context.selectBestMatcher(noIndices)
+        .filter { matcher -> !matcher.isTypeMatcher() }
+      ).removeDuplicates()
+    if (matchers.isNotEmpty()) {
+      node.add(ExecutionPlanNode.annotation(Into { "${p.lastField()} ${matchers.generateDescription(false)}" }))
+      val currentValue = ExecutionPlanNode.action("to-string")
+      currentValue.add(ExecutionPlanNode.resolveCurrentValue(p))
+      node.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(text),
+        currentValue, matchers, false))
+    } else {
       if (text.isNotEmpty() && text.isNotBlank()) {
         val matchNode = ExecutionPlanNode.action("match:equality")
         matchNode
@@ -266,7 +266,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
           .add(ExecutionPlanNode.action("to-string")
             .add(ExecutionPlanNode.resolveCurrentValue(p))))
       }
-    //    }
+    }
   }
 
   private fun textContent(element: Node): String {

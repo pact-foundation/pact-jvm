@@ -76,12 +76,12 @@ open class PlanMatchingContext @JvmOverloads constructor(
     }
   }
 
-//  /// If there is a type matcher defined at the path in this context
-//  pub fn type_matcher_defined(&self, path: &DocPath) -> bool {
-//    let path = path.to_vec();
-//    let path_slice = path.iter().map(|p| p.as_str()).collect_vec();
-//    self.matching_rules.resolve_matchers_for_path(path_slice.as_slice()).type_matcher_defined()
-//  }
+  /**
+   * If there is a type matcher defined at the path in this context
+   */
+  fun typeMatcherDefined(path: DocPath): Boolean {
+    return matchingContext.typeMatcherDefined(path.asList())
+  }
 
   /** Creates a clone of this context, but with the matching rules set for the Request Method */
   fun forMethod(): PlanMatchingContext {

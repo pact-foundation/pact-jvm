@@ -74,6 +74,16 @@ interface MatchingRule {
   fun validForLists(): Boolean = false
 
   /**
+   * If this matching rule is a type matcher
+   */
+  fun isTypeMatcher(): Boolean = false
+
+  /**
+   * If this matching rule is a type matcher that includes a length restriction
+   */
+  fun isLengthTypeMatcher(): Boolean = false
+
+  /**
    * Returns the type name of the matching rule
    */
   val name: String
@@ -341,6 +351,10 @@ data class MaxTypeMatcher(val max: Int) : MatchingRule {
 
   override fun validForLists() = true
 
+  override fun isTypeMatcher() = true
+
+  override fun isLengthTypeMatcher() = true
+
   override val name: String
     get() = "max-type"
   override val attributes: Map<String, JsonValue>
@@ -365,6 +379,10 @@ data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
 
   override fun validForLists() = true
 
+  override fun isTypeMatcher() = true
+
+  override fun isLengthTypeMatcher() = true
+
   override val name: String
     get() = "min-max-type"
   override val attributes: Map<String, JsonValue>
@@ -388,6 +406,10 @@ data class MinTypeMatcher(val min: Int) : MatchingRule {
   override fun forSingleItem() = TypeMatcher
 
   override fun validForLists() = true
+
+  override fun isTypeMatcher() = true
+
+  override fun isLengthTypeMatcher() = true
 
   override val name: String
     get() = "min-type"
@@ -523,6 +545,8 @@ object TypeMatcher : MatchingRule {
   override fun generateDescription(forCollection: Boolean) = "must match by type"
 
   override fun validForLists() = true
+
+  override fun isTypeMatcher() = true
 
   override val name: String
     get() = "type"
@@ -842,6 +866,31 @@ data class MatchingRuleGroup @JvmOverloads constructor(
       else -> rules.joinToString { rule -> rule.generateDescription(forCollection) }
     }
   }
+
+  /**
+   * Filters this list with the given predicate, returning a new list
+   */
+  fun filter(predicate: (MatchingRule) -> Boolean): MatchingRuleGroup {
+    return copy(rules = rules.filter(predicate).toMutableList())
+  }
+
+  /**
+   * Create a new rule group with all the rules from both
+   */
+  fun andRules(other: MatchingRuleGroup): MatchingRuleGroup {
+    return copy(rules = (rules + other.rules).toMutableList())
+  }
+
+  /**
+   * Creates a new rule group with no duplicated rules
+   */
+  fun removeDuplicates(): MatchingRuleGroup {
+    return copy(rules = rules.toMutableSet().toMutableList())
+  }
+
+  fun isEmpty() = rules.isEmpty()
+
+  fun isNotEmpty() = rules.isNotEmpty()
 
   companion object {
     @JvmStatic

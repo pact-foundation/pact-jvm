@@ -227,43 +227,7 @@ sealed class NodeValue: Into<NodeValue> {
 //    }
 //  }
 //}
-//
-//impl From<String> for NodeValue {
-//  fn from(value: String) -> Self {
-//    NodeValue::STRING(value.clone())
-//  }
-//}
-//
-//impl From<&str> for NodeValue {
-//  fn from(value: &str) -> Self {
-//    NodeValue::STRING(value.to_string())
-//  }
-//}
-//
-//impl From<usize> for NodeValue {
-//  fn from(value: usize) -> Self {
-//    NodeValue::UINT(value as u64)
-//  }
-//}
-//
-//impl From<u64> for NodeValue {
-//  fn from(value: u64) -> Self {
-//    NodeValue::UINT(value)
-//  }
-//}
-//
-//impl From<Value> for NodeValue {
-//  fn from(value: Value) -> Self {
-//    NodeValue::JSON(value.clone())
-//  }
-//}
-//
-//impl From<&Value> for NodeValue {
-//  fn from(value: &Value) -> Self {
-//    NodeValue::JSON(value.clone())
-//  }
-//}
-//
+
 //impl From<HashMap<&str, Value>> for NodeValue {
 //  fn from(value: HashMap<&str, Value>) -> Self {
 //    let json = Object(value.iter().map(|(k, v)| (k.to_string(), v.clone())).collect());
@@ -280,20 +244,6 @@ sealed class NodeValue: Into<NodeValue> {
 //impl From<Vec<&String>> for NodeValue {
 //  fn from(value: Vec<&String>) -> Self {
 //    NodeValue::SLIST(value.iter().map(|v| (*v).clone()).collect())
-//  }
-//}
-//
-//#[cfg(feature = "xml")]
-//impl From<Element> for NodeValue {
-//  fn from(value: Element) -> Self {
-//    NodeValue::XML(XmlValue::Element(value.clone()))
-//  }
-//}
-//
-//#[cfg(feature = "xml")]
-//impl From<&Element> for NodeValue {
-//  fn from(value: &Element) -> Self {
-//    NodeValue::XML(XmlValue::Element(value.clone()))
 //  }
 //}
 
