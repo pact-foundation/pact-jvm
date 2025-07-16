@@ -129,7 +129,7 @@ object XmlUtils {
     t.setOutputProperty(OutputKeys.INDENT, "yes")
     val buffer = StringWriter()
     t.transform(DOMSource(node), StreamResult(buffer))
-    return buffer.toString().trim()
+    return buffer.toString().replace("\r", "").trim()
   }
 
   /** Group the child nodes by tag name */
