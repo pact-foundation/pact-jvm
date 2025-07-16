@@ -11,6 +11,7 @@ import spock.lang.Specification
 
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
+@SuppressWarnings('MethodSize')
 class XMLPlanBuilderSpec extends Specification {
   PlanMatchingContext context
   V4Pact pact

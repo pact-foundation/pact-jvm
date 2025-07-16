@@ -19,7 +19,7 @@ import spock.lang.Specification
 
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
-@SuppressWarnings(['LineLength', 'ClassSize', 'UnusedVariable', 'UnnecessaryParenthesesForMethodCallWithClosure'])
+@SuppressWarnings(['LineLength', 'ClassSize', 'UnusedVariable', 'UnnecessaryParenthesesForMethodCallWithClosure', 'MethodSize'])
 class ExecutionPlanInterpreterSpec extends Specification {
   def 'json with null'() {
     given:

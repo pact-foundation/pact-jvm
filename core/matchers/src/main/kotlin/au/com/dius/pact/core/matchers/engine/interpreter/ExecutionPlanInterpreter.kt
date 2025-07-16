@@ -37,7 +37,7 @@ private val logger = KotlinLogging.logger {}
 /**
  * Main interpreter for the matching plan AST
  */
-@Suppress("LargeClass", "TooManyFunctions")
+@Suppress("LargeClass", "TooManyFunctions", "ReturnCount", "UnusedParameter")
 class ExecutionPlanInterpreter(
   /** Context to use to execute the plan */
   val context: PlanMatchingContext
@@ -509,10 +509,12 @@ class ExecutionPlanInterpreter(
                     children = (args + errorNodeResult).toMutableList())
                 } else {
                   // There was an error generating the optional message, so just return the original error
-                  node.copy(result = NodeResult.ERROR(result.error), children = (args + errorNodeResult).toMutableList())
+                  node.copy(result = NodeResult.ERROR(result.error),
+                    children = (args + errorNodeResult).toMutableList())
                 }
               } else {
-                node.copy(result = NodeResult.ERROR(result.error), children = (args + optional).toMutableList())
+                node.copy(result = NodeResult.ERROR(result.error),
+                  children = (args + optional).toMutableList())
               }
             }
           }
@@ -1015,6 +1017,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("CyclomaticComplexMethod")
   private fun executeToString(
     action: String,
     valueResolver: ValueResolver,
@@ -1129,6 +1132,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
   private fun executeExpectCount(
     action: String,
     valueResolver: ValueResolver,
@@ -1246,6 +1250,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("CyclomaticComplexMethod")
   private fun executeLength(
     action: String,
     valueResolver: ValueResolver,
@@ -1323,8 +1328,10 @@ class ExecutionPlanInterpreter(
         val result = if (argValue != null) {
           when (argValue) {
             is NodeValue.XML -> when (val xml = argValue.xml) {
-              is XmlValue.Attribute -> NodeResult.VALUE(NodeValue.ENTRY(xml.name, NodeValue.STRING(xml.value)))
-              is XmlValue.Element -> NodeResult.VALUE(NodeValue.MMAP(attributes(xml.element).mapValues { listOf(it.value) }))
+              is XmlValue.Attribute -> NodeResult.VALUE(
+                NodeValue.ENTRY(xml.name, NodeValue.STRING(xml.value)))
+              is XmlValue.Element -> NodeResult.VALUE(
+                NodeValue.MMAP(attributes(xml.element).mapValues { listOf(it.value) }))
               else -> NodeResult.ERROR("'xml:attributes' can't be used with $xml")
             }
             else -> NodeResult.ERROR("'xml:attributes' can't be used with a ${argValue.valueType()} node")
@@ -1366,6 +1373,7 @@ class ExecutionPlanInterpreter(
   /** Return the current stack value */
   fun stackValue() = valueStack.lastOrNull()
 
+  @Suppress("LongMethod", "CyclomaticComplexMethod", "NestedBlockDepth")
   fun resolveStackValue(path: DocPath): Result<NodeValue, String> {
     return when (val result = stackValue()) {
       null -> Result.Err("Can not resolve '$path', current value stack is either empty or contains an " +

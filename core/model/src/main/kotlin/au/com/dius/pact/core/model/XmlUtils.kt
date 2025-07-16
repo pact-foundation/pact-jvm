@@ -186,6 +186,7 @@ object XmlUtils {
     }
   }
 
+  @Suppress("LongMethod", "CyclomaticComplexMethod", "NestedBlockDepth")
   private fun queryGraph(
     pathTokens: List<PathToken>,
     parentNode: TreeNode,

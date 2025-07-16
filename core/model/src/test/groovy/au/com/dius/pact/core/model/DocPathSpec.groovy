@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class DocPathSpec extends Specification {
   def 'empty'() {
     expect:

@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.XmlUtils
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
@@ -27,7 +28,7 @@ class MatcherExecutorSpec extends Specification {
   def path
 
   static xml(String xml) {
-    XmlContentMatcher.INSTANCE.parse(xml)
+    XmlUtils.INSTANCE.parse(xml)
   }
 
   static json(String json) {

@@ -4,6 +4,7 @@ import org.w3c.dom.Element
 import spock.lang.Shared
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class XmlUtilsSpec extends Specification {
   @Shared
   static xml = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -45,12 +46,8 @@ class XmlUtilsSpec extends Specification {
   def 'resolve matching node test'() {
     given:
     def sound = root.getElementsByTagName('sound').item(0) as Element
-    def propertiesList = sound.getElementsByTagName("property")
+    def propertiesList = sound.getElementsByTagName('property')
     def properties = (0..<propertiesList.length).step(1).collect { propertiesList.item(it) }
-
-  //    expect!(resolve_matching_node(root, "/config[0]/name[0]/#text")).to(be_some()
-  //      .value(XmlResult::TextNode("My Settings".to_string())));
-  //    expect!(resolve_matching_node(root, "/config[0]/sound[0]/property[0]/#text")).to(be_none());
 
     when:
     def result = XmlUtils.INSTANCE.resolveMatchingNode(root, '/config[0]')

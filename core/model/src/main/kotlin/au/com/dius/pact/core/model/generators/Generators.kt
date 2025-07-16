@@ -82,7 +82,9 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
 
   companion object {
 
-    @JvmStatic fun fromJson(json: JsonValue?): Generators {
+    @JvmStatic
+    @Suppress("NestedBlockDepth")
+    fun fromJson(json: JsonValue?): Generators {
       val generators = Generators()
 
       if (json is JsonValue.Object) {
