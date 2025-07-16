@@ -451,7 +451,7 @@ class PactDslJsonBodySpec extends Specification {
     body.toString() == '{"test":{"2.01":null}}'
     body.matchers.matchingRules.keySet() == ['$.test'] as Set
     body.matchers.matchingRules['$.test'] == new MatchingRuleGroup([
-      new EachKeyMatcher(new MatchingRuleDefinition('2.01', new RegexMatcher('\\d+\\.\\d{2}', '2.01'), null))
+      new EachKeyMatcher(new MatchingRuleDefinition('2.01', new RegexMatcher('\\d+\\.\\d{2}', '2.01'), null, ''))
     ])
   }
 

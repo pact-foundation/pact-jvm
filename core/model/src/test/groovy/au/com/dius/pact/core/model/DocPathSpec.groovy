@@ -1,7 +1,9 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Result
 import spock.lang.Specification
 
+@SuppressWarnings('LineLength')
 class DocPathSpec extends Specification {
   def 'empty'() {
     expect:
@@ -58,46 +60,49 @@ class DocPathSpec extends Specification {
     !new DocPath('$[*]').matchesPath(['$', 'name'])
   }
 
-  //  #[test]
-  //  fn obj_key_for_path_quotes_keys_when_necessary() {
-  //    assert_eq!(obj_key_for_path("foo"), ".foo");
-  //    assert_eq!(obj_key_for_path("_foo"), "._foo");
-  //    assert_eq!(obj_key_for_path("["), "['[']");
-  //
-  //    // I don't actually know how the JSON Path specification wants us to handle
-  //    // these cases, but we need to _something_ to avoid panics or passing
-  //    // `Result` around everywhere, so let's go with JavaScript string escape
-  //    // syntax.
-  //    assert_eq!(obj_key_for_path(r#"''"#), r#"['\'\'']"#);
-  //    assert_eq!(obj_key_for_path(r#"a'"#), r#"['a\'']"#);
-  //    assert_eq!(obj_key_for_path(r#"\"#), r#"['\\']"#);
-  //  }
-  //
-  //  #[test]
-  //  fn path_join() {
-  //    let something = DocPath::root().join("something");
-  //    expect!(something.to_string()).to(be_equal_to("$.something"));
-  //    expect!(DocPath::root().join("something else").to_string()).to(be_equal_to("$['something else']"));
-  //    expect!(something.join("else").to_string()).to(be_equal_to("$.something.else"));
-  //    expect!(something.join("*").to_string()).to(be_equal_to("$.something.*"));
-  //    expect!(something.join("101").to_string()).to(be_equal_to("$.something[101]"));
-  //  }
-  //
-  //  #[test]
-  //  fn path_push() {
-  //    let mut root = DocPath::root();
-  //    let something = root.push(PathToken::Field("something".to_string()));
-  //    expect!(something.to_string()).to(be_equal_to("$.something"));
-  //    expect!(DocPath::root().push(PathToken::Field("something else".to_string())).to_string())
-  //      .to(be_equal_to("$['something else']"));
-  //    expect!(something.push(PathToken::Field("else".to_string())).to_string())
-  //      .to(be_equal_to("$.something.else"));
-  //    expect!(something.push(PathToken::Star).to_string())
-  //      .to(be_equal_to("$.something.else.*"));
-  //    expect!(something.push(PathToken::Index(101)).to_string())
-  //      .to(be_equal_to("$.something.else.*[101]"));
-  //  }
-  //
+  def 'writeObjKeyForPath quotes keys when necessary'() {
+    expect:
+    DocPath.writeObjKeyForPath('', path) == result
+
+    where:
+
+    path   | result
+    'foo'  | '.foo'
+    '_foo' | '._foo'
+    '['    | "['[']"
+    "''"   | "['\\'\\'']"
+    "a'"   | "['a\\'']"
+    '\\'   | "['\\\\']"
+  }
+
+  def join() {
+    expect:
+    path.join(part).expr == result
+
+    where:
+
+    path                       | part             | result
+    DocPath.root()             | 'something'      | '$.something'
+    DocPath.root()             | 'something else' | "\$['something else']"
+    new DocPath('$.something') | 'else'           | '$.something.else'
+    new DocPath('$.something') | '101'            | '$.something[101]'
+  }
+
+  def 'path push'() {
+    expect:
+    path.push(part).toString() == result
+
+    where:
+
+    path                       | part                                  | result
+    DocPath.root()             | new PathToken.Field('something')      | '$.something'
+    DocPath.root()             | new PathToken.Field('something else') | "\$['something else']"
+    new DocPath('$.something') | new PathToken.Field('else')           | '$.something.else'
+    new DocPath('$.something') | PathToken.Star.INSTANCE               | '$.something.*'
+    new DocPath('$.something') | PathToken.StarIndex.INSTANCE          | '$.something[*]'
+    new DocPath('$.something') | new PathToken.Index(101)              | '$.something[101]'
+  }
+
   //  #[test]
   //  fn push_path() {
   //    let mut empty = DocPath::empty();
@@ -113,23 +118,24 @@ class DocPathSpec extends Specification {
   //    expect!(DocPath::root().push_path(c).to_string())
   //      .to(be_equal_to("$.a.b['se-token']"));
   //  }
-  //
-  //  #[test]
-  //  fn build_expr() {
-  //    let mut root = DocPath::root();
-  //    expect!(root.build_expr()).to(be_equal_to("$"));
-  //    let something = root.push(PathToken::Field("something".to_string()));
-  //    expect!(something.build_expr()).to(be_equal_to("$.something"));
-  //    expect!(DocPath::root().push(PathToken::Field("something else".to_string())).build_expr())
-  //      .to(be_equal_to("$['something else']"));
-  //    expect!(something.push(PathToken::Field("else".to_string())).build_expr())
-  //      .to(be_equal_to("$.something.else"));
-  //    expect!(something.push(PathToken::Star).build_expr())
-  //      .to(be_equal_to("$.something.else.*"));
-  //    expect!(something.push(PathToken::Index(101)).build_expr())
-  //      .to(be_equal_to("$.something.else.*[101]"));
-  //  }
-  //
+
+    def 'buildExpr'() {
+      expect:
+      DocPath.buildExpr(tokens) == result
+
+      where:
+
+      tokens                                                                                                         | result
+      [PathToken.Root.INSTANCE]                                                                                      | '$'
+      [PathToken.Root.INSTANCE, new PathToken.Field('something')]                                                    | '$.something'
+      [PathToken.Root.INSTANCE, new PathToken.Field('something else')]                                               | "\$['something else']"
+      [PathToken.Root.INSTANCE, new PathToken.Field('something'), new PathToken.Field('else')]                       | '$.something.else'
+      [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.Star.INSTANCE]                           | '$.something.*'
+      [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.StarIndex.INSTANCE]                      | '$.something[*]'
+      [PathToken.Root.INSTANCE, new PathToken.Field('something'), new PathToken.Index(101)]                          | '$.something[101]'
+      [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.Star.INSTANCE, new PathToken.Index(101)] | '$.something.*[101]'
+    }
+
   //  #[test]
   //  fn path_parent() {
   //    let something = DocPath::root().join("something");
@@ -149,30 +155,24 @@ class DocPathSpec extends Specification {
   //    expect!(DocPath::root().parent()).to(be_none());
   //    expect!(DocPath::empty().parent()).to(be_none());
   //  }
-  //
-  //  #[test]
-  //  fn as_json_pointer() {
-  //    let root = DocPath::root();
-  //    expect!(root.as_json_pointer().unwrap()).to(be_equal_to(""));
-  //
-  //    let mut something = root.join("something");
-  //    expect!(something.as_json_pointer().unwrap()).to(be_equal_to("/something"));
-  //
-  //    let with_slash = something.join("a/b");
-  //    expect!(with_slash.as_json_pointer().unwrap()).to(be_equal_to("/something/a~1b"));
-  //    let with_tilde = something.join("m~n");
-  //    expect!(with_tilde.as_json_pointer().unwrap()).to(be_equal_to("/something/m~0n"));
-  //
-  //    let encoded = something.join("c%25d");
-  //    expect!(encoded.as_json_pointer().unwrap()).to(be_equal_to("/something/c%25d"));
-  //
-  //    expect!(DocPath::root().push(PathToken::Field("something else".to_string())).as_json_pointer().unwrap())
-  //      .to(be_equal_to("/something else"));
-  //    expect!(something.join("*").as_json_pointer()).to(be_err());
-  //    expect!(something.push(PathToken::Index(101)).as_json_pointer().unwrap())
-  //      .to(be_equal_to("/something/101"));
-  //  }
-  //
+
+    def 'as json pointer'() {
+      expect:
+      path.asJsonPointer() == result
+
+      where:
+
+      path                                            | result
+      DocPath.root()                                  | new Result.Ok('')
+      DocPath.root().join('something')                | new Result.Ok('/something')
+      DocPath.root().join('something else')           | new Result.Ok('/something else')
+      DocPath.root().join('something').join('a/b')    | new Result.Ok('/something/a~1b')
+      DocPath.root().join('something').join('m~n')    | new Result.Ok('/something/m~0n')
+      DocPath.root().join('something').join('c%25d')  | new Result.Ok('/something/c%25d')
+      DocPath.root().join('something').join('*')      | new Result.Err('* can not be converted to a JSON pointer')
+      DocPath.root().join('something').pushIndex(101) | new Result.Ok('/something/101')
+    }
+
   //  #[rstest(
   //    case("", "[0]"),
   //    case("$", "$[0]"),

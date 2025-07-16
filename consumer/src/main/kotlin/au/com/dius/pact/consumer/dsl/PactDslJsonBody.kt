@@ -2362,7 +2362,8 @@ open class PactDslJsonBody : DslPart {
     val path = if (rootPath.endsWith(".")) rootPath.substring(0, rootPath.length - 1) else rootPath
     val value = matcher.value.toString()
     if (matcher.matcher != null) {
-      matchers.addRule(path, EachKeyMatcher(MatchingRuleDefinition(value, matcher.matcher!!, matcher.generator)))
+      matchers.addRule(path, EachKeyMatcher(
+        MatchingRuleDefinition(value, matcher.matcher!!, matcher.generator, "")))
     }
     if (!body.has(value)) {
       when (val body = body) {

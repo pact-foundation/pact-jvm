@@ -17,6 +17,10 @@ object NotEmptyMatcher : MatchingRule {
 
   override fun canMatch(contentType: ContentType) = true
 
+  override fun generateDescription(forCollection: Boolean) = "must not be empty"
+
+  override fun validForLists() = true
+
   override val name: String
     get() = "not-empty"
   override val attributes: Map<String, JsonValue>

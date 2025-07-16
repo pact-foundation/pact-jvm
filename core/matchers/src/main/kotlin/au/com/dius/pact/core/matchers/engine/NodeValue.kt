@@ -1,8 +1,13 @@
 package au.com.dius.pact.core.matchers.engine
 
+import au.com.dius.pact.core.matchers.BodyItemMatchResult
 import au.com.dius.pact.core.matchers.BodyMismatchFactory
+import au.com.dius.pact.core.matchers.JsonContentMatcher
+import au.com.dius.pact.core.matchers.Matchers.compareLists
 import au.com.dius.pact.core.matchers.domatch
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.XmlUtils.renderXml
+import au.com.dius.pact.core.model.constructPath
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.json.JsonValue
@@ -57,9 +62,8 @@ sealed class NodeValue: Into<NodeValue> {
   /** List of values */
   data class LIST(val items: List<NodeValue>): NodeValue()
 
-//  /// XML
-//  #[cfg(feature = "xml")]
-//  XML(XmlValue)
+  /** XML */
+  data class XML(val xml: XmlValue): NodeValue()
 
   /** Returns the encoded string form of the node value */
   @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -137,13 +141,13 @@ sealed class NodeValue: Into<NodeValue> {
         buffer.append(']')
         buffer.toString()
       }
-//      #[cfg(feature = "xml")]
-//      NodeValue::XML(node) -> match node {
-//        XmlValue::Element(element) -> format!("xml:{}", escape(element.to_string().as_str())),
-//        XmlValue::Text(text) -> format!("xml:text:{}", escape(text.as_str())),
-//        XmlValue::Attribute(name, value) -> format!("xml:attribute:{}={}",
-//          escape(name.as_str()), escape(value.as_str()))
-//      }
+      is XML -> {
+        when (val xml = this.xml) {
+          is XmlValue.Attribute -> "xml:attribute:${escape(xml.name)}=${escape(xml.value)}"
+          is XmlValue.Element -> "xml:${escape(renderXml(xml.element))}"
+          is XmlValue.Text -> "xml:text:${escape(xml.text)}"
+        }
+      }
     }
   }
 
@@ -161,44 +165,9 @@ sealed class NodeValue: Into<NodeValue> {
       is SLIST -> "String List"
       is STRING -> "String"
       is UINT -> "Unsigned Integer"
-//      #[cfg(feature = "xml")]
-//      NodeValue::XML(_) => "XML"
+      is XML -> "XML"
     }
   }
-
-//
-//  /// If this value is an XML value, returns it, otherwise returns None
-//  #[cfg(feature = "xml")]
-//  pub fn as_xml(&self) -> Option<XmlValue> {
-//    match self {
-//      NodeValue::XML(xml) => Some(xml.clone()),
-//      _ => None
-//    }
-//  }
-
-//  /// If this value is a bool value, returns it, otherwise returns None
-//  pub fn as_bool(&self) -> Option<bool> {
-//    match self {
-//      NodeValue::BOOL(b) => Some(*b),
-//      _ => None
-//    }
-//  }
-//
-//  /// If this value is an UInt value, returns it, otherwise returns None
-//  pub fn as_uint(&self) -> Option<u64> {
-//    match self {
-//      NodeValue::UINT(u) => Some(*u),
-//      _ => None
-//    }
-//  }
-//
-//  /// If this value is a string value, returns it, otherwise returns None
-//  pub fn as_slist(&self) -> Option<Vec<String>> {
-//    match self {
-//      NodeValue::SLIST(list) => Some(list.clone()),
-//      _ => None
-//    }
-//  }
 
   /** Calculates an AND of two values */
   fun and(other: NodeValue): NodeValue {
@@ -327,6 +296,7 @@ sealed class NodeValue: Into<NodeValue> {
 //    NodeValue::XML(XmlValue::Element(value.clone()))
 //  }
 //}
+
   /** If this value is a JSON value, returns it, otherwise returns null */
   fun asJson(): JsonValue? {
     return if (this is JSON) {
@@ -345,7 +315,63 @@ sealed class NodeValue: Into<NodeValue> {
     }
   }
 
+  /** If this value is an XML value, returns it, otherwise returns null */
+  fun asXml(): XmlValue? {
+    return if (this is XML) {
+      xml
+    } else {
+      null
+    }
+  }
+
+  /** If this value is a bool value, returns it, otherwise returns null */
+  fun asBool(): Boolean? {
+    return if (this is BOOL) {
+      bool
+    } else {
+      null
+    }
+  }
+
+  /** If this value is an UInt value, returns it, otherwise returns null */
+  fun asUInt(): UInt? {
+    return if (this is UINT) {
+      uint
+    } else {
+      null
+    }
+  }
+
+  /** If this value is a string list, returns it, otherwise returns null */
+  fun asSList(): List<String>? {
+    return if (this is SLIST) {
+      items
+    } else {
+      null
+    }
+  }
+
   override fun into() = this
+
+  /**
+   * Returns the inner value if the NodeValue
+   */
+  fun unwrap(): Any? {
+    return when (this) {
+      is BARRAY -> this.bytes
+      is BOOL -> this.bool
+      is ENTRY -> Pair(this.key, this.value)
+      is JSON -> this.json
+      is LIST -> this.items.map { it.unwrap() }
+      is MMAP -> this.entries
+      is NAMESPACED -> Pair(this.name, this.value)
+      NULL -> null
+      is SLIST -> this.items
+      is STRING -> this.string
+      is UINT -> this.uint
+      is XML -> this.xml
+    }
+  }
 
   companion object {
     @JvmStatic
@@ -359,81 +385,110 @@ sealed class NodeValue: Into<NodeValue> {
       }
     }
 
+    @Suppress("LongParameterList", "LongMethod", "CyclomaticComplexMethod")
     fun doMatch(
       expected: NodeValue,
       actual: NodeValue,
       matcher: MatchingRule,
       cascaded: Boolean,
-      actionPath: List<String>
+      actionPath: List<String>,
+      context: PlanMatchingContext
     ): String? {
-    //    match self {
-    //      NodeValue::NULL => Value::Null.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::STRING(s) => if let Some(actual_str) = actual.as_string() {
-    //        s.matches_with(actual_str, matcher, cascaded)
-    //      } else if let Some(list) = actual.as_slist() {
-    //        let result = list.iter()
-    //          .map(|item| s.matches_with(item, matcher, cascaded))
-    //          .filter_map(|r| match r {
-    //            Ok(_) => None,
-    //            Err(err) => Some(err.to_string())
-    //          })
-    //          .collect_vec();
-    //        if result.is_empty() {
-    //          Ok(())
-    //        } else {
-    //          Err(anyhow!(result.join(", ")))
-    //        }
-    //      } else {
-    //        s.matches_with(actual.to_string(), matcher, cascaded)
-    //      },
-    //      NodeValue::BOOL(b) => b.matches_with(actual.as_bool().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::UINT(u) => u.matches_with(actual.as_uint().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::JSON(json) => json.matches_with(actual.as_json().unwrap_or_default(), matcher, cascaded),
-    //      NodeValue::SLIST(list) => if let Some(actual_list) = actual.as_slist() {
-    //        list.matches_with(&actual_list, matcher, cascaded)
-    //      } else {
-    //        let actual_str = if let Some(actual_str) = actual.as_string() {
-    //          actual_str
-    //        } else {
-    //          actual.to_string()
-    //        };
-    //        list.matches_with(&vec![actual_str], matcher, cascaded)
-    //      }
     //      #[cfg(feature = "xml")]
     //      NodeValue::XML(xml_value) => if let Some(actual) = actual.as_xml() {
     //        xml_value.matches_with(actual, matcher, cascaded)
     //      } else {
     //        Err(anyhow!("Was expecting an XML value but got {}", actual))
     //      },
-    //      _ => Err(anyhow!("Matching rules can not be applied to {} values", self.str_form()))
-    //    }
-    //  }
       return when (expected) {
-        is BARRAY -> TODO()
-        is BOOL -> TODO()
-        is ENTRY -> TODO()
-        is JSON -> TODO()
-        is LIST -> TODO()
+        is JSON -> {
+          if (actual is NULL || actual is JSON) {
+            // TODO: need a way to pass allowUnexpectedKeys here
+            val actualJson = if (actual is JSON) {
+              actual.json
+            } else {
+              JsonValue.Null
+            }
+            val result = JsonContentMatcher.compare(listOf("$"), expected.json, actualJson, context.matchingContext)
+            if (result.any { it.result.isNotEmpty() }) {
+              result.flatMap { mismatches -> mismatches.result }
+                .joinToString(", ") { it.mismatch }
+            } else {
+              null
+            }
+          } else {
+            "Expected a value of type '${expected.valueType()}' but got '${actual.valueType()}'"
+          }
+        }
+        is LIST -> {
+          val items = when (actual) {
+            is LIST -> actual.items.map { it.unwrap() }
+            is SLIST -> actual.items
+            else -> listOf(actual.unwrap())
+          }
+          val result = compareLists(actionPath, matcher, expected.items, items, context.matchingContext, { "" }, cascaded) {
+              p, expected, actual, context ->
+            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
+            listOf(BodyItemMatchResult(constructPath(p), result))
+          }.flatMap { it.result }
+          if (result.isNotEmpty()) {
+            result.joinToString(", ") { it.mismatch }
+          } else {
+            null
+          }
+        }
         is MMAP -> TODO()
-        is NAMESPACED -> TODO()
-        NULL -> TODO()
-        is SLIST -> TODO()
+        is SLIST -> {
+          val items = when (actual) {
+            is LIST -> actual.items.map { it.unwrap() }
+            is SLIST -> actual.items
+            else -> listOf(actual.unwrap())
+          }
+          val result = compareLists(actionPath, matcher, expected.items, items, context.matchingContext, { "" }, cascaded) {
+              p, expected, actual, context ->
+            val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
+            listOf(BodyItemMatchResult(constructPath(p), result))
+          }.flatMap { it.result }
+          if (result.isNotEmpty()) {
+            result.joinToString(", ") { it.mismatch }
+          } else {
+            null
+          }
+        }
         is STRING -> {
           if (actual is STRING) {
-            val result = domatch(matcher, actionPath, expected.string, actual.string, BodyMismatchFactory, cascaded)
+            val result = domatch(matcher, actionPath, expected.string, actual.string, BodyMismatchFactory, cascaded, context.matchingContext)
             if (result.isNotEmpty()) {
               result.joinToString(", ") { it.mismatch }
             } else {
               null
             }
           } else if (actual is SLIST) {
-            TODO()
+            val result = compareLists(actionPath, matcher, listOf(expected.string), actual.items, context.matchingContext, { "" }, cascaded) {
+                p, expected, actual, context ->
+                  val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
+                  listOf(BodyItemMatchResult(constructPath(p), result))
+            }.flatMap { it.result }
+            if (result.isNotEmpty()) {
+              result.joinToString(", ") { it.mismatch }
+            } else {
+              null
+            }
           } else {
-            TODO()
+            "Expected a value of type '${expected.valueType()}' but got '${actual.valueType()}'"
           }
         }
-        is UINT -> TODO()
+        else -> {
+          val result = domatch(matcher, actionPath, expected.unwrap(), actual.unwrap(), BodyMismatchFactory, cascaded, context.matchingContext)
+          if (result.isNotEmpty()) {
+            result.joinToString(", ") { it.mismatch }
+          } else {
+            null
+          }
+        }
       }
     }
   }
 }
+
+fun NodeValue?.orDefault() = this ?: NodeValue.NULL

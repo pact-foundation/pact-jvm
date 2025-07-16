@@ -63,6 +63,7 @@ open class ExecutionPlan(
   /**
    * Returns a standard Pact request match result for the executed plan
    */
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
   fun intoRequestMatchResult(): RequestMatchResult {
     val methodNode = fetchNode(listOf(":request", ":method"))
     val methodMismatch = if (methodNode != null) {

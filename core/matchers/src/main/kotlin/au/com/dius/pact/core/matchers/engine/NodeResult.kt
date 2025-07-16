@@ -3,29 +3,6 @@ package au.com.dius.pact.core.matchers.engine
 import au.com.dius.pact.core.support.Result
 import java.util.Base64
 
-//  /// If the result is a number, returns it
-//  pub fn as_number(&self) -> Option<u64> {
-//    match self {
-//      NodeResult::OK => None,
-//      NodeResult::VALUE(val) => match val {
-//        NodeValue::UINT(ui) => Some(*ui),
-//        _ => None
-//      }
-//      NodeResult::ERROR(_) => None
-//    }
-//  }
-//
-//  /// If the result is a list of Strings, returns it
-//  pub fn as_slist(&self) -> Option<Vec<String>> {
-//    match self {
-//      NodeResult::OK => None,
-//      NodeResult::VALUE(val) => match val {
-//        NodeValue::SLIST(list) => Some(list.clone()),
-//        _ => None
-//      }
-//      NodeResult::ERROR(_) => None
-//    }
-//  }
 //  /// If the result is an error result
 //  pub fn is_err(&self) -> bool {
 //    match self {
@@ -58,6 +35,9 @@ sealed class NodeResult {
   /** Marks a node as unsuccessfully executed with an error */
   data class ERROR(val message: String): NodeResult() {
     override fun toString() = "ERROR($message)"
+
+    override fun strForm() = "ERROR(${message.replace("(", "\\(")
+      .replace(")", "\\)")})"
   }
 
   /** If this value represents a truthy value (not NULL, false ot empty) */
@@ -130,6 +110,7 @@ sealed class NodeResult {
   }
 
   /** Converts the result value to a string */
+  @Suppress("CyclomaticComplexMethod")
   fun asString(): String? {
     return when (this) {
       OK -> null
@@ -146,8 +127,7 @@ sealed class NodeResult {
           is NodeValue.SLIST -> v.items.toString()
           is NodeValue.STRING -> v.string
           is NodeValue.UINT -> v.uint.toString()
-          //#[cfg(feature = "xml")]
-          //NodeValue::XML(node) => Some(node.to_string())
+          is NodeValue.XML -> v.toString()
         }
       }
       is ERROR -> null
@@ -162,6 +142,35 @@ sealed class NodeResult {
       null
     }
   }
+
+  /** If the result is a number, returns it */
+  fun asNumber(): UInt? {
+    return if (this is VALUE) {
+      if (this.value is NodeValue.UINT) {
+        this.value.uint
+      } else {
+        null
+      }
+    } else {
+      null
+    }
+  }
+
+  /** If the result is a list of Strings, returns it */
+  fun asSList(): List<String>? {
+    return if (this is VALUE) {
+      if (this.value is NodeValue.SLIST) {
+        this.value.items
+      } else {
+        null
+      }
+    } else {
+      null
+    }
+  }
+
+  /** Safe form to put in the plan output */
+  open fun strForm(): String = this.toString()
 }
 
 public fun NodeResult?.or(result: NodeResult) = this?.or(result) ?: result

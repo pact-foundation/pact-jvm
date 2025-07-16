@@ -18,6 +18,8 @@ object SemverMatcher : MatchingRule {
     }
   }
 
+  override fun generateDescription(forCollection: Boolean) = "must match a semver version"
+
   override val name: String
     get() = "semver"
   override val attributes: Map<String, JsonValue>

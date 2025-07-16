@@ -51,4 +51,32 @@ class NodeResultSpec extends Specification {
     new NodeResult.ERROR('error')                   | new NodeResult.VALUE(NodeValue.NULL.INSTANCE)   | new NodeResult.VALUE(NodeValue.NULL.INSTANCE)
     new NodeResult.ERROR('error')                   | new NodeResult.ERROR('error2')                  | new NodeResult.ERROR('error2')
   }
+
+  def 'toString() form'() {
+    expect:
+    value.toString() == result
+
+    where:
+    value                                                                     | result
+    NodeResult.OK.INSTANCE                                                    | 'OK'
+    new NodeResult.VALUE(NodeValue.NULL.INSTANCE)                             | 'NULL'
+    new NodeResult.ERROR('')                                                  | 'ERROR()'
+    new NodeResult.VALUE(new NodeValue.BOOL(true))                            | 'BOOL(true)'
+    new NodeResult.ERROR('error')                                             | 'ERROR(error)'
+    new NodeResult.ERROR("Expected 'C' (String) to be equal to 'b' (String)") | "ERROR(Expected 'C' (String) to be equal to 'b' (String))"
+  }
+
+  def 'string form'() {
+    expect:
+    value.strForm() == result
+
+    where:
+    value                                                                     | result
+    NodeResult.OK.INSTANCE                                                    | 'OK'
+    new NodeResult.VALUE(NodeValue.NULL.INSTANCE)                             | 'NULL'
+    new NodeResult.ERROR('')                                                  | 'ERROR()'
+    new NodeResult.VALUE(new NodeValue.BOOL(true))                            | 'BOOL(true)'
+    new NodeResult.ERROR('error')                                             | 'ERROR(error)'
+    new NodeResult.ERROR("Expected 'C' (String) to be equal to 'b' (String)") | "ERROR(Expected 'C' \\(String\\) to be equal to 'b' \\(String\\))"
+  }
 }

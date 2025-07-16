@@ -117,125 +117,134 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   //      ;
   @Suppress("ReturnCount", "LongMethod")
   fun matchingDefinitionExp(): Result<MatchingRuleDefinition, String> {
-    return when {
-      lexer.matchString("matching") -> {
-        if (matchChar('(')) {
-          when (val matchingRuleResult = matchingRule()) {
-            is Result.Ok -> {
-              if (matchChar(')')) {
-                if (matchingRuleResult.value.reference != null) {
+    return lexer.mark {
+      when {
+        lexer.matchString("matching") -> {
+          if (matchChar('(')) {
+            when (val matchingRuleResult = matchingRule()) {
+              is Result.Ok -> {
+                if (matchChar(')')) {
+                  if (matchingRuleResult.value.reference != null) {
+                    Result.Ok(
+                      MatchingRuleDefinition(
+                        matchingRuleResult.value.value, matchingRuleResult.value.reference!!,
+                        matchingRuleResult.value.generator,
+                        lexer.fromMark()
+                      )
+                    )
+                  } else {
+                    Result.Ok(
+                      MatchingRuleDefinition(
+                        matchingRuleResult.value.value, matchingRuleResult.value.rule,
+                        matchingRuleResult.value.generator,
+                        lexer.fromMark()
+                      )
+                    )
+                  }
+                } else {
+                  Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+                }
+              }
+              is Result.Err -> return@mark matchingRuleResult
+            }
+          } else {
+            Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
+          }
+        }
+        lexer.matchString("notEmpty") -> {
+          if (matchChar('(')) {
+            when (val primitiveValueResult = primitiveValue(false)) {
+              is Result.Ok -> {
+                if (matchChar(')')) {
                   Result.Ok(
                     MatchingRuleDefinition(
-                      matchingRuleResult.value.value, matchingRuleResult.value.reference!!,
-                      matchingRuleResult.value.generator
-                    )
+                      primitiveValueResult.value.first,
+                      NotEmptyMatcher,
+                      primitiveValueResult.value.third,
+                      lexer.fromMark()
+                    ).withType(primitiveValueResult.value.second)
                   )
                 } else {
-                  Result.Ok(
-                    MatchingRuleDefinition(
-                      matchingRuleResult.value.value, matchingRuleResult.value.rule,
-                      matchingRuleResult.value.generator
-                    )
-                  )
+                  Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
                 }
-              } else {
-                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
               }
+              is Result.Err -> return@mark primitiveValueResult
             }
-            is Result.Err -> return matchingRuleResult
+          } else {
+            Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
           }
-        } else {
-          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
-      }
-      lexer.matchString("notEmpty") -> {
-        if (matchChar('(')) {
-          when (val primitiveValueResult = primitiveValue(false)) {
-            is Result.Ok -> {
-              if (matchChar(')')) {
-                Result.Ok(
-                  MatchingRuleDefinition(
-                    primitiveValueResult.value.first,
-                    NotEmptyMatcher,
-                    primitiveValueResult.value.third
-                  ).withType(primitiveValueResult.value.second)
-                )
-              } else {
-                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+        lexer.matchString("eachKey") -> {
+          if (matchChar('(')) {
+            when (val definitionResult = matchingDefinitionExp()) {
+              is Result.Ok -> {
+                if (matchChar(')')) {
+                  Result.Ok(MatchingRuleDefinition(null, EachKeyMatcher(definitionResult.value),
+                    null, lexer.fromMark()))
+                } else {
+                  Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+                }
               }
+              is Result.Err -> return@mark definitionResult
             }
-            is Result.Err -> return primitiveValueResult
+          } else {
+            Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
           }
-        } else {
-          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
-      }
-      lexer.matchString("eachKey") -> {
-        if (matchChar('(')) {
-          when (val definitionResult = matchingDefinitionExp()) {
-            is Result.Ok -> {
-              if (matchChar(')')) {
-                Result.Ok(MatchingRuleDefinition(null, EachKeyMatcher(definitionResult.value), null))
-              } else {
-                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+        lexer.matchString("eachValue") -> {
+          if (matchChar('(')) {
+            when (val definitionResult = matchingDefinitionExp()) {
+              is Result.Ok -> {
+                if (matchChar(')')) {
+                  Result.Ok(MatchingRuleDefinition(null, ValueType.Unknown,
+                    listOf(Either.A(EachValueMatcher(definitionResult.value))), null,
+                    lexer.fromMark()))
+                } else {
+                  Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+                }
               }
+              is Result.Err -> return@mark definitionResult
             }
-            is Result.Err -> return definitionResult
+          } else {
+            Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
           }
-        } else {
-          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
-      }
-      lexer.matchString("eachValue") -> {
-        if (matchChar('(')) {
-          when (val definitionResult = matchingDefinitionExp()) {
-            is Result.Ok -> {
-              if (matchChar(')')) {
-                Result.Ok(MatchingRuleDefinition(null, ValueType.Unknown,
-                  listOf(Either.A(EachValueMatcher(definitionResult.value))), null))
-              } else {
-                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+        lexer.matchString("atLeast") -> {
+          if (matchChar('(')) {
+            when (val lengthResult = unsignedNumber()) {
+              is Result.Ok -> {
+                if (matchChar(')')) {
+                  Result.Ok(MatchingRuleDefinition("", MinTypeMatcher(lengthResult.value),
+                    null, lexer.fromMark()))
+                } else {
+                  Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+                }
               }
+              is Result.Err -> return@mark lengthResult
             }
-            is Result.Err -> return definitionResult
+          } else {
+            Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
           }
-        } else {
-          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
-      }
-      lexer.matchString("atLeast") -> {
-        if (matchChar('(')) {
-          when (val lengthResult = unsignedNumber()) {
-            is Result.Ok -> {
-              if (matchChar(')')) {
-                Result.Ok(MatchingRuleDefinition("", MinTypeMatcher(lengthResult.value), null))
-              } else {
-                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+        lexer.matchString("atMost") -> {
+          if (matchChar('(')) {
+            when (val lengthResult = unsignedNumber()) {
+              is Result.Ok -> {
+                if (matchChar(')')) {
+                  Result.Ok(MatchingRuleDefinition("", MaxTypeMatcher(lengthResult.value),
+                    null, lexer.fromMark()))
+                } else {
+                  Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+                }
               }
+              is Result.Err -> return@mark lengthResult
             }
-            is Result.Err -> return lengthResult
+          } else {
+            Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
           }
-        } else {
-          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
         }
+        else -> Result.Err(parseError("Was expecting a matching rule definition type at index ${lexer.index}"))
       }
-      lexer.matchString("atMost") -> {
-        if (matchChar('(')) {
-          when (val lengthResult = unsignedNumber()) {
-            is Result.Ok -> {
-              if (matchChar(')')) {
-                Result.Ok(MatchingRuleDefinition("", MaxTypeMatcher(lengthResult.value), null))
-              } else {
-                Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
-              }
-            }
-            is Result.Err -> return lengthResult
-          }
-        } else {
-          Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
-        }
-      }
-      else -> Result.Err(parseError("Was expecting a matching rule definition type at index ${lexer.index}"))
     }
   }
 

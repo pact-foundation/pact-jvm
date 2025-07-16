@@ -1,6 +1,5 @@
 package au.com.dius.pact.core.matchers.engine.resolvers
 
-import au.com.dius.pact.core.matchers.MatchingContext
 import au.com.dius.pact.core.matchers.engine.MatchingConfiguration
 import au.com.dius.pact.core.matchers.engine.NodeValue
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
@@ -10,7 +9,6 @@ import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import spock.lang.Specification
 
 class HttpRequestValueResolverSpec extends Specification {
@@ -18,9 +16,8 @@ class HttpRequestValueResolverSpec extends Specification {
     given:
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
 
     expect:
     new HttpRequestValueResolver(new HttpRequest()).resolve(new DocPath(path), context).unwrap() == result
@@ -38,9 +35,8 @@ class HttpRequestValueResolverSpec extends Specification {
     given:
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp('test interaction')
-    def matchingRules = new MatchingRuleCategory('test')
     def config = new MatchingConfiguration(false, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, new MatchingContext(matchingRules, false), config)
+    def context = new PlanMatchingContext(pact, interaction, config)
     def request = new HttpRequest()
     def resolver = new HttpRequestValueResolver(request)
 

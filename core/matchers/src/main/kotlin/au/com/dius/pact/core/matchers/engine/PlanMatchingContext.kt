@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 
 /** Configuration for driving behaviour of the execution */
 data class MatchingConfiguration(
@@ -47,22 +48,33 @@ data class MatchingConfiguration(
 //}
 
 /** Context to store data for use in executing an execution plan. */
-open class PlanMatchingContext(
+open class PlanMatchingContext @JvmOverloads constructor(
   /** Pact the plan is for */
   val pact: V4Pact,
   /** Interaction that the plan id for */
   val interaction: V4Interaction,
-  /** Matching rules to use */
-  val matchingContext: MatchingContext,
   /** Configuration */
-  val config: MatchingConfiguration
+  val config: MatchingConfiguration,
+  /** Matching rules to use */
+  val matchingContext: MatchingContext = MatchingContext(MatchingRuleCategory(""), config.allowUnexpectedEntries)
 ) {
 
   /** If there is a matcher defined at the path in this context */
-  fun matcherIsDefined(path: DocPath) = matchingContext.matcherDefined(path.asList())
+  fun matcherIsDefined(path: DocPath): Boolean {
+    return when {
+      path.firstField() == "headers" -> matchingContext.matcherDefined(path.asList().drop(2))
+      else -> matchingContext.matcherDefined(path.asList())
+    }
+  }
 
   /** Select the best matcher to use for the given path */
-  fun selectBestMatcher(path: DocPath) = matchingContext.selectBestMatcher(path.asList())
+  fun selectBestMatcher(path: DocPath): MatchingRuleGroup {
+    return if (path.firstField() == "headers") {
+      matchingContext.selectBestMatcher(path.asList().drop(2))
+    } else {
+      matchingContext.selectBestMatcher(path.asList())
+    }
+  }
 
 //  /// If there is a type matcher defined at the path in this context
 //  pub fn type_matcher_defined(&self, path: &DocPath) -> bool {
@@ -80,8 +92,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 
@@ -94,8 +106,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 
@@ -108,8 +120,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries, mapOf(), true)
     )
   }
 
@@ -122,8 +134,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config.copy(allowUnexpectedEntries = true),
+      MatchingContext(matchingRules, config.allowUnexpectedEntries, mapOf(), true)
     )
   }
 
@@ -136,8 +148,8 @@ open class PlanMatchingContext(
     return PlanMatchingContext(
       pact,
       interaction,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries),
-      config
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
 }

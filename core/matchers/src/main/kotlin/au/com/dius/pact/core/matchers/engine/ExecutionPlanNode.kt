@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.support.json.JsonValue
 import com.github.ajalt.mordant.TermColors
 import org.apache.commons.text.StringEscapeUtils.escapeJson
 
@@ -13,25 +14,6 @@ enum class Terminator {
   CONTAINERS
 }
 
-//  /// Clones this node, replacing the result with the given one
-//  pub fn clone_with_result(&self, result: NodeResult) -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: self.node_type.clone(),
-//      result: Some(result),
-//      children: self.children.clone()
-//    }
-//  }
-//
-//  /// Clones this node, replacing the result with the given one
-//  pub fn clone_with_children<I>(&self, children: I) -> ExecutionPlanNode
-//    where I: IntoIterator<Item = ExecutionPlanNode> {
-//    ExecutionPlanNode {
-//      node_type: self.node_type.clone(),
-//      result: self.result.clone(),
-//      children: children.into_iter().collect()
-//    }
-//  }
-//
 //  /// Pushes the node onto the front of the list
 //  pub fn push_node(&mut self, node: ExecutionPlanNode) {
 //    self.children.insert(0, node.into());
@@ -40,6 +22,7 @@ enum class Terminator {
 /**
  * Node in an executable plan tree
  */
+@Suppress("TooManyFunctions")
 data class ExecutionPlanNode(
   /** Type of the node */
   val nodeType: PlanNodeType,
@@ -95,7 +78,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ACTION -> {
@@ -107,7 +90,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.VALUE -> {
@@ -115,7 +98,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE -> {
@@ -123,7 +106,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.PIPELINE -> {
@@ -134,7 +117,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE_CURRENT -> {
@@ -143,7 +126,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.SPLAT -> {
@@ -154,7 +137,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append("=>")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ANNOTATION -> {
@@ -207,7 +190,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ACTION -> {
@@ -225,7 +208,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.VALUE -> {
@@ -234,7 +217,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE -> {
@@ -243,7 +226,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.PIPELINE -> {
@@ -260,7 +243,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.RESOLVE_CURRENT -> {
@@ -270,7 +253,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.SPLAT -> {
@@ -287,7 +270,7 @@ data class ExecutionPlanNode(
 
         if (result != null) {
           buffer.append(" => ")
-          buffer.append(result.toString())
+          buffer.append(result.strForm())
         }
       }
       is PlanNodeType.ANNOTATION -> {
@@ -312,6 +295,7 @@ data class ExecutionPlanNode(
   }
 
   /** Return a summary of the execution to display in a console */
+  @Suppress("LongMethod", "CyclomaticComplexMethod", "NestedBlockDepth")
   fun generateSummary(ansiColor: Boolean, buffer: StringBuilder, indent: Int) {
     val pad = " ".repeat(indent)
     if (nodeType is PlanNodeType.CONTAINER) {
@@ -575,6 +559,10 @@ data class ExecutionPlanNode(
 
     /** Constructor for a value node */
     fun valueNode(value: String) = valueNode(Into { NodeValue.STRING(value) })
+    /** Constructor for a value node */
+    fun valueNode(value: UInt) = valueNode(Into { NodeValue.UINT(value) })
+    /** Constructor for a value node */
+    fun valueNode(value: JsonValue) = valueNode(Into { NodeValue.JSON(value) })
 
     /** Constructor for a resolve node */
     fun <T> resolveValue(resolveStr: T): ExecutionPlanNode where T: Into<DocPath> {
@@ -602,17 +590,17 @@ data class ExecutionPlanNode(
 //      children: vec![],
 //    }
 //  }
-//
-//  /// Constructor for the splat node
-//  pub fn splat() -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::SPLAT,
-//      result: None,
-//      children: vec![]
-//    }
-//  }
 
-    fun <S> annotation(description: S): ExecutionPlanNode where S: Into<String> {
+    /** Constructor for the splat node */
+    fun splat(): ExecutionPlanNode {
+      return ExecutionPlanNode(
+        PlanNodeType.SPLAT,
+        null,
+        mutableListOf()
+      )
+    }
+
+    fun <S>  annotation(description: S): ExecutionPlanNode where S: Into<String> {
       return ExecutionPlanNode(
         PlanNodeType.ANNOTATION(description.into()),
         null,

@@ -8,15 +8,16 @@ import io.ktor.http.HeaderValueWithParameters
 import io.ktor.http.parseHeaderValue
 import java.util.Locale
 
+val SINGLE_VALUE_HEADERS = setOf("date", "accept-datetime", "if-modified-since", "if-unmodified-since",
+  "expires", "retry-after", "last-modified", "set-cookie", "user-agent")
+val PARAMETERISED_HEADERS = setOf("accept", "content-type")
+
 class HeaderWithParameters(
   content: String,
   parameters: List<HeaderValueParam>
 ) : HeaderValueWithParameters(content, parameters)
 
 object HeaderParser {
-    private val SINGLE_VALUE_HEADERS = setOf("date", "accept-datetime", "if-modified-since", "if-unmodified-since",
-      "expires", "retry-after", "last-modified", "set-cookie", "user-agent")
-
   fun fromJson(key: String, value: JsonValue): List<String> {
     return when {
       value is JsonValue.Array -> value.values.map { Json.toString(it).trim() }
@@ -34,6 +35,16 @@ object HeaderParser {
     } else {
       val h = HeaderWithParameters(headerValue.value, headerValue.params)
       h.toString()
+    }
+  }
+
+  /**
+   * Splits the header value into the value and the attributes as a Map
+   */
+  fun headerValueToMap(value: String): Pair<String, Map<String, String>> {
+    val header = parseHeaderValue(value)
+    return header[0].value to header[0].params.fold(mutableMapOf()) {
+      acc, value -> acc[value.name] = value.value; acc
     }
   }
 }
