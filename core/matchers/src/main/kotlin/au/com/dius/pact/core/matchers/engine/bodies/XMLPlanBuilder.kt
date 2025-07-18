@@ -51,7 +51,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     node: ExecutionPlanNode
   ) {
     val name = QualifiedName(element)
-    val elementPath = if (path.endsWith("$name[*]")) {
+    val elementPath = if (path.endsWith("['${name}*']")) {
       path
     } else if (index != null) {
       path.pushField(name.toString()).pushIndex(index)
@@ -176,7 +176,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
         parentNode.add(
           ExecutionPlanNode.action("expect:empty")
             .add(ExecutionPlanNode.resolveCurrentValue(path))
-        );
+        )
       } else {
         parentNode.add(
           ExecutionPlanNode.action("expect:only-entries")
@@ -189,7 +189,12 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     for ((childName, elements) in children) {
       val p = path.join(childName)
 
-      if (!context.typeMatcherDefined(p)) {
+      val noIndices = dropIndices(p)
+      val matchers = context.selectBestMatcher(p)
+        .andRules(context.selectBestMatcher(noIndices))
+        .filter { matcher -> matcher.isTypeMatcher() }
+        .removeDuplicates()
+      if (matchers.isEmpty()) {
         parentNode.add(
           ExecutionPlanNode.action("expect:count")
             .add(ExecutionPlanNode.valueNode(NodeValue.UINT(elements.size.toUInt())))
@@ -211,19 +216,19 @@ object XMLPlanBuilder: PlanBodyBuilder  {
           }
         }
       } else {
-        val rules = context.selectBestMatcher(p)
-          .filter { it.isLengthTypeMatcher() }
+        val rules = matchers.filter { it.isLengthTypeMatcher() }
         if (rules.isNotEmpty()) {
           parentNode.add(ExecutionPlanNode.annotation(Into {
-            "${path.lastField()} ${rules.generateDescription(true)}"
+            "${p.lastField()} ${rules.generateDescription(true)}"
           }))
           parentNode.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(elements[0]),
-            ExecutionPlanNode.resolveCurrentValue(path), rules, true))
+            ExecutionPlanNode.resolveCurrentValue(p), rules, true))
         }
 
         val forEachNode = ExecutionPlanNode.action("for-each")
+        forEachNode.add(ExecutionPlanNode.valueNode("$childName*"))
         forEachNode.add(ExecutionPlanNode.resolveCurrentValue(p))
-        val itemPath = p.join("[*]")
+        val itemPath = path.join("$childName*")
 
         processElement(context, elements[0], 0, itemPath, forEachNode)
 
@@ -277,7 +282,17 @@ object XMLPlanBuilder: PlanBodyBuilder  {
       .joinToString("") { it.textContent }
   }
 
-  private fun dropIndices(path: DocPath) = DocPath(path.pathTokens.filter {
-    it !is PathToken.Index && it !is PathToken.StarIndex
-  })
+  private fun dropIndices(path: DocPath) = DocPath(path.pathTokens
+    .map {
+      when (it) {
+        is PathToken.Field -> if (it.name.endsWith('*')) {
+          PathToken.Field(it.name.dropLast(1))
+        } else it
+        else -> it
+      }
+    }
+    .filter {
+      it !is PathToken.Index && it !is PathToken.StarIndex
+    }
+  )
 }

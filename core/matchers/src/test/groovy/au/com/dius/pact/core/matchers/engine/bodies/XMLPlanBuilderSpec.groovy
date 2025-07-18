@@ -559,9 +559,9 @@ class XMLPlanBuilderSpec extends Specification {
     def node = builder.buildPlan(content.bytes, context)
     def str = new StringBuilder()
     node.prettyForm(str, 0)
+    def actual = str.toString()
 
-    then:
-    str.toString() == '''%tee (
+    def expected = '''%tee (
     |  %xml:parse (
     |    $.body
     |  ),
@@ -582,43 +582,50 @@ class XMLPlanBuilderSpec extends Specification {
     |          ['value'],
     |          ~>$.values
     |        ),
-    |        #{'values must match by type and have at least 2 items'},
+    |        #{'value must match by type and have at least 2 items'},
     |        %match:min-type (
     |          xml:'<value>100</value>',
-    |          ~>$.values,
+    |          ~>$.values.value,
     |          json:{"min":2}
     |        ),
     |        %for-each (
+    |          'value*',
     |          ~>$.values.value,
     |          %if (
     |            %check:exists (
-    |              ~>$.values.value[*]
+    |              ~>$.values['value*']
     |            ),
-    |            :$.values.value[*] (
+    |            :$.values['value*'] (
     |              :#text (
     |                %match:equality (
     |                  '100',
     |                  %to-string (
-    |                    ~>$.values.value[*]['#text']
+    |                    ~>$.values['value*']['#text']
     |                  ),
     |                  NULL
     |                )
     |              ),
     |              %expect:empty (
-    |                ~>$.values.value[*]
+    |                ~>$.values['value*']
     |              )
     |            ),
     |            %error (
-    |              'Was expecting an XML element value but it was missing\'
+    |              'Was expecting an XML element \\/values\\/value* but it was missing'
     |            )
     |          )
     |        )
     |      ),
     |      %error (
-    |        'Was expecting an XML element \\/values but it was missing\'
+    |        'Was expecting an XML element \\/values but it was missing'
     |      )
     |    )
     |  )
     |)'''.stripMargin('|')
+    def patch = DiffUtils.diff(actual, expected, null)
+    def diff = generateUnifiedDiff('', '', actual.split('\n') as List<String>,
+      patch, 0).join('\n')
+
+    then:
+    diff == ''
   }
 }

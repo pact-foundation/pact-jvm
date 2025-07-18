@@ -201,33 +201,6 @@ sealed class NodeValue: Into<NodeValue> {
     }
   }
 
-//  /// Converts this value into a list of values
-//  pub fn to_list(&self) -> Vec<NodeValue> {
-//    match self {
-//      NodeValue::MMAP(entries) => {
-//        entries.iter()
-//          .map(|(k, v)| NodeValue::ENTRY(k.clone(), Box::new(NodeValue::SLIST(v.clone()))))
-//          .collect()
-//      }
-//      NodeValue::SLIST(list) => {
-//        list.iter()
-//          .map(|v| NodeValue::STRING(v.clone()))
-//          .collect()
-//      }
-//      NodeValue::JSON(json) => match json {
-//        Value::Array(a) => {
-//          a.iter()
-//            .map(|v| NodeValue::JSON(v.clone()))
-//            .collect()
-//        }
-//        _ => vec![ self.clone() ]
-//      }
-//      NodeValue::LIST(list) => list.clone(),
-//      _ => vec![ self.clone() ]
-//    }
-//  }
-//}
-
 //impl From<HashMap<&str, Value>> for NodeValue {
 //  fn from(value: HashMap<&str, Value>) -> Self {
 //    let json = Object(value.iter().map(|(k, v)| (k.to_string(), v.clone())).collect());
@@ -298,6 +271,20 @@ sealed class NodeValue: Into<NodeValue> {
       items
     } else {
       null
+    }
+  }
+
+  /** Converts this value into a list of values */
+  fun toList(): List<NodeValue> {
+    return when(this) {
+      is JSON -> when (val json = this.json) {
+        is JsonValue.Array -> json.values.map { JSON(it) }
+        else -> listOf(this)
+      }
+      is LIST -> this.items
+      is MMAP -> this.entries.entries.map { ENTRY(it.key, SLIST(it.value)) }
+      is SLIST -> this.items.map { STRING(it) }
+      else -> listOf(this)
     }
   }
 

@@ -12,6 +12,9 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
+import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonValue
 import com.github.difflib.DiffUtils
@@ -1311,6 +1314,390 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |    ) => BOOL(false)
     |  ) => BOOL(false)
     |) => BOOL(false)'''.stripMargin('|')
+    def patch = DiffUtils.diff(prettyResult, expected, null)
+    def diff = generateUnifiedDiff('', '', prettyResult.split('\n') as List<String>, patch, 0).join('\n')
+
+    then:
+    result.result.value.bool == false
+    diff == ''
+  }
+
+  def 'xml with matching rules'() {
+    given:
+    List<String> path = ['$']
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp('test interaction')
+    interaction.request.matchingRules
+      .addCategory('body')
+      .addRule('$.config.name', NotEmptyMatcher.INSTANCE)
+      .addRule('$.config.sound.property', new MinTypeMatcher(1))
+      .addRule('$.config.sound.property.*', EqualsMatcher.INSTANCE)
+      .addRule("\$.config.sound.property['@name']", NotEmptyMatcher.INSTANCE)
+    def config = new MatchingConfiguration(false, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, config).forBody()
+    ExecutionPlanInterpreter interpreter = new ExecutionPlanInterpreter(context)
+
+    def builder = XMLPlanBuilder.INSTANCE
+    def xml = '''<?xml version="1.0" encoding="UTF-8"?>
+      <config>
+        <name>My Settings</name>
+        <sound>
+          <property name="volume" value="11" />
+          <property name="mixer" value="standard" />
+        </sound>
+      </config>
+    '''
+    ExecutionPlanNode node = builder.buildPlan(xml.bytes, context)
+
+    def content = '''<?xml version="1.0" encoding="UTF-8"?>
+      <config>
+        <name>My Settings</name>
+        <sound>
+          <property name="volume" value="11" />
+          <property name="mixer" value="standard" />
+          <property name="" value=""/>
+        </sound>
+      </config>
+    '''
+    ValueResolver resolver = Mock() {
+      resolve(_, _) >> { new Result.Ok(new NodeValue.BARRAY(content.bytes)) }
+    }
+
+    when:
+    def result = interpreter.walkTree(path, node, resolver)
+    def buffer = new StringBuilder()
+    result.prettyForm(buffer, 0)
+    def prettyResult = buffer.toString()
+    def expected = '''%tee (
+      |  %xml:parse (
+      |    $.body => BYTES(280, PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KICAgICAgPGNvbmZpZz4KICAgICAgICA8bmFtZT5NeSBTZXR0aW5nczwvbmFtZT4KICAgICAgICA8c291bmQ+CiAgICAgICAgICA8cHJvcGVydHkgbmFtZT0idm9sdW1lIiB2YWx1ZT0iMTEiIC8+CiAgICAgICAgICA8cHJvcGVydHkgbmFtZT0ibWl4ZXIiIHZhbHVlPSJzdGFuZGFyZCIgLz4KICAgICAgICAgIDxwcm9wZXJ0eSBuYW1lPSIiIHZhbHVlPSIiLz4KICAgICAgICA8L3NvdW5kPgogICAgICA8L2NvbmZpZz4KICAgIA==)
+      |  ) => xml:'<config>\\n            \\n    <name>My Settings<\\/name>\\n            \\n    <sound>\\n                  \\n        <property name=\\"volume\\" value=\\"11\\"\\/>\\n                  \\n        <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n                  \\n        <property name=\\"\\" value=\\"\\"\\/>\\n                \\n    <\\/sound>\\n          \\n<\\/config>',
+      |  :$ (
+      |    %if (
+      |      %check:exists (
+      |        ~>$.config => xml:'<config>\\n            \\n    <name>My Settings<\\/name>\\n            \\n    <sound>\\n                  \\n        <property name=\\"volume\\" value=\\"11\\"\\/>\\n                  \\n        <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n                  \\n        <property name=\\"\\" value=\\"\\"\\/>\\n                \\n    <\\/sound>\\n          \\n<\\/config>\'
+      |      ) => BOOL(true),
+      |      :$.config (
+      |        :#text (
+      |          %expect:empty (
+      |            %to-string (
+      |              ~>$.config['#text'] => NULL
+      |            ) => \'\'
+      |          ) => BOOL(true)
+      |        ) => BOOL(true),
+      |        %expect:only-entries (
+      |          ['name', 'sound'] => ['name', 'sound'],
+      |          ~>$.config => xml:'<config>\\n            \\n    <name>My Settings<\\/name>\\n            \\n    <sound>\\n                  \\n        <property name=\\"volume\\" value=\\"11\\"\\/>\\n                  \\n        <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n                  \\n        <property name=\\"\\" value=\\"\\"\\/>\\n                \\n    <\\/sound>\\n          \\n<\\/config>\'
+      |        ) => OK,
+      |        %expect:count (
+      |          UINT(1) => UINT(1),
+      |          ~>$.config.name => xml:'<name>My Settings<\\/name>',
+      |          %join (
+      |            'Expected 1 <name> child element but there were ',
+      |            %length (
+      |              ~>$.config.name
+      |            )
+      |          )
+      |        ) => OK,
+      |        %if (
+      |          %check:exists (
+      |            ~>$.config.name[0] => xml:'<name>My Settings<\\/name>\'
+      |          ) => BOOL(true),
+      |          :$.config.name[0] (
+      |            :#text (
+      |              #{'#text must not be empty'},
+      |              %match:not-empty (
+      |                'My Settings' => 'My Settings',
+      |                %to-string (
+      |                  ~>$.config.name[0]['#text'] => xml:text:'My Settings\'
+      |                ) => 'My Settings',
+      |                json:{} => json:{}
+      |              ) => BOOL(true)
+      |            ) => BOOL(true),
+      |            %expect:empty (
+      |              ~>$.config.name[0] => xml:'<name>My Settings<\\/name>\'
+      |            ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Was expecting an XML element \\/config\\/name\\/0 but it was missing\'
+      |          )
+      |        ) => BOOL(true),
+      |        %expect:count (
+      |          UINT(1) => UINT(1),
+      |          ~>$.config.sound => xml:'<sound>\\n              \\n    <property name=\\"volume\\" value=\\"11\\"\\/>\\n              \\n    <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n              \\n    <property name=\\"\\" value=\\"\\"\\/>\\n            \\n<\\/sound>',
+      |          %join (
+      |            'Expected 1 <sound> child element but there were ',
+      |            %length (
+      |              ~>$.config.sound
+      |            )
+      |          )
+      |        ) => OK,
+      |        %if (
+      |          %check:exists (
+      |            ~>$.config.sound[0] => xml:'<sound>\\n              \\n    <property name=\\"volume\\" value=\\"11\\"\\/>\\n              \\n    <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n              \\n    <property name=\\"\\" value=\\"\\"\\/>\\n            \\n<\\/sound>\'
+      |          ) => BOOL(true),
+      |          :$.config.sound[0] (
+      |            :#text (
+      |              %expect:empty (
+      |                %to-string (
+      |                  ~>$.config.sound[0]['#text'] => NULL
+      |                ) => \'\'
+      |              ) => BOOL(true)
+      |            ) => BOOL(true),
+      |            %expect:only-entries (
+      |              ['property'] => ['property'],
+      |              ~>$.config.sound[0] => xml:'<sound>\\n              \\n    <property name=\\"volume\\" value=\\"11\\"\\/>\\n              \\n    <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n              \\n    <property name=\\"\\" value=\\"\\"\\/>\\n            \\n<\\/sound>\'
+      |            ) => OK,
+      |            #{'property must match by type and have at least 1 item'},
+      |            %match:min-type (
+      |              xml:'<property name=\\"volume\\" value=\\"11\\"\\/>' => xml:'<property name=\\"volume\\" value=\\"11\\"\\/>',
+      |              ~>$.config.sound[0].property => [xml:'<property name=\\"volume\\" value=\\"11\\"\\/>', xml:'<property name=\\"mixer\\" value=\\"standard\\"\\/>', xml:'<property name=\\"\\" value=\\"\\"\\/>'],
+      |              json:{"min":1} => json:{"min":1}
+      |            ) => BOOL(true),
+      |            %for-each (
+      |              'property*' => 'property*',
+      |              ~>$.config.sound[0].property => [xml:'<property name=\\"volume\\" value=\\"11\\"\\/>', xml:'<property name=\\"mixer\\" value=\\"standard\\"\\/>', xml:'<property name=\\"\\" value=\\"\\"\\/>'],
+      |              %if (
+      |                %check:exists (
+      |                  ~>$.config.sound[0].property[0] => xml:'<property name=\\"volume\\" value=\\"11\\"\\/>\'
+      |                ) => BOOL(true),
+      |                :$.config.sound[0].property[0] (
+      |                  :attributes (
+      |                    :$.config.sound[0].property[0]['@name'] (
+      |                      #{'@name must not be empty'},
+      |                      %if (
+      |                        %check:exists (
+      |                          ~>$.config.sound[0].property[0]['@name'] => xml:attribute:'name'='volume\'
+      |                        ) => BOOL(true),
+      |                        %match:not-empty (
+      |                          'volume' => 'volume',
+      |                          %xml:value (
+      |                            ~>$.config.sound[0].property[0]['@name'] => xml:attribute:'name'='volume\'
+      |                          ) => 'volume',
+      |                          json:{} => json:{}
+      |                        ) => BOOL(true)
+      |                      ) => BOOL(true)
+      |                    ) => BOOL(true),
+      |                    :$.config.sound[0].property[0]['@value'] (
+      |                      #{'@value must be equal to the expected value'},
+      |                      %if (
+      |                        %check:exists (
+      |                          ~>$.config.sound[0].property[0]['@value'] => xml:attribute:'value'='11\'
+      |                        ) => BOOL(true),
+      |                        %match:equality (
+      |                          '11' => '11',
+      |                          %xml:value (
+      |                            ~>$.config.sound[0].property[0]['@value'] => xml:attribute:'value'='11\'
+      |                          ) => '11',
+      |                          json:{} => json:{}
+      |                        ) => BOOL(true)
+      |                      ) => BOOL(true)
+      |                    ) => BOOL(true),
+      |                    %expect:entries (
+      |                      ['name', 'value'] => ['name', 'value'],
+      |                      %xml:attributes (
+      |                        ~>$.config.sound[0].property[0] => xml:'<property name=\\"volume\\" value=\\"11\\"\\/>\'
+      |                      ) => {'name': 'volume', 'value': '11'},
+      |                      %join (
+      |                        'The following expected attributes were missing: ',
+      |                        %join-with (
+      |                          ', ',
+      |                          ** (
+      |                            %apply ()
+      |                          )
+      |                        )
+      |                      )
+      |                    ) => OK,
+      |                    %expect:only-entries (
+      |                      ['name', 'value'] => ['name', 'value'],
+      |                      %xml:attributes (
+      |                        ~>$.config.sound[0].property[0] => xml:'<property name=\\"volume\\" value=\\"11\\"\\/>\'
+      |                      ) => {'name': 'volume', 'value': '11'}
+      |                    ) => OK
+      |                  ) => BOOL(true),
+      |                  :#text (
+      |                    #{'#text must be equal to the expected value'},
+      |                    %match:equality (
+      |                      '' => '',
+      |                      %to-string (
+      |                        ~>$.config.sound[0].property[0]['#text'] => NULL
+      |                      ) => '',
+      |                      json:{} => json:{}
+      |                    ) => BOOL(true)
+      |                  ) => BOOL(true),
+      |                  %expect:empty (
+      |                    ~>$.config.sound[0].property[0] => xml:'<property name=\\"volume\\" value=\\"11\\"\\/>\'
+      |                  ) => BOOL(true)
+      |                ) => BOOL(true),
+      |                %error (
+      |                  'Was expecting an XML element \\/config\\/sound\\/0\\/property* but it was missing\'
+      |                )
+      |              ) => BOOL(true),
+      |              %if (
+      |                %check:exists (
+      |                  ~>$.config.sound[0].property[1] => xml:'<property name=\\"mixer\\" value=\\"standard\\"\\/>\'
+      |                ) => BOOL(true),
+      |                :$.config.sound[0].property[1] (
+      |                  :attributes (
+      |                    :$.config.sound[0].property[1]['@name'] (
+      |                      #{'@name must not be empty'},
+      |                      %if (
+      |                        %check:exists (
+      |                          ~>$.config.sound[0].property[1]['@name'] => xml:attribute:'name'='mixer\'
+      |                        ) => BOOL(true),
+      |                        %match:not-empty (
+      |                          'volume' => 'volume',
+      |                          %xml:value (
+      |                            ~>$.config.sound[0].property[1]['@name'] => xml:attribute:'name'='mixer\'
+      |                          ) => 'mixer',
+      |                          json:{} => json:{}
+      |                        ) => BOOL(true)
+      |                      ) => BOOL(true)
+      |                    ) => BOOL(true),
+      |                    :$.config.sound[0].property[1]['@value'] (
+      |                      #{'@value must be equal to the expected value'},
+      |                      %if (
+      |                        %check:exists (
+      |                          ~>$.config.sound[0].property[1]['@value'] => xml:attribute:'value'='standard\'
+      |                        ) => BOOL(true),
+      |                        %match:equality (
+      |                          '11' => '11',
+      |                          %xml:value (
+      |                            ~>$.config.sound[0].property[1]['@value'] => xml:attribute:'value'='standard\'
+      |                          ) => 'standard',
+      |                          json:{} => json:{}
+      |                        ) => ERROR(Expected 'standard' \\(String\\) to be equal to '11' \\(String\\))
+      |                      ) => BOOL(false)
+      |                    ) => BOOL(false),
+      |                    %expect:entries (
+      |                      ['name', 'value'] => ['name', 'value'],
+      |                      %xml:attributes (
+      |                        ~>$.config.sound[0].property[1] => xml:'<property name=\\"mixer\\" value=\\"standard\\"\\/>\'
+      |                      ) => {'name': 'mixer', 'value': 'standard'},
+      |                      %join (
+      |                        'The following expected attributes were missing: ',
+      |                        %join-with (
+      |                          ', ',
+      |                          ** (
+      |                            %apply ()
+      |                          )
+      |                        )
+      |                      )
+      |                    ) => OK,
+      |                    %expect:only-entries (
+      |                      ['name', 'value'] => ['name', 'value'],
+      |                      %xml:attributes (
+      |                        ~>$.config.sound[0].property[1] => xml:'<property name=\\"mixer\\" value=\\"standard\\"\\/>\'
+      |                      ) => {'name': 'mixer', 'value': 'standard'}
+      |                    ) => OK
+      |                  ) => BOOL(false),
+      |                  :#text (
+      |                    #{'#text must be equal to the expected value'},
+      |                    %match:equality (
+      |                      '' => '',
+      |                      %to-string (
+      |                        ~>$.config.sound[0].property[1]['#text'] => NULL
+      |                      ) => '',
+      |                      json:{} => json:{}
+      |                    ) => BOOL(true)
+      |                  ) => BOOL(true),
+      |                  %expect:empty (
+      |                    ~>$.config.sound[0].property[1] => xml:'<property name=\\"mixer\\" value=\\"standard\\"\\/>\'
+      |                  ) => BOOL(true)
+      |                ) => BOOL(false),
+      |                %error (
+      |                  'Was expecting an XML element \\/config\\/sound\\/0\\/property* but it was missing\'
+      |                )
+      |              ) => BOOL(false),
+      |              %if (
+      |                %check:exists (
+      |                  ~>$.config.sound[0].property[2] => xml:'<property name=\\"\\" value=\\"\\"\\/>\'
+      |                ) => BOOL(true),
+      |                :$.config.sound[0].property[2] (
+      |                  :attributes (
+      |                    :$.config.sound[0].property[2]['@name'] (
+      |                      #{'@name must not be empty'},
+      |                      %if (
+      |                        %check:exists (
+      |                          ~>$.config.sound[0].property[2]['@name'] => xml:attribute:'name'=\'\'
+      |                        ) => BOOL(true),
+      |                        %match:not-empty (
+      |                          'volume' => 'volume',
+      |                          %xml:value (
+      |                            ~>$.config.sound[0].property[2]['@name'] => xml:attribute:'name'=\'\'
+      |                          ) => '',
+      |                          json:{} => json:{}
+      |                        ) => ERROR(Expected '' \\(String\\) to not be empty)
+      |                      ) => BOOL(false)
+      |                    ) => BOOL(false),
+      |                    :$.config.sound[0].property[2]['@value'] (
+      |                      #{'@value must be equal to the expected value'},
+      |                      %if (
+      |                        %check:exists (
+      |                          ~>$.config.sound[0].property[2]['@value'] => xml:attribute:'value'=\'\'
+      |                        ) => BOOL(true),
+      |                        %match:equality (
+      |                          '11' => '11',
+      |                          %xml:value (
+      |                            ~>$.config.sound[0].property[2]['@value'] => xml:attribute:'value'=\'\'
+      |                          ) => '',
+      |                          json:{} => json:{}
+      |                        ) => ERROR(Expected '' \\(String\\) to be equal to '11' \\(String\\))
+      |                      ) => BOOL(false)
+      |                    ) => BOOL(false),
+      |                    %expect:entries (
+      |                      ['name', 'value'] => ['name', 'value'],
+      |                      %xml:attributes (
+      |                        ~>$.config.sound[0].property[2] => xml:'<property name=\\"\\" value=\\"\\"\\/>\'
+      |                      ) => {'name': '', 'value': ''},
+      |                      %join (
+      |                        'The following expected attributes were missing: ',
+      |                        %join-with (
+      |                          ', ',
+      |                          ** (
+      |                            %apply ()
+      |                          )
+      |                        )
+      |                      )
+      |                    ) => OK,
+      |                    %expect:only-entries (
+      |                      ['name', 'value'] => ['name', 'value'],
+      |                      %xml:attributes (
+      |                        ~>$.config.sound[0].property[2] => xml:'<property name=\\"\\" value=\\"\\"\\/>\'
+      |                      ) => {'name': '', 'value': ''}
+      |                    ) => OK
+      |                  ) => BOOL(false),
+      |                  :#text (
+      |                    #{'#text must be equal to the expected value'},
+      |                    %match:equality (
+      |                      '' => '',
+      |                      %to-string (
+      |                        ~>$.config.sound[0].property[2]['#text'] => NULL
+      |                      ) => '',
+      |                      json:{} => json:{}
+      |                    ) => BOOL(true)
+      |                  ) => BOOL(true),
+      |                  %expect:empty (
+      |                    ~>$.config.sound[0].property[2] => xml:'<property name=\\"\\" value=\\"\\"\\/>\'
+      |                  ) => BOOL(true)
+      |                ) => BOOL(false),
+      |                %error (
+      |                  'Was expecting an XML element \\/config\\/sound\\/0\\/property* but it was missing\'
+      |                )
+      |              ) => BOOL(false)
+      |            ) => BOOL(false)
+      |          ) => BOOL(false),
+      |          %error (
+      |            'Was expecting an XML element \\/config\\/sound\\/0 but it was missing\'
+      |          )
+      |        ) => BOOL(false)
+      |      ) => BOOL(false),
+      |      %error (
+      |        'Was expecting an XML element \\/config but it was missing\'
+      |      )
+      |    ) => BOOL(false)
+      |  ) => BOOL(false)
+      |) => BOOL(false)'''.stripMargin('|')
     def patch = DiffUtils.diff(prettyResult, expected, null)
     def diff = generateUnifiedDiff('', '', prettyResult.split('\n') as List<String>, patch, 0).join('\n')
 
