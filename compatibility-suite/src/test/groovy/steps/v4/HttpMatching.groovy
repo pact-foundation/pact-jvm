@@ -4,8 +4,12 @@ import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.RequestMatchResult
+import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.HttpRequest
 import au.com.dius.pact.core.model.HttpResponse
+import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.V4Interaction
+import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import io.cucumber.datatable.DataTable
@@ -130,7 +134,9 @@ class HttpMatching {
 
   @When('the request is compared to the expected one')
   void the_request_is_compared_to_the_expected_one() {
-    requestResults << requestMismatches(expectedRequest, receivedRequests[0])
+    def pact = new V4Pact(new Consumer(this.class.name), new Provider(this.class.name))
+    def interaction = new V4Interaction.SynchronousHttp(null, 'compatibility-suite', [], expectedRequest)
+    requestResults << requestMismatches(pact, interaction, receivedRequests[0])
   }
 
   @Then('the comparison should be OK')
