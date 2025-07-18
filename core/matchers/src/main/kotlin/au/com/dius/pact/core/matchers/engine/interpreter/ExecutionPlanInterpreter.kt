@@ -12,6 +12,7 @@ import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
 import au.com.dius.pact.core.model.JsonUtils
+import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.XmlUtils.attributes
 import au.com.dius.pact.core.model.XmlUtils.childElements
 import au.com.dius.pact.core.model.XmlUtils.groupChildren
@@ -270,7 +271,7 @@ class ExecutionPlanInterpreter(
         "join-with" -> executeJoin(action, valueResolver, node, actionPath)
         "error" -> executeError(action, valueResolver, node, actionPath)
         "header:parse" -> executeHeaderParse(action, valueResolver, node, actionPath)
-        //        "for-each" => self.execute_for_each(valueResolver, node, actionPath),
+        "for-each" -> executeForEach(valueResolver, node, actionPath)
         else -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
       }
     }
@@ -1345,6 +1346,42 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  private fun executeForEach(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val argResult = validateArgs(2, 1, node, "for-each", valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (markerResult, loopItems) = argResult.value.first
+        val marker = markerResult.value().orDefault().asString() ?: "[*]"
+        when (loopItems.result) {
+          is NodeResult.ERROR -> node.copy(result = loopItems.result,
+            children = mutableListOf(markerResult, loopItems, argResult.value.second[0]))
+          else -> {
+            var result: NodeResult = NodeResult.OK
+            val childResults = mutableListOf(markerResult, loopItems)
+
+            val loopItems = loopItems.result
+              .orDefault()
+              .asValue()
+              .orDefault()
+              .toList()
+            for (index in 0..<loopItems.size) {
+              val updatedChild = injectIndex(argResult.value.second[0], marker, index)
+              val childResult = walkTree(actionPath, updatedChild, valueResolver)
+              result = result.and(childResult.result)
+              childResults.add(childResult)
+            }
+
+            node.copy(result = result.truthy(), children = childResults)
+          }
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(argResult.error))
+    }
+  }
+
   /** Push a result value onto the value stack */
   fun pushResult(value: NodeResult?) {
     valueStack.add(value)
@@ -1615,5 +1652,50 @@ class ExecutionPlanInterpreter(
       else -> "'$action' is not a valid action" to null
     }
   }
-}
 
+  private fun injectIndex(
+    node: ExecutionPlanNode,
+    marker: String,
+    index: Int
+  ): ExecutionPlanNode {
+    return when (node.nodeType) {
+      is PlanNodeType.ACTION -> node.copy(children = node.children
+        .map { injectIndex(it, marker, index) }
+        .toMutableList())
+      is PlanNodeType.CONTAINER -> {
+        when (val pathResult = handleWith<DocPath> { DocPath(node.nodeType.label) }) {
+          is Result.Ok -> node.copy(
+            nodeType = PlanNodeType.CONTAINER(injectIndexInPath(pathResult.value, marker, index).toString()),
+            children = node.children
+              .map { injectIndex(it, marker, index) }
+              .toMutableList())
+          is Result.Err -> node.copy(children = node.children
+            .map { injectIndex(it, marker, index) }
+            .toMutableList())
+        }
+      }
+      is PlanNodeType.RESOLVE_CURRENT -> node.copy(nodeType = PlanNodeType.RESOLVE_CURRENT(
+        injectIndexInPath(node.nodeType.path, marker, index)
+      ))
+      PlanNodeType.SPLAT, PlanNodeType.PIPELINE -> node.copy(children = node.children
+        .map { injectIndex(it, marker, index) }
+        .toMutableList())
+      else -> node
+    }
+  }
+
+  private fun injectIndexInPath(
+    path: DocPath,
+    marker: String,
+    index: Int
+  ): DocPath {
+    return DocPath(path.tokens().flatMap {
+      when (it) {
+        is PathToken.Field -> if (it.name == marker) {
+          listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
+        } else listOf(it)
+        else -> listOf(it)
+      }
+    })
+  }
+}

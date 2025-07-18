@@ -201,69 +201,6 @@ sealed class NodeValue: Into<NodeValue> {
     }
   }
 
-//  /// Converts this value into a list of values
-//  pub fn to_list(&self) -> Vec<NodeValue> {
-//    match self {
-//      NodeValue::MMAP(entries) => {
-//        entries.iter()
-//          .map(|(k, v)| NodeValue::ENTRY(k.clone(), Box::new(NodeValue::SLIST(v.clone()))))
-//          .collect()
-//      }
-//      NodeValue::SLIST(list) => {
-//        list.iter()
-//          .map(|v| NodeValue::STRING(v.clone()))
-//          .collect()
-//      }
-//      NodeValue::JSON(json) => match json {
-//        Value::Array(a) => {
-//          a.iter()
-//            .map(|v| NodeValue::JSON(v.clone()))
-//            .collect()
-//        }
-//        _ => vec![ self.clone() ]
-//      }
-//      NodeValue::LIST(list) => list.clone(),
-//      _ => vec![ self.clone() ]
-//    }
-//  }
-//}
-//
-//impl From<String> for NodeValue {
-//  fn from(value: String) -> Self {
-//    NodeValue::STRING(value.clone())
-//  }
-//}
-//
-//impl From<&str> for NodeValue {
-//  fn from(value: &str) -> Self {
-//    NodeValue::STRING(value.to_string())
-//  }
-//}
-//
-//impl From<usize> for NodeValue {
-//  fn from(value: usize) -> Self {
-//    NodeValue::UINT(value as u64)
-//  }
-//}
-//
-//impl From<u64> for NodeValue {
-//  fn from(value: u64) -> Self {
-//    NodeValue::UINT(value)
-//  }
-//}
-//
-//impl From<Value> for NodeValue {
-//  fn from(value: Value) -> Self {
-//    NodeValue::JSON(value.clone())
-//  }
-//}
-//
-//impl From<&Value> for NodeValue {
-//  fn from(value: &Value) -> Self {
-//    NodeValue::JSON(value.clone())
-//  }
-//}
-//
 //impl From<HashMap<&str, Value>> for NodeValue {
 //  fn from(value: HashMap<&str, Value>) -> Self {
 //    let json = Object(value.iter().map(|(k, v)| (k.to_string(), v.clone())).collect());
@@ -280,20 +217,6 @@ sealed class NodeValue: Into<NodeValue> {
 //impl From<Vec<&String>> for NodeValue {
 //  fn from(value: Vec<&String>) -> Self {
 //    NodeValue::SLIST(value.iter().map(|v| (*v).clone()).collect())
-//  }
-//}
-//
-//#[cfg(feature = "xml")]
-//impl From<Element> for NodeValue {
-//  fn from(value: Element) -> Self {
-//    NodeValue::XML(XmlValue::Element(value.clone()))
-//  }
-//}
-//
-//#[cfg(feature = "xml")]
-//impl From<&Element> for NodeValue {
-//  fn from(value: &Element) -> Self {
-//    NodeValue::XML(XmlValue::Element(value.clone()))
 //  }
 //}
 
@@ -348,6 +271,20 @@ sealed class NodeValue: Into<NodeValue> {
       items
     } else {
       null
+    }
+  }
+
+  /** Converts this value into a list of values */
+  fun toList(): List<NodeValue> {
+    return when(this) {
+      is JSON -> when (val json = this.json) {
+        is JsonValue.Array -> json.values.map { JSON(it) }
+        else -> listOf(this)
+      }
+      is LIST -> this.items
+      is MMAP -> this.entries.entries.map { ENTRY(it.key, SLIST(it.value)) }
+      is SLIST -> this.items.map { STRING(it) }
+      else -> listOf(this)
     }
   }
 

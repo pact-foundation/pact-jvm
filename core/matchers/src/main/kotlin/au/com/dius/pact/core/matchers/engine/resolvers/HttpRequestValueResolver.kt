@@ -3,13 +3,13 @@ package au.com.dius.pact.core.matchers.engine.resolvers
 import au.com.dius.pact.core.matchers.engine.NodeValue
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
 import au.com.dius.pact.core.model.DocPath
-import au.com.dius.pact.core.model.HttpRequest
+import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.support.Result
 
 class HttpRequestValueResolver(
   /** Request to resolve values against */
-  val request: HttpRequest
+  val request: IRequest
 ): ValueResolver {
   @Suppress("LongMethod", "CyclomaticComplexMethod")
   override fun resolve(path: DocPath, context: PlanMatchingContext): Result<NodeValue, String> {

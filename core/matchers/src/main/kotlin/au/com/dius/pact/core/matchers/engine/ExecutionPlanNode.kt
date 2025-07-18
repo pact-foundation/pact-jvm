@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.support.json.JsonValue
 import com.github.ajalt.mordant.TermColors
 import org.apache.commons.text.StringEscapeUtils.escapeJson
+import org.w3c.dom.Element
 
 /** Terminator for tree transversal */
 enum class Terminator {
@@ -557,12 +558,14 @@ data class ExecutionPlanNode(
       )
     }
 
-    /** Constructor for a value node */
+    /** Constructor for a String value node */
     fun valueNode(value: String) = valueNode(Into { NodeValue.STRING(value) })
-    /** Constructor for a value node */
+    /** Constructor for a UInt value node */
     fun valueNode(value: UInt) = valueNode(Into { NodeValue.UINT(value) })
-    /** Constructor for a value node */
+    /** Constructor for a JSON value node */
     fun valueNode(value: JsonValue) = valueNode(Into { NodeValue.JSON(value) })
+    /** Constructor for an XML Element value node */
+    fun valueNode(value: Element) = valueNode(Into { NodeValue.XML(XmlValue.Element(value)) })
 
     /** Constructor for a resolve node */
     fun <T> resolveValue(resolveStr: T): ExecutionPlanNode where T: Into<DocPath> {

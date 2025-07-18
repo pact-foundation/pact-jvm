@@ -12,7 +12,10 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.support.json.JsonValue
+import com.github.difflib.DiffUtils
 import spock.lang.Specification
+
+import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
 
 class JsonPlanBuilderSpec extends Specification {
   PlanMatchingContext context
@@ -391,9 +394,9 @@ class JsonPlanBuilderSpec extends Specification {
     def node = builder.buildPlan(content.bytes, context)
     def str = new StringBuilder()
     node.prettyForm(str, 0)
+    def actual = str.toString()
 
-    then:
-    str.toString() == '''%tee (
+    def expected = '''%tee (
     |  %json:parse (
     |    $.body
     |  ),
@@ -415,6 +418,7 @@ class JsonPlanBuilderSpec extends Specification {
     |        json:{"min":2}
     |      ),
     |      %for-each (
+    |        'item[*]',
     |        ~>$.item,
     |        :$.item[*] (
     |          %json:expect:entries (
@@ -439,5 +443,12 @@ class JsonPlanBuilderSpec extends Specification {
     |    )
     |  )
     |)'''.stripMargin('|')
+
+    def patch = DiffUtils.diff(actual, expected, null)
+    def diff = generateUnifiedDiff('', '', actual.split('\n') as List<String>,
+      patch, 0).join('\n')
+
+    then:
+    diff == ''
   }
 }

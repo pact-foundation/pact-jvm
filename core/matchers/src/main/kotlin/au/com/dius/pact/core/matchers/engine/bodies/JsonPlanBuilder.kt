@@ -74,6 +74,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
           val template = expectedJson.values.firstOrNull()
           if (template != null) {
             val forEachNode = ExecutionPlanNode.action("for-each")
+            forEachNode.add(ExecutionPlanNode.valueNode(path.lastField()!! + "[*]"))
             val itemPath = path.pushStarIndex()
             forEachNode.add(ExecutionPlanNode.resolveCurrentValue(path))
             val itemNode = ExecutionPlanNode.container(itemPath.toString())

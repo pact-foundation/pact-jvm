@@ -42,8 +42,15 @@ class BaseRequestSpec extends Specification {
         def jsonMap = Json.INSTANCE.toMap(json)
         def expected = HttpRequest.fromJson(json.asObject().get('expected'))
         def actual = HttpRequest.fromJson(json.asObject().get('actual'))
-        result << [d.name, f.name, jsonMap.comment, jsonMap.match, jsonMap.match ? 'should match' : 'should not match',
-                   expected, actual]
+        result << [
+          d.name,
+          f.name,
+          jsonMap.comment,
+          jsonMap.match,
+          jsonMap.match ? 'should match' : 'should not match',
+          expected,
+          actual
+        ]
       }
     }
     result

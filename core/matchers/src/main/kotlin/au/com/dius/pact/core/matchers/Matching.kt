@@ -70,7 +70,7 @@ data class MatchingContext @JvmOverloads constructor(
 
   fun typeMatcherDefined(path: List<String>): Boolean {
     val resolvedMatchers = resolveMatchers(path, Comparator.naturalOrder())
-    return resolvedMatchers.allMatchingRules().any { it is TypeMatcher }
+    return resolvedMatchers.allMatchingRules().any { it.isTypeMatcher() }
   }
 
   fun <T> matchKeys(
