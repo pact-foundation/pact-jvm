@@ -3,8 +3,12 @@ package steps.v3
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.RequestMatchResult
+import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.HeaderParser
+import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
@@ -92,12 +96,16 @@ class HttpMatching {
 
   @When('the request is compared to the expected one')
   void the_request_is_compared_to_the_expected_one() {
-    results << requestMismatches(expectedRequest, receivedRequests[0])
+    def pact = new RequestResponsePact(new Provider(this.class.name), new Consumer(this.class.name))
+    def interaction = new RequestResponseInteraction('compatibility-suite', [], expectedRequest)
+    results << requestMismatches(pact, interaction, receivedRequests[0])
   }
 
   @When('the requests are compared to the expected one')
   void the_requests_are_compared_to_the_expected_one() {
-    results.addAll(receivedRequests.collect { requestMismatches(expectedRequest, it) })
+    def pact = new RequestResponsePact(new Provider(this.class.name), new Consumer(this.class.name))
+    def interaction = new RequestResponseInteraction('compatibility-suite', [], expectedRequest)
+    results.addAll(receivedRequests.collect { requestMismatches(pact, interaction, it) })
   }
 
   @Then('the comparison should be OK')
