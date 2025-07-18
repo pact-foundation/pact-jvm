@@ -1,5 +1,11 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.matchers.engine.ExecutionPlan
+import au.com.dius.pact.core.matchers.engine.MatchingConfiguration
+import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
+import au.com.dius.pact.core.matchers.engine.V2MatchingEngine
+import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterpreter
+import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
@@ -8,9 +14,11 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.Json
-import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.pact.plugins.jvm.core.PluginConfiguration
-import io.github.oshai.kotlinlogging.KLogging
+
+private val logger = KotlinLogging.logger {}
 
 sealed class RequestMatch {
   private val score: Int
@@ -56,7 +64,7 @@ data class PartialRequestMatch(val problems: Map<Interaction, RequestMatchResult
     return s
   }
 
-  fun calculateScore() = problems.values.map { it.calculateScore() }.maxOrNull() ?: 0
+  fun calculateScore() = problems.values.maxOfOrNull { it.calculateScore() } ?: 0
 }
 
 object RequestMismatch : RequestMatch()
@@ -71,7 +79,7 @@ class RequestMatching(private val expectedPact: Pact) {
       .filter { it.isSynchronousRequestResponse() }
       .map { interaction ->
         val response = interaction.asSynchronousRequestResponse()!!
-        compareRequest(response, actual, pluginConfiguration.associate {
+        compareRequest(expectedPact, response, actual, pluginConfiguration.associate {
           it.name to PluginConfiguration(
             if (interaction.isV4()) {
               interaction.asV4Interaction().pluginConfiguration[it.name] ?: emptyMap()
@@ -95,7 +103,7 @@ class RequestMatching(private val expectedPact: Pact) {
     }
   }
 
-  companion object : KLogging() {
+  companion object {
     private fun decideRequestMatch(expected: SynchronousRequestResponse, result: RequestMatchResult) =
       when {
         result.matchedOk() -> FullRequestMatch(expected, result)
@@ -105,11 +113,12 @@ class RequestMatching(private val expectedPact: Pact) {
 
     @JvmOverloads
     fun compareRequest(
+      pact: Pact,
       expected: SynchronousRequestResponse,
       actual: IRequest,
       pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
     ): RequestMatch {
-        val mismatches = requestMismatches(expected.request, actual, pluginConfiguration)
+        val mismatches = requestMismatches(pact, expected, actual, pluginConfiguration)
         logger.debug { "Request mismatch: $mismatches" }
         return decideRequestMatch(expected, mismatches)
     }
@@ -117,28 +126,75 @@ class RequestMatching(private val expectedPact: Pact) {
     @JvmStatic
     @JvmOverloads
     fun requestMismatches(
-      expected: IRequest,
+      pact: Pact,
+      interaction: SynchronousRequestResponse,
       actual: IRequest,
       pluginConfiguration: Map<String, PluginConfiguration> = mapOf()
     ): RequestMatchResult {
+      val expected = interaction.request
       logger.debug { "comparing to expected request: \n$expected" }
       logger.debug { "pluginConfiguration=$pluginConfiguration" }
 
-      val pathContext = MatchingContext(expected.matchingRules.rulesForCategory("path"),
-        false, pluginConfiguration)
-      val bodyContext = MatchingContext(expected.matchingRules.rulesForCategory("body"),
-        false, pluginConfiguration)
-      val queryContext = MatchingContext(expected.matchingRules.rulesForCategory("query"),
-        false, pluginConfiguration, true)
-      val headerContext = MatchingContext(expected.matchingRules.rulesForCategory("header"),
-        false, pluginConfiguration, true)
+      if (lookupEnvironmentValue("pact.matching.engine")?.lowercase() == "v2") {
+        val config = MatchingConfiguration.fromEnv()
+          .copy(allowUnexpectedEntries = false)
+        val context = PlanMatchingContext(pact.asV4Pact().unwrap(), interaction.asV4Interaction(), config)
+        val plan = V2MatchingEngine.buildRequestPlan(expected, context)
+        val executedPlan = executeRequestPlan(plan, actual, context)
 
-      return RequestMatchResult(Matching.matchMethod(expected.method, actual.method),
-        Matching.matchPath(expected, actual, pathContext),
-        Matching.matchQuery(expected, actual, queryContext),
-        Matching.matchCookies(expected.cookies(), actual.cookies(), headerContext),
-        Matching.matchRequestHeaders(expected, actual, headerContext),
-        Matching.matchBody(expected.asHttpPart(), actual.asHttpPart(), bodyContext))
+        if (config.logExecutedPlan) {
+          logger.debug { "config = $config" }
+          logger.debug { executedPlan.prettyForm() }
+        }
+        if (config.logPlanSummary) {
+          logger.info { executedPlan.generateSummary(config.colouredOutput) }
+        }
+
+        return executedPlan.intoRequestMatchResult()
+      } else {
+        val pathContext = MatchingContext(
+          expected.matchingRules.rulesForCategory("path"),
+          false,
+          pluginConfiguration
+        )
+        val bodyContext = MatchingContext(
+          expected.matchingRules.rulesForCategory("body"),
+          false,
+          pluginConfiguration
+        )
+        val queryContext = MatchingContext(
+          expected.matchingRules.rulesForCategory("query"),
+          false,
+          pluginConfiguration,
+          true
+        )
+        val headerContext = MatchingContext(
+          expected.matchingRules.rulesForCategory("header"),
+          false,
+          pluginConfiguration,
+          true
+        )
+
+        return RequestMatchResult(
+          Matching.matchMethod(expected.method, actual.method),
+          Matching.matchPath(expected, actual, pathContext),
+          Matching.matchQuery(expected, actual, queryContext),
+          Matching.matchCookies(expected.cookies(), actual.cookies(), headerContext),
+          Matching.matchRequestHeaders(expected, actual, headerContext),
+          Matching.matchBody(expected.asHttpPart(), actual.asHttpPart(), bodyContext)
+        )
+      }
+    }
+
+    private fun executeRequestPlan(
+      plan: ExecutionPlan,
+      actual: IRequest,
+      context: PlanMatchingContext
+    ): ExecutionPlan {
+      val valueResolver = HttpRequestValueResolver(actual)
+      val interpreter = ExecutionPlanInterpreter(context)
+      val executedTree = interpreter.walkTree(emptyList(), plan.planRoot, valueResolver)
+      return ExecutionPlan(executedTree)
     }
   }
 }

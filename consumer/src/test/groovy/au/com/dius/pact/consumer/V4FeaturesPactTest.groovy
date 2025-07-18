@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.support.V4PactFeaturesException
 import org.apache.hc.core5.http.ContentType
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runMessageConsumerTest
@@ -42,6 +43,9 @@ class V4FeaturesPactTest {
   }
 
   @Test
+  // TODO: unorderedArray does not work with V2 matching engine
+  @DisabledIfEnvironmentVariable(named = 'PACT_MATCHING_ENGINE', matches = 'v2',
+    disabledReason = 'unorderedArray does not work with V2 matching engine')
   void testPassesIfV4FeaturesUsedWithV4Spec() {
     Pact pact = ConsumerPactBuilder
       .consumer('V4 Some Consumer')

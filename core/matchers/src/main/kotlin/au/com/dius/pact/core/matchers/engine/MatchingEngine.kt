@@ -6,7 +6,7 @@ import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterprete
 import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
-import au.com.dius.pact.core.model.HttpRequest
+import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.model.PARAMETERISED_HEADERS
 import au.com.dius.pact.core.model.PathToken
@@ -19,15 +19,15 @@ interface MatchingEngine {
   /**
    * Constructs an execution plan for the HTTP request part.
    */
-  fun buildRequestPlan(expectedRequest: HttpRequest, context: PlanMatchingContext): ExecutionPlan
+  fun buildRequestPlan(expectedRequest: IRequest, context: PlanMatchingContext): ExecutionPlan
 
   /** Executes the request plan against the actual request. */
-  fun executeRequestPlan(plan: ExecutionPlan, actual: HttpRequest, context: PlanMatchingContext): ExecutionPlan
+  fun executeRequestPlan(plan: ExecutionPlan, actual: IRequest, context: PlanMatchingContext): ExecutionPlan
 }
 
 object V2MatchingEngine: MatchingEngine {
   override fun buildRequestPlan(
-    expectedRequest: HttpRequest,
+    expectedRequest: IRequest,
     context: PlanMatchingContext
   ): ExecutionPlan {
     val plan = ExecutionPlan("request")
@@ -43,7 +43,7 @@ object V2MatchingEngine: MatchingEngine {
 
   override fun executeRequestPlan(
     plan: ExecutionPlan,
-    actual: HttpRequest,
+    actual: IRequest,
     context: PlanMatchingContext
   ): ExecutionPlan {
     val valueResolver = HttpRequestValueResolver(actual)
@@ -54,7 +54,7 @@ object V2MatchingEngine: MatchingEngine {
   }
 
   @Suppress("UnusedParameter")
-  fun setupMethodPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+  fun setupMethodPlan(expected: IRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val methodContainer = ExecutionPlanNode.container("method")
 
     val matchMethod = ExecutionPlanNode.action("match:equality")
@@ -71,7 +71,7 @@ object V2MatchingEngine: MatchingEngine {
     return methodContainer
   }
 
-  fun setupPathPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+  fun setupPathPlan(expected: IRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("path")
 
     val expectedNode = ExecutionPlanNode.valueNode(expected.path)
@@ -96,7 +96,7 @@ object V2MatchingEngine: MatchingEngine {
   }
 
   @Suppress("LongMethod")
-  fun setupQueryPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+  fun setupQueryPlan(expected: IRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("query parameters")
     val docPath = DocPath("$.query")
 
@@ -189,7 +189,7 @@ object V2MatchingEngine: MatchingEngine {
   }
 
   @Suppress("LongMethod")
-  fun setupHeaderPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+  fun setupHeaderPlan(expected: IRequest, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("headers")
     val docPath = DocPath("$.headers")
 
@@ -325,7 +325,7 @@ object V2MatchingEngine: MatchingEngine {
     return applyNode
   }
 
-  fun setupBodyPlan(expected: HttpRequest, context: PlanMatchingContext): ExecutionPlanNode {
+  fun setupBodyPlan(expected: IRequest, context: PlanMatchingContext): ExecutionPlanNode {
     // TODO: Look at the matching rules and generators here
     val planNode = ExecutionPlanNode.container("body")
 
