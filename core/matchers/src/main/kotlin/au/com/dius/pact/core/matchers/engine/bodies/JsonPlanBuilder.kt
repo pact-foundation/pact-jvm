@@ -64,8 +64,9 @@ object JsonPlanBuilder: PlanBodyBuilder  {
       is JsonValue.Array -> processArray(context, path, rootNode, expectedJson)
       is JsonValue.Object -> processObject(context, path, rootNode, expectedJson)
       else -> {
-        if (context.matcherIsDefined(path)) {
-          val matchers = context.selectBestMatcher(path)
+        val filteredPath = path.dropMarkers()
+        if (context.matcherIsDefined(filteredPath)) {
+          val matchers = context.selectBestMatcher(filteredPath)
           rootNode.add(ExecutionPlanNode.annotation(Into {
             "${path.lastField()} ${matchers.generateDescription(false)}"
           }))
@@ -89,7 +90,8 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     rootNode: ExecutionPlanNode,
     expectedJson: JsonValue.Object
   ) {
-    val matchers = context.selectBestMatcher(path)
+    val filteredPath = path.dropMarkers()
+    val matchers = context.selectBestMatcher(filteredPath)
     if (matchers.rules.isNotEmpty() && shouldApplyToMapEntries(matchers)) {
       rootNode.add(ExecutionPlanNode.annotation(Into { matchers.generateDescription(true) }))
       rootNode.add(
@@ -142,8 +144,9 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     rootNode: ExecutionPlanNode,
     expectedJson: JsonValue.Array
   ) {
-    if (context.matcherIsDefined(path)) {
-      val matchers = context.selectBestMatcher(path)
+    val filteredPath = path.dropMarkers()
+    if (context.matcherIsDefined(filteredPath)) {
+      val matchers = context.selectBestMatcher(filteredPath)
       rootNode.add(ExecutionPlanNode.annotation(Into {
         "${path.lastField()} ${matchers.generateDescription(true)}"
       }))
@@ -170,7 +173,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
               .add(
                 ExecutionPlanNode.action("check:exists")
                   .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
-              );
+              )
             if (context.matcherIsDefined(itemPath)) {
               val matchers = context.selectBestMatcher(itemPath)
               presenceCheck.add(ExecutionPlanNode.annotation(Into { "[*] ${matchers.generateDescription(false)}" }))
@@ -186,7 +189,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
                   .add(ExecutionPlanNode.valueNode(NodeValue.NAMESPACED("json", template.serialise())))
                   .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
                   .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
-              );
+              )
             }
             itemNode.add(presenceCheck)
           }

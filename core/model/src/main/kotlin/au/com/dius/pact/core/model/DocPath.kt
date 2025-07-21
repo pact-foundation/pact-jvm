@@ -301,6 +301,20 @@ data class DocPath(
     }
   }
 
+  /**
+   * Removes marker fields (name*), replacing them with basic fields (name) and a zero index
+   */
+  fun dropMarkers() = DocPath(pathTokens
+    .flatMap {
+      when (it) {
+        is PathToken.Field -> if (it.name.endsWith('*')) {
+          listOf(PathToken.Field(it.name.dropLast(1)), PathToken.Index(0))
+        } else listOf(it)
+        else -> listOf(it)
+      }
+    }
+  )
+
   companion object {
     val IDENT = Regex("^[_A-Za-z][_A-Za-z0-9]*$")
 
