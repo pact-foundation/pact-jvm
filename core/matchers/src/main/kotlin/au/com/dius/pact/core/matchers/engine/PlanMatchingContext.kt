@@ -17,12 +17,15 @@ data class MatchingConfiguration(
   /** If the executed plan summary should be logged */
   val logPlanSummary: Boolean = true,
   /** If output should be coloured */
-  val colouredOutput: Boolean = true
+  val colouredOutput: Boolean = true,
+  /** If the raw plan should be logged (before it is executed) */
+  val logRawPlan: Boolean = false
 ) {
   companion object {
     /**
      * Loads the matching engine configuration from system properties or environment variables:
      * `pact.matching.v2.logExecutedPlan` or `PACT_V2_MATCHING_LOG_EXECUTED_PLAN` - Enable to log the executed plan.
+     * `pact.matching.v2.logRawPlan` or `PACT_V2_MATCHING_LOG_RAW_PLAN` - Enable to log the plan before it is executed.
      * `pact.matching.v2.logPlanSummary` or `PACT_V2_MATCHING_LOG_PLAN_SUMMARY` - Enable to log a summary of the executed plan.
      * `pact.matching.v2.ColouredOutput` or `PACT_V2_MATCHING_COLOURED_OUTPUT` - Enables coloured output.
      */
@@ -31,6 +34,10 @@ data class MatchingConfiguration(
 
       if (envVarSet("pact.matching.v2.logExecutedPlan") || envVarSet("PACT_V2_MATCHING_LOG_EXECUTED_PLAN")) {
         config = config.copy(logExecutedPlan = true)
+      }
+
+      if (envVarSet("pact.matching.v2.logRawPlan") || envVarSet("PACT_V2_MATCHING_LOG_RAW_PLAN")) {
+        config = config.copy(logRawPlan = true)
       }
 
       if (envVarSet("pact.matching.v2.logPlanSummary") || envVarSet("PACT_V2_MATCHING_LOG_PLAN_SUMMARY")) {

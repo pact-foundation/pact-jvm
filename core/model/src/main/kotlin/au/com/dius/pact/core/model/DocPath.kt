@@ -15,22 +15,6 @@ private val logger = KotlinLogging.logger {}
 //    }
 //    self
 //  }
-//
-//  /// Return the parent path from this one
-//  pub fn parent(&self) -> Option<Self> {
-//    if self.path_tokens.len() <= 1 {
-//      None
-//    } else {
-//      let mut vec = self.path_tokens.clone();
-//      vec.truncate(vec.len() - 1);
-//      let mut path = DocPath {
-//        path_tokens: vec,
-//        expr: "".to_string()
-//      };
-//      path.expr = path.build_expr();
-//      Some(path)
-//    }
-//  }
 
 //  /// Returns a copy of this path will all parts lower case
 //  pub fn to_lower_case(&self) -> DocPath {
@@ -306,6 +290,15 @@ data class DocPath(
     }
 
     return Result.Ok(buffer.toString())
+  }
+
+  /** Return the parent path from this one */
+  fun parent(): DocPath? {
+    return if (pathTokens.size <= 1) {
+      null
+    } else {
+      DocPath(pathTokens.dropLast(1))
+    }
   }
 
   companion object {

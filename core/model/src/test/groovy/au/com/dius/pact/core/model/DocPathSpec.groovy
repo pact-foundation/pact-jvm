@@ -119,59 +119,57 @@ class DocPathSpec extends Specification {
   //      .to(be_equal_to("$.a.b['se-token']"));
   //  }
 
-    def 'buildExpr'() {
-      expect:
-      DocPath.buildExpr(tokens) == result
+  def 'buildExpr'() {
+    expect:
+    DocPath.buildExpr(tokens) == result
 
-      where:
+    where:
 
-      tokens                                                                                                         | result
-      [PathToken.Root.INSTANCE]                                                                                      | '$'
-      [PathToken.Root.INSTANCE, new PathToken.Field('something')]                                                    | '$.something'
-      [PathToken.Root.INSTANCE, new PathToken.Field('something else')]                                               | "\$['something else']"
-      [PathToken.Root.INSTANCE, new PathToken.Field('something'), new PathToken.Field('else')]                       | '$.something.else'
-      [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.Star.INSTANCE]                           | '$.something.*'
-      [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.StarIndex.INSTANCE]                      | '$.something[*]'
-      [PathToken.Root.INSTANCE, new PathToken.Field('something'), new PathToken.Index(101)]                          | '$.something[101]'
-      [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.Star.INSTANCE, new PathToken.Index(101)] | '$.something.*[101]'
-    }
+    tokens                                                                                                         | result
+    [PathToken.Root.INSTANCE]                                                                                      | '$'
+    [PathToken.Root.INSTANCE, new PathToken.Field('something')]                                                    | '$.something'
+    [PathToken.Root.INSTANCE, new PathToken.Field('something else')]                                               | "\$['something else']"
+    [PathToken.Root.INSTANCE, new PathToken.Field('something'), new PathToken.Field('else')]                       | '$.something.else'
+    [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.Star.INSTANCE]                           | '$.something.*'
+    [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.StarIndex.INSTANCE]                      | '$.something[*]'
+    [PathToken.Root.INSTANCE, new PathToken.Field('something'), new PathToken.Index(101)]                          | '$.something[101]'
+    [PathToken.Root.INSTANCE, new PathToken.Field('something'), PathToken.Star.INSTANCE, new PathToken.Index(101)] | '$.something.*[101]'
+  }
 
-  //  #[test]
-  //  fn path_parent() {
-  //    let something = DocPath::root().join("something");
-  //    let something_else = something.join("else");
-  //    let something_star = something.join("*");
-  //    let something_escaped = something.join("e l s e");
-  //    let something_escaped2 = something_escaped.join("two");
-  //    let something_star_child = something_star.join("child");
-  //
-  //    expect!(something.parent()).to(be_some().value(DocPath::root()));
-  //    expect!(something_else.parent()).to(be_some().value(something.clone()));
-  //    expect!(something_star.parent()).to(be_some().value(something.clone()));
-  //    expect!(something_escaped.parent()).to(be_some().value(something.clone()));
-  //    expect!(something_escaped2.parent()).to(be_some().value(something_escaped.clone()));
-  //    expect!(something_star_child.parent()).to(be_some().value(something_star.clone()));
-  //
-  //    expect!(DocPath::root().parent()).to(be_none());
-  //    expect!(DocPath::empty().parent()).to(be_none());
-  //  }
+  def path_parent() {
+    expect:
+    path.parent() == parent
 
-    def 'as json pointer'() {
-      expect:
-      path.asJsonPointer() == result
+    where:
 
-      where:
+    path                                                         | parent
+    DocPath.empty()                                              | null
+    DocPath.root()                                               | null
+    new DocPath([new PathToken.Field('test')])                   | null
+    DocPath.root().join("something")                             | DocPath.root()
+    DocPath.root().join("something").join('else')                | DocPath.root().join("something")
+    DocPath.root().join("something").join('*')                   | DocPath.root().join("something")
+    DocPath.root().join("something").join('e l s e')             | DocPath.root().join("something")
+    DocPath.root().join("something").join('e l s e').join('two') | DocPath.root().join("something").join('e l s e')
+    DocPath.root().join("something").join('*').join('child')     | DocPath.root().join("something").join('*')
+  }
 
-      path                                            | result
-      DocPath.root()                                  | new Result.Ok('')
-      DocPath.root().join('something')                | new Result.Ok('/something')
-      DocPath.root().join('something else')           | new Result.Ok('/something else')
-      DocPath.root().join('something').join('a/b')    | new Result.Ok('/something/a~1b')
-      DocPath.root().join('something').join('m~n')    | new Result.Ok('/something/m~0n')
-      DocPath.root().join('something').join('c%25d')  | new Result.Ok('/something/c%25d')
-      DocPath.root().join('something').join('*')      | new Result.Err('* can not be converted to a JSON pointer')
-      DocPath.root().join('something').pushIndex(101) | new Result.Ok('/something/101')
-    }
+  def 'as json pointer'() {
+    expect:
+    path.asJsonPointer() == result
+
+    where:
+
+    path                                            | result
+    DocPath.root()                                  | new Result.Ok('')
+    DocPath.root().join('something')                | new Result.Ok('/something')
+    DocPath.root().join('something else')           | new Result.Ok('/something else')
+    DocPath.root().join('something').join('a/b')    | new Result.Ok('/something/a~1b')
+    DocPath.root().join('something').join('m~n')    | new Result.Ok('/something/m~0n')
+    DocPath.root().join('something').join('c%25d')  | new Result.Ok('/something/c%25d')
+    DocPath.root().join('something').join('*')      | new Result.Err('* can not be converted to a JSON pointer')
+    DocPath.root().join('something').pushIndex(101) | new Result.Ok('/something/101')
+  }
 
   //  #[rstest(
   //    case("", "[0]"),

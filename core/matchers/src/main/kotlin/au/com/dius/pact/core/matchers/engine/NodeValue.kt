@@ -3,6 +3,7 @@ package au.com.dius.pact.core.matchers.engine
 import au.com.dius.pact.core.matchers.BodyItemMatchResult
 import au.com.dius.pact.core.matchers.BodyMismatchFactory
 import au.com.dius.pact.core.matchers.JsonContentMatcher
+import au.com.dius.pact.core.matchers.Matchers
 import au.com.dius.pact.core.matchers.Matchers.compareLists
 import au.com.dius.pact.core.matchers.domatch
 import au.com.dius.pact.core.model.Into
@@ -340,16 +341,14 @@ sealed class NodeValue: Into<NodeValue> {
       return when (expected) {
         is JSON -> {
           if (actual is NULL || actual is JSON) {
-            // TODO: need a way to pass allowUnexpectedKeys here
             val actualJson = if (actual is JSON) {
               actual.json
             } else {
               JsonValue.Null
             }
-            val result = JsonContentMatcher.compare(listOf("$"), expected.json, actualJson, context.matchingContext)
-            if (result.any { it.result.isNotEmpty() }) {
-              result.flatMap { mismatches -> mismatches.result }
-                .joinToString(", ") { it.mismatch }
+            val result = Matchers.domatch(context.matchingContext, listOf("$"), expected, actualJson, BodyMismatchFactory)
+            if (result.isNotEmpty()) {
+              result.joinToString(", ") { it.mismatch }
             } else {
               null
             }

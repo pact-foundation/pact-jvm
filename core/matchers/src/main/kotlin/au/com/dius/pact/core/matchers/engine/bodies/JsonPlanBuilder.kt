@@ -53,7 +53,6 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     }
   }
 
-  @Suppress("LongMethod", "CyclomaticComplexMethod")
   private fun processBodyNode(
     context: PlanMatchingContext,
     expectedJson: JsonValue,
@@ -62,142 +61,8 @@ object JsonPlanBuilder: PlanBodyBuilder  {
   ) {
     logger.trace { "processBodyNode($path, $expectedJson)" }
     when (expectedJson) {
-      is JsonValue.Array -> {
-        if (context.matcherIsDefined(path)) {
-          val matchers = context.selectBestMatcher(path)
-          rootNode.add(ExecutionPlanNode.annotation(Into {
-            "${path.lastField()} ${matchers.generateDescription(true)}"
-          }))
-          rootNode.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(expectedJson),
-            ExecutionPlanNode.resolveCurrentValue(path), matchers, true))
-
-          val template = expectedJson.values.firstOrNull()
-          if (template != null) {
-            val forEachNode = ExecutionPlanNode.action("for-each")
-            forEachNode.add(ExecutionPlanNode.valueNode(path.lastField()!! + "[*]"))
-            val itemPath = path.pushStarIndex()
-            forEachNode.add(ExecutionPlanNode.resolveCurrentValue(path))
-            val itemNode = ExecutionPlanNode.container(itemPath.toString())
-            when (template) {
-              is JsonValue.Array -> processBodyNode(context, template, itemPath, itemNode)
-              is JsonValue.Object -> processBodyNode(context, template, itemPath, itemNode)
-              else -> {
-                val presenceCheck = ExecutionPlanNode.action("if")
-                presenceCheck
-                  .add(
-                    ExecutionPlanNode.action("check:exists")
-                      .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
-                  );
-                if (context.matcherIsDefined(itemPath)) {
-                  val matchers = context.selectBestMatcher(itemPath)
-                  presenceCheck.add(ExecutionPlanNode.annotation(Into { "[*] ${matchers.generateDescription(false)}" }))
-                  presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(template),
-                    ExecutionPlanNode.resolveCurrentValue(itemPath), matchers, false))
-                } else {
-                  presenceCheck.add(
-                    ExecutionPlanNode.action("match:equality")
-                      .add(ExecutionPlanNode.valueNode(NodeValue.NAMESPACED("json", template.serialise())))
-                      .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
-                      .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
-                  );
-                }
-                itemNode.add(presenceCheck)
-              }
-            }
-            forEachNode.add(itemNode)
-            rootNode.add(forEachNode)
-          }
-        } else if (expectedJson.values.isEmpty()) {
-          rootNode.add(
-            ExecutionPlanNode.action("json:expect:empty")
-              .add(ExecutionPlanNode.valueNode("ARRAY"))
-              .add(ExecutionPlanNode.resolveCurrentValue(path))
-          )
-        } else {
-          rootNode.add(
-            ExecutionPlanNode.action("json:match:length")
-              .add(ExecutionPlanNode.valueNode("ARRAY"))
-              .add(ExecutionPlanNode.valueNode(expectedJson.values.size.toUInt()))
-              .add(ExecutionPlanNode.resolveCurrentValue(path))
-          )
-
-          for ((index, item) in expectedJson.values.withIndex()) {
-            val itemPath = path.pushIndex(index)
-            val itemNode = ExecutionPlanNode.container(itemPath.toString())
-            when (item) {
-              is JsonValue.Array -> processBodyNode(context, item, itemPath, itemNode)
-              is JsonValue.Object -> processBodyNode(context, item, itemPath, itemNode)
-              else -> {
-                val presenceCheck = ExecutionPlanNode.action("if")
-                presenceCheck
-                  .add(
-                    ExecutionPlanNode.action("check:exists")
-                      .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
-                  )
-                if (context.matcherIsDefined(itemPath)) {
-                  val matchers = context.selectBestMatcher(itemPath)
-                  presenceCheck.add(ExecutionPlanNode.annotation(Into {
-                    "[$index] ${matchers.generateDescription(false)}"
-                  }))
-                  presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(item),
-                    ExecutionPlanNode.resolveCurrentValue(itemPath), matchers, false))
-                } else {
-                  presenceCheck.add(
-                    ExecutionPlanNode.action("match:equality")
-                      .add(ExecutionPlanNode.valueNode(NodeValue.NAMESPACED("json", item.serialise())))
-                      .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
-                      .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
-                  );
-                }
-                itemNode.add(presenceCheck)
-                rootNode.add(itemNode)
-              }
-            }
-          }
-        }
-      }
-      is JsonValue.Object -> {
-        val matchers = context.selectBestMatcher(path)
-        if (matchers.rules.isNotEmpty() && shouldApplyToMapEntries(matchers)) {
-          rootNode.add(ExecutionPlanNode.annotation(Into { matchers.generateDescription(true) }))
-          rootNode.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(expectedJson),
-            ExecutionPlanNode.resolveCurrentValue(path), matchers, true))
-        } else if (expectedJson.entries.isEmpty()) {
-          rootNode.add(
-            ExecutionPlanNode.action("json:expect:empty")
-              .add(ExecutionPlanNode.valueNode("OBJECT"))
-              .add(ExecutionPlanNode.resolveCurrentValue(path))
-          )
-        } else {
-          val keys = NodeValue.SLIST(expectedJson.entries.keys.toList())
-          rootNode.add(
-            ExecutionPlanNode.action("json:expect:entries")
-              .add(ExecutionPlanNode.valueNode("OBJECT"))
-              .add(ExecutionPlanNode.valueNode(keys))
-              .add(ExecutionPlanNode.resolveCurrentValue(path))
-          )
-          if (!context.config.allowUnexpectedEntries) {
-            rootNode.add(
-              ExecutionPlanNode.action("expect:only-entries")
-                .add(ExecutionPlanNode.valueNode(keys))
-                .add(ExecutionPlanNode.resolveCurrentValue(path))
-            )
-          } else {
-            rootNode.add(
-              ExecutionPlanNode.action("json:expect:not-empty")
-                .add(ExecutionPlanNode.valueNode("OBJECT"))
-                .add(ExecutionPlanNode.resolveCurrentValue(path))
-            )
-          }
-
-          for ((key, value) in expectedJson.entries) {
-            val itemPath = path.pushField(Into { key })
-            val itemNode = ExecutionPlanNode.container(itemPath.toString())
-            processBodyNode(context, value, itemPath, itemNode)
-            rootNode.add(itemNode)
-          }
-        }
-      }
+      is JsonValue.Array -> processArray(context, path, rootNode, expectedJson)
+      is JsonValue.Object -> processObject(context, path, rootNode, expectedJson)
       else -> {
         if (context.matcherIsDefined(path)) {
           val matchers = context.selectBestMatcher(path)
@@ -213,6 +78,170 @@ object JsonPlanBuilder: PlanBodyBuilder  {
             .add(ExecutionPlanNode.resolveCurrentValue(path))
             .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
           rootNode.add(matchNode)
+        }
+      }
+    }
+  }
+
+  private fun processObject(
+    context: PlanMatchingContext,
+    path: DocPath,
+    rootNode: ExecutionPlanNode,
+    expectedJson: JsonValue.Object
+  ) {
+    val matchers = context.selectBestMatcher(path)
+    if (matchers.rules.isNotEmpty() && shouldApplyToMapEntries(matchers)) {
+      rootNode.add(ExecutionPlanNode.annotation(Into { matchers.generateDescription(true) }))
+      rootNode.add(
+        buildMatchingRuleNode(
+          ExecutionPlanNode.valueNode(expectedJson),
+          ExecutionPlanNode.resolveCurrentValue(path), matchers, true
+        )
+      )
+    } else if (expectedJson.entries.isEmpty()) {
+      rootNode.add(
+        ExecutionPlanNode.action("json:expect:empty")
+          .add(ExecutionPlanNode.valueNode("OBJECT"))
+          .add(ExecutionPlanNode.resolveCurrentValue(path))
+      )
+    } else {
+      val keys = NodeValue.SLIST(expectedJson.entries.keys.toList())
+      rootNode.add(
+        ExecutionPlanNode.action("json:expect:entries")
+          .add(ExecutionPlanNode.valueNode("OBJECT"))
+          .add(ExecutionPlanNode.valueNode(keys))
+          .add(ExecutionPlanNode.resolveCurrentValue(path))
+      )
+      if (!context.config.allowUnexpectedEntries) {
+        rootNode.add(
+          ExecutionPlanNode.action("expect:only-entries")
+            .add(ExecutionPlanNode.valueNode(keys))
+            .add(ExecutionPlanNode.resolveCurrentValue(path))
+        )
+      } else {
+        rootNode.add(
+          ExecutionPlanNode.action("json:expect:not-empty")
+            .add(ExecutionPlanNode.valueNode("OBJECT"))
+            .add(ExecutionPlanNode.resolveCurrentValue(path))
+        )
+      }
+
+      for ((key, value) in expectedJson.entries) {
+        val itemPath = path.pushField(Into { key })
+        val itemNode = ExecutionPlanNode.container(itemPath.toString())
+        processBodyNode(context, value, itemPath, itemNode)
+        rootNode.add(itemNode)
+      }
+    }
+  }
+
+  private fun processArray(
+    context: PlanMatchingContext,
+    path: DocPath,
+    rootNode: ExecutionPlanNode,
+    expectedJson: JsonValue.Array
+  ) {
+    if (context.matcherIsDefined(path)) {
+      val matchers = context.selectBestMatcher(path)
+      rootNode.add(ExecutionPlanNode.annotation(Into {
+        "${path.lastField()} ${matchers.generateDescription(true)}"
+      }))
+      rootNode.add(
+        buildMatchingRuleNode(
+          ExecutionPlanNode.valueNode(expectedJson),
+          ExecutionPlanNode.resolveCurrentValue(path), matchers, true
+        )
+      )
+
+      val template = expectedJson.values.firstOrNull()
+      if (template != null) {
+        val forEachNode = ExecutionPlanNode.action("for-each")
+        forEachNode.add(ExecutionPlanNode.valueNode(path.lastField()!! + "*"))
+        val itemPath = path.parent()!!.join("${path.lastField()}*")
+        forEachNode.add(ExecutionPlanNode.resolveCurrentValue(path))
+        val itemNode = ExecutionPlanNode.container(itemPath.toString())
+        when (template) {
+          is JsonValue.Array -> processBodyNode(context, template, itemPath, itemNode)
+          is JsonValue.Object -> processBodyNode(context, template, itemPath, itemNode)
+          else -> {
+            val presenceCheck = ExecutionPlanNode.action("if")
+            presenceCheck
+              .add(
+                ExecutionPlanNode.action("check:exists")
+                  .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
+              );
+            if (context.matcherIsDefined(itemPath)) {
+              val matchers = context.selectBestMatcher(itemPath)
+              presenceCheck.add(ExecutionPlanNode.annotation(Into { "[*] ${matchers.generateDescription(false)}" }))
+              presenceCheck.add(
+                buildMatchingRuleNode(
+                  ExecutionPlanNode.valueNode(template),
+                  ExecutionPlanNode.resolveCurrentValue(itemPath), matchers, false
+                )
+              )
+            } else {
+              presenceCheck.add(
+                ExecutionPlanNode.action("match:equality")
+                  .add(ExecutionPlanNode.valueNode(NodeValue.NAMESPACED("json", template.serialise())))
+                  .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
+                  .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+              );
+            }
+            itemNode.add(presenceCheck)
+          }
+        }
+        forEachNode.add(itemNode)
+        rootNode.add(forEachNode)
+      }
+    } else if (expectedJson.values.isEmpty()) {
+      rootNode.add(
+        ExecutionPlanNode.action("json:expect:empty")
+          .add(ExecutionPlanNode.valueNode("ARRAY"))
+          .add(ExecutionPlanNode.resolveCurrentValue(path))
+      )
+    } else {
+      rootNode.add(
+        ExecutionPlanNode.action("json:match:length")
+          .add(ExecutionPlanNode.valueNode("ARRAY"))
+          .add(ExecutionPlanNode.valueNode(expectedJson.values.size.toUInt()))
+          .add(ExecutionPlanNode.resolveCurrentValue(path))
+      )
+
+      for ((index, item) in expectedJson.values.withIndex()) {
+        val itemPath = path.pushIndex(index)
+        val itemNode = ExecutionPlanNode.container(itemPath.toString())
+        when (item) {
+          is JsonValue.Array -> processBodyNode(context, item, itemPath, itemNode)
+          is JsonValue.Object -> processBodyNode(context, item, itemPath, itemNode)
+          else -> {
+            val presenceCheck = ExecutionPlanNode.action("if")
+            presenceCheck
+              .add(
+                ExecutionPlanNode.action("check:exists")
+                  .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
+              )
+            if (context.matcherIsDefined(itemPath)) {
+              val matchers = context.selectBestMatcher(itemPath)
+              presenceCheck.add(ExecutionPlanNode.annotation(Into {
+                "[$index] ${matchers.generateDescription(false)}"
+              }))
+              presenceCheck.add(
+                buildMatchingRuleNode(
+                  ExecutionPlanNode.valueNode(item),
+                  ExecutionPlanNode.resolveCurrentValue(itemPath), matchers, false
+                )
+              )
+            } else {
+              presenceCheck.add(
+                ExecutionPlanNode.action("match:equality")
+                  .add(ExecutionPlanNode.valueNode(NodeValue.NAMESPACED("json", item.serialise())))
+                  .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
+                  .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+              );
+            }
+            itemNode.add(presenceCheck)
+            rootNode.add(itemNode)
+          }
         }
       }
     }
