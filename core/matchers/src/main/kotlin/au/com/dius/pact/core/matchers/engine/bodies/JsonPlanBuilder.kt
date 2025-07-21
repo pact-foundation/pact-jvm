@@ -135,6 +135,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     }
   }
 
+  @Suppress("LongMethod")
   private fun processArray(
     context: PlanMatchingContext,
     path: DocPath,
@@ -237,8 +238,13 @@ object JsonPlanBuilder: PlanBodyBuilder  {
                   .add(ExecutionPlanNode.valueNode(NodeValue.NAMESPACED("json", item.serialise())))
                   .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
                   .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
-              );
+              )
             }
+            presenceCheck.add(
+              ExecutionPlanNode.action("error")
+                .add(ExecutionPlanNode.valueNode(
+                  "Expected a value for '${path.asJsonPointer().unwrap()}' but it was missing"))
+            )
             itemNode.add(presenceCheck)
             rootNode.add(itemNode)
           }

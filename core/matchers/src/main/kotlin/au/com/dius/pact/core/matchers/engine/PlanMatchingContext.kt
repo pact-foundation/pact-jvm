@@ -26,7 +26,8 @@ data class MatchingConfiguration(
      * Loads the matching engine configuration from system properties or environment variables:
      * `pact.matching.v2.logExecutedPlan` or `PACT_V2_MATCHING_LOG_EXECUTED_PLAN` - Enable to log the executed plan.
      * `pact.matching.v2.logRawPlan` or `PACT_V2_MATCHING_LOG_RAW_PLAN` - Enable to log the plan before it is executed.
-     * `pact.matching.v2.logPlanSummary` or `PACT_V2_MATCHING_LOG_PLAN_SUMMARY` - Enable to log a summary of the executed plan.
+     * `pact.matching.v2.logPlanSummary` or `PACT_V2_MATCHING_LOG_PLAN_SUMMARY` - Enable to log a summary of the
+     * executed plan.
      * `pact.matching.v2.ColouredOutput` or `PACT_V2_MATCHING_COLOURED_OUTPUT` - Enables coloured output.
      */
     fun fromEnv(): MatchingConfiguration {

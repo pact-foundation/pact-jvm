@@ -88,6 +88,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     node.add(presenceCheck)
   }
 
+  @Suppress("LongMethod")
   private fun processAttributes(
     path: DocPath,
     element: Node,
@@ -163,6 +164,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     }
   }
 
+  @Suppress("LongMethod")
   private fun processChildren(
     context: PlanMatchingContext,
     path: DocPath,
@@ -202,7 +204,8 @@ object XMLPlanBuilder: PlanBodyBuilder  {
             .add(
               ExecutionPlanNode.action("join")
                 .add(ExecutionPlanNode.valueNode(
-                  "Expected ${elements.size} <${childName}> child element${if (elements.size > 1) "s" else ""} but there were "))
+                  "Expected ${elements.size} <${childName}> child element${if (elements.size > 1) "s" else ""}" +
+                    " but there were "))
                 .add(ExecutionPlanNode.action("length")
                   .add(ExecutionPlanNode.resolveCurrentValue(p)))
             )

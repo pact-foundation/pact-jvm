@@ -525,7 +525,11 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  private fun executeIf(valueResolver: ValueResolver, node: ExecutionPlanNode, actionPath: List<String>): ExecutionPlanNode {
+  private fun executeIf(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
     val firstNode = node.children.firstOrNull()
     return if (firstNode != null) {
       val result = walkTree(actionPath, firstNode, valueResolver)
@@ -1068,7 +1072,7 @@ class ExecutionPlanInterpreter(
   ): ExecutionPlanNode {
     val (children, values) = when (val result = evaluateChildren(valueResolver, node, path)) {
       is Result.Ok -> {
-        result.value.first to result.value.second.flatMap { it ->
+        result.value.first to result.value.second.flatMap {
           when (it) {
             is NodeValue.BARRAY -> listOf(it.strForm())
             is NodeValue.BOOL -> listOf(it.bool.toString())

@@ -146,12 +146,12 @@ class DocPathSpec extends Specification {
     DocPath.empty()                                              | null
     DocPath.root()                                               | null
     new DocPath([new PathToken.Field('test')])                   | null
-    DocPath.root().join("something")                             | DocPath.root()
-    DocPath.root().join("something").join('else')                | DocPath.root().join("something")
-    DocPath.root().join("something").join('*')                   | DocPath.root().join("something")
-    DocPath.root().join("something").join('e l s e')             | DocPath.root().join("something")
-    DocPath.root().join("something").join('e l s e').join('two') | DocPath.root().join("something").join('e l s e')
-    DocPath.root().join("something").join('*').join('child')     | DocPath.root().join("something").join('*')
+    DocPath.root().join('something')                             | DocPath.root()
+    DocPath.root().join('something').join('else')                | DocPath.root().join('something')
+    DocPath.root().join('something').join('*')                   | DocPath.root().join('something')
+    DocPath.root().join('something').join('e l s e')             | DocPath.root().join('something')
+    DocPath.root().join('something').join('e l s e').join('two') | DocPath.root().join('something').join('e l s e')
+    DocPath.root().join('something').join('*').join('child')     | DocPath.root().join('something').join('*')
   }
 
   def 'as json pointer'() {

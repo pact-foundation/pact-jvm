@@ -2,8 +2,6 @@ package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.matchers.BodyItemMatchResult
 import au.com.dius.pact.core.matchers.BodyMismatchFactory
-import au.com.dius.pact.core.matchers.JsonContentMatcher
-import au.com.dius.pact.core.matchers.Matchers
 import au.com.dius.pact.core.matchers.Matchers.compareLists
 import au.com.dius.pact.core.matchers.domatch
 import au.com.dius.pact.core.model.Into
@@ -346,7 +344,8 @@ sealed class NodeValue: Into<NodeValue> {
             } else {
               JsonValue.Null
             }
-            val result = Matchers.domatch(context.matchingContext, listOf("$"), expected, actualJson, BodyMismatchFactory)
+            val result = domatch(matcher, listOf("$"), expected.json, actualJson,
+              BodyMismatchFactory, cascaded, context.matchingContext)
             if (result.isNotEmpty()) {
               result.joinToString(", ") { it.mismatch }
             } else {
@@ -362,7 +361,8 @@ sealed class NodeValue: Into<NodeValue> {
             is SLIST -> actual.items
             else -> listOf(actual.unwrap())
           }
-          val result = compareLists(actionPath, matcher, expected.items, items, context.matchingContext, { "" }, cascaded) {
+          val result = compareLists(actionPath, matcher, expected.items, items,
+            context.matchingContext, { "" }, cascaded) {
               p, expected, actual, context ->
             val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
             listOf(BodyItemMatchResult(constructPath(p), result))
@@ -380,7 +380,8 @@ sealed class NodeValue: Into<NodeValue> {
             is SLIST -> actual.items
             else -> listOf(actual.unwrap())
           }
-          val result = compareLists(actionPath, matcher, expected.items, items, context.matchingContext, { "" }, cascaded) {
+          val result = compareLists(actionPath, matcher, expected.items, items,
+            context.matchingContext, { "" }, cascaded) {
               p, expected, actual, context ->
             val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
             listOf(BodyItemMatchResult(constructPath(p), result))
@@ -393,14 +394,16 @@ sealed class NodeValue: Into<NodeValue> {
         }
         is STRING -> {
           if (actual is STRING) {
-            val result = domatch(matcher, actionPath, expected.string, actual.string, BodyMismatchFactory, cascaded, context.matchingContext)
+            val result = domatch(matcher, actionPath, expected.string, actual.string,
+              BodyMismatchFactory, cascaded, context.matchingContext)
             if (result.isNotEmpty()) {
               result.joinToString(", ") { it.mismatch }
             } else {
               null
             }
           } else if (actual is SLIST) {
-            val result = compareLists(actionPath, matcher, listOf(expected.string), actual.items, context.matchingContext, { "" }, cascaded) {
+            val result = compareLists(actionPath, matcher, listOf(expected.string), actual.items,
+              context.matchingContext, { "" }, cascaded) {
                 p, expected, actual, context ->
                   val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
                   listOf(BodyItemMatchResult(constructPath(p), result))
@@ -415,7 +418,8 @@ sealed class NodeValue: Into<NodeValue> {
           }
         }
         else -> {
-          val result = domatch(matcher, actionPath, expected.unwrap(), actual.unwrap(), BodyMismatchFactory, cascaded, context.matchingContext)
+          val result = domatch(matcher, actionPath, expected.unwrap(), actual.unwrap(),
+            BodyMismatchFactory, cascaded, context.matchingContext)
           if (result.isNotEmpty()) {
             result.joinToString(", ") { it.mismatch }
           } else {
