@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.matchers.MatchingContext
+import au.com.dius.pact.core.matchers.MatchingContext.BestMatcherResult
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
@@ -86,6 +87,21 @@ open class PlanMatchingContext @JvmOverloads constructor(
     } else {
       matchingContext.selectBestMatcher(path.asList())
     }
+  }
+
+  /**
+   * Select the best matcher taking into account two paths
+   */
+  fun selectBestMatcher(path1: DocPath, path2: DocPath): MatchingRuleGroup {
+    val result1 = matchingContext.matchers.matchingRules
+      .map { BestMatcherResult(path = path1.asList(), pathExp = it.key, ruleGroup = it.value) }
+      .filter { it.pathWeight > 0 }
+    val result2 = matchingContext.matchers.matchingRules
+      .map { BestMatcherResult(path = path2.asList(), pathExp = it.key, ruleGroup = it.value) }
+      .filter { it.pathWeight > 0 }
+    val result = (result1 + result2)
+      .maxWithOrNull(compareBy<BestMatcherResult> { it.pathWeight }.thenBy { it.pathExp.length })
+    return result?.ruleGroup?.copy(cascaded = result.pathTokens.size < path1.len()) ?: MatchingRuleGroup()
   }
 
   /**

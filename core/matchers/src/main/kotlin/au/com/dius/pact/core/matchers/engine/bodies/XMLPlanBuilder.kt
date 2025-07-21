@@ -111,10 +111,9 @@ object XMLPlanBuilder: PlanBodyBuilder  {
             .add(ExecutionPlanNode.resolveCurrentValue(p))
         )
 
-      val noIndices = dropIndices(p)
-      val matchers = context.selectBestMatcher(p)
-        .andRules(context.selectBestMatcher(noIndices))
-        .removeDuplicates()
+      val noMarkers = p.dropMarkers()
+      val noIndices = dropIndices(noMarkers)
+      val matchers = context.selectBestMatcher(noMarkers, noIndices)
       if (matchers.isNotEmpty()) {
         itemNode.add(ExecutionPlanNode.annotation(Into { "@${key} ${matchers.generateDescription(true)}" }))
         presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(itemValue),
@@ -286,14 +285,6 @@ object XMLPlanBuilder: PlanBodyBuilder  {
   }
 
   private fun dropIndices(path: DocPath) = DocPath(path.pathTokens
-    .map {
-      when (it) {
-        is PathToken.Field -> if (it.name.endsWith('*')) {
-          PathToken.Field(it.name.dropLast(1))
-        } else it
-        else -> it
-      }
-    }
     .filter {
       it !is PathToken.Index && it !is PathToken.StarIndex
     }

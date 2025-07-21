@@ -8,10 +8,15 @@ import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.ContentType
+import spock.lang.PendingFeatureIf
 import spock.lang.Specification
 
+import static au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled
+
+// TODO: Multipart bodies not supported yet
 class ExampleFileUploadSpec extends Specification {
 
+    @PendingFeatureIf(reason = 'Multipart bodies not supported yet', value = { v2EngineEnabled() })
     def 'handles bodies from form posts'() {
         given:
         def service = new PactBuilder()

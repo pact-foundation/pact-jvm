@@ -61,7 +61,7 @@ data class MatchingContext @JvmOverloads constructor(
     }
   }
 
-  private class BestMatcherResult(path: List<String>, val pathExp: String, val ruleGroup: MatchingRuleGroup) {
+  class BestMatcherResult(path: List<String>, val pathExp: String, val ruleGroup: MatchingRuleGroup) {
     val pathTokens: List<PathToken> = parsePath(pathExp)
     val pathWeight: Int = if (ruleGroup.rules.none { it is ValuesMatcher } || pathTokens.size == path.size)
       Matchers.calculatePathWeight(pathTokens, path)

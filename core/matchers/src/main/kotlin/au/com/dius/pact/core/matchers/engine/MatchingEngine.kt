@@ -12,6 +12,7 @@ import au.com.dius.pact.core.model.PARAMETERISED_HEADERS
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
 import au.com.dius.pact.core.support.json.JsonValue
 import kotlin.collections.map
 
@@ -366,6 +367,9 @@ object V2MatchingEngine: MatchingEngine {
 
     return planNode
   }
+
+  @JvmStatic
+  fun v2EngineEnabled(): Boolean = lookupEnvironmentValue("pact.matching.engine")?.lowercase() == "v2"
 }
 
 fun buildMatchingRuleNode(

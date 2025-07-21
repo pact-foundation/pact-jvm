@@ -20,7 +20,7 @@ interface PlanBodyBuilder {
 
 private val BODY_PLAN_BUILDERS: List<PlanBodyBuilder> = listOf(
   JsonPlanBuilder,
-  // XMLPlanBuilder(),
+  XMLPlanBuilder
 )
 
 fun getBodyPlanBuilder(contentType: ContentType): PlanBodyBuilder? {

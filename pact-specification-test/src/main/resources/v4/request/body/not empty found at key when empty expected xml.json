@@ -5,7 +5,7 @@
     "method": "POST",
     "path": "/",
     "query": {},
-    "headers": {"Content-Type": "application/json"},
+    "headers": {"Content-Type": "application/xml"},
     "body": {
       "contentType": "application/xml",
       "encoded": false,
