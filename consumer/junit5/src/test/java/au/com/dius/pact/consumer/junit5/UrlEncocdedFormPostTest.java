@@ -10,6 +10,7 @@ import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -21,6 +22,9 @@ import static org.hamcrest.Matchers.is;
 
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "FormPostProvider", pactVersion = PactSpecVersion.V3)
+// TODO: form-urlencoded bodies not supported yet
+@DisabledIfEnvironmentVariable(named = "PACT_MATCHING_ENGINE", matches = "v2",
+  disabledReason = "form-urlencoded bodies not supported yet")
 public class UrlEncocdedFormPostTest {
   @Pact(consumer = "FormPostConsumer")
   public RequestResponsePact formpost(PactDslWithProvider builder) {
