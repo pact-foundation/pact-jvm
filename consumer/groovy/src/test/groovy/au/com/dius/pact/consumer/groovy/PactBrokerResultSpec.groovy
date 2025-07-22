@@ -92,9 +92,8 @@ class PactBrokerResultSpec extends Specification {
 
       then:
          def e = thrown(AssertionError)
-         e.message.contains(
-            'QueryMismatch(queryParameter=status, expected=null, actual=null, ' +
-              'mismatch=Expected \'bad\' (String) to be equal to \'good\' (String), path=/)')
+         e.message.contains('QueryMismatch')
+         e.message.contains('mismatch=Expected \'good\' but received \'bad\' for query parameter \'status\'')
     }
 
     def 'case when the test passes and there is a missing request'() {
