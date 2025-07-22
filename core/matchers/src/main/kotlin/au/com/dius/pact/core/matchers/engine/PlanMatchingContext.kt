@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers.engine
 
 import au.com.dius.pact.core.matchers.MatchingContext
+import au.com.dius.pact.core.matchers.MatchingContext.BestMatcherResult
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
@@ -9,7 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
 
 /** Configuration for driving behaviour of the execution */
-data class MatchingConfiguration(
+data class MatchingConfiguration @JvmOverloads constructor(
   /** If extra keys/values are allowed (and ignored) */
   val allowUnexpectedEntries: Boolean = false,
   /** If the executed plan should be logged */
@@ -17,13 +18,17 @@ data class MatchingConfiguration(
   /** If the executed plan summary should be logged */
   val logPlanSummary: Boolean = true,
   /** If output should be coloured */
-  val colouredOutput: Boolean = true
+  val colouredOutput: Boolean = true,
+  /** If the raw plan should be logged (before it is executed) */
+  val logRawPlan: Boolean = false
 ) {
   companion object {
     /**
      * Loads the matching engine configuration from system properties or environment variables:
      * `pact.matching.v2.logExecutedPlan` or `PACT_V2_MATCHING_LOG_EXECUTED_PLAN` - Enable to log the executed plan.
-     * `pact.matching.v2.logPlanSummary` or `PACT_V2_MATCHING_LOG_PLAN_SUMMARY` - Enable to log a summary of the executed plan.
+     * `pact.matching.v2.logRawPlan` or `PACT_V2_MATCHING_LOG_RAW_PLAN` - Enable to log the plan before it is executed.
+     * `pact.matching.v2.logPlanSummary` or `PACT_V2_MATCHING_LOG_PLAN_SUMMARY` - Enable to log a summary of the
+     * executed plan.
      * `pact.matching.v2.ColouredOutput` or `PACT_V2_MATCHING_COLOURED_OUTPUT` - Enables coloured output.
      */
     fun fromEnv(): MatchingConfiguration {
@@ -31,6 +36,10 @@ data class MatchingConfiguration(
 
       if (envVarSet("pact.matching.v2.logExecutedPlan") || envVarSet("PACT_V2_MATCHING_LOG_EXECUTED_PLAN")) {
         config = config.copy(logExecutedPlan = true)
+      }
+
+      if (envVarSet("pact.matching.v2.logRawPlan") || envVarSet("PACT_V2_MATCHING_LOG_RAW_PLAN")) {
+        config = config.copy(logRawPlan = true)
       }
 
       if (envVarSet("pact.matching.v2.logPlanSummary") || envVarSet("PACT_V2_MATCHING_LOG_PLAN_SUMMARY")) {
@@ -78,6 +87,21 @@ open class PlanMatchingContext @JvmOverloads constructor(
     } else {
       matchingContext.selectBestMatcher(path.asList())
     }
+  }
+
+  /**
+   * Select the best matcher taking into account two paths
+   */
+  fun selectBestMatcher(path1: DocPath, path2: DocPath): MatchingRuleGroup {
+    val result1 = matchingContext.matchers.matchingRules
+      .map { BestMatcherResult(path = path1.asList(), pathExp = it.key, ruleGroup = it.value) }
+      .filter { it.pathWeight > 0 }
+    val result2 = matchingContext.matchers.matchingRules
+      .map { BestMatcherResult(path = path2.asList(), pathExp = it.key, ruleGroup = it.value) }
+      .filter { it.pathWeight > 0 }
+    val result = (result1 + result2)
+      .maxWithOrNull(compareBy<BestMatcherResult> { it.pathWeight }.thenBy { it.pathExp.length })
+    return result?.ruleGroup?.copy(cascaded = result.pathTokens.size < path1.len()) ?: MatchingRuleGroup()
   }
 
   /**

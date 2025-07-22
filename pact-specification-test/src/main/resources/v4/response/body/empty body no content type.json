@@ -9,7 +9,6 @@
   "actual": {
     "headers": {"Content-Type": "application/json"},
     "body": {
-      "content": ""
     }
   }
 }

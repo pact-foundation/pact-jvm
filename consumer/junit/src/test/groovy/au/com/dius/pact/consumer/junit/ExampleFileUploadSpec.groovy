@@ -9,10 +9,20 @@ import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
+import org.junit.Assume
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+import static au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled
+
+// TODO: Multipart bodies not supported yet
 class ExampleFileUploadSpec {
+
+  @Before
+  void beforeMethod() {
+    Assume.assumeTrue(!v2EngineEnabled())
+  }
 
   @Rule
   @SuppressWarnings('PublicInstanceField')

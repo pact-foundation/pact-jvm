@@ -1,10 +1,9 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.matchers.engine.ExecutionPlan
 import au.com.dius.pact.core.matchers.engine.MatchingConfiguration
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
 import au.com.dius.pact.core.matchers.engine.V2MatchingEngine
-import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterpreter
+import au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled
 import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Interaction
@@ -135,17 +134,16 @@ class RequestMatching(private val expectedPact: Pact) {
       logger.debug { "comparing to expected request: \n$expected" }
       logger.debug { "pluginConfiguration=$pluginConfiguration" }
 
-      if (lookupEnvironmentValue("pact.matching.engine")?.lowercase() == "v2") {
+      if (v2EngineEnabled()) {
         val config = MatchingConfiguration.fromEnv()
           .copy(allowUnexpectedEntries = false)
         val context = PlanMatchingContext(pact.asV4Pact().unwrap(), interaction.asV4Interaction(), config)
-        val plan = V2MatchingEngine.buildRequestPlan(expected, context)
-        val executedPlan = executeRequestPlan(plan, actual, context)
 
-        if (config.logExecutedPlan) {
-          logger.debug { "config = $config" }
-          logger.debug { executedPlan.prettyForm() }
-        }
+        val plan = V2MatchingEngine.buildRequestPlan(expected, context)
+        val valueResolver = HttpRequestValueResolver(actual)
+
+        val executedPlan = plan.execute(context, valueResolver)
+
         if (config.logPlanSummary) {
           logger.info { executedPlan.generateSummary(config.colouredOutput) }
         }
@@ -184,17 +182,6 @@ class RequestMatching(private val expectedPact: Pact) {
           Matching.matchBody(expected.asHttpPart(), actual.asHttpPart(), bodyContext)
         )
       }
-    }
-
-    private fun executeRequestPlan(
-      plan: ExecutionPlan,
-      actual: IRequest,
-      context: PlanMatchingContext
-    ): ExecutionPlan {
-      val valueResolver = HttpRequestValueResolver(actual)
-      val interpreter = ExecutionPlanInterpreter(context)
-      val executedTree = interpreter.walkTree(emptyList(), plan.planRoot, valueResolver)
-      return ExecutionPlan(executedTree)
     }
   }
 }

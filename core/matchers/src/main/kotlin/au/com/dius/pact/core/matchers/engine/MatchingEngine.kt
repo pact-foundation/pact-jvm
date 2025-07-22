@@ -12,6 +12,7 @@ import au.com.dius.pact.core.model.PARAMETERISED_HEADERS
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
 import au.com.dius.pact.core.support.json.JsonValue
 import kotlin.collections.map
 
@@ -339,33 +340,46 @@ object V2MatchingEngine: MatchingEngine {
       }
       expected.body.isPresent() -> {
         val contentType = expected.determineContentType()
-        val contentTypeCheckNode = ExecutionPlanNode.action("if")
-        contentTypeCheckNode
-          .add(
-            ExecutionPlanNode.action("match:equality")
-              .add(ExecutionPlanNode.valueNode(contentType.toString()))
-              .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
-              .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
-              .add(
-                ExecutionPlanNode.action("error")
-                  .add(ExecutionPlanNode.valueNode(NodeValue.STRING("Body type error - ")))
-                  .add(ExecutionPlanNode.action("apply"))
-              )
-          )
-
-        val planBuilder = getBodyPlanBuilder(contentType)
-        if (planBuilder != null) {
-          contentTypeCheckNode.add(planBuilder.buildPlan(expected.body.unwrap(), context))
+        val rootMatcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
+        if (rootMatcher != null && rootMatcher.canMatch(contentType)) {
+          planNode.add(buildMatchingRuleNode(
+            ExecutionPlanNode.valueNode(NodeValue.NULL),
+            ExecutionPlanNode.resolveValue(DocPath("$.body")),
+            rootMatcher,
+            true
+          ))
         } else {
-          val builder = PlainTextBuilder
-          contentTypeCheckNode.add(builder.buildPlan(expected.body.unwrap(), context))
+          val contentTypeCheckNode = ExecutionPlanNode.action("if")
+          contentTypeCheckNode
+            .add(
+              ExecutionPlanNode.action("match:equality")
+                .add(ExecutionPlanNode.valueNode(contentType.toString()))
+                .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
+                .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+                .add(
+                  ExecutionPlanNode.action("error")
+                    .add(ExecutionPlanNode.valueNode(NodeValue.STRING("Body type error - ")))
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+            )
+
+          val planBuilder = getBodyPlanBuilder(contentType)
+          if (planBuilder != null) {
+            contentTypeCheckNode.add(planBuilder.buildPlan(expected.body.unwrap(), context))
+          } else {
+            val builder = PlainTextBuilder
+            contentTypeCheckNode.add(builder.buildPlan(expected.body.unwrap(), context))
+          }
+          planNode.add(contentTypeCheckNode)
         }
-        planNode.add(contentTypeCheckNode)
       }
     }
 
     return planNode
   }
+
+  @JvmStatic
+  fun v2EngineEnabled(): Boolean = lookupEnvironmentValue("pact.matching.engine")?.lowercase() == "v2"
 }
 
 fun buildMatchingRuleNode(

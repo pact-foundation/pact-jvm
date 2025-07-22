@@ -13,10 +13,14 @@ import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'ProviderThatAcceptsImages', pactVersion = PactSpecVersion.V3)
+// TODO: Multipart bodies not supported yet
+@DisabledIfEnvironmentVariable(named = 'PACT_MATCHING_ENGINE', matches = 'v2',
+  disabledReason = 'Multipart bodies not supported yet')
 class PostImageBodyTest {
   @Pact(consumer = 'Consumer')
   RequestResponsePact pact(PactDslWithProvider builder) {

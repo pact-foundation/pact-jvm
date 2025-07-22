@@ -88,6 +88,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     node.add(presenceCheck)
   }
 
+  @Suppress("LongMethod")
   private fun processAttributes(
     path: DocPath,
     element: Node,
@@ -110,10 +111,9 @@ object XMLPlanBuilder: PlanBodyBuilder  {
             .add(ExecutionPlanNode.resolveCurrentValue(p))
         )
 
-      val noIndices = dropIndices(p)
-      val matchers = context.selectBestMatcher(p)
-        .andRules(context.selectBestMatcher(noIndices))
-        .removeDuplicates()
+      val noMarkers = p.dropMarkers()
+      val noIndices = dropIndices(noMarkers)
+      val matchers = context.selectBestMatcher(noMarkers, noIndices)
       if (matchers.isNotEmpty()) {
         itemNode.add(ExecutionPlanNode.annotation(Into { "@${key} ${matchers.generateDescription(true)}" }))
         presenceCheck.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(itemValue),
@@ -163,6 +163,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     }
   }
 
+  @Suppress("LongMethod")
   private fun processChildren(
     context: PlanMatchingContext,
     path: DocPath,
@@ -202,7 +203,8 @@ object XMLPlanBuilder: PlanBodyBuilder  {
             .add(
               ExecutionPlanNode.action("join")
                 .add(ExecutionPlanNode.valueNode(
-                  "Expected ${elements.size} <${childName}> child element${if (elements.size > 1) "s" else ""} but there were "))
+                  "Expected ${elements.size} <${childName}> child element${if (elements.size > 1) "s" else ""}" +
+                    " but there were "))
                 .add(ExecutionPlanNode.action("length")
                   .add(ExecutionPlanNode.resolveCurrentValue(p)))
             )
@@ -245,12 +247,10 @@ object XMLPlanBuilder: PlanBodyBuilder  {
   ) {
     val text = textContent(element)
     val p = path.join("#text")
-    val noIndices = dropIndices(p)
-    val matchers = context.selectBestMatcher(p)
-      .filter { matcher -> !matcher.isTypeMatcher() }
-      .andRules(context.selectBestMatcher(noIndices)
-        .filter { matcher -> !matcher.isTypeMatcher() }
-      ).removeDuplicates()
+    val noMarkers = p.dropMarkers()
+    val noIndices = dropIndices(noMarkers)
+    val matchers = context.selectBestMatcher(noMarkers, noIndices)
+      .filter { !it.isTypeMatcher() }
     if (matchers.isNotEmpty()) {
       node.add(ExecutionPlanNode.annotation(Into { "${p.lastField()} ${matchers.generateDescription(false)}" }))
       val currentValue = ExecutionPlanNode.action("to-string")
@@ -283,14 +283,6 @@ object XMLPlanBuilder: PlanBodyBuilder  {
   }
 
   private fun dropIndices(path: DocPath) = DocPath(path.pathTokens
-    .map {
-      when (it) {
-        is PathToken.Field -> if (it.name.endsWith('*')) {
-          PathToken.Field(it.name.dropLast(1))
-        } else it
-        else -> it
-      }
-    }
     .filter {
       it !is PathToken.Index && it !is PathToken.StarIndex
     }

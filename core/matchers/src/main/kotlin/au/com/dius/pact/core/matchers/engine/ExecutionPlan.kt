@@ -11,7 +11,12 @@ import au.com.dius.pact.core.matchers.PathMismatch
 import au.com.dius.pact.core.matchers.QueryMatchResult
 import au.com.dius.pact.core.matchers.QueryMismatch
 import au.com.dius.pact.core.matchers.RequestMatchResult
+import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterpreter
+import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * An executable plan that contains a tree of execution nodes
@@ -173,5 +178,26 @@ open class ExecutionPlan(
       headers = headerMismatches,
       body = bodyResult
     )
+  }
+
+  /**
+   * Executes the plan, returning the resulting plan
+   */
+  fun execute(context: PlanMatchingContext, valueResolver: HttpRequestValueResolver): ExecutionPlan {
+    if (context.config.logRawPlan) {
+      logger.debug { prettyForm() }
+    }
+
+    val interpreter = ExecutionPlanInterpreter(context)
+    val executionPlanNode = interpreter.walkTree(emptyList(), planRoot, valueResolver)
+
+    val executedPlan = ExecutionPlan(executionPlanNode)
+
+    if (context.config.logExecutedPlan) {
+      logger.debug { "config = ${context.config}" }
+      logger.debug { executedPlan.prettyForm() }
+    }
+
+    return executedPlan
   }
 }

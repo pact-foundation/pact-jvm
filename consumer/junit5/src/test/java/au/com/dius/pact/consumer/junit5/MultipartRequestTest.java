@@ -11,6 +11,7 @@ import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -21,6 +22,9 @@ import static org.hamcrest.Matchers.is;
 
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "MultipartProvider")
+// TODO: Multipart bodies not supported yet
+@DisabledIfEnvironmentVariable(named = "PACT_MATCHING_ENGINE", matches = "v2",
+  disabledReason = "Multipart bodies not supported yet")
 public class MultipartRequestTest {
   @Pact(consumer = "MultipartConsumer")
   public V4Pact pact(PactBuilder builder) {

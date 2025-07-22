@@ -10,7 +10,10 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import spock.lang.IgnoreIf
 import spock.lang.Specification
+
+import static au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled
 
 class RequestMatchingSpec extends Specification {
 
@@ -163,6 +166,8 @@ class RequestMatchingSpec extends Specification {
     !actualResponse
   }
 
+  // TODO: Support for cookies
+  @IgnoreIf(reason = 'Cookies not supported yet', value = { v2EngineEnabled() })
   def 'request with cookie should match if actual cookie contains more data than expected one'() {
     given:
     request = new Request('GET', '/', [:], [Cookie: ['key1=value1;key2=value2']], OptionalBody.body(''.bytes))
@@ -176,6 +181,8 @@ class RequestMatchingSpec extends Specification {
     actualResponse == response
   }
 
+  // TODO: Support for cookies
+  @IgnoreIf(reason = 'Cookies not supported yet', value = { v2EngineEnabled() })
   def 'request with cookie should mismatch if actual cookie has no intersection with expected request'() {
     given:
     request = new Request('GET', '/', [:], [Cookie: ['key1=value1;key2=value2']], OptionalBody.body(''.bytes))
@@ -189,6 +196,8 @@ class RequestMatchingSpec extends Specification {
     !actualResponse
   }
 
+  // TODO: Support for cookies
+  @IgnoreIf(reason = 'Cookies not supported yet', value = { v2EngineEnabled() })
   def 'request with cookie should match when cookie field is different from cases'() {
     given:
     request = new Request('GET', '/', [:], [Cookie: ['key1=value1;key2=value2']], OptionalBody.body(''.bytes))
@@ -202,6 +211,8 @@ class RequestMatchingSpec extends Specification {
     actualResponse == response
   }
 
+  // TODO: Support for cookies
+  @IgnoreIf(reason = 'Cookies not supported yet', value = { v2EngineEnabled() })
   def 'request with cookie should match when there are spaces between cookie items'() {
     given:
     request = new Request('GET', '/', [:], [Cookie: ['key1=value1;key2=value2']], OptionalBody.body(''.bytes))

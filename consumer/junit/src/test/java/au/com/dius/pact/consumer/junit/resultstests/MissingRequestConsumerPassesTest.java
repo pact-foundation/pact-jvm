@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -67,14 +68,26 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
 
     @Override
     protected void assertException(Throwable e) {
-        assertThat(e.getMessage(),
-            containsString("The following requests were not received:\n" +
-              "\tmethod: OPTIONS\n" +
-              "\tpath: /second\n" +
-              "\tquery: {}\n" +
-              "\theaders: {testreqheader=[testreqheadervalue]}\n" +
-              "\tmatchers: MatchingRules(rules={path=MatchingRuleCategory(name=path, matchingRules={}), body=MatchingRuleCategory(name=body, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})})\n" +
-              "\tgenerators: Generators(categories={})\n" +
-              "\tbody: EMPTY"));
+        if (v2EngineEnabled()) {
+            assertThat(e.getMessage(),
+              containsString("The following requests were not received:\n" +
+                "\tmethod: OPTIONS\n" +
+                "\tpath: /second\n" +
+                "\tquery: {}\n" +
+                "\theaders: {testreqheader=[testreqheadervalue]}\n" +
+                "\tmatchers: MatchingRules(rules={method=MatchingRuleCategory(name=method, matchingRules={}), path=MatchingRuleCategory(name=path, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={}), body=MatchingRuleCategory(name=body, matchingRules={})})\n" +
+                "\tgenerators: Generators(categories={})\n" +
+                "\tbody: EMPTY"));
+        } else {
+            assertThat(e.getMessage(),
+              containsString("The following requests were not received:\n" +
+                "\tmethod: OPTIONS\n" +
+                "\tpath: /second\n" +
+                "\tquery: {}\n" +
+                "\theaders: {testreqheader=[testreqheadervalue]}\n" +
+                "\tmatchers: MatchingRules(rules={path=MatchingRuleCategory(name=path, matchingRules={}), body=MatchingRuleCategory(name=body, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})})\n" +
+                "\tgenerators: Generators(categories={})\n" +
+                "\tbody: EMPTY"));
+        }
     }
 }

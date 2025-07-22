@@ -93,8 +93,8 @@ class PactBrokerResultSpec extends Specification {
       then:
          def e = thrown(AssertionError)
          e.message.contains(
-            'QueryMismatch(queryParameter=status, expected=good, actual=bad, mismatch=Expected \'good\'' +
-              ' but received \'bad\' for query parameter \'status\', path=status)')
+            'QueryMismatch(queryParameter=status, expected=null, actual=null, ' +
+              'mismatch=Expected \'bad\' (String) to be equal to \'good\' (String), path=/)')
     }
 
     def 'case when the test passes and there is a missing request'() {
@@ -131,6 +131,6 @@ class PactBrokerResultSpec extends Specification {
           '''The following requests were not received:
              |HttpRequest(method=post, path=/path, query={}, headers={Content-Type=[application/json]}, body=PRESENT({
              |    "status": "isGood"
-             |}), matchingRules=MatchingRules(rules={body=MatchingRuleCategory(name=body, matchingRules={}), path=MatchingRuleCategory(name=path, matchingRules={}), query=MatchingRuleCategory(name=query, matchingRules={}), header=MatchingRuleCategory(name=header, matchingRules={})}), generators=Generators(categories={}))'''.stripMargin())
+             |})'''.stripMargin())
     }
 }

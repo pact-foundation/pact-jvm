@@ -75,43 +75,4 @@
     }
   }
 
-  fn execute_and(
-    &mut self,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    match self.evaluate_children(value_resolver, node, path) {
-      Ok((children, values)) => {
-        ExecutionPlanNode {
-          node_type: node.node_type.clone(),
-          result: Some(NodeResult::VALUE(values.iter().fold(NodeValue::NULL, |result, value| {
-            result.and(value)
-          }))),
-          children
-        }
-      }
-      Err(err) => err
-    }
-  }
-
-  fn execute_or(
-    &mut self,
-    value_resolver: &dyn ValueResolver,
-    node: &ExecutionPlanNode,
-    path: &Vec<String>
-  ) -> ExecutionPlanNode {
-    match self.evaluate_children(value_resolver, node, path) {
-      Ok((children, values)) => {
-        ExecutionPlanNode {
-          node_type: node.node_type.clone(),
-          result: Some(NodeResult::VALUE(values.iter().fold(NodeValue::NULL, |result, value| {
-            result.or(value)
-          }))),
-          children
-        }
-      }
-      Err(err) => err
-    }
-  }
 

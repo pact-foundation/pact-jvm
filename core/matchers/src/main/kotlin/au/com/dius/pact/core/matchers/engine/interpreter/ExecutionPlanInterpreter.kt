@@ -248,8 +248,8 @@ class ExecutionPlanInterpreter(
         "expect:empty" -> executeExpectEmpty(action, valueResolver, node, actionPath)
         "convert:UTF8" -> executeConvertUtf8(action, valueResolver, node, actionPath)
         "if" -> executeIf(valueResolver, node, actionPath)
-        //        "and" => self.execute_and(valueResolver, node, actionPath),
-        //        "or" => self.execute_or(valueResolver, node, actionPath),
+        "and" -> executeAnd(valueResolver, node, actionPath)
+        "or" -> executeOr(valueResolver, node, actionPath)
         "tee" -> executeTee(valueResolver, node, actionPath)
         "apply" -> executeApply(node)
         //        "push" => self.execute_push(node),
@@ -293,8 +293,8 @@ class ExecutionPlanInterpreter(
       is Result.Err -> return result.error
     }
 
-    val results = values.map { value ->
-      when (value) {
+    val results = values.map { v ->
+      when (val value = v.asValue().orDefault()) {
         is NodeValue.JSON -> when (val json = value.json) {
           is JsonValue.StringValue -> NodeValue.STRING(
             if (uppercase) json.toString().uppercase()
@@ -525,7 +525,11 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  private fun executeIf(valueResolver: ValueResolver, node: ExecutionPlanNode, actionPath: List<String>): ExecutionPlanNode {
+  private fun executeIf(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
     val firstNode = node.children.firstOrNull()
     return if (firstNode != null) {
       val result = walkTree(actionPath, firstNode, valueResolver)
@@ -962,16 +966,16 @@ class ExecutionPlanInterpreter(
   ): ExecutionPlanNode {
     val (children, values) = when (val result = evaluateChildren(valueResolver, node, actionPath)) {
       is Result.Ok -> {
-        result.value.first to result.value.second.flatMap {
-          when (it) {
-            is NodeValue.BARRAY -> listOf(it.strForm())
-            is NodeValue.BOOL -> listOf(it.bool.toString())
-            is NodeValue.JSON -> listOf(it.json.toString())
-            is NodeValue.MMAP -> listOf(it.strForm())
-            is NodeValue.NAMESPACED -> listOf(it.strForm())
-            is NodeValue.SLIST -> it.items
-            is NodeValue.STRING -> listOf(it.string)
-            is NodeValue.UINT -> listOf(it.uint.toString())
+        result.value.first to result.value.second.flatMap { value ->
+          when (val v = value.asValue().orDefault()) {
+            is NodeValue.BARRAY -> listOf(v.strForm())
+            is NodeValue.BOOL -> listOf(v.bool.toString())
+            is NodeValue.JSON -> listOf(v.json.toString())
+            is NodeValue.MMAP -> listOf(v.strForm())
+            is NodeValue.NAMESPACED -> listOf(v.strForm())
+            is NodeValue.SLIST -> v.items
+            is NodeValue.STRING -> listOf(v.string)
+            is NodeValue.UINT -> listOf(v.uint.toString())
             else -> emptyList()
           }
         }
@@ -1027,23 +1031,23 @@ class ExecutionPlanInterpreter(
   ): ExecutionPlanNode {
     val (children, values) = when (val result = evaluateChildren(valueResolver, node, actionPath)) {
       is Result.Ok -> {
-        result.value.first to result.value.second.map {
-          when (it) {
-            is NodeValue.JSON -> when (val json = it.json) {
+        result.value.first to result.value.second.map { v ->
+          when (val value = v.asValue().orDefault()) {
+            is NodeValue.JSON -> when (val json = value.json) {
               is JsonValue.StringValue -> NodeValue.STRING(json.toString())
               else -> NodeValue.STRING(json.serialise())
             }
             NodeValue.NULL -> NodeValue.STRING("")
-            is NodeValue.SLIST -> it
-            is NodeValue.STRING -> it
+            is NodeValue.SLIST -> value
+            is NodeValue.STRING -> value
             is NodeValue.XML -> {
-              when (val xml = it.xml) {
+              when (val xml = value.xml) {
                 is XmlValue.Attribute -> NodeValue.STRING("@${xml.name}='${escape(xml.value)}'")
                 is XmlValue.Element -> NodeValue.STRING(renderXml(xml.element))
                 is XmlValue.Text -> NodeValue.STRING(xml.text)
               }
             }
-            else -> NodeValue.STRING(it.strForm())
+            else -> NodeValue.STRING(value.strForm())
           }
         }
       }
@@ -1068,17 +1072,17 @@ class ExecutionPlanInterpreter(
   ): ExecutionPlanNode {
     val (children, values) = when (val result = evaluateChildren(valueResolver, node, path)) {
       is Result.Ok -> {
-        result.value.first to result.value.second.flatMap { it ->
-          when (it) {
-            is NodeValue.BARRAY -> listOf(it.strForm())
-            is NodeValue.BOOL -> listOf(it.bool.toString())
-            is NodeValue.JSON -> listOf(it.json.toString())
-            is NodeValue.LIST -> it.items.map { item -> item.toString() }
-            is NodeValue.MMAP -> listOf(it.strForm())
-            is NodeValue.NAMESPACED -> listOf(it.strForm())
-            is NodeValue.SLIST -> it.items
-            is NodeValue.STRING -> listOf(it.string)
-            is NodeValue.UINT -> listOf(it.uint.toString())
+        result.value.first to result.value.second.flatMap { value ->
+          when (val v = value.asValue().orDefault()) {
+            is NodeValue.BARRAY -> listOf(v.strForm())
+            is NodeValue.BOOL -> listOf(v.bool.toString())
+            is NodeValue.JSON -> listOf(v.json.toString())
+            is NodeValue.LIST -> v.items.map { item -> item.toString() }
+            is NodeValue.MMAP -> listOf(v.strForm())
+            is NodeValue.NAMESPACED -> listOf(v.strForm())
+            is NodeValue.SLIST -> v.items
+            is NodeValue.STRING -> listOf(v.string)
+            is NodeValue.UINT -> listOf(v.uint.toString())
             else -> emptyList()
           }
         }
@@ -1382,6 +1386,40 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  private fun executeAnd(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    path: List<String>
+  ): ExecutionPlanNode {
+    val (children, result) = when (val result = evaluateChildren(valueResolver, node, path)) {
+      is Result.Ok -> {
+        result.value.first to result.value.second.fold(NodeResult.OK as NodeResult) { acc, value ->
+          acc.and(value)
+        }
+      }
+      is Result.Err -> return result.error
+    }
+
+    return node.copy(result = result, children = children.toMutableList())
+  }
+
+  private fun executeOr(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    path: List<String>
+  ): ExecutionPlanNode {
+    val (children, result) = when (val result = evaluateChildren(valueResolver, node, path, false)) {
+      is Result.Ok -> {
+        result.value.first to result.value.second.fold(NodeResult.OK as NodeResult) { acc, value ->
+          acc.or(value)
+        }
+      }
+      is Result.Err -> return result.error
+    }
+
+    return node.copy(result = result, children = children.toMutableList())
+  }
+
   /** Push a result value onto the value stack */
   fun pushResult(value: NodeResult?) {
     valueStack.add(value)
@@ -1489,10 +1527,11 @@ class ExecutionPlanInterpreter(
   private fun evaluateChildren(
     valueResolver: ValueResolver,
     node: ExecutionPlanNode,
-    path: List<String>
-  ): Result<Pair<List<ExecutionPlanNode>, List<NodeValue>>, ExecutionPlanNode> {
+    path: List<String>,
+    shortCircuit: Boolean = true
+  ): Result<Pair<List<ExecutionPlanNode>, List<NodeResult>>, ExecutionPlanNode> {
     val children = mutableListOf<ExecutionPlanNode>()
-    val values = mutableListOf<NodeValue>()
+    val values = mutableListOf<NodeResult>()
     val loopItems = ArrayDeque(node.children)
 
     while (loopItems.isNotEmpty()) {
@@ -1501,30 +1540,24 @@ class ExecutionPlanInterpreter(
       var nodeResult = child.value()
       if (nodeResult == null) {
         val result = walkTree(path, child, valueResolver)
-        when (result.result) {
-          is NodeResult.ERROR -> {
-            children.add(result)
-            children.addAll(loopItems)
-            return Result.Err(node.copy(result = result.result, children = children))
+        if (result.result is NodeResult.ERROR && shortCircuit) {
+          children.add(result)
+          children.addAll(loopItems)
+          return Result.Err(node.copy(result = result.result, children = children))
+        }
+        else if (result.isSplat()) {
+          children.add(result)
+          for (splatChild in result.children.reversed()) {
+            loopItems.addFirst(splatChild)
           }
-          else -> {
-            if (result.isSplat()) {
-              children.add(result)
-              for (splatChild in result.children.reversed()) {
-                loopItems.addFirst(splatChild)
-              }
-              nodeResult = NodeResult.OK
-            } else {
-              children.add(result)
-              nodeResult = result.result ?: NodeResult.OK
-            }
-          }
+          nodeResult = NodeResult.OK
+        } else {
+          children.add(result)
+          nodeResult = result.result ?: NodeResult.OK
         }
       }
 
-      if (nodeResult is NodeResult.VALUE) {
-        values.add(nodeResult.value)
-      }
+      values.add(nodeResult)
     }
 
     return Result.Ok(children to values)
@@ -1689,13 +1722,25 @@ class ExecutionPlanInterpreter(
     marker: String,
     index: Int
   ): DocPath {
-    return DocPath(path.tokens().flatMap {
-      when (it) {
-        is PathToken.Field -> if (it.name == marker) {
-          listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
-        } else listOf(it)
-        else -> listOf(it)
-      }
-    })
+    return if (path.expr.startsWith("$['$*']")) {
+      // Special case where for-each is applied at the root
+      DocPath(listOf(PathToken.Root, PathToken.Index(index)) + path.tokens().drop(2).flatMap {
+        when (it) {
+          is PathToken.Field -> if (it.name == marker) {
+            listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
+          } else listOf(it)
+          else -> listOf(it)
+        }
+      })
+    } else {
+      DocPath(path.tokens().flatMap {
+        when (it) {
+          is PathToken.Field -> if (it.name == marker) {
+            listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
+          } else listOf(it)
+          else -> listOf(it)
+        }
+      })
+    }
   }
 }
