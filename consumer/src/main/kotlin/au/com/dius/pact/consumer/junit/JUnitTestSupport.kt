@@ -101,6 +101,10 @@ object JUnitTestSupport {
   fun validateMockServerResult(result: PactVerificationResult) {
     if (result !is Ok) {
       if (result is PactVerificationResult.Error) {
+        if (result.error.javaClass.name == "org.junit.AssumptionViolatedException") {
+          // Ignored test, JUnit 4 style
+          return
+        }
         if (result.mockServerState !is Ok) {
           throw AssertionError("Pact Test function failed with an exception, possibly due to " + result.mockServerState, result.error)
         } else {

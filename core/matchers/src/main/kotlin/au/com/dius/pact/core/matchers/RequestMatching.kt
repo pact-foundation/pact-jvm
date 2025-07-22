@@ -3,6 +3,7 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.matchers.engine.MatchingConfiguration
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
 import au.com.dius.pact.core.matchers.engine.V2MatchingEngine
+import au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled
 import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Interaction
@@ -133,7 +134,7 @@ class RequestMatching(private val expectedPact: Pact) {
       logger.debug { "comparing to expected request: \n$expected" }
       logger.debug { "pluginConfiguration=$pluginConfiguration" }
 
-      if (lookupEnvironmentValue("pact.matching.engine")?.lowercase() == "v2") {
+      if (v2EngineEnabled()) {
         val config = MatchingConfiguration.fromEnv()
           .copy(allowUnexpectedEntries = false)
         val context = PlanMatchingContext(pact.asV4Pact().unwrap(), interaction.asV4Interaction(), config)

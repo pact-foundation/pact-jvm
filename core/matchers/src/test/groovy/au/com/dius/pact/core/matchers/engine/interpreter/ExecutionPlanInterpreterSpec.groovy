@@ -366,7 +366,10 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:1 => json:1,
     |          ~>$[0] => json:1,
     |          NULL => NULL
-    |        ) => BOOL(true)
+    |        ) => BOOL(true),
+    |        %error (
+    |          'Expected a value for \\'\\/0\\' but it was missing\'
+    |        )
     |      ) => BOOL(true)
     |    ) => BOOL(true),
     |    :$[1] (
@@ -378,7 +381,10 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:2 => json:2,
     |          ~>$[1] => json:2,
     |          NULL => NULL
-    |        ) => BOOL(true)
+    |        ) => BOOL(true),
+    |        %error (
+    |          'Expected a value for \\'\\/1\\' but it was missing\'
+    |        )
     |      ) => BOOL(true)
     |    ) => BOOL(true),
     |    :$[2] (
@@ -390,7 +396,10 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:3 => json:3,
     |          ~>$[2] => json:3,
     |          NULL => NULL
-    |        ) => BOOL(true)
+    |        ) => BOOL(true),
+    |        %error (
+    |          'Expected a value for \\'\\/2\\' but it was missing\'
+    |        )
     |      ) => BOOL(true)
     |    ) => BOOL(true)
     |  ) => BOOL(true)
@@ -444,8 +453,11 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:1,
     |          ~>$[0],
     |          NULL
-    |        )
-    |      ) => BOOL(false)
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/0\\' but it was missing' => 'Expected a value for \\'\\/0\\' but it was missing'
+    |        ) => ERROR(Expected a value for '/0' but it was missing)
+    |      ) => ERROR(Expected a value for '/0' but it was missing)
     |    ) => BOOL(false),
     |    :$[1] (
     |      %if (
@@ -456,8 +468,11 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:2,
     |          ~>$[1],
     |          NULL
-    |        )
-    |      ) => BOOL(false)
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/1\\' but it was missing' => 'Expected a value for \\'\\/1\\' but it was missing'
+    |        ) => ERROR(Expected a value for '/1' but it was missing)
+    |      ) => ERROR(Expected a value for '/1' but it was missing)
     |    ) => BOOL(false),
     |    :$[2] (
     |      %if (
@@ -468,8 +483,11 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:3,
     |          ~>$[2],
     |          NULL
-    |        )
-    |      ) => BOOL(false)
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/2\\' but it was missing' => 'Expected a value for \\'\\/2\\' but it was missing'
+    |        ) => ERROR(Expected a value for '/2' but it was missing)
+    |      ) => ERROR(Expected a value for '/2' but it was missing)
     |    ) => BOOL(false)
     |  ) => BOOL(false)
     |) => BOOL(false)'''.stripMargin('|')
@@ -522,7 +540,10 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:1 => json:1,
     |          ~>$[0] => json:true,
     |          NULL => NULL
-    |        ) => ERROR(Expected true \\(Boolean\\) to be equal to 1 \\(Integer\\))
+    |        ) => ERROR(Expected true \\(Boolean\\) to be equal to 1 \\(Integer\\)),
+    |        %error (
+    |          'Expected a value for \\'\\/0\\' but it was missing'
+    |        )
     |      ) => BOOL(false)
     |    ) => BOOL(false),
     |    :$[1] (
@@ -534,8 +555,11 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:2,
     |          ~>$[1],
     |          NULL
-    |        )
-    |      ) => BOOL(false)
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/1\\' but it was missing' => 'Expected a value for \\'\\/1\\' but it was missing'
+    |        ) => ERROR(Expected a value for '/1' but it was missing)
+    |      ) => ERROR(Expected a value for '/1' but it was missing)
     |    ) => BOOL(false),
     |    :$[2] (
     |      %if (
@@ -546,8 +570,11 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:3,
     |          ~>$[2],
     |          NULL
-    |        )
-    |      ) => BOOL(false)
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/2\\' but it was missing' => 'Expected a value for \\'\\/2\\' but it was missing'
+    |        ) => ERROR(Expected a value for '/2' but it was missing)
+    |      ) => ERROR(Expected a value for '/2' but it was missing)
     |    ) => BOOL(false)
     |  ) => BOOL(false)
     |) => BOOL(false)'''.stripMargin('|')
@@ -600,7 +627,10 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:1 => json:1,
     |          ~>$[0] => json:1,
     |          NULL => NULL
-    |        ) => BOOL(true)
+    |        ) => BOOL(true),
+    |        %error (
+    |          'Expected a value for \\'\\/0\\' but it was missing'
+    |        )
     |      ) => BOOL(true)
     |    ) => BOOL(true),
     |    :$[1] (
@@ -612,7 +642,10 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:2 => json:2,
     |          ~>$[1] => json:3,
     |          NULL => NULL
-    |        ) => ERROR(Expected 3 \\(Integer\\) to be equal to 2 \\(Integer\\))
+    |        ) => ERROR(Expected 3 \\(Integer\\) to be equal to 2 \\(Integer\\)),
+    |        %error (
+    |          'Expected a value for \\'\\/1\\' but it was missing'
+    |        )
     |      ) => BOOL(false)
     |    ) => BOOL(false),
     |    :$[2] (
@@ -624,7 +657,10 @@ class ExecutionPlanInterpreterSpec extends Specification {
     |          json:3 => json:3,
     |          ~>$[2] => json:3,
     |          NULL => NULL
-    |        ) => BOOL(true)
+    |        ) => BOOL(true),
+    |        %error (
+    |          'Expected a value for \\'\\/2\\' but it was missing'
+    |        )
     |      ) => BOOL(true)
     |    ) => BOOL(true)
     |  ) => BOOL(false)
@@ -1401,7 +1437,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
       |        ) => OK,
       |        %if (
       |          %check:exists (
-      |            ~>$.config.name[0] => xml:'<name>My Settings<\\/name>\'
+      |            ~>$.config.name[0] => xml:'<name>My Settings<\\/name>'
       |          ) => BOOL(true),
       |          :$.config.name[0] (
       |            :#text (
@@ -1409,17 +1445,17 @@ class ExecutionPlanInterpreterSpec extends Specification {
       |              %match:not-empty (
       |                'My Settings' => 'My Settings',
       |                %to-string (
-      |                  ~>$.config.name[0]['#text'] => xml:text:'My Settings\'
+      |                  ~>$.config.name[0]['#text'] => xml:text:'My Settings'
       |                ) => 'My Settings',
       |                json:{} => json:{}
       |              ) => BOOL(true)
       |            ) => BOOL(true),
       |            %expect:empty (
-      |              ~>$.config.name[0] => xml:'<name>My Settings<\\/name>\'
+      |              ~>$.config.name[0] => xml:'<name>My Settings<\\/name>'
       |            ) => BOOL(true)
       |          ) => BOOL(true),
       |          %error (
-      |            'Was expecting an XML element \\/config\\/name\\/0 but it was missing\'
+      |            'Was expecting an XML element \\/config\\/name\\/0 but it was missing'
       |          )
       |        ) => BOOL(true),
       |        %expect:count (
@@ -1434,7 +1470,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
       |        ) => OK,
       |        %if (
       |          %check:exists (
-      |            ~>$.config.sound[0] => xml:'<sound>\\n              \\n    <property name=\\"volume\\" value=\\"11\\"\\/>\\n              \\n    <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n              \\n    <property name=\\"\\" value=\\"\\"\\/>\\n            \\n<\\/sound>\'
+      |            ~>$.config.sound[0] => xml:'<sound>\\n              \\n    <property name=\\"volume\\" value=\\"11\\"\\/>\\n              \\n    <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n              \\n    <property name=\\"\\" value=\\"\\"\\/>\\n            \\n<\\/sound>'
       |          ) => BOOL(true),
       |          :$.config.sound[0] (
       |            :#text (
@@ -1446,7 +1482,7 @@ class ExecutionPlanInterpreterSpec extends Specification {
       |            ) => BOOL(true),
       |            %expect:only-entries (
       |              ['property'] => ['property'],
-      |              ~>$.config.sound[0] => xml:'<sound>\\n              \\n    <property name=\\"volume\\" value=\\"11\\"\\/>\\n              \\n    <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n              \\n    <property name=\\"\\" value=\\"\\"\\/>\\n            \\n<\\/sound>\'
+      |              ~>$.config.sound[0] => xml:'<sound>\\n              \\n    <property name=\\"volume\\" value=\\"11\\"\\/>\\n              \\n    <property name=\\"mixer\\" value=\\"standard\\"\\/>\\n              \\n    <property name=\\"\\" value=\\"\\"\\/>\\n            \\n<\\/sound>'
       |            ) => OK,
       |            #{'property must match by type and have at least 1 item'},
       |            %match:min-type (

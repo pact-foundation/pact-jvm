@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
@@ -52,7 +53,12 @@ public class PactMismatchConsumerPassesTest extends ExpectedToFailBase {
 
     @Override
     protected void assertException(Throwable e) {
-        assertThat(e.getMessage(),
-            containsString("Expected header 'testreqheader' to have value 'someotherheader' but was 'testreqheadervalue'"));
+        if (v2EngineEnabled()) {
+            assertThat(e.getMessage(),
+              containsString("Expected 'testreqheadervalue' (String) to be equal to 'someotherheader' (String)"));
+        } else {
+            assertThat(e.getMessage(),
+              containsString("Expected header 'testreqheader' to have value 'someotherheader' but was 'testreqheadervalue'"));
+        }
     }
 }

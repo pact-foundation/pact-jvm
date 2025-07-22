@@ -213,6 +213,9 @@ class JsonPlanBuilderSpec extends Specification {
     |          json:100,
     |          ~>$[0],
     |          NULL
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/0\\' but it was missing'
     |        )
     |      )
     |    ),
@@ -225,6 +228,9 @@ class JsonPlanBuilderSpec extends Specification {
     |          json:200,
     |          ~>$[1],
     |          NULL
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/1\\' but it was missing'
     |        )
     |      )
     |    ),
@@ -237,6 +243,9 @@ class JsonPlanBuilderSpec extends Specification {
     |          json:300,
     |          ~>$[2],
     |          NULL
+    |        ),
+    |        %error (
+    |          'Expected a value for \\'\\/2\\' but it was missing'
     |        )
     |      )
     |    )
@@ -418,23 +427,23 @@ class JsonPlanBuilderSpec extends Specification {
     |        json:{"min":2}
     |      ),
     |      %for-each (
-    |        'item[*]',
+    |        'item*',
     |        ~>$.item,
-    |        :$.item[*] (
+    |        :$['item*'] (
     |          %json:expect:entries (
     |            'OBJECT',
     |            ['a'],
-    |            ~>$.item[*]
+    |            ~>$['item*']
     |          ),
     |          %expect:only-entries (
     |            ['a'],
-    |            ~>$.item[*]
+    |            ~>$['item*']
     |          ),
-    |          :$.item[*].a (
+    |          :$['item*'].a (
     |            #{'a must match by type'},
     |            %match:type (
     |              json:100,
-    |              ~>$.item[*].a,
+    |              ~>$['item*'].a,
     |              json:{}
     |            )
     |          )

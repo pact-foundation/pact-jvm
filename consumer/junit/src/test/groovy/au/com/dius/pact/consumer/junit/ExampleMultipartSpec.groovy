@@ -8,14 +8,24 @@ import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.ContentType
+import org.junit.Assume
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+
+import static au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled
 
 /**
  * It is just an example how to build multipart request with multiple parts
  * Actual bodies of multipart requests are not compared
  */
+// TODO: Multipart bodies not supported yet
 class ExampleMultipartSpec {
+
+  @Before
+  void beforeMethod() {
+    Assume.assumeTrue(!v2EngineEnabled())
+  }
 
   @Rule
   @SuppressWarnings('PublicInstanceField')

@@ -247,12 +247,10 @@ object XMLPlanBuilder: PlanBodyBuilder  {
   ) {
     val text = textContent(element)
     val p = path.join("#text")
-    val noIndices = dropIndices(p)
-    val matchers = context.selectBestMatcher(p)
-      .filter { matcher -> !matcher.isTypeMatcher() }
-      .andRules(context.selectBestMatcher(noIndices)
-        .filter { matcher -> !matcher.isTypeMatcher() }
-      ).removeDuplicates()
+    val noMarkers = p.dropMarkers()
+    val noIndices = dropIndices(noMarkers)
+    val matchers = context.selectBestMatcher(noMarkers, noIndices)
+      .filter { !it.isTypeMatcher() }
     if (matchers.isNotEmpty()) {
       node.add(ExecutionPlanNode.annotation(Into { "${p.lastField()} ${matchers.generateDescription(false)}" }))
       val currentValue = ExecutionPlanNode.action("to-string")

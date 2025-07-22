@@ -17,7 +17,14 @@ class HttpRequestValueResolver(
     return if (field != null) {
       when (field) {
         "method" -> Result.Ok(NodeValue.STRING(request.method))
-        "path" -> Result.Ok(NodeValue.STRING(request.path))
+        "path" -> {
+          val match = URL_RE.find(request.path)
+          if (match != null) {
+            Result.Ok(NodeValue.STRING(request.path.replaceFirst(match.value, "")))
+          } else {
+            Result.Ok(NodeValue.STRING(request.path))
+          }
+        }
         "query" -> {
           if (path.len() == 2 || (path.len() == 3 && path.isWildcard())) {
             Result.Ok(NodeValue.MMAP(request.query.mapValues { entry -> entry.value.map { it ?: "" } }))
@@ -84,5 +91,9 @@ class HttpRequestValueResolver(
     } else {
       Result.Err("$path is not valid for a HTTP request")
     }
+  }
+
+  companion object {
+    val URL_RE = Regex("^https?://([^/]*)")
   }
 }

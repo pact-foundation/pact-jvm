@@ -1722,13 +1722,25 @@ class ExecutionPlanInterpreter(
     marker: String,
     index: Int
   ): DocPath {
-    return DocPath(path.tokens().flatMap {
-      when (it) {
-        is PathToken.Field -> if (it.name == marker) {
-          listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
-        } else listOf(it)
-        else -> listOf(it)
-      }
-    })
+    return if (path.expr.startsWith("$['$*']")) {
+      // Special case where for-each is applied at the root
+      DocPath(listOf(PathToken.Root, PathToken.Index(index)) + path.tokens().drop(2).flatMap {
+        when (it) {
+          is PathToken.Field -> if (it.name == marker) {
+            listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
+          } else listOf(it)
+          else -> listOf(it)
+        }
+      })
+    } else {
+      DocPath(path.tokens().flatMap {
+        when (it) {
+          is PathToken.Field -> if (it.name == marker) {
+            listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
+          } else listOf(it)
+          else -> listOf(it)
+        }
+      })
+    }
   }
 }

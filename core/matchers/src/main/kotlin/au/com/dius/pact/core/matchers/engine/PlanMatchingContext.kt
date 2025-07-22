@@ -10,7 +10,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
 
 /** Configuration for driving behaviour of the execution */
-data class MatchingConfiguration(
+data class MatchingConfiguration @JvmOverloads constructor(
   /** If extra keys/values are allowed (and ignored) */
   val allowUnexpectedEntries: Boolean = false,
   /** If the executed plan should be logged */
