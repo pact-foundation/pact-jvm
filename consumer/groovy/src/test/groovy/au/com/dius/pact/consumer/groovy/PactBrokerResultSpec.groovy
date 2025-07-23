@@ -5,7 +5,10 @@ import groovy.json.JsonSlurper
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
+import static au.com.dius.pact.core.matchers.engine.V2MatchingEngine.v2EngineEnabled
+
 @IgnoreIf({ os.windows }) // Failing on GH action Windows agents
+@IgnoreIf({ v2EngineEnabled() }) // Error messages will be different with V2 engine
 @SuppressWarnings('LineLength')
 class PactBrokerResultSpec extends Specification {
 
