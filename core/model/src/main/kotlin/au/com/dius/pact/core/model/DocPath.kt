@@ -5,48 +5,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-//  /// Mutates this path by pushing another path onto the end. Will drop the root marker from the
-//  /// other path
-//  pub fn push_path(&mut self, path: &DocPath) -> &mut Self {
-//    for token in &path.path_tokens {
-//      if token != &PathToken::Root {
-//        self.push(token.clone());
-//      }
-//    }
-//    self
-//  }
-
-//  /// Returns a copy of this path will all parts lower case
-//  pub fn to_lower_case(&self) -> DocPath {
-//    DocPath {
-//      path_tokens: self.path_tokens.iter().map(|p| match p {
-//        PathToken::Field(f) => PathToken::Field(f.to_lowercase()),
-//        _ => p.clone()
-//      }).collect(),
-//      expr: self.expr.to_lowercase()
-//    }
-//  }
-//
-//
-//  /// Creates a new path with the last `n` parts removed.
-//  pub fn drop(&self, n: usize) -> Self {
-//    let vec = self.path_tokens.iter()
-//      .dropping_back(n)
-//      .cloned()
-//      .collect_vec();
-//    if vec.is_empty() {
-//      Self::root()
-//    } else {
-//      let mut path = DocPath {
-//        path_tokens: vec,
-//        expr: "".to_string()
-//      };
-//      path.expr = path.build_expr();
-//      path
-//    }
-//  }
-//}
-
 @Suppress("TooManyFunctions")
 data class DocPath(
   val pathTokens: List<PathToken>,
@@ -218,49 +176,6 @@ data class DocPath(
     }
     return DocPath(pathTokens + pathToken, exp)
   }
-
-//  /// Creates a new path by cloning this one and joining the index onto the end. Paths that end
-//  /// with `*` will have the `*` replaced with the index.
-//  pub fn join_index(&self, index: usize) -> Self {
-//    let mut path = self.clone();
-//    match self.path_tokens.last() {
-//      Some(PathToken::Root) => { path.push_index(index); }
-//      Some(PathToken::Field(_)) => { path.push_index(index); }
-//      Some(PathToken::Index(_)) => { path.push_index(index); }
-//      Some(PathToken::Star) | Some(PathToken::StarIndex) => {
-//        if let Some(part) = path.path_tokens.last_mut() {
-//          *part = PathToken::Index(index);
-//          path.expr = path.build_expr();
-//        } else {
-//          path.push_index(index);
-//        }
-//      }
-//      None => { path.push_index(index); }
-//    }
-//    path
-//  }
-//
-//  /// Creates a new path by cloning this one and joining the field onto the end. Paths that end
-//  /// with `*` will have the `*` replaced with the field.
-//  pub fn join_field<S: Into<String>>(&self, name: S) -> Self {
-//    let mut path = self.clone();
-//    match self.path_tokens.last() {
-//      Some(PathToken::Root) => { path.push_field(name.into()); }
-//      Some(PathToken::Field(_)) => { path.push_field(name.into()); }
-//      Some(PathToken::Index(_)) => { path.push_field(name.into()); }
-//      Some(PathToken::Star) => {
-//        if let Some(part) = path.path_tokens.last_mut() {
-//          *part = PathToken::Field(name.into());
-//          path.expr = path.build_expr();
-//        } else {
-//          path.push_field(name.into());
-//        }
-//      }
-//      Some(PathToken::StarIndex) => { path.push_field(name.into()); }
-//      None => { path.push_field(name.into()); }
-//    }
-//    path
-//  }
 
   /** If this path (as a string) ends with the given string */
   fun endsWith(suffix: String): Boolean = this.expr.endsWith(suffix)

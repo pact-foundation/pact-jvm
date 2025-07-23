@@ -15,11 +15,6 @@ enum class Terminator {
   CONTAINERS
 }
 
-//  /// Pushes the node onto the front of the list
-//  pub fn push_node(&mut self, node: ExecutionPlanNode) {
-//    self.children.insert(0, node.into());
-//  }
-
 /**
  * Node in an executable plan tree
  */
@@ -584,15 +579,6 @@ data class ExecutionPlanNode(
         mutableListOf()
       )
     }
-
-//  /// Constructor for an apply node
-//  pub fn apply() -> ExecutionPlanNode {
-//    ExecutionPlanNode {
-//      node_type: PlanNodeType::PIPELINE,
-//      result: None,
-//      children: vec![],
-//    }
-//  }
 
     /** Constructor for the splat node */
     fun splat(): ExecutionPlanNode {

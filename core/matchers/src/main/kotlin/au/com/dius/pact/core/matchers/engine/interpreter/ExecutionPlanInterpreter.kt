@@ -252,12 +252,8 @@ class ExecutionPlanInterpreter(
         "or" -> executeOr(valueResolver, node, actionPath)
         "tee" -> executeTee(valueResolver, node, actionPath)
         "apply" -> executeApply(node)
-        //        "push" => self.execute_push(node),
-        //        "pop" => self.execute_pop(node),
         "json:parse" -> executeJsonParse(action, valueResolver, node, actionPath)
         "xml:parse" -> executeXmlParse(action, valueResolver, node, actionPath)
-        //        #[cfg(feature = "xml")]
-        //        "xml:tag-name" => self.execute_xml_tag_name(action, valueResolver, node, actionPath),
         "xml:value" -> executeXmlValue(action, valueResolver, node, actionPath)
         "xml:attributes" -> executeXmlAttributes(action, valueResolver, node, actionPath)
         "json:expect:empty" -> executeJsonExpectEmpty(action, valueResolver, node, actionPath)

@@ -330,12 +330,6 @@ sealed class NodeValue: Into<NodeValue> {
       actionPath: List<String>,
       context: PlanMatchingContext
     ): String? {
-    //      #[cfg(feature = "xml")]
-    //      NodeValue::XML(xml_value) => if let Some(actual) = actual.as_xml() {
-    //        xml_value.matches_with(actual, matcher, cascaded)
-    //      } else {
-    //        Err(anyhow!("Was expecting an XML value but got {}", actual))
-    //      },
       return when (expected) {
         is JSON -> {
           if (actual is NULL || actual is JSON) {

@@ -3,23 +3,6 @@ package au.com.dius.pact.core.matchers.engine
 import au.com.dius.pact.core.support.Result
 import java.util.Base64
 
-//  /// If the result is an error result
-//  pub fn is_err(&self) -> bool {
-//    match self {
-//      NodeResult::ERROR(_) => true,
-//      _ => false
-//    }
-//  }
-//
-//  /// If the result is an ok result
-//  pub fn is_ok(&self) -> bool {
-//    match self {
-//      NodeResult::OK => true,
-//      _ => false
-//    }
-//  }
-//}
-
 /** Enum to store the result of executing a node */
 sealed class NodeResult {
   /** Default value to make a node as successfully executed */
