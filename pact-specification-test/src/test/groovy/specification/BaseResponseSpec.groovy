@@ -1,6 +1,7 @@
 package specification
 
 import au.com.dius.pact.core.model.DefaultPactReader
+import au.com.dius.pact.core.model.HttpResponse
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonParser
 import groovy.util.logging.Slf4j
@@ -10,7 +11,7 @@ import spock.lang.Specification
 class BaseResponseSpec extends Specification {
 
   static List loadTestCases(String testDir) {
-    def resources = ResponseSpecificationV1Spec.getResource(testDir)
+    def resources = BaseResponseSpec.getResource(testDir)
     def file = new File(resources.toURI())
     def result = []
     file.eachDir { d ->
@@ -26,6 +27,30 @@ class BaseResponseSpec extends Specification {
           'application/json')
         result << [d.name, f.name, jsonMap.comment, jsonMap.match, jsonMap.match ? 'should match' : 'should not match',
                    expected, actual]
+      }
+    }
+    result
+  }
+
+  static List loadV4TestCases(String testDir) {
+    def resources = BaseRequestSpec.getResource(testDir)
+    def file = new File(resources.toURI())
+    def result = []
+    file.eachDir { d ->
+      d.eachFile { f ->
+        def json = f.withReader { JsonParser.INSTANCE.parseReader(it) }
+        def jsonMap = Json.INSTANCE.toMap(json)
+        def expected = HttpResponse.fromJson(json.asObject().get('expected'))
+        def actual = HttpResponse.fromJson(json.asObject().get('actual'))
+        result << [
+          d.name,
+          f.name,
+          jsonMap.comment,
+          jsonMap.match,
+          jsonMap.match ? 'should match' : 'should not match',
+          expected,
+          actual
+        ]
       }
     }
     result

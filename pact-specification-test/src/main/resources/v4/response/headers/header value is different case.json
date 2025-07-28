@@ -3,12 +3,12 @@
   "comment": "Headers values are case sensitive",
   "expected" : {
     "headers": {
-      "Accept": "alligators"
+      "X-Accept": "alligators"
     }
   },
   "actual": {
     "headers": {
-      "Accept": "Alligators"
+      "X-Accept": "Alligators"
     }
   }
 }

@@ -235,6 +235,7 @@ data class HttpResponse @JvmOverloads constructor(
   }
 
   companion object {
+    @JvmStatic
     fun fromJson(json: JsonValue): HttpResponse {
       val status = when {
         json.has("status") -> {
