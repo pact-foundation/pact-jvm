@@ -571,13 +571,7 @@ class XMLPlanBuilderSpec extends Specification {
     |        ~>$.values
     |      ),
     |      :$.values (
-    |        :#text (
-    |          %expect:empty (
-    |            %to-string (
-    |              ~>$.values['#text']
-    |            )
-    |          )
-    |        ),
+    |        :#text (),
     |        %expect:only-entries (
     |          ['value'],
     |          ~>$.values
@@ -596,15 +590,7 @@ class XMLPlanBuilderSpec extends Specification {
     |              ~>$.values['value*']
     |            ),
     |            :$.values['value*'] (
-    |              :#text (
-    |                %match:equality (
-    |                  '100',
-    |                  %to-string (
-    |                    ~>$.values['value*']['#text']
-    |                  ),
-    |                  NULL
-    |                )
-    |              ),
+    |              :#text (),
     |              %expect:empty (
     |                ~>$.values['value*']
     |              )

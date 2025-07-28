@@ -1,12 +1,12 @@
 package au.com.dius.pact.core.matchers
 
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
-object HeaderMatcher : KLogging() {
+private val logger = KotlinLogging.logger {}
+
+object HeaderMatcher {
 
   fun matchHeaderWithParameters(headerKey: String, expected: String, actual: String): HeaderMismatch? {
-    logger.debug { "Comparing $headerKey header: '$actual' to '$expected'" }
-
     val expectedValues = expected.split(';').map { it.trim() }
     val actualValues = actual.split(';').map { it.trim() }
     val expectedValue = expectedValues.first()
@@ -16,7 +16,7 @@ object HeaderMatcher : KLogging() {
     val headerMismatch = HeaderMismatch(headerKey, expected, actual,
       "Expected header '$headerKey' to have value '$expected' but was '$actual'")
 
-    return if (expectedValue.equals(actualValue, ignoreCase = true)) {
+    val mismatch = if (expectedValue.equals(actualValue, ignoreCase = true)) {
       expectedParameters.map { entry ->
         if (actualParameters.contains(entry.key)) {
           if (entry.value.equals(actualParameters[entry.key], ignoreCase = true)) null
@@ -26,6 +26,10 @@ object HeaderMatcher : KLogging() {
     } else {
       headerMismatch
     }
+
+    logger.debug { "Comparing $headerKey header: '$actual' to '$expected' -> $mismatch" }
+
+    return mismatch
   }
 
   @JvmStatic

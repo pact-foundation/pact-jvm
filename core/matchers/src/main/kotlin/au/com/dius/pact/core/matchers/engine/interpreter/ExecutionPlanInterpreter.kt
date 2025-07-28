@@ -256,7 +256,8 @@ class ExecutionPlanInterpreter(
         "xml:parse" -> executeXmlParse(action, valueResolver, node, actionPath)
         "xml:value" -> executeXmlValue(action, valueResolver, node, actionPath)
         "xml:attributes" -> executeXmlAttributes(action, valueResolver, node, actionPath)
-        "json:expect:empty" -> executeJsonExpectEmpty(action, valueResolver, node, actionPath)
+        "json:expect:empty" -> executeJsonExpectEmpty(action, valueResolver, node, actionPath, true)
+        "json:expect:not-empty" -> executeJsonExpectEmpty(action, valueResolver, node, actionPath, false)
         "json:match:length" -> executeJsonMatchLength(action, valueResolver, node, actionPath)
         "json:expect:entries" -> executeJsonExpectEntries(action, valueResolver, node, actionPath)
         "check:exists" -> executeCheckExists(action, valueResolver, node, actionPath)
@@ -673,7 +674,8 @@ class ExecutionPlanInterpreter(
     action: String,
     valueResolver: ValueResolver,
     node: ExecutionPlanNode,
-    actionPath: List<String>
+    actionPath: List<String>,
+    expectEmpty: Boolean
   ): ExecutionPlanNode {
     return when (val result = validateTwoArgs(node, action, valueResolver, actionPath)) {
       is Result.Ok -> {
@@ -704,15 +706,34 @@ class ExecutionPlanInterpreter(
             children = mutableListOf(first, second))
         }
 
-        val error = when (jsonValue) {
-          is JsonValue.Array -> if (jsonValue.values.isEmpty()) null
+        val error = if (expectEmpty) {
+          when (jsonValue) {
+            is JsonValue.Array -> if (jsonValue.values.isEmpty()) null
             else "Expected JSON Array (${jsonValue}) to be empty"
-          JsonValue.Null -> null
-          is JsonValue.Object -> if (jsonValue.entries.isEmpty()) null
+
+            JsonValue.Null -> null
+            is JsonValue.Object -> if (jsonValue.entries.isEmpty()) null
             else "Expected JSON Object (${jsonValue}) to be empty"
-          is JsonValue.StringValue -> if (jsonValue.value.chars.isEmpty()) null
+
+            is JsonValue.StringValue -> if (jsonValue.value.chars.isEmpty()) null
             else "Expected JSON String (${jsonValue}) to be empty"
-          else -> "Expected json (${jsonValue}) to be empty"
+
+            else -> "Expected json (${jsonValue}) to be empty"
+          }
+        } else {
+          when (jsonValue) {
+            is JsonValue.Array -> if (!jsonValue.values.isEmpty()) null
+            else "Expected JSON Array (${jsonValue}) to not be empty"
+
+            JsonValue.Null -> "Expected JSON value to not be empty but was NULL"
+            is JsonValue.Object -> if (!jsonValue.entries.isEmpty()) null
+            else "Expected JSON Object (${jsonValue}) to not be empty"
+
+            is JsonValue.StringValue -> if (!jsonValue.value.chars.isEmpty()) null
+            else "Expected JSON String (${jsonValue}) to not be empty"
+
+            else -> null
+          }
         }
         if (error == null) {
           node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)),

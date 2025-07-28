@@ -171,8 +171,13 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     parentNode: ExecutionPlanNode
   ) {
     val children = groupChildren(element)
+    val noIndices = dropIndices(path)
+    val matchers = context.selectBestMatcher(path)
+      .andRules(context.selectBestMatcher(noIndices))
+      .filter { matcher -> matcher.isTypeMatcher() }
+      .removeDuplicates()
 
-    if (!context.config.allowUnexpectedEntries) {
+    if (!context.config.allowUnexpectedEntries || matchers.isNotEmpty()) {
       if (children.isEmpty()) {
         parentNode.add(
           ExecutionPlanNode.action("expect:empty")
@@ -196,19 +201,26 @@ object XMLPlanBuilder: PlanBodyBuilder  {
         .filter { matcher -> matcher.isTypeMatcher() }
         .removeDuplicates()
       if (matchers.isEmpty()) {
-        parentNode.add(
-          ExecutionPlanNode.action("expect:count")
-            .add(ExecutionPlanNode.valueNode(NodeValue.UINT(elements.size.toUInt())))
-            .add(ExecutionPlanNode.resolveCurrentValue(p))
-            .add(
-              ExecutionPlanNode.action("join")
-                .add(ExecutionPlanNode.valueNode(
-                  "Expected ${elements.size} <${childName}> child element${if (elements.size > 1) "s" else ""}" +
-                    " but there were "))
-                .add(ExecutionPlanNode.action("length")
-                  .add(ExecutionPlanNode.resolveCurrentValue(p)))
-            )
-        )
+        if (!context.config.allowUnexpectedEntries) {
+          val plural = if (elements.size > 1) "s" else ""
+          parentNode.add(
+            ExecutionPlanNode.action("expect:count")
+              .add(ExecutionPlanNode.valueNode(NodeValue.UINT(elements.size.toUInt())))
+              .add(ExecutionPlanNode.resolveCurrentValue(p))
+              .add(
+                ExecutionPlanNode.action("join")
+                  .add(
+                    ExecutionPlanNode.valueNode(
+                      "Expected ${elements.size} <${childName}> child element$plural but there were "
+                    )
+                  )
+                  .add(
+                    ExecutionPlanNode.action("length")
+                      .add(ExecutionPlanNode.resolveCurrentValue(p))
+                  )
+              )
+          )
+        }
 
         if (elements.size == 1) {
           processElement(context, elements[0], 0, path, parentNode)
@@ -250,26 +262,38 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     val noMarkers = p.dropMarkers()
     val noIndices = dropIndices(noMarkers)
     val matchers = context.selectBestMatcher(noMarkers, noIndices)
-      .filter { !it.isTypeMatcher() }
-    if (matchers.isNotEmpty()) {
-      node.add(ExecutionPlanNode.annotation(Into { "${p.lastField()} ${matchers.generateDescription(false)}" }))
-      val currentValue = ExecutionPlanNode.action("to-string")
-      currentValue.add(ExecutionPlanNode.resolveCurrentValue(p))
-      node.add(buildMatchingRuleNode(ExecutionPlanNode.valueNode(text),
-        currentValue, matchers, false))
-    } else {
-      if (text.isNotEmpty() && text.isNotBlank()) {
-        val matchNode = ExecutionPlanNode.action("match:equality")
-        matchNode
-          .add(ExecutionPlanNode.valueNode(NodeValue.STRING(text)))
-          .add(ExecutionPlanNode.action("to-string")
-            .add(ExecutionPlanNode.resolveCurrentValue(p)))
-          .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
-        node.add(matchNode)
+      .removeDuplicates()
+    if (!matchers.typeMatcherDefined()) {
+      if (matchers.isNotEmpty()) {
+        node.add(ExecutionPlanNode.annotation(Into { "${p.lastField()} ${matchers.generateDescription(false)}" }))
+        val currentValue = ExecutionPlanNode.action("to-string")
+        currentValue.add(ExecutionPlanNode.resolveCurrentValue(p))
+        node.add(
+          buildMatchingRuleNode(
+            ExecutionPlanNode.valueNode(text),
+            currentValue, matchers, false
+          )
+        )
       } else {
-        node.add(ExecutionPlanNode.action("expect:empty")
-          .add(ExecutionPlanNode.action("to-string")
-            .add(ExecutionPlanNode.resolveCurrentValue(p))))
+        if (text.isNotEmpty() && text.isNotBlank()) {
+          val matchNode = ExecutionPlanNode.action("match:equality")
+          matchNode
+            .add(ExecutionPlanNode.valueNode(NodeValue.STRING(text)))
+            .add(
+              ExecutionPlanNode.action("to-string")
+                .add(ExecutionPlanNode.resolveCurrentValue(p))
+            )
+            .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+          node.add(matchNode)
+        } else {
+          node.add(
+            ExecutionPlanNode.action("expect:empty")
+              .add(
+                ExecutionPlanNode.action("to-string")
+                  .add(ExecutionPlanNode.resolveCurrentValue(p))
+              )
+          )
+        }
       }
     }
   }

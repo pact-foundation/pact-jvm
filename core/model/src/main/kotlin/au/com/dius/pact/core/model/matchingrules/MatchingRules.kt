@@ -16,6 +16,7 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.json.map
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.lang.RuntimeException
+import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
@@ -855,6 +856,11 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     return rules.any { matchers.contains(it.javaClass) }
   }
 
+  /** If there is a type matcher defined for this group */
+  fun typeMatcherDefined(): Boolean {
+    return rules.any { TYPE_MATCHERS.contains(it::class) }
+  }
+
   /**
    * Generates a description of the matching rules that can be displayed in a test report.
    * @param forCollection Changes the description for collections or single items.
@@ -935,6 +941,13 @@ data class MatchingRuleGroup @JvmOverloads constructor(
     private const val TIMESTAMP = "timestamp"
     private const val TIME = "time"
     private const val DATE = "date"
+
+    private val TYPE_MATCHERS: Set<KClass<out MatchingRule>> = setOf(
+      TypeMatcher::class,
+      MinTypeMatcher::class,
+      MaxTypeMatcher::class,
+      MinMaxTypeMatcher::class
+    )
   }
 }
 

@@ -160,8 +160,10 @@ object JsonPlanBuilder: PlanBodyBuilder  {
       val template = expectedJson.values.firstOrNull()
       if (template != null) {
         val forEachNode = ExecutionPlanNode.action("for-each")
-        val marker = (path.lastField() ?: path.toString()) + "*"
+        val marker = if (path.isRoot()) "$*"
+          else (path.lastField() ?: path.toString()) + "*"
         forEachNode.add(ExecutionPlanNode.valueNode(marker))
+
         val itemPath = (path.parent() ?: path).join(marker)
         forEachNode.add(ExecutionPlanNode.resolveCurrentValue(path))
         val itemNode = ExecutionPlanNode.container(itemPath.toString())
@@ -250,9 +252,10 @@ object JsonPlanBuilder: PlanBodyBuilder  {
                   "Expected a value for '${itemPath.asJsonPointer().unwrap()}' but it was missing"))
             )
             itemNode.add(presenceCheck)
-            rootNode.add(itemNode)
           }
         }
+
+        rootNode.add(itemNode)
       }
     }
   }
