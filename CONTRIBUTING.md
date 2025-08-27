@@ -10,7 +10,7 @@
 
 Most of Pact-JVM is written in Kotlin and is built with Gradle. Tests are written using [Spock](https://spockframework.org/).
 
-Before you build, install java 11, `Gradle` and `Maven` (Maven is required to build the Maven plugin).
+Before you build, install java 17, `Gradle` and `Maven` (Maven is required to build the Maven plugin).
 
 #### To build the libraries:
 
