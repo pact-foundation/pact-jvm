@@ -19,7 +19,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew --no-daemon :compatibility-suite:v1
     - name: Archive cucumber results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: cucumber-report-v1
         path: compatibility-suite/build/cucumber-report-v1.html
@@ -36,7 +36,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --no-daemon :compatibility-suite:v2
       - name: Archive cucumber results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cucumber-report-v2
           path: compatibility-suite/build/cucumber-report-v2.html
@@ -53,7 +53,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --no-daemon :compatibility-suite:v3
       - name: Archive cucumber results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cucumber-report-v3
           path: compatibility-suite/build/cucumber-report-v3.html
@@ -70,7 +70,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --no-daemon :compatibility-suite:v4
       - name: Archive cucumber results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cucumber-report-v4
           path: compatibility-suite/build/cucumber-report-v4.html
