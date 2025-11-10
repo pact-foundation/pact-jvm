@@ -11,13 +11,13 @@ mainClassName = 'au.com.dius.pact.server.Server'
 dependencies {
   implementation project(':consumer')
   implementation project(':core:pactbroker')
-  implementation 'ch.qos.logback:logback-core:1.4.4'
-  implementation 'ch.qos.logback:logback-classic:1.4.4'
-  implementation 'com.github.scopt:scopt_2.12:3.5.0'
-  implementation('com.typesafe.scala-logging:scala-logging_2.12:3.7.2') {
+  implementation 'ch.qos.logback:logback-core:1.5.20'
+  implementation 'ch.qos.logback:logback-classic:1.5.20'
+  implementation 'com.github.scopt:scopt_2.12:3.7.1'
+  implementation('com.typesafe.scala-logging:scala-logging_2.12:3.9.6') {
       exclude group: 'org.scala-lang'
   }
-  implementation( 'ws.unfiltered:unfiltered-netty-server_2.12:0.10.4') {
+  implementation('ws.unfiltered:unfiltered-netty-server_2.12:0.12.1') {
     exclude module: 'netty-transport-native-kqueue'
     exclude module: 'netty-transport-native-epoll'
   }
