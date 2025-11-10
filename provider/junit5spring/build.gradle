@@ -8,18 +8,18 @@ group = 'au.com.dius.pact.provider'
 dependencies {
   api project(':provider:junit5')
 
-  implementation 'org.springframework:spring-context:5.3.20'
-  implementation 'org.springframework:spring-test:5.3.20'
-  implementation 'org.springframework:spring-web:5.3.20'
-  implementation 'org.springframework:spring-webflux:5.3.20'
+  implementation 'org.springframework:spring-context:5.3.39'
+  implementation 'org.springframework:spring-test:5.3.39'
+  implementation 'org.springframework:spring-web:5.3.39'
+  implementation 'org.springframework:spring-webflux:5.3.39'
   implementation 'javax.servlet:javax.servlet-api:3.1.0'
   implementation 'org.hamcrest:hamcrest:2.2'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'javax.mail:mail:1.5.0-b01'
 
-  testImplementation 'org.springframework.boot:spring-boot-test:2.5.14'
-  testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure:2.5.14'
-  testImplementation 'org.springframework:spring-webmvc:5.3.20'
+  testImplementation 'org.springframework.boot:spring-boot-test:2.7.18'
+  testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure:2.7.18'
+  testImplementation 'org.springframework:spring-webmvc:5.3.39'
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.yaml:snakeyaml:1.33'
 }

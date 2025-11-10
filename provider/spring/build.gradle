@@ -9,18 +9,20 @@ dependencies {
   api project(':provider:junit')
 
   implementation 'org.apache.groovy:groovy'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.5.14'
-  implementation group: 'org.springframework', name: 'spring-webmvc', version: '5.3.19'
-  implementation group: 'org.springframework', name: 'spring-webflux', version: '5.3.19'
-  implementation group: 'org.springframework', name: 'spring-test', version: '5.3.19'
-  implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.13.4'
-  runtimeOnly group: 'org.synchronoss.cloud', name: 'nio-multipart-parser', version: '1.1.0'
+  implementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
+  implementation 'org.springframework:spring-webmvc:5.3.39'
+  implementation 'org.springframework:spring-webflux:5.3.39'
+  implementation 'org.springframework:spring-test:5.3.39'
+  implementation 'javax.servlet:javax.servlet-api:3.1.0'
+  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.20.1'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'javax.mail:mail:1.5.0-b01'
   implementation 'org.apache.commons:commons-collections4'
 
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.5.14'
+  runtimeOnly 'org.synchronoss.cloud:nio-multipart-parser:1.1.0'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-web:2.7.18'
   testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.mockito:mockito-core:5.20.0'
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
 }
