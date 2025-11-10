@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 
 import java.util.function.Consumer;
 
@@ -34,6 +35,41 @@ public class LambdaDsl {
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
         array.accept(dslArray);
         return dslArray;
+    }
+
+    /**
+     * Array where each item must match the provided example.
+     */
+    public static LambdaDslJsonArray newJsonArrayLike(Consumer<LambdaDslObject> obj) {
+      final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
+      pactDslJsonArray.getMatchers().addRule("", TypeMatcher.INSTANCE);
+      final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+
+      final PactDslJsonBody pactObject = pactDslJsonArray.object();
+      LambdaDslObject object = new LambdaDslObject(pactObject);
+      obj.accept(object);
+      pactObject.closeObject();
+
+      return dslArray;
+    }
+
+    /**
+     * Array where each item must match the provided example.
+     * @param examples Number of examples to populate the array with
+     */
+    public static LambdaDslJsonArray newJsonArrayLike(Integer examples, Consumer<LambdaDslObject> obj) {
+      final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
+      pactDslJsonArray.getMatchers().addRule("", TypeMatcher.INSTANCE);
+
+      pactDslJsonArray.setNumberExamples(examples);
+      final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+
+      final PactDslJsonBody pactObject = pactDslJsonArray.object();
+      LambdaDslObject object = new LambdaDslObject(pactObject);
+      obj.accept(object);
+      pactObject.closeObject();
+
+      return dslArray;
     }
 
     /**
