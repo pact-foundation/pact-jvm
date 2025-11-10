@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'ProviderThatAcceptsGZippedBodies', pactVersion = PactSpecVersion.V3)
-@MockServerConfig(port = '42567', implementation = MockServerImplementation.KTorServer)
+@MockServerConfig(implementation = MockServerImplementation.KTorServer)
 class KTorGZippedBodyTest {
   @Pact(consumer = 'KTorGZippedBodyTestConsumer')
   RequestResponsePact pact(PactDslWithProvider builder) {
