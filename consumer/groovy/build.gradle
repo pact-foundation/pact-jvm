@@ -22,7 +22,7 @@ dependencies {
   testImplementation 'org.apache.groovy:groovy-xml'
   testImplementation 'org.apache.groovy:groovy-dateutil'
 
-  groovyDoc 'org.apache.groovy:groovy-all:4.0.11'
+  groovyDoc 'org.apache.groovy:groovy-all:4.0.29'
 }
 
 compileGroovy {
