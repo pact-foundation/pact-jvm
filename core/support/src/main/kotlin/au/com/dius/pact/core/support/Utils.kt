@@ -60,7 +60,7 @@ object Utils {
     var port: Int? = null
     var count = 0
     while (port == null && count < 20) {
-      val randomPort = RandomUtils.nextInt(lower, upper)
+      val randomPort = RandomUtils.insecure().randomInt(lower, upper)
       if (portAvailable(randomPort)) {
         port = randomPort
       }

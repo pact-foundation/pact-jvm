@@ -11,6 +11,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.ClassicHttpResponse
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.StringEntity
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
@@ -32,7 +33,7 @@ class SimpleHttp(private val baseUrl: String) {
     for ((key, value) in  headers) {
       httpGet.addHeader(key, value)
     }
-    return Response(client.execute(httpGet))
+    return client.execute(httpGet) { response -> Response(response) }
   }
 
   @JvmOverloads
@@ -47,7 +48,7 @@ class SimpleHttp(private val baseUrl: String) {
       httpPost.addHeader(key, value)
     }
     httpPost.entity = StringEntity(body, ContentType.parse(contentType))
-    return Response(client.execute(httpPost))
+    return client.execute(httpPost) { response -> Response(response) }
   }
 
   @JvmOverloads
@@ -62,12 +63,12 @@ class SimpleHttp(private val baseUrl: String) {
       httpPut.addHeader(key, value)
     }
     httpPut.entity = StringEntity(body, ContentType.parse(contentType))
-    return Response(client.execute(httpPut))
+    return client.execute(httpPut) { response -> Response(response) }
   }
 
   fun delete(path: String): Response {
     val httpDelete = HttpDelete(buildUrl(baseUrl, path, emptyMap()))
-    return Response(client.execute(httpDelete))
+    return client.execute(httpDelete) { response -> Response(response) }
   }
 
   companion object {
@@ -87,13 +88,14 @@ class Response(val response: ClassicHttpResponse) {
   val contentType: String = if (response.entity != null && response.entity.contentType != null) {
     response.entity.contentType
   } else "text/plain"
+  val body = response.entity?.content?.readBytes()
 
   fun getReader(): Reader {
-    return InputStreamReader(response.entity.content)
+    return InputStreamReader(ByteArrayInputStream(body))
   }
 
   fun getInputStream(): InputStream {
-    return response.entity.content
+    return ByteArrayInputStream(body)
   }
 
   fun getHeaders(): Map<String, List<String>> {
@@ -110,15 +112,15 @@ class Response(val response: ClassicHttpResponse) {
   }
 
   fun bodyToMap(): Map<String, Any?> {
-    return when (response.entity.contentType) {
+    return when (contentType) {
       "application/x-www-form-urlencoded" -> {
-        response.entity.content.reader().readText().split('&').map {
+        getReader().readText().split('&').map {
           val values = it.split('=', limit = 2)
           values[0] to values[1]
         }.associate { it }
       }
       "application/json" -> {
-        toMap(JsonParser.parseStream(response.entity.content))
+        toMap(JsonParser.parseStream(getInputStream()))
       }
       else -> emptyMap()
     }
