@@ -115,14 +115,14 @@ ask('Tag and Push commits?: [Y]') {
 ask('Publish artifacts to maven central?: [Y]') {
   executeOnShell 'rm -rf build/staging-deploy'
   executeOnShell './gradlew clean publish -S -x :provider:gradle:publish'
-  executeOnShell 'jrelease publish -od build'
+  executeOnShell 'jreleaser deploy --output-directory build'
 }
 
 ask('Publish Gradle plugin?: [Y]') {
   executeOnShell 'rm -rf provider/gradle/build/staging-deploy/'
   executeOnShell './gradlew :provider:gradle:publish'
   executeOnShell 'rm -rf provider/gradle/build/staging-deploy/au/com/dius/pact/au.com.dius.pact.gradle.plugin/'
-  executeOnShell 'cd provider/gradle && jrelease publish -od build'
+  executeOnShell 'cd provider/gradle && jreleaser deploy --output-directory build'
   executeOnShell './gradlew :provider:gradle:publish'
   executeOnShell './gradlew :provider:gradle:publishPlugins'
 }
@@ -134,7 +134,9 @@ ask('Publish pacts to pact-foundation.pactflow.io?: [Y]') {
 def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle"
-  executeOnShell("git add buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle")
+  executeOnShell "sed -i -e \"s/version: ${releaseVer}/version: ${nextVer}/\" jreleaser.yml"
+  executeOnShell "sed -i -e \"s/version: ${releaseVer}/version: ${nextVer}/\" provider/gradle/jreleaser.yml"
+  executeOnShell("git add jreleaser.yml provider/gradle/jreleaser.yml buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle")
   executeOnShell("git diff --cached")
   ask("Commit and push this change?: [Y]") {
     executeOnShell("git commit -m 'bump version to $nextVer'")
