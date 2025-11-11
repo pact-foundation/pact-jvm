@@ -1,6 +1,6 @@
 project:
   name: au.com.dius.pact
-  version: 4.6.18
+  version: 4.6.19
   description: Pact JVM
   longDescription: Pact JVM
   license: MIT
