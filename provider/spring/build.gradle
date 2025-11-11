@@ -14,7 +14,7 @@ dependencies {
   implementation 'org.springframework:spring-webflux:5.3.39'
   implementation 'org.springframework:spring-test:5.3.39'
   implementation 'javax.servlet:javax.servlet-api:4.0.1'
-  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.19.0'
+  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.20.1'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'javax.mail:mail:1.5.0-b01'
   implementation 'org.apache.commons:commons-collections4'
@@ -23,5 +23,6 @@ dependencies {
 
   testImplementation 'org.springframework.boot:spring-boot-starter-web:2.7.18'
   testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.mockito:mockito-core:5.20.0'
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
 }

@@ -56,8 +56,8 @@ jobs:
         jdk: [ 17, 18, 19, 21, 22 ]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      - name: Set up JDK ${{ matrix.jdk }}
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ matrix.jdk }}

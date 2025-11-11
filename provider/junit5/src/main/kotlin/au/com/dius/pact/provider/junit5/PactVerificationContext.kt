@@ -168,6 +168,17 @@ data class PactVerificationContext @JvmOverloads constructor(
           client, request, context + ("userConfig" to targetForInteraction.userConfig)))
       }
       else -> {
+        when (interaction) {
+          is V4Interaction.SynchronousMessages -> {
+            interaction.request = DefaultResponseGenerator.generateContents(
+              interaction.request, context,
+              GeneratorTestMode.Provider,
+              pact.asV4Pact().get()?.pluginData() ?: emptyList(),
+              interaction.pluginConfiguration.toMap(),
+              true
+            )
+          }
+        }
         return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
           interaction.description, mutableMapOf(), consumer.pending, pluginConfigForInteraction(pact, interaction)))
       }

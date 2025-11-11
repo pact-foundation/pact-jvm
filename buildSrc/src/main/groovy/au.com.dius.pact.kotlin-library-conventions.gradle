@@ -6,7 +6,6 @@ plugins {
     id 'java-library'
 
     id 'maven-publish'
-    id 'signing'
     id 'org.jetbrains.dokka'
 }
 
@@ -83,18 +82,7 @@ publishing {
     }
     repositories {
         maven {
-            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-            if (project.hasProperty('sonatypeUsername')) {
-                credentials {
-                    username sonatypeUsername
-                    password sonatypePassword
-                }
-            }
+          url = rootProject.layout.buildDirectory.dir('staging-deploy')
         }
     }
-}
-
-signing {
-    required { project.hasProperty('isRelease') }
-    sign publishing.publications.mavenPublication
 }

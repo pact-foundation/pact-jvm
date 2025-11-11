@@ -5,17 +5,6 @@ plugins {
 description = 'Provider Spring6/Springboot3 + JUnit5 Support'
 group = 'au.com.dius.pact.provider'
 
-java {
-  targetCompatibility = '17'
-  sourceCompatibility = '17'
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-  kotlinOptions {
-    jvmTarget = "17"
-  }
-}
-
 dependencies {
   api project(':provider:junit5')
 
@@ -31,5 +20,6 @@ dependencies {
   testImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.5'
   testImplementation 'org.springframework.boot:spring-boot-starter-web:3.4.5'
   testImplementation 'org.apache.groovy:groovy'
-  testImplementation 'org.mockito:mockito-core:5.18.0'
+  testImplementation 'org.mockito:mockito-core:5.20.0'
+  testImplementation 'org.yaml:snakeyaml:2.5'
 }

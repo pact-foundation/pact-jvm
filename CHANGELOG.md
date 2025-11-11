@@ -1,5 +1,47 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.18 - Maintenance Release
+
+* 8a1e8b0a4 - chore: fix port conflict in test (Ronald Holshausen, Tue Nov 11 10:39:20 2025 +1100)
+* 8c22c525e - chore: Update release process to use jreleaser (Ronald Holshausen, Tue Nov 11 10:30:48 2025 +1100)
+* 57c5bda6f - fix: add Lambda DSL methods that are the same as the old DSL arrayEachLike #1877 (Ronald Holshausen, Mon Nov 10 15:30:04 2025 +1100)
+* 012242246 - chore: Update provider dependencies (Ronald Holshausen, Mon Nov 10 14:35:19 2025 +1100)
+* ab81b32ba - chore: Update core dependencies (Ronald Holshausen, Mon Nov 10 11:20:36 2025 +1100)
+* f3b1d6e5a - chore: Update consumer dependencies (Ronald Holshausen, Mon Nov 10 11:06:01 2025 +1100)
+* 87cc6c0ce - chore: Update main dependency versions (Ronald Holshausen, Mon Nov 10 10:45:18 2025 +1100)
+* 8696796fe - chore: Update Gradle to 7.6.6 (Ronald Holshausen, Mon Nov 10 10:19:21 2025 +1100)
+* 3f60ce0e0 - Merge pull request #1875 from holly-cummins/reference-quarkus-in-docs (Ronald Holshausen, Fri Aug 29 09:06:32 2025 +1000)
+* 897aaea3c - Reference Quarkus in service providers section (Holly Cummins, Thu Aug 28 19:30:51 2025 +0100)
+* c4abfaaf8 - Merge pull request #1872 from pact-foundation/dependabot/github_actions/actions/setup-java-5 (Ronald Holshausen, Thu Aug 28 10:10:55 2025 +1000)
+* 8a3e56648 - Merge pull request #1873 from holly-cummins/update-classgraph (Ronald Holshausen, Thu Aug 28 10:10:20 2025 +1000)
+* c50f6271d - chore(deps): bump actions/setup-java from 3 to 5 (dependabot[bot], Wed Aug 27 23:37:55 2025 +0000)
+* f663217ad - Merge pull request #1874 from holly-cummins/improve-java-version-clarity (Ronald Holshausen, Thu Aug 28 09:34:44 2025 +1000)
+* 4670fa8f4 - Correct Java versions in developer-facing content (Holly Cummins, Wed Aug 27 16:35:52 2025 +0100)
+* aa17dca65 - Update classgraph to work around compatibility issue (Holly Cummins, Wed Aug 27 16:19:14 2025 +0100)
+* 286861e97 - chore(CI): update to actions/cache@v4 (Ronald Holshausen, Thu May 29 13:59:06 2025 +1000)
+* 64a931298 - chore: Update plugin driver to 0.5.2 (Ronald Holshausen, Thu May 29 11:00:58 2025 +1000)
+* 15da5a605 - Update README.md (Ronald Holshausen, Fri May 23 10:10:59 2025 +1000)
+* 7d49354be - Merge pull request #1858 from WellingR/sync-message-pact-provider-state (Ronald Holshausen, Mon Mar 17 10:03:08 2025 +1100)
+* 7a924a007 - fix: Ensure provider state is injected when verifying synchronous message pacts (Ruud Welling, Sun Mar 16 18:44:41 2025 +0100)
+* 90e0f919d - bump version to 4.6.18 (Ronald Holshausen, Fri Feb 14 11:52:44 2025 +1100)
+
+# 4.6.17 - Bugfix Release
+
+* b3656418f - fix: Only coerce strings to numbers when comparing headers and query parameters (Ronald Holshausen, Fri Feb 14 10:27:01 2025 +1100)
+* 00e4b409f - Merge commit '8cb9773b51dc729c4d03414bcb8bc0a8843662a1' (Ronald Holshausen, Fri Feb 14 10:24:30 2025 +1100)
+* 8cb9773b5 - Squashed 'compatibility-suite/pact-compatibility-suite/' changes from cc76eac3c..1acfa1ecb (Ronald Holshausen, Fri Feb 14 10:24:30 2025 +1100)
+* 1b1cf8432 - chore(compatibility-suite): Correct the shared steps after updating the compatibility suite (Ronald Holshausen, Thu Feb 13 10:23:52 2025 +1100)
+* f6fa6e3fe - Squashed 'compatibility-suite/pact-compatibility-suite/' changes from 416f3a64d..cc76eac3c (Ronald Holshausen, Thu Feb 13 10:06:48 2025 +1100)
+* 878949219 - Merge commit 'f6fa6e3fe1da4c8fa8a7285f844c3187252365b3' (Ronald Holshausen, Thu Feb 13 10:06:48 2025 +1100)
+* c3938b4c8 - chore: Fix compatibility-suite CI build (Ronald Holshausen, Thu Feb 13 09:34:10 2025 +1100)
+* dea8fb762 - chore: Fix compatibility-suite CI build (Ronald Holshausen, Thu Feb 13 09:15:34 2025 +1100)
+* 8c5b0b1da - fix: Only split values of known multi-value headers #1852 (Ronald Holshausen, Wed Feb 12 16:01:17 2025 +1100)
+* d7d30304c - fix: Matching rule paths for fields with only digits should not be written as indices #1851 (Ronald Holshausen, Wed Feb 12 11:21:26 2025 +1100)
+* 5dba442e2 - fix: Lambda based DSL stringType method did not match the old DSL #1850 (Ronald Holshausen, Wed Feb 12 10:27:13 2025 +1100)
+* 287b16c44 - feat: Pass any transport config to the plugin in the test context under the transport_config key (Ronald Holshausen, Mon Dec 16 10:34:56 2024 +1100)
+* 80d8a8779 - chore: Add example of a test with a pending interaction (Ronald Holshausen, Fri Dec 6 09:38:52 2024 +1100)
+* 8b09520f2 - bump version to 4.6.17 (Ronald Holshausen, Thu Dec 5 09:50:10 2024 +1100)
+
 # 4.7.0-beta.1 - Upgrade Kotlin to 2.1 and update all dependencies
 
 * 7d50d9891 - chore: Upgrade KTor to 3.1.3 #1863 (Ronald Holshausen, Thu May 22 16:35:07 2025 +1000)

@@ -1,11 +1,11 @@
 plugins {
   id 'au.com.dius.pact.kotlin-common-conventions'
-  id 'java-library'
-  id 'java-gradle-plugin'
-  id "com.gradle.plugin-publish" version "1.2.0"
+  id 'maven-publish'
+  id "com.gradle.plugin-publish" version "2.0.0"
 }
 
 group = 'au.com.dius.pact.provider'
+description = 'Pact-JVM - Gradle plugin for verifying pacts against a provider'
 
 dependencies {
   implementation gradleApi()
@@ -34,14 +34,12 @@ groovydoc {
 gradlePlugin {
   website = 'https://github.com/pact-foundation/pact-jvm/tree/master/provider/gradle'
   vcsUrl = 'https://github.com/pact-foundation/pact-jvm'
-  plugins {
-    pactProviderPlugin {
+  plugins.create('pactProviderPlugin') {
       id = 'au.com.dius.pact'
       displayName = 'Gradle Pact Provider plugin'
       implementationClass = 'au.com.dius.pact.provider.gradle.PactPlugin'
       description = 'Gradle plugin for verifying pacts against a provider.'
       tags.set(['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting'])
-    }
   }
 }
 
@@ -86,18 +84,7 @@ publishing {
   }
   repositories {
     maven {
-      url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-      if (project.hasProperty('sonatypeUsername')) {
-        credentials {
-          username sonatypeUsername
-          password sonatypePassword
-        }
-      }
+      url = layout.buildDirectory.dir('staging-deploy')
     }
   }
-}
-
-signing {
-  required { project.hasProperty('isRelease') }
-  sign publishing.publications.pluginMaven
 }

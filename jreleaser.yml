@@ -1,0 +1,32 @@
+project:
+  name: au.com.dius.pact
+  version: 4.6.19
+  description: Pact JVM
+  longDescription: Pact JVM
+  license: MIT
+  links:
+    homepage: https://github.com/pact-foundation/pact-jvm
+    documentation: https://docs.pact.io
+  inceptionYear: 2014
+  authors:
+    - Ronald Holshausen
+  maintainers:
+    - rholshausen
+  languages:
+    java:
+      groupId: au.com.dius.pact
+      version: 17
+
+signing:
+  active: ALWAYS
+  armored: true
+  mode: FILE
+
+deploy:
+  maven:
+    mavenCentral:
+      sonatype:
+        active: ALWAYS
+        url: https://central.sonatype.com/api/v1/publisher
+        stagingRepositories:
+          - build/staging-deploy

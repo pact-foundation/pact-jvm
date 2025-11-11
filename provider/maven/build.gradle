@@ -8,8 +8,8 @@ group = 'au.com.dius.pact.provider'
 dependencies {
   api project(":provider")
 
-  implementation 'org.apache.maven:maven-plugin-api:3.9.9'
-  implementation 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.15.1'
+  implementation 'org.apache.maven:maven-plugin-api:3.9.11'
+  implementation 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.15.2'
   implementation 'org.apache.maven:maven-core:3.9.9'
   implementation 'com.github.ajalt:mordant:1.2.1'
 

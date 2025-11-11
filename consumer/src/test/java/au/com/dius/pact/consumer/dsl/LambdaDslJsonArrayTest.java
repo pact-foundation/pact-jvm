@@ -772,7 +772,7 @@ public class LambdaDslJsonArrayTest {
         .stringType("name", "Berlin")
       .close();
 
-    // Lambda DSL
+    // Lambda DSL (not exactly the same)
     final DslPart lambdaPactDsl = LambdaDsl.newJsonArray(2, array ->
       array.object(obj ->
         obj.stringType("name", "Berlin")
@@ -780,5 +780,13 @@ public class LambdaDslJsonArrayTest {
     ).build().close();
 
     assertThat(lambdaPactDsl.getBody().toString(), is(pactDslJson.getBody().toString()));
+
+    // Lambda DSL
+    final DslPart lambdaPactDsl2 = LambdaDsl.newJsonArrayLike(2, obj ->
+      obj.stringType("name", "Berlin")
+    ).build().close();
+
+    assertThat(lambdaPactDsl2.getBody().toString(), is(pactDslJson.getBody().toString()));
+    assertThat(lambdaPactDsl2.getMatchers(), is(pactDslJson.getMatchers()));
   }
 }

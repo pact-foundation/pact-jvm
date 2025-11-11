@@ -28,5 +28,5 @@ dependencies {
 
   // JAX-B dependencies for JDK 9+
   testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
-  testImplementation 'org.glassfish.jaxb:jaxb-runtime:2.3.3'
+  testImplementation 'org.glassfish.jaxb:jaxb-runtime:2.3.9'
 }

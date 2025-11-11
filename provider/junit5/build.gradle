@@ -28,7 +28,7 @@ dependencies {
   testImplementation('com.github.javafaker:javafaker:1.0.2') {
     exclude group: 'org.yaml'
   }
-  testImplementation 'org.yaml:snakeyaml:2.4'
-  testImplementation 'org.mockito:mockito-core:5.18.0'
-  testImplementation 'org.mockito:mockito-inline:5.2.0'
+  testImplementation 'org.yaml:snakeyaml:2.5'
+  testImplementation 'org.mockito:mockito-core:2.28.2'
+  testImplementation 'org.mockito:mockito-inline:2.28.2'
 }

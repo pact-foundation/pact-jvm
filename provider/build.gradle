@@ -11,7 +11,7 @@ dependencies {
   api project(':core:matchers')
   api project(':core:pactbroker')
   api 'org.apache.httpcomponents.client5:httpclient5'
-  api 'io.github.classgraph:classgraph:4.8.179'
+  api 'io.github.classgraph:classgraph:4.8.184'
   api('io.pact.plugin.driver:core') {
     exclude group: 'au.com.dius.pact.core'
   }

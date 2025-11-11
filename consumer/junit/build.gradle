@@ -5,14 +5,14 @@ buildscript {
     mavenLocal()
   }
   dependencies {
-    classpath 'org.apache.commons:commons-lang3:3.10'
+    classpath 'org.apache.commons:commons-lang3:3.19.0'
   }
 }
 
 plugins {
   id 'au.com.dius.pact.kotlin-library-conventions'
 
-  id "com.netflix.nebula.clojure" version "14.2.1"
+  id "com.netflix.nebula.clojure" version "14.2.2"
 }
 
 description = 'Pact-JVM - Provides a DSL and a base test class for use with Junit to build consumer tests'
@@ -33,8 +33,8 @@ dependencies {
   testImplementation 'ch.qos.logback:logback-classic'
   testImplementation 'org.apache.commons:commons-collections4'
   testImplementation 'org.junit.vintage:junit-vintage-engine'
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
-  testImplementation('io.rest-assured:rest-assured:5.5.2') {
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.20.1'
+  testImplementation('io.rest-assured:rest-assured:5.5.6') {
     exclude group: 'org.apache.groovy'
   }
   testImplementation 'org.apache.groovy:groovy'
@@ -47,14 +47,14 @@ dependencies {
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
   testRuntimeOnly 'org.objenesis:objenesis:3.4'
 
-  testImplementation 'org.clojure:clojurescript:1.12.42', 'http-kit:http-kit:2.3.0'
+  testImplementation 'org.clojure:clojure:1.12.3', 'http-kit:http-kit:2.8.1'
   testImplementation 'javax.xml.bind:jaxb-api:2.3.1'
   testImplementation 'javax.activation:activation:1.1'
-  testImplementation 'org.glassfish.jaxb:jaxb-runtime:2.3.0'
+  testImplementation 'org.glassfish.jaxb:jaxb-runtime:2.3.9'
 }
 
 clojureTest {
   junit = true
-  junitOutputDir = file("$buildDir/test-results/clojure/" + org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(6))
+  junitOutputDir = file("$buildDir/test-results/clojure/" + org.apache.commons.lang3.RandomStringUtils.insecure().nextAlphanumeric(6))
   clojureTest.dependsOn 'testClasses'
 }

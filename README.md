@@ -168,6 +168,10 @@ You want to look at: [pact leiningen plugin](provider/lein)
 
 Have a look at [spring](provider/spring) or [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc) (Not maintained).
 
+#### verify pacts with a Quarkus project
+
+Have a look at the Quarkus Pact [provider extension](https://quarkus.io/extensions/io.quarkiverse.pact/quarkus-pact-provider/)
+
 #### I want to verify pacts but don't want to use sbt or gradle or leiningen
 
 You want to look at: [provider](provider)
