@@ -1,0 +1,31 @@
+{
+  "provider" : {
+    "name" : "CookieService"
+  },
+  "consumer" : {
+    "name" : "CookieConsumer"
+  },
+  "interactions" : [ {
+    "description" : "Get data",
+    "request" : {
+      "method" : "GET",
+      "path" : "/cookie",
+      "query" : "id=0000",
+      "headers" : {
+        "Cookie" : "token=1234abcd"
+      }
+    },
+    "response" : {
+      "status" : 200,
+      "body" : "Hello 0000 1234abcd"
+    }
+  } ],
+  "metadata" : {
+    "pact-specification" : {
+      "version" : "2.0.0"
+    },
+    "pact-jvm" : {
+      "version" : "3.1.1"
+    }
+  }
+}

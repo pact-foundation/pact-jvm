@@ -1,0 +1,1 @@
+Pact-JVM - Provider Spring7/Spring Boot4 + JUnit5 Support

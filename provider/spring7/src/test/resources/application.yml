@@ -1,0 +1,3 @@
+pactbroker:
+  host: localhost
+  port: ${local.server.port}

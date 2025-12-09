@@ -19,6 +19,7 @@ include 'provider:junit5'
 include 'provider:spring'
 include 'provider:junit5spring'
 include 'provider:spring6'
+include 'provider:spring7'
 
 // In Windows, fails with java.lang.NullPointerException
 if (System.getenv('GITHUB_WORKFLOW') == null) {

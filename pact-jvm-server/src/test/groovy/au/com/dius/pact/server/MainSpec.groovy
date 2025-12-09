@@ -66,7 +66,7 @@ class MainSpec extends Specification {
     def process = invokeApp(true, '--daemon', '--debug', '31311')
 
     when:
-    process.waitFor(500, TimeUnit.MILLISECONDS)
+    process.waitFor(2000, TimeUnit.MILLISECONDS)
     def result = createMock('31311', pact)
 
     then:

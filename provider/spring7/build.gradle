@@ -1,0 +1,26 @@
+plugins {
+  id 'au.com.dius.pact.kotlin-library-conventions'
+}
+
+description = 'Provider Spring7/Spring Boot4 + JUnit5 Support'
+group = 'au.com.dius.pact.provider'
+
+dependencies {
+  api project(':provider:junit5')
+
+  implementation 'org.springframework:spring-context:7.0.0'
+  implementation 'org.springframework:spring-test:7.0.0'
+  implementation 'org.springframework:spring-web:7.0.0'
+  implementation 'org.springframework:spring-webflux:7.0.0'
+  implementation 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+  implementation 'org.hamcrest:hamcrest:3.0'
+  implementation 'org.apache.commons:commons-lang3'
+  implementation 'javax.mail:mail:1.5.0-b01'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test-classic:4.0.0'
+  testImplementation 'org.springframework.boot:spring-boot-starter-webmvc:4.0.0'
+  testImplementation 'org.springframework.boot:spring-boot-starter-security-test:4.0.0'
+  testImplementation 'org.apache.groovy:groovy'
+  testImplementation 'org.mockito:mockito-core:5.20.0'
+  testImplementation 'org.yaml:snakeyaml:2.5'
+}
