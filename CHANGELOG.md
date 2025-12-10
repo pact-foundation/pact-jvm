@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.0-beta.3 - Support for Spring 7 and Spring Boot 4
+
+* fa9f35159 - Merge pull request #1884 from schmidthappens/update/add-support-for-spring7 (Ronald Holshausen, Wed Dec 10 10:32:59 2025 +1100)
+* f0e01e85d - Add new module to support Spring 7 and Spring Boot 4 (Martin Schmidt, Mon Dec 8 12:44:36 2025 +0100)
+* b5ce914a5 - bump version to 4.7.0-beta.3 (Ronald Holshausen, Tue Nov 11 14:54:12 2025 +1100)
+
 # 4.7.0-beta.2 - Maintenance Release
 
 * 89bdf495a - chore: Upgrade Kotlin to 2.2.21 (Ronald Holshausen, Tue Nov 11 14:12:27 2025 +1100)
