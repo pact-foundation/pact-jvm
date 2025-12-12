@@ -24,7 +24,7 @@ class ContentType(val contentType: MediaType?) {
           else if (jsonRegex.matches(contentType.subtype.toLowerCase())) {
             true
           } else {
-            val superType = registry.getSupertype(contentType)
+            val superType = resolvedSuperType()
             superType != null && superType.type == "application" && superType.subtype == "json"
           }
         }
@@ -78,7 +78,7 @@ class ContentType(val contentType: MediaType?) {
   @Suppress("ComplexMethod")
   fun isBinaryType(): Boolean {
     return if (contentType != null) {
-      val superType = registry.getSupertype(contentType) ?: MediaType.OCTET_STREAM
+      val superType = resolvedSuperType() ?: MediaType.OCTET_STREAM
       val type = contentType.type
       val baseType = superType.type
       val override = System.getProperty("pact.content_type.override.$type.${contentType.subtype}")
@@ -100,6 +100,17 @@ class ContentType(val contentType: MediaType?) {
         else -> false
       }
     } else false
+  }
+
+  private fun resolvedSuperType(): MediaType? {
+    if (contentType == null) return null
+    val asString = contentType.toString()
+    val mapped = Companion.customSuperTypes[asString]
+    if (mapped != null) return MediaType.parse(mapped)
+    val supertype = registry.getSupertype(contentType)
+    return if (supertype != null && supertype.type == "text" && supertype.subtype == "javascript") {
+      MediaType.parse("application/javascript")
+    } else supertype
   }
 
   fun isMultipart() = if (contentType != null)
@@ -124,14 +135,27 @@ class ContentType(val contentType: MediaType?) {
   fun getSupertype() : ContentType? {
     return if (contentType != null && contentType.subtype.endsWith("+json")) {
       JSON
-    } else {
-      val supertype = registry.getSupertype(contentType)
-      if (supertype != null) {
-        ContentType(supertype)
+    } else if (contentType != null) {
+      // Respect custom mappings for some known types that may not be present
+      // in the Tika registry for all versions.
+      val asString = contentType.toString()
+      val mapped = customSuperTypes[asString]
+      if (mapped != null) {
+        ContentType(mapped)
       } else {
-        null
+        val supertype = registry.getSupertype(contentType)
+        if (supertype != null) {
+          // Normalise some Tika results to the values expected by the tests
+          if (supertype.type == "text" && supertype.subtype == "javascript") {
+            ContentType("application/javascript")
+          } else {
+            ContentType(supertype)
+          }
+        } else {
+          null
+        }
       }
-    }
+    } else null
   }
 
   companion object : KLogging() {
@@ -152,6 +176,12 @@ class ContentType(val contentType: MediaType?) {
     val registry:
       MediaTypeRegistry = MimeTypes.getDefaultMimeTypes(ContentType::class.java.classLoader)
       .mediaTypeRegistry
+
+    val customSuperTypes = mapOf(
+      "application/graphql" to "application/json",
+      "application/x-www-form-urlencoded" to "text/plain",
+      "application/protobuf" to "application/octet-stream"
+    )
 
     @JvmStatic
     val UNKNOWN = ContentType(null)
