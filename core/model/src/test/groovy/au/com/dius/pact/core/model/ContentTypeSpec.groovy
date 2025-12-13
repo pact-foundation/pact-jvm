@@ -141,7 +141,7 @@ class ContentTypeSpec extends Specification {
     'text/plain'                        || 'application/octet-stream'
     'application/pdf'                   || 'application/octet-stream'
     'application/zip'                   || 'application/octet-stream'
-    'application/json'                  || 'application/javascript'
+    'application/json'                  || 'text/javascript'
     'application/hal+json'              || 'application/json'
     'application/HAL+JSON'              || 'application/json'
     'application/vnd.siren+json'        || 'application/json'
