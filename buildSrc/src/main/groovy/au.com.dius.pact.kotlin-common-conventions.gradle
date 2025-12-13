@@ -32,14 +32,14 @@ dependencies {
         api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.4.4'
         api 'org.json:json:20250517'
         api 'io.pact.plugin.driver:core:0.5.2' // remember also to update implementation
-        api 'org.apache.tika:tika-core:2.9.4'
+        api 'org.apache.tika:tika-core:3.2.3'
         api 'io.github.oshai:kotlin-logging-jvm:6.0.9'
 
         implementation 'org.jetbrains.kotlin:kotlin-stdlib'
         implementation 'org.apache.commons:commons-lang3:3.19.0'
         implementation 'org.apache.commons:commons-text:1.14.0'
         implementation 'org.apache.commons:commons-collections4:4.5.0'
-        implementation 'org.apache.tika:tika-core:2.9.4'
+        implementation 'org.apache.tika:tika-core:3.2.3'
         implementation 'com.google.guava:guava:33.5.0-jre'
         implementation 'org.slf4j:slf4j-api:2.0.17'
         implementation 'io.ktor:ktor-http-jvm:2.3.13'
