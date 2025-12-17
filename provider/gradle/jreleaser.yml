@@ -1,6 +1,6 @@
 project:
   name: au.com.dius.pact.provider
-  version: 4.6.19
+  version: 4.6.20
   description: Pact JVM Gradle Plugin
   longDescription: Pact JVM Gradle Plugin
   license: Apache2
