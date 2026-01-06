@@ -1,6 +1,6 @@
 buildscript {
   repositories {
-    maven { url 'https://clojars.org/repo' }
+    maven { url = 'https://clojars.org/repo' }
     mavenCentral()
     mavenLocal()
   }

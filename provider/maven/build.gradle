@@ -70,7 +70,7 @@ if (System.env.CI != 'true') {
     }
 
     doLast {
-      final dir = project.compileKotlin.destinationDirectory.dir('META-INF/maven').get()
+      final dir = compileKotlin.destinationDirectory.dir('META-INF/maven').get()
       final pluginDescriptor = dir.file('plugin.xml').getAsFile()
       assert pluginDescriptor.exists(), "[$pluginDescriptor.canonicalPath] was not created"
     }
