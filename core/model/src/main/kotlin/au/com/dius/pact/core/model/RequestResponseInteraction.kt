@@ -22,6 +22,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   override fun toString() =
     "Interaction: $description\n\tin states ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"
 
+  @Deprecated("Conflict detection causes too many issues when merging Pact files")
   override fun conflictsWith(other: Interaction) = other !is RequestResponseInteraction
 
   override fun uniqueKey() = "${displayState()}_$description"

@@ -140,6 +140,7 @@ sealed class V4Interaction(
   var interactionMarkup: InteractionMarkup = InteractionMarkup(),
   var transport: String? = null
 ) : BaseInteraction(interactionId, description, providerStates.toMutableList(), comments) {
+  @Deprecated("Conflict detection causes too many issues when merging Pact files")
   override fun conflictsWith(other: Interaction): Boolean {
     return false
   }

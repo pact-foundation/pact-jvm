@@ -55,6 +55,7 @@ interface Interaction {
   /**
    * Checks if this interaction conflicts with the other one. Used for merging pact files.
    */
+  @Deprecated("Conflict detection causes too many issues when merging Pact files")
   fun conflictsWith(other: Interaction): Boolean
 
   /**

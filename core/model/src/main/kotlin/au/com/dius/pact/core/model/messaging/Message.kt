@@ -187,6 +187,7 @@ class Message @JvmOverloads constructor(
       "_$description"
   }
 
+  @Deprecated("Conflict detection causes too many issues when merging Pact files")
   override fun conflictsWith(other: Interaction) = other !is Message
 
   override fun equals(other: Any?): Boolean {
