@@ -188,6 +188,25 @@ class PathExpressionsSpec extends Specification {
     '1234'  | 'a.b' || 'a.b[1234]'
   }
 
+  @Unroll
+  def 'correctly generates a key for an attribute name'() {
+    expect:
+    PathExpressionsKt.constructValidPath(name, 'a.b.c.', true) == result
+
+    where:
+
+    name         | result
+    'a'          | 'a.b.c.a'
+    'a1'         | 'a.b.c.a1'
+    '_a'         | 'a.b.c._a'
+    '@a'         | 'a.b.c.@a'
+    '#a'         | 'a.b.c.#a'
+    'b-a'        | 'a.b.c.b-a'
+    'b:a'        | 'a.b.c.b:a'
+    '01/01/2001' | "a.b.c['01/01/2001']"
+    'a['         | "a.b.c['a[']"
+  }
+
   @Issue('#1851')
   def 'Constructing valid path expressions where numbers are not considered indices'() {
     expect:

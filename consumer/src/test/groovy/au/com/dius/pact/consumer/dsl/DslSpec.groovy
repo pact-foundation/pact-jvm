@@ -8,31 +8,11 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import spock.lang.Issue
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 class DslSpec extends Specification {
-
-  @Unroll
-  def 'correctly generates a key for an attribute name'() {
-    expect:
-    Dsl.matcherKey(name, 'a.b.c.') == result
-
-    where:
-
-    name         | result
-    'a'          | 'a.b.c.a'
-    'a1'         | 'a.b.c.a1'
-    '_a'         | 'a.b.c._a'
-    '@a'         | 'a.b.c.@a'
-    '#a'         | 'a.b.c.#a'
-    'b-a'        | 'a.b.c.b-a'
-    'b:a'        | 'a.b.c.b:a'
-    '01/01/2001' | "a.b.c['01/01/2001']"
-    'a['         | "a.b.c['a[']"
-  }
 
   @Issue('#401')
   def 'eachKeyMappedToAnArrayLike does not work on "nested" property'() {

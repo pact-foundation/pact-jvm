@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.InvalidMatcherException
-import au.com.dius.pact.consumer.dsl.Dsl.matcherKey
 import au.com.dius.pact.core.matchers.UrlMatcherSupport
 import au.com.dius.pact.core.model.constructValidPath
 import au.com.dius.pact.core.model.generators.Category
@@ -304,7 +303,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+    matchers.addRule(constructValidPath(name, rootPath), TypeMatcher)
 
     return this
   }
@@ -314,7 +313,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun stringType(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RandomStringGenerator(20))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), RandomStringGenerator(20))
     return stringType(name, *examples("string"))
   }
 
@@ -371,7 +370,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+    matchers.addRule(constructValidPath(name, rootPath), TypeMatcher)
 
     return this
   }
@@ -381,7 +380,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun numberType(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
     return numberType(name, 100)
   }
 
@@ -434,7 +433,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER))
+    matchers.addRule(constructValidPath(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER))
 
     return this
   }
@@ -444,7 +443,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun integerType(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
+    generators.addGenerator(Category.BODY, constructValidPath(name!!, rootPath), RandomIntGenerator(0, Int.MAX_VALUE))
     return integerType(name, 100 as Int)
   }
 
@@ -497,7 +496,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
+    matchers.addRule(constructValidPath(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
 
     return this
   }
@@ -534,7 +533,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
+    matchers.addRule(constructValidPath(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
 
     return this
   }
@@ -544,7 +543,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun decimalType(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RandomDecimalGenerator(10))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), RandomDecimalGenerator(10))
     return decimalType(name, 100.0)
   }
 
@@ -597,7 +596,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
+    matchers.addRule(constructValidPath(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
 
     return this
   }
@@ -634,7 +633,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
+    matchers.addRule(constructValidPath(name, rootPath), NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
 
     return this
   }
@@ -777,7 +776,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+    matchers.addRule(constructValidPath(name, rootPath), TypeMatcher)
 
     return this
   }
@@ -825,7 +824,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), regexp(regex))
+    matchers.addRule(constructValidPath(name, rootPath), regexp(regex))
 
     return this
   }
@@ -836,7 +835,7 @@ open class PactDslJsonBody : DslPart {
    * @param regex regular expression
    */
   fun stringMatcher(name: String, regex: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), RegexGenerator(regex))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), RegexGenerator(regex))
     stringMatcher(name, regex, *examples(Random.generateRandomString(regex)))
     return this
   }
@@ -847,8 +846,8 @@ open class PactDslJsonBody : DslPart {
    */
   fun datetime(name: String): PactDslJsonBody {
     val pattern = DateFormatUtils.ISO_DATETIME_FORMAT.pattern
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateTimeGenerator(pattern, null))
-    matchers.addRule(matcherKey(name, rootPath), matchTimestamp(pattern))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), DateTimeGenerator(pattern, null))
+    matchers.addRule(constructValidPath(name, rootPath), matchTimestamp(pattern))
 
     val stringValue = JsonValue.StringValue(DateFormatUtils.ISO_DATETIME_FORMAT.format(Date(DATE_2000)).toCharArray())
     when (val body = body) {
@@ -1344,7 +1343,7 @@ open class PactDslJsonBody : DslPart {
    * @param name field name
    */
   override fun array(name: String): PactDslJsonArray {
-    return PactDslJsonArray(matcherKey(name, rootPath), name, this)
+    return PactDslJsonArray(constructValidPath(name, rootPath), name, this)
   }
 
   override fun array(): PactDslJsonArray {
@@ -1352,7 +1351,7 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun unorderedArray(name: String): PactDslJsonArray {
-    matchers.addRule(matcherKey(name, rootPath), EqualsIgnoreOrderMatcher)
+    matchers.addRule(constructValidPath(name, rootPath), EqualsIgnoreOrderMatcher)
     return this.array(name)
   }
 
@@ -1361,7 +1360,7 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun unorderedMinArray(name: String, size: Int): PactDslJsonArray {
-    matchers.addRule(matcherKey(name, rootPath), MinEqualsIgnoreOrderMatcher(size))
+    matchers.addRule(constructValidPath(name, rootPath), MinEqualsIgnoreOrderMatcher(size))
     return this.array(name)
   }
 
@@ -1370,7 +1369,7 @@ open class PactDslJsonBody : DslPart {
   }
 
   override fun unorderedMaxArray(name: String, size: Int): PactDslJsonArray {
-    matchers.addRule(matcherKey(name, rootPath), MaxEqualsIgnoreOrderMatcher(size))
+    matchers.addRule(constructValidPath(name, rootPath), MaxEqualsIgnoreOrderMatcher(size))
     return this.array(name)
   }
 
@@ -1383,7 +1382,7 @@ open class PactDslJsonBody : DslPart {
       String.format("The minimum size of %d is greater than the maximum of %d",
         minSize, maxSize)
     }
-    matchers.addRule(matcherKey(name, rootPath), MinMaxEqualsIgnoreOrderMatcher(minSize, maxSize))
+    matchers.addRule(constructValidPath(name, rootPath), MinMaxEqualsIgnoreOrderMatcher(minSize, maxSize))
     return this.array(name)
   }
 
@@ -1686,7 +1685,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+    matchers.addRule(constructValidPath(name, rootPath), TypeMatcher)
 
     return this
   }
@@ -1696,7 +1695,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun hexValue(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name!!, rootPath), RandomHexadecimalGenerator(10))
+    generators.addGenerator(Category.BODY, constructValidPath(name!!, rootPath), RandomHexadecimalGenerator(10))
     return hexValue(name, "1234a")
   }
 
@@ -1737,7 +1736,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), regexp("[0-9a-fA-F]+"))
+    matchers.addRule(constructValidPath(name, rootPath), regexp("[0-9a-fA-F]+"))
 
     return this
   }
@@ -1747,7 +1746,7 @@ open class PactDslJsonBody : DslPart {
    * @param name attribute name
    */
   fun uuid(name: String): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), UuidGenerator())
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), UuidGenerator())
     return uuid(name, "e2490de5-5bd3-43d5-b7c4-526e33f71304")
   }
 
@@ -1799,7 +1798,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), regexp(UUID_REGEX.pattern))
+    matchers.addRule(constructValidPath(name, rootPath), regexp(UUID_REGEX.pattern))
 
     return this
   }
@@ -1975,7 +1974,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), includesMatcher(value))
+    matchers.addRule(constructValidPath(name, rootPath), includesMatcher(value))
 
     return this
   }
@@ -2009,7 +2008,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), EqualsMatcher)
+    matchers.addRule(constructValidPath(name, rootPath), EqualsMatcher)
 
     return this
   }
@@ -2027,7 +2026,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.setRules(matcherKey(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.AND))
+    matchers.setRules(constructValidPath(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.AND))
 
     return this
   }
@@ -2045,7 +2044,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.setRules(matcherKey(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.OR))
+    matchers.setRules(constructValidPath(name, rootPath), MatchingRuleGroup(mutableListOf(*rules), RuleLogic.OR))
 
     return this
   }
@@ -2069,9 +2068,9 @@ open class PactDslJsonBody : DslPart {
     }
 
     val regexExpression = urlMatcher.getRegexExpression()
-    matchers.addRule(matcherKey(name, rootPath), regexp(regexExpression))
+    matchers.addRule(constructValidPath(name, rootPath), regexp(regexExpression))
     if (StringUtils.isEmpty(basePath)) {
-      generators.addGenerator(Category.BODY, matcherKey(name, rootPath),
+      generators.addGenerator(Category.BODY, constructValidPath(name, rootPath),
         MockServerURLGenerator(exampleValue, regexExpression))
     }
     return this
@@ -2233,7 +2232,7 @@ open class PactDslJsonBody : DslPart {
    * @param example Example value to be used in the consumer test
    */
   fun valueFromProviderState(name: String, expression: String, example: Any?): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath),
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath),
       ProviderStateGenerator(expression, from(example)))
 
     when (val body = body) {
@@ -2242,7 +2241,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), TypeMatcher)
+    matchers.addRule(constructValidPath(name, rootPath), TypeMatcher)
     return this
   }
 
@@ -2258,7 +2257,7 @@ open class PactDslJsonBody : DslPart {
     expression: String,
     format: String = DateFormatUtils.ISO_DATE_FORMAT.pattern
   ): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateGenerator(format, expression))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), DateGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
 
     when (val body = body) {
@@ -2269,7 +2268,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), matchDate(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchDate(format))
 
     return this
   }
@@ -2286,7 +2285,7 @@ open class PactDslJsonBody : DslPart {
     expression: String,
     format: String = DateFormatUtils.ISO_TIME_NO_T_FORMAT.pattern
   ): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), TimeGenerator(format, expression))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), TimeGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
 
     when (val body = body) {
@@ -2297,7 +2296,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), matchTime(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchTime(format))
 
     return this
   }
@@ -2314,7 +2313,7 @@ open class PactDslJsonBody : DslPart {
     expression: String,
     format: String = DateFormatUtils.ISO_DATETIME_FORMAT.pattern
   ): PactDslJsonBody {
-    generators.addGenerator(Category.BODY, matcherKey(name, rootPath), DateTimeGenerator(format, expression))
+    generators.addGenerator(Category.BODY, constructValidPath(name, rootPath), DateTimeGenerator(format, expression))
     val instance = FastDateFormat.getInstance(format)
 
     when (val body = body) {
@@ -2325,7 +2324,7 @@ open class PactDslJsonBody : DslPart {
       else -> {}
     }
 
-    matchers.addRule(matcherKey(name, rootPath), matchTimestamp(format))
+    matchers.addRule(constructValidPath(name, rootPath), matchTimestamp(format))
 
     return this
   }
