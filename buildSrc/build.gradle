@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21'
+    implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.0'
     implementation 'io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.8'
     implementation 'org.jetbrains.dokka:dokka-gradle-plugin:1.9.20'
     implementation 'org.apache.commons:commons-text:1.14.0'
