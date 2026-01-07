@@ -15,15 +15,13 @@ open class GradleConsumerInfo(
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
-  @Deprecated("Replaced with auth")
-  override var pactFileAuthentication: List<Any?> = emptyList(),
   override val notices: List<VerificationNotice> = mutableListOf(),
   override val pending: Boolean = false,
   override val wip: Boolean = false,
   override val auth: Auth? = Auth.None
   ) : IConsumerInfo {
   @Inject
-  constructor(name: String): this(name, null, false, emptyList(), null, null, emptyList())
+  constructor(name: String): this(name, null, false, emptyList(), null, null)
 
   override fun toPactConsumer() = Consumer(name)
 

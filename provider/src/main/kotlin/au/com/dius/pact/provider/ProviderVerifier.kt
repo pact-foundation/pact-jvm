@@ -1351,8 +1351,6 @@ open class ProviderVerifier @JvmOverloads constructor (
       val options = mutableMapOf<String, Any>()
       if (consumer.auth != null && consumer.auth !is Auth.None) {
         options["authentication"] = consumer.auth!!
-      } else if (consumer.pactFileAuthentication.isNotEmpty()) {
-        options["authentication"] = consumer.pactFileAuthentication
       }
       pactReader.loadPact(pactSource, options)
     } else {

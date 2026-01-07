@@ -31,8 +31,7 @@ object ProviderUtils : KLogging() {
     stateChange: Any? = null,
     stateChangeUsesBody: Boolean = true,
     verificationType: PactVerification = PactVerification.REQUEST_RESPONSE,
-    packagesToScan: List<String> = emptyList(),
-    pactFileAuthentication: List<String> = emptyList()
+    packagesToScan: List<String> = emptyList()
   ): List<IConsumerInfo> {
     if (!pactFileDir.exists()) {
       throw PactVerifierException("Pact file directory ($pactFileDir) does not exist")
@@ -55,7 +54,7 @@ object ProviderUtils : KLogging() {
       if (providerName == provider.name) {
         consumers.add(ConsumerInfo(pact.consumer.name,
           stateChange, stateChangeUsesBody, packagesToScan, verificationType,
-          FileSource(f), pactFileAuthentication))
+          FileSource(f)))
       } else {
         println("Skipping $f as the provider names don't match provider.name: " +
           "${provider.name} vs pactJson.provider.name: $providerName")

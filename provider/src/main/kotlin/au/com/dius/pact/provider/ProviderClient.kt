@@ -17,7 +17,7 @@ import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
 import io.pact.plugins.jvm.core.CatalogueEntry
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.hc.client5.http.classic.methods.HttpDelete
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.classic.methods.HttpHead
@@ -45,6 +45,8 @@ import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
 import au.com.dius.pact.core.model.ContentType as PactContentType
+
+private val logger = KotlinLogging.logger {}
 
 interface IHttpClientFactory {
   fun newClient(provider: IProviderInfo): CloseableHttpClient
@@ -81,8 +83,6 @@ interface IConsumerInfo {
   var packagesToScan: List<String>
   var verificationType: PactVerification?
   var pactSource: Any?
-  @Deprecated("Replaced with auth")
-  var pactFileAuthentication: List<Any?>
   val notices: List<VerificationNotice>
   val pending: Boolean
   val wip: Boolean
@@ -100,8 +100,6 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
-  @Deprecated("replaced with auth")
-  override var pactFileAuthentication: List<Any?> = emptyList(),
   override val notices: List<VerificationNotice> = emptyList(),
   override val pending: Boolean = false,
   override val wip: Boolean = false,
@@ -133,7 +131,7 @@ open class ConsumerInfo @JvmOverloads constructor (
     if (packagesToScan != other.packagesToScan) return false
     if (verificationType != other.verificationType) return false
     if (pactSource != other.pactSource) return false
-    if (pactFileAuthentication != other.pactFileAuthentication) return false
+    if (auth != other.auth) return false
     if (notices != other.notices) return false
     if (pending != other.pending) return false
     if (wip != other.wip) return false
@@ -148,18 +146,18 @@ open class ConsumerInfo @JvmOverloads constructor (
     result = 31 * result + packagesToScan.hashCode()
     result = 31 * result + (verificationType?.hashCode() ?: 0)
     result = 31 * result + (pactSource?.hashCode() ?: 0)
-    result = 31 * result + pactFileAuthentication.hashCode()
+    result = 31 * result + auth.hashCode()
     result = 31 * result + notices.hashCode()
     result = 31 * result + pending.hashCode()
     result = 31 * result + wip.hashCode()
     return result
   }
 
-  companion object : KLogging() {
+  companion object {
     fun from(result: PactBrokerResult) =
       ConsumerInfo(name = result.name,
         pactSource = BrokerUrlSource(url = result.source, pactBrokerUrl = result.pactBrokerUrl, result = result),
-        pactFileAuthentication = result.pactFileAuthentication, notices = result.notices, pending = result.pending,
+        notices = result.notices, pending = result.pending,
         wip = result.wip, auth = result.auth
       )
 
@@ -248,7 +246,7 @@ open class ProviderClient(
   private val httpClientFactory: IHttpClientFactory
 ) {
 
-  companion object : KLogging() {
+  companion object {
     const val CONTENT_TYPE = "Content-Type"
     const val UTF8 = "UTF-8"
     const val REQUEST = "request"

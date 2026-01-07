@@ -32,6 +32,7 @@ import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.json.JsonValue
@@ -352,14 +353,16 @@ class ProviderVerifierSpec extends Specification {
   def 'when loading a pact file for a consumer, it should pass on any authentication options'() {
     given:
     def pactFile = new UrlSource('http://some.pact.file/')
-    def consumer = new ConsumerInfo(pactSource: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
+    def authentication = new Auth.BasicAuthentication('test', 'pwd')
+    def consumer = new ConsumerInfo('', null, true, [], null, pactFile, [], false, false,
+      authentication)
     verifier.pactReader = Mock(PactReader)
 
     when:
     verifier.loadPactFileForConsumer(consumer)
 
     then:
-    1 * verifier.pactReader.loadPact(pactFile, ['authentication': ['basic', 'test', 'pwd']]) >> Mock(Pact)
+    1 * verifier.pactReader.loadPact(pactFile, ['authentication': authentication]) >> Mock(Pact)
   }
 
   def 'when loading a pact file for a consumer, it handles a closure'() {
@@ -379,7 +382,9 @@ class ProviderVerifierSpec extends Specification {
     given:
     def pactUrl = 'https://test.pact.dius.com.au/pacticipants/Foo%20Web%20Client/versions/1.0.1'
     def pactFile = new UrlSource('http://some.pact.file/')
-    def consumer = new ConsumerInfo(pactSource: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
+    def authentication = new Auth.BasicAuthentication('test', 'pwd')
+    def consumer = new ConsumerInfo('', null, true, [], null, pactFile, [], false, false,
+      authentication)
     verifier.pactReader = Mock(PactReader)
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PACTURL }
     verifier.projectGetProperty = { it == ProviderVerifier.PACT_FILTER_PACTURL ? pactUrl : null }
@@ -388,7 +393,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.loadPactFileForConsumer(consumer)
 
     then:
-    1 * verifier.pactReader.loadPact(new UrlSource(pactUrl), ['authentication': ['basic', 'test', 'pwd']]) >> Mock(Pact)
+    1 * verifier.pactReader.loadPact(new UrlSource(pactUrl), ['authentication': authentication]) >> Mock(Pact)
   }
 
   static class TestSupport {

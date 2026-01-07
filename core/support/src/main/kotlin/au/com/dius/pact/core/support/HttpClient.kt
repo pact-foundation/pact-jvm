@@ -113,6 +113,10 @@ object HttpClient {
         }
       }
       is List<*> -> {
+        logger.warn {
+          "You are using a deprecated form of authentication as an unstructured list. This has been replaced with the" +
+            " the au.com.dius.pact.core.support.Auth class."
+        }
         when (val scheme = authentication.first().toString().lowercase(Locale.getDefault())) {
           "basic" -> {
             if (authentication.size > 2) {

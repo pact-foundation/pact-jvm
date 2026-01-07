@@ -112,7 +112,7 @@ class VerifyProviderSpec extends Specification {
     consumer.stateChangeUsesBody == expected.stateChangeUsesBody
     consumer.verificationType == expected.verificationType
     new ArrayList(consumer.packagesToScan as List) == expected.packagesToScan
-    consumer.pactFileAuthentication == expected.pactFileAuthentication
+    consumer.auth == expected.auth
   }
 
 }

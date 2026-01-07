@@ -14,10 +14,8 @@ class Consumer(
   override var stateChangeUsesBody: Boolean = true,
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
-  override var pactSource: Any? = null,
-  @Deprecated("replaced with auth")
-  override var pactFileAuthentication: List<Any?> = emptyList()
-) : ConsumerInfo(name, stateChange, stateChangeUsesBody, packagesToScan, verificationType, pactSource, pactFileAuthentication) {
+  override var pactSource: Any? = null
+) : ConsumerInfo(name, stateChange, stateChangeUsesBody, packagesToScan, verificationType, pactSource) {
 
   fun getPactUrl() = if (pactSource is UrlSource) {
     URL((pactSource as UrlSource).url)
