@@ -20,7 +20,6 @@ import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactDirectory
-import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Annotations
 import au.com.dius.pact.core.support.BuiltToolConfig
@@ -671,7 +670,6 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
   private fun lookupPactDirectory(context: ExtensionContext): String {
     logger.trace { "lookupPactDirectory($context)" }
-    val pactFolder = AnnotationSupport.findAnnotation(context.requiredTestClass, PactFolder::class.java)
     val pactDirectory = if (AnnotationSupport.isAnnotated(context.requiredTestClass, Nested::class.java)) {
       val search = Annotations.searchForAnnotation(context.requiredTestClass.kotlin, PactDirectory::class)
       if (search != null) {
@@ -683,11 +681,6 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
       AnnotationSupport.findAnnotation(context.requiredTestClass, PactDirectory::class.java)
     }
     return when {
-      pactFolder.isPresent -> {
-        logger.info { "Writing pacts out to directory from @PactFolder annotation" }
-        logger.warn { "DEPRECATED: Annotation @PactFolder is deprecated and has been replaced with @PactDirectory" }
-        pactFolder.get().value
-      }
       pactDirectory.isPresent -> {
         logger.info { "Writing pacts out to directory from @PactDirectory annotation" }
         pactDirectory.get().value

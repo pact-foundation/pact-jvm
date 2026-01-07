@@ -13,7 +13,6 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactDirectory;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.support.Json;
 import au.com.dius.pact.core.support.MetricEvent;
 import au.com.dius.pact.core.support.Metrics;
@@ -98,11 +97,10 @@ public class BaseProviderRule extends ExternalResource {
             .forEach(i -> i.getComments().put("testname", Json.toJson(description.getDisplayName())));
         }
 
-        PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
         PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
         BasePact basePact = pact.get();
         Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(basePact.getInteractions().size(), "junit"));
-        PactVerificationResult result = runPactTest(base, basePact, pactFolder, pactDirectory);
+        PactVerificationResult result = runPactTest(base, basePact, pactDirectory);
         validateResult(result, pactDef);
       }
     };
@@ -141,9 +139,8 @@ public class BaseProviderRule extends ExternalResource {
       }
     });
 
-    PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
     PactDirectory pactDirectory = target.getClass().getAnnotation(PactDirectory.class);
-    PactVerificationResult result = runPactTest(base, pact[0], pactFolder, pactDirectory);
+    PactVerificationResult result = runPactTest(base, pact[0], pactDirectory);
     JUnitTestSupport.validateMockServerResult(result);
   }
 
@@ -186,15 +183,12 @@ public class BaseProviderRule extends ExternalResource {
       }
   }
 
-  private PactVerificationResult runPactTest(final Statement base, BasePact pact, PactFolder pactFolder, PactDirectory pactDirectory) {
+  private PactVerificationResult runPactTest(final Statement base, BasePact pact, PactDirectory pactDirectory) {
     return runConsumerTest(pact, config, (mockServer, context) -> {
       this.mockServer = mockServer;
       base.evaluate();
       this.mockServer = null;
 
-      if (pactFolder != null) {
-        context.setPactFolder(pactFolder.value());
-      }
       if (pactDirectory != null) {
         context.setPactFolder(pactDirectory.value());
       }

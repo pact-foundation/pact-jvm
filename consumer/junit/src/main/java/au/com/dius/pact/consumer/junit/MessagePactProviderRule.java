@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactDirectory;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
 import au.com.dius.pact.core.support.BuiltToolConfig;
@@ -54,31 +53,31 @@ public class MessagePactProviderRule extends ExternalResource {
 		ep = new ExpressionParser();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.junit.rules.ExternalResource#apply(org.junit.runners.model.Statement, org.junit.runner.Description)
-	 */
-	@Override
-	public Statement apply(final Statement base, final Description description) {
-		return new Statement() {
+  /* (non-Javadoc)
+   * @see org.junit.rules.ExternalResource#apply(org.junit.runners.model.Statement, org.junit.runner.Description)
+   */
+  @Override
+  public Statement apply(final Statement base, final Description description) {
+    return new Statement() {
 
-			@Override
-			public void evaluate() throws Throwable {
-				PactVerifications pactVerifications = description.getAnnotation(PactVerifications.class);
-				if (pactVerifications != null) {
-					evaluatePactVerifications(pactVerifications, base, description);
-					return;
-				}
+      @Override
+      public void evaluate() throws Throwable {
+        PactVerifications pactVerifications = description.getAnnotation(PactVerifications.class);
+        if (pactVerifications != null) {
+          evaluatePactVerifications(pactVerifications, base, description);
+          return;
+        }
 
-				PactVerification pactDef = description.getAnnotation(PactVerification.class);
-				// no pactVerification? execute the test normally
-				if (pactDef == null) {
-					base.evaluate();
-					return;
-				}
+        PactVerification pactDef = description.getAnnotation(PactVerification.class);
+        // no pactVerification? execute the test normally
+        if (pactDef == null) {
+          base.evaluate();
+          return;
+        }
 
-				Message providedMessage = null;
-				Map<String, Message> pacts;
-				if (StringUtils.isNoneEmpty(pactDef.fragment())) {
+        Message providedMessage = null;
+        Map<String, Message> pacts;
+        if (StringUtils.isNoneEmpty(pactDef.fragment())) {
           Optional<Method> possiblePactMethod = findPactMethod(pactDef);
           if (possiblePactMethod.isEmpty()) {
             base.evaluate();
@@ -89,11 +88,11 @@ public class MessagePactProviderRule extends ExternalResource {
           Method method = possiblePactMethod.get();
           Pact pact = method.getAnnotation(Pact.class);
           MessagePactBuilder builder = new MessagePactBuilder().consumer(
-          		Objects.toString(ep.parseExpression(pact.consumer(), DataType.RAW))).hasPactWith(provider);
+            Objects.toString(ep.parseExpression(pact.consumer(), DataType.RAW))).hasPactWith(provider);
           messagePact = (MessagePact) method.invoke(testClassInstance, builder);
           for (Message message : messagePact.getMessages()) {
             pacts.put(message.getProviderStates().stream().map(ProviderState::getName).collect(Collectors.joining()),
-							message);
+              message);
           }
         } else {
           pacts = parsePacts();
@@ -105,30 +104,24 @@ public class MessagePactProviderRule extends ExternalResource {
           providedMessage = pacts.values().iterator().next();
         }
 
-				if (providedMessage == null) {
-					base.evaluate();
-					return;
-				}
+        if (providedMessage == null) {
+          base.evaluate();
+          return;
+        }
 
-				setMessage(providedMessage, description);
-				Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(messagePact.getMessages().size(), "junit"));
-				try {
-					base.evaluate();
-					PactFolder pactFolder = testClassInstance.getClass().getAnnotation(PactFolder.class);
-					PactDirectory pactDirectory = testClassInstance.getClass().getAnnotation(PactDirectory.class);
-					if (pactFolder != null) {
-						messagePact.write(pactFolder.value(), PactSpecVersion.V3);
-					} else if (pactDirectory != null) {
-						messagePact.write(pactDirectory.value(), PactSpecVersion.V3);
-					} else {
-						messagePact.write(BuiltToolConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
-					}
-				} catch (Throwable t) {
-					throw t;
-				}
-			}
-		};
-	}
+        setMessage(providedMessage, description);
+        Metrics.INSTANCE.sendMetrics(new MetricEvent.ConsumerTestRun(messagePact.getMessages().size(), "junit"));
+
+        base.evaluate();
+        PactDirectory pactDirectory = testClassInstance.getClass().getAnnotation(PactDirectory.class);
+        if (pactDirectory != null) {
+          messagePact.write(pactDirectory.value(), PactSpecVersion.V3);
+        } else {
+          messagePact.write(BuiltToolConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+        }
+      }
+    };
+  }
 
 	private void evaluatePactVerifications(PactVerifications pactVerifications, Statement base, Description description)
 			throws Throwable {

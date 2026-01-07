@@ -94,9 +94,6 @@ class Request @Suppress("LongParameterList") @JvmOverloads constructor(
     return headers.filter { (k, _) -> k.lowercase(Locale.getDefault()) != COOKIE_KEY }
   }
 
-  @Deprecated("use cookies()", ReplaceWith("cookies()"))
-  fun cookie() = cookies()
-
   override fun cookies(): List<String> {
     val cookieEntry = headers.entries.find { (k, _) -> k.lowercase(Locale.getDefault()) == COOKIE_KEY }
     return if (cookieEntry != null) {

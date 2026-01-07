@@ -50,11 +50,6 @@ interface IHttpPart {
  * Base trait for an object that represents part of an http message
  */
 abstract class HttpPart: IHttpPart {
-  @Deprecated("use method that returns a content type object",
-    replaceWith = ReplaceWith("determineContentType"))
-  fun contentType(): String? = contentTypeHeader()?.split(Regex("\\s*;\\s*"))?.first()
-    ?: body.contentType.asString()
-
   fun jsonBody() = determineContentType().isJson()
 
   fun xmlBody() = determineContentType().isXml()
