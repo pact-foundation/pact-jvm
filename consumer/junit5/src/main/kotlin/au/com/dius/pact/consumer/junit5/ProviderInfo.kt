@@ -39,8 +39,6 @@ data class ProviderInfo @JvmOverloads constructor(
         val pactVersion: PactSpecVersion? = null,
         val providerType: ProviderType? = null,
         val https: Boolean = false,
-        @Deprecated("This has been replaced with the @MockServer annotation")
-        val mockServerImplementation: MockServerImplementation = MockServerImplementation.Default,
         val keyStorePath: String = "",
         val keyStoreAlias: String = "",
         val keyStorePassword: String = "",
@@ -52,8 +50,7 @@ data class ProviderInfo @JvmOverloads constructor(
     MockProviderConfig.httpConfig(
             hostInterface.ifEmpty { MockProviderConfig.LOCALHOST },
             if (port.isEmpty()) 0 else port.toInt(),
-            pactVersion ?: PactSpecVersion.V4,
-            mockServerImplementation
+            pactVersion ?: PactSpecVersion.V4
     )
   }
 
@@ -61,8 +58,7 @@ data class ProviderInfo @JvmOverloads constructor(
     return MockHttpsProviderConfig.httpsConfig(
       hostInterface.ifEmpty { MockProviderConfig.LOCALHOST },
             if (port.isEmpty()) 0 else port.toInt(),
-            pactVersion ?: PactSpecVersion.V3,
-            mockServerImplementation)
+            pactVersion ?: PactSpecVersion.V3)
   }
 
   private fun httpsKeyStoreProviderConfig() : MockHttpsProviderConfig {
@@ -84,7 +80,6 @@ data class ProviderInfo @JvmOverloads constructor(
             pactVersion = pactVersion ?: other.pactVersion,
             providerType = providerType ?: other.providerType,
             https = https || other.https,
-            mockServerImplementation = mockServerImplementation.merge(other.mockServerImplementation),
             keyStorePath = keyStorePath.ifEmpty { other.keyStorePath },
             keyStoreAlias = keyStoreAlias.ifEmpty { other.keyStoreAlias },
             keyStorePassword = keyStorePassword.ifEmpty { other.keyStorePassword },
@@ -96,8 +91,7 @@ data class ProviderInfo @JvmOverloads constructor(
     return if (mockServerConfig != null) {
       this.copy(hostInterface = mockServerConfig.hostname,
         port = if (mockServerConfig.port > 0) mockServerConfig.port.toString() else "",
-        pactVersion = mockServerConfig.pactVersion.or(pactVersion), https = mockServerConfig.scheme == "https",
-        mockServerImplementation = mockServerConfig.mockServerImplementation.merge(mockServerImplementation))
+        pactVersion = mockServerConfig.pactVersion.or(pactVersion), https = mockServerConfig.scheme == "https")
     } else {
       this
     }
@@ -117,7 +111,7 @@ data class ProviderInfo @JvmOverloads constructor(
       }
       val port = ExpressionParser().parseExpression(annotation.port, DataType.STRING)?.toString() ?: annotation.port
       return ProviderInfo(providerName, annotation.hostInterface, port, pactVersion, providerType,
-        annotation.https, annotation.mockServerImplementation, annotation.keyStorePath, annotation.keyStoreAlias,
+        annotation.https, annotation.keyStorePath, annotation.keyStoreAlias,
         annotation.keyStorePassword, annotation.privateKeyPassword)
     }
   }
