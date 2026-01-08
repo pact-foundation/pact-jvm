@@ -22,7 +22,6 @@ import java.text.ParseException
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.regex.Pattern
 
 sealed class Matcher(
@@ -48,7 +47,7 @@ data class TypeMatcher(
 ) : Matcher(value, matcher, generator)
 
 data class TimestampMatcher(
-  val pattern: String = DateFormatUtils.ISO_DATETIME_FORMAT.pattern,
+  val pattern: String = DateFormatUtils.ISO_8601_EXTENDED_DATETIME_FORMAT.pattern,
   val dateTimeValue: String?
 ) : Matcher(dateTimeValue ?: DateTimeFormatter
     .ofPattern(pattern)
@@ -58,7 +57,7 @@ data class TimestampMatcher(
 )
 
 data class TimeMatcher(
-  val pattern: String = DateFormatUtils.ISO_TIME_FORMAT.pattern,
+  val pattern: String = DateFormatUtils.ISO_8601_EXTENDED_TIME_FORMAT.pattern,
   val timeValue: String?
 ) : Matcher(
   timeValue ?: DateTimeFormatter.ofPattern(pattern).format(Instant.ofEpochMilli(DATE_2000).atOffset(ZoneOffset.UTC)),
@@ -67,7 +66,7 @@ data class TimeMatcher(
 )
 
 data class DateMatcher(
-  val pattern: String = DateFormatUtils.ISO_DATE_FORMAT.pattern,
+  val pattern: String = DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.pattern,
   val dateValue: String?
 ) : Matcher(
   dateValue ?: DateTimeFormatter.ofPattern(pattern).format(Instant.ofEpochMilli(DATE_2000).atOffset(ZoneOffset.UTC)),
@@ -204,7 +203,7 @@ object Matchers {
   @JvmOverloads
   @JvmStatic
   fun timestamp(pattern: String? = null, value: String? = null): Matcher {
-    val pattern = pattern ?: DateFormatUtils.ISO_DATETIME_FORMAT.pattern
+    val pattern = pattern ?: DateFormatUtils.ISO_8601_EXTENDED_DATETIME_FORMAT.pattern
     validateTimeValue(value, pattern)
     return TimestampMatcher(pattern, value)
   }
@@ -227,7 +226,7 @@ object Matchers {
   @JvmOverloads
   @JvmStatic
   fun time(pattern: String? = null, value: String? = null): Matcher {
-    val pattern = pattern ?: DateFormatUtils.ISO_TIME_FORMAT.pattern
+    val pattern = pattern ?: DateFormatUtils.ISO_8601_EXTENDED_TIME_FORMAT.pattern
     validateTimeValue(value, pattern)
     return TimeMatcher(pattern, value)
   }
@@ -240,7 +239,7 @@ object Matchers {
   @JvmOverloads
   @JvmStatic
   fun date(pattern: String? = null, value: String? = null): Matcher {
-    val pattern = pattern ?: DateFormatUtils.ISO_DATE_FORMAT.pattern
+    val pattern = pattern ?: DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.pattern
     validateTimeValue(value, pattern)
     return DateMatcher(pattern, value)
   }

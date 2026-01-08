@@ -14,14 +14,15 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
-import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.padTo
 import io.pact.plugins.jvm.core.PluginConfiguration
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.codec.binary.Hex
 import java.util.Locale
+
+private val logger = KotlinLogging.logger {}
 
 data class MatchingContext @JvmOverloads constructor(
   val matchers: MatchingRuleCategory,
@@ -175,7 +176,7 @@ data class MatchingContext @JvmOverloads constructor(
 }
 
 @Suppress("TooManyFunctions")
-object Matching : KLogging() {
+object Matching {
   private val lowerCaseComparator = Comparator<String> { a, b -> a.lowercase().compareTo(b.lowercase()) }
 
   val pathFilter = Regex("http[s]*://([^/]*)")
