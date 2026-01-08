@@ -118,9 +118,6 @@ class StubVerificationReporter extends BaseVerifierReporter  {
   void generatesAMessageWhich() { }
 
   @Override
-  void displayFailures(Map<String, ?> failures) { }
-
-  @Override
   void displayFailures(List<VerificationResult.Failed> failures) { }
 
   @Override

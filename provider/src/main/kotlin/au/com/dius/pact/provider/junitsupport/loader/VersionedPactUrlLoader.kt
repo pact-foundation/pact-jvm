@@ -7,7 +7,7 @@ package au.com.dius.pact.provider.junitsupport.loader
  * @see VersionedPactUrl usage instructions
  */
 open class VersionedPactUrlLoader(urls: Array<String>) : PactUrlLoader(expandVariables(urls)) {
-  constructor(pactUrl: VersionedPactUrl) : this(pactUrl.urls) {}
+  constructor(pactUrl: VersionedPactUrl) : this(pactUrl.urls)
 
   companion object {
     @JvmStatic

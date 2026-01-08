@@ -199,41 +199,6 @@ class SLF4JReporter(
     log.info("    generates a message which")
   }
 
-  override fun displayFailures(failures: Map<String, Any>) {
-    val result = StringBuilder()
-    result.appendLine("Failures:")
-    failures.entries.forEachIndexed { i, err ->
-      result.appendLine("$i) ${err.key}")
-      when {
-        err.value is Throwable -> {
-          result.appendLine(prepareError(err.value as Throwable))
-        }
-
-        err.value is Map<*, *> &&
-          (err.value as Map<*, *>).containsKey("comparison") &&
-          (err.value as Map<*, *>)["comparison"] is Map<*, *>
-        -> {
-          result.appendLine(prepareDiff(err.value as Map<String, Any>))
-        }
-
-        err.value is String -> {
-          result.appendLine("      ${err.value}")
-        }
-
-        err.value is Map<*, *> -> {
-          for ((key, message) in err.value as Map<*, *>) {
-            result.appendLine("      $key -> $message")
-          }
-        }
-
-        else -> {
-          result.appendLine(Json.toJson(err.value).serialise().prependIndent("      "))
-        }
-      }
-    }
-    log.info(result.toString())
-  }
-
   override fun displayFailures(failures: List<VerificationResult.Failed>) {
     val nonPending = failures.filterNot { it.pending }
     val pending = failures.filter { it.pending }
@@ -281,46 +246,6 @@ class SLF4JReporter(
 
   override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
     log.warn("NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')")
-  }
-
-  private fun prepareDiff(diff: Map<String, Any>): String {
-    val result = StringBuilder()
-
-    val comparison = diff["comparison"] as Map<String, List<Map<String, Any>>>
-    for ((key, messageAndDiff) in comparison) {
-      for (mismatch in messageAndDiff) {
-        result.appendLine("      $key -> ${mismatch["mismatch"]}")
-
-        val mismatchDiff = if (mismatch["diff"] is List<*>) {
-          mismatch["diff"] as List<String>
-        } else {
-          listOf(mismatch["diff"].toString())
-        }
-
-        if (mismatchDiff.all { it.isEmpty() }) {
-          continue
-        }
-
-        result.appendLine("        Diff:")
-        mismatchDiff
-          .asSequence()
-          .filter { it.isNotEmpty() }
-          .forEach { result.appendLine("        $it") }
-      }
-    }
-
-    if (displayFullDiff) {
-      result.appendLine("      Full Diff:")
-      for (delta in diff["diff"] as List<String>) {
-        result.appendLine("      $delta")
-      }
-    }
-
-    return result.toString()
-  }
-
-  private fun prepareError(err: Throwable): String {
-    return "      ${err.javaClass.name}: ${err.message}"
   }
 
   override fun receive(event: Event) {

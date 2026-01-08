@@ -67,8 +67,6 @@ interface VerifierReporter {
   fun errorHasNoAnnotatedMethodsFoundForInteraction(interaction: Interaction)
   fun verificationFailed(interaction: Interaction, e: Exception, printStackTrace: Boolean)
   fun generatesAMessageWhich()
-  @Deprecated("Use version that takes a VerificationResult")
-  fun displayFailures(failures: Map<String, Any>)
   fun displayFailures(failures: List<VerificationResult.Failed>)
   fun includesMetadata()
   fun metadataComparisonOk()

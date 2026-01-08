@@ -475,8 +475,6 @@ class MarkdownReporter(
     events.add(MREvent("generatesAMessageWhich", "&nbsp;&nbsp;generates a message which  <br/>\n", listOf()))
   }
 
-  override fun displayFailures(failures: Map<String, Any>) { }
-
   override fun displayFailures(failures: List<VerificationResult.Failed>) { }
 
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {

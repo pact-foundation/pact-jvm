@@ -184,24 +184,6 @@ class AnsiConsoleReporter(
     println("    generates a message which")
   }
 
-  override fun displayFailures(failures: Map<String, Any>) {
-    println("\nFailures:\n")
-    failures.entries.forEachIndexed { i, err ->
-      println("$i) ${err.key}")
-      when {
-        err.value is Throwable -> displayError(err.value as Throwable)
-        err.value is Map<*, *> && (err.value as Map<*, *>).containsKey("comparison") &&
-          (err.value as Map<*, *>)["comparison"] is Map<*, *> -> displayDiff(err.value as Map<String, Any>)
-        err.value is String -> println("      ${err.value}")
-        err.value is Map<*, *> -> (err.value as Map<*, *>).forEach { (key, message) ->
-          println("      $key -> $message")
-        }
-        else -> println("      $err")
-      }
-      println()
-    }
-  }
-
   override fun displayFailures(failures: List<VerificationResult.Failed>) {
     println(failuresToString(failures))
   }

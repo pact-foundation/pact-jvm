@@ -268,8 +268,6 @@ class JsonReporter(
 
   override fun generatesAMessageWhich() { }
 
-  override fun displayFailures(failures: Map<String, Any>) { }
-
   override fun displayFailures(failures: List<VerificationResult.Failed>) { }
 
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
