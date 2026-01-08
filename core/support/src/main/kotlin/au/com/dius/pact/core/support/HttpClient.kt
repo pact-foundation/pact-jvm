@@ -61,15 +61,25 @@ sealed class Auth {
     }
   }
 
-  fun legacyForm(): List<String> {
-    return when (this) {
-      is BasicAuthentication -> listOf("basic", this.username, this.password)
-      is BearerAuthentication -> listOf("bearer", this.token)
-      else -> emptyList()
-    }
-  }
-
   companion object {
+    fun fromLegacy(authentication: List<*>): Auth {
+      return when (val scheme = authentication.firstOrNull()?.toString()?.lowercase(Locale.getDefault())) {
+        null, "" -> None
+        "basic" -> BasicAuthentication(authentication[1].toString(), authentication[2].toString())
+        "bearer" -> {
+          if (authentication.size > 2) {
+            BearerAuthentication(authentication[1].toString(), authentication[2].toString())
+          } else {
+            BearerAuthentication(authentication[1].toString(), DEFAULT_AUTH_HEADER)
+          }
+        }
+        else -> {
+          logger.warn { "Authentication is set to an unknown scheme: '$scheme'" }
+          None
+        }
+      }
+    }
+
     const val DEFAULT_AUTH_HEADER = "Authorization"
   }
 }
@@ -114,7 +124,7 @@ object HttpClient {
       }
       is List<*> -> {
         logger.warn {
-          "You are using a deprecated form of authentication as an unstructured list. This has been replaced with the" +
+          "You are using a deprecated form of authentication as an unstructured list. This has been replaced with" +
             " the au.com.dius.pact.core.support.Auth class."
         }
         when (val scheme = authentication.first().toString().lowercase(Locale.getDefault())) {

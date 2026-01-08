@@ -77,7 +77,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Result.Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
+      new PactBrokerResult('consumer', '', url, [], false, null, false, false, null)
     ])
     result.size() == 1
     result[0].name == 'consumer'
@@ -100,7 +100,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Result.Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
+      new PactBrokerResult('consumer', '', url, [], true, null, false, false, null)
     ])
     result.size() == 1
     result[0].name == 'consumer'
@@ -123,7 +123,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], 'master', true, '') >> new Result.Ok([
-            new PactBrokerResult('consumer', '', url, [], [], true, null, false, false, null)
+            new PactBrokerResult('consumer', '', url, [], true, null, false, false, null)
     ])
     result.size() == 1
     result[0].name == 'consumer'
@@ -165,7 +165,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '') >> new Result.Ok([
-      new PactBrokerResult('consumer', '', url, [], [], false, null, false, false, null)
+      new PactBrokerResult('consumer', '', url, [], false, null, false, false, null)
     ])
     result.size() == 1
     result[0].name == 'consumer'
@@ -189,7 +189,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, ['master'], '', true, '2020-05-23') >> new Result.Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
+      new PactBrokerResult('consumer', '', url, [], true, null, true, false, null)
     ])
     result.size() == 1
     result[0].name == 'consumer'
@@ -211,7 +211,7 @@ class ProviderInfoSpec extends Specification {
     then:
     providerInfo.pactBrokerClient(_, { it.auth == new Auth.BearerAuthentication('Authorization', '123ABC') }) >> pactBrokerClient
     pactBrokerClient.fetchConsumersWithSelectorsV2('TestProvider', selectors, [], '', false, '') >> new Result.Ok([
-      new PactBrokerResult('consumer', '', url, [], [], true, null, true, false, null)
+      new PactBrokerResult('consumer', '', url, [], true, null, true, false, null)
     ])
     result.size() == 1
     result[0].name == 'consumer'

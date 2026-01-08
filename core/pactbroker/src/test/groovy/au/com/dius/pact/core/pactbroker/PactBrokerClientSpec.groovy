@@ -450,7 +450,7 @@ class PactBrokerClientSpec extends Specification {
     result instanceof Result.Ok
     result.value.first() == new PactBrokerResult('Pact between Foo Web Client (1.0.2) and Activity Service',
       'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727',
-      'baseUrl', [], [
+      'baseUrl', [
         new VerificationNotice('before_verification',
          'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')
       ],

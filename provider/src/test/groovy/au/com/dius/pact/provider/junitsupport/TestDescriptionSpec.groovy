@@ -43,8 +43,7 @@ class TestDescriptionSpec extends Specification {
     def interaction = new RequestResponseInteraction('Interaction 1',
       [ new ProviderState('Test State') ], new Request(), new Response())
     def pactSource =  new BrokerUrlSource('url', 'url', [:], [:], 'master',
-      new PactBrokerResult('test', 'test', 'test', [], [],
-        pending == 'enabled', null, false, true, null))
+      new PactBrokerResult('test', 'test', 'test', [], pending == 'enabled', null, false, true, null))
     def generator = new TestDescription(interaction, pactSource, 'the-consumer-name')
 
     expect:

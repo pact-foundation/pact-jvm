@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.pactbroker
 
+import au.com.dius.pact.core.support.Auth
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.Utils
@@ -611,8 +612,8 @@ open class PactBrokerClient(
             properties["wip"].asBoolean()!!
           else false
 
-          PactBrokerResult(name, href, pactBrokerUrl, halClient.getAuth()?.legacyForm() ?: emptyList(),
-            notices, pending, wip = wip, usedNewEndpoint = true, auth = halClient.getAuth())
+          PactBrokerResult(name, href, pactBrokerUrl, notices, pending, wip = wip, usedNewEndpoint = true,
+            auth = halClient.getAuth())
         }
       }
     }
@@ -926,11 +927,16 @@ open class PactBrokerClient(
         .forAll(PACTS) { pact ->
           val href = URLDecoder.decode(pact["href"].toString(), UTF8)
           val name = pact["name"].toString()
-          val authentication = options["authentication"]
-          if (authentication is List<*>) {
-            consumers.add(PactBrokerResult(name, href, pactBrokerUrl, authentication.map { it.toString() }))
-          } else {
-            consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList()))
+          when (val authentication = options["authentication"]) {
+            is List<*> -> {
+              logger.warn {
+                "You are using a deprecated form of authentication as an unstructured list. This has been replaced with" +
+                  " the au.com.dius.pact.core.support.Auth class."
+              }
+              consumers.add(PactBrokerResult(name, href, pactBrokerUrl, auth = Auth.fromLegacy(authentication)))
+            }
+            is Auth -> consumers.add(PactBrokerResult(name, href, pactBrokerUrl, auth = authentication))
+            else -> consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList()))
           }
         }
       consumers

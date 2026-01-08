@@ -286,9 +286,9 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('c', true, null, null)
     ]
     def expected = [
-      new PactBrokerResult('test', 'a', '', [], [], false, null, false, true),
-      new PactBrokerResult('test', 'b', '', [], [], false, null, false, true),
-      new PactBrokerResult('test', 'c', '', [], [], false, null, false, true)
+      new PactBrokerResult('test', 'a', '', [], false, null, false, true),
+      new PactBrokerResult('test', 'b', '', [], false, null, false, true),
+      new PactBrokerResult('test', 'c', '', [], false, null, false, true)
     ]
 
     when:
@@ -314,9 +314,9 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('c', true, null, null)
     ]
     def expected = [
-      new PactBrokerResult('test', 'a', '', [], [], false, null, false, true),
-      new PactBrokerResult('test', 'b', '', [], [], false, null, false, true),
-      new PactBrokerResult('test', 'c', '', [], [], false, null, false, true)
+      new PactBrokerResult('test', 'a', '', [], false, null, false, true),
+      new PactBrokerResult('test', 'b', '', [], false, null, false, true),
+      new PactBrokerResult('test', 'c', '', [], false, null, false, true)
     ]
 
     when:
@@ -340,8 +340,8 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('two', true, null, null)
     ]
     def expected = [
-      new PactBrokerResult('test', 'one', '', [], [], false, null, false, true),
-      new PactBrokerResult('test', 'two', '', [], [], false, null, false, true)
+      new PactBrokerResult('test', 'one', '', [], false, null, false, true),
+      new PactBrokerResult('test', 'two', '', [], false, null, false, true)
     ]
 
     when:
@@ -364,8 +364,8 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('two', false, null, null)
     ]
     def expected = [
-      new PactBrokerResult('test', 'one', '', [], [], false, null, false, true),
-      new PactBrokerResult('test', 'two', '', [], [], false, null, false, true)
+      new PactBrokerResult('test', 'one', '', [], false, null, false, true),
+      new PactBrokerResult('test', 'two', '', [], false, null, false, true)
     ]
 
     when:
@@ -379,7 +379,7 @@ class PactBrokerLoaderSpec extends Specification {
   def 'Loads the latest pacts if no consumer version selector or tag is provided'() {
     given:
     tags = []
-    def expected = [ new PactBrokerResult('test', 'latest', '', [], [], false, null, false, true) ]
+    def expected = [ new PactBrokerResult('test', 'latest', '', [], false, null, false, true) ]
 
     when:
     def result = pactBrokerLoader().load('test')
@@ -395,7 +395,7 @@ class PactBrokerLoaderSpec extends Specification {
     tags = ['${a}', '${latest}', '${b}']
     def loader = pactBrokerLoader()
     loader.valueResolver = [resolveValue: { val -> 'X' } ] as ValueResolver
-    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null, false, true) ]
+    def expected = [ new PactBrokerResult('test', 'a', '', [], false, null, false, true) ]
     def selectors = [
       new ConsumerVersionSelectors.Selector('X', true, null, null),
       new ConsumerVersionSelectors.Selector('X', true, null, null),
@@ -423,7 +423,7 @@ class PactBrokerLoaderSpec extends Specification {
     ]
     def newLoader = pactBrokerLoader()
     newLoader.valueResolver = [resolveValue: { val -> val == 'd' ? 'D' : 'X' }] as ValueResolver
-    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false, null, false, true) ]
+    def expected = [ new PactBrokerResult('test', 'a', '', [], false, null, false, true) ]
     def selectors = [
       new ConsumerVersionSelectors.Selector('X', true, null, null),
       new ConsumerVersionSelectors.Selector('X', false, null, null),
@@ -452,8 +452,8 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('three', true, null, null)
     ]
     def expected = [
-      new PactBrokerResult('test', 'one', '', [], [], false, null, false, true),
-      new PactBrokerResult('test', 'two', '', [], [], false, null, false, true)
+      new PactBrokerResult('test', 'one', '', [], false, null, false, true),
+      new PactBrokerResult('test', 'two', '', [], false, null, false, true)
     ]
 
     when:
@@ -488,10 +488,10 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector(null, true, 'c', null)
     ]
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('b', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('c', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('d', '', '', [], [], false, null, false, false)
+      new PactBrokerResult('a', '', '', [], false, null, false, false),
+      new PactBrokerResult('b', '', '', [], false, null, false, false),
+      new PactBrokerResult('c', '', '', [], false, null, false, false),
+      new PactBrokerResult('d', '', '', [], false, null, false, false)
     ]
 
     when:
@@ -512,10 +512,10 @@ class PactBrokerLoaderSpec extends Specification {
       createVersionSelector(consumer: 'c')
     ]
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null, false, true),
-      new PactBrokerResult('b', '', '', [], [], false, null, false, true),
-      new PactBrokerResult('c', '', '', [], [], false, null, false, true),
-      new PactBrokerResult('d', '', '', [], [], false, null, false, true)
+      new PactBrokerResult('a', '', '', [], false, null, false, true),
+      new PactBrokerResult('b', '', '', [], false, null, false, true),
+      new PactBrokerResult('c', '', '', [], false, null, false, true),
+      new PactBrokerResult('d', '', '', [], false, null, false, true)
     ]
     def selectors = [
       new ConsumerVersionSelectors.Selector(null, true, 'a', null),
@@ -545,10 +545,10 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector(null, true, 'c', null)
     ]
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('b', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('c', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('d', '', '', [], [], false, null, false, false)
+      new PactBrokerResult('a', '', '', [], false, null, false, false),
+      new PactBrokerResult('b', '', '', [], false, null, false, false),
+      new PactBrokerResult('c', '', '', [], false, null, false, false),
+      new PactBrokerResult('d', '', '', [], false, null, false, false)
     ]
 
     when:
@@ -565,10 +565,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = []
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('b', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('c', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('d', '', '', [], [], false, null, false, false)
+      new PactBrokerResult('a', '', '', [], false, null, false, false),
+      new PactBrokerResult('b', '', '', [], false, null, false, false),
+      new PactBrokerResult('c', '', '', [], false, null, false, false),
+      new PactBrokerResult('d', '', '', [], false, null, false, false)
     ]
 
     when:
@@ -587,10 +587,10 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = ['${pactbroker.consumers:}']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('b', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('c', '', '', [], [], false, null, false, false),
-      new PactBrokerResult('d', '', '', [], [], false, null, false, false)
+      new PactBrokerResult('a', '', '', [], false, null, false, false),
+      new PactBrokerResult('b', '', '', [], false, null, false, false),
+      new PactBrokerResult('c', '', '', [], false, null, false, false),
+      new PactBrokerResult('d', '', '', [], false, null, false, false)
     ]
 
     when:
@@ -608,10 +608,10 @@ class PactBrokerLoaderSpec extends Specification {
     consumers = ['a', 'b', 'c']
     tags = ['demo']
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('b', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('c', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('d', '', '', [], [], false, 'demo', false, false)
+      new PactBrokerResult('a', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('b', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('c', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('d', '', '', [], false, 'demo', false, false)
     ]
     def selectors = [
       new ConsumerVersionSelectors.Selector('demo', true, 'a', null),
@@ -634,10 +634,10 @@ class PactBrokerLoaderSpec extends Specification {
     consumers = ['a', 'b', 'c']
     consumerVersionSelectors = [createVersionSelector(tag: 'demo', latest: 'true')]
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('b', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('c', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('d', '', '', [], [], false, 'demo', false, false)
+      new PactBrokerResult('a', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('b', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('c', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('d', '', '', [], false, 'demo', false, false)
     ]
     def selectors = [ new ConsumerVersionSelectors.Selector('demo', true, null, null) ]
 
@@ -687,7 +687,7 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('three', true, null, null)
     ]
     def expected = [
-      new PactBrokerResult('d', '', '', [], [], false, 'one', false, false)
+      new PactBrokerResult('d', '', '', [], false, 'one', false, false)
     ]
     consumerVersionSelectors = [
       createVersionSelector(tag: '${pactbroker.consumerversionselectors.tags}', latest: 'true')
@@ -707,10 +707,10 @@ class PactBrokerLoaderSpec extends Specification {
     tags = ['master', 'prod']
     consumerVersionSelectors = [createVersionSelector(tag: 'demo', latest: 'true')]
     def expected = [
-      new PactBrokerResult('a', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('b', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('c', '', '', [], [], false, 'demo', false, false),
-      new PactBrokerResult('d', '', '', [], [], false, 'demo', false, false)
+      new PactBrokerResult('a', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('b', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('c', '', '', [], false, 'demo', false, false),
+      new PactBrokerResult('d', '', '', [], false, 'demo', false, false)
     ]
     def selectors = [ new ConsumerVersionSelectors.Selector('demo', true, null, null) ]
 
@@ -757,9 +757,9 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('b', false, null, null),
     ]
     def expected = [
-      new PactBrokerResult('test', 'a', '', [], [], false, null, false, false),
-      new PactBrokerResult('test', 'b', '', [], [], false, null, false, false),
-      new PactBrokerResult('test', 'c', '', [], [], false, null, false, false),
+      new PactBrokerResult('test', 'a', '', [], false, null, false, false),
+      new PactBrokerResult('test', 'b', '', [], false, null, false, false),
+      new PactBrokerResult('test', 'c', '', [], false, null, false, false),
     ]
 
     when:
@@ -786,9 +786,9 @@ class PactBrokerLoaderSpec extends Specification {
       new ConsumerVersionSelectors.Selector('b', false, null, null),
     ]
     def expected = [
-      new PactBrokerResult('test', 'a', '', [], [], false, null, false, false),
-      new PactBrokerResult('test', 'b1', '', [], [], true, null, false, false),
-      new PactBrokerResult('test', 'b2', '', [], [], true, null, true, false),
+      new PactBrokerResult('test', 'a', '', [], false, null, false, false),
+      new PactBrokerResult('test', 'b1', '', [], true, null, false, false),
+      new PactBrokerResult('test', 'b2', '', [], true, null, true, false),
     ]
 
     when:

@@ -317,7 +317,7 @@ class InteractionRunnerSpec extends Specification {
 
   def 'if the test result is a success but pending, do not call the notifier that the test is finished'() {
     given:
-    def result = new PactBrokerResult('', '', '', [], [], true, null, false, false)
+    def result = new PactBrokerResult('', '', '', [], true, null, false, false)
     def source = new BrokerUrlSource('', '', [:], [:], null, result)
     def interaction1 = new RequestResponseInteraction('Interaction 1')
     def interaction2 = new RequestResponseInteraction('Interaction 2')
@@ -379,7 +379,7 @@ class InteractionRunnerSpec extends Specification {
 
   def 'if the test result is a failure but pending, do not call the notifier that the test has failed'() {
     given:
-    def result = new PactBrokerResult('', '', '', [], [], true, null, false, false)
+    def result = new PactBrokerResult('', '', '', [], true, null, false, false)
     def source = new BrokerUrlSource('', '', [:], [:], null, result)
     def interaction1 = new RequestResponseInteraction('Interaction 1')
     def interaction2 = new RequestResponseInteraction('Interaction 2')
