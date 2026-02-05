@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.isNotEmpty
@@ -143,6 +144,22 @@ class MessageContentsBuilder(var contents: MessageContents) {
     contents = contents.copy(
       contents = OptionalBody.body(payload, ct),
       metadata = (contents.metadata + Pair("contentType", ct.toString())).toMutableMap()
+    )
+
+    return this
+  }
+
+  /**
+   * Sets the body, content type and matching rules from a BodyBuilder
+   */
+  fun withContent(builder: BodyBuilder): MessageContentsBuilder {
+    val matchingRules = MatchingRulesImpl()
+    matchingRules.addCategory(builder.matchers)
+    contents = contents.copy(
+      contents = OptionalBody.body(builder.buildBody(), builder.contentType),
+      metadata = (contents.metadata + Pair("contentType", builder.contentType.toString())).toMutableMap(),
+      generators = builder.generators,
+      matchingRules = matchingRules
     )
 
     return this

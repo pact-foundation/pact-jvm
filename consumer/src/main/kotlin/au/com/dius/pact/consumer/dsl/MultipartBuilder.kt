@@ -28,6 +28,14 @@ open class MultipartBuilder: BodyBuilder {
     builder.setMode(HttpMultipartMode.EXTENDED)
   }
 
+  /**
+   * Set the boundary marker
+   */
+  fun withBoundaryMarker(marker: String): MultipartBuilder {
+    builder.setBoundary(marker)
+    return this
+  }
+
   override fun getMatchers(): MatchingRuleCategory {
     build()
     return matchingRules.rulesForCategory("body")
