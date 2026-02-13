@@ -175,7 +175,7 @@ class Spring7MockMvcTestTarget @JvmOverloads constructor(
 
     override fun executeInteraction(client: Any?, request: Any?): ProviderResponse {
         val mockMvcClient = client as MockMvc
-        val requestBuilder = request as MockHttpServletRequestBuilder
+        val requestBuilder = request as RequestBuilder
         val mvcResult = performRequest(mockMvcClient, requestBuilder).andDo {
             if (printRequestResponse) {
                 MockMvcResultHandlers.print().handle(it)
