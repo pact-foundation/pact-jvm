@@ -383,3 +383,22 @@ Synchronous message example:
         return new MessageAndMetadata(message.getPayload().getBytes(), metadata);
     }
 ```
+
+# Filtering interactions that are verified
+
+Interactions that are verified can be filtered using the `@PactFilter` annotation. For instance, adding 
+```java
+@PactFilter(value = "Synchronous/HTTP", filter = InteractionFilter.ByInteractionType.class)
+```
+to a test for a V4 Pact with different types of interactions will only validate the given type.
+
+You can give multiple values to the filter:
+```java
+@PactFilter(value = { "Synchronous/HTTP", "Asynchronous/Messages" }, filter = InteractionFilter.ByInteractionType.class)
+```
+
+Available filters:
+* ByProviderState - Filter interactions by any of their provider state. If one matches any of the values, the 
+   interaction is kept and verified.
+* ByRequestPath - Filter interactions by their request path, e.g. with value "^\\/somepath.*".
+* ByInteractionType - Filter the interactions by type.

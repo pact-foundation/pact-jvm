@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.junitsupport.filter;
 
 import au.com.dius.pact.core.model.Interaction;
-import au.com.dius.pact.core.model.RequestResponseInteraction;
 import au.com.dius.pact.core.model.SynchronousRequestResponse;
+import au.com.dius.pact.core.model.v4.V4InteractionType;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -43,6 +43,19 @@ public interface InteractionFilter<I extends Interaction> {
                     return false;
                 }
             };
+        }
+    }
+
+    /**
+     * Filter interactions by type
+     */
+    class ByInteractionType<I extends Interaction> implements InteractionFilter<I> {
+        @Override
+        public Predicate<I> buildPredicate(String[] values) {
+            return interaction -> Arrays.stream(values).anyMatch(value -> {
+                V4InteractionType type = V4InteractionType.Companion.fromString(value).get();
+                return type != null && interaction.asV4Interaction().isInteractionType(type);
+            });
         }
     }
 }
