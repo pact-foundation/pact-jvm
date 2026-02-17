@@ -71,7 +71,7 @@ open class MessageTarget @JvmOverloads constructor(
     verifier.projectClasspath = Supplier {
       logger.debug { "Classloader = ${this.classLoader}" }
       when (this.classLoader) {
-        is URLClassLoader -> this.classLoader.urLs.asList()
+        is URLClassLoader -> this.classLoader.urLs.map { it.toURI() }
         else -> emptyList()
       }
     }

@@ -210,7 +210,7 @@ open class MessageTestTarget @JvmOverloads constructor(
     verifier.projectClassLoader = Supplier { classLoader }
     verifier.projectClasspath = Supplier {
       when (val classLoader = classLoader ?: testInstance.javaClass.classLoader) {
-        is URLClassLoader -> classLoader.urLs.toList()
+        is URLClassLoader -> classLoader.urLs.map { it.toURI() }
         else -> emptyList()
       }
     }

@@ -55,6 +55,7 @@ import io.pact.plugins.jvm.core.PluginManager
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 import java.lang.reflect.Method
+import java.net.URI
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.function.BiConsumer
@@ -173,7 +174,7 @@ interface IProviderVerifier {
   /**
    * Callback to return the project classpath to use for looking up methods
    */
-  var projectClasspath: Supplier<List<URL>>
+  var projectClasspath: Supplier<List<URI>>
 
   /**
    * Callback to display a pact load error
@@ -378,7 +379,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
   override var executeBuildSpecificTask: BiConsumer<Any, ProviderState> = BiConsumer { _, _ -> },
-  override var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
+  override var projectClasspath: Supplier<List<URI>> = Supplier { emptyList<URI>() },
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
   override var providerVersion: Supplier<String> = ProviderVersion {
@@ -712,7 +713,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       val urls = projectClasspath.get()
       logger.debug { "projectClasspath = $urls" }
       if (urls.isNotEmpty()) {
-        classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
+        classGraph.overrideClassLoaders(URLClassLoader(urls.map { it.toURL() }.toTypedArray()))
       }
     } else {
       classGraph.overrideClassLoaders(classLoader)

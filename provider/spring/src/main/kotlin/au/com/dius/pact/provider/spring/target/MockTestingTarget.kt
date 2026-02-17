@@ -52,7 +52,9 @@ abstract class MockTestingTarget(
 
     setupReporters(verifier)
 
-    verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
+    verifier.projectClasspath = Supplier {
+      (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.map { it.toURI() }
+    }
 
     verifier.initialiseReporters(provider)
     verifier.reportVerificationForConsumer(consumer, provider, pactSource)
