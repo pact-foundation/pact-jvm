@@ -51,7 +51,7 @@ class ContentTypeSpec extends Specification {
     ''                                       || false
     'text/plain'                             || true
     'application/pdf'                        || false
-    'application/json'                       || false
+    'application/json'                       || true
     'application/hal+json'                   || false
     'application/x-thrift'                   || false
     'application/x-other'                    || true
