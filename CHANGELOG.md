@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.20 - Small Feature Release
+
+* 8253d47d5 - chore: correct typeo in readme (Ronald Holshausen, Tue Feb 17 16:38:31 2026 +1100)
+* 5caa7c5e9 - feat: Add a JUnit 5 filter by interation type #1894 (Ronald Holshausen, Tue Feb 17 16:21:52 2026 +1100)
+* 698a93b50 - chore: switch from org.apache.commons:commons-io to commons-io:commons-io #1878 (Ronald Holshausen, Tue Feb 17 11:07:17 2026 +1100)
+* 1ef1363c6 - chore: fix for failing CI build (Ronald Holshausen, Tue Feb 17 10:37:54 2026 +1100)
+* bb1b8576d - fix: Support message tests where the annotated method is on a parent class #1890 (Ronald Holshausen, Tue Feb 17 10:08:12 2026 +1100)
+* 9d97753dd - feat: Add support for using BodyBuilder implementations with MessageContentsBuilder (Ronald Holshausen, Thu Feb 5 14:15:10 2026 +1100)
+* e66524a2e - bump version to 4.6.20 (Ronald Holshausen, Wed Dec 17 15:34:49 2025 +1100)
+
 # 4.6.19 - Maintenance Release
 
 * 84e70f187 - Merge pull request #1880 from pact-foundation/dependabot/github_actions/actions/checkout-6 (Ronald Holshausen, Mon Dec 15 10:21:53 2025 +1100)
