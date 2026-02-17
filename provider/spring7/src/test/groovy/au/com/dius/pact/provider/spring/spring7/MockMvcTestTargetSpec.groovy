@@ -8,9 +8,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -136,12 +138,56 @@ class MockMvcTestTargetSpec extends Specification {
         request.query == 'A=&A=&B&B'
     }
 
+    def 'should prepare multipart file upload request'() {
+        given:
+        def request = new Request('POST', '/upload')
+                .withMultipartFileUpload('file', 'filename', 'text/csv', 'file,contents')
+        def interaction = new RequestResponseInteraction('multipart upload', [], request)
+        def pact = Mock(Pact)
+
+        when:
+        def requestAndClient = mockMvcTestTarget.prepareRequest(pact, interaction, [:])
+        def requestBuilder = requestAndClient.first
+        def client = requestAndClient.second
+
+        then:
+        client instanceof MockMvc
+        def builtRequest = requestBuilder.buildRequest(null)
+        builtRequest.requestURI == '/upload'
+        builtRequest.method == 'POST'
+        builtRequest.contentType.startsWith('multipart/')
+    }
+
+    def 'should execute interaction with multipart file upload'() {
+        given:
+        def request = new Request('POST', '/upload')
+                .withMultipartFileUpload('file', 'filename', 'text/csv', 'file,contents')
+        def interaction = new RequestResponseInteraction('multipart upload', [], request)
+        def pact = Mock(Pact)
+        def requestAndClient = mockMvcTestTarget.prepareRequest(pact, interaction, [:])
+        def requestBuilder = requestAndClient.first
+        def client = requestAndClient.second
+
+        when:
+        def response = mockMvcTestTarget.executeInteraction(client, requestBuilder)
+
+        then:
+        response.statusCode == 200
+        response.body.valueAsString() == 'file|text/csv|filename|file,contents'
+    }
+
     @RestController
     static class TestResource {
         @GetMapping(value = '/data', produces = 'application/json')
         @ResponseStatus(HttpStatus.OK)
         String getData(@RequestParam('id') String id) {
             "Hello $id"
+        }
+
+        @PostMapping(value = '/upload', produces = 'text/plain')
+        @ResponseStatus(HttpStatus.OK)
+        String upload(@RequestParam('file') MultipartFile file) {
+            [file.name, file.contentType, file.originalFilename, file.inputStream.text].join('|')
         }
     }
 }
