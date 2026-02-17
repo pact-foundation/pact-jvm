@@ -1,5 +1,39 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.0-beta.4 - Support Gradle 9+/JVM, removed deprecated methods, other small feature enhancements
+
+* 6db476b05 - fix: Switch from the use of URL to URI in Gradle plugin to support Gradle 9+/JVM 25 #1892 (Ronald Holshausen, Wed Feb 18 09:57:01 2026 +1100)
+* 5bfd06d35 - feat: Add a JUnit 5 filter by interation type #1894 (Ronald Holshausen, Tue Feb 17 16:21:52 2026 +1100)
+* b7f76e2f1 - chore: Fix test after upgrade to Apache Tika (Ronald Holshausen, Tue Feb 17 12:44:33 2026 +1100)
+* 99f5bf303 - Merge branch 'master' into v4.7.x (Ronald Holshausen, Tue Feb 17 11:48:49 2026 +1100)
+* d25424fec - Merge pull request #1896 from kranich/v4.7.x (Ronald Holshausen, Tue Feb 17 11:25:34 2026 +1100)
+* 698a93b50 - chore: switch from org.apache.commons:commons-io to commons-io:commons-io #1878 (Ronald Holshausen, Tue Feb 17 11:07:17 2026 +1100)
+* 1ef1363c6 - chore: fix for failing CI build (Ronald Holshausen, Tue Feb 17 10:37:54 2026 +1100)
+* bb1b8576d - fix: Support message tests where the annotated method is on a parent class #1890 (Ronald Holshausen, Tue Feb 17 10:08:12 2026 +1100)
+* 798d7096f - fix: fix ClassCastException for multipart requests in Spring7MockMvcTestTarget (Stefan Kranich, Fri Feb 13 10:34:47 2026 +0100)
+* 9d97753dd - feat: Add support for using BodyBuilder implementations with MessageContentsBuilder (Ronald Holshausen, Thu Feb 5 14:15:10 2026 +1100)
+* da16f8101 - chore: Update use of deprecated DateFormatUtils ISO_8601 constants (Ronald Holshausen, Thu Jan 8 14:20:36 2026 +1100)
+* 859051b6d - chore: remove deprecated displayFailures method (Ronald Holshausen, Thu Jan 8 11:49:17 2026 +1100)
+* 02c639b9c - core: Remove the deprecated pactFileAuthentication property (Ronald Holshausen, Thu Jan 8 11:25:29 2026 +1100)
+* 0b30ac2c3 - core: Remove the deprecated pactFileAuthentication property (Ronald Holshausen, Thu Jan 8 10:40:36 2026 +1100)
+* 1530ce46f - chore: Upgrade Kotlin to 2.3.0 (Ronald Holshausen, Thu Jan 8 09:58:17 2026 +1100)
+* 31054d700 - chore: Remove deprected cookie() and contentType() functions and PactFolder annotation (Ronald Holshausen, Thu Jan 8 09:51:38 2026 +1100)
+* b9f2b2bef - chore: Remove deprected DSL.matcherKey method (Ronald Holshausen, Wed Jan 7 11:36:27 2026 +1100)
+* d794f0158 - chore: Remove deprecated ProviderInfo.mockServerImplementation property (Ronald Holshausen, Wed Jan 7 11:24:04 2026 +1100)
+* 6c99423cb - chore: Deprecate interaction conflictsWith method and remove ignored tests (Ronald Holshausen, Wed Jan 7 10:59:28 2026 +1100)
+* 85b71b41f - chore: Fix Gradle deprecation warnings (Ronald Holshausen, Wed Jan 7 10:44:20 2026 +1100)
+* 58ec6294d - chore: Upgrade Gradle to 8.12.1 (Ronald Holshausen, Wed Jan 7 10:03:18 2026 +1100)
+* e66524a2e - bump version to 4.6.20 (Ronald Holshausen, Wed Dec 17 15:34:49 2025 +1100)
+* e9dda51ac - update changelog for release 4.6.19 (Ronald Holshausen, Wed Dec 17 15:14:44 2025 +1100)
+* 84e70f187 - Merge pull request #1880 from pact-foundation/dependabot/github_actions/actions/checkout-6 (Ronald Holshausen, Mon Dec 15 10:21:53 2025 +1100)
+* 59816cf78 - Merge pull request #1887 from csbiggar/upgrade-tika-for-issue-1885 (Ronald Holshausen, Mon Dec 15 10:21:13 2025 +1100)
+* ce88f2729 - Move custom-mimetypes.xml directly to classpath (Carolyn Biggar, Sat Dec 13 00:35:03 2025 +0000)
+* afb1cff55 - [broken build] Change expected supertype for application/json to text/javascript (Carolyn Biggar, Sat Dec 13 00:29:35 2025 +0000)
+* 12029d5dd - [broken build] Upgrade tika-core 2.9.4 > 3.2.3 (Carolyn Biggar, Sat Dec 13 00:25:11 2025 +0000)
+* 076c6cc60 - Update Kotlin version for 4.7.x in README (Ronald Holshausen, Wed Dec 10 11:47:06 2025 +1100)
+* 24a579e55 - bump version to 4.7.0-beta.4 (Ronald Holshausen, Wed Dec 10 11:45:49 2025 +1100)
+* 7cfade7eb - chore(deps): bump actions/checkout from 2 to 6 (dependabot[bot], Mon Nov 24 16:53:18 2025 +0000)
+
 # 4.7.0-beta.3 - Support for Spring 7 and Spring Boot 4
 
 * fa9f35159 - Merge pull request #1884 from schmidthappens/update/add-support-for-spring7 (Ronald Holshausen, Wed Dec 10 10:32:59 2025 +1100)
