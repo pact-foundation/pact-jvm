@@ -99,6 +99,18 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 90e0f919d - bump version to 4.6.18 (Ronald Holshausen, Fri Feb 14 11:52:44 2025 +1100)
 * 8ee5c8b9b - update changelog for release 4.6.17 (Ronald Holshausen, Fri Feb 14 11:10:39 2025 +1100)
 
+# 4.6.19 - Maintenance Release
+
+* 84e70f187 - Merge pull request #1880 from pact-foundation/dependabot/github_actions/actions/checkout-6 (Ronald Holshausen, Mon Dec 15 10:21:53 2025 +1100)
+* 59816cf78 - Merge pull request #1887 from csbiggar/upgrade-tika-for-issue-1885 (Ronald Holshausen, Mon Dec 15 10:21:13 2025 +1100)
+* ce88f2729 - Move custom-mimetypes.xml directly to classpath (Carolyn Biggar, Sat Dec 13 00:35:03 2025 +0000)
+* afb1cff55 - [broken build] Change expected supertype for application/json to text/javascript (Carolyn Biggar, Sat Dec 13 00:29:35 2025 +0000)
+* 12029d5dd - [broken build] Upgrade tika-core 2.9.4 > 3.2.3 (Carolyn Biggar, Sat Dec 13 00:25:11 2025 +0000)
+* 076c6cc60 - Update Kotlin version for 4.7.x in README (Ronald Holshausen, Wed Dec 10 11:47:06 2025 +1100)
+* 7cfade7eb - chore(deps): bump actions/checkout from 2 to 6 (dependabot[bot], Mon Nov 24 16:53:18 2025 +0000)
+* 0c727fe86 - chore: Correct release script (Ronald Holshausen, Tue Nov 11 11:28:59 2025 +1100)
+* 64044d17e - bump version to 4.6.19 (Ronald Holshausen, Tue Nov 11 11:28:27 2025 +1100)
+
 # 4.6.18 - Maintenance Release
 
 * 8a1e8b0a4 - chore: fix port conflict in test (Ronald Holshausen, Tue Nov 11 10:39:20 2025 +1100)

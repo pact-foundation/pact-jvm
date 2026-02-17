@@ -1,0 +1,65 @@
+{
+  "consumer": {
+    "name": "some-consumer"
+  },
+  "interactions": [
+    {
+      "comments": {
+        "testname": "repro.ReproConsumerTest.canHandleEvent(List)"
+      },
+      "contents": {
+        "content": {
+          "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+        },
+        "contentType": "application/json",
+        "encoded": false
+      },
+      "description": "an event",
+      "generators": {
+        "body": {
+          "$.id": {
+            "type": "Uuid"
+          }
+        }
+      },
+      "key": "499aa24f",
+      "matchingRules": {
+        "body": {
+          "$.id": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "contentType": "application/json"
+      },
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "none"
+        }
+      ],
+      "type": "Asynchronous/Messages"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.18"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    },
+    "plugins": [
+
+    ]
+  },
+  "provider": {
+    "name": "parent-provider"
+  }
+}

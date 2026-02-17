@@ -132,9 +132,14 @@ public class Issue406Test {
   }
 
   private static void outputOpenFileCount(String prefix) {
-    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-    if(os instanceof UnixOperatingSystemMXBean){
-      System.out.println(prefix + ": Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
+    try {
+      OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+      if (os instanceof UnixOperatingSystemMXBean) {
+        System.out.println(prefix + ": Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
+      }
+    } catch (Exception e) {
+      System.out.println("Failed get the open file count");
+      e.printStackTrace();
     }
   }
 

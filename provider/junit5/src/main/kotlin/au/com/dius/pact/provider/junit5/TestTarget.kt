@@ -216,7 +216,7 @@ open class MessageTestTarget @JvmOverloads constructor(
     }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
     verifier.providerMethodInstance = Function { m ->
-      if (m.declaringClass == testInstance.javaClass) {
+      if (m.declaringClass.isAssignableFrom(testInstance.javaClass)) {
         testInstance
       } else {
         defaultProviderMethodInstance.apply(m)
