@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 
-version = '4.7.0-beta.4'
+version = '4.7.0-beta.5'
 
 java {
     targetCompatibility = '17'
