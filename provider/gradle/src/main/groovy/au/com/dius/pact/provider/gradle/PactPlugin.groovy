@@ -78,25 +78,25 @@ class PactPlugin extends PactPluginBase {
                 provider.taskNames = project.gradle.startParameter.taskNames
 
                 def providerTask = project.tasks.register(taskName, PactVerificationTask) {
-                    group = GROUP
-                    description = "Verify the pacts against ${provider.name}"
+                    it.group = GROUP
+                    it.description = "Verify the pacts against ${provider.name}"
 
-                    notCompatibleWithConfigurationCache('Configuration Cache is disabled for this task ' +
+                    it.notCompatibleWithConfigurationCache('Configuration Cache is disabled for this task ' +
                       'because of `executeStateChangeTask`')
 
-                    providerToVerify = provider
+                    it.providerToVerify = provider
 
-                    taskContainer.addAll(project.tasks)
-                    List<URL> classPathUrl = []
+                    it.taskContainer.addAll(project.tasks)
+                    List<URI> classPathUrl = []
                     try {
-                        classPathUrl = project.sourceSets.test.runtimeClasspath*.toURL()
+                        classPathUrl = project.sourceSets.test.runtimeClasspath*.toURI()
                     } catch (MissingPropertyException ignored) {
                         // do nothing, the list will be empty
                     }
-                    testClasspathURL.set(classPathUrl)
-                    projectVersion.set(project.version)
-                    report.set(extension.reports)
-                    buildDir.set(project.buildDir)
+                    it.testClasspathURL.set(classPathUrl)
+                    it.projectVersion.set(project.version)
+                    it.report.set(extension.reports)
+                    it.buildDir.set(project.buildDir)
                 }
 
                 if (project.tasks.findByName(TEST_CLASSES)) {
