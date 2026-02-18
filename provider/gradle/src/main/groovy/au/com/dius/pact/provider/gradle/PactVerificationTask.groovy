@@ -55,8 +55,10 @@ abstract class PactVerificationTask extends PactVerificationBaseTask {
         it instanceof Task || it instanceof String && taskContainer.get().find { t -> t.name == it }
       }
       executeBuildSpecificTask = this.&executeStateChangeTask
-      projectClasspath = { testClasspathURL.get() }
-      providerVersion = providerToVerify.providerVersion ?: { projectVersion.get() }
+      projectClasspath = {
+        testClasspathURL.get()*.toURL()
+      }
+        providerVersion = providerToVerify.providerVersion ?: { projectVersion.get() }
       if (providerToVerify.providerTags) {
         if (providerToVerify.providerTags instanceof Closure ) {
           providerTags = providerToVerify.providerTags

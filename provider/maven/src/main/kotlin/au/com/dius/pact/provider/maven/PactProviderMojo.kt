@@ -81,7 +81,7 @@ open class PactProviderMojo : PactBaseMojo() {
       verifier.checkBuildSpecificTask = Function { false }
       verifier.providerVersion = ProviderVersion { projectVersion }
 
-      verifier.projectClasspath = Supplier { classpathElements.map { File(it).toURI() } }
+      verifier.projectClasspath = Supplier { classpathElements.map { File(it).toURI().toURL() } }
 
       if (reports.isNotEmpty()) {
         val reportsDir = File(buildDir, "reports/pact")
