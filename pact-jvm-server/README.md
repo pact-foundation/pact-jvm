@@ -103,12 +103,16 @@ and a path.
 
 For example:
 
+```text
     POST http://localhost:29999/create?state=NoUsers&path=/sub/ref/path '{ "provider": { "name": "Animal_Service"}, ... }'
+```
 
 This will create a new running mock service provider on a randomly generated port.  The port will be returned in the
 `201` response:
 
+```text
     { "port" : 34423 }
+```
 
 But you can also reference the path from `/sub/ref/path` using the server port.  The service will not strip
 the prefix path, but instead will use it as a differentiator.  If your services do not have differences
@@ -121,7 +125,9 @@ Once the client has finished running its tests against the mock server on the su
 
 For example:
 
+```text
     POST http://localhost:29999/complete '{ "port" : 34423 }'
+```
 
 This will cause the Pact server to verify the interactions, shutdown the mock server running on that port and writing
 the pact `JSON` file to disk under the `target` directory.
@@ -134,7 +140,9 @@ Optionaly an authentication token can be used for authentication against the bro
 
 For example:
 
+```text
     POST http://localhost:29999/publish '{ "consumer": "Zoo", "consumerVersion": "0.0.1", "provider": "Animal_Service" }'
+```
 
 This will cause the Pact server to check for the pact `Zoo-Animal_Service.json` on disk under `target` and publish it to
 the configured pact broker. After a successful publish the pact will be removed from disk.
@@ -146,6 +154,8 @@ running mock servers port numbers.
 
 For example:
 
+```text
     GET http://localhost:29999/
 
         '{ "ports": [23443,43232] }'
+```
