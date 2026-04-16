@@ -140,6 +140,16 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 90e0f919d - bump version to 4.6.18 (Ronald Holshausen, Fri Feb 14 11:52:44 2025 +1100)
 * 8ee5c8b9b - update changelog for release 4.6.17 (Ronald Holshausen, Fri Feb 14 11:10:39 2025 +1100)
 
+# 4.6.20 - Small Feature Release
+
+* 8253d47d5 - chore: correct typeo in readme (Ronald Holshausen, Tue Feb 17 16:38:31 2026 +1100)
+* 5caa7c5e9 - feat: Add a JUnit 5 filter by interation type #1894 (Ronald Holshausen, Tue Feb 17 16:21:52 2026 +1100)
+* 698a93b50 - chore: switch from org.apache.commons:commons-io to commons-io:commons-io #1878 (Ronald Holshausen, Tue Feb 17 11:07:17 2026 +1100)
+* 1ef1363c6 - chore: fix for failing CI build (Ronald Holshausen, Tue Feb 17 10:37:54 2026 +1100)
+* bb1b8576d - fix: Support message tests where the annotated method is on a parent class #1890 (Ronald Holshausen, Tue Feb 17 10:08:12 2026 +1100)
+* 9d97753dd - feat: Add support for using BodyBuilder implementations with MessageContentsBuilder (Ronald Holshausen, Thu Feb 5 14:15:10 2026 +1100)
+* e66524a2e - bump version to 4.6.20 (Ronald Holshausen, Wed Dec 17 15:34:49 2025 +1100)
+
 # 4.6.19 - Maintenance Release
 
 * 84e70f187 - Merge pull request #1880 from pact-foundation/dependabot/github_actions/actions/checkout-6 (Ronald Holshausen, Mon Dec 15 10:21:53 2025 +1100)
@@ -3638,7 +3648,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 177774ef0 - chore: upgrade Gradle to 5.5.1 (Ronald Holshausen, Sun Jan 26 11:56:36 2020 +1100)
 * adc95f1e5 - fix: lint and codenarc errors #994 (Ronald Holshausen, Sun Jan 26 11:38:32 2020 +1100)
 * 13b653184 - feat: added a can-i-deploy Gradle task #994 (Ronald Holshausen, Sat Jan 25 19:05:29 2020 +1100)
-* b0b07b0fb - fix: Message should return metadata as Map<String, Object> #1006 (Ronald Holshausen, Sat Jan 25 17:26:21 2020 +1100)
+* b0b07b0fb - fix: Message should return metadata as `Map<String, Object>` #1006 (Ronald Holshausen, Sat Jan 25 17:26:21 2020 +1100)
 * 86f5e8051 - fix: lein plugin parentheses after PR merge (Ronald Holshausen, Sat Jan 25 17:01:56 2020 +1100)
 * 14fd2586c - fix: correct the type matcher to treat JsonNull as a null #981 (Ronald Holshausen, Sat Jan 25 16:47:41 2020 +1100)
 * afba8a6a9 - fix: BigDecimal comparison should use scale and include BigDecimal.ZERO #1001 (Ronald Holshausen, Sat Jan 25 16:32:44 2020 +1100)
@@ -5639,7 +5649,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 3655889 - Merge pull request #450 from marcpa00/isDependencyForPactVerify (Ronald Holshausen, Fri Jun 2 09:02:45 2017 +1000)
 * a595e46 - Merge pull request #449 from marcpa00/provider-gradle-readme-fixes (Ronald Holshausen, Fri Jun 2 09:01:17 2017 +1000)
 * ea1f25c - Add provider task as a dependency to pactVerify unless provider property `isDependencyForPactVerify` is false (defaults to true). (Marc Paquette, Thu Jun 1 16:07:38 2017 -0400)
-* 8d11ef6 - use explicit form of task definition as '<<' shortcut will be deprecated in the future. (Marc Paquette, Wed May 31 14:48:39 2017 -0400)
+* 8d11ef6 - use explicit form of task definition as `'<<'` shortcut will be deprecated in the future. (Marc Paquette, Wed May 31 14:48:39 2017 -0400)
 * b143ccf - give an example JSON body for provider state change. (Marc Paquette, Wed May 31 14:13:41 2017 -0400)
 * 24cb1ac - use backticks when refering to properties; fix typo : provider "pactFile", not "host"; use name of properties when describing start/shutdown of provider. (Marc Paquette, Wed May 31 14:11:53 2017 -0400)
 * 4e77745 - Merge pull request #446 from marcpa00/marcpa00-readme-fixes (Ronald Holshausen, Wed May 31 09:06:57 2017 +1000)
@@ -5666,7 +5676,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 3655889 - Merge pull request #450 from marcpa00/isDependencyForPactVerify (Ronald Holshausen, Fri Jun 2 09:02:45 2017 +1000)
 * a595e46 - Merge pull request #449 from marcpa00/provider-gradle-readme-fixes (Ronald Holshausen, Fri Jun 2 09:01:17 2017 +1000)
 * ea1f25c - Add provider task as a dependency to pactVerify unless provider property `isDependencyForPactVerify` is false (defaults to true). (Marc Paquette, Thu Jun 1 16:07:38 2017 -0400)
-* 8d11ef6 - use explicit form of task definition as '<<' shortcut will be deprecated in the future. (Marc Paquette, Wed May 31 14:48:39 2017 -0400)
+* 8d11ef6 - use explicit form of task definition as `'<<'` shortcut will be deprecated in the future. (Marc Paquette, Wed May 31 14:48:39 2017 -0400)
 * b143ccf - give an example JSON body for provider state change. (Marc Paquette, Wed May 31 14:13:41 2017 -0400)
 * 24cb1ac - use backticks when refering to properties; fix typo : provider "pactFile", not "host"; use name of properties when describing start/shutdown of provider. (Marc Paquette, Wed May 31 14:11:53 2017 -0400)
 * 4e77745 - Merge pull request #446 from marcpa00/marcpa00-readme-fixes (Ronald Holshausen, Wed May 31 09:06:57 2017 +1000)
@@ -7887,7 +7897,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 
 * 1c493e9 - updated readme on overriding http client (Ronald Holshausen, Wed Jun 17 19:42:54 2015 +1000)
 * 4200ccf - use jsonpath bracket notation for normal fields as well #127 (Ronald Holshausen, Wed Jun 17 15:14:03 2015 +1000)
-* 27639eb - correct the junit <-> hamcrest dependency clash (Ronald Holshausen, Wed Jun 17 14:55:34 2015 +1000)
+* 27639eb - correct the junit \<-> hamcrest dependency clash (Ronald Holshausen, Wed Jun 17 14:55:34 2015 +1000)
 * 40f461a - when using jsonpath bracket–notation, we still need to build the object with the original name #127 (Ronald Holshausen, Wed Jun 17 14:54:32 2015 +1000)
 * 196cc27 - make the newClient method non-static so a test can mock it (Ronald Holshausen, Wed Jun 17 13:56:14 2015 +1000)
 * 938f008 - use the field name for the jsonpath bracket–notation #127 (Ronald Holshausen, Wed Jun 17 13:39:57 2015 +1000)

@@ -1,5 +1,4 @@
-pact-jvm-consumer-groovy
-=========================
+# pact-jvm-consumer-groovy
 
 Groovy DSL for Pact JVM
 
@@ -7,9 +6,9 @@ Groovy DSL for Pact JVM
 
 The library is available on maven central using:
 
-* group-id = `au.com.dius.pact.consumer`
-* artifact-id = `groovy`
-* version-id = `4.1.0`
+- group-id = `au.com.dius.pact.consumer`
+- artifact-id = `groovy`
+- version-id = `4.1.0`
 
 ## Usage
 
@@ -18,12 +17,15 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 
 If you are using gradle for your build, add it to your `build.gradle`:
 
+```groovy
     dependencies {
         testCompile 'au.com.dius.pact.consumer:groovy:4.1.0'
     }
-    
+```
+
 In order to avoid the name collision between `au.com.dius.pact.consumer:groovy` and Groovy Gradle plugin's [automatic configuraiton of `groovyClasspath`](https://docs.gradle.org/current/userguide/groovy_plugin.html#sec:automatic_configuration_of_groovyclasspath)
 add the following configuration to your `build.gradle`:
+
 ```groovy
 compileTestGroovy {
     groovyClasspath = configurations.testCompileClasspath
@@ -80,31 +82,35 @@ Then create an instance of the `PactBuilder` in your test.
 
 After running this test, the following pact file is produced:
 
+```json
+{
+  "provider": {
+    "name": "Alice Service"
+  },
+  "consumer": {
+    "name": "Consumer"
+  },
+  "interactions": [
     {
-      "provider" : {
-        "name" : "Alice Service"
+      "provider_state": "there is some good mallory",
+      "description": "a retrieve Mallory request",
+      "request": {
+        "method": "get",
+        "path": "/mallory",
+        "requestMatchers": {}
       },
-      "consumer" : {
-        "name" : "Consumer"
-      },
-      "interactions" : [ {
-        "provider_state" : "there is some good mallory",
-        "description" : "a retrieve Mallory request",
-        "request" : {
-          "method" : "get",
-          "path" : "/mallory",
-          "requestMatchers" : { }
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html"
         },
-        "response" : {
-          "status" : 200,
-          "headers" : {
-            "Content-Type" : "text/html"
-          },
-          "body" : "That is some good Mallory.",
-          "responseMatchers" : { }
-        }
-      } ]
+        "body": "That is some good Mallory.",
+        "responseMatchers": {}
+      }
     }
+  ]
+}
+```
 
 ### DSL Methods
 
@@ -138,14 +144,14 @@ Starts the definition of a of a pact interaction.
 
 Defines the request for the interaction. The request data map can contain the following:
 
-| key                           |  Description                               | Default Value             |
-|----------------------------|-------------------------------------------|-----------------------------|
-| method | The HTTP method to use | get |
-| path | The Path for the request | / |
-| query | Query parameters as a Map<String, List> |  |
-| headers | Map of key-value pairs for the request headers | |
-| body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
-| prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies below |
+| key         | Description                                                                                                   | Default Value |
+| ----------- | ------------------------------------------------------------------------------------------------------------- | ------------- |
+| method      | The HTTP method to use                                                                                        | get           |
+| path        | The Path for the request                                                                                      | /             |
+| query       | Query parameters as a Map<String, List>                                                                       |               |
+| headers     | Map of key-value pairs for the request headers                                                                |               |
+| body        | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. |               |
+| prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies below               |
 
 For the path, header attributes and query parameters (version 2.2.2+ for headers, 3.3.7+ for query parameters),
 you can use regular expressions to match. You can either provide a regex `Pattern` class or use the `regexp` method
@@ -171,13 +177,13 @@ Constructs the body of the request or response by invoking the supplied closure 
 
 An optional Map can be supplied to control how the body is generated. The option values are available:
 
-| Option | Description |
-|--------|-------------|
-| mimeType | The mime type of the body. Defaults to `application/json` |
+| Option      | Description                                                                         |
+| ----------- | ----------------------------------------------------------------------------------- |
+| mimeType    | The mime type of the body. Defaults to `application/json`                           |
 | prettyPrint | Boolean value controlling whether to pretty-print the body or not. Defaults to true |
 
 If the prettyPrint option is not specified, the bodies will be pretty printed unless the mime type corresponds to one
- that requires compact bodies. Currently only `application/x-thrift+json` is classed as requiring a compact body.
+that requires compact bodies. Currently only `application/x-thrift+json` is classed as requiring a compact body.
 
 For an example of turning off pretty printing:
 
@@ -196,12 +202,12 @@ service {
 
 Defines the response for the interaction. The response data map can contain the following:
 
-| key                           |  Description                               | Default Value             |
-|----------------------------|-------------------------------------------|-----------------------------|
-| status | The HTTP status code to return | 200 |
-| headers | Map of key-value pairs for the response headers | |
-| body | The body of the response. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
-| prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies above |
+| key         | Description                                                                                                    | Default Value |
+| ----------- | -------------------------------------------------------------------------------------------------------------- | ------------- |
+| status      | The HTTP status code to return                                                                                 | 200           |
+| headers     | Map of key-value pairs for the response headers                                                                |               |
+| body        | The body of the response. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. |               |
+| prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies above                |
 
 For the headers (version 2.2.2+), you can use regular expressions to match. You can either provide a regex `Pattern` class or use
 the `regexp` method to construct a `RegexpMatcher` (you can use any of the defined matcher methods, see DSL methods below).
@@ -263,10 +269,10 @@ This will return the following body:
 
 ```json
 {
-       "name": "harry",
-       "surname": "larry",
-       "position": "staff",
-       "happy": true
+  "name": "harry",
+  "surname": "larry",
+  "position": "staff",
+  "happy": true
 }
 ```
 
@@ -274,9 +280,9 @@ and add the following matchers:
 
 ```json
 {
-    "$.body.name": {"regex": "\\w+"},
-    "$.body.surname": {"regex": "\\w+"},
-    "$.body.position": {"regex": "staff|contractor"}
+  "$.body.name": { "regex": "\\w+" },
+  "$.body.surname": { "regex": "\\w+" },
+  "$.body.position": { "regex": "staff|contractor" }
 }
 ```
 
@@ -284,65 +290,65 @@ and add the following matchers:
 
 The DSL supports the following matching methods:
 
-* regexp(Pattern re, String value = null), regexp(String regexp, String value = null)
+- regexp(Pattern re, String value = null), regexp(String regexp, String value = null)
 
 Defines a regular expression matcher. If the value is not provided, a random one will be generated.
 
-* hexValue(String value = null)
+- hexValue(String value = null)
 
 Defines a matcher that accepts hexidecimal values. If the value is not provided, a random hexidcimal value will be
 generated.
 
-* identifier(def value = null)
+- identifier(def value = null)
 
-Defines a matcher that accepts integer values.  If the value is not provided, a random value will be generated.
+Defines a matcher that accepts integer values. If the value is not provided, a random value will be generated.
 
-* ipAddress(String value = null)
+- ipAddress(String value = null)
 
-Defines a matcher that accepts IP addresses.  If the value is not provided, a 127.0.0.1 will be used.
+Defines a matcher that accepts IP addresses. If the value is not provided, a 127.0.0.1 will be used.
 
-* numeric(Number value = null)
+- numeric(Number value = null)
 
 Defines a matcher that accepts any numerical values. If the value is not provided, a random integer will be used.
 
-* integer(def value = null)
+- integer(def value = null)
 
 Defines a matcher that accepts any integer values. If the value is not provided, a random integer will be used.
 
-* decimal(def value = null)
+- decimal(def value = null)
 
 Defines a matcher that accepts any decimal numbers. If the value is not provided, a random decimal will be used.
 
-* timestamp(String pattern = null, def value = null)
+- timestamp(String pattern = null, def value = null)
 
 If pattern is not provided the ISO_DATETIME_FORMAT is used ("yyyy-MM-dd'T'HH:mm:ss") . If the value is not provided, the current date and time is used.
 
-* time(String pattern = null, def value = null)
+- time(String pattern = null, def value = null)
 
 If pattern is not provided the ISO_TIME_FORMAT is used ("'T'HH:mm:ss") . If the value is not provided, the current date and time is used.
 
-* date(String pattern = null, def value = null)
+- date(String pattern = null, def value = null)
 
 If pattern is not provided the ISO_DATE_FORMAT is used ("yyyy-MM-dd") . If the value is not provided, the current date and time is used.
 
-* uuid(String value = null)
+- uuid(String value = null)
 
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
 
-* equalTo(def value)
+- equalTo(def value)
 
 Defines an equality matcher that always matches the provided value using `equals`. This is useful for resetting cascading
 type matchers.
 
-* includesStr(def value)
+- includesStr(def value)
 
 Defines a matcher that accepts any value where its string form includes the provided string.
 
-* nullValue()
+- nullValue()
 
 Defines a matcher that accepts only null values.
 
-* url(String basePath, Object... pathFragments)
+- url(String basePath, Object... pathFragments)
 
 Defines a matcher for URLs, given the base URL path and a sequence of path fragments. The path fragments could be
 strings or regular expression matchers. For example:
@@ -369,10 +375,10 @@ Lots of the time you might not know the number of items that will be in a list, 
 has a minimum or maximum size and that each item in the list matches a given example. You can do this with the `eachLike`,
 `minLike` and `maxLike` functions.
 
-| function | description |
-|----------|-------------|
-| `eachLike()` | Ensure that each item in the list matches the provided example |
-| `maxLike(integer max)` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max |
+| function               | description                                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `eachLike()`           | Ensure that each item in the list matches the provided example                                                  |
+| `maxLike(integer max)` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max  |
 | `minLike(integer min)` | Ensure that each item in the list matches the provided example and the list is no smaller than the provided min |
 
 For example:
@@ -413,7 +419,7 @@ will generate the following JSON
 
 ```json
 {
-    "permissions": ["GRANT", "GRANT", "GRANT"]
+  "permissions": ["GRANT", "GRANT", "GRANT"]
 }
 ```
 
@@ -421,7 +427,7 @@ and matchers
 
 ```json
 {
-    "$.body.permissions": {"match": "type"}
+  "$.body.permissions": { "match": "type" }
 }
 ```
 
@@ -522,7 +528,7 @@ For an example, have a look at [WildcardPactSpec](https://github.com/DiUS/pact-j
 ### Matching with an OR
 
 The V3 spec allows multiple matchers to be combined using either AND or OR for a value. The main use of this would be to
- either be able to match a value or a null, or to combine different matchers.
+either be able to match a value or a null, or to combine different matchers.
 
 For example:
 
@@ -569,10 +575,10 @@ If you use Gradle, you can use the [pact Gradle plugin](/provider/gradle/README.
 
 Version 3 of the pact specification changes the format of pact files in the following ways:
 
-* Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
-and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
-* Introduces a new message pact format for testing interactions via a message queue.
-* Multiple provider states can be defined with data parameters.
+- Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
+  and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
+- Introduces a new message pact format for testing interactions via a message queue.
+- Multiple provider states can be defined with data parameters.
 
 ## Generating V3 spec pact files
 
@@ -681,6 +687,7 @@ service {
 ## Overriding the expression markers `${` and `}` (4.1.25+)
 
 You can change the markers of the expressions using the following system properties:
+
 - `pact.expressions.start` (default is `${`)
 - `pact.expressions.end` (default is `}`)
 

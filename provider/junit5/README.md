@@ -368,20 +368,21 @@ For example:
 Synchronous message example:
 
 ```java
-    @PactVerifyProvider("a test message")
-    public MessageAndMetadata messageRecievedAndCreated(MessageContents requestMessage) {
 
-        var req = MyMessageHandler.getRequest(requestMessage.getContents().valueAsString());
-        Message<String> message = MyMessageBuilder.createResponse(req);
-        return generateMessageAndMetadata(message);
-    }
+@PactVerifyProvider("a test message")
+public MessageAndMetadata messageReceivedAndCreated(MessageContents requestMessage) {
 
-    private MessageAndMetadata generateMessageAndMetadata(Message<String> message) {
-        HashMap<String, Object> metadata = new HashMap<String, Object>();
-        message.getHeaders().forEach((k, v) -> metadata.put(k, v));
+  var req = MyMessageHandler.getRequest(requestMessage.getContents().valueAsString());
+  Message<String> message = MyMessageBuilder.createResponse(req);
+  return generateMessageAndMetadata(message);
+}
 
-        return new MessageAndMetadata(message.getPayload().getBytes(), metadata);
-    }
+private MessageAndMetadata generateMessageAndMetadata(Message<String> message) {
+  HashMap<String, Object> metadata = new HashMap<String, Object>();
+  message.getHeaders().forEach((k, v) -> metadata.put(k, v));
+
+  return new MessageAndMetadata(message.getPayload().getBytes(), metadata);
+}
 ```
 
 # Filtering interactions that are verified
