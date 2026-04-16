@@ -18,7 +18,7 @@ class MockServerLogSpec extends Specification {
     def request = new Request('GET', '/path')
 
     expect:
-    MockServerLog.INSTANCE.requestToString(request) == '>>> GET /path'
+    MockServerLog.INSTANCE.requestToString(request) == '| GET /path'
   }
 
   def 'requestToString - includes query parameters'() {
@@ -26,7 +26,7 @@ class MockServerLogSpec extends Specification {
     def request = new Request('GET', '/search', ['q': ['pact'], 'page': ['2']])
 
     expect:
-    MockServerLog.INSTANCE.requestToString(request) == '>>> GET /search?q=pact&page=2'
+    MockServerLog.INSTANCE.requestToString(request) == '| GET /search?q=pact&page=2'
   }
 
   def 'requestToString - multi-value query parameter'() {
@@ -34,7 +34,7 @@ class MockServerLogSpec extends Specification {
     def request = new Request('GET', '/items', ['id': ['1', '2', '3']])
 
     expect:
-    MockServerLog.INSTANCE.requestToString(request) == '>>> GET /items?id=1&id=2&id=3'
+    MockServerLog.INSTANCE.requestToString(request) == '| GET /items?id=1&id=2&id=3'
   }
 
   def 'requestToString - includes headers'() {
@@ -44,9 +44,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> DELETE /resource
-  Accept: application/json
-  X-Request-Id: abc-123'''
+| DELETE /resource
+|  Accept: application/json
+|  X-Request-Id: abc-123'''
   }
 
   def 'requestToString - multi-value header is joined with commas'() {
@@ -56,8 +56,8 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> GET /
-  Accept: application/json, text/plain'''
+| GET /
+|  Accept: application/json, text/plain'''
   }
 
   def 'requestToString - missing body produces no body block'() {
@@ -65,7 +65,7 @@ class MockServerLogSpec extends Specification {
     def request = new Request('GET', '/', [:], [:], OptionalBody.missing())
 
     expect:
-    MockServerLog.INSTANCE.requestToString(request) == '>>> GET /'
+    MockServerLog.INSTANCE.requestToString(request) == '| GET /'
   }
 
   def 'requestToString - empty body is labelled'() {
@@ -74,9 +74,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> POST /api
-
-  (empty body)'''
+| POST /api
+|
+|  (empty body)'''
   }
 
   def 'requestToString - null body is labelled'() {
@@ -85,9 +85,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> POST /api
-
-  (null body)'''
+| POST /api
+|
+|  (null body)'''
   }
 
   def 'requestToString - JSON body is pretty-printed'() {
@@ -98,13 +98,13 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> POST /users
-  Content-Type: application/json
-
-  {
-    "id": 1,
-    "name": "Alice"
-  }'''
+| POST /users
+|  Content-Type: application/json
+|
+|  {
+|    "id": 1,
+|    "name": "Alice"
+|  }'''
   }
 
   def 'requestToString - text body is indented'() {
@@ -114,9 +114,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> POST /notes
-
-  hello world'''
+| POST /notes
+|
+|  hello world'''
   }
 
   def 'requestToString - multiline text body each line is indented'() {
@@ -126,10 +126,10 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> POST /notes
-
-  line one
-  line two'''
+| POST /notes
+|
+|  line one
+|  line two'''
   }
 
   def 'requestToString - XML body is indented'() {
@@ -139,9 +139,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> POST /data
-
-  <root/>'''
+| POST /data
+|
+|  <root/>'''
   }
 
   def 'requestToString - binary body shows byte count'() {
@@ -151,9 +151,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.requestToString(request) == '''\
->>> PUT /upload
-
-  (42 bytes of binary data)'''
+| PUT /upload
+|
+|  (42 bytes of binary data)'''
   }
 
   // -------------------------------------------------------------------------
@@ -165,7 +165,7 @@ class MockServerLogSpec extends Specification {
     def response = new Response(204)
 
     expect:
-    MockServerLog.INSTANCE.responseToString(response) == '<<< 204 No Content'
+    MockServerLog.INSTANCE.responseToString(response) == '| 204 No Content'
   }
 
   def 'responseToString - unknown status code has no description'() {
@@ -173,7 +173,7 @@ class MockServerLogSpec extends Specification {
     def response = new Response(999)
 
     expect:
-    MockServerLog.INSTANCE.responseToString(response) == '<<< 999'
+    MockServerLog.INSTANCE.responseToString(response) == '| 999'
   }
 
   def 'responseToString - includes headers'() {
@@ -182,9 +182,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.responseToString(response) == '''\
-<<< 200 OK
-  Content-Type: application/json
-  X-Trace-Id: xyz'''
+| 200 OK
+|  Content-Type: application/json
+|  X-Trace-Id: xyz'''
   }
 
   def 'responseToString - JSON body is pretty-printed'() {
@@ -194,13 +194,13 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.responseToString(response) == '''\
-<<< 200 OK
-  Content-Type: application/json
-
-  {
-    "id": 42,
-    "name": "Bob"
-  }'''
+| 200 OK
+|  Content-Type: application/json
+|
+|  {
+|    "id": 42,
+|    "name": "Bob"
+|  }'''
   }
 
   def 'responseToString - invalid JSON falls back to raw string'() {
@@ -210,9 +210,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.responseToString(response) == '''\
-<<< 200 OK
-
-  not-valid-json'''
+| 200 OK
+|
+|  not-valid-json'''
   }
 
   def 'responseToString - text body is indented'() {
@@ -222,9 +222,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.responseToString(response) == '''\
-<<< 200 OK
-
-  plain text response'''
+| 200 OK
+|
+|  plain text response'''
   }
 
   def 'responseToString - binary body shows byte count'() {
@@ -234,9 +234,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.responseToString(response) == '''\
-<<< 200 OK
-
-  (256 bytes of binary data)'''
+| 200 OK
+|
+|  (256 bytes of binary data)'''
   }
 
   def 'responseToString - empty body is labelled'() {
@@ -245,9 +245,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.responseToString(response) == '''\
-<<< 200 OK
-
-  (empty body)'''
+| 200 OK
+|
+|  (empty body)'''
   }
 
   def 'responseToString - null body is labelled'() {
@@ -256,9 +256,9 @@ class MockServerLogSpec extends Specification {
 
     expect:
     MockServerLog.INSTANCE.responseToString(response) == '''\
-<<< 200 OK
-
-  (null body)'''
+| 200 OK
+|
+|  (null body)'''
   }
 
   @Unroll
@@ -267,7 +267,7 @@ class MockServerLogSpec extends Specification {
     def response = new Response(status)
 
     expect:
-    MockServerLog.INSTANCE.responseToString(response).startsWith("<<< $status $description")
+    MockServerLog.INSTANCE.responseToString(response).startsWith("| $status $description")
 
     where:
     status | description

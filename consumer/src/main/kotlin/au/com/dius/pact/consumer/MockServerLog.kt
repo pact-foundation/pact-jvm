@@ -8,25 +8,29 @@ import au.com.dius.pact.core.support.json.JsonParser
 /**
  * Formats HTTP requests and responses for mock server debug logging.
  *
- * Requests are prefixed with `>>>` and responses with `<<<` so they are easy
+ * Requests and responses are prefixed with `|` so they are easy
  * to distinguish at a glance in a log stream.
  */
 object MockServerLog {
 
   fun requestToString(request: IRequest): String = buildString {
-    appendLine(">>> ${request.method} ${request.path}${queryString(request)}")
+    appendLine("| ${request.method} ${request.path}${queryString(request)}")
     request.headers.forEach { (key, values) ->
-      appendLine("  $key: ${values.joinToString(", ")}")
+      appendLine("|  $key: ${values.joinToString(", ")}")
     }
-    bodyBlock(request.body)?.let { append(it) }
+    bodyBlock(request.body)?.let { text ->
+      text.lines().forEach { append("|$it\n") }
+    }
   }.trimEnd()
 
   fun responseToString(response: IResponse): String = buildString {
-    appendLine("<<< ${response.status} ${httpStatusDescription(response.status)}")
+    appendLine("| ${response.status} ${httpStatusDescription(response.status)}")
     response.headers.forEach { (key, values) ->
-      appendLine("  $key: ${values.joinToString(", ")}")
+      appendLine("|  $key: ${values.joinToString(", ")}")
     }
-    bodyBlock(response.body)?.let { append(it) }
+    bodyBlock(response.body)?.let { text ->
+      text.lines().forEach { append("|$it\n") }
+    }
   }.trimEnd()
 
   private fun queryString(request: IRequest): String {
