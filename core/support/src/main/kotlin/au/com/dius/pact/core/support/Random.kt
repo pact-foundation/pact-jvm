@@ -1,9 +1,10 @@
 package au.com.dius.pact.core.support
 
-import com.mifmif.common.regex.Generex
+import au.com.dius.pact.core.support.regex.RegexParser
+import au.com.dius.pact.core.support.regex.RegexStringGenerator
 
 /**
- * Support for the generator of random values
+ * Support for the generation of random values
  */
 object Random {
   /**
@@ -11,10 +12,11 @@ object Random {
    */
   @JvmStatic
   fun generateRandomString(regex: String): String {
-    return if (regex.endsWith('$') && !regex.endsWith("\\$")) {
-      Generex(regex.trimStart('^').trimEnd('$')).random()
+    val cleaned = if (regex.endsWith('$') && !regex.endsWith("\\$")) {
+      regex.trimStart('^').trimEnd('$')
     } else {
-      Generex(regex.trimStart('^')).random()
+      regex.trimStart('^')
     }
+    return RegexStringGenerator().generate(RegexParser(cleaned).parse())
   }
 }
