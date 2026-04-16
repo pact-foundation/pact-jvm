@@ -161,7 +161,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
             httpHeaders.add(k, v.joinToString(", "))
         }
 
-        if (hasBody && !httpHeaders.containsKey(HttpHeaders.CONTENT_TYPE)) {
+        if (hasBody && httpHeaders.getFirst(HttpHeaders.CONTENT_TYPE) == null) {
             httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         }
 
