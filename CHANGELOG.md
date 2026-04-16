@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.0-beta.5 - Bugfix Release
+
+* fff39e5f7 - fix: HttpHeaders.containsKey() which was removed in Spring Framework 7, causing NoSuchMethodError at runtime #1902 (Ronald Holshausen, Thu Apr 16 13:38:01 2026 +1000)
+* f27d9aaff - fix: Switch from the use of URL to URI in Gradle plugin to support Gradle 9+/JVM 25 #1892 (Ronald Holshausen, Thu Feb 19 09:49:18 2026 +1100)
+* 161c08324 - Revert "fix: Switch from the use of URL to URI in Gradle plugin to support Gradle 9+/JVM 25 #1892" (Ronald Holshausen, Thu Feb 19 09:19:01 2026 +1100)
+* 699d755c0 - bump version to 4.7.0-beta.5 (Ronald Holshausen, Wed Feb 18 11:12:50 2026 +1100)
+
 # 4.7.0-beta.4 - Support Gradle 9+/JVM, removed deprecated methods, other small feature enhancements
 
 * 6db476b05 - fix: Switch from the use of URL to URI in Gradle plugin to support Gradle 9+/JVM 25 #1892 (Ronald Holshausen, Wed Feb 18 09:57:01 2026 +1100)
