@@ -252,9 +252,9 @@ abstract class BaseJdkMockServer(
     } else {
       try {
         val request = toPactRequest(exchange)
-        logger.debug { "Received request: $request" }
+        logger.debug { "Received request:\n${MockServerLog.requestToString(request)}" }
         val response = generatePactResponse(request)
-        logger.debug { "Generating response: $response" }
+        logger.debug { "Generating response:\n${MockServerLog.responseToString(response)}" }
         pactResponseToHttpExchange(response, exchange)
       } catch (e: Exception) {
         logger.error(e) { "Failed to generate response" }
