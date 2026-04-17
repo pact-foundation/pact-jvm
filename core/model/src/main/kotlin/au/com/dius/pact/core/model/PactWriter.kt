@@ -105,7 +105,12 @@ object DefaultPactWriter : PactWriter, KLogging() {
           raf.write(bytes)
           Result.Ok(bytes.size)
         } else {
-          pactFile.printWriter().use { writePact(pact, it, pactSpecVersion) }
+          val swriter = StringWriter()
+          val writer = PrintWriter(swriter)
+          writePact(pact, writer, pactSpecVersion)
+          val bytes = swriter.toString().toByteArray()
+          raf.write(bytes)
+          Result.Ok(bytes.size)
         }
       } finally {
         lock.release()
