@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.0-beta.6 - Maintenance Release
+
+* 698c1b2a1 - chore: Update readme after upgrading Kotlin to 2.3.10 (Ronald Holshausen, Fri Apr 17 10:56:41 2026 +1000)
+* 0a983466e - chore: Upgrade Kotlin to 2.3.10 (Ronald Holshausen, Fri Apr 17 10:56:01 2026 +1000)
+* e9f112aac - feat: add support for custom headers with the PactBroker annotation #1835 (Ronald Holshausen, Fri Apr 17 10:38:54 2026 +1000)
+* f0283de99 - feat(consumer): Make the mock server log entries for requests and responses clearer in the log output (Ronald Holshausen, Fri Apr 17 09:32:07 2026 +1000)
+* bdb9db101 - chore(consumer): Add test for MockServerLog (Ronald Holshausen, Thu Apr 16 17:22:04 2026 +1000)
+* 64b5af54c - Merge branch 'master' into v4.7.x (Ronald Holshausen, Thu Apr 16 17:15:19 2026 +1000)
+* 7cf4acc16 - feat(consumer): Make the mock server log entries for requests and responses clearer in the log output (Ronald Holshausen, Thu Apr 16 16:51:38 2026 +1000)
+* 451d7f0e6 - fix: Replace Generex with a custom random string generator #1848 (Ronald Holshausen, Thu Apr 16 15:58:56 2026 +1000)
+* d5bb09476 - bump version to 4.7.0-beta.6 (Ronald Holshausen, Thu Apr 16 14:28:00 2026 +1000)
+* c2ffe0c55 - Merge pull request #1904 from kevinrvaz/docs/update_docs_for_docusaurus_update (Ronald Holshausen, Thu Apr 16 09:34:27 2026 +1000)
+* 6d4c19934 - docs: update docs for docusaurus upgrade (Kevin Rohan Vaz, Fri Mar 27 13:37:50 2026 +0530)
+* 50fc16748 - bump version to 4.6.21 (Ronald Holshausen, Wed Feb 18 09:48:20 2026 +1100)
+* 57acbd63b - update changelog for release 4.6.20 (Ronald Holshausen, Wed Feb 18 09:24:06 2026 +1100)
+* 8253d47d5 - chore: correct typeo in readme (Ronald Holshausen, Tue Feb 17 16:38:31 2026 +1100)
+* 5caa7c5e9 - feat: Add a JUnit 5 filter by interation type #1894 (Ronald Holshausen, Tue Feb 17 16:21:52 2026 +1100)
+
 # 4.7.0-beta.5 - Bugfix Release
 
 * fff39e5f7 - fix: HttpHeaders.containsKey() which was removed in Spring Framework 7, causing NoSuchMethodError at runtime #1902 (Ronald Holshausen, Thu Apr 16 13:38:01 2026 +1000)
