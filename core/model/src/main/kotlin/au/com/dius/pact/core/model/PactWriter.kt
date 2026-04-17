@@ -88,7 +88,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
-        if(pactFile.length() > 0) {
+        val pactToWrite = if (pactFile.length() > 0) {
           val source = FileSource(pactFile)
           val json: JsonValue.Object = JsonParser.parseString(readFileUtf8(raf)).downcast()
           val existingPact = DefaultPactReader.pactFromJson(json, source)
@@ -96,22 +96,18 @@ object DefaultPactWriter : PactWriter, KLogging() {
           if (!result.ok) {
             throw InvalidPactException(result.message)
           }
-          raf.seek(0)
-          val swriter = StringWriter()
-          val writer = PrintWriter(swriter)
-          writePact(result.result!!, writer, pactSpecVersion)
-          val bytes = swriter.toString().toByteArray()
-          raf.setLength(bytes.size.toLong())
-          raf.write(bytes)
-          Result.Ok(bytes.size)
+          result.result!!
         } else {
-          val swriter = StringWriter()
-          val writer = PrintWriter(swriter)
-          writePact(pact, writer, pactSpecVersion)
-          val bytes = swriter.toString().toByteArray()
-          raf.write(bytes)
-          Result.Ok(bytes.size)
+          pact
         }
+        raf.seek(0)
+        val swriter = StringWriter()
+        val writer = PrintWriter(swriter)
+        writePact(pactToWrite, writer, pactSpecVersion)
+        val bytes = swriter.toString().toByteArray()
+        raf.write(bytes)
+        raf.setLength(bytes.size.toLong())
+        Result.Ok(bytes.size)
       } finally {
         lock.release()
         raf.close()
