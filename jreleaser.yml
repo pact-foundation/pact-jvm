@@ -1,6 +1,6 @@
 project:
   name: au.com.dius.pact
-  version: 4.7.0-beta.6
+  version: 4.7.0-beta.7
   description: Pact JVM
   longDescription: Pact JVM
   license: MIT
