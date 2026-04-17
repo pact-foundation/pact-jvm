@@ -114,4 +114,10 @@ public @interface PactBroker {
    * This can be set with the pactbroker.enableInsecureTls JVM system property.
    */
   String enableInsecureTls() default "${pactbroker.enableInsecureTls:false}";
+
+  /**
+   * Custom HTTP headers to include in all requests to the pact broker. Both name and value support expression
+   * syntax (e.g. {@code @PactBrokerHttpHeader(name = "X-My-Header", value = "${MY_VALUE:default}")}).
+   */
+  PactBrokerHttpHeader[] customHeaders() default {};
 }

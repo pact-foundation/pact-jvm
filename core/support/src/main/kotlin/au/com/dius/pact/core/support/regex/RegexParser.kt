@@ -70,6 +70,7 @@ class RegexParser(private val pattern: String) {
 
   // ── Group ────────────────────────────────────────────────────────────────
 
+  @Suppress("CyclomaticComplexMethod")
   private fun parseGroup(): RegexNode {
     pos++ // consume '('
     var ignore = false
@@ -113,6 +114,7 @@ class RegexParser(private val pattern: String) {
 
   // ── Character class ──────────────────────────────────────────────────────
 
+  @Suppress("CyclomaticComplexMethod")
   private fun parseCharClass(): RegexNode {
     pos++ // consume '['
     val negated = pos < pattern.length && pattern[pos] == '^'
@@ -180,6 +182,7 @@ class RegexParser(private val pattern: String) {
    * Returns (ranges, chars) for what the escape contributes to the class.
    * Called after the backslash has already been consumed.
    */
+  @Suppress("CyclomaticComplexMethod")
   private fun parseCharClassEscape(): Pair<List<Pair<Char, Char>>, List<Char>> {
     if (pos >= pattern.length) return Pair(emptyList(), emptyList())
     return when (val ch = pattern[pos++]) {
@@ -222,9 +225,10 @@ class RegexParser(private val pattern: String) {
 
   // ── Escape sequences ─────────────────────────────────────────────────────
 
+  @Suppress("CyclomaticComplexMethod")
   private fun parseEscape(): RegexNode {
     pos++ // consume '\\'
-    if (pos >= pattern.length) throw IllegalArgumentException("Trailing backslash in regex pattern")
+    require(pos < pattern.length) { "Trailing backslash in regex pattern" }
     return when (val ch = pattern[pos++]) {
       'w' -> RegexNode.CharClass(listOf(Pair('a', 'z'), Pair('A', 'Z'), Pair('0', '9')), listOf('_'))
       'W' -> RegexNode.CharClass(listOf(Pair(' ', '/'), Pair(':', '@'), Pair('[', '^'), Pair('{', '~')), listOf('`'))
@@ -351,7 +355,7 @@ class RegexParser(private val pattern: String) {
 
   // ── Quantifier ───────────────────────────────────────────────────────────
 
-  @Suppress("ReturnCount")
+  @Suppress("ReturnCount", "CyclomaticComplexMethod", "NestedBlockDepth")
   private fun parseQuantifier(node: RegexNode): RegexNode {
     if (pos >= pattern.length) return node
     val quantified = when (pattern[pos]) {

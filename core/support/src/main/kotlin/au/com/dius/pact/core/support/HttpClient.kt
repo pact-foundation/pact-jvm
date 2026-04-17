@@ -99,12 +99,15 @@ object HttpClient {
   /**
    * Creates a new HTTP client
    */
+  @JvmOverloads
+  @Suppress("LongParameterList")
   fun newHttpClient(
     authentication: Any?,
     uri: URI,
     maxPublishRetries: Int = 5,
     publishRetryInterval: Int = 3000,
-    insecureTLS: Boolean = false
+    insecureTLS: Boolean = false,
+    customHeaders: Map<String, String> = emptyMap()
   ): Pair<CloseableHttpClient, CredentialsProvider?> {
     val builder = HttpClients.custom().useSystemProperties()
       .setRetryStrategy(RetryAnyMethod(maxPublishRetries,
@@ -155,6 +158,7 @@ object HttpClient {
       else -> SystemDefaultCredentialsProvider()
     }
 
+    defaultHeaders.putAll(customHeaders)
     builder.setDefaultHeaders(defaultHeaders.map { BasicHeader(it.key, it.value) })
 
     if (insecureTLS) {

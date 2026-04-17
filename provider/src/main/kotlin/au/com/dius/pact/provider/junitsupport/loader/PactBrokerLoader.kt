@@ -74,6 +74,12 @@ open class PactBrokerLoader(
 
   var pactReader: PactReader = DefaultPactReader
 
+  /**
+   * Custom HTTP headers to include in all requests to the pact broker.
+   * Values support expression syntax (e.g. {@code ${MY_TOKEN:}}).
+   */
+  var customHeaders: Map<String, String> = emptyMap()
+
   constructor(pactBroker: PactBroker) : this(
     pactBroker.host,
     pactBroker.port,
@@ -91,7 +97,9 @@ open class PactBrokerLoader(
     pactBroker.includeWipPactsSince,
     pactBroker.url,
     pactBroker.enableInsecureTls
-  )
+  ) {
+    customHeaders = pactBroker.customHeaders.associate { it.name to it.value }
+  }
 
   override fun description(): String {
     val resolver = setupValueResolver()
@@ -341,7 +349,11 @@ open class PactBrokerLoader(
   open fun newPactBrokerClient(url: URI, resolver: ValueResolver): IPactBrokerClient {
     var options = mapOf<String, Any>()
     val insecureTls = ep.parseExpression(enableInsecureTls, DataType.BOOLEAN, resolver) as Boolean
-    val config = PactBrokerClientConfig(insecureTLS = insecureTls)
+    val resolvedCustomHeaders = customHeaders.entries.associate { (name, value) ->
+      ep.parseExpression(name, DataType.RAW, resolver).toString() to
+        ep.parseExpression(value, DataType.RAW, resolver).toString()
+    }
+    val config = PactBrokerClientConfig(insecureTLS = insecureTls, customHeaders = resolvedCustomHeaders)
 
     if (authentication == null) {
       logger.debug { "Authentication: None" }

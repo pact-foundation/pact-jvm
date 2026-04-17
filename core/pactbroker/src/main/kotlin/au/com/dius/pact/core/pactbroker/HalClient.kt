@@ -228,7 +228,7 @@ open class HalClient @JvmOverloads constructor(
       }
       val uri = URI(baseUrl)
       val (client, credentialsProvider) = HttpClient.newHttpClient(options["authentication"], uri, this.maxPublishRetries,
-        this.publishRetryInterval, config.insecureTLS)
+        this.publishRetryInterval, config.insecureTLS, config.customHeaders)
       httpClient = client
 
       if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {

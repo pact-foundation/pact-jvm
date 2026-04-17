@@ -972,6 +972,52 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerClient.options == [:]
   }
 
+  def 'Custom Headers: Passes custom headers to the PactBrokerClient config'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationWithCustomHeaders.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.config.customHeaders == ['X-Custom-Header': 'custom-value']
+  }
+
+  def 'Custom Headers: Resolves expressions in custom header values'() {
+    given:
+    System.setProperty('my.token', 'resolved-token')
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationWithCustomHeaderExpression.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.config.customHeaders == ['X-Token-Header': 'resolved-token']
+
+    cleanup:
+    System.clearProperty('my.token')
+  }
+
+  def 'Custom Headers: No custom headers if none are configured'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.config.customHeaders == [:]
+  }
+
   @Unroll
   @SuppressWarnings('LineLength')
   def 'shouldFallBackToTags is #result when #desc'() {
@@ -1601,6 +1647,18 @@ class PactBrokerLoaderSpec extends Specification {
 
   @PactBroker(host = 'pactbroker.host', port = '1000', enableInsecureTls = 'true')
   static class EnableInsecureTlsPactBrokerAnnotation {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      customHeaders = [@PactBrokerHttpHeader(name = 'X-Custom-Header', value = 'custom-value')])
+  static class PactBrokerAnnotationWithCustomHeaders {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      customHeaders = [@PactBrokerHttpHeader(name = 'X-Token-Header', value = '${my.token}')])
+  static class PactBrokerAnnotationWithCustomHeaderExpression {
 
   }
 
