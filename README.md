@@ -120,7 +120,7 @@ updated DSL for consumer tests](/consumer).
 
 ### I Use Groovy or Grails
 
-You want to look at: [groovy](consumer/groovy) or [junit](consumer/junit)
+You want to look at: [groovy](consumer/groovy) or [junit](consumer/junit) or [spock](consumer/spock)
 
 ### (Use Clojure I)
 
