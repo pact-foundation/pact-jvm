@@ -15,7 +15,7 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  *     @Pact(provider = 'MyProvider')
  *     RequestResponsePact myPact(PactDslWithProvider builder) { ... }
  *
- *     @PactTestFor(pactMethod = 'myPact')
+ *     @PactSpecFor(pactMethod = 'myPact')
  *     def 'calls the provider'() { ... }
  * }
  * ```

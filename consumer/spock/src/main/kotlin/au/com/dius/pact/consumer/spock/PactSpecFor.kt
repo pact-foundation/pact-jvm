@@ -9,6 +9,9 @@ import au.com.dius.pact.core.model.PactSpecVersion
  * When placed on the spec class, applies to all feature methods. When placed on a feature method,
  * overrides any class-level annotation for that feature.
  *
+ * Note: this annotation is named `@PactSpecFor` (not `@PactTestFor`) to avoid accidental imports
+ * of the JUnit5 `au.com.dius.pact.consumer.junit5.PactTestFor` annotation in Spock specs.
+ *
  * @param providerName Name of the provider to create the mock server for.
  * @param pactMethod Name of the method annotated with [@Pact] that builds the pact for this test.
  * @param pactVersion Pact spec version for the generated pact file (defaults to V4).
@@ -19,7 +22,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
  */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PactTestFor(
+annotation class PactSpecFor(
   val providerName: String = "",
   val hostInterface: String = "",
   val port: String = "",

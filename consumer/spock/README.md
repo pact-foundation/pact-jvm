@@ -35,13 +35,13 @@ A Pact consumer Spock test has three parts:
 
 1. Activate the extension with `@PactConsumerSpockTest` on the spec class.
 2. Define a pact builder method annotated with `@Pact` that describes the expected interactions.
-3. Write the feature method with `@PactTestFor` that exercises your client code against the mock server.
+3. Write the feature method with `@PactSpecFor` that exercises your client code against the mock server.
 
 ```groovy
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.consumer.spock.PactConsumerSpockTest
-import au.com.dius.pact.consumer.spock.PactTestFor
+import au.com.dius.pact.consumer.spock.PactSpecFor
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
@@ -66,7 +66,7 @@ class ArticlesConsumerSpec extends Specification {
             .toPact()
     }
 
-    @PactTestFor(pactMethod = 'articleList', pactVersion = PactSpecVersion.V3)
+    @PactSpecFor(pactMethod = 'articleList', pactVersion = PactSpecVersion.V3)
     def 'fetches a list of articles'() {
         given:
         def client = new ArticlesClient(mockServer.url)
@@ -90,7 +90,7 @@ After the test runs, a pact file is written to `build/pacts/ArticlesConsumer-Art
 ### 1. Activate the extension
 
 Place `@PactConsumerSpockTest` on your spec class. This activates the Spock extension that manages
-the mock server lifecycle and pact file writing for every `@PactTestFor`-annotated feature.
+the mock server lifecycle and pact file writing for every `@PactSpecFor`-annotated feature.
 
 ```groovy
 @PactConsumerSpockTest
@@ -141,13 +141,13 @@ V4Pact getUser(PactBuilder builder) {
 The `provider` and `consumer` values on `@Pact` set the names in the generated pact file. If `consumer` is
 left blank, the system property `pact.consumer.name` is used.
 
-### 3. Link the feature to a pact with `@PactTestFor`
+### 3. Link the feature to a pact with `@PactSpecFor`
 
-The `@PactTestFor` annotation connects a feature method to the pact it should run against. Place it on
+The `@PactSpecFor` annotation connects a feature method to the pact it should run against. Place it on
 the feature method, or on the class to apply it to every feature (see [Class-level annotation](#class-level-pactTestFor)).
 
 ```groovy
-@PactTestFor(pactMethod = 'getUser', pactVersion = PactSpecVersion.V3)
+@PactSpecFor(pactMethod = 'getUser', pactVersion = PactSpecVersion.V3)
 def 'retrieves user details'() {
     when:
     def user = new UserClient(mockServer.url).getUser(42)
@@ -194,15 +194,15 @@ def client = new MyClient(mockServer.url)
 
 ---
 
-## Class-level `@PactTestFor`
+## Class-level `@PactSpecFor`
 
-If all features in a spec test the same provider, put `@PactTestFor` on the class instead of each method.
-Every feature method in the spec will then use that annotation. A method-level `@PactTestFor` always
+If all features in a spec test the same provider, put `@PactSpecFor` on the class instead of each method.
+Every feature method in the spec will then use that annotation. A method-level `@PactSpecFor` always
 overrides the class-level one for that specific feature.
 
 ```groovy
 @PactConsumerSpockTest
-@PactTestFor(providerName = 'UserService', pactMethod = 'userPact', pactVersion = PactSpecVersion.V3)
+@PactSpecFor(providerName = 'UserService', pactMethod = 'userPact', pactVersion = PactSpecVersion.V3)
 class UserServiceConsumerSpec extends Specification {
 
     MockServer mockServer
@@ -234,7 +234,7 @@ class UserServiceConsumerSpec extends Specification {
 ## Multiple providers in a single spec
 
 Each feature method can test against a different provider by using distinct `@Pact` methods and
-`@PactTestFor` annotations. A separate mock server is started for each feature.
+`@PactSpecFor` annotations. A separate mock server is started for each feature.
 
 ```groovy
 @PactConsumerSpockTest
@@ -256,13 +256,13 @@ class MultiProviderSpec extends Specification {
                .toPact()
     }
 
-    @PactTestFor(pactMethod = 'userPact', pactVersion = PactSpecVersion.V3)
+    @PactSpecFor(pactMethod = 'userPact', pactVersion = PactSpecVersion.V3)
     def 'calls the user service'() {
         expect:
         new SimpleHttp(mockServer.url).get('/users/1').statusCode == 200
     }
 
-    @PactTestFor(pactMethod = 'orderPact', pactVersion = PactSpecVersion.V3)
+    @PactSpecFor(pactMethod = 'orderPact', pactVersion = PactSpecVersion.V3)
     def 'calls the order service'() {
         expect:
         new SimpleHttp(mockServer.url).get('/orders/99').statusCode == 200
@@ -276,12 +276,12 @@ Two pact files are generated — one per provider.
 
 ## HTTPS mock server
 
-Set `https = true` on `@PactTestFor` to start the mock server over HTTPS. The mock server uses a
+Set `https = true` on `@PactSpecFor` to start the mock server over HTTPS. The mock server uses a
 self-signed certificate, so your client code needs to be configured to accept self-signed certificates
 (or trust-all).
 
 ```groovy
-@PactTestFor(pactMethod = 'securePact', pactVersion = PactSpecVersion.V3, https = true)
+@PactSpecFor(pactMethod = 'securePact', pactVersion = PactSpecVersion.V3, https = true)
 def 'calls the HTTPS endpoint'() {
     ...
 }
@@ -290,7 +290,7 @@ def 'calls the HTTPS endpoint'() {
 To use your own KeyStore:
 
 ```groovy
-@PactTestFor(
+@PactSpecFor(
     pactMethod = 'securePact',
     pactVersion = PactSpecVersion.V3,
     https = true,
@@ -320,7 +320,7 @@ to the corresponding feature method:
 RequestResponsePact upcomingFeature(PactDslWithProvider builder) { ... }
 
 @Ignore
-@PactTestFor(pactMethod = 'upcomingFeature', pactVersion = PactSpecVersion.V3)
+@PactSpecFor(pactMethod = 'upcomingFeature', pactVersion = PactSpecVersion.V3)
 def 'upcoming feature not yet implemented'() { ... }
 ```
 

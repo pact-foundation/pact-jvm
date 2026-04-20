@@ -75,7 +75,7 @@ data class ProviderInfo @JvmOverloads constructor(
   )
 
   companion object {
-    fun fromAnnotation(annotation: PactTestFor): ProviderInfo {
+    fun fromAnnotation(annotation: PactSpecFor): ProviderInfo {
       val ep = ExpressionParser()
       val providerName = ep.parseExpression(annotation.providerName, DataType.STRING)?.toString()
         ?: annotation.providerName

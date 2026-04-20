@@ -41,7 +41,7 @@ class PactConsumerSpockExtSpec extends Specification {
       .toPact()
   }
 
-  @PactTestFor(pactMethod = 'articles', pactVersion = PactSpecVersion.V3)
+  @PactSpecFor(pactMethod = 'articles', pactVersion = PactSpecVersion.V3)
   def 'fetches articles from the mock server'() {
     when:
     def http = new SimpleHttp(mockServer.url)
@@ -51,7 +51,7 @@ class PactConsumerSpockExtSpec extends Specification {
     response.statusCode == 200
   }
 
-  @PactTestFor(pactMethod = 'users', pactVersion = PactSpecVersion.V3)
+  @PactSpecFor(pactMethod = 'users', pactVersion = PactSpecVersion.V3)
   def 'fetches users from the mock server'() {
     when:
     def http = new SimpleHttp(mockServer.url)

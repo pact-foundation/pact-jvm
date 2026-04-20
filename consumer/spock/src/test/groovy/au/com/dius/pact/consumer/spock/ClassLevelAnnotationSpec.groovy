@@ -13,7 +13,7 @@ import spock.lang.Specification
  */
 @SuppressWarnings(['JUnitPublicNonTestMethod', 'FactoryMethodName'])
 @PactConsumerSpockTest
-@PactTestFor(providerName = 'class_level_provider', pactMethod = 'classPact', pactVersion = PactSpecVersion.V3)
+@PactSpecFor(providerName = 'class_level_provider', pactMethod = 'classPact', pactVersion = PactSpecVersion.V3)
 class ClassLevelAnnotationSpec extends Specification {
 
   MockServer mockServer

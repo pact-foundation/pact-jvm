@@ -39,10 +39,10 @@ class PactConsumerSpockExt : IAnnotationDrivenExtension<PactConsumerSpockTest> {
     val executedFragments = ConcurrentHashMap.newKeySet<Method>()
     val pactsToWrite = ConcurrentHashMap<Pair<Consumer, Provider>, Pair<BasePact, PactSpecVersion>>()
 
-    val classLevelAnnotation = spec.reflection.getAnnotation(PactTestFor::class.java)
+    val classLevelAnnotation = spec.reflection.getAnnotation(PactSpecFor::class.java)
 
     for (feature in spec.allFeatures) {
-      val methodAnnotation = feature.featureMethod.reflection.getAnnotation(PactTestFor::class.java)
+      val methodAnnotation = feature.featureMethod.reflection.getAnnotation(PactSpecFor::class.java)
       val pactTestFor = methodAnnotation ?: classLevelAnnotation
       if (pactTestFor != null) {
         feature.addInterceptor { invocation ->
@@ -63,7 +63,7 @@ class PactConsumerSpockExt : IAnnotationDrivenExtension<PactConsumerSpockTest> {
   }
 
   private fun runPactTest(
-    pactTestFor: PactTestFor,
+    pactTestFor: PactSpecFor,
     spec: SpecInfo,
     invocation: IMethodInvocation,
     executedFragments: MutableSet<Method>,
@@ -100,7 +100,7 @@ class PactConsumerSpockExt : IAnnotationDrivenExtension<PactConsumerSpockTest> {
 
   private fun buildPact(
     providerInfo: ProviderInfo,
-    pactTestFor: PactTestFor,
+    pactTestFor: PactSpecFor,
     spec: SpecInfo,
     instance: Specification,
     executedFragments: MutableSet<Method>
