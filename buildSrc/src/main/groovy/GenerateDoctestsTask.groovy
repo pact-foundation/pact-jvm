@@ -38,7 +38,7 @@ class GenerateDoctestsTask extends DefaultTask {
 
             if (!outFile.exists()) {
                 outputDir.mkdirs()
-                outFile.text = generateStub(block.lang as String, className, marker, codeContent, blockNum)
+                outFile.write(generateStub(block.lang as String, className, marker, codeContent, blockNum), 'UTF-8')
                 logger.lifecycle("Created: ${outFile.path}")
             } else if (updateMarkerRegion(outFile, marker, codeContent)) {
                 logger.lifecycle("Updated: ${outFile.path}")
@@ -47,7 +47,7 @@ class GenerateDoctestsTask extends DefaultTask {
     }
 
     boolean updateMarkerRegion(File file, String marker, String newContent) {
-        def text = file.text
+        def text = DoctestUtils.normalizeLineEndings(file.text)
         def beginTag = "// @DOCTEST-BEGIN ${marker}"
         def endTag = '// @DOCTEST-END'
 
@@ -70,7 +70,7 @@ class GenerateDoctestsTask extends DefaultTask {
         def existing = text.substring(afterBegin, endIdx)
         if (existing == formatted) return false
 
-        file.text = text.substring(0, afterBegin) + formatted + text.substring(endIdx)
+        file.write(text.substring(0, afterBegin) + formatted + text.substring(endIdx), 'UTF-8')
         true
     }
 

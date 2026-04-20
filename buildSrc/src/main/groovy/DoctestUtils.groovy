@@ -1,6 +1,10 @@
 class DoctestUtils {
     static final List<String> SUPPORTED_LANGS = ['java', 'kotlin']
 
+    static String normalizeLineEndings(String text) {
+        text.replace('\r\n', '\n').replace('\r', '\n')
+    }
+
     static List<Map> extractCodeBlocks(File readme) {
         def blocks = []
         def lines = readme.readLines('UTF-8')
@@ -32,7 +36,7 @@ class DoctestUtils {
     }
 
     static String extractMarkerContent(File file, String marker) {
-        def text = file.text
+        def text = normalizeLineEndings(file.text)
         def beginTag = "// @DOCTEST-BEGIN ${marker}"
         def endTag = '// @DOCTEST-END'
 
@@ -48,7 +52,7 @@ class DoctestUtils {
     // Strip common leading whitespace from all non-empty lines so that
     // content indented inside a method body compares equal to the raw README block.
     static String dedent(String text) {
-        def lines = text.split('\n')
+        def lines = normalizeLineEndings(text).split('\n')
         def nonEmpty = lines.findAll { it.trim() }
         if (!nonEmpty) return text.trim()
         def minIndent = nonEmpty.collect { line ->
