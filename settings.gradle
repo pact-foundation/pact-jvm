@@ -10,6 +10,7 @@ include 'consumer:groovy'
 include 'consumer:junit'
 include 'consumer:junit5'
 include 'consumer:kotlin'
+include 'consumer:spock'
 
 include 'provider'
 include 'provider:gradle'

@@ -1,0 +1,21 @@
+plugins {
+  id 'au.com.dius.pact.kotlin-library-conventions'
+}
+
+description = 'Pact-JVM - Spock support for Pact consumer tests'
+group = 'au.com.dius.pact.consumer'
+
+dependencies {
+  api project(':consumer')
+  api 'org.spockframework:spock-core:2.3-groovy-4.0'
+
+  implementation 'org.apache.groovy:groovy'
+  implementation 'org.slf4j:slf4j-api'
+
+  testImplementation 'ch.qos.logback:logback-classic'
+  testImplementation 'ch.qos.logback:logback-core'
+  testImplementation 'org.apache.groovy:groovy-json'
+  testImplementation 'org.apache.httpcomponents.client5:httpclient5'
+  testRuntimeOnly 'net.bytebuddy:byte-buddy'
+  testRuntimeOnly 'org.objenesis:objenesis:3.4'
+}
