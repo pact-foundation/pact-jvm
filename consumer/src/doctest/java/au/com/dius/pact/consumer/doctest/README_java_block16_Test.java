@@ -1,0 +1,26 @@
+// Auto-generated — run './gradlew generateDoctests' to regenerate from README.md
+// Source: README.md block 16
+// Remove @Disabled once the test compiles and passes
+package au.com.dius.pact.consumer.doctest;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+// TODO: add required imports
+
+@Disabled("Doctest stub — see README.md block 16")
+class README_java_block16_Test {
+
+    @Test
+    void block() throws Exception {
+        // @DOCTEST-BEGIN README.md:java:16
+        array.object((o) -> {
+          o.stringValue("foo", "Foo");          # an attribute
+          o.stringValue("bar", "Bar");          # an attribute
+          o.object("tar", (tarObject) -> {      # an attribute with a nested object
+            tarObject.stringValue("a", "A");    # attribute of the nested object
+            tarObject.stringValue("b", "B");    # attribute of the nested object
+          })
+        });
+        // @DOCTEST-END
+    }
+}
