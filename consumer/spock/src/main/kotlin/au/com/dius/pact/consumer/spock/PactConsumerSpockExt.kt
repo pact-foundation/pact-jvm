@@ -242,15 +242,13 @@ class PactConsumerSpockExt : IAnnotationDrivenExtension<PactConsumerSpockTest> {
     val field = generateSequence(spec.reflection) { it.superclass }
       .flatMap { it.declaredFields.asSequence() }
       .firstOrNull { MockServer::class.java.isAssignableFrom(it.type) }
-    if (field != null) {
-      field.isAccessible = true
-      field.set(instance, mockServer)
-    } else {
-      logger.warn {
-        "No field of type MockServer found on '${spec.reflection.simpleName}' — " +
-          "declare a 'MockServer mockServer' field to receive the injected mock server"
-      }
-    }
+      ?: throw UnsupportedOperationException(
+        "'${spec.reflection.simpleName}' is missing a MockServer field. " +
+          "Add a field to the spec class to receive the injected mock server:\n\n" +
+          "    MockServer mockServer\n"
+      )
+    field.isAccessible = true
+    field.set(instance, mockServer)
   }
 
   private fun storePactForWrite(

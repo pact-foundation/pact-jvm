@@ -9,7 +9,7 @@ import au.com.dius.pact.core.support.SimpleHttp
 import spock.lang.Specification
 
 /**
- * Tests that @PactTestFor placed on the class applies to all feature methods.
+ * Tests that @PactSpecFor placed on the class applies to all feature methods.
  */
 @SuppressWarnings(['JUnitPublicNonTestMethod', 'FactoryMethodName'])
 @PactConsumerSpockTest
