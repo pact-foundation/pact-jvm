@@ -25,6 +25,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.spockframework.runtime.extension.IAnnotationDrivenExtension
 import org.spockframework.runtime.extension.IMethodInvocation
 import org.spockframework.runtime.model.SpecInfo
+import spock.lang.Ignore
 import spock.lang.Specification
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
@@ -288,13 +289,24 @@ class PactConsumerSpockExt : IAnnotationDrivenExtension<PactConsumerSpockTest> {
       .flatMap { it.declaredMethods.asSequence() }
       .filter { it.isAnnotationPresent(Pact::class.java) }
       .toList()
-    val nonExecuted = allPactMethods.filter { it !in executedFragments }
+    val nonExecuted = allPactMethods.filter { it !in executedFragments && !isIgnored(it, spec) }
     if (nonExecuted.isNotEmpty()) {
       val names = nonExecuted.joinToString(", ") { "${it.declaringClass.simpleName}.${it.name}" }
       throw AssertionError(
         "The following methods annotated with @Pact were not executed during the test: $names\n" +
-          "If these are currently a work in progress, add @Ignore to the corresponding feature method\n"
+          "If these are currently a work in progress, add @Ignore to the @Pact method or its " +
+          "corresponding feature method\n"
       )
+    }
+  }
+
+  private fun isIgnored(pactMethod: Method, spec: SpecInfo): Boolean {
+    if (pactMethod.isAnnotationPresent(Ignore::class.java)) return true
+    return spec.allFeatures.any { feature ->
+      val annotation = feature.featureMethod.reflection.getAnnotation(PactSpecFor::class.java)
+        ?: spec.reflection.getAnnotation(PactSpecFor::class.java)
+      annotation?.pactMethod == pactMethod.name &&
+        feature.featureMethod.reflection.isAnnotationPresent(Ignore::class.java)
     }
   }
 }
