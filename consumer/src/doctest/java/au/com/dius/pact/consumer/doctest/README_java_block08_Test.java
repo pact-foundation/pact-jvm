@@ -3,6 +3,7 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 // TODO: add required imports
@@ -31,5 +32,6 @@ class README_java_block08_Test {
           .closeObject()
           .closeArray()
         // @DOCTEST-END
+        ;
     }
 }

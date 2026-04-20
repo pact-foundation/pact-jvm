@@ -3,6 +3,7 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 // TODO: add required imports
@@ -20,7 +21,7 @@ class README_java_block03_Test {
             .id()
             .ipAddress("localAddress")
             .numberValue("age", 100)
-            .timestamp();
+            .datetime("timestamp");
         // @DOCTEST-END
     }
 }

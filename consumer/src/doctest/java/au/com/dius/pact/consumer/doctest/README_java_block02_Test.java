@@ -3,6 +3,7 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 // TODO: add required imports
@@ -12,6 +13,8 @@ class README_java_block02_Test {
 
     @Test
     void block() throws Exception {
+        ConsumerPactBuilder
+          .consumer("Some Consumer")
         // @DOCTEST-BEGIN README.md:java:2
         .consumer("Some Consumer")
         .hasPactWith("Some Provider")
@@ -30,10 +33,11 @@ class README_java_block02_Test {
             .willRespondWith()
                 .status(200)
                 .body("{\"hello\": \"harry\"}")
-            .
-            .
-            .
+        //    .
+        //    .
+        //    .
         .toPact()
         // @DOCTEST-END
+        ;
     }
 }

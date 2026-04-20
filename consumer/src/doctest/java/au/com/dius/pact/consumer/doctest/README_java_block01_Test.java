@@ -3,30 +3,43 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.*;
+import au.com.dius.pact.consumer.model.MockProviderConfig;
+import au.com.dius.pact.core.model.RequestResponsePact;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.core5.http.ContentType;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 // TODO: add required imports
 
-@Disabled("Doctest stub — see README.md block 1")
-class README_java_block01_Test {
+class ConsumerClient {
+  private String url;
 
-    @Test
-    void block() throws Exception {
+  public ConsumerClient(String url) {
+    this.url = url;
+  }
+
+  public Map post(String path, String body, ContentType mimeType) throws IOException {
+    return Map.of();
+  }
+}
+
+@Disabled("Doctest stub — see README.md block 1")
+public class README_java_block01_Test {
+
+//    @Test
+//    void block() throws Exception {
         // @DOCTEST-BEGIN README.md:java:1
-        import au.com.dius.pact.model.MockProviderConfig;
-        import au.com.dius.pact.model.RequestResponsePact;
-        import org.apache.http.entity.ContentType;
-        import org.jetbrains.annotations.NotNull;
-        import org.junit.Test;
-        
-        import java.io.IOException;
-        import java.util.HashMap;
-        import java.util.Map;
-        
-        import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
-        import static org.junit.Assert.assertEquals;
-        
-        public class PactTest {
+        class PactTest {
         
           @Test
           public void testPact() {
@@ -45,11 +58,12 @@ class README_java_block01_Test {
             MockProviderConfig config = MockProviderConfig.createDefault();
             PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
               @Override
-              public void run(@NotNull MockServer mockServer) throws IOException {
+              public Object run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
                 Map expectedResponse = new HashMap();
                 expectedResponse.put("hello", "harry");
                 assertEquals(expectedResponse, new ConsumerClient(mockServer.getUrl()).post("/hello",
                     "{\"name\": \"harry\"}", ContentType.APPLICATION_JSON));
+                return true;
               }
             });
         
@@ -57,10 +71,10 @@ class README_java_block01_Test {
               throw new RuntimeException(((PactVerificationResult.Error)result).getError());
             }
         
-            assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+            assert(result instanceof PactVerificationResult.Ok);
           }
         
         }
         // @DOCTEST-END
-    }
+//    }
 }

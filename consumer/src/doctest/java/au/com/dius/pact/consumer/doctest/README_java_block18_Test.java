@@ -3,8 +3,12 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
 // TODO: add required imports
 
 @Disabled("Doctest stub — see README.md block 18")
@@ -12,13 +16,11 @@ class README_java_block18_Test {
 
     @Test
     void block() throws Exception {
-        // @DOCTEST-BEGIN README.md:java:18
-        
-        import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
-        
-        ...
-        
-        PactDslWithProvider builder = ...
+      PactDslWithProvider builder = ConsumerPactBuilder
+        .consumer("Some Consumer")
+        .hasPactWith("Some Provider");
+      // @DOCTEST-BEGIN README.md:java:18
+        // import au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray
         builder.given("some state")
                 .uponReceiving("a request")
                 .path("/my-app/my-service")

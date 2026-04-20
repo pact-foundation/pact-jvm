@@ -3,15 +3,48 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.junit5.doctest;
 
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.dsl.PactBuilder;
+import au.com.dius.pact.consumer.junit5.PactConsumerTest;
+import au.com.dius.pact.consumer.junit5.PactTestFor;
+import au.com.dius.pact.core.model.V4Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static au.com.dius.pact.consumer.dsl.Matchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesRegex;
 // TODO: add required imports
 
 @Disabled("Doctest stub — see README.md block 12")
 class README_java_block12_Test {
 
-    @Test
-    void block() throws Exception {
+  class CSVRecord {
+
+    public String get(int i) {
+      return null;
+    }
+  }
+
+  class CsvClient {
+
+    public CsvClient(@NotNull String url) {
+    }
+
+    public List<CSVRecord> fetch(String s, boolean b) {
+      return null;
+    }
+  }
+
+//    @Test
+//    void block() throws Exception {
         // @DOCTEST-BEGIN README.md:java:12
         @PactConsumerTest
         class CsvClientTest {
@@ -60,5 +93,5 @@ class README_java_block12_Test {
           }
         }
         // @DOCTEST-END
-    }
+//    }
 }

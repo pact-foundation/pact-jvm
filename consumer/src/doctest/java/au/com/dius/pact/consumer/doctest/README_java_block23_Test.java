@@ -5,6 +5,8 @@ package au.com.dius.pact.consumer.doctest;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
 // TODO: add required imports
 
 @Disabled("Doctest stub — see README.md block 23")

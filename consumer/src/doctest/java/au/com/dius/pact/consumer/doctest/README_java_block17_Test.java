@@ -12,8 +12,10 @@ class README_java_block17_Test {
 
     @Test
     void block() throws Exception {
+        /*
         // @DOCTEST-BEGIN README.md:java:17
         au.com.dius.pact.consumer.dsl.LambdaDsl.*
         // @DOCTEST-END
+         */
     }
 }

@@ -109,8 +109,8 @@ You can get the mock server injected into the test method by adding a `MockServe
 ```java
   @Test
   void test(MockServer mockServer) throws IOException {
-    HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
-    assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
+    HttpResponse httpResponse = Request.get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
+    assertThat(httpResponse.getCode(), is(equalTo(200)));
   }
 ```
 
@@ -195,7 +195,7 @@ expression for the path where the ID will be replaced with the value returned fr
 You can also just use the key instead of an expression:
 
 ```java
-    .valueFromProviderState('userId', 'userId', 100) // will lookup value using userId as the key
+    .valueFromProviderState("userId", "userId", 100) // will lookup value using userId as the key
 ```
 
 ## Overriding the expression markers `${` and `}` (4.1.25+)

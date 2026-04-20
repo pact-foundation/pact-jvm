@@ -3,6 +3,7 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.junit5.doctest;
 
+import au.com.dius.pact.consumer.junit5.PactConsumerTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 // TODO: add required imports
@@ -10,8 +11,8 @@ import org.junit.jupiter.api.Test;
 @Disabled("Doctest stub — see README.md block 1")
 class README_java_block01_Test {
 
-    @Test
-    void block() throws Exception {
+//    @Test
+//    void block() throws Exception {
         // @DOCTEST-BEGIN README.md:java:1
         @PactConsumerTest
         class ExampleJavaConsumerPactTest {

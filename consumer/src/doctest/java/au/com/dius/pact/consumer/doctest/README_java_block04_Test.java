@@ -3,6 +3,9 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
+import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 // TODO: add required imports
@@ -14,7 +17,7 @@ class README_java_block04_Test {
     void block() throws Exception {
         // @DOCTEST-BEGIN README.md:java:4
             DslPart body = new PactDslJsonBody()
-                .minArrayLike("users")
+                .minArrayLike("users", 2)
                     .id()
                     .stringType("name")
                 .closeObject()

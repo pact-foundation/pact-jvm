@@ -3,6 +3,7 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.junit5.doctest;
 
+import au.com.dius.pact.consumer.MessagePactBuilder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 // TODO: add required imports
@@ -12,6 +13,9 @@ class README_java_block11_Test {
 
     @Test
     void block() throws Exception {
+      MessagePactBuilder builder = new MessagePactBuilder()
+        .consumer("consumer")
+        .hasPactWith("provider");
         // @DOCTEST-BEGIN README.md:java:11
         builder.given("SomeProviderState")
             .expectsToReceive("a test message with metadata")

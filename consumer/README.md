@@ -21,20 +21,7 @@ The library is available on maven central using:
 Example in a JUnit test:
 
 ```java
-import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.RequestResponsePact;
-import org.apache.http.entity.ContentType;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
-import static org.junit.Assert.assertEquals;
-
-public class PactTest {
+class PactTest {
 
   @Test
   public void testPact() {
@@ -53,11 +40,12 @@ public class PactTest {
     MockProviderConfig config = MockProviderConfig.createDefault();
     PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
       @Override
-      public void run(@NotNull MockServer mockServer) throws IOException {
+      public Object run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
         Map expectedResponse = new HashMap();
         expectedResponse.put("hello", "harry");
         assertEquals(expectedResponse, new ConsumerClient(mockServer.getUrl()).post("/hello",
             "{\"name\": \"harry\"}", ContentType.APPLICATION_JSON));
+        return true;
       }
     });
 
@@ -65,7 +53,7 @@ public class PactTest {
       throw new RuntimeException(((PactVerificationResult.Error)result).getError());
     }
 
-    assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+    assert(result instanceof PactVerificationResult.Ok);
   }
 
 }
@@ -91,9 +79,9 @@ The DSL has the following pattern:
     .willRespondWith()
         .status(200)
         .body("{\"hello\": \"harry\"}")
-    .
-    .
-    .
+//    .
+//    .
+//    .
 .toPact()
 ```
 
@@ -116,7 +104,7 @@ PactDslJsonBody body = new PactDslJsonBody()
     .id()
     .ipAddress("localAddress")
     .numberValue("age", 100)
-    .timestamp();
+    .datetime("timestamp");
 ```
 
 #### DSL Matching methods
@@ -167,7 +155,7 @@ For example:
 
 ```java
     DslPart body = new PactDslJsonBody()
-        .minArrayLike("users")
+        .minArrayLike("users", 2)
             .id()
             .stringType("name")
         .closeObject()
@@ -445,7 +433,7 @@ expression for the path where the ID will be replaced with the value returned fr
 You can also just use the key instead of an expression:
 
 ```java
-    .valueFromProviderState('userId', 'userId', 100) // will look value using userId as the key
+    .valueFromProviderState("userId", "userId", 100) // will look value using userId as the key
 ```
 
 # A Lambda DSL for Pact
@@ -459,19 +447,19 @@ The lambda DSL solves the following two main issues. Both are visible in the fol
  
 ```java
 new PactDslJsonArray()
-    .array()                            # open an array
-    .stringValue("a1")                  # choose the method that is valid for arrays
-    .stringValue("a2")                  # choose the method that is valid for arrays
-    .closeArray()                       # close the array
-    .array()                            # open an array
-    .numberValue(1)                     # choose the method that is valid for arrays
-    .numberValue(2)                     # choose the method that is valid for arrays
-    .closeArray()                       # close the array
-    .array()                            # open an array
-    .object()                           # now we work with an object
-    .stringValue("foo", "Foo")          # choose the method that is valid for objects
-    .closeObject()                      # close the object and we're back in the array
-    .closeArray()                       # close the array
+    .array()                            // open an array
+    .stringValue("a1")                  // choose the method that is valid for arrays
+    .stringValue("a2")                  // choose the method that is valid for arrays
+    .closeArray()                       // close the array
+    .array()                            // open an array
+    .numberValue(1)                     // choose the method that is valid for arrays
+    .numberValue(2)                     // choose the method that is valid for arrays
+    .closeArray()                       // close the array
+    .array()                            // open an array
+    .object()                           // now we work with an object
+    .stringValue("foo", "Foo")          // choose the method that is valid for objects
+    .closeObject()                      // close the object and we're back in the array
+    .closeArray()                       // close the array
 ```
 
 ### The existing DSL is quite error-prone
@@ -490,12 +478,12 @@ Auto formatting works great for the new DSL!
 
 ```java
 array.object((o) -> {
-  o.stringValue("foo", "Foo");          # an attribute
-  o.stringValue("bar", "Bar");          # an attribute
-  o.object("tar", (tarObject) -> {      # an attribute with a nested object
-    tarObject.stringValue("a", "A");    # attribute of the nested object
-    tarObject.stringValue("b", "B");    # attribute of the nested object
-  })
+  o.stringValue("foo", "Foo");          // an attribute
+  o.stringValue("bar", "Bar");          // an attribute
+  o.object("tar", (tarObject) -> {      // an attribute with a nested object
+    tarObject.stringValue("a", "A");    // attribute of the nested object
+    tarObject.stringValue("b", "B");    // attribute of the nested object
+  });
 });
 ```
 
@@ -512,12 +500,7 @@ au.com.dius.pact.consumer.dsl.LambdaDsl.*
 ### Response body as json array
 
 ```java
-
-import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
-
-...
-
-PactDslWithProvider builder = ...
+// import au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray
 builder.given("some state")
         .uponReceiving("a request")
         .path("/my-app/my-service")
@@ -533,12 +516,7 @@ builder.given("some state")
 ### Response body as json object
 
 ```java
-
-import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
-
-...
-
-PactDslWithProvider builder = ...
+// import au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody
 builder.given("some state")
         .uponReceiving("a request")
         .path("/my-app/my-service")

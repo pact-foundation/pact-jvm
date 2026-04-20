@@ -41,7 +41,7 @@ tasks.register('testDoctest', Test) {
   group = 'verification'
   useJUnitPlatform()
   testClassesDirs = sourceSets.doctest.output.classesDirs
-  classpath = sourceSets.doctest.runtimeClasspath
+  classpath = sourceSets.main.output + sourceSets.doctest.runtimeClasspath
   systemProperty 'pact_do_not_track', 'true'
 }
 

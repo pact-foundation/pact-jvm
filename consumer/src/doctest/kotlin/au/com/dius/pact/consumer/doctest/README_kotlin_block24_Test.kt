@@ -3,6 +3,9 @@
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest
 
+import au.com.dius.pact.consumer.dsl.newArray
+import au.com.dius.pact.consumer.dsl.newJsonArray
+import au.com.dius.pact.consumer.dsl.newObject
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 // TODO: add required imports
