@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.0 - 4.7.0 Release
+
+* 00a50289f - chore: remove beta flag from 4.7.x version (Ronald Holshausen, Tue Apr 21 10:25:35 2026 +1000)
+* 95af91301 - chore: Update supported JDK versions table (Ronald Holshausen, Tue Apr 21 10:17:06 2026 +1000)
+* 1a684e1a3 - chore: Correct the doctests for line endings on Windows (Ronald Holshausen, Mon Apr 20 16:58:34 2026 +1000)
+* 468b9a38c - chore: Add doctests for consumer and consumer/junit5 (Ronald Holshausen, Mon Apr 20 16:20:13 2026 +1000)
+* 12e3c37be - chore: Add Gradle task to generate tests off readme code blocks (Ronald Holshausen, Mon Apr 20 14:44:48 2026 +1000)
+* 119efb3e0 - feat: Check for `@Ignore` on the Pact method in the post spec check stage (Ronald Holshausen, Mon Apr 20 13:37:11 2026 +1000)
+* 629350842 - chore: Update main readme (Ronald Holshausen, Mon Apr 20 13:24:19 2026 +1000)
+* 06deeb5ab - feat: Check for the mock server field and raise an exception if it is missing (Ronald Holshausen, Mon Apr 20 13:23:03 2026 +1000)
+* d39f691d8 - feat: rename annotation so it does not have the same name as the JUnit one (Ronald Holshausen, Mon Apr 20 13:08:25 2026 +1000)
+* 977572cf6 - feat: Add a consumer spock module (Ronald Holshausen, Mon Apr 20 13:00:58 2026 +1000)
+* a1b2abf32 - bump version to 4.7.0-beta.7 (Ronald Holshausen, Fri Apr 17 11:42:01 2026 +1000)
+
 # 4.7.0-beta.6 - Maintenance Release
 
 * 698c1b2a1 - chore: Update readme after upgrading Kotlin to 2.3.10 (Ronald Holshausen, Fri Apr 17 10:56:41 2026 +1000)
