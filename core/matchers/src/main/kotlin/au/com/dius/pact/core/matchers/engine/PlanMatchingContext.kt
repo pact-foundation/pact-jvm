@@ -180,4 +180,74 @@ open class PlanMatchingContext @JvmOverloads constructor(
       MatchingContext(matchingRules, config.allowUnexpectedEntries)
     )
   }
+
+  /** Creates a clone of this context, but with the matching rules set for the Response Status */
+  fun forResponseStatus(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.response?.matchingRules?.rulesForCategory("status")
+      ?: MatchingRuleCategory("status")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
+    )
+  }
+
+  /** Creates a clone of this context, but with the matching rules set for the Response Headers */
+  fun forResponseHeaders(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.response?.matchingRules?.rulesForCategory("header")
+      ?: MatchingRuleCategory("header")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      config.copy(allowUnexpectedEntries = true),
+      MatchingContext(matchingRules, config.allowUnexpectedEntries, mapOf(), true)
+    )
+  }
+
+  /** Creates a clone of this context, but with the matching rules set for the Response Body */
+  fun forResponseBody(): PlanMatchingContext {
+    val httpInteraction = interaction.asSynchronousRequestResponse()
+    val matchingRules = httpInteraction?.response?.matchingRules?.rulesForCategory("body")
+      ?: MatchingRuleCategory("body")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
+    )
+  }
+
+  /** Creates a clone of this context, but with the matching rules set for the Message Contents (body) */
+  fun forMessageContents(): PlanMatchingContext {
+    val messageInteraction = interaction.asAsynchronousMessage()
+    val matchingRules = messageInteraction?.contents?.matchingRules?.rulesForCategory("content")
+      ?: MatchingRuleCategory("content")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      config,
+      MatchingContext(matchingRules, config.allowUnexpectedEntries)
+    )
+  }
+
+  /** Creates a clone of this context, but with the matching rules set for the Message Metadata */
+  fun forMessageMetadata(): PlanMatchingContext {
+    val messageInteraction = interaction.asAsynchronousMessage()
+    val matchingRules = messageInteraction?.contents?.matchingRules?.rulesForCategory("metadata")
+      ?: MatchingRuleCategory("metadata")
+
+    return PlanMatchingContext(
+      pact,
+      interaction,
+      config.copy(allowUnexpectedEntries = true),
+      MatchingContext(matchingRules, config.allowUnexpectedEntries, mapOf(), true)
+    )
+  }
 }

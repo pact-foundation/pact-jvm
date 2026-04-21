@@ -2,9 +2,9 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
@@ -124,6 +124,7 @@ data class PactVerificationContext @JvmOverloads constructor(
           val actualResponse = targetForInteraction.executeInteraction(client, request)
 
           listOf(
+            @Suppress("DEPRECATION")
             verifier!!.verifyRequestResponsePact(
               expectedResponse, actualResponse, interactionMessage, mutableMapOf(),
               reqResInteraction.interactionId.orEmpty(), consumer.pending,
