@@ -175,3 +175,9 @@ object MetadataMismatchFactory : MismatchFactory<MetadataMismatch> {
   override fun create(expected: Any?, actual: Any?, message: String, path: List<String>) =
     MetadataMismatch(path.last(), expected, actual, message)
 }
+
+/** Carries a raw error message from the V2 matching engine for a status check. */
+data class StatusMismatchV2(val mismatch: String) : Mismatch() {
+  override fun description() = mismatch
+  override fun type() = "status"
+}

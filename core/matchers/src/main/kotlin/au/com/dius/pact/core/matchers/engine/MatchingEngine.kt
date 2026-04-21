@@ -4,14 +4,19 @@ import au.com.dius.pact.core.matchers.engine.bodies.PlainTextBuilder
 import au.com.dius.pact.core.matchers.engine.bodies.getBodyPlanBuilder
 import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterpreter
 import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
+import au.com.dius.pact.core.matchers.engine.resolvers.HttpResponseValueResolver
+import au.com.dius.pact.core.matchers.engine.resolvers.MessageValueResolver
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
+import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.IRequest
+import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.model.PARAMETERISED_HEADERS
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
 import au.com.dius.pact.core.support.json.JsonValue
 import kotlin.collections.map
@@ -24,6 +29,18 @@ interface MatchingEngine {
 
   /** Executes the request plan against the actual request. */
   fun executeRequestPlan(plan: ExecutionPlan, actual: IRequest, context: PlanMatchingContext): ExecutionPlan
+
+  /** Constructs an execution plan for the HTTP response part. */
+  fun buildResponsePlan(expectedResponse: IResponse, context: PlanMatchingContext): ExecutionPlan
+
+  /** Executes the response plan against the actual response. */
+  fun executeResponsePlan(plan: ExecutionPlan, actual: IResponse, context: PlanMatchingContext): ExecutionPlan
+
+  /** Constructs an execution plan for an asynchronous message interaction. */
+  fun buildMessagePlan(expected: MessageContents, context: PlanMatchingContext): ExecutionPlan
+
+  /** Executes the message plan against the actual message contents. */
+  fun executeMessagePlan(plan: ExecutionPlan, actual: MessageContents, context: PlanMatchingContext): ExecutionPlan
 }
 
 object V2MatchingEngine: MatchingEngine {
@@ -51,6 +68,53 @@ object V2MatchingEngine: MatchingEngine {
     val interpreter = ExecutionPlanInterpreter(context)
     val path = listOf<String>()
     val executedTree = interpreter.walkTree(path, plan.planRoot, valueResolver)
+    return ExecutionPlan(executedTree)
+  }
+
+  override fun buildResponsePlan(
+    expectedResponse: IResponse,
+    context: PlanMatchingContext
+  ): ExecutionPlan {
+    val plan = ExecutionPlan("response")
+
+    plan.add(setupStatusPlan(expectedResponse, context.forResponseStatus()))
+    plan.add(setupHeaderPlan(expectedResponse, context.forResponseHeaders()))
+    plan.add(setupBodyPlan(expectedResponse, context.forResponseBody()))
+
+    return plan
+  }
+
+  override fun executeResponsePlan(
+    plan: ExecutionPlan,
+    actual: IResponse,
+    context: PlanMatchingContext
+  ): ExecutionPlan {
+    val valueResolver = HttpResponseValueResolver(actual)
+    val interpreter = ExecutionPlanInterpreter(context)
+    val executedTree = interpreter.walkTree(listOf(), plan.planRoot, valueResolver)
+    return ExecutionPlan(executedTree)
+  }
+
+  override fun buildMessagePlan(
+    expected: MessageContents,
+    context: PlanMatchingContext
+  ): ExecutionPlan {
+    val plan = ExecutionPlan("message")
+
+    plan.add(setupMessageBodyPlan(expected, context.forMessageContents()))
+    plan.add(setupMessageMetadataPlan(expected, context.forMessageMetadata()))
+
+    return plan
+  }
+
+  override fun executeMessagePlan(
+    plan: ExecutionPlan,
+    actual: MessageContents,
+    context: PlanMatchingContext
+  ): ExecutionPlan {
+    val valueResolver = MessageValueResolver(actual)
+    val interpreter = ExecutionPlanInterpreter(context)
+    val executedTree = interpreter.walkTree(listOf(), plan.planRoot, valueResolver)
     return ExecutionPlan(executedTree)
   }
 
@@ -190,7 +254,7 @@ object V2MatchingEngine: MatchingEngine {
   }
 
   @Suppress("LongMethod")
-  fun setupHeaderPlan(expected: IRequest, context: PlanMatchingContext): ExecutionPlanNode {
+  fun setupHeaderPlan(expected: IHttpPart, context: PlanMatchingContext): ExecutionPlanNode {
     val planNode = ExecutionPlanNode.container("headers")
     val docPath = DocPath("$.headers")
 
@@ -326,7 +390,7 @@ object V2MatchingEngine: MatchingEngine {
     return applyNode
   }
 
-  fun setupBodyPlan(expected: IRequest, context: PlanMatchingContext): ExecutionPlanNode {
+  fun setupBodyPlan(expected: IHttpPart, context: PlanMatchingContext): ExecutionPlanNode {
     // TODO: Look at the matching rules and generators here
     val planNode = ExecutionPlanNode.container("body")
 
@@ -373,6 +437,146 @@ object V2MatchingEngine: MatchingEngine {
           planNode.add(contentTypeCheckNode)
         }
       }
+    }
+
+    return planNode
+  }
+
+  fun setupStatusPlan(expected: IResponse, context: PlanMatchingContext): ExecutionPlanNode {
+    val planNode = ExecutionPlanNode.container("status")
+    val docPath = DocPath("$.status")
+    val expectedNode = ExecutionPlanNode.valueNode(NodeValue.UINT(expected.status.toUInt()))
+    val actualNode = ExecutionPlanNode.resolveValue(docPath)
+
+    if (context.matcherIsDefined(docPath)) {
+      val matchers = context.selectBestMatcher(docPath)
+      planNode.add(ExecutionPlanNode.annotation(Into { "status ${matchers.generateDescription(false)}" }))
+      planNode.add(buildMatchingRuleNode(expectedNode, actualNode, matchers, false))
+    } else {
+      planNode.add(ExecutionPlanNode.annotation(Into { "status == ${expected.status}" }))
+      planNode.add(
+        ExecutionPlanNode.action("match:equality")
+          .add(expectedNode)
+          .add(actualNode)
+          .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+      )
+    }
+
+    return planNode
+  }
+
+  @Suppress("LongMethod")
+  fun setupMessageBodyPlan(expected: MessageContents, context: PlanMatchingContext): ExecutionPlanNode {
+    val planNode = ExecutionPlanNode.container("body")
+
+    when {
+      expected.contents.isMissing() -> {}
+      expected.contents.isNull() || expected.contents.isEmpty() -> {
+        planNode.add(
+          ExecutionPlanNode.action("expect:empty")
+            .add(ExecutionPlanNode.resolveValue(DocPath("$.body")))
+        )
+      }
+      expected.contents.isPresent() -> {
+        val contentType = expected.getContentType()
+        val rootMatcher = expected.matchingRules.rulesForCategory("content").matchingRules["$"]
+        if (rootMatcher != null && rootMatcher.canMatch(contentType)) {
+          planNode.add(buildMatchingRuleNode(
+            ExecutionPlanNode.valueNode(NodeValue.NULL),
+            ExecutionPlanNode.resolveValue(DocPath("$.body")),
+            rootMatcher,
+            true
+          ))
+        } else {
+          val contentTypeCheckNode = ExecutionPlanNode.action("if")
+          contentTypeCheckNode
+            .add(
+              ExecutionPlanNode.action("match:equality")
+                .add(ExecutionPlanNode.valueNode(contentType.toString()))
+                .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
+                .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+                .add(
+                  ExecutionPlanNode.action("error")
+                    .add(ExecutionPlanNode.valueNode(NodeValue.STRING("Body type error - ")))
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+            )
+
+          val planBuilder = getBodyPlanBuilder(contentType)
+          if (planBuilder != null) {
+            contentTypeCheckNode.add(planBuilder.buildPlan(expected.contents.unwrap(), context))
+          } else {
+            contentTypeCheckNode.add(PlainTextBuilder.buildPlan(expected.contents.unwrap(), context))
+          }
+          planNode.add(contentTypeCheckNode)
+        }
+      }
+    }
+
+    return planNode
+  }
+
+  @Suppress("LongMethod")
+  fun setupMessageMetadataPlan(expected: MessageContents, context: PlanMatchingContext): ExecutionPlanNode {
+    val planNode = ExecutionPlanNode.container("metadata")
+    val docPath = DocPath("$.metadata")
+
+    if (expected.metadata.isNotEmpty()) {
+      val keys = expected.metadata.keys.sorted()
+      for (key in keys) {
+        val value = expected.metadata[key]
+        val itemNode = ExecutionPlanNode.container(key)
+        val path = docPath.join(Into { key })
+        val itemValue = NodeValue.STRING(value?.toString() ?: "")
+
+        val presenceCheck = ExecutionPlanNode.action("if")
+        presenceCheck
+          .add(
+            ExecutionPlanNode.action("check:exists")
+              .add(ExecutionPlanNode.resolveValue(path))
+          )
+
+        val itemPath = au.com.dius.pact.core.model.DocPath(
+          listOf(au.com.dius.pact.core.model.PathToken.Field(key)), key
+        )
+        if (context.matcherIsDefined(itemPath)) {
+          val matchers = context.selectBestMatcher(itemPath)
+          itemNode.add(ExecutionPlanNode.annotation(Into { "$key ${matchers.generateDescription(true)}" }))
+          presenceCheck.add(buildMatchingRuleNode(
+            ExecutionPlanNode.valueNode(itemValue),
+            ExecutionPlanNode.resolveValue(path),
+            matchers, true
+          ))
+        } else {
+          itemNode.add(ExecutionPlanNode.annotation(Into { "$key=${itemValue.strForm()}" }))
+          val itemCheck = ExecutionPlanNode.action("match:equality")
+          itemCheck
+            .add(ExecutionPlanNode.valueNode(itemValue))
+            .add(ExecutionPlanNode.resolveValue(path))
+            .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+          presenceCheck.add(itemCheck)
+        }
+
+        itemNode.add(presenceCheck)
+        planNode.add(itemNode)
+      }
+
+      planNode.add(
+        ExecutionPlanNode.action("expect:entries")
+          .add(ExecutionPlanNode.valueNode(NodeValue.SLIST(keys)))
+          .add(ExecutionPlanNode.resolveValue(docPath))
+          .add(
+            ExecutionPlanNode.action("join")
+              .add(ExecutionPlanNode.valueNode("The following expected metadata keys were missing: "))
+              .add(ExecutionPlanNode.action("join-with")
+                .add(ExecutionPlanNode.valueNode(", "))
+                .add(
+                  ExecutionPlanNode.splat()
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+              )
+          )
+      )
     }
 
     return planNode

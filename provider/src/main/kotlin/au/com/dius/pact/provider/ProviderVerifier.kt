@@ -250,6 +250,21 @@ interface IProviderVerifier {
   ): VerificationResult
 
   /**
+   * Verifies the response from the provider against the interaction, using the supplied pact for context
+   */
+  @Suppress("LongParameterList")
+  fun verifyResponseFromProvider(
+    provider: IProviderInfo,
+    interaction: SynchronousRequestResponse,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    client: ProviderClient,
+    context: MutableMap<String, Any>,
+    pending: Boolean,
+    pact: Pact
+  ): VerificationResult
+
+  /**
    * Verifies the interaction by invoking a method on a provider test class
    */
   @Suppress("LongParameterList")
@@ -303,6 +318,22 @@ interface IProviderVerifier {
    * Compares the expected and actual responses
    */
   @Suppress("LongParameterList")
+  fun verifyRequestResponsePact(
+    pact: Pact,
+    interaction: SynchronousRequestResponse,
+    actualResponse: ProviderResponse,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    interactionId: String,
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
+  ): VerificationResult
+
+  /**
+   * Compares the expected and actual responses
+   */
+  @Suppress("LongParameterList")
+  @Deprecated("Use version that passes pact and interaction")
   fun verifyRequestResponsePact(
     expectedResponse: IResponse,
     actualResponse: ProviderResponse,
@@ -966,9 +997,14 @@ open class ProviderVerifier @JvmOverloads constructor (
       val result = when (ProviderUtils.verificationType(provider, consumer)) {
         PactVerification.REQUEST_RESPONSE -> {
           logger.debug { "Verifying via request/response" }
-          verifyResponseFromProvider(
-            provider, interaction.asSynchronousRequestResponse()!!, interactionMessage, failures, providerClient,
-            context, pending)
+          val reqResInteraction = interaction.asSynchronousRequestResponse()!!
+          if (pact != null) {
+            verifyResponseFromProvider(provider, reqResInteraction, interactionMessage, failures, providerClient,
+              context, pending, pact)
+          } else {
+            verifyResponseFromProvider(provider, reqResInteraction, interactionMessage, failures, providerClient,
+              context, pending)
+          }
         }
         PactVerification.RESPONSE_FACTORY -> {
           logger.debug { "Verifying via response factory function" }
@@ -1043,6 +1079,29 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   override fun verifyRequestResponsePact(
+    pact: Pact,
+    interaction: SynchronousRequestResponse,
+    actualResponse: ProviderResponse,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    interactionId: String,
+    pending: Boolean,
+    pluginConfiguration: Map<String, PluginConfiguration>
+  ): VerificationResult {
+    val comparison = responseComparer.compareResponse(pact, interaction, actualResponse, pluginConfiguration)
+
+    reporters.forEach { it.returnsAResponseWhich() }
+
+    return displayStatusResult(failures, interaction.response.status, comparison.statusMismatch,
+        interactionMessage, interactionId, pending, currentInteraction)
+      .merge(displayHeadersResult(failures, interaction.response.headers, comparison.headerMismatches,
+        interactionMessage, interactionId, pending, currentInteraction))
+      .merge(displayBodyResult(failures, comparison.bodyMismatches,
+        interactionMessage, interactionId, pending, currentInteraction))
+  }
+
+  @Deprecated("Use version that passes pact and interaction")
+  override fun verifyRequestResponsePact(
     expectedResponse: IResponse,
     actualResponse: ProviderResponse,
     interactionMessage: String,
@@ -1051,6 +1110,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     pending: Boolean,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): VerificationResult {
+    @Suppress("DEPRECATION")
     val comparison = responseComparer.compareResponse(expectedResponse, actualResponse, pluginConfiguration)
 
     reporters.forEach { it.returnsAResponseWhich() }
@@ -1142,8 +1202,48 @@ open class ProviderVerifier @JvmOverloads constructor (
         GeneratorTestMode.Provider, emptyList(), emptyMap())
       val actualResponse = client.makeRequest(interaction.request.generatedRequest(context, GeneratorTestMode.Provider))
 
+      @Suppress("DEPRECATION")
       verifyRequestResponsePact(
         expectedResponse,
+        actualResponse,
+        interactionMessage,
+        failures,
+        interaction.interactionId.orEmpty(),
+        pending,
+        emptyMap() // TODO: Pass any plugin config in here
+      )
+    } catch (e: Exception) {
+      failures[interactionMessage] = e
+      reporters.forEach {
+        it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
+      }
+      VerificationResult.Failed("Request to provider endpoint failed with an exception", interactionMessage,
+        mapOf(interaction.interactionId.orEmpty() to
+          listOf(VerificationFailureType.ExceptionFailure("Request to provider endpoint failed with an exception",
+            e, interaction))),
+        pending)
+    }
+  }
+
+  @Suppress("TooGenericExceptionCaught", "LongParameterList")
+  override fun verifyResponseFromProvider(
+    provider: IProviderInfo,
+    interaction: SynchronousRequestResponse,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    client: ProviderClient,
+    context: MutableMap<String, Any>,
+    pending: Boolean,
+    pact: Pact
+  ): VerificationResult {
+    currentInteraction = interaction
+    return try {
+      // TODO: Pass any plugin config in here
+      val actualResponse = client.makeRequest(interaction.request.generatedRequest(context, GeneratorTestMode.Provider))
+
+      verifyRequestResponsePact(
+        pact,
+        interaction,
         actualResponse,
         interactionMessage,
         failures,

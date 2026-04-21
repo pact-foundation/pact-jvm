@@ -6,13 +6,18 @@ import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMatchResult
 import au.com.dius.pact.core.matchers.HeaderMismatch
+import au.com.dius.pact.core.matchers.MessageMatchResult
+import au.com.dius.pact.core.matchers.MetadataMismatch
+import au.com.dius.pact.core.matchers.MetadataMatchResult
 import au.com.dius.pact.core.matchers.MethodMismatch
 import au.com.dius.pact.core.matchers.PathMismatch
 import au.com.dius.pact.core.matchers.QueryMatchResult
 import au.com.dius.pact.core.matchers.QueryMismatch
 import au.com.dius.pact.core.matchers.RequestMatchResult
+import au.com.dius.pact.core.matchers.ResponseMatchResult
+import au.com.dius.pact.core.matchers.StatusMismatchV2
 import au.com.dius.pact.core.matchers.engine.interpreter.ExecutionPlanInterpreter
-import au.com.dius.pact.core.matchers.engine.resolvers.HttpRequestValueResolver
+import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
 import io.github.oshai.kotlinlogging.KotlinLogging
 
@@ -181,9 +186,156 @@ open class ExecutionPlan(
   }
 
   /**
+   * Returns a standard Pact response match result for the executed plan
+   */
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
+  fun intoResponseMatchResult(): ResponseMatchResult {
+    val statusNode = fetchNode(listOf(":response", ":status"))
+    val statusMismatch = if (statusNode != null) {
+      val error = statusNode.error()
+      if (error != null) {
+        StatusMismatchV2(error)
+      } else null
+    } else null
+
+    val headerNode = fetchNode(listOf(":response", ":headers"))
+    val headerMismatches = if (headerNode != null) {
+      val mismatches = headerNode.children.fold(mutableMapOf<String, List<HeaderMismatch>>()) { acc, child ->
+        if (child.nodeType is PlanNodeType.CONTAINER) {
+          acc[child.nodeType.label] = child.errors()
+            .map { HeaderMismatch(child.nodeType.label, "", "", it) }
+        } else {
+          val mismatches = child.errors()
+            .map { HeaderMismatch("", "", "", it) }
+          if (mismatches.isNotEmpty()) {
+            acc[""] = mismatches
+          }
+        }
+        acc
+      }
+      val errors = headerNode.childErrors(Terminator.CONTAINERS)
+      if (errors.isNotEmpty()) {
+        val additionalMismatches = errors
+          .map { HeaderMismatch("", "", "", it) }
+        mismatches[""] = additionalMismatches
+      }
+      mismatches.map {
+        HeaderMatchResult(it.key, it.value)
+      }
+    } else emptyList()
+
+    val bodyNode = fetchNode(listOf(":response", ":body"))
+    val bodyResult = if (bodyNode == null || bodyNode.result.orDefault().isTruthy()) {
+      BodyMatchResult(null, emptyList())
+    } else if (bodyNode.isEmpty()) {
+      if (bodyNode.result is NodeResult.ERROR) {
+        BodyMatchResult(null, listOf(BodyItemMatchResult("",
+          listOf(BodyMismatch(null, null, bodyNode.result.message)))))
+      } else {
+        BodyMatchResult(null, emptyList())
+      }
+    } else {
+      val firstError = bodyNode.error()
+      if (firstError != null && firstError.lowercase().startsWith("body type error")) {
+        BodyMatchResult(BodyTypeMismatch(null, null, firstError), emptyList())
+      } else {
+        val initial = mutableMapOf<String, List<BodyMismatch>>()
+        val bodyMismatches = bodyNode.traverseContainers(initial) { acc, label, node ->
+          val errors = node.childErrors(Terminator.CONTAINERS)
+          if (errors.isNotEmpty()) {
+            val mismatches = errors.map { BodyMismatch(null, null, it, label) }
+            acc[label] = mismatches
+          }
+          acc
+        }
+        val results = bodyMismatches.map { BodyItemMatchResult(it.key, it.value) }.toMutableList()
+        if (firstError.isNotEmpty()) {
+          results.add(BodyItemMatchResult("", listOf(BodyMismatch(null, null, firstError!!))))
+        }
+        BodyMatchResult(null, results)
+      }
+    }
+
+    return ResponseMatchResult(
+      status = statusMismatch,
+      headers = headerMismatches,
+      body = bodyResult
+    )
+  }
+
+  /**
+   * Returns a match result for the executed message interaction plan
+   */
+  @Suppress("LongMethod", "CyclomaticComplexMethod")
+  fun intoMessageMatchResult(): MessageMatchResult {
+    val bodyNode = fetchNode(listOf(":message", ":body"))
+    val bodyResult = if (bodyNode == null || bodyNode.result.orDefault().isTruthy()) {
+      BodyMatchResult(null, emptyList())
+    } else if (bodyNode.isEmpty()) {
+      if (bodyNode.result is NodeResult.ERROR) {
+        BodyMatchResult(null, listOf(BodyItemMatchResult("",
+          listOf(BodyMismatch(null, null, bodyNode.result.message)))))
+      } else {
+        BodyMatchResult(null, emptyList())
+      }
+    } else {
+      val firstError = bodyNode.error()
+      if (firstError != null && firstError.lowercase().startsWith("body type error")) {
+        BodyMatchResult(BodyTypeMismatch(null, null, firstError), emptyList())
+      } else {
+        val initial = mutableMapOf<String, List<BodyMismatch>>()
+        val bodyMismatches = bodyNode.traverseContainers(initial) { acc, label, node ->
+          val errors = node.childErrors(Terminator.CONTAINERS)
+          if (errors.isNotEmpty()) {
+            val mismatches = errors.map { BodyMismatch(null, null, it, label) }
+            acc[label] = mismatches
+          }
+          acc
+        }
+        val results = bodyMismatches.map { BodyItemMatchResult(it.key, it.value) }.toMutableList()
+        if (firstError.isNotEmpty()) {
+          results.add(BodyItemMatchResult("", listOf(BodyMismatch(null, null, firstError!!))))
+        }
+        BodyMatchResult(null, results)
+      }
+    }
+
+    val metadataNode = fetchNode(listOf(":message", ":metadata"))
+    val metadataMismatches = if (metadataNode != null) {
+      val mismatches = metadataNode.children.fold(mutableMapOf<String, List<MetadataMismatch>>()) { acc, child ->
+        if (child.nodeType is PlanNodeType.CONTAINER) {
+          acc[child.nodeType.label] = child.errors()
+            .map { MetadataMismatch(child.nodeType.label, null, null, it) }
+        } else {
+          val mismatches = child.errors()
+            .map { MetadataMismatch("", null, null, it) }
+          if (mismatches.isNotEmpty()) {
+            acc[""] = mismatches
+          }
+        }
+        acc
+      }
+      val errors = metadataNode.childErrors(Terminator.CONTAINERS)
+      if (errors.isNotEmpty()) {
+        val additionalMismatches = errors
+          .map { MetadataMismatch("", null, null, it) }
+        mismatches[""] = additionalMismatches
+      }
+      mismatches.map {
+        MetadataMatchResult(it.key, it.value)
+      }
+    } else emptyList()
+
+    return MessageMatchResult(
+      contents = bodyResult,
+      metadata = metadataMismatches
+    )
+  }
+
+  /**
    * Executes the plan, returning the resulting plan
    */
-  fun execute(context: PlanMatchingContext, valueResolver: HttpRequestValueResolver): ExecutionPlan {
+  fun execute(context: PlanMatchingContext, valueResolver: ValueResolver): ExecutionPlan {
     if (context.config.logRawPlan) {
       logger.debug { prettyForm() }
     }

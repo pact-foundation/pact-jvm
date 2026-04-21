@@ -66,7 +66,11 @@ class HttpMatching {
 
   @When('the response is compared to the expected one')
   void the_response_is_compared_to_the_expected_one() {
-    responseResults.addAll(responseMismatches(expectedResponse, receivedResponses[0]))
+    def pact = new V4Pact(new Consumer(this.class.name), new Provider(this.class.name))
+    def interaction = new V4Interaction.SynchronousHttp(
+      null, 'compatibility-suite', [], new HttpRequest(), expectedResponse)
+    pact.interactions << interaction
+    responseResults.addAll(responseMismatches(pact, interaction, receivedResponses[0]))
   }
 
   @Then('the response comparison should be OK')
