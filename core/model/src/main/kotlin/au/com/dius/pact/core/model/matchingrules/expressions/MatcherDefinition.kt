@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model.matchingrules.expressions
 
 import au.com.dius.pact.core.model.generators.Generator
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
+import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.ContentTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
@@ -10,6 +11,7 @@ import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
@@ -54,7 +56,7 @@ data class MatchingRuleResult(
   val reference: MatchingReference? = null
 )
 
-@Suppress("MaxLineLength")
+@Suppress("MaxLineLength", "LargeClass")
 class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   /**
    * Parse a matcher expression into a MatchingRuleDefinition containing the example value, matching rules and any generator.
@@ -113,6 +115,7 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   //        | 'eachValue' LEFT_BRACKET e=matchingDefinitionExp RIGHT_BRACKET
   //        | 'atLeast' LEFT_BRACKET DIGIT+ RIGHT_BRACKET
   //        | 'atMost' LEFT_BRACKET DIGIT+ RIGHT_BRACKET
+  //        | 'arrayContains' LEFT_BRACKET e=matchingDefinitionExp (',' e=matchingDefinitionExp)* RIGHT_BRACKET
   //      )
   //      ;
   @Suppress("ReturnCount", "LongMethod")
@@ -243,9 +246,65 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
             Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
           }
         }
+        lexer.matchString("arrayContains") -> {
+          if (matchChar('(')) {
+            val variants = mutableListOf<Triple<Int, MatchingRuleCategory, Map<String, Generator>>>()
+            var index = 0
+            lexer.skipWhitespace()
+            when (val firstVariant = matchingDefinitionExp()) {
+              is Result.Err -> return@mark firstVariant
+              is Result.Ok -> when (val v = buildVariant(index++, firstVariant.value)) {
+                is Result.Err -> return@mark v
+                is Result.Ok -> variants.add(v.value)
+              }
+            }
+            lexer.skipWhitespace()
+            while (lexer.peekNextChar() == ',') {
+              lexer.advance()
+              lexer.skipWhitespace()
+              when (val variantResult = matchingDefinitionExp()) {
+                is Result.Err -> return@mark variantResult
+                is Result.Ok -> when (val v = buildVariant(index++, variantResult.value)) {
+                  is Result.Err -> return@mark v
+                  is Result.Ok -> variants.add(v.value)
+                }
+              }
+              lexer.skipWhitespace()
+            }
+            if (matchChar(')')) {
+              Result.Ok(MatchingRuleDefinition(null, ValueType.Unknown,
+                listOf(Either.A(ArrayContainsMatcher(variants))), null, lexer.fromMark()))
+            } else {
+              Result.Err(parseError("Was expecting a ')' at index ${lexer.index}"))
+            }
+          } else {
+            Result.Err(parseError("Was expecting a '(' at index ${lexer.index}"))
+          }
+        }
         else -> Result.Err(parseError("Was expecting a matching rule definition type at index ${lexer.index}"))
       }
     }
+  }
+
+  private fun buildVariant(
+    index: Int,
+    definition: MatchingRuleDefinition
+  ): Result<Triple<Int, MatchingRuleCategory, Map<String, Generator>>, String> {
+    val category = MatchingRuleCategory("body")
+    for (rule in definition.rules) {
+      when (rule) {
+        is Either.A -> category.addRule("", rule.value)
+        is Either.B -> return Result.Err(
+          parseError("References are not supported inside arrayContains at index ${lexer.index}")
+        )
+      }
+    }
+    val generators: Map<String, Generator> = if (definition.generator != null) {
+      mapOf("" to definition.generator)
+    } else {
+      emptyMap()
+    }
+    return Result.Ok(Triple(index, category, generators))
   }
 
   private fun matchChar(c: Char): Boolean {

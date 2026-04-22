@@ -1,12 +1,15 @@
 package au.com.dius.pact.core.model.matchingrules.expressions
 
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
+import au.com.dius.pact.core.model.matchingrules.ArrayContainsMatcher
+import kotlin.Triple
 import au.com.dius.pact.core.model.matchingrules.BooleanMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
@@ -338,5 +341,98 @@ class MatchingDefinitionParserSpec extends Specification {
     'atMost(100'  | 'Error parsing expression: Was expecting a \')\' at index 10\n        atMost(100\n                  ^'
     'atMost(-10)' | 'Error parsing expression: Was expecting an unsigned number at index 7'
     'atMost(0.1)' | 'Error parsing expression: Was expecting a \')\' at index 8\n        atMost(0.1)\n                ^'
+  }
+
+  def 'parse arrayContains with single variant'() {
+    given:
+    def expression = "arrayContains(matching(type, 'Name'))"
+    def category = new MatchingRuleCategory('body')
+    category.addRule('', TypeMatcher.INSTANCE)
+    def expected = new MatchingRuleDefinition(null, ValueType.Unknown,
+      [Either.a(new ArrayContainsMatcher([new Triple(0, category, [:])]))] , null, expression)
+
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
+
+    then:
+    result == expected
+  }
+
+  def 'parse arrayContains with multiple variants'() {
+    given:
+    def expression = "arrayContains(matching(type, 'Name'), matching(number, 100))"
+    def cat1 = new MatchingRuleCategory('body')
+    cat1.addRule('', TypeMatcher.INSTANCE)
+    def cat2 = new MatchingRuleCategory('body')
+    cat2.addRule('', new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER))
+    def expected = new MatchingRuleDefinition(null, ValueType.Unknown,
+      [Either.a(new ArrayContainsMatcher([new Triple(0, cat1, [:]), new Triple(1, cat2, [:])]))] , null, expression)
+
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
+
+    then:
+    result == expected
+  }
+
+  def 'parse arrayContains with regex variant'() {
+    given:
+    def expression = "arrayContains(matching(regex, '\\\\w+', 'Fred'))"
+    def category = new MatchingRuleCategory('body')
+    category.addRule('', new RegexMatcher('\\w+'))
+    def expected = new MatchingRuleDefinition(null, ValueType.Unknown,
+      [Either.a(new ArrayContainsMatcher([new Triple(0, category, [:])]))] , null, expression)
+
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
+
+    then:
+    result == expected
+  }
+
+  def 'parse arrayContains combined with atLeast'() {
+    given:
+    def expression = "arrayContains(matching(type, 'Name')), atLeast(1)"
+    def cat = new MatchingRuleCategory('body')
+    cat.addRule('', TypeMatcher.INSTANCE)
+    def expected = new MatchingRuleDefinition('', ValueType.Unknown,
+      [Either.a(new ArrayContainsMatcher([new Triple(0, cat, [:])])), Either.a(new MinTypeMatcher(1))],
+      null, expression)
+
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
+
+    then:
+    result == expected
+  }
+
+  def 'parse arrayContains combined with eachValue'() {
+    given:
+    def expression = "eachValue(matching(type, 'X')), arrayContains(matching(equalTo, 'PUBLIC'))"
+    def innerDef = new MatchingRuleDefinition('X', TypeMatcher.INSTANCE, null, "matching(type, 'X')")
+    def cat = new MatchingRuleCategory('body')
+    cat.addRule('', EqualsMatcher.INSTANCE)
+    def expected = new MatchingRuleDefinition(null, ValueType.Unknown,
+      [Either.a(new EachValueMatcher(innerDef)), Either.a(new ArrayContainsMatcher([new Triple(0, cat, [:])]))] ,
+      null, expression)
+
+    when:
+    def result = MatchingRuleDefinition.parseMatchingRuleDefinition(expression).value
+
+    then:
+    result == expected
+  }
+
+  def 'invalid arrayContains'() {
+    expect:
+    MatchingRuleDefinition.parseMatchingRuleDefinition(expression).errorValue() == error
+
+    where:
+
+    expression                               | error
+    'arrayContains'                          | 'Error parsing expression: Was expecting a \'(\' at index 13\n        arrayContains\n                     ^'
+    'arrayContains('                         | "Error parsing expression: Was expecting a matching rule definition type at index 14\n        arrayContains(\n                      ^"
+    'arrayContains()'                        | "Error parsing expression: Was expecting a matching rule definition type at index 14\n        arrayContains()\n                      ^"
+    "arrayContains(matching(type, 'Name')"   | "Error parsing expression: Was expecting a ')' at index 36\n        arrayContains(matching(type, 'Name')\n                                            ^"
   }
 }
