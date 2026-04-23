@@ -6,17 +6,18 @@ scoping, and named-parameter entry points.
 
 ## Gradle dependency
 
-```kotlin
+```groovy
 testImplementation("au.com.dius.pact.consumer:kotlin:4.7.1")
 ```
 
 ## Quick start
 
-```kotlin
-import au.com.dius.pact.consumer.kotlin.pact
-import au.com.dius.pact.consumer.kotlin.runConsumerTest
-import au.com.dius.pact.consumer.dsl.newJsonObject
+Add these imports at the top of your file:
+`import au.com.dius.pact.consumer.kotlin.pact`,
+`import au.com.dius.pact.consumer.kotlin.runConsumerTest`,
+`import au.com.dius.pact.consumer.dsl.newJsonObject`
 
+```kotlin
 val myPact = pact(consumer = "MyConsumer", provider = "MyProvider") {
     uponReceiving("a request for a user") {
         given("user 1 exists")
@@ -112,7 +113,10 @@ multiple times to attach multiple provider states to one interaction:
 ```kotlin
 given("users exist")
 given("the database is healthy")
-uponReceiving("a request that needs two states") { ... }
+uponReceiving("a request that needs two states") {
+    withRequest { method("GET"); path("/api/data") }
+    willRespondWith { status(200) }
+}
 ```
 
 ---
@@ -306,7 +310,7 @@ See [Body matchers](#body-matchers) below.
 Body matchers use the DSL functions from the `consumer` module. Import them alongside the
 Kotlin DSL:
 
-```kotlin
+```text
 import au.com.dius.pact.consumer.dsl.newJsonObject
 import au.com.dius.pact.consumer.dsl.newJsonArray
 import au.com.dius.pact.consumer.dsl.newObject   // extension on LambdaDslJsonArray
@@ -322,11 +326,11 @@ body(newJsonObject {
     integerType("score", 100)            // any integer
     decimalType("balance", 9.99)         // any decimal
     booleanType("active", true)          // any boolean
-    datetime("createdAt", "yyyy-MM-dd'T'HH:mm:ss", "2024-01-15T10:30:00")
-    date("dob", "yyyy-MM-dd", "1990-06-01")
-    time("startTime", "HH:mm", "09:00")
-    uuid("id", "550e8400-e29b-41d4-a716-446655440000")
-    regex("postcode", "[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}", "SW1A 1AA")
+    datetime("createdAt", "yyyy-MM-dd'T'HH:mm:ss")
+    date("dob", "yyyy-MM-dd")
+    time("startTime", "HH:mm")
+    uuid("id")
+    stringMatcher("postcode", "[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}", "SW1A 1AA")
     nullValue("deletedAt")
 })
 ```
@@ -343,11 +347,10 @@ body(newJsonObject {
 })
 ```
 
-Or using the Kotlin-friendly extension (avoids the backtick):
+Or using the Kotlin-friendly extension (avoids the backtick); import
+`au.com.dius.pact.consumer.dsl.newObject` alongside the other DSL imports:
 
 ```kotlin
-import au.com.dius.pact.consumer.dsl.newObject   // LambdaDslObject extension
-
 body(newJsonObject {
     stringType("name", "Alice")
     newObject("address") {
@@ -399,11 +402,10 @@ body(newJsonObject {
 ### Path/header/query matchers
 
 Use `PM` (Pact Matcher) functions when attaching matchers to path, header, or query parameter
-values instead of a JSON body:
+values instead of a JSON body. Import `au.com.dius.pact.consumer.dsl.Matchers.regexp` (and
+similar) or use the `PM` object:
 
 ```kotlin
-import au.com.dius.pact.consumer.dsl.PM
-
 withRequest {
     method("GET")
     path(regexp("\\/orders\\/[0-9]+", "/orders/42"))
@@ -442,8 +444,8 @@ Call `given` multiple times to attach more than one state to an interaction:
 interaction("a privileged request") {
     given("user 42 exists")
     given("user 42 has admin role")
-    withRequest { ... }
-    willRespondWith { ... }
+    withRequest { method("GET"); path("/api/admin") }
+    willRespondWith { status(200) }
 }
 ```
 
@@ -475,9 +477,6 @@ interaction("a future endpoint") {
 expected interactions were called, then writes the Pact file.
 
 ```kotlin
-import au.com.dius.pact.consumer.kotlin.runConsumerTest
-import au.com.dius.pact.consumer.PactVerificationResult
-
 val result = runConsumerTest(myPact) {
     // `this` is MockServer
     val baseUrl = getUrl()
@@ -493,9 +492,6 @@ assertThat(result, instanceOf(PactVerificationResult.Ok::class.java))
 ### Custom mock server configuration
 
 ```kotlin
-import au.com.dius.pact.consumer.model.MockProviderConfig
-import au.com.dius.pact.core.model.PactSpecVersion
-
 val result = runConsumerTest(
     pact = myPact,
     config = MockProviderConfig.createDefault(PactSpecVersion.V4)
@@ -510,7 +506,7 @@ For annotation-driven tests without manual `runConsumerTest` calls, use the
 [`consumer:junit5`](../junit5/README.md) module alongside this one. The `@PactConsumerTest` and
 `@Pact` annotations work with `V4Pact` objects produced by this DSL:
 
-```kotlin
+```text
 @PactConsumerTest
 @PactTestFor(providerName = "ProductService")
 class ProductServiceConsumerTest {
@@ -545,7 +541,7 @@ By default, Pact files are written to `build/pacts/`. Override with the system p
 
 Or in your Gradle test configuration:
 
-```kotlin
+```gradle
 tasks.test {
     systemProperty("pact.rootDir", layout.buildDirectory.dir("pacts").get().asFile.path)
 }
