@@ -128,6 +128,61 @@ class V4InteractionSpec extends Specification {
     interaction.pluginConfiguration['test-plugin'].containsKey('v2')
   }
 
+  def 'addReference creates a references entry in comments for the first call'() {
+    given:
+    def interaction = new V4Interaction.SynchronousHttp('key', 'test')
+
+    when:
+    interaction.addReference('openapi', 'operationId', 'createUser')
+
+    then:
+    interaction.comments.containsKey('references')
+    def refs = interaction.comments['references'] as JsonValue.Object
+    refs.entries.containsKey('openapi')
+    def group = refs.entries['openapi'] as JsonValue.Object
+    group.entries['operationId'].toString() == 'createUser'
+  }
+
+  def 'addReference adds a second name-value pair to an existing group'() {
+    given:
+    def interaction = new V4Interaction.SynchronousHttp('key', 'test')
+    interaction.addReference('openapi', 'operationId', 'createUser')
+
+    when:
+    interaction.addReference('openapi', 'tag', 'user')
+
+    then:
+    def group = (interaction.comments['references'] as JsonValue.Object).entries['openapi'] as JsonValue.Object
+    group.entries['operationId'].toString() == 'createUser'
+    group.entries['tag'].toString() == 'user'
+  }
+
+  def 'addReference handles multiple independent groups'() {
+    given:
+    def interaction = new V4Interaction.SynchronousHttp('key', 'test')
+
+    when:
+    interaction.addReference('openapi', 'operationId', 'createUser')
+    interaction.addReference('jira', 'ticket', 'PROJ-123')
+
+    then:
+    def refs = interaction.comments['references'] as JsonValue.Object
+    (refs.entries['openapi'] as JsonValue.Object).entries['operationId'].toString() == 'createUser'
+    (refs.entries['jira'] as JsonValue.Object).entries['ticket'].toString() == 'PROJ-123'
+  }
+
+  def 'addReference stores non-string values using Json conversion'() {
+    given:
+    def interaction = new V4Interaction.SynchronousHttp('key', 'test')
+
+    when:
+    interaction.addReference('metadata', 'version', 3)
+
+    then:
+    def refs = interaction.comments['references'] as JsonValue.Object
+    (refs.entries['metadata'] as JsonValue.Object).entries['version'].toString() == '3'
+  }
+
   // ---- SynchronousHttp ----
 
   def 'SynchronousHttp generateKey is deterministic from description and provider states'() {

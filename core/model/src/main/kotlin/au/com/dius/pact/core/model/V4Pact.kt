@@ -177,6 +177,23 @@ sealed class V4Interaction(
   }
 
   /**
+   * Adds an external reference for the interaction. The reference will be stored in the Pact
+   * file comments under the group key. For instance, you could store the OpenAPI operation ID
+   * that the interaction corresponds to as an external reference.
+   */
+  fun addReference(group: String, name: String, value: Any) {
+    if (!comments.containsKey("references")) {
+      comments["references"] = JsonValue.Object()
+    }
+    val references = comments["references"] as JsonValue.Object
+    if (!references.has(group)) {
+      references[group] = JsonValue.Object()
+    }
+    val groupObj = references[group] as JsonValue.Object
+    groupObj[name] = value
+  }
+
+  /**
    * Add configuration values from the plugin to this interaction
    */
   fun addPluginConfiguration(plugin: String, config: Map<String, JsonValue>) {
