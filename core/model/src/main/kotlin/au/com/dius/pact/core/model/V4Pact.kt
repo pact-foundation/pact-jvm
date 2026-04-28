@@ -115,6 +115,7 @@ data class InteractionMarkup(
   }
 
   companion object {
+    @JvmStatic
     fun fromJson(json: JsonValue): InteractionMarkup {
       return when (json) {
         is JsonValue.Object -> InteractionMarkup(Json.toString(json["markup"]), Json.toString(json["markupType"]))
@@ -555,6 +556,7 @@ sealed class V4Interaction(
   }
 
   companion object {
+    @JvmStatic
     fun interactionFromJson(index: Int, json: JsonValue, source: PactSource): Result<V4Interaction, String> {
       return if (json.has("type")) {
         val type = Json.toString(json["type"])
