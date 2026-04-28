@@ -128,6 +128,20 @@ class SynchronousMessagePactBuilder @JvmOverloads constructor(
   }
 
   /**
+   * Adds an external reference for the interaction. The reference will be stored in the Pact
+   * file comments under the group key. For instance, you could store the OpenAPI operation ID
+   * that the interaction corresponds to as an external reference.
+   */
+  fun reference(group: String, name: String, value: Any): SynchronousMessagePactBuilder {
+    if (messages.isEmpty()) {
+      throw InvalidPactException("expectsToReceive is required before reference")
+    }
+    val message = messages.last()
+    message.addReference(group, name, value)
+    return this
+  }
+
+  /**
    * Sets the unique key for the interaction. If this is not set, or is empty, a key will be calculated from the
    * contents of the interaction.
    */

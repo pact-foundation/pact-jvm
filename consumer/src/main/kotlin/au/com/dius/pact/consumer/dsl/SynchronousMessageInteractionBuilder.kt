@@ -80,6 +80,16 @@ open class SynchronousMessageInteractionBuilder(
   }
 
   /**
+   * Adds an external reference for the interaction. The reference will be stored in the Pact
+   * file comments under the group key. For instance, you could store the OpenAPI operation ID
+   * that the interaction corresponds to as an external reference.
+   */
+  fun reference(group: String, name: String, value: Any): SynchronousMessageInteractionBuilder {
+    interaction.addReference(group, name, value)
+    return this
+  }
+
+  /**
    * Build the request part of the interaction using a contents builder
    */
   fun withRequest(
