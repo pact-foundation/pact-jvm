@@ -10,15 +10,20 @@ class DoctestUtils {
         def lines = readme.readLines('UTF-8')
         boolean inBlock = false
         Map currentBlock = null
+        int globalIdx = 0
 
         lines.eachWithIndex { String line, int lineIdx ->
             if (!inBlock) {
-                def m = line =~ /^```(\w+)\s*$/
+                // Match fences like ```java or ```java block01
+                def m = line =~ /^```(\w+)(?:\s+(\S+))?\s*$/
                 if (m.matches()) {
                     def lang = (m[0][1] as String).toLowerCase()
                     if (lang in SUPPORTED_LANGS) {
                         inBlock = true
-                        currentBlock = [lang: lang, startLine: lineIdx + 1, content: []]
+                        globalIdx++
+                        def explicitId = m[0][2] ? (m[0][2] as String) : null
+                        def id = explicitId ?: "block${globalIdx.toString().padLeft(2, '0')}"
+                        currentBlock = [lang: lang, startLine: lineIdx + 1, content: [], id: id, blockNum: globalIdx]
                     }
                 }
             } else {
@@ -61,8 +66,8 @@ class DoctestUtils {
         lines.collect { it.length() >= minIndent ? it.substring(minIndent) : it.trim() }.join('\n').trim()
     }
 
-    static String classNameFor(String lang, int blockNum) {
-        "README_${lang}_block${blockNum.toString().padLeft(2, '0')}_Test"
+    static String classNameFor(String lang, String id) {
+        "README_${lang}_${id}_Test"
     }
 
     static String fileExtFor(String lang) {

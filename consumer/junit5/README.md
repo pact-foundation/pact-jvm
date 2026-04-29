@@ -46,13 +46,13 @@ The library is available on maven central using:
 To write Pact consumer tests with JUnit 5, you need to add `@PactConsumerTest` to your test class. This
 replaces the `PactRunner` used for JUnit 4 tests. The rest of the test follows a similar pattern as for JUnit 4 tests.
 
-```java
+```java block01
 @PactConsumerTest
 class ExampleJavaConsumerPactTest {
 ```
 
 Alternatively, you can explicitly declare the JUnit extension.
-```java
+```java block02
 @ExtendWith(PactConsumerTestExt.class)
 class ExampleJavaConsumerPactTest {
 ```
@@ -62,7 +62,7 @@ class ExampleJavaConsumerPactTest {
 For each test (as with JUnit 4), you need to define a method annotated with the `@Pact` annotation that returns the
 interactions for the test.
 
-```java
+```java block03
     @Pact(provider="ArticlesProvider", consumer="test_consumer")
     public RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
@@ -78,7 +78,7 @@ interactions for the test.
 ```
 
 Note for V4 Pacts, the format of the method needs to be
-```java
+```java block04
     @Pact(provider="ArticlesProvider", consumer="test_consumer")
     public V4Pact createPact(PactDslWithProvider builder) {
         return builder
@@ -104,7 +104,7 @@ The `@PactTestFor` annotation allows you to control the mock server in the same 
 allows you to set the hostname to bind to (default is `localhost`) and the port (default is to use a random port). You
 can also set the Pact specification version to use (default is V3).
 
-```java
+```java block05
 @PactConsumerTest
 @PactTestFor(providerName = "ArticlesProvider")
 public class ExampleJavaConsumerPactTest {
@@ -134,7 +134,7 @@ needs a `@Pact` annotation). See [MultiTest](https://github.com/DiUS/pact-jvm/bl
 
 You can get the mock server injected into the test method by adding a `MockServer` parameter to the test method.
 
-```java
+```java block06
   @Test
   void test(MockServer mockServer) throws IOException {
     HttpResponse httpResponse = Request.get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
@@ -217,12 +217,12 @@ For example, assume that an API call is made to get the details of a user by ID.
 specifies that the user must exist, but the ID will be created when the user is created. So we can then define an
 expression for the path where the ID will be replaced with the value returned from the provider state callback.
 
-```java
+```java block07
     .pathFromProviderState("/api/users/${id}", "/api/users/100")
 ``` 
 You can also just use the key instead of an expression:
 
-```java
+```java block08
     .valueFromProviderState("userId", "userId", 100) // will lookup value using userId as the key
 ```
 
@@ -286,7 +286,7 @@ actual messages that come off the message queue in production.
 
 For example:
 
-```java
+```java block09
 builder.given("Some Provider State")
     .expectsToReceive("a test message")
     .withContent("{\"value\": \"test\"}")
@@ -295,7 +295,7 @@ builder.given("Some Provider State")
 
 or using a Dsl object:
 
-```java
+```java block10
 builder.given("Some Provider State")
     .expectsToReceive("a test message")
     .withContent(new PactDslJsonBody()
@@ -317,7 +317,7 @@ help with this. You can access it via the `withMetadata` method that takes a Jav
 
 For example:
 
-```java
+```java block11
 builder.given("SomeProviderState")
     .expectsToReceive("a test message with metadata")
     .withMetadata(md -> {
@@ -347,7 +347,7 @@ runs its tests.
 The `reference` method is available on the builder passed to `expectsToReceiveHttpInteraction`,
 `expectsToReceiveMessageInteraction`, and `expectsToReceiveSynchronousMessageInteraction` on `PactBuilder`:
 
-```java
+```java block12
 @Pact(consumer = "ArticlesClient")
 V4Pact createPact(PactBuilder builder) {
   return builder
@@ -364,13 +364,14 @@ V4Pact createPact(PactBuilder builder) {
 
 For message interactions:
 
-```java
+```java block13
 @Pact(consumer = "ArticlesClient")
 V4Pact createPact(PactBuilder builder) {
   return builder
     .expectsToReceiveMessageInteraction("article created event", message -> message
-        .withContent(new PactDslJsonBody().stringType("title"))
-        .reference("asyncapi", "messageId", "ArticleCreated")
+      .withContents( contents -> contents
+        .withContent(new PactDslJsonBody().stringType("title")) )
+      .reference("asyncapi", "messageId", "ArticleCreated")
     )
     .toPact();
 }
@@ -399,7 +400,7 @@ setup the interaction.
 
 For example, if we use the CSV plugin from the plugins project, our test would look like:
 
-```java
+```java block14
 @PactConsumerTest
 class CsvClientTest {
   /**

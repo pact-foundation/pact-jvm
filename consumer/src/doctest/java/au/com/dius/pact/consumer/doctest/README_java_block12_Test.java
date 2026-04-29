@@ -1,14 +1,13 @@
 // Auto-generated — run './gradlew generateDoctests' to regenerate from README.md
-// Source: README.md block 12
+// Source: README.md block block12
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-// TODO: add required imports
 
-@Disabled("Doctest stub — see README.md block 12")
+@Disabled("Doctest stub — see README.md block block12")
 class README_java_block12_Test {
 
     @Test
@@ -16,7 +15,7 @@ class README_java_block12_Test {
       ConsumerPactBuilder
         .consumer("Some Consumer")
         .hasPactWith("Some Provider")
-        // @DOCTEST-BEGIN README.md:java:12
+        // @DOCTEST-BEGIN README.md:java:block12
           .given("test state")
             .uponReceiving("a test interaction")
                 .path("/hello")
