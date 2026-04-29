@@ -8,6 +8,35 @@ framework is not implemented, this module should give you all the hooks you need
 
 Provides a DSL for use with Java to build consumer pacts.
 
+## Contents
+
+- [Dependency](#dependency)
+- [DSL Usage](#dsl-usage)
+  - [Building JSON bodies with PactDslJsonBody DSL](#building-json-bodies-with-pactdsljsonbody-dsl)
+    - [DSL Matching methods](#dsl-matching-methods)
+    - [Ensuring all items in a list match an example](#ensuring-all-items-in-a-list-match-an-example)
+    - [Ignoring the list order (V4 specification)](#ignoring-the-list-order-v4-specification)
+    - [Array contains matcher (V4 specification)](#array-contains-matcher-v4-specification)
+    - [Matching JSON values at the root](#matching-json-values-at-the-root)
+    - [Root level arrays that match all items](#root-level-arrays-that-match-all-items)
+    - [Matching arrays of arrays](#matching-arrays-of-arrays)
+    - [Matching any key in a map](#matching-any-key-in-a-map)
+  - [Matching on paths](#matching-on-paths)
+  - [Matching on headers](#matching-on-headers)
+  - [Matching on query parameters](#matching-on-query-parameters)
+- [Adding external references to interactions (V4 specification)](#adding-external-references-to-interactions-v4-specification)
+- [Forcing pact files to be overwritten](#forcing-pact-files-to-be-overwritten)
+- [Having values injected from provider state callbacks](#having-values-injected-from-provider-state-callbacks)
+- [A Lambda DSL for Pact](#a-lambda-dsl-for-pact)
+  - [Why a new DSL implementation?](#why-a-new-dsl-implementation)
+    - [The existing DSL is quite error-prone](#the-existing-dsl-is-quite-error-prone)
+    - [The existing DSL is hard to read](#the-existing-dsl-is-hard-to-read)
+  - [Usage](#usage)
+    - [Response body as json array](#response-body-as-json-array)
+    - [Response body as json object](#response-body-as-json-object)
+    - [Examples](#examples)
+  - [Dealing with persistent HTTP/1.1 connections (Keep Alive)](#dealing-with-persistent-http11-connections-keep-alive)
+
 ## Dependency
 
 The library is available on maven central using:

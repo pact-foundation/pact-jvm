@@ -7,6 +7,17 @@ This library provides the basic tools required to automate the process, and shou
 
 Framework and build tool specific bindings will be provided in separate libraries that build on top of this core functionality.
 
+## Contents
+
+- [Provider State](#provider-state)
+- [Displaying external references from Pact interactions](#displaying-external-references-from-pact-interactions)
+  - [Console (ANSI) output](#console-ansi-output)
+  - [SLF4J](#slf4j)
+  - [Markdown report](#markdown-report)
+  - [JSON report](#json-report)
+- [An example of running provider verification with junit](#an-example-of-running-provider-verification-with-junit)
+- [An example of running provider verification with spock](#an-example-of-running-provider-verification-with-spock)
+
 ### Provider State
 
 Before each interaction is executed, the provider under test will have the opportunity to enter a state.

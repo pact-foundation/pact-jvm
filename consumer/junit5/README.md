@@ -3,6 +3,34 @@ pact-jvm-consumer-junit5
 
 JUnit 5 support for Pact consumer tests
 
+## Contents
+
+- [Dependency](#dependency)
+- [Usage](#usage)
+  - [1. Add the Pact consumer test extension to the test class.](#1-add-the-pact-consumer-test-extension-to-the-test-class)
+  - [2. Create a method annotated with `@Pact` that returns the interactions for the test](#2-create-a-method-annotated-with-pact-that-returns-the-interactions-for-the-test)
+  - [3. Link the mock server with the interactions for the test with `@PactTestFor`](#3-link-the-mock-server-with-the-interactions-for-the-test-with-pacttestfor)
+    - [Matching the interactions by provider name](#matching-the-interactions-by-provider-name)
+    - [Matching the interactions by method name](#matching-the-interactions-by-method-name)
+  - [Injecting the mock server into the test](#injecting-the-mock-server-into-the-test)
+- [Changing the directory pact files are written to](#changing-the-directory-pact-files-are-written-to)
+  - [Using `@PactDirectory` annotation](#using-pactdirectory-annotation)
+- [Forcing pact files to be overwritten](#forcing-pact-files-to-be-overwritten)
+- [Having values injected from provider state callbacks](#having-values-injected-from-provider-state-callbacks)
+- [Overriding the expression markers `${` and `}` (4.1.25+)](#overriding-the-expression-markers--and--4125)
+- [Using HTTPS](#using-https)
+- [Using own KeyStore](#using-own-keystore)
+- [Using multiple providers in a test (4.2.5+)](#using-multiple-providers-in-a-test-425)
+- [Dealing with persistent HTTP/1.1 connections (Keep Alive)](#dealing-with-persistent-http11-connections-keep-alive)
+- [Testing messages](#testing-messages)
+  - [Asynchronous messages](#asynchronous-messages)
+    - [Matching message metadata](#matching-message-metadata)
+  - [V4 Synchronous request/response messages](#v4-synchronous-requestresponse-messages)
+- [Adding external references to interactions (V4 specification)](#adding-external-references-to-interactions-v4-specification)
+- [Using Pact plugins (version 4.3.0+)](#using-pact-plugins-version-430)
+- [Test Analytics](#test-analytics)
+- [Mixing Pact and non-Pact test methods in the same test class](#mixing-pact-and-non-pact-test-methods-in-the-same-test-class)
+
 ## Dependency
 
 The library is available on maven central using:
