@@ -552,6 +552,19 @@ class MarkdownReporter(
         else -> result.appendLine("    $text")
       }
     }
+
+    val references = event.comments["references"]
+    if (references is JsonValue.Object) {
+      result.appendLine("References:")
+      for ((group, groupValue) in references.entries) {
+        result.appendLine("* $group:")
+        if (groupValue is JsonValue.Object) {
+          for ((name, value) in groupValue.entries) {
+            result.appendLine("  * $name: ${value.toString()}")
+          }
+        }
+      }
+    }
     return result.toString()
   }
 }

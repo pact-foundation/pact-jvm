@@ -323,6 +323,19 @@ class AnsiConsoleReporter(
         else -> println("    $text")
       }
     }
+
+    val references = event.comments["references"]
+    if (references is JsonValue.Object) {
+      println("\n  References:")
+      for ((group, groupValue) in references.entries) {
+        println("    $group:")
+        if (groupValue is JsonValue.Object) {
+          for ((name, value) in groupValue.entries) {
+            println("      $name: ${value.toString()}")
+          }
+        }
+      }
+    }
     println()
   }
 }
