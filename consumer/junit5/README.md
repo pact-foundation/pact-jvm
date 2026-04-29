@@ -309,6 +309,53 @@ one or more response messages are returned. Examples of this would be things lik
 
 For a V4 synchronous request/response message example, see [V4AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/master/consumer/junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/V4SyncMessageTest.groovy).
 
+# Adding external references to interactions (V4 specification)
+
+External references let you link a V4 Pact interaction to an artefact in another system — for example,
+the OpenAPI operation it was derived from, or a Jira ticket that motivated it. References are stored in
+the Pact file alongside the interaction and are displayed by the verification reporters when the provider
+runs its tests.
+
+The `reference` method is available on the builder passed to `expectsToReceiveHttpInteraction`,
+`expectsToReceiveMessageInteraction`, and `expectsToReceiveSynchronousMessageInteraction` on `PactBuilder`:
+
+```java
+@Pact(consumer = "ArticlesClient")
+V4Pact createPact(PactBuilder builder) {
+  return builder
+    .expectsToReceiveHttpInteraction("create article", http -> http
+        .withRequest(req -> req.method("POST").path("/articles"))
+        .willRespondWith(res -> res.status(201))
+        .reference("openapi", "operationId", "createArticle")
+        .reference("openapi", "tag", "articles")
+        .reference("jira", "ticket", "PROJ-123")
+    )
+    .toPact();
+}
+```
+
+For message interactions:
+
+```java
+@Pact(consumer = "ArticlesClient")
+V4Pact createPact(PactBuilder builder) {
+  return builder
+    .expectsToReceiveMessageInteraction("article created event", message -> message
+        .withContent(new PactDslJsonBody().stringType("title"))
+        .reference("asyncapi", "messageId", "ArticleCreated")
+    )
+    .toPact();
+}
+```
+
+The `reference` method takes three parameters:
+- `group` — a namespace identifying the external system (e.g. `openapi`, `jira`, `asyncapi`)
+- `name` — the key within that group (e.g. `operationId`, `ticket`)
+- `value` — the associated value
+
+Multiple calls accumulate independently; multiple names within the same group and multiple groups all
+coexist in the Pact file under `interactions[].comments.references.{group}.{name}`.
+
 # Using Pact plugins (version 4.3.0+)
 
 The `PactBuilder` consumer test builder supports using Pact plugins. Plugins are defined in the [Pact plugins project](https://github.com/pact-foundation/pact-plugins).

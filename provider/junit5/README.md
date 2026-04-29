@@ -333,6 +333,30 @@ plugin to be able to be loaded.
 Note that the request data used to generate the request for verification can be injected into the test template method
 using the `au.com.dius.pact.provider.RequestData` type. This can be used to add any required metadata to the request.
 
+# Displaying external references from Pact interactions (V4 specification)
+
+When a V4 Pact interaction contains external references (added on the consumer side using the `reference`
+method — see the [consumer JUnit 5 README](../../consumer/junit5/README.md#adding-external-references-to-interactions-v4-specification)),
+the verification reporters automatically display them after the interaction description.
+
+For example, an interaction linked to an OpenAPI operation and a Jira ticket will appear in the console
+output as:
+
+```
+  create article
+
+  References:
+    openapi:
+      operationId: createArticle
+      tag: articles
+    jira:
+      ticket: PROJ-123
+```
+
+The same information is included in the SLF4J log output, the Markdown report, and the JSON report. See
+the [provider README](../README.md#displaying-external-references-from-pact-interactions) for the full
+format of each reporter.
+
 # Test Analytics
 
 We are tracking anonymous analytics to gather important usage statistics like JVM version

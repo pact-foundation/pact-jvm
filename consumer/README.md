@@ -403,6 +403,56 @@ For example:
         .body("{\"hello\": \"harry\"}")
 ```
 
+## Adding external references to interactions (V4 specification)
+
+External references let you link an interaction to an artefact in another system — for example, the OpenAPI
+operation it was derived from, or a Jira ticket that motivated it. The reference is stored in the Pact file
+alongside the interaction so it can be surfaced by tooling and verification reporters.
+
+References are grouped by a namespace key (the `group`) that identifies the external system, and then by a
+`name` key within that group. Any value type is accepted.
+
+The `reference` method is available on the builder returned from the V4 interaction factory methods on
+`PactBuilder`:
+
+```kotlin
+val pact = PactBuilder("Some Consumer", "Some Provider")
+  .expectsToReceiveHttpInteraction("create user") { http ->
+    http
+      .withRequest { req -> req.method("POST").path("/users") }
+      .willRespondWith { res -> res.status(201) }
+      .reference("openapi", "operationId", "createUser")
+      .reference("openapi", "tag", "users")
+      .reference("jira", "ticket", "PROJ-123")
+  }
+  .toPact()
+```
+
+The same method is available on `MessageInteractionBuilder` and `SynchronousMessageInteractionBuilder`:
+
+```kotlin
+PactBuilder("Some Consumer", "Some Provider")
+  .expectsToReceiveMessageInteraction("user created event") { message ->
+    message
+      .withContent(/* ... */)
+      .reference("asyncapi", "messageId", "UserCreated")
+  }
+```
+
+When using `SynchronousMessagePactBuilder`, call `reference` directly on the builder after
+`expectsToReceive`:
+
+```kotlin
+SynchronousMessagePactBuilder("Some Consumer", "Some Provider")
+  .expectsToReceive("create user request")
+  .reference("openapi", "operationId", "createUser")
+  .toPact()
+```
+
+References are stored in the Pact file under `interactions[].comments.references.{group}.{name}`.
+Multiple calls with the same `group` accumulate under that group's object; multiple groups coexist
+independently.
+
 # Forcing pact files to be overwritten
 
 By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
