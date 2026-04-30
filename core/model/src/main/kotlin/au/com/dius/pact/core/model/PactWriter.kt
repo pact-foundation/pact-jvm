@@ -85,31 +85,36 @@ object DefaultPactWriter : PactWriter {
    */
   @Synchronized
   override fun writePact(pactFile: File, pact: Pact, pactSpecVersion: PactSpecVersion) : Result<Int, Throwable> {
-    return if (pactWriteMode() == PactWriteMode.MERGE && pactFile.exists() && pactFile.length() > 0) {
+    pactFile.parentFile.mkdirs()
+    return if (pactWriteMode() == PactWriteMode.MERGE) {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
-        val source = FileSource(pactFile)
-        val json: JsonValue.Object = JsonParser.parseString(readFileUtf8(raf)).downcast()
-        val existingPact = DefaultPactReader.pactFromJson(json, source)
-        val result = PactMerge.merge(pact, existingPact)
-        if (!result.ok) {
-          throw InvalidPactException(result.message)
+        val pactToWrite = if (pactFile.length() > 0) {
+          val source = FileSource(pactFile)
+          val json: JsonValue.Object = JsonParser.parseString(readFileUtf8(raf)).downcast()
+          val existingPact = DefaultPactReader.pactFromJson(json, source)
+          val result = PactMerge.merge(pact, existingPact)
+          if (!result.ok) {
+            throw InvalidPactException(result.message)
+          }
+          result.result!!
+        } else {
+          pact
         }
         raf.seek(0)
         val swriter = StringWriter()
         val writer = PrintWriter(swriter)
-        writePact(result.result!!, writer, pactSpecVersion)
+        writePact(pactToWrite, writer, pactSpecVersion)
         val bytes = swriter.toString().toByteArray()
-        raf.setLength(bytes.size.toLong())
         raf.write(bytes)
+        raf.setLength(bytes.size.toLong())
         Result.Ok(bytes.size)
       } finally {
         lock.release()
         raf.close()
       }
     } else {
-      pactFile.parentFile.mkdirs()
       pactFile.printWriter().use { writePact(pact, it, pactSpecVersion) }
     }
   }
