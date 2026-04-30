@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.1 - Feature release
+
+* d38c2f13e - chore: add todo file to track things to do (Ronald Holshausen, Thu Apr 30 10:51:54 2026 +1000)
+* a489e72bb - Merge pull request #1908 from pact-foundation/kotlin-dsl (Ronald Holshausen, Thu Apr 30 10:49:22 2026 +1000)
+* 0e8d6ecf9 - Merge pull request #1901 from biergit/patch-3 (Ronald Holshausen, Thu Apr 30 10:44:20 2026 +1000)
+* 0cdd0e3b3 - chore: Corrected all the doctests after update to the readmes (Ronald Holshausen, Wed Apr 29 15:32:33 2026 +1000)
+* a34e72a72 - chore: Add TOC to the consumer and provider readmes (Ronald Holshausen, Wed Apr 29 11:49:37 2026 +1000)
+* f695f6d79 - feat: Update readmes with details on using external references (Ronald Holshausen, Wed Apr 29 11:36:19 2026 +1000)
+* 3cb5eb590 - feat: Display references in the verifier output (Ronald Holshausen, Wed Apr 29 11:20:43 2026 +1000)
+* 170b27669 - feat: Add a method to the DSL interaction builders to capture external references (Ronald Holshausen, Tue Apr 28 17:22:36 2026 +1000)
+* b43d22530 - feat: Add a method V4Interaction to capture external references (Ronald Holshausen, Tue Apr 28 17:15:27 2026 +1000)
+* 130aaa28b - chore: Add tests for V4Interaction and child classes (Ronald Holshausen, Tue Apr 28 17:01:34 2026 +1000)
+* c22838534 - Merge pull request #1909 from kevinrvaz/chore/fix_minor_typo (Ronald Holshausen, Thu Apr 23 13:02:51 2026 +1000)
+* 4ee8ddd5d - chore: fix typo breaking internal build (Kevin Rohan Vaz, Thu Apr 23 08:13:00 2026 +0530)
+* 76cabe478 - feat: Add doctests for the readme code blocks #1352 (Ronald Holshausen, Thu Apr 23 11:19:19 2026 +1000)
+* e2ee20b00 - feat: Add a Kotlin consumer DSL #1352 (Ronald Holshausen, Thu Apr 23 10:39:13 2026 +1000)
+* 3798d97b8 - Merge pull request #1907 from pact-foundation/feat/array-contains-matching-expression (Ronald Holshausen, Wed Apr 22 17:40:56 2026 +1000)
+* 39c734aa8 - feat: add arrayContains as a matching rule expression (Ronald Holshausen, Wed Apr 22 17:19:53 2026 +1000)
+* 41c2c39b3 - chore: Update project documentation (Ronald Holshausen, Wed Apr 22 15:43:17 2026 +1000)
+* a09b4ee27 - bump version to 4.7.1 (Ronald Holshausen, Tue Apr 21 10:59:57 2026 +1000)
+* 2de7c5022 - refactor: deduplicate write logic in MERGE branch (biergit, Fri Apr 17 15:00:56 2026 +0200)
+* 332f3b305 - fix: write through RandomAccessFile instead of opening a competing file handle (biergit, Fri Apr 17 14:36:59 2026 +0200)
+* 66e25c362 - Refactor writePact to handle empty pactFile case (biergit, Fri Mar 13 14:30:13 2026 +0100)
+
 # 4.7.0 - 4.7.0 Release
 
 * 00a50289f - chore: remove beta flag from 4.7.x version (Ronald Holshausen, Tue Apr 21 10:25:35 2026 +1000)
