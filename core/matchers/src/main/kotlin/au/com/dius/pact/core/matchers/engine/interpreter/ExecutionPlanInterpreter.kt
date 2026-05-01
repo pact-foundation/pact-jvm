@@ -243,6 +243,7 @@ class ExecutionPlanInterpreter(
       when (action) {
         "upper-case" -> executeChangeCase(action, valueResolver, node, actionPath, true)
         "lower-case" -> executeChangeCase(action, valueResolver, node, actionPath, false)
+        "header:normalize-commas" -> executeNormalizeCommaWhitespace(action, valueResolver, node, actionPath)
         "to-string" -> executeToString(action, valueResolver, node, actionPath)
         "length" -> executeLength(action, valueResolver, node, actionPath)
         "expect:empty" -> executeExpectEmpty(action, valueResolver, node, actionPath)
@@ -312,6 +313,32 @@ class ExecutionPlanInterpreter(
     } else {
       NodeValue.LIST(results)
     }
+    return node.copy(result = NodeResult.VALUE(result), children = children.toMutableList())
+  }
+
+  @Suppress("UnusedParameter")
+  private fun executeNormalizeCommaWhitespace(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    val (children, values) = when (val result = evaluateChildren(valueResolver, node, actionPath)) {
+      is Result.Ok -> result.value
+      is Result.Err -> return result.error
+    }
+
+    val normalize = { s: String -> s.split(',').joinToString(",") { it.trim() } }
+
+    val results = values.map { v ->
+      when (val value = v.asValue().orDefault()) {
+        is NodeValue.STRING -> NodeValue.STRING(normalize(value.string))
+        is NodeValue.SLIST -> NodeValue.SLIST(value.items.map { normalize(it) })
+        else -> value
+      }
+    }
+
+    val result = if (results.size == 1) results[0] else NodeValue.LIST(results)
     return node.copy(result = NodeResult.VALUE(result), children = children.toMutableList())
   }
 

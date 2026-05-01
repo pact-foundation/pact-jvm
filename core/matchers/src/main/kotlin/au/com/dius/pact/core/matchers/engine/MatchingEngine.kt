@@ -234,10 +234,18 @@ object V2MatchingEngine: MatchingEngine {
           }
         } else {
           itemNode.add(ExecutionPlanNode.annotation(Into { "$key=${itemValue.strForm()}" }))
+          // RFC 7230: optional whitespace after commas in header values is insignificant
+          val normalizedValue = when (itemValue) {
+            is NodeValue.STRING -> NodeValue.STRING(
+              itemValue.string.split(',').joinToString(",") { it.trim() }
+            )
+            else -> itemValue
+          }
           val itemCheck = ExecutionPlanNode.action("match:equality")
           itemCheck
-            .add(ExecutionPlanNode.valueNode(itemValue))
-            .add(ExecutionPlanNode.resolveValue(path))
+            .add(ExecutionPlanNode.valueNode(normalizedValue))
+            .add(ExecutionPlanNode.action("header:normalize-commas")
+              .add(ExecutionPlanNode.resolveValue(path)))
             .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
           presenceCheck.add(itemCheck)
         }
