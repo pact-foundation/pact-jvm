@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.HeaderParser.headerValueToMap
 import au.com.dius.pact.core.model.IRequest
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.MULTI_VALUE_HEADERS
 import au.com.dius.pact.core.model.PARAMETERISED_HEADERS
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
@@ -234,19 +235,27 @@ object V2MatchingEngine: MatchingEngine {
           }
         } else {
           itemNode.add(ExecutionPlanNode.annotation(Into { "$key=${itemValue.strForm()}" }))
-          // RFC 7230: optional whitespace after commas in header values is insignificant
-          val normalizedValue = when (itemValue) {
-            is NodeValue.STRING -> NodeValue.STRING(
-              itemValue.string.split(',').joinToString(",") { it.trim() }
-            )
-            else -> itemValue
-          }
           val itemCheck = ExecutionPlanNode.action("match:equality")
-          itemCheck
-            .add(ExecutionPlanNode.valueNode(normalizedValue))
-            .add(ExecutionPlanNode.action("header:normalize-commas")
-              .add(ExecutionPlanNode.resolveValue(path)))
-            .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+          if (MULTI_VALUE_HEADERS.contains(key.lowercase())) {
+            // RFC 7230: optional whitespace after commas is insignificant for known multi-value
+            // headers. Custom headers (e.g. JSON payloads) must not be normalised.
+            val normalizedValue = when (itemValue) {
+              is NodeValue.STRING -> NodeValue.STRING(
+                itemValue.string.split(',').joinToString(",") { it.trim() }
+              )
+              else -> itemValue
+            }
+            itemCheck
+              .add(ExecutionPlanNode.valueNode(normalizedValue))
+              .add(ExecutionPlanNode.action("header:normalize-commas")
+                .add(ExecutionPlanNode.resolveValue(path)))
+              .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+          } else {
+            itemCheck
+              .add(ExecutionPlanNode.valueNode(itemValue))
+              .add(ExecutionPlanNode.resolveValue(path))
+              .add(ExecutionPlanNode.valueNode(NodeValue.NULL))
+          }
           presenceCheck.add(itemCheck)
         }
 

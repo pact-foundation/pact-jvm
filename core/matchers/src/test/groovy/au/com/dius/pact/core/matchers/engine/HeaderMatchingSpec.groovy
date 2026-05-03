@@ -90,9 +90,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'b' => 'b',
-      |            %header:normalize-commas (
-      |              $.headers['HEADER-X'] => 'b'
-      |            ) => 'b',
+      |            $.headers['HEADER-X'] => 'b',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -153,9 +151,7 @@ class HeaderMatchingSpec extends Specification {
       |          ),
       |          %match:equality (
       |            'b',
-      |            %header:normalize-commas (
-      |              $.headers['HEADER-X']
-      |            ),
+      |            $.headers['HEADER-X'],
       |            NULL
       |          )
       |        )
@@ -191,9 +187,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(false),
       |          %match:equality (
       |            'b',
-      |            %header:normalize-commas (
-      |              $.headers['HEADER-X']
-      |            ),
+      |            $.headers['HEADER-X'],
       |            NULL
       |          )
       |        ) => BOOL(false)
@@ -265,9 +259,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'b' => 'b',
-      |            %header:normalize-commas (
-      |              $.headers['HEADER-X'] => 'C'
-      |            ) => 'C',
+      |            $.headers['HEADER-X'] => 'C',
       |            NULL => NULL
       |          ) => ERROR(Expected 'C' \\(String\\) to be equal to 'b' \\(String\\))
       |        ) => BOOL(false)
@@ -332,9 +324,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'b' => 'b',
-      |            %header:normalize-commas (
-      |              $.headers['HEADER-X'] => 'b'
-      |            ) => 'b',
+      |            $.headers['HEADER-X'] => 'b',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -399,9 +389,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'b' => 'b',
-      |            %header:normalize-commas (
-      |              $.headers['HEADER-X'] => 'b'
-      |            ) => 'b',
+      |            $.headers['HEADER-X'] => 'b',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -480,9 +468,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(false),
       |          %match:equality (
       |            'b',
-      |            %header:normalize-commas (
-      |              $.headers['HEADER-X']
-      |            ),
+      |            $.headers['HEADER-X'],
       |            NULL
       |          )
       |        ) => BOOL(false)
@@ -576,9 +562,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -670,9 +654,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -746,9 +728,7 @@ class HeaderMatchingSpec extends Specification {
       |          ),
       |          %match:equality (
       |            ['test', 'test2'],
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE']
-      |            ),
+      |            $.headers['REF-CODE'],
       |            NULL
       |          )
       |        )
@@ -761,9 +741,7 @@ class HeaderMatchingSpec extends Specification {
       |          ),
       |          %match:equality (
       |            '1234',
-      |            %header:normalize-commas (
-      |              $.headers['REF-ID']
-      |            ),
+      |            $.headers['REF-ID'],
       |            NULL
       |          )
       |        )
@@ -799,9 +777,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            ['test', 'test2'] => ['test', 'test2'],
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => ['test', 'test2']
-      |            ) => ['test', 'test2'],
+      |            $.headers['REF-CODE'] => ['test', 'test2'],
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -814,9 +790,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            '1234' => '1234',
-      |            %header:normalize-commas (
-      |              $.headers['REF-ID'] => '1234'
-      |            ) => '1234',
+      |            $.headers['REF-ID'] => '1234',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -890,9 +864,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            ['test', 'test2'] => ['test', 'test2'],
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => ERROR(Expected [test] \\(Array\\) to be equal to [test, test2] \\(Array\\))
       |        ) => BOOL(false)
@@ -905,9 +877,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            '1234' => '1234',
-      |            %header:normalize-commas (
-      |              $.headers['REF-ID'] => ['1234', '1234', '4567']
-      |            ) => ['1234', '1234', '4567'],
+      |            $.headers['REF-ID'] => ['1234', '1234', '4567'],
       |            NULL => NULL
       |          ) => ERROR(Expected [1234, 1234, 4567] \\(Array\\) to be equal to [1234] \\(Array\\), Expected '4567' \\(String\\) to be equal to '1234' \\(String\\))
       |        ) => BOOL(false)
@@ -985,9 +955,7 @@ class HeaderMatchingSpec extends Specification {
       |          ),
       |          %match:equality (
       |            'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE']
-      |            ),
+      |            $.headers['REF-CODE'],
       |            NULL
       |          )
       |        )
@@ -1036,9 +1004,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -1120,9 +1086,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -1202,9 +1166,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -1279,9 +1241,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -1361,9 +1321,7 @@ class HeaderMatchingSpec extends Specification {
       |          ),
       |          %match:equality (
       |            'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE']
-      |            ),
+      |            $.headers['REF-CODE'],
       |            NULL
       |          )
       |        )
@@ -1412,9 +1370,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
@@ -1513,9 +1469,7 @@ class HeaderMatchingSpec extends Specification {
       |          ) => BOOL(true),
       |          %match:equality (
       |            'test' => 'test',
-      |            %header:normalize-commas (
-      |              $.headers['REF-CODE'] => 'test'
-      |            ) => 'test',
+      |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
       |          ) => BOOL(true)
       |        ) => BOOL(true)
