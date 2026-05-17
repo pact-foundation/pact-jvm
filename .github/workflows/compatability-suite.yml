@@ -2,9 +2,13 @@ name: Pact-JVM Compatibility Suite
 
 on:
   push:
-    branches: [ master, v4.1.x, v4.6.x, v4.7.x ]
+    branches: [ '**' ]
   pull_request:
     branches: [ master, v4.1.x, v4.6.x, v4.7.x ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   v1:
