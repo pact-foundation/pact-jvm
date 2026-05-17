@@ -3,13 +3,41 @@ pact-jvm-consumer-junit5
 
 JUnit 5 support for Pact consumer tests
 
+## Contents
+
+- [Dependency](#dependency)
+- [Usage](#usage)
+  - [1. Add the Pact consumer test extension to the test class.](#1-add-the-pact-consumer-test-extension-to-the-test-class)
+  - [2. Create a method annotated with `@Pact` that returns the interactions for the test](#2-create-a-method-annotated-with-pact-that-returns-the-interactions-for-the-test)
+  - [3. Link the mock server with the interactions for the test with `@PactTestFor`](#3-link-the-mock-server-with-the-interactions-for-the-test-with-pacttestfor)
+    - [Matching the interactions by provider name](#matching-the-interactions-by-provider-name)
+    - [Matching the interactions by method name](#matching-the-interactions-by-method-name)
+  - [Injecting the mock server into the test](#injecting-the-mock-server-into-the-test)
+- [Changing the directory pact files are written to](#changing-the-directory-pact-files-are-written-to)
+  - [Using `@PactDirectory` annotation](#using-pactdirectory-annotation)
+- [Forcing pact files to be overwritten](#forcing-pact-files-to-be-overwritten)
+- [Having values injected from provider state callbacks](#having-values-injected-from-provider-state-callbacks)
+- [Overriding the expression markers `${` and `}` (4.1.25+)](#overriding-the-expression-markers--and--4125)
+- [Using HTTPS](#using-https)
+- [Using own KeyStore](#using-own-keystore)
+- [Using multiple providers in a test (4.2.5+)](#using-multiple-providers-in-a-test-425)
+- [Dealing with persistent HTTP/1.1 connections (Keep Alive)](#dealing-with-persistent-http11-connections-keep-alive)
+- [Testing messages](#testing-messages)
+  - [Asynchronous messages](#asynchronous-messages)
+    - [Matching message metadata](#matching-message-metadata)
+  - [V4 Synchronous request/response messages](#v4-synchronous-requestresponse-messages)
+- [Adding external references to interactions (V4 specification)](#adding-external-references-to-interactions-v4-specification)
+- [Using Pact plugins (version 4.3.0+)](#using-pact-plugins-version-430)
+- [Test Analytics](#test-analytics)
+- [Mixing Pact and non-Pact test methods in the same test class](#mixing-pact-and-non-pact-test-methods-in-the-same-test-class)
+
 ## Dependency
 
 The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.consumer`
 * artifact-id = `junit5`
-* version-id = `4.4.X`
+* version-id = `4.7.x`
 
 ## Usage
 
@@ -18,13 +46,13 @@ The library is available on maven central using:
 To write Pact consumer tests with JUnit 5, you need to add `@PactConsumerTest` to your test class. This
 replaces the `PactRunner` used for JUnit 4 tests. The rest of the test follows a similar pattern as for JUnit 4 tests.
 
-```java
+```java block01
 @PactConsumerTest
 class ExampleJavaConsumerPactTest {
 ```
 
 Alternatively, you can explicitly declare the JUnit extension.
-```java
+```java block02
 @ExtendWith(PactConsumerTestExt.class)
 class ExampleJavaConsumerPactTest {
 ```
@@ -34,7 +62,7 @@ class ExampleJavaConsumerPactTest {
 For each test (as with JUnit 4), you need to define a method annotated with the `@Pact` annotation that returns the
 interactions for the test.
 
-```java
+```java block03
     @Pact(provider="ArticlesProvider", consumer="test_consumer")
     public RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
@@ -50,7 +78,7 @@ interactions for the test.
 ```
 
 Note for V4 Pacts, the format of the method needs to be
-```java
+```java block04
     @Pact(provider="ArticlesProvider", consumer="test_consumer")
     public V4Pact createPact(PactDslWithProvider builder) {
         return builder
@@ -76,7 +104,7 @@ The `@PactTestFor` annotation allows you to control the mock server in the same 
 allows you to set the hostname to bind to (default is `localhost`) and the port (default is to use a random port). You
 can also set the Pact specification version to use (default is V3).
 
-```java
+```java block05
 @PactConsumerTest
 @PactTestFor(providerName = "ArticlesProvider")
 public class ExampleJavaConsumerPactTest {
@@ -106,7 +134,7 @@ needs a `@Pact` annotation). See [MultiTest](https://github.com/DiUS/pact-jvm/bl
 
 You can get the mock server injected into the test method by adding a `MockServer` parameter to the test method.
 
-```java
+```java block06
   @Test
   void test(MockServer mockServer) throws IOException {
     HttpResponse httpResponse = Request.get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
@@ -189,12 +217,12 @@ For example, assume that an API call is made to get the details of a user by ID.
 specifies that the user must exist, but the ID will be created when the user is created. So we can then define an
 expression for the path where the ID will be replaced with the value returned from the provider state callback.
 
-```java
+```java block07
     .pathFromProviderState("/api/users/${id}", "/api/users/100")
 ``` 
 You can also just use the key instead of an expression:
 
-```java
+```java block08
     .valueFromProviderState("userId", "userId", 100) // will lookup value using userId as the key
 ```
 
@@ -258,7 +286,7 @@ actual messages that come off the message queue in production.
 
 For example:
 
-```java
+```java block09
 builder.given("Some Provider State")
     .expectsToReceive("a test message")
     .withContent("{\"value\": \"test\"}")
@@ -267,7 +295,7 @@ builder.given("Some Provider State")
 
 or using a Dsl object:
 
-```java
+```java block10
 builder.given("Some Provider State")
     .expectsToReceive("a test message")
     .withContent(new PactDslJsonBody()
@@ -289,7 +317,7 @@ help with this. You can access it via the `withMetadata` method that takes a Jav
 
 For example:
 
-```java
+```java block11
 builder.given("SomeProviderState")
     .expectsToReceive("a test message with metadata")
     .withMetadata(md -> {
@@ -309,6 +337,54 @@ one or more response messages are returned. Examples of this would be things lik
 
 For a V4 synchronous request/response message example, see [V4AsyncMessageTest](https://github.com/pact-foundation/pact-jvm/blob/master/consumer/junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/V4SyncMessageTest.groovy).
 
+# Adding external references to interactions (V4 specification)
+
+External references let you link a V4 Pact interaction to an artefact in another system — for example,
+the OpenAPI operation it was derived from, or a Jira ticket that motivated it. References are stored in
+the Pact file alongside the interaction and are displayed by the verification reporters when the provider
+runs its tests.
+
+The `reference` method is available on the builder passed to `expectsToReceiveHttpInteraction`,
+`expectsToReceiveMessageInteraction`, and `expectsToReceiveSynchronousMessageInteraction` on `PactBuilder`:
+
+```java block12
+@Pact(consumer = "ArticlesClient")
+V4Pact createPact(PactBuilder builder) {
+  return builder
+    .expectsToReceiveHttpInteraction("create article", http -> http
+        .withRequest(req -> req.method("POST").path("/articles"))
+        .willRespondWith(res -> res.status(201))
+        .reference("openapi", "operationId", "createArticle")
+        .reference("openapi", "tag", "articles")
+        .reference("jira", "ticket", "PROJ-123")
+    )
+    .toPact();
+}
+```
+
+For message interactions:
+
+```java block13
+@Pact(consumer = "ArticlesClient")
+V4Pact createPact(PactBuilder builder) {
+  return builder
+    .expectsToReceiveMessageInteraction("article created event", message -> message
+      .withContents( contents -> contents
+        .withContent(new PactDslJsonBody().stringType("title")) )
+      .reference("asyncapi", "messageId", "ArticleCreated")
+    )
+    .toPact();
+}
+```
+
+The `reference` method takes three parameters:
+- `group` — a namespace identifying the external system (e.g. `openapi`, `jira`, `asyncapi`)
+- `name` — the key within that group (e.g. `operationId`, `ticket`)
+- `value` — the associated value
+
+Multiple calls accumulate independently; multiple names within the same group and multiple groups all
+coexist in the Pact file under `interactions[].comments.references.{group}.{name}`.
+
 # Using Pact plugins (version 4.3.0+)
 
 The `PactBuilder` consumer test builder supports using Pact plugins. Plugins are defined in the [Pact plugins project](https://github.com/pact-foundation/pact-plugins).
@@ -324,7 +400,7 @@ setup the interaction.
 
 For example, if we use the CSV plugin from the plugins project, our test would look like:
 
-```java
+```java block14
 @PactConsumerTest
 class CsvClientTest {
   /**

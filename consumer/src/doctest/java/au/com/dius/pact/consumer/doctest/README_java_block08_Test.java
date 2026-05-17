@@ -1,5 +1,5 @@
 // Auto-generated — run './gradlew generateDoctests' to regenerate from README.md
-// Source: README.md block 8
+// Source: README.md block block08
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 // TODO: add required imports
 
-@Disabled("Doctest stub — see README.md block 8")
+@Disabled("Doctest stub — see README.md block block08")
 class README_java_block08_Test {
 
     @Test
     void block() throws Exception {
-        // @DOCTEST-BEGIN README.md:java:8
+        // @DOCTEST-BEGIN README.md:java:block08
         new PactDslJsonBody()
           .stringType("type","FeatureCollection")
           .eachLike("features")

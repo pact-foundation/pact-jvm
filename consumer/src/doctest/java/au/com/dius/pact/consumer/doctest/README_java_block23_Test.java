@@ -1,25 +1,22 @@
 // Auto-generated — run './gradlew generateDoctests' to regenerate from README.md
-// Source: README.md block 23
+// Source: README.md block block23
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
-// TODO: add required imports
-
-@Disabled("Doctest stub — see README.md block 23")
+@Disabled("Doctest stub — see README.md block block23")
 class README_java_block23_Test {
 
     @Test
     void block() throws Exception {
-        // @DOCTEST-BEGIN README.md:java:23
-        newJsonArray((rootArray) -> {
-            rootArray.array((a) -> a.stringValue("a1").stringValue("a2"));
-            rootArray.array((a) -> a.numberValue(1).numberValue(2));
-            rootArray.array((a) -> a.object((o) -> o.stringValue("foo", "Foo")));
-        }).build();
+        // @DOCTEST-BEGIN README.md:java:block23
+        new PactDslJsonBody()
+            .stringValue("foo", "Foo")
+            .stringValue("bar", "Bar")
         // @DOCTEST-END
+        ;
     }
 }

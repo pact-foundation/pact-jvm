@@ -8,7 +8,7 @@ The library is available on maven central using:
 
 - group-id = `au.com.dius.pact.consumer`
 - artifact-id = `groovy`
-- version-id = `4.1.0`
+- version-id = `4.7.x`
 
 ## Usage
 

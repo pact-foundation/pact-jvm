@@ -7,6 +7,17 @@ This library provides the basic tools required to automate the process, and shou
 
 Framework and build tool specific bindings will be provided in separate libraries that build on top of this core functionality.
 
+## Contents
+
+- [Provider State](#provider-state)
+- [Displaying external references from Pact interactions](#displaying-external-references-from-pact-interactions)
+  - [Console (ANSI) output](#console-ansi-output)
+  - [SLF4J](#slf4j)
+  - [Markdown report](#markdown-report)
+  - [JSON report](#json-report)
+- [An example of running provider verification with junit](#an-example-of-running-provider-verification-with-junit)
+- [An example of running provider verification with spock](#an-example-of-running-provider-verification-with-spock)
+
 ### Provider State
 
 Before each interaction is executed, the provider under test will have the opportunity to enter a state.
@@ -16,6 +27,65 @@ The pact framework will instruct the test server to enter that state by sending:
 
 ```text
     POST "${config.stateChangeUrl.url}/setup" { "state" : "${interaction.stateName}" }
+```
+
+### Displaying external references from Pact interactions
+
+When a V4 Pact file contains external references (see the consumer README for how to add them), the
+verification reporters include them in their output after the interaction description.
+
+#### Console (ANSI) output
+
+```
+  a test interaction
+
+  References:
+    openapi:
+      operationId: createUser
+      tag: users
+    jira:
+      ticket: PROJ-123
+```
+
+#### SLF4J
+
+The same information is logged at `INFO` level using the same indented structure.
+
+#### Markdown report
+
+References appear as a nested list immediately after the interaction description:
+
+```markdown
+a test interaction  <br/>
+References:
+* openapi:
+  * operationId: createUser
+  * tag: users
+* jira:
+  * ticket: PROJ-123
+```
+
+#### JSON report
+
+References are included under `consumer.comments.references` in the JSON output:
+
+```json
+{
+  "consumer": {
+    "name": "SomeConsumer",
+    "comments": {
+      "references": {
+        "openapi": {
+          "operationId": "createUser",
+          "tag": "users"
+        },
+        "jira": {
+          "ticket": "PROJ-123"
+        }
+      }
+    }
+  }
+}
 ```
 
 ### An example of running provider verification with junit

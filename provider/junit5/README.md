@@ -1,12 +1,45 @@
 # Pact Junit 5 Extension
 
+## Contents
+
+- [Dependency](#dependency)
+- [Overview](#overview)
+- [Test target](#test-target)
+  - [HttpTestTarget](#httptesttarget)
+  - [HttpsTestTarget](#httpstesttarget)
+  - [MessageTestTarget](#messagetesttarget)
+- [Important note for Maven users](#-important-note-for-maven-users-)
+- [JVM system properties and Gradle/Maven](#important-note-jvm-system-properties-needs-to-be-set-on-the-test-jvm-if-your-build-is-running-with-gradle-or-maven)
+  - [For Message Tests and Spring and Maven](#for-message-tests-and-spring-and-maven)
+- [Selecting the Pacts to verify with Consumer Version Selectors [4.3.12+]](#selecting-the-pacts-to-verify-with-consumer-version-selectors-4312)
+  - [Using an annotated method with a builder](#using-an-annotated-method-with-a-builder)
+  - [Providing the raw Consumer Version Selectors JSON](#providing-the-raw-consumer-version-selectors-json)
+- [Provider State Methods](#provider-state-methods)
+  - [Using multiple classes for the state change methods](#using-multiple-classes-for-the-state-change-methods)
+- [Modifying the requests before they are sent](#modifying-the-requests-before-they-are-sent)
+- [Objects that can be injected into the test methods](#objects-that-can-be-injected-into-the-test-methods)
+- [Allowing the test to pass when no pacts are found to verify (version 4.0.7+)](#allowing-the-test-to-pass-when-no-pacts-are-found-to-verify-version-407)
+- [Overriding the handling of a body data type](#overriding-the-handling-of-a-body-data-type)
+  - [Controlling the generation of diffs](#controlling-the-generation-of-diffs)
+- [Publishing verification results to a Pact Broker](#publishing-verification-results-to-a-pact-broker)
+  - [Tagging the provider before verification results are published [4.0.1+]](#tagging-the-provider-before-verification-results-are-published-401)
+  - [Setting the provider branch before verification results are published [4.3.0-beta.7+]](#setting-the-provider-branch-before-verification-results-are-published-430-beta7)
+  - [Setting the build URL for verification results [4.3.2+]](#setting-the-build-url-for-verification-results-432)
+- [Pending Pact Support (version 4.1.0 and later)](#pending-pact-support-version-410-and-later)
+- [Work In Progress (WIP) Pact Support (version 4.1.5 and later)](#work-in-progress-wip-pact-support-version-415-and-later)
+- [Verifying V4 Pact files that require plugins (version 4.3.0+)](#verifying-v4-pact-files-that-require-plugins-version-430)
+- [Displaying external references from Pact interactions (V4 specification)](#displaying-external-references-from-pact-interactions-v4-specification)
+- [Test Analytics](#test-analytics)
+- [Testing message interactions](#testing-message-interactions)
+- [Filtering interactions that are verified](#filtering-interactions-that-are-verified)
+
 ## Dependency
 
 The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.provider`
 * artifact-id = `junit5`
-* version-id = `4.6.x`
+* version-id = `4.7.x`
 
 ## Overview
 
@@ -332,6 +365,30 @@ plugin to be able to be loaded.
 
 Note that the request data used to generate the request for verification can be injected into the test template method
 using the `au.com.dius.pact.provider.RequestData` type. This can be used to add any required metadata to the request.
+
+# Displaying external references from Pact interactions (V4 specification)
+
+When a V4 Pact interaction contains external references (added on the consumer side using the `reference`
+method — see the [consumer JUnit 5 README](../../consumer/junit5/README.md#adding-external-references-to-interactions-v4-specification)),
+the verification reporters automatically display them after the interaction description.
+
+For example, an interaction linked to an OpenAPI operation and a Jira ticket will appear in the console
+output as:
+
+```
+  create article
+
+  References:
+    openapi:
+      operationId: createArticle
+      tag: articles
+    jira:
+      ticket: PROJ-123
+```
+
+The same information is included in the SLF4J log output, the Markdown report, and the JSON report. See
+the [provider README](../README.md#displaying-external-references-from-pact-interactions) for the full
+format of each reporter.
 
 # Test Analytics
 

@@ -8,19 +8,48 @@ framework is not implemented, this module should give you all the hooks you need
 
 Provides a DSL for use with Java to build consumer pacts.
 
+## Contents
+
+- [Dependency](#dependency)
+- [DSL Usage](#dsl-usage)
+  - [Building JSON bodies with PactDslJsonBody DSL](#building-json-bodies-with-pactdsljsonbody-dsl)
+    - [DSL Matching methods](#dsl-matching-methods)
+    - [Ensuring all items in a list match an example](#ensuring-all-items-in-a-list-match-an-example)
+    - [Ignoring the list order (V4 specification)](#ignoring-the-list-order-v4-specification)
+    - [Array contains matcher (V4 specification)](#array-contains-matcher-v4-specification)
+    - [Matching JSON values at the root](#matching-json-values-at-the-root)
+    - [Root level arrays that match all items](#root-level-arrays-that-match-all-items)
+    - [Matching arrays of arrays](#matching-arrays-of-arrays)
+    - [Matching any key in a map](#matching-any-key-in-a-map)
+  - [Matching on paths](#matching-on-paths)
+  - [Matching on headers](#matching-on-headers)
+  - [Matching on query parameters](#matching-on-query-parameters)
+- [Adding external references to interactions (V4 specification)](#adding-external-references-to-interactions-v4-specification)
+- [Forcing pact files to be overwritten](#forcing-pact-files-to-be-overwritten)
+- [Having values injected from provider state callbacks](#having-values-injected-from-provider-state-callbacks)
+- [A Lambda DSL for Pact](#a-lambda-dsl-for-pact)
+  - [Why a new DSL implementation?](#why-a-new-dsl-implementation)
+    - [The existing DSL is quite error-prone](#the-existing-dsl-is-quite-error-prone)
+    - [The existing DSL is hard to read](#the-existing-dsl-is-hard-to-read)
+  - [Usage](#usage)
+    - [Response body as json array](#response-body-as-json-array)
+    - [Response body as json object](#response-body-as-json-object)
+    - [Examples](#examples)
+  - [Dealing with persistent HTTP/1.1 connections (Keep Alive)](#dealing-with-persistent-http11-connections-keep-alive)
+
 ## Dependency
 
 The library is available on maven central using:
 
 * group-id = `au.com.dius.pact`
 * artifact-id = `consumer`
-* version-id = `4.4.x`
+* version-id = `4.7.x`
 
 ## DSL Usage
 
 Example in a JUnit test:
 
-```java
+```java block01
 class PactTest {
 
   @Test
@@ -61,7 +90,7 @@ class PactTest {
 
 The DSL has the following pattern:
 
-```java
+```java block02
 .consumer("Some Consumer")
 .hasPactWith("Some Provider")
 .given("a certain state on the provider")
@@ -96,7 +125,7 @@ define regex and type matchers.
 
 For example:
 
-```java
+```java block03
 PactDslJsonBody body = new PactDslJsonBody()
     .stringType("name")
     .booleanType("happy")
@@ -153,7 +182,7 @@ has a minimum or maximum size and that each item in the list matches a given exa
 
 For example:
 
-```java
+```java block04
     DslPart body = new PactDslJsonBody()
         .minArrayLike("users", 2)
             .id()
@@ -189,7 +218,7 @@ these can be used to match a hypermedia format like Siren, see [Example Pact + S
 |----------|-------------|
 | `arrayContaining` | Matches the items in an array against a number of variants. Matching is successful if each variant occurs once in the array. Variants may be objects containing matching rules. |
 
-```java
+```java block05
 .arrayContaining("actions")
   .object()
     .stringValue("name", "update")
@@ -212,7 +241,7 @@ values that you can use.
 
 For example:
 
-```java
+```java block06
 .consumer("Some Consumer")
 .hasPactWith("Some Provider")
     .uponReceiving("a request for a basic JSON value")
@@ -234,7 +263,7 @@ If the root of the body is an array, you can create PactDslJsonArray classes wit
 
 For example:
 
-```java
+```java block07
 PactDslJsonArray.arrayEachLike()
     .date("clearedDate", "mm/dd/yyyy", date)
     .stringType("status", "STATUS")
@@ -273,7 +302,7 @@ For the case where you have arrays of arrays (GeoJSON is an example), the follow
 
 For example (with GeoJSON structure):
 
-```java
+```java block08
 new PactDslJsonBody()
   .stringType("type","FeatureCollection")
   .eachLike("features")
@@ -321,7 +350,7 @@ example key as a parameter.
 
 For example:
 
-```java
+```java block09
 DslPart body = new PactDslJsonBody()
   .object("one")
     .eachKeyLike("001", PactDslJsonRootValue.id(12345L)) // key like an id mapped to a matcher
@@ -350,7 +379,7 @@ from the regular expression.
 
 For example:
 
-```java
+```java block10
   .given("test state")
     .uponReceiving("a test interaction")
         .matchPath("/transaction/[0-9]+") // or .matchPath("/transaction/[0-9]+", "/transaction/1234567890")
@@ -369,7 +398,7 @@ from the regular expression.
 
 For example:
 
-```java
+```java block11
   .given("test state")
     .uponReceiving("a test interaction")
         .path("/hello")
@@ -390,7 +419,7 @@ from the regular expression.
 
 For example:
 
-```java
+```java block12
   .given("test state")
     .uponReceiving("a test interaction")
         .path("/hello")
@@ -402,6 +431,56 @@ For example:
         .status(200)
         .body("{\"hello\": \"harry\"}")
 ```
+
+## Adding external references to interactions (V4 specification)
+
+External references let you link an interaction to an artefact in another system — for example, the OpenAPI
+operation it was derived from, or a Jira ticket that motivated it. The reference is stored in the Pact file
+alongside the interaction so it can be surfaced by tooling and verification reporters.
+
+References are grouped by a namespace key (the `group`) that identifies the external system, and then by a
+`name` key within that group. Any value type is accepted.
+
+The `reference` method is available on the builder returned from the V4 interaction factory methods on
+`PactBuilder`:
+
+```kotlin block13
+val pact = PactBuilder("Some Consumer", "Some Provider")
+  .expectsToReceiveHttpInteraction("create user") { http ->
+    http
+      .withRequest { req -> req.method("POST").path("/users") }
+      .willRespondWith { res -> res.status(201) }
+      .reference("openapi", "operationId", "createUser")
+      .reference("openapi", "tag", "users")
+      .reference("jira", "ticket", "PROJ-123")
+  }
+  .toPact()
+```
+
+The same method is available on `MessageInteractionBuilder` and `SynchronousMessageInteractionBuilder`:
+
+```kotlin block14
+PactBuilder("Some Consumer", "Some Provider")
+  .expectsToReceiveMessageInteraction("user created event") { message ->
+    message
+      // .withContent(/* ... */)
+      .reference("asyncapi", "messageId", "UserCreated")
+  }
+```
+
+When using `SynchronousMessagePactBuilder`, call `reference` directly on the builder after
+`expectsToReceive`:
+
+```kotlin block15
+SynchronousMessagePactBuilder(Consumer("Some Consumer"), Provider("Some Provider"))
+  .expectsToReceive("create user request")
+  .reference("openapi", "operationId", "createUser")
+  .toPact()
+```
+
+References are stored in the Pact file under `interactions[].comments.references.{group}.{name}`.
+Multiple calls with the same `group` accumulate under that group's object; multiple groups coexist
+independently.
 
 # Forcing pact files to be overwritten
 
@@ -426,13 +505,13 @@ For example, assume that an API call is made to get the details of a user by ID.
 specifies that the user must be exist, but the ID will be created when the user is created. So we can then define an
 expression for the path where the ID will be replaced with the value returned from the provider state callback.
 
-```java
+```java block16
     .pathFromProviderState("/api/users/${id}", "/api/users/100")
 ``` 
 
 You can also just use the key instead of an expression:
 
-```java
+```java block17
     .valueFromProviderState("userId", "userId", 100) // will look value using userId as the key
 ```
 
@@ -445,7 +524,7 @@ the default pact DSL and this lambda DSL is, as the name suggests, the usage of 
 
 The lambda DSL solves the following two main issues. Both are visible in the following code sample:
  
-```java
+```java block18
 new PactDslJsonArray()
     .array()                            // open an array
     .stringValue("a1")                  // choose the method that is valid for arrays
@@ -476,7 +555,7 @@ The lambda DSL has no ambiguous methods and there's no need to close objects and
 When formatting your source code with an IDE the code becomes hard to read as there's no indentation possible. Of course, you could do it by hand but we want auto formatting!
 Auto formatting works great for the new DSL!
 
-```java
+```java block19
 array.object((o) -> {
   o.stringValue("foo", "Foo");          // an attribute
   o.stringValue("bar", "Bar");          // an attribute
@@ -493,13 +572,13 @@ Start with a static import of `LambdaDsl`. This class contains factory methods f
 When you come accross the `body()` method of `PactDslWithProvider` builder start using the new extensions. 
 The call to `LambdaDsl` replaces the call to instance `new PactDslJsonArray()` and `new PactDslJsonBody()` of the pact library.
 
-```java
+```java block20
 au.com.dius.pact.consumer.dsl.LambdaDsl.*
 ```
 
 ### Response body as json array
 
-```java
+```java block21
 // import au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray
 builder.given("some state")
         .uponReceiving("a request")
@@ -515,7 +594,7 @@ builder.given("some state")
 
 ### Response body as json object
 
-```java
+```java block22
 // import au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody
 builder.given("some state")
         .uponReceiving("a request")
@@ -546,7 +625,7 @@ When creating simple json structures the difference between the two approaches i
 
 ##### Pact DSL
 
-```java
+```java block23
 new PactDslJsonBody()
     .stringValue("foo", "Foo")
     .stringValue("bar", "Bar")
@@ -554,7 +633,7 @@ new PactDslJsonBody()
 
 ##### Lambda DSL
 
-```java
+```java block24
 newJsonBody((o) -> {
     o.stringValue("foo", "Foo");
     o.stringValue("bar", "Bar");
@@ -577,7 +656,7 @@ When we come to more complex constructs with arrays and nested objects the beaut
 
 ##### Pact DSL
 
-```java
+```java block25
 new PactDslJsonArray()
     .array()
     .stringValue("a1")
@@ -596,7 +675,7 @@ new PactDslJsonArray()
 
 ##### Lambda DSL
 
-```java
+```java block26
 newJsonArray((rootArray) -> {
     rootArray.array((a) -> a.stringValue("a1").stringValue("a2"));
     rootArray.array((a) -> a.numberValue(1).numberValue(2));
@@ -606,7 +685,7 @@ newJsonArray((rootArray) -> {
 
 ##### Kotlin Lambda DSL
 
-```kotlin
+```kotlin block27
 newJsonArray {
     newArray {
       stringValue("a1")

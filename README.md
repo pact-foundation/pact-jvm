@@ -48,7 +48,7 @@ and in the [Pact-JVM wiki](https://github.com/pact-foundation/pact-jvm/wiki). [S
 
 | Branch                                                                            | Specification | JDK                   | Kotlin Version | Latest Version | Notes |
 |-----------------------------------------------------------------------------------|---------------|-----------------------|----------------|----------------|-------|
-| [4.7.x](https://github.com/pact-foundation/pact-jvm/blob/v4.7.x/README.md) master        | V4 + plugins  | 17+ (tested up to 23) | 2.3.10         | 4.7.0-beta.5   |       |
+| [4.7.x](https://github.com/pact-foundation/pact-jvm/blob/v4.7.x/README.md) master        | V4 + plugins  | 17+ (tested up to 23) | 2.3.10         | 4.7.0          |       |
 | [4.6.x](https://github.com/pact-foundation/pact-jvm/blob/v4.6.x/README.md) | V4 + plugins  | 17+ (tested up to 18) | 1.8.22         | 4.6.20         |       |
 | [4.5.x](https://github.com/pact-foundation/pact-jvm/blob/v4.5.x/README.md)        | V4 + plugins  | 11+/17+(1)            | 1.7.20         | 4.5.13         |       |
 | [4.1.x](https://github.com/pact-foundation/pact-jvm/blob/v4.1.x/README.md)        | V3            | 8-12                  | 1.3.72         | 4.1.43         |       |
@@ -80,20 +80,19 @@ au.com.dius.pact:consumer
 au.com.dius.pact.consumer:groovy
 au.com.dius.pact.consumer:junit
 au.com.dius.pact.consumer:junit5
-au.com.dius.pact.consumer:java8
-au.com.dius.pact.consumer:specs2_2.13
+au.com.dius.pact.consumer:kotlin
+au.com.dius.pact.consumer:spock
 au.com.dius.pact:pact-jvm-server
 au.com.dius.pact:provider
-au.com.dius.pact.provider:scalatest_2.13
 au.com.dius.pact.provider:spring
+au.com.dius.pact.provider:spring6
+au.com.dius.pact.provider:spring7
 au.com.dius.pact.provider:maven
 au.com.dius.pact:provider
 au.com.dius.pact.provider:junit
 au.com.dius.pact.provider:junit5
-au.com.dius.pact.provider:scalasupport_2.13
 au.com.dius.pact.provider:lein
 au.com.dius.pact.provider:gradle
-au.com.dius.pact.provider:specs2_2.13
 au.com.dius.pact.provider:junit5spring
 au.com.dius.pact.core:support
 au.com.dius.pact.core:model
@@ -126,6 +125,10 @@ You want to look at: [groovy](consumer/groovy) or [junit](consumer/junit) or [sp
 
 Clojure can call out to Java, so have a look at [junit](consumer/junit). For an example
 look at [example_clojure_consumer_pact_test.clj](https://github.com/pact-foundation/pact-jvm/blob/master/consumer/junit/src/test/clojure/au/com/dius/pact/consumer/junit/example_clojure_consumer_pact_test.clj).
+
+### I Use Kotlin
+
+You want to look at: [kotlin](consumer/kotlin)
 
 ### I Use some other jvm language or test framework
 
@@ -166,7 +169,8 @@ You want to look at: [pact leiningen plugin](provider/lein)
 
 #### verify pacts with a Spring MVC project
 
-Have a look at [spring](provider/spring) or [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc) (Not maintained).
+Have a look at [spring](provider/spring) for Spring 5, [spring6](provider/spring6) for Spring 6 / Spring Boot 3,
+or [spring7](provider/spring7) for Spring 7 / Spring Boot 4. Also see [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc) (Not maintained).
 
 #### verify pacts with a Quarkus project
 

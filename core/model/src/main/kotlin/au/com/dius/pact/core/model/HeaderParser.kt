@@ -12,6 +12,23 @@ val SINGLE_VALUE_HEADERS = setOf("date", "accept-datetime", "if-modified-since",
   "expires", "retry-after", "last-modified", "set-cookie", "user-agent")
 val PARAMETERISED_HEADERS = setOf("accept", "content-type")
 
+/** Standard HTTP headers whose values are comma-separated lists (RFC 7230/9110). Comma whitespace
+ *  normalisation is only applied to these headers to avoid corrupting custom headers (e.g. JSON). */
+val MULTI_VALUE_HEADERS = setOf(
+  "accept",
+  "accept-encoding",
+  "accept-language",
+  "access-control-allow-headers",
+  "access-control-allow-methods",
+  "access-control-expose-headers",
+  "access-control-request-headers",
+  "allow",
+  "cache-control",
+  "if-match",
+  "if-none-match",
+  "vary"
+)
+
 class HeaderWithParameters(
   content: String,
   parameters: List<HeaderValueParam>

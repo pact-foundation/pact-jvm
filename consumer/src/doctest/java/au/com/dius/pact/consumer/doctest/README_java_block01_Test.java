@@ -1,15 +1,15 @@
 // Auto-generated — run './gradlew generateDoctests' to regenerate from README.md
-// Source: README.md block 1
+// Source: README.md block block01
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
 import au.com.dius.pact.consumer.*;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.RequestResponsePact;
-import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ContentType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,8 +17,6 @@ import java.util.Map;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
-
-import org.junit.jupiter.api.Disabled;
 // TODO: add required imports
 
 class ConsumerClient {
