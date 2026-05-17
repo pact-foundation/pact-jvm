@@ -2,9 +2,13 @@ name: Pact-JVM Build
 
 on:
   push:
-    branches: [ master, v4.1.x, v4.5.x, v4.6.x, v4.7.x ]
+    branches: [ '**' ]
   pull_request:
     branches: [ master, v4.1.x, v4.5.x, v4.6.x, v4.7.x ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   latest_jdk:
@@ -70,4 +74,3 @@ jobs:
       - run: ./gradlew -v
       - name: Build with Gradle
         run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} check
-
