@@ -19,6 +19,7 @@ interface PlanBodyBuilder {
 }
 
 private val BODY_PLAN_BUILDERS: List<PlanBodyBuilder> = listOf(
+  MultipartFormDataPlanBuilder,
   FormUrlencodedPlanBuilder,
   JsonPlanBuilder,
   XMLPlanBuilder

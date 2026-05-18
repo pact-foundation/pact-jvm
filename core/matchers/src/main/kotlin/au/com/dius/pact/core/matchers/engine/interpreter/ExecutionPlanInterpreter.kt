@@ -37,6 +37,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.io.ByteArrayInputStream
+import java.util.TreeMap
+import javax.mail.internet.ContentDisposition
+import javax.mail.internet.MimeMultipart
+import javax.mail.util.ByteArrayDataSource
 
 private val logger = KotlinLogging.logger {}
 
@@ -263,6 +267,7 @@ class ExecutionPlanInterpreter(
         "apply" -> executeApply(node)
         "json:parse" -> executeJsonParse(action, valueResolver, node, actionPath)
         "form:parse" -> executeFormParse(action, valueResolver, node, actionPath)
+        "multipart:parse" -> executeMultipartParse(action, valueResolver, node, actionPath)
         "xml:parse" -> executeXmlParse(action, valueResolver, node, actionPath)
         "xml:value" -> executeXmlValue(action, valueResolver, node, actionPath)
         "xml:attributes" -> executeXmlAttributes(action, valueResolver, node, actionPath)
@@ -648,6 +653,13 @@ class ExecutionPlanInterpreter(
                   Result.Err("Expected ${argValue.items} to be empty")
                 }
               }
+              is NodeValue.MAP -> {
+                if (argValue.entries.isEmpty()) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected ${argValue.entries} to be empty")
+                }
+              }
               is NodeValue.MMAP -> {
                 if (argValue.entries.isEmpty()) {
                   Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
@@ -898,6 +910,51 @@ class ExecutionPlanInterpreter(
         node.copy(result = result, children = mutableListOf(resultNode.value))
       }
       is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeMultipartParse(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateTwoArgs(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (bodyNode, ctNode) = result.value
+        val bodyValue = bodyNode.value().orDefault().asValue().orDefault()
+        val ctValue = ctNode.value().orDefault().asValue().orDefault()
+        val parseResult = when {
+          bodyValue is NodeValue.BARRAY && ctValue is NodeValue.STRING -> {
+            try {
+              val multipart = MimeMultipart(ByteArrayDataSource(bodyValue.bytes, ctValue.string))
+              val map = TreeMap<String, NodeValue>()
+              for (i in 0 until multipart.count) {
+                val part = multipart.getBodyPart(i)
+                val cd = ContentDisposition(part.disposition ?: "form-data")
+                val name = cd.getParameter("name") ?: continue
+                val bytes = part.inputStream.readAllBytes()
+                // Try JSON first; fall back to raw bytes for binary parts
+                val value = try {
+                  NodeValue.JSON(JsonParser.parseStream(ByteArrayInputStream(bytes)))
+                } catch (_: Exception) {
+                  NodeValue.BARRAY(bytes)
+                }
+                map[name] = value
+              }
+              NodeResult.VALUE(NodeValue.MAP(map))
+            } catch (e: Exception) {
+              NodeResult.ERROR("multipart:parse error - ${e.message}")
+            }
+          }
+          else -> NodeResult.ERROR(
+            "multipart:parse requires BARRAY body and STRING content-type, got " +
+              "${bodyValue.valueType()} and ${ctValue.valueType()}"
+          )
+        }
+        node.copy(result = parseResult, children = mutableListOf(bodyNode, ctNode))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
     }
   }
 
@@ -1156,6 +1213,7 @@ class ExecutionPlanInterpreter(
               else -> "'$action' can't be used with a $second node" to null
             }
           }
+          is NodeValue.MAP -> checkDiff(action, expectedKeys, second.entries.keys)
           is NodeValue.MMAP -> checkDiff(action, expectedKeys, second.entries.keys)
           is NodeValue.SLIST -> checkDiff(action, expectedKeys, second.items.toSet())
           is NodeValue.STRING -> checkDiff(action, expectedKeys, setOf(second.string))
@@ -1779,6 +1837,45 @@ class ExecutionPlanInterpreter(
               }
             } else {
               Result.Err("Can not resolve '$path' from a map value")
+            }
+          }
+        }
+
+        is NodeValue.MAP -> {
+          if (path.isRoot()) {
+            Result.Ok(result.value)
+          } else {
+            val tokens = path.pathTokens
+            // tokens[0] is Root; tokens[1] is the part name
+            val partName = (tokens.getOrNull(1) as? PathToken.Field)?.name
+              ?: return Result.Err("Can not resolve '$path' from a MAP value")
+            val partValue = result.value.entries[partName]
+              ?: return Result.Ok(NodeValue.NULL)
+            if (tokens.size <= 2) {
+              Result.Ok(partValue)
+            } else {
+              // Navigate remaining path into the part value (typically JSON)
+              val subPath = DocPath(listOf(PathToken.Root) + tokens.drop(2))
+              when (partValue) {
+                is NodeValue.JSON -> {
+                  val jsonPaths = JsonUtils.resolvePath(partValue.json, subPath)
+                  if (jsonPaths.isEmpty()) {
+                    Result.Ok(NodeValue.NULL)
+                  } else if (jsonPaths.size == 1) {
+                    when (val value = partValue.json.pointer(jsonPaths[0])) {
+                      JsonValue.Null -> Result.Ok(NodeValue.NULL)
+                      else -> Result.Ok(NodeValue.JSON(value))
+                    }
+                  } else {
+                    Result.Ok(NodeValue.JSON(JsonValue.Array(jsonPaths
+                      .map { partValue.json.pointer(it) }
+                      .toMutableList()
+                    )))
+                  }
+                }
+                else -> Result.Err("Can not navigate '$subPath' in MAP part '$partName' " +
+                  "of type ${partValue.valueType()}")
+              }
             }
           }
         }

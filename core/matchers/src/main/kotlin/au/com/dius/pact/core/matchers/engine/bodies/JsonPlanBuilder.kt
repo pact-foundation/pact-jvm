@@ -53,7 +53,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     }
   }
 
-  private fun processBodyNode(
+  internal fun processBodyNode(
     context: PlanMatchingContext,
     expectedJson: JsonValue,
     path: DocPath,

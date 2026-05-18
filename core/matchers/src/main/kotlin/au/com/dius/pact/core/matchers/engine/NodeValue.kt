@@ -64,6 +64,9 @@ sealed class NodeValue: Into<NodeValue> {
   /** XML */
   data class XML(val xml: XmlValue): NodeValue()
 
+  /** Generic map of String keys to NodeValue values (sorted for deterministic output) */
+  data class MAP(val entries: Map<String, NodeValue>): NodeValue()
+
   /** Returns the encoded string form of the node value */
   @Suppress("LongMethod", "CyclomaticComplexMethod")
   fun strForm(): String {
@@ -147,6 +150,19 @@ sealed class NodeValue: Into<NodeValue> {
           is XmlValue.Text -> "xml:text:${escape(xml.text)}"
         }
       }
+      is MAP -> {
+        val sb = StringBuilder("MAP{")
+        var first = true
+        for ((key, value) in entries.entries.sortedBy { it.key }) {
+          if (!first) sb.append(", ")
+          sb.append(escape(key))
+          sb.append(": ")
+          sb.append(value.strForm())
+          first = false
+        }
+        sb.append("}")
+        sb.toString()
+      }
     }
   }
 
@@ -158,6 +174,7 @@ sealed class NodeValue: Into<NodeValue> {
       is ENTRY -> "Entry"
       is JSON -> "JSON"
       is LIST -> "List"
+      is MAP -> "MAP"
       is MMAP -> "Multi-Value String Map"
       is NAMESPACED -> "Namespaced Value"
       NULL -> "NULL"
@@ -192,6 +209,7 @@ sealed class NodeValue: Into<NodeValue> {
       is BARRAY -> this.bytes.isNotEmpty()
       is BOOL -> this.bool
       is LIST -> this.items.isNotEmpty()
+      is MAP -> this.entries.isNotEmpty()
       is MMAP -> this.entries.isNotEmpty()
       is SLIST -> this.items.isNotEmpty()
       is STRING -> this.string.isNotEmpty()
@@ -281,6 +299,7 @@ sealed class NodeValue: Into<NodeValue> {
         else -> listOf(this)
       }
       is LIST -> this.items
+      is MAP -> this.entries.keys.sorted().map { STRING(it) }
       is MMAP -> this.entries.entries.map { ENTRY(it.key, SLIST(it.value)) }
       is SLIST -> this.items.map { STRING(it) }
       else -> listOf(this)
@@ -299,6 +318,7 @@ sealed class NodeValue: Into<NodeValue> {
       is ENTRY -> Pair(this.key, this.value)
       is JSON -> this.json
       is LIST -> this.items.map { it.unwrap() }
+      is MAP -> this.entries
       is MMAP -> this.entries
       is NAMESPACED -> Pair(this.name, this.value)
       NULL -> null

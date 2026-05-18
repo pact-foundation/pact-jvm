@@ -443,8 +443,24 @@ object V2MatchingEngine: MatchingEngine {
           ))
         } else {
           val contentTypeCheckNode = ExecutionPlanNode.action("if")
-          contentTypeCheckNode
-            .add(
+          if (contentType.isMultipart()) {
+            val baseType = contentType.getBaseType() ?: "multipart/form-data"
+            contentTypeCheckNode.add(
+              ExecutionPlanNode.action("match:include")
+                .add(ExecutionPlanNode.valueNode(NodeValue.STRING(baseType)))
+                .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
+                .add(ExecutionPlanNode.valueNode(NodeValue.JSON(
+                  au.com.dius.pact.core.support.json.JsonParser.parseString("{\"value\": \"$baseType\"}")
+                )))
+                .add(ExecutionPlanNode.valueNode(NodeValue.BOOL(false)))
+                .add(
+                  ExecutionPlanNode.action("error")
+                    .add(ExecutionPlanNode.valueNode(NodeValue.STRING("Body type error - ")))
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+            )
+          } else {
+            contentTypeCheckNode.add(
               ExecutionPlanNode.action("match:equality")
                 .add(ExecutionPlanNode.valueNode(contentType.toString()))
                 .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
@@ -455,6 +471,7 @@ object V2MatchingEngine: MatchingEngine {
                     .add(ExecutionPlanNode.action("apply"))
                 )
             )
+          }
 
           val planBuilder = getBodyPlanBuilder(contentType)
           if (planBuilder != null) {
@@ -524,8 +541,24 @@ object V2MatchingEngine: MatchingEngine {
           ))
         } else {
           val contentTypeCheckNode = ExecutionPlanNode.action("if")
-          contentTypeCheckNode
-            .add(
+          if (contentType.isMultipart()) {
+            val baseType = contentType.getBaseType() ?: "multipart/form-data"
+            contentTypeCheckNode.add(
+              ExecutionPlanNode.action("match:include")
+                .add(ExecutionPlanNode.valueNode(NodeValue.STRING(baseType)))
+                .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
+                .add(ExecutionPlanNode.valueNode(NodeValue.JSON(
+                  au.com.dius.pact.core.support.json.JsonParser.parseString("{\"value\": \"$baseType\"}")
+                )))
+                .add(ExecutionPlanNode.valueNode(NodeValue.BOOL(false)))
+                .add(
+                  ExecutionPlanNode.action("error")
+                    .add(ExecutionPlanNode.valueNode(NodeValue.STRING("Body type error - ")))
+                    .add(ExecutionPlanNode.action("apply"))
+                )
+            )
+          } else {
+            contentTypeCheckNode.add(
               ExecutionPlanNode.action("match:equality")
                 .add(ExecutionPlanNode.valueNode(contentType.toString()))
                 .add(ExecutionPlanNode.resolveValue(DocPath("$.content-type")))
@@ -536,6 +569,7 @@ object V2MatchingEngine: MatchingEngine {
                     .add(ExecutionPlanNode.action("apply"))
                 )
             )
+          }
 
           val planBuilder = getBodyPlanBuilder(contentType)
           if (planBuilder != null) {

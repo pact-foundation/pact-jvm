@@ -104,6 +104,7 @@ sealed class NodeResult {
           is NodeValue.ENTRY -> "${v.key} -> ${v.value}"
           is NodeValue.JSON -> v.json.serialise()
           is NodeValue.LIST -> v.items.toString()
+          is NodeValue.MAP -> v.entries.toString()
           is NodeValue.MMAP -> v.entries.toString()
           is NodeValue.NAMESPACED -> "${v.name}:${v.value}"
           NodeValue.NULL -> ""
