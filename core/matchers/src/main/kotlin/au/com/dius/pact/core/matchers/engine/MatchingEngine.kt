@@ -423,9 +423,14 @@ object V2MatchingEngine: MatchingEngine {
         val contentType = expected.determineContentType()
         val rootMatcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
         if (rootMatcher != null && rootMatcher.canMatch(contentType)) {
+          val actualBodyNode = if (contentType.isText()) {
+            ExecutionPlanNode.action("convert:UTF8").add(ExecutionPlanNode.resolveValue(DocPath("$.body")))
+          } else {
+            ExecutionPlanNode.resolveValue(DocPath("$.body"))
+          }
           planNode.add(buildMatchingRuleNode(
             ExecutionPlanNode.valueNode(NodeValue.NULL),
-            ExecutionPlanNode.resolveValue(DocPath("$.body")),
+            actualBodyNode,
             rootMatcher,
             true
           ))

@@ -218,8 +218,8 @@ open class PlanMatchingContext @JvmOverloads constructor(
     return PlanMatchingContext(
       pact,
       interaction,
-      config,
-      MatchingContext(matchingRules, config.allowUnexpectedEntries)
+      config.copy(allowUnexpectedEntries = true),
+      MatchingContext(matchingRules, true)
     )
   }
 
