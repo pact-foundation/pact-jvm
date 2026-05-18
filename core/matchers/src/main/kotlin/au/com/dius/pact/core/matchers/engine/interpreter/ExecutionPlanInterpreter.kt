@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.XmlUtils.attributes
 import au.com.dius.pact.core.model.XmlUtils.childElements
 import au.com.dius.pact.core.model.XmlUtils.groupChildren
+import au.com.dius.pact.core.model.XmlUtils.groupChildrenNS
 import au.com.dius.pact.core.model.XmlUtils.parse
 import au.com.dius.pact.core.model.XmlUtils.renderXml
 import au.com.dius.pact.core.model.XmlUtils.resolveMatchingNode
@@ -957,7 +958,7 @@ class ExecutionPlanInterpreter(
           is NodeValue.XML -> {
             when (val xml = second.xml) {
               is XmlValue.Element -> {
-                val actualKeys = groupChildren(xml.element).keys
+                val actualKeys = groupChildrenNS(xml.element).keys
                 checkDiff(action, expectedKeys, actualKeys)
               }
               else -> "'$action' can't be used with a $second node" to null

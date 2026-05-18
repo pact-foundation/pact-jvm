@@ -149,6 +149,36 @@ object XmlUtils {
       }
   }
 
+  /** Group the child nodes using Clark notation ({namespace}localName) as key when a namespace is present */
+  fun groupChildrenNS(element: Node): Map<String, MutableList<Element>> {
+    val childNodes = element.childNodes
+    return (0..<childNodes.length)
+      .map { index -> childNodes.item(index) }
+      .filter { it.nodeType == Node.ELEMENT_NODE }
+      .fold(mutableMapOf()) { acc, node ->
+        val el = node as Element
+        val tagName = if (el.namespaceURI != null) "{${el.namespaceURI}}${el.localName}" else el.nodeName
+        if (acc.contains(tagName)) {
+          acc[tagName]!!.add(el)
+        } else {
+          acc[tagName] = mutableListOf(el)
+        }
+        acc
+      }
+  }
+
+  /** Check if an element matches a path token name, handling Clark notation ({namespace}localName) */
+  private fun elementMatchesToken(element: Element, tokenName: String): Boolean {
+    return if (tokenName.startsWith("{")) {
+      val nsEnd = tokenName.indexOf('}')
+      val ns = tokenName.substring(1, nsEnd)
+      val localName = tokenName.substring(nsEnd + 1)
+      element.namespaceURI == ns && element.localName == localName
+    } else {
+      element.nodeName == tokenName && element.namespaceURI == null
+    }
+  }
+
   /** Returns the child elements of the node */
   fun childElements(element: Node): List<Element> {
     return (0..<element.childNodes.length)
@@ -156,12 +186,16 @@ object XmlUtils {
       .filter { it.nodeType == Node.ELEMENT_NODE } as List<Element>
   }
 
-  /** Returns a Map of all the node's attributes */
+  /** Returns a Map of all the node's attributes, skipping namespace declarations and using Clark notation for keys */
   fun attributes(node: Element): Map<String, String> {
     val attr = node.attributes
     return (0..<attr.length)
       .map { index -> attr.item(index) as Attr }
-      .associate { it.name to it.value }
+      .filter { !it.nodeName.startsWith("xmlns") }
+      .associate {
+        val key = if (it.namespaceURI != null) "{${it.namespaceURI}}${it.localName}" else it.nodeName
+        key to it.value
+      }
   }
 
   /** Resolve the path expression against the XML, returning a list of pointer values that match. */
@@ -201,9 +235,9 @@ object XmlUtils {
 
       when (token) {
         is PathToken.Field -> {
-          if (element.nodeName == token.name) {
+          if (elementMatchesToken(element, token.name)) {
             logger.trace { "Field name matches element [${token.name}, ${parentNode.id}]" }
-            val node = parentNode.addChild("${token.name}[${index}]")
+            val node = parentNode.addChild("${element.nodeName}[${index}]")
 
             val remainingTokens = pathTokens.drop(1)
             if (remainingTokens.isNotEmpty()) {
@@ -299,7 +333,12 @@ object XmlUtils {
       logger.trace { "next token = $nextToken"  }
       if (nextToken is PathToken.Field && nextToken.name.startsWith('@')) {
         val attributeName = nextToken.name.drop(1)
-        val attribute = element.attributes.getNamedItem(attributeName)
+        val attribute = if (attributeName.startsWith("{")) {
+          val nsEnd = attributeName.indexOf('}')
+          element.attributes.getNamedItemNS(attributeName.substring(1, nsEnd), attributeName.substring(nsEnd + 1))
+        } else {
+          element.attributes.getNamedItem(attributeName)
+        }
         if (attribute != null) {
           logger.trace { "Field name matches element attribute [$attributeName]" }
           parentNode.addChild(nextToken.name)
@@ -308,7 +347,7 @@ object XmlUtils {
     }
   }
 
-  val PATH_RE = Regex("(\\w+)\\[(\\d+)]")
+  val PATH_RE = Regex("([\\w:.-]+)\\[(\\d+)]")
 
   /** Returns the matching node from the XML for the given path. */
   fun resolveMatchingNode(element: Element, path: String): XmlResult? {
@@ -345,7 +384,13 @@ object XmlUtils {
     val firstPart = paths.firstOrNull()
     return if (firstPart != null) {
       if (firstPart.startsWith('@')) {
-        val attribute = element.attributes.getNamedItem(firstPart.drop(1))
+        val attributeName = firstPart.drop(1)
+        val attribute = if (attributeName.startsWith("{")) {
+          val nsEnd = attributeName.indexOf('}')
+          element.attributes.getNamedItemNS(attributeName.substring(1, nsEnd), attributeName.substring(nsEnd + 1))
+        } else {
+          element.attributes.getNamedItem(attributeName)
+        }
         if (attribute != null) {
           XmlResult.Attribute(attribute.nodeName, attribute.nodeValue)
         } else {
