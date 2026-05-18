@@ -356,7 +356,7 @@ class ExecutionPlanInterpreter(
     return node.copy(result = NodeResult.VALUE(result), children = children.toMutableList())
   }
 
-  @Suppress("ReturnCount")
+  @Suppress("ReturnCount", "CyclomaticComplexMethod")
   private fun executeMatch(
     action: String,
     matcher: String,
@@ -425,6 +425,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("CyclomaticComplexMethod")
   private fun executeMatchValues(
     valueResolver: ValueResolver,
     node: ExecutionPlanNode,
@@ -465,6 +466,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("CyclomaticComplexMethod")
   private fun executeMatchEachKey(
     valueResolver: ValueResolver,
     node: ExecutionPlanNode,
@@ -500,7 +502,8 @@ class ExecutionPlanInterpreter(
 
         val actualObject = (actualValue as? NodeValue.JSON)?.json as? JsonValue.Object
         if (actualObject == null) {
-          return node.copy(result = NodeResult.ERROR("Was expecting a JSON Object but got a ${actualValue.valueType()}"),
+          return node.copy(
+            result = NodeResult.ERROR("Was expecting a JSON Object but got a ${actualValue.valueType()}"),
             children = children)
         }
 
@@ -508,7 +511,8 @@ class ExecutionPlanInterpreter(
         var hasError = false
         for (key in actualObject.entries.keys) {
           for (rule in innerRules) {
-            val mismatch = NodeValue.doMatch(NodeValue.STRING(""), NodeValue.STRING(key), rule, false, actionPath, context)
+            val mismatch = NodeValue.doMatch(NodeValue.STRING(""), NodeValue.STRING(key),
+              rule, false, actionPath, context)
             if (mismatch != null) {
               hasError = true
               children.add(ExecutionPlanNode.action("each-key:$key").copy(result = NodeResult.ERROR(mismatch)))
@@ -522,6 +526,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
+  @Suppress("CyclomaticComplexMethod")
   private fun executeMatchEachValue(
     valueResolver: ValueResolver,
     node: ExecutionPlanNode,
@@ -566,11 +571,13 @@ class ExecutionPlanInterpreter(
           is NodeValue.JSON -> when (val json = actualValue.json) {
             is JsonValue.Array -> json.values.map { NodeValue.JSON(it) }
             is JsonValue.Object -> json.entries.values.map { NodeValue.JSON(it) }
-            else -> return node.copy(result = NodeResult.ERROR("Was expecting a JSON Array or Object but got a ${json.type()}"),
+            else -> return node.copy(
+              result = NodeResult.ERROR("Was expecting a JSON Array or Object but got a ${json.type()}"),
               children = children)
           }
           is NodeValue.SLIST -> actualValue.items.map { NodeValue.STRING(it) }
-          else -> return node.copy(result = NodeResult.ERROR("Was expecting a JSON value or String List but got a ${actualValue.valueType()}"),
+          else -> return node.copy(
+            result = NodeResult.ERROR("Was expecting a JSON value or String List but got a ${actualValue.valueType()}"),
             children = children)
         }
 
@@ -958,7 +965,7 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  @Suppress("CyclomaticComplexMethod")
+  @Suppress("CyclomaticComplexMethod", "LongMethod")
   private fun executeJsonExpectEmpty(
     action: String,
     valueResolver: ValueResolver,
