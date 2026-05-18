@@ -153,7 +153,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
       rootNode.add(
         buildMatchingRuleNode(
           ExecutionPlanNode.valueNode(expectedJson),
-          ExecutionPlanNode.resolveCurrentValue(path), matchers, true
+          ExecutionPlanNode.resolveCurrentValue(path), matchers, !matchers.cascaded
         )
       )
 

@@ -324,6 +324,11 @@ object V2MatchingEngine: MatchingEngine {
           presenceCheck.add(itemCheck)
         }
 
+        presenceCheck.add(
+          ExecutionPlanNode.action("error")
+            .add(ExecutionPlanNode.valueNode("Expected header '$key' but was missing"))
+        )
+
         itemNode.add(presenceCheck)
         planNode.add(itemNode)
       }

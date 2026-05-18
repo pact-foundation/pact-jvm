@@ -244,6 +244,7 @@ class ExecutionPlanInterpreter(
         "" -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
         "each-key" -> executeMatchEachKey(valueResolver, node, actionPath)
         "each-value" -> executeMatchEachValue(valueResolver, node, actionPath)
+        "values" -> executeMatchValues(valueResolver, node, actionPath)
         else -> executeMatch(action, matcher, valueResolver, node, actionPath)
       }
     } else {
@@ -390,12 +391,16 @@ class ExecutionPlanInterpreter(
             } else {
               val errorNode = optional.firstOrNull()
               if (errorNode != null) {
-                pushResult(NodeResult.ERROR(matchResult))
+                pushResult(NodeResult.VALUE(NodeValue.STRING(matchResult)))
 
                 val errorNodeResult = walkTree(actionPath, errorNode, valueResolver)
-                val message = errorNodeResult.value()?.asString()
+                val nodeResultValue = errorNodeResult.value()
+                val message = when (nodeResultValue) {
+                  is NodeResult.ERROR -> nodeResultValue.message
+                  else -> nodeResultValue?.asString() ?: ""
+                }
                 return if (message.isNotEmpty()) {
-                  node.copy(result = NodeResult.ERROR(message!!),
+                  node.copy(result = NodeResult.ERROR(message),
                     children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
                 } else {
                   // There was an error generating the optional message, so just return the original error
@@ -412,6 +417,46 @@ class ExecutionPlanInterpreter(
         }
       }
       is Result.Err -> return node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeMatchValues(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(3, 0, node, "match:values", valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, _) = result.value
+        val expectedNode = args[0]
+        val actualNode = args[1]
+        val children = args.toMutableList()
+
+        val expectedValue = expectedNode.value().orDefault().asValue()
+        val actualValue = actualNode.value().orDefault().asValue()
+
+        val ok = when {
+          expectedValue is NodeValue.JSON && actualValue is NodeValue.JSON &&
+            expectedValue.json is JsonValue.Object && actualValue.json is JsonValue.Object -> true
+          expectedValue is NodeValue.JSON && actualValue is NodeValue.JSON &&
+            expectedValue.json is JsonValue.Array && actualValue.json is JsonValue.Array -> true
+          expectedValue is NodeValue.MMAP && actualValue is NodeValue.MMAP -> true
+          expectedValue == NodeValue.NULL || actualValue == NodeValue.NULL -> true
+          else -> false
+        }
+
+        if (ok) {
+          node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)), children = children)
+        } else {
+          node.copy(
+            result = NodeResult.ERROR(
+              "Expected type ${expectedValue?.valueType()} but was ${actualValue?.valueType()}"
+            ),
+            children = children
+          )
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
     }
   }
 

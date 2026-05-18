@@ -132,12 +132,6 @@ open class ExecutionPlan(
         }
         acc
       }
-      val errors = headerNode.childErrors(Terminator.CONTAINERS)
-      if (errors.isNotEmpty()) {
-        val additionalMismatches = errors
-          .map { HeaderMismatch("", "", "", it) }
-        mismatches[""] = additionalMismatches
-      }
       mismatches.map {
         HeaderMatchResult(it.key, it.value)
       }
@@ -212,12 +206,6 @@ open class ExecutionPlan(
           }
         }
         acc
-      }
-      val errors = headerNode.childErrors(Terminator.CONTAINERS)
-      if (errors.isNotEmpty()) {
-        val additionalMismatches = errors
-          .map { HeaderMismatch("", "", "", it) }
-        mismatches[""] = additionalMismatches
       }
       mismatches.map {
         HeaderMatchResult(it.key, it.value)
