@@ -485,7 +485,7 @@ data class RegexMatcher @JvmOverloads constructor (val regex: String, val exampl
 
   override fun generateDescription(forCollection: Boolean) = "must match the regular expression /${regex}/"
 
-  override fun canMatch(contentType: ContentType) = true
+  override fun canMatch(contentType: ContentType) = false
 
   override val name: String
     get() = "regex"
