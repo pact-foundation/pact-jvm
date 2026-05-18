@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.Into
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.XmlUtils.groupChildren
+import au.com.dius.pact.core.model.XmlUtils.groupChildrenNS
 import au.com.dius.pact.core.model.XmlUtils.parse
 import au.com.dius.pact.core.support.getOr
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -97,10 +98,18 @@ object XMLPlanBuilder: PlanBodyBuilder  {
   ) {
     val attributes = (0..<element.attributes.length)
       .map { element.attributes.item(it) }
-    val keys = attributes.map { it.nodeName }.sorted()
+      .filter { !it.nodeName.startsWith("xmlns") }
+    val keys = attributes.map { attr ->
+      if (attr.namespaceURI != null) "{${attr.namespaceURI}}${attr.localName}" else attr.nodeName
+    }.sorted()
     for (key in keys) {
       val p = path.pushField("@${key}")
-      val value = element.attributes.getNamedItem(key)
+      val value = if (key.startsWith("{")) {
+        val nsEnd = key.indexOf('}')
+        element.attributes.getNamedItemNS(key.substring(1, nsEnd), key.substring(nsEnd + 1))
+      } else {
+        element.attributes.getNamedItem(key)
+      }
       val itemNode = ExecutionPlanNode.container(p.toString())
 
       val presenceCheck = ExecutionPlanNode.action("if")
@@ -170,7 +179,7 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     element: Node,
     parentNode: ExecutionPlanNode
   ) {
-    val children = groupChildren(element)
+    val children = groupChildrenNS(element)
     val noIndices = dropIndices(path)
     val matchers = context.selectBestMatcher(path)
       .andRules(context.selectBestMatcher(noIndices))
@@ -261,7 +270,8 @@ object XMLPlanBuilder: PlanBodyBuilder  {
     val p = path.join("#text")
     val noMarkers = p.dropMarkers()
     val noIndices = dropIndices(noMarkers)
-    val matchers = context.selectBestMatcher(noMarkers, noIndices)
+    val matchers = context.selectBestMatcher(noMarkers)
+      .andRules(context.selectBestMatcher(noIndices))
       .removeDuplicates()
     if (!matchers.typeMatcherDefined()) {
       if (matchers.isNotEmpty()) {
