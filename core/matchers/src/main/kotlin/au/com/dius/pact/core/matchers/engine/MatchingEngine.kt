@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.MULTI_VALUE_HEADERS
 import au.com.dius.pact.core.model.PARAMETERISED_HEADERS
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Utils.lookupEnvironmentValue
@@ -422,8 +423,9 @@ object V2MatchingEngine: MatchingEngine {
       expected.body.isPresent() -> {
         val contentType = expected.determineContentType()
         val rootMatcher = expected.matchingRules.rulesForCategory("body").matchingRules["$"]
-        if (rootMatcher != null && rootMatcher.canMatch(contentType)) {
-          val actualBodyNode = if (contentType.isText()) {
+        val isTextRegex = rootMatcher != null && rootMatcher.rules.any { it is RegexMatcher } && contentType.isText()
+        if (rootMatcher != null && (rootMatcher.canMatch(contentType) || isTextRegex)) {
+          val actualBodyNode = if (isTextRegex) {
             ExecutionPlanNode.action("convert:UTF8").add(ExecutionPlanNode.resolveValue(DocPath("$.body")))
           } else {
             ExecutionPlanNode.resolveValue(DocPath("$.body"))
@@ -502,10 +504,16 @@ object V2MatchingEngine: MatchingEngine {
       expected.contents.isPresent() -> {
         val contentType = expected.getContentType()
         val rootMatcher = expected.matchingRules.rulesForCategory("content").matchingRules["$"]
-        if (rootMatcher != null && rootMatcher.canMatch(contentType)) {
+        val isTextRegex = rootMatcher != null && rootMatcher.rules.any { it is RegexMatcher } && contentType.isText()
+        if (rootMatcher != null && (rootMatcher.canMatch(contentType) || isTextRegex)) {
+          val actualBodyNode = if (isTextRegex) {
+            ExecutionPlanNode.action("convert:UTF8").add(ExecutionPlanNode.resolveValue(DocPath("$.body")))
+          } else {
+            ExecutionPlanNode.resolveValue(DocPath("$.body"))
+          }
           planNode.add(buildMatchingRuleNode(
             ExecutionPlanNode.valueNode(NodeValue.NULL),
-            ExecutionPlanNode.resolveValue(DocPath("$.body")),
+            actualBodyNode,
             rootMatcher,
             true
           ))
