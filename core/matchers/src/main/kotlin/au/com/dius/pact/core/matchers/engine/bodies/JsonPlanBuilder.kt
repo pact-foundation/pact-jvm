@@ -177,8 +177,8 @@ object JsonPlanBuilder: PlanBodyBuilder  {
                 ExecutionPlanNode.action("check:exists")
                   .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
               )
-            if (context.matcherIsDefined(itemPath)) {
-              val matchers = context.selectBestMatcher(itemPath)
+            if (context.matcherIsDefined(itemPath.dropMarkers())) {
+              val matchers = context.selectBestMatcher(itemPath.dropMarkers())
               presenceCheck.add(ExecutionPlanNode.annotation(Into { "[*] ${matchers.generateDescription(false)}" }))
               presenceCheck.add(
                 buildMatchingRuleNode(
