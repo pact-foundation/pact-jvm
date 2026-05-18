@@ -7,6 +7,7 @@ import au.com.dius.pact.core.matchers.engine.NodeValue.Companion.escape
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
 import au.com.dius.pact.core.matchers.engine.PlanNodeType
 import au.com.dius.pact.core.matchers.engine.XmlValue
+import au.com.dius.pact.core.matchers.engine.bodies.parseFormUrlencoded
 import au.com.dius.pact.core.matchers.engine.orDefault
 import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.model.DocPath
@@ -21,8 +22,11 @@ import au.com.dius.pact.core.model.XmlUtils.parse
 import au.com.dius.pact.core.model.XmlUtils.renderXml
 import au.com.dius.pact.core.model.XmlUtils.resolveMatchingNode
 import au.com.dius.pact.core.model.XmlUtils.resolvePath
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
+import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.json.JsonParser
@@ -238,6 +242,8 @@ class ExecutionPlanInterpreter(
     val result = if (action.startsWith("match:")) {
       when (val matcher = action.removePrefix("match:")) {
         "" -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
+        "each-key" -> executeMatchEachKey(valueResolver, node, actionPath)
+        "each-value" -> executeMatchEachValue(valueResolver, node, actionPath)
         else -> executeMatch(action, matcher, valueResolver, node, actionPath)
       }
     } else {
@@ -255,6 +261,7 @@ class ExecutionPlanInterpreter(
         "tee" -> executeTee(valueResolver, node, actionPath)
         "apply" -> executeApply(node)
         "json:parse" -> executeJsonParse(action, valueResolver, node, actionPath)
+        "form:parse" -> executeFormParse(action, valueResolver, node, actionPath)
         "xml:parse" -> executeXmlParse(action, valueResolver, node, actionPath)
         "xml:value" -> executeXmlValue(action, valueResolver, node, actionPath)
         "xml:attributes" -> executeXmlAttributes(action, valueResolver, node, actionPath)
@@ -405,6 +412,132 @@ class ExecutionPlanInterpreter(
         }
       }
       is Result.Err -> return node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeMatchEachKey(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(3, 1, node, "match:each-key", valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, optional) = result.value
+        val actualNode = args[1]
+        val matcherParamsNode = args[2]
+        val children = (args + optional).toMutableList()
+
+        val actualValue = when (val v = actualNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+        val matcherParams = when (val v = matcherParamsNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value.asJson().orNull()
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+
+        val matcher = when (val matchResult = handleWith<MatchingRule> {
+          MatchingRule.create("each-key", matcherParams ?: JsonValue.Object())
+        }) {
+          is Result.Ok -> matchResult.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(matchResult.error.message!!), children = children)
+        }
+
+        if (matcher !is EachKeyMatcher) {
+          return node.copy(result = NodeResult.ERROR("Matcher 'each-key' did not produce an EachKeyMatcher"),
+            children = children)
+        }
+
+        val actualObject = (actualValue as? NodeValue.JSON)?.json as? JsonValue.Object
+        if (actualObject == null) {
+          return node.copy(result = NodeResult.ERROR("Was expecting a JSON Object but got a ${actualValue.valueType()}"),
+            children = children)
+        }
+
+        val innerRules = unwrapRules(matcher.definition.rules)
+        var hasError = false
+        for (key in actualObject.entries.keys) {
+          for (rule in innerRules) {
+            val mismatch = NodeValue.doMatch(NodeValue.STRING(""), NodeValue.STRING(key), rule, false, actionPath, context)
+            if (mismatch != null) {
+              hasError = true
+              children.add(ExecutionPlanNode.action("each-key:$key").copy(result = NodeResult.ERROR(mismatch)))
+            }
+          }
+        }
+
+        node.copy(result = NodeResult.VALUE(NodeValue.BOOL(!hasError)), children = children)
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  private fun executeMatchEachValue(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(3, 1, node, "match:each-value", valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, optional) = result.value
+        val expectedNode = args[0]
+        val actualNode = args[1]
+        val matcherParamsNode = args[2]
+        val children = (args + optional).toMutableList()
+
+        val expectedValue = when (val v = expectedNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+        val actualValue = when (val v = actualNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+        val matcherParams = when (val v = matcherParamsNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value.asJson().orNull()
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+
+        val matcher = when (val matchResult = handleWith<MatchingRule> {
+          MatchingRule.create("each-value", matcherParams ?: JsonValue.Object())
+        }) {
+          is Result.Ok -> matchResult.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(matchResult.error.message!!), children = children)
+        }
+
+        if (matcher !is EachValueMatcher) {
+          return node.copy(result = NodeResult.ERROR("Matcher 'each-value' did not produce an EachValueMatcher"),
+            children = children)
+        }
+
+        val innerRules = unwrapRules(matcher.definition.rules)
+        val expectedItem = resolveEachValueTemplate(expectedValue)
+        val items = when (actualValue) {
+          is NodeValue.JSON -> when (val json = actualValue.json) {
+            is JsonValue.Array -> json.values.map { NodeValue.JSON(it) }
+            is JsonValue.Object -> json.entries.values.map { NodeValue.JSON(it) }
+            else -> return node.copy(result = NodeResult.ERROR("Was expecting a JSON Array or Object but got a ${json.type()}"),
+              children = children)
+          }
+          is NodeValue.SLIST -> actualValue.items.map { NodeValue.STRING(it) }
+          else -> return node.copy(result = NodeResult.ERROR("Was expecting a JSON value or String List but got a ${actualValue.valueType()}"),
+            children = children)
+        }
+
+        var hasError = false
+        items.forEachIndexed { index, item ->
+          for (rule in innerRules) {
+            val mismatch = NodeValue.doMatch(expectedItem, item, rule, false, actionPath, context)
+            if (mismatch != null) {
+              hasError = true
+              children.add(ExecutionPlanNode.action("each-value:$index").copy(result = NodeResult.ERROR(mismatch)))
+            }
+          }
+        }
+
+        node.copy(result = NodeResult.VALUE(NodeValue.BOOL(!hasError)), children = children)
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
     }
   }
 
@@ -692,6 +825,32 @@ class ExecutionPlanInterpreter(
           is Result.Err -> node.copy(result = NodeResult.ERROR(result.error),
             children = mutableListOf(resultNode.value))
         }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeFormParse(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.BARRAY -> NodeResult.VALUE(NodeValue.MMAP(parseFormUrlencoded(argValue.bytes)))
+            NodeValue.NULL -> NodeResult.VALUE(NodeValue.NULL)
+            is NodeValue.STRING -> NodeResult.VALUE(NodeValue.MMAP(parseFormUrlencoded(argValue.string)))
+            else -> NodeResult.ERROR("form:parse can not be used with ${argValue.valueType()}")
+          }
+        } else {
+          NodeResult.VALUE(NodeValue.NULL)
+        }
+
+        node.copy(result = result, children = mutableListOf(resultNode.value))
       }
       is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
     }
@@ -1561,6 +1720,24 @@ class ExecutionPlanInterpreter(
           }
         }
 
+        is NodeValue.MMAP -> {
+          if (path.isRoot()) {
+            Result.Ok(result.value)
+          } else {
+            val field = path.firstField()
+            if (field != null) {
+              val values = result.value.entries[field]
+              when {
+                values == null -> Result.Ok(NodeValue.NULL)
+                values.size == 1 -> Result.Ok(NodeValue.STRING(values[0]))
+                else -> Result.Ok(NodeValue.SLIST(values))
+              }
+            } else {
+              Result.Err("Can not resolve '$path' from a map value")
+            }
+          }
+        }
+
         else -> Result.Err("Can not resolve '$path', current stack value does not contain a value that is " +
           "resolvable (${result.value})")
       }
@@ -1786,6 +1963,28 @@ class ExecutionPlanInterpreter(
           else -> listOf(it)
         }
       })
+    }
+  }
+
+  private fun unwrapRules(rules: List<Either<MatchingRule, *>>): List<MatchingRule> {
+    return rules.mapNotNull {
+      when (it) {
+        is Either.A -> it.value
+        else -> null
+      }
+    }
+  }
+
+  private fun resolveEachValueTemplate(expectedValue: NodeValue): NodeValue {
+    return when (expectedValue) {
+      is NodeValue.JSON -> when (val json = expectedValue.json) {
+        is JsonValue.Array -> json.values.firstOrNull()?.let { NodeValue.JSON(it) } ?: NodeValue.NULL
+        is JsonValue.Object -> json.entries.values.firstOrNull()?.let { NodeValue.JSON(it) } ?: NodeValue.NULL
+        else -> expectedValue
+      }
+      is NodeValue.LIST -> expectedValue.items.firstOrNull() ?: NodeValue.NULL
+      is NodeValue.SLIST -> expectedValue.items.firstOrNull()?.let { NodeValue.STRING(it) } ?: NodeValue.NULL
+      else -> expectedValue
     }
   }
 }

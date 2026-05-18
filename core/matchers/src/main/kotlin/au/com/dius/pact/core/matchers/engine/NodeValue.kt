@@ -367,7 +367,15 @@ sealed class NodeValue: Into<NodeValue> {
             null
           }
         }
-        is MMAP -> TODO()
+        is MMAP -> {
+          val result = domatch(matcher, actionPath, expected.entries, actual.unwrap(),
+            BodyMismatchFactory, cascaded, context.matchingContext)
+          if (result.isNotEmpty()) {
+            result.joinToString(", ") { it.mismatch }
+          } else {
+            null
+          }
+        }
         is SLIST -> {
           val items = when (actual) {
             is LIST -> actual.items.map { it.unwrap() }
