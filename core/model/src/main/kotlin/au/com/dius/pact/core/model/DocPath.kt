@@ -8,13 +8,23 @@ private val logger = KotlinLogging.logger {}
 @Suppress("TooManyFunctions")
 data class DocPath(
   val pathTokens: List<PathToken>,
-  val expr: String
+  private var e: String?
 ): Into<DocPath> {
   /** Construct a new document path from the provided string path */
   constructor(expression: String): this(parsePath(expression), expression)
 
   /** Construct a new DocPath from a list of tokens */
-  constructor(tokens: List<PathToken>): this(tokens, buildExpr(tokens))
+  constructor(tokens: List<PathToken>): this(tokens, null)
+
+  val expr: String by lazy {
+    if (this.e == null) {
+      val exp = buildExpr(this.pathTokens)
+      this.e = exp
+      exp
+    } else {
+      this.e!!
+    }
+  }
 
   override fun into() = this.copy()
 
