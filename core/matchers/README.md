@@ -7,6 +7,8 @@ This library implements the core matching logic required for matching HTTP reque
 [V3 pact specification](https://github.com/pact-foundation/pact-specification/tree/version-3) and
 [V4 pact specification](https://github.com/pact-foundation/pact-specification/tree/version-4).
 
+For the V2 matching engine benchmark and profiling workflow, see [BENCHMARKING.md](BENCHMARKING.md).
+
 ## Matching request and response parts
 
 V3 specification matching is supported for both JSON and XML bodies, headers, query strings and request paths.
