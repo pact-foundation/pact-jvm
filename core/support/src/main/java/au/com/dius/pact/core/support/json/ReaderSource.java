@@ -7,50 +7,61 @@ import java.io.Reader;
  * JSON source from a Reader
  */
 public class ReaderSource extends JsonSource {
-  private Reader reader;
-  private int buffer = EOF;
-  private boolean hasBuffer = false;
+  private static final int BUFFER_SIZE = 8192;
+
+  private final Reader reader;
+  private final char[] buffer = new char[BUFFER_SIZE];
+  private int bufferIndex = 0;
+  private int bufferLimit = 0;
+  private boolean endOfInput = false;
 
   public ReaderSource(Reader reader) {
     this.reader = reader;
   }
 
   public int nextChar() {
-    int next;
-    if (hasBuffer) {
-      next = buffer;
-      hasBuffer = false;
-      buffer = EOF;
-    } else {
-      next = readNextChar();
+    if (!ensureAvailable()) {
+      return EOF;
     }
 
-    if (next != EOF) {
-      updatePosition(next);
-    }
-
+    int next = buffer[bufferIndex++];
+    updatePosition(next);
     return next;
   }
 
   public int peekNextChar() {
-    if (!hasBuffer) {
-      buffer = readNextChar();
-      hasBuffer = true;
+    if (!ensureAvailable()) {
+      return EOF;
     }
-    return buffer;
+    return buffer[bufferIndex];
   }
 
   public void advance(int count) {
     for (int i = 0; i < count; i++) {
-      if (nextChar() == EOF) {
+      if (!ensureAvailable()) {
         return;
       }
+      updatePosition(buffer[bufferIndex++]);
     }
   }
 
-  private int readNextChar() {
+  private boolean ensureAvailable() {
+    if (bufferIndex < bufferLimit) {
+      return true;
+    }
+    if (endOfInput) {
+      return false;
+    }
+
     try {
-      return reader.read();
+      bufferLimit = reader.read(buffer, 0, buffer.length);
+      bufferIndex = 0;
+      if (bufferLimit == -1) {
+        endOfInput = true;
+        bufferLimit = 0;
+        return false;
+      }
+      return true;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
