@@ -1,9 +1,18 @@
 plugins {
     id 'au.com.dius.pact.kotlin-library-conventions'
+    id 'me.champeau.jmh' version '0.7.3'
 }
 
 description = 'Pact-JVM Support module with common utilities'
 group = 'au.com.dius.pact.core'
+
+def benchmarkLogbackConfig = file('src/jmh/resources/logback-benchmark.xml').absolutePath
+def benchmarkJvmArgs = [
+    '-Dpact_do_not_track=true',
+    '-Xms512m',
+    '-Xmx1g',
+    "-Dlogback.configurationFile=${benchmarkLogbackConfig}"
+]
 
 dependencies {
     api 'io.github.oshai:kotlin-logging-jvm'
@@ -17,4 +26,69 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest'
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'junit:junit'
+}
+
+jmh {
+    warmupIterations = 3
+    iterations = 5
+    fork = 1
+    warmup = '1s'
+    timeOnIteration = '1s'
+    jvmArgsAppend = benchmarkJvmArgs
+}
+
+tasks.register('jmhJfr', Exec) {
+    dependsOn tasks.named('jmhJar')
+    group = 'benchmarking'
+    description = 'Runs the JMH benchmark jar with Java Flight Recorder enabled'
+
+    doFirst {
+        def benchmark = providers.gradleProperty('jmhBenchmark')
+            .orElse('au.com.dius.pact.core.support.json.JsonParserBenchmark.parseString')
+            .get()
+        def payloadType = providers.gradleProperty('jmhPayloadType').orElse('http-pact').get()
+        def itemCount = providers.gradleProperty('jmhItemCount').orElse('50').get()
+        def warmupIterations = providers.gradleProperty('jmhWarmupIterations').orElse('3').get()
+        def measurementIterations = providers.gradleProperty('jmhMeasurementIterations').orElse('5').get()
+        def forks = providers.gradleProperty('jmhForks').orElse('1').get()
+        def iterationTime = providers.gradleProperty('jmhIterationTime').orElse('1s').get()
+        def jfrSettings = providers.gradleProperty('jfrSettings').orElse('profile').get()
+        def safeBenchmark = benchmark.replaceAll('[^A-Za-z0-9._-]', '_')
+        def safePayloadType = payloadType.replaceAll('[^A-Za-z0-9._-]', '_')
+        def defaultJfrFile = layout.buildDirectory.file("jfr/${safeBenchmark}-${safePayloadType}-${itemCount}.jfr")
+            .get()
+            .asFile
+            .absolutePath
+        def configuredJfrFile = providers.gradleProperty('jfrFile').orElse(defaultJfrFile).get()
+        def configuredJfrPath = new File(configuredJfrFile)
+        def jfrFile = configuredJfrPath.isAbsolute()
+            ? configuredJfrPath.absolutePath
+            : new File(rootProject.rootDir, configuredJfrFile).absolutePath
+        def jmhJarFile = tasks.named('jmhJar').get().archiveFile.get().asFile
+        def javaExecutable = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(17)
+        }.get().executablePath.asFile.absolutePath
+        def forkJvmArgs = (benchmarkJvmArgs + [
+            "-XX:StartFlightRecording=filename=${jfrFile},settings=${jfrSettings},dumponexit=true"
+        ]).join(' ')
+
+        file(jfrFile).parentFile.mkdirs()
+
+        commandLine(
+            javaExecutable,
+            '-jar',
+            jmhJarFile.absolutePath,
+            benchmark,
+            '-p', "payloadType=${payloadType}",
+            '-p', "itemCount=${itemCount}",
+            '-wi', warmupIterations,
+            '-i', measurementIterations,
+            '-r', iterationTime,
+            '-w', iterationTime,
+            '-f', forks,
+            '-jvmArgsAppend', forkJvmArgs
+        )
+
+        println "Writing JFR recording to ${jfrFile}"
+    }
 }

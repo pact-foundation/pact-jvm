@@ -8,71 +8,49 @@ import java.io.Reader;
  */
 public class ReaderSource extends JsonSource {
   private Reader reader;
-  private Character buffer = null;
+  private int buffer = EOF;
+  private boolean hasBuffer = false;
 
   public ReaderSource(Reader reader) {
     this.reader = reader;
   }
 
-  public Character nextChar() {
-    if (buffer != null) {
-      Character c = buffer;
-      buffer = null;
-      return c;
+  public int nextChar() {
+    int next;
+    if (hasBuffer) {
+      next = buffer;
+      hasBuffer = false;
+      buffer = EOF;
     } else {
-      int next = 0;
-      try {
-        next = reader.read();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      if (next == -1) {
-        return null;
-      } else {
-        if (next == '\n') {
-          character = 0;
-          line++;
-        } else {
-          character++;
-        }
-        return (char) next;
-      }
+      next = readNextChar();
     }
+
+    if (next != EOF) {
+      updatePosition(next);
+    }
+
+    return next;
   }
 
-  public Character peekNextChar() {
-    if (buffer == null) {
-      int next = 0;
-      try {
-        next = reader.read();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      if (next == -1) {
-        buffer = null;
-      } else {
-        buffer = (char) next;
-      }
+  public int peekNextChar() {
+    if (!hasBuffer) {
+      buffer = readNextChar();
+      hasBuffer = true;
     }
     return buffer;
   }
 
   public void advance(int count) {
-    int charsToSkip = count;
-    if (buffer != null) {
-      buffer = null;
-      charsToSkip = count - 1;
-    }
-    try {
-      for (int i = 0; i < charsToSkip; i++) {
-        int next = reader.read();
-        if (next == '\n') {
-          character = 0;
-          line++;
-        } else {
-          character++;
-        }
+    for (int i = 0; i < count; i++) {
+      if (nextChar() == EOF) {
+        return;
       }
+    }
+  }
+
+  private int readNextChar() {
+    try {
+      return reader.read();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
