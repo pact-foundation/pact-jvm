@@ -11,6 +11,24 @@ import java.util.function.IntPredicate;
 public class BaseJsonLexer {
   protected JsonSource json;
 
+  private static final class ScannedString {
+    private final char[] buffer;
+    private final int length;
+
+    private ScannedString(char[] buffer, int length) {
+      this.buffer = buffer;
+      this.length = length;
+    }
+
+    private char[] toCharArray() {
+      return length == buffer.length ? buffer : Arrays.copyOf(buffer, length);
+    }
+
+    private String toStringValue() {
+      return new String(buffer, 0, length);
+    }
+  }
+
   public BaseJsonLexer(JsonSource json) {
     this.json = json;
   }
@@ -24,6 +42,22 @@ public class BaseJsonLexer {
   }
 
   protected Result<JsonToken.StringValue, JsonException> scanString() {
+    try {
+      return new Result.Ok(new JsonToken.StringValue(scanStringValue().toCharArray()));
+    } catch (JsonException e) {
+      return new Result.Err(e);
+    }
+  }
+
+  protected Result<String, JsonException> scanKeyString() {
+    try {
+      return new Result.Ok(scanStringValue().toStringValue());
+    } catch (JsonException e) {
+      return new Result.Err(e);
+    }
+  }
+
+  private ScannedString scanStringValue() {
     char[] buffer = new char[128];
     int index = 0;
     int next;
@@ -32,8 +66,8 @@ public class BaseJsonLexer {
       if (next == '\\') {
         int escapeCode = json.nextChar();
         if (escapeCode == JsonSource.EOF) {
-          return new Result.Err(new JsonException(String.format(
-            "Invalid JSON (%s), End of document scanning for string terminator", json.documentPointer())));
+          throw new JsonException(String.format(
+            "Invalid JSON (%s), End of document scanning for string terminator", json.documentPointer()));
         }
         switch (escapeCode) {
           case '"': if (index >= buffer.length) { buffer = allocate(buffer); }; buffer[index++] = '"'; break;
@@ -49,14 +83,14 @@ public class BaseJsonLexer {
             for (int i = 0; i < 4; i++) {
               int codePoint = json.nextChar();
               if (codePoint == JsonSource.EOF) {
-                return new Result.Err(new JsonException(String.format(
-                  "Invalid JSON (%s), Unicode characters require 4 hex digits", json.documentPointer())));
+                throw new JsonException(String.format(
+                  "Invalid JSON (%s), Unicode characters require 4 hex digits", json.documentPointer()));
               }
 
               int digit = hexValue(codePoint);
               if (digit == -1) {
-                return new Result.Err(new JsonException(String.format(
-                  "Invalid JSON (%s), '%c' is not a valid hex code character", json.documentPointer(), (char) codePoint)));
+                throw new JsonException(String.format(
+                  "Invalid JSON (%s), '%c' is not a valid hex code character", json.documentPointer(), (char) codePoint));
               }
 
               hex = (hex << 4) | digit;
@@ -64,17 +98,17 @@ public class BaseJsonLexer {
             if (index >= buffer.length) { buffer = allocate(buffer); }; buffer[index++] = (char) hex;
             break;
           }
-          default: return new Result.Err(new JsonException(String.format(
-            "Invalid JSON (%s), '%c' is not a valid escape code", json.documentPointer(), (char) escapeCode)));
+          default: throw new JsonException(String.format(
+            "Invalid JSON (%s), '%c' is not a valid escape code", json.documentPointer(), (char) escapeCode));
         }
       } else if (next == JsonSource.EOF) {
-        return new Result.Err(new JsonException(String.format("Invalid JSON (%s), End of document scanning for string terminator",
-          json.documentPointer())));
+        throw new JsonException(String.format("Invalid JSON (%s), End of document scanning for string terminator",
+          json.documentPointer()));
       } else if (next != '"') {
         if (index >= buffer.length) { buffer = allocate(buffer); }; buffer[index++] = (char) next;
       }
     } while (next != '"');
-    return new Result.Ok(new JsonToken.StringValue(Arrays.copyOf(buffer, index)));
+    return new ScannedString(buffer, index);
   }
 
   private char[] allocate(char[] buffer) {

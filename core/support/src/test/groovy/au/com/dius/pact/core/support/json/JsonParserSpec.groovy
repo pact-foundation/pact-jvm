@@ -63,6 +63,7 @@ class JsonParserSpec extends Specification {
     'empty array'                     | '[]'                     | new JsonValue.Array([])
     'empty string'                    | '""'                     | new JsonValue.StringValue(''.chars)
     'keys with special chars'         | '{"ä": "äbc"}'           | new JsonValue.Object(['ä': new JsonValue.StringValue('äbc'.chars)])
+    'keys with escapes'               | '{"a\\tb": "äbc"}'       | new JsonValue.Object(['a\tb': new JsonValue.StringValue('äbc'.chars)])
   }
 
   @SuppressWarnings('TrailingWhitespace')

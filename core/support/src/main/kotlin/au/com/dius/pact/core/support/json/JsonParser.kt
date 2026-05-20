@@ -56,6 +56,11 @@ sealed class JsonToken(val chars: CharArray) {
 
 @Suppress("ReturnCount")
 class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
+  sealed interface ObjectKeyToken {
+    data class Key(val value: String) : ObjectKeyToken
+    data object ObjectEnd : ObjectKeyToken
+  }
+
   fun nextToken(): Result<JsonToken?, JsonException> {
     val next = json.nextChar()
     if (next != JsonSource.EOF) {
@@ -79,6 +84,28 @@ class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
       }
     }
     return Result.Ok(null)
+  }
+
+  fun nextObjectKey(): Result<ObjectKeyToken?, JsonException> {
+    var next = json.nextChar()
+    while (next != JsonSource.EOF && next.toChar().isWhitespace()) {
+      next = json.nextChar()
+    }
+
+    return when (next) {
+      JsonSource.EOF -> Result.Ok(null)
+      '}'.code -> Result.Ok(ObjectKeyToken.ObjectEnd)
+      '"'.code -> when (val result = scanKeyString()) {
+        is Result.Ok -> Result.Ok(ObjectKeyToken.Key(result.value))
+        is Result.Err -> Result.Err(result.error)
+      }
+      else -> Result.Err(
+        JsonException(
+          "Invalid Json document (${documentPointer()}) - expected a string but found unexpected characters " +
+            "'${next.toChar()}'"
+        )
+      )
+    }
   }
 
   private fun unexpectedCharacter(next: Int) = if (next == JsonSource.EOF)
@@ -180,15 +207,17 @@ object JsonParser {
     var token: JsonToken?
 
     do {
-      token = nextTokenOrThrow(lexer)
-      if (token !is JsonToken.ObjectEnd) {
-        val key = when (token) {
+      val keyToken = when (val result = lexer.nextObjectKey()) {
+        is Result.Ok -> result.value
+        is Result.Err -> throw result.error
+      }
+      if (keyToken != JsonLexer.ObjectKeyToken.ObjectEnd) {
+        val key = when (keyToken) {
           null -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-          is JsonToken.StringValue -> String(token.chars)
-          else -> throw JsonException(
-            "Invalid Json document (${lexer.documentPointer()}) - expected a string but found unexpected characters " +
-              "'${token.chars}'")
+          is JsonLexer.ObjectKeyToken.Key -> keyToken.value
+          JsonLexer.ObjectKeyToken.ObjectEnd -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected end of object while parsing key")
         }
 
         token = nextTokenOrThrow(lexer)
@@ -223,6 +252,8 @@ object JsonParser {
             "Invalid Json document (${lexer.documentPointer()}) - Expecting ',' or '}' while parsing object, " +
               "found '${String(token.chars)}'")
         }
+      } else {
+        token = JsonToken.ObjectEnd
       }
     } while (token != null && token != JsonToken.ObjectEnd)
 
