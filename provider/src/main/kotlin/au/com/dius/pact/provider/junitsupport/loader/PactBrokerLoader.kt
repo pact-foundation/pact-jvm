@@ -378,6 +378,10 @@ open class PactBrokerLoader(
       }
     }
 
+    if (insecureTls) {
+      options = options + ("insecureTLS" to insecureTls)
+    }
+
     return PactBrokerClient(url.toString(), options.toMutableMap(), config)
   }
 
