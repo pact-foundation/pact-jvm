@@ -110,6 +110,11 @@ object HttpClient : KLogging() {
       else -> SystemDefaultCredentialsProvider()
     }
 
+    val pactVersion = Utils.lookupVersion(HttpClient::class.java).ifEmpty { "unknown" }
+    val httpClientVersion = CloseableHttpClient::class.java.`package`?.implementationVersion ?: "unknown"
+    val javaVersion = System.getProperty("java.version") ?: "unknown"
+    defaultHeaders["User-Agent"] = "pact-jvm/$pactVersion Apache-HttpClient/$httpClientVersion Java/$javaVersion"
+
     builder.setDefaultHeaders(defaultHeaders.map { BasicHeader(it.key, it.value) })
 
     if (insecureTLS) {
