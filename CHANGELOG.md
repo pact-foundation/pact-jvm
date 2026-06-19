@@ -1,5 +1,42 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.2 - Maintenance Release
+
+* 33a4e60f3 - chore: fix jreleaser config for Maven Central deployment (Ronald Holshausen, Fri Jun 19 13:31:02 2026 +1000)
+* ae628629d - chore: fix release script (Ronald Holshausen, Fri Jun 19 12:53:15 2026 +1000)
+* 05df59967 - chore: fix jrelease (Ronald Holshausen, Fri Jun 19 11:57:23 2026 +1000)
+* 07cadd67c - Fix deprecated GitHub Actions versions in compatibility-suite workflow (copilot-swe-agent[bot], Fri Jun 19 00:44:23 2026 +0000)
+* d32ab0b2a - Merge pull request #1920 from pact-foundation/copilot/fix-latest-jdk-failure (Ronald Holshausen, Fri Jun 19 10:35:50 2026 +1000)
+* a796b1c64 - fix: update deprecated GitHub Actions versions in gradle.yml (copilot-swe-agent[bot], Fri Jun 19 00:20:56 2026 +0000)
+* a2bf74ffc - Initial plan (copilot-swe-agent[bot], Fri Jun 19 00:19:24 2026 +0000)
+* a1ebba007 - chore: Remove 4.1.x from the supported versions (Ronald Holshausen, Fri Jun 19 10:08:07 2026 +1000)
+* 2926d7ff1 - chore: add pact-jvm user agent (JP-Ellis, Thu Jun 18 08:53:52 2026 +1000)
+* 34848ae9f - fix: include insecureTLS in options map so PactReader honours it when loading pacts (#1917) (Ronald Holshausen, Fri Jun 12 10:13:44 2026 +1000)
+* a5ea6c627 - chore: update Pact plugin driver to version supporting initial V2 plugins (Ronald Holshausen, Fri May 29 13:33:17 2026 +1000)
+* c7961c712 - Merge pull request #1914 from pact-foundation/v2-engine-perf (Ronald Holshausen, Wed May 20 14:01:55 2026 +1000)
+* f3aec4517 - chore: buffer JSON reader source (Ronald Holshausen, Wed May 20 10:51:22 2026 +1000)
+* 373756a30 - chore: optimize JSON parser object key parsing (Ronald Holshausen, Wed May 20 10:26:55 2026 +1000)
+* 3021c0e2a - chore: add JMH benchmarks for JSON parser (Ronald Holshausen, Wed May 20 10:09:17 2026 +1000)
+* 31d29cd86 - preformance(v2-engine): Make DocPath expr field lazy so it is not calculated in the constructor (Ronald Holshausen, Tue May 19 16:33:45 2026 +1000)
+* 127e22d83 - chore(matchers): Add JMH benchmark harness for the V2 matching engine (Ronald Holshausen, Tue May 19 12:57:01 2026 +1000)
+* 69148857f - chore: Fix static code violations (Ronald Holshausen, Tue May 19 09:17:56 2026 +1000)
+* 42d6d76cf - feat(v2-engine): Add multipart/form-data support to V2 matching engine (Ronald Holshausen, Mon May 18 17:44:59 2026 +1000)
+* e2ef70fe0 - fix(v2-engine): Port 4 V2 engine fixes from pact-reference Rust (Ronald Holshausen, Mon May 18 16:17:16 2026 +1000)
+* 5a5a4b33e - chore: Port V2 engine changes from Pact Rust (Ronald Holshausen, Mon May 18 14:57:53 2026 +1000)
+* 75b6fcc75 - fix(v2-engine): Fix regression where TypeMatcher at root level was incorrectly applied to text body (Ronald Holshausen, Mon May 18 12:56:08 2026 +1000)
+* ca2b86ee7 - fix(v2-engine): Fix remaining 7 XML spec test failures in V2 matching engine (Ronald Holshausen, Mon May 18 12:05:39 2026 +1000)
+* e1f2dbcab - fix(v2-engine): Fix spec test failures when running with the V2 matching engine (Ronald Holshausen, Mon May 18 11:22:18 2026 +1000)
+* 41bfe8350 - chore: Correct the spec tests to use a header that supports CSV form (Ronald Holshausen, Mon May 18 10:00:34 2026 +1000)
+* 92e5daa29 - chore: Update the CI pipeline to also run branches (Ronald Holshausen, Mon May 18 09:26:52 2026 +1000)
+* 5f9073cc2 - feat: Implement V2 matching engine for responses (Ronald Holshausen, Tue Apr 21 15:20:52 2026 +1000)
+* abab9608f - Merge pull request #1913 from PhilHardwick/fix/no-pacts-http-request-resolver (Ronald Holshausen, Mon May 18 09:40:53 2026 +1000)
+* c94006517 - chore: cleanup imports #1913 (Ronald Holshausen, Mon May 18 09:18:12 2026 +1000)
+* 19f75f502 - fix: support HttpRequest in no-pacts dummy template (phil.hardwick, Fri May 15 15:49:59 2026 +0100)
+* 9d59ad591 - chore(v2-engine): Only split headers where it is known that it is safe to do (Ronald Holshausen, Mon May 4 09:34:04 2026 +1000)
+* 0f9d53867 - chore(v2-matching-engine): Implement header:normalize-commas to make it consitent with the Rust V2 engine (Ronald Holshausen, Fri May 1 17:39:52 2026 +1000)
+* 2e72e5b83 - chore: Correct Gradle plugin jreleaser.yml (Ronald Holshausen, Thu Apr 30 11:39:51 2026 +1000)
+* 9b90069e1 - bump version to 4.7.2 (Ronald Holshausen, Thu Apr 30 11:34:58 2026 +1000)
+
 # 4.7.1 - Feature release
 
 * d38c2f13e - chore: add todo file to track things to do (Ronald Holshausen, Thu Apr 30 10:51:54 2026 +1000)
