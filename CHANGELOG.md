@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.5.14 - Maintenance Release
+
+* a5b3754ee - chore: fix for failing CI build (Ronald Holshausen, Tue Feb 17 10:37:54 2026 +1100)
+* 741e9f704 - chore: Update release process to use jreleaser (Ronald Holshausen, Tue Nov 11 10:30:48 2025 +1100)
+* 604bffc47 - chore: Fix CI build (Ronald Holshausen, Fri Jun 19 10:52:10 2026 +1000)
+* 3be78e646 - Merge pull request #1921 from pact-foundation/copilot/fix-github-actions-job-v1 (Ronald Holshausen, Fri Jun 19 10:50:27 2026 +1000)
+* f8037897c - Fix deprecated GitHub Actions versions in compatibility-suite workflow (copilot-swe-agent[bot], Fri Jun 19 00:44:23 2026 +0000)
+* 8301136f3 - chore: Fix CI build (Ronald Holshausen, Fri Jun 19 10:40:14 2026 +1000)
+* 1c877e18c - chore: Remove 4.1.x from the supported versions (Ronald Holshausen, Fri Jun 19 10:08:07 2026 +1000)
+* 061177066 - chore: add pact-jvm user agent (JP-Ellis, Thu Jun 18 08:53:52 2026 +1000)
+* cced876e7 - bump version to 4.5.14 (Ronald Holshausen, Wed Aug 28 11:21:17 2024 +1000)
+
 # 4.5.13 - Bugfix Release
 
 * c87dadeab - chore: Fix build after merge from master (Ronald Holshausen, Tue Aug 27 17:07:13 2024 +1000)
