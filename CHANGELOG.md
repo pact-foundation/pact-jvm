@@ -1,5 +1,18 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.6.21 - Maintenance Release
+
+* 71a590779 - chore: fix jreleaser config for Maven Central deployment (Ronald Holshausen, Fri Jun 19 13:31:02 2026 +1000)
+* 22c5ce324 - chore: fix release script (Ronald Holshausen, Fri Jun 19 12:53:15 2026 +1000)
+* 2bfc9cab9 - chore: fix jrelease (Ronald Holshausen, Fri Jun 19 11:57:23 2026 +1000)
+* 0d74d025f - Fix deprecated GitHub Actions versions in compatibility-suite workflow (copilot-swe-agent[bot], Fri Jun 19 00:44:23 2026 +0000)
+* d16a2f7b3 - chore: Fix CI build (Ronald Holshausen, Fri Jun 19 10:40:14 2026 +1000)
+* 28cfd65cd - chore: Remove 4.1.x from the supported versions (Ronald Holshausen, Fri Jun 19 10:08:07 2026 +1000)
+* 28943722c - chore: add pact-jvm user agent (JP-Ellis, Thu Jun 18 08:53:52 2026 +1000)
+* c2ffe0c55 - Merge pull request #1904 from kevinrvaz/docs/update_docs_for_docusaurus_update (Ronald Holshausen, Thu Apr 16 09:34:27 2026 +1000)
+* 6d4c19934 - docs: update docs for docusaurus upgrade (Kevin Rohan Vaz, Fri Mar 27 13:37:50 2026 +0530)
+* 50fc16748 - bump version to 4.6.21 (Ronald Holshausen, Wed Feb 18 09:48:20 2026 +1100)
+
 # 4.6.20 - Small Feature Release
 
 * 8253d47d5 - chore: correct typeo in readme (Ronald Holshausen, Tue Feb 17 16:38:31 2026 +1100)
