@@ -17,6 +17,11 @@ project:
       groupId: au.com.dius.pact.provider
       version: 17
 
+release:
+  github:
+    skipTag: true
+    skipRelease: true
+
 signing:
   active: ALWAYS
   armored: true
