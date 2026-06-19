@@ -92,7 +92,10 @@ class HeaderMatchingSpec extends Specification {
       |            'b' => 'b',
       |            $.headers['HEADER-X'] => 'b',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'HEADER-X\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -153,6 +156,9 @@ class HeaderMatchingSpec extends Specification {
       |            'b',
       |            $.headers['HEADER-X'],
       |            NULL
+      |          ),
+      |          %error (
+      |            'Expected header \\'HEADER-X\\' but was missing'
       |          )
       |        )
       |      ),
@@ -189,8 +195,11 @@ class HeaderMatchingSpec extends Specification {
       |            'b',
       |            $.headers['HEADER-X'],
       |            NULL
-      |          )
-      |        ) => BOOL(false)
+      |          ),
+      |          %error (
+      |            'Expected header \\'HEADER-X\\' but was missing' => 'Expected header \\'HEADER-X\\' but was missing'
+      |          ) => ERROR(Expected header 'HEADER-X' but was missing)
+      |        ) => ERROR(Expected header 'HEADER-X' but was missing)
       |      ) => BOOL(false),
       |      %expect:entries (
       |        %lower-case (
@@ -261,7 +270,10 @@ class HeaderMatchingSpec extends Specification {
       |            'b' => 'b',
       |            $.headers['HEADER-X'] => 'C',
       |            NULL => NULL
-      |          ) => ERROR(Expected 'C' \\(String\\) to be equal to 'b' \\(String\\))
+      |          ) => ERROR(Expected 'C' \\(String\\) to be equal to 'b' \\(String\\)),
+      |          %error (
+      |            'Expected header \\'HEADER-X\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (
@@ -326,7 +338,10 @@ class HeaderMatchingSpec extends Specification {
       |            'b' => 'b',
       |            $.headers['HEADER-X'] => 'b',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'HEADER-X\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -391,7 +406,10 @@ class HeaderMatchingSpec extends Specification {
       |            'b' => 'b',
       |            $.headers['HEADER-X'] => 'b',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'HEADER-X\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -470,8 +488,11 @@ class HeaderMatchingSpec extends Specification {
       |            'b',
       |            $.headers['HEADER-X'],
       |            NULL
-      |          )
-      |        ) => BOOL(false)
+      |          ),
+      |          %error (
+      |            'Expected header \\'HEADER-X\\' but was missing' => 'Expected header \\'HEADER-X\\' but was missing'
+      |          ) => ERROR(Expected header 'HEADER-X' but was missing)
+      |        ) => ERROR(Expected header 'HEADER-X' but was missing)
       |      ) => BOOL(false),
       |      %expect:entries (
       |        %lower-case (
@@ -564,7 +585,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -577,7 +601,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => '9023470945622',
       |            json:{"regex":"^[0-9]+$"} => json:{"regex":"^[0-9]+$"}
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -656,7 +683,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -669,7 +699,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => '9023470X945622',
       |            json:{"regex":"^[0-9]+$"} => json:{"regex":"^[0-9]+$"}
-      |          ) => ERROR(Expected '9023470X945622' to match '^[0-9]+$')
+      |          ) => ERROR(Expected '9023470X945622' to match '^[0-9]+$'),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (
@@ -730,6 +763,9 @@ class HeaderMatchingSpec extends Specification {
       |            ['test', 'test2'],
       |            $.headers['REF-CODE'],
       |            NULL
+      |          ),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
       |          )
       |        )
       |      ),
@@ -743,6 +779,9 @@ class HeaderMatchingSpec extends Specification {
       |            '1234',
       |            $.headers['REF-ID'],
       |            NULL
+      |          ),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
       |          )
       |        )
       |      ),
@@ -779,7 +818,10 @@ class HeaderMatchingSpec extends Specification {
       |            ['test', 'test2'] => ['test', 'test2'],
       |            $.headers['REF-CODE'] => ['test', 'test2'],
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -792,7 +834,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => '1234',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -866,7 +911,10 @@ class HeaderMatchingSpec extends Specification {
       |            ['test', 'test2'] => ['test', 'test2'],
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => ERROR(Expected [test] \\(Array\\) to be equal to [test, test2] \\(Array\\))
+      |          ) => ERROR(Expected [test] \\(Array\\) to be equal to [test, test2] \\(Array\\)),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      :REF-ID (
@@ -879,7 +927,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => ['1234', '1234', '4567'],
       |            NULL => NULL
-      |          ) => ERROR(Expected [1234, 1234, 4567] \\(Array\\) to be equal to [1234] \\(Array\\), Expected '4567' \\(String\\) to be equal to '1234' \\(String\\))
+      |          ) => ERROR(Expected [1234, 1234, 4567] \\(Array\\) to be equal to [1234] \\(Array\\), Expected '4567' \\(String\\) to be equal to '1234' \\(String\\)),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (
@@ -957,6 +1008,9 @@ class HeaderMatchingSpec extends Specification {
       |            'test',
       |            $.headers['REF-CODE'],
       |            NULL
+      |          ),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
       |          )
       |        )
       |      ),
@@ -970,6 +1024,9 @@ class HeaderMatchingSpec extends Specification {
       |            '1234',
       |            $.headers['REF-ID'],
       |            json:{}
+      |          ),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
       |          )
       |        )
       |      ),
@@ -1006,7 +1063,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -1019,7 +1079,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => '9023470945622',
       |            json:{} => json:{}
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -1088,7 +1151,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -1101,7 +1167,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => ['1111', '2222'],
       |            json:{} => json:{}
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -1168,7 +1237,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -1181,7 +1253,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => '9023470X945622',
       |            json:{} => json:{}
-      |          ) => ERROR(Expected '9023470X945622' \\(String\\) to be an integer)
+      |          ) => ERROR(Expected '9023470X945622' \\(String\\) to be an integer),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (
@@ -1243,7 +1318,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -1256,7 +1334,10 @@ class HeaderMatchingSpec extends Specification {
       |            '1234' => '1234',
       |            $.headers['REF-ID'] => ['1111', 'two'],
       |            json:{} => json:{}
-      |          ) => ERROR(Expected 'two' \\(String\\) to be an integer)
+      |          ) => ERROR(Expected 'two' \\(String\\) to be an integer),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (
@@ -1323,6 +1404,9 @@ class HeaderMatchingSpec extends Specification {
       |            'test',
       |            $.headers['REF-CODE'],
       |            NULL
+      |          ),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
       |          )
       |        )
       |      ),
@@ -1336,6 +1420,9 @@ class HeaderMatchingSpec extends Specification {
       |            ['1234', '4567'],
       |            $.headers['REF-ID'],
       |            json:{"min":2}
+      |          ),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
       |          )
       |        )
       |      ),
@@ -1372,7 +1459,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -1385,7 +1475,10 @@ class HeaderMatchingSpec extends Specification {
       |            ['1234', '4567'] => ['1234', '4567'],
       |            $.headers['REF-ID'] => ['1', '1', '1'],
       |            json:{"min":2} => json:{"min":2}
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -1471,7 +1564,10 @@ class HeaderMatchingSpec extends Specification {
       |            'test' => 'test',
       |            $.headers['REF-CODE'] => 'test',
       |            NULL => NULL
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'REF-CODE\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      :REF-ID (
@@ -1484,7 +1580,10 @@ class HeaderMatchingSpec extends Specification {
       |            ['1234', '4567'] => ['1234', '4567'],
       |            $.headers['REF-ID'] => '1',
       |            json:{"min":2} => json:{"min":2}
-      |          ) => ERROR(Expected [1] \\(size 1\\) to have minimum size of 2)
+      |          ) => ERROR(Expected [1] \\(size 1\\) to have minimum size of 2),
+      |          %error (
+      |            'Expected header \\'REF-ID\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (
@@ -1561,6 +1660,9 @@ class HeaderMatchingSpec extends Specification {
       |              ),
       |              NULL
       |            )
+      |          ),
+      |          %error (
+      |            'Expected header \\'Content-Type\\' but was missing'
       |          )
       |        )
       |      ),
@@ -1604,7 +1706,10 @@ class HeaderMatchingSpec extends Specification {
       |              ) => 'application/hal+json',
       |              NULL => NULL
       |            ) => BOOL(true)
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'Content-Type\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -1704,6 +1809,9 @@ class HeaderMatchingSpec extends Specification {
       |                )
       |              )
       |            )
+      |          ),
+      |          %error (
+      |            'Expected header \\'Content-Type\\' but was missing'
       |          )
       |        )
       |      ),
@@ -1764,7 +1872,10 @@ class HeaderMatchingSpec extends Specification {
       |                )
       |              ) => BOOL(true)
       |            ) => BOOL(true)
-      |          ) => BOOL(true)
+      |          ) => BOOL(true),
+      |          %error (
+      |            'Expected header \\'Content-Type\\' but was missing'
+      |          )
       |        ) => BOOL(true)
       |      ) => BOOL(true),
       |      %expect:entries (
@@ -1854,7 +1965,10 @@ class HeaderMatchingSpec extends Specification {
       |                ) => ERROR(Expected a charset value of 'UTF-8' but it was missing)
       |              ) => ERROR(Expected a charset value of 'UTF-8' but it was missing)
       |            ) => BOOL(false)
-      |          ) => BOOL(false)
+      |          ) => BOOL(false),
+      |          %error (
+      |            'Expected header \\'Content-Type\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (
@@ -1926,7 +2040,10 @@ class HeaderMatchingSpec extends Specification {
       |                )
       |              ) => BOOL(false)
       |            ) => BOOL(false)
-      |          ) => BOOL(false)
+      |          ) => BOOL(false),
+      |          %error (
+      |            'Expected header \\'Content-Type\\' but was missing'
+      |          )
       |        ) => BOOL(false)
       |      ) => BOOL(false),
       |      %expect:entries (

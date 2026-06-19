@@ -10,7 +10,7 @@ The combined library (JUnit5 + Spring7) is available on maven central using:
 
 group-id = au.com.dius.pact.provider
 artifact-id = spring7
-version-id = 4.5.x
+version-id = 4.7.x
 
 ## Usage
 For writing Spring Pact verification tests with JUnit 5, there is an JUnit 5 Invocation Context Provider that you can use with 

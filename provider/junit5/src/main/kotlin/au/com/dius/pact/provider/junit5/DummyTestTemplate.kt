@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.provider.ProviderVerifier
 import org.apache.hc.core5.http.ClassicHttpRequest
+import org.apache.hc.core5.http.HttpRequest
 import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
@@ -23,6 +24,7 @@ object DummyTestTemplate : TestTemplateInvocationContext, ParameterResolver {
       Pact::class.java -> true
       Interaction::class.java -> true
       ClassicHttpRequest::class.java -> true
+      HttpRequest::class.java -> true
       PactVerificationContext::class.java -> true
       ProviderVerifier::class.java -> true
       else -> false

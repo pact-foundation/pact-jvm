@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius.pact.consumer`
 * artifact-id = `junit`
-* version-id = `4.2.9`
+* version-id = `4.7.x`
 
 ## Usage
 

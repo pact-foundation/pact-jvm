@@ -7,72 +7,61 @@ import java.io.Reader;
  * JSON source from a Reader
  */
 public class ReaderSource extends JsonSource {
-  private Reader reader;
-  private Character buffer = null;
+  private static final int BUFFER_SIZE = 8192;
+
+  private final Reader reader;
+  private final char[] buffer = new char[BUFFER_SIZE];
+  private int bufferIndex = 0;
+  private int bufferLimit = 0;
+  private boolean endOfInput = false;
 
   public ReaderSource(Reader reader) {
     this.reader = reader;
   }
 
-  public Character nextChar() {
-    if (buffer != null) {
-      Character c = buffer;
-      buffer = null;
-      return c;
-    } else {
-      int next = 0;
-      try {
-        next = reader.read();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      if (next == -1) {
-        return null;
-      } else {
-        if (next == '\n') {
-          character = 0;
-          line++;
-        } else {
-          character++;
-        }
-        return (char) next;
-      }
+  public int nextChar() {
+    if (!ensureAvailable()) {
+      return EOF;
     }
+
+    int next = buffer[bufferIndex++];
+    updatePosition(next);
+    return next;
   }
 
-  public Character peekNextChar() {
-    if (buffer == null) {
-      int next = 0;
-      try {
-        next = reader.read();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      if (next == -1) {
-        buffer = null;
-      } else {
-        buffer = (char) next;
-      }
+  public int peekNextChar() {
+    if (!ensureAvailable()) {
+      return EOF;
     }
-    return buffer;
+    return buffer[bufferIndex];
   }
 
   public void advance(int count) {
-    int charsToSkip = count;
-    if (buffer != null) {
-      buffer = null;
-      charsToSkip = count - 1;
-    }
-    try {
-      for (int i = 0; i < charsToSkip; i++) {
-        int next = reader.read();
-        if (next == '\n') {
-          character = 0;
-          line++;
-        } else {
-          character++;
-        }
+    for (int i = 0; i < count; i++) {
+      if (!ensureAvailable()) {
+        return;
       }
+      updatePosition(buffer[bufferIndex++]);
+    }
+  }
+
+  private boolean ensureAvailable() {
+    if (bufferIndex < bufferLimit) {
+      return true;
+    }
+    if (endOfInput) {
+      return false;
+    }
+
+    try {
+      bufferLimit = reader.read(buffer, 0, buffer.length);
+      bufferIndex = 0;
+      if (bufferLimit == -1) {
+        endOfInput = true;
+        bufferLimit = 0;
+        return false;
+      }
+      return true;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

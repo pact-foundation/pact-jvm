@@ -1,6 +1,6 @@
 project:
   name: au.com.dius.pact.provider
-  version: 4.7.1-beta.7
+  version: 4.7.3
   description: Pact JVM Gradle Plugin
   longDescription: Pact JVM Gradle Plugin
   license: Apache2
@@ -17,10 +17,16 @@ project:
       groupId: au.com.dius.pact.provider
       version: 17
 
+release:
+  github:
+    skipTag: true
+    skipRelease: true
+
 signing:
   active: ALWAYS
-  armored: true
-  mode: FILE
+  pgp:
+    armored: true
+    mode: FILE
 
 deploy:
   maven:

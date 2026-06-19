@@ -56,65 +56,92 @@ sealed class JsonToken(val chars: CharArray) {
 
 @Suppress("ReturnCount")
 class JsonLexer(json: JsonSource) : BaseJsonLexer(json) {
+  sealed interface ObjectKeyToken {
+    data class Key(val value: String) : ObjectKeyToken
+    data object ObjectEnd : ObjectKeyToken
+  }
+
   fun nextToken(): Result<JsonToken?, JsonException> {
     val next = json.nextChar()
-    if (next != null) {
+    if (next != JsonSource.EOF) {
       return when {
-        next.isWhitespace() -> {
+        next.toChar().isWhitespace() -> {
           skipWhitespace()
           Result.Ok(JsonToken.Whitespace)
         }
-        next == '-' || next.isDigit() -> scanNumber(next)
-        next == 't' -> scanTrue()
-        next == 'f' -> scanFalse()
-        next == 'n' -> scanNull()
-        next == '"' -> scanString()
-        next == '[' -> Result.Ok(JsonToken.ArrayStart)
-        next == ']' -> Result.Ok(JsonToken.ArrayEnd)
-        next == '{' -> Result.Ok(JsonToken.ObjectStart)
-        next == '}' -> Result.Ok(JsonToken.ObjectEnd)
-        next == ',' -> Result.Ok(JsonToken.Comma)
-        next == ':' -> Result.Ok(JsonToken.Colon)
+        next == '-'.code || next.toChar().isDigit() -> scanNumber(next)
+        next == 't'.code -> scanTrue()
+        next == 'f'.code -> scanFalse()
+        next == 'n'.code -> scanNull()
+        next == '"'.code -> scanString()
+        next == '['.code -> Result.Ok(JsonToken.ArrayStart)
+        next == ']'.code -> Result.Ok(JsonToken.ArrayEnd)
+        next == '{'.code -> Result.Ok(JsonToken.ObjectStart)
+        next == '}'.code -> Result.Ok(JsonToken.ObjectEnd)
+        next == ','.code -> Result.Ok(JsonToken.Comma)
+        next == ':'.code -> Result.Ok(JsonToken.Colon)
         else -> unexpectedCharacter(next)
       }
     }
     return Result.Ok(null)
   }
 
-  private fun unexpectedCharacter(next: Char?) = if (next == null)
+  fun nextObjectKey(): Result<ObjectKeyToken?, JsonException> {
+    var next = json.nextChar()
+    while (next != JsonSource.EOF && next.toChar().isWhitespace()) {
+      next = json.nextChar()
+    }
+
+    return when (next) {
+      JsonSource.EOF -> Result.Ok(null)
+      '}'.code -> Result.Ok(ObjectKeyToken.ObjectEnd)
+      '"'.code -> when (val result = scanKeyString()) {
+        is Result.Ok -> Result.Ok(ObjectKeyToken.Key(result.value))
+        is Result.Err -> Result.Err(result.error)
+      }
+      else -> Result.Err(
+        JsonException(
+          "Invalid Json document (${documentPointer()}) - expected a string but found unexpected characters " +
+            "'${next.toChar()}'"
+        )
+      )
+    }
+  }
+
+  private fun unexpectedCharacter(next: Int) = if (next == JsonSource.EOF)
     Result.Err(JsonException("Invalid JSON (${documentPointer()}), unexpected end of the JSON document"))
   else
-    Result.Err(JsonException("Invalid JSON (${documentPointer()}), found unexpected character '$next'"))
+    Result.Err(JsonException("Invalid JSON (${documentPointer()}), found unexpected character '${next.toChar()}'"))
 
   private fun scanNull(): Result<JsonToken?, JsonException> {
     var next = json.nextChar()
-    if (next == null || next != 'u') return unexpectedCharacter(next)
+    if (next != 'u'.code) return unexpectedCharacter(next)
     next = json.nextChar()
-    if (next == null || next != 'l') return unexpectedCharacter(next)
+    if (next != 'l'.code) return unexpectedCharacter(next)
     next = json.nextChar()
-    if (next == null || next != 'l') return unexpectedCharacter(next)
+    if (next != 'l'.code) return unexpectedCharacter(next)
     return Result.Ok(JsonToken.Null)
   }
 
   private fun scanFalse(): Result<JsonToken?, JsonException> {
     var next = json.nextChar()
-    if (next == null || next != 'a') return unexpectedCharacter(next)
+    if (next != 'a'.code) return unexpectedCharacter(next)
     next = json.nextChar()
-    if (next == null || next != 'l') return unexpectedCharacter(next)
+    if (next != 'l'.code) return unexpectedCharacter(next)
     next = json.nextChar()
-    if (next == null || next != 's') return unexpectedCharacter(next)
+    if (next != 's'.code) return unexpectedCharacter(next)
     next = json.nextChar()
-    if (next == null || next != 'e') return unexpectedCharacter(next)
+    if (next != 'e'.code) return unexpectedCharacter(next)
     return Result.Ok(JsonToken.False)
   }
 
   private fun scanTrue(): Result<JsonToken?, JsonException> {
     var next = json.nextChar()
-    if (next == null || next != 'r') return unexpectedCharacter(next)
+    if (next != 'r'.code) return unexpectedCharacter(next)
     next = json.nextChar()
-    if (next == null || next != 'u') return unexpectedCharacter(next)
+    if (next != 'u'.code) return unexpectedCharacter(next)
     next = json.nextChar()
-    if (next == null || next != 'e') return unexpectedCharacter(next)
+    if (next != 'e'.code) return unexpectedCharacter(next)
     return Result.Ok(JsonToken.True)
   }
 
@@ -180,15 +207,17 @@ object JsonParser {
     var token: JsonToken?
 
     do {
-      token = nextTokenOrThrow(lexer)
-      if (token !is JsonToken.ObjectEnd) {
-        val key = when (token) {
+      val keyToken = when (val result = lexer.nextObjectKey()) {
+        is Result.Ok -> result.value
+        is Result.Err -> throw result.error
+      }
+      if (keyToken != JsonLexer.ObjectKeyToken.ObjectEnd) {
+        val key = when (keyToken) {
           null -> throw JsonException(
             "Invalid Json document (${lexer.documentPointer()}) - found end of document while parsing object")
-          is JsonToken.StringValue -> String(token.chars)
-          else -> throw JsonException(
-            "Invalid Json document (${lexer.documentPointer()}) - expected a string but found unexpected characters " +
-              "'${token.chars}'")
+          is JsonLexer.ObjectKeyToken.Key -> keyToken.value
+          JsonLexer.ObjectKeyToken.ObjectEnd -> throw JsonException(
+            "Invalid Json document (${lexer.documentPointer()}) - found unexpected end of object while parsing key")
         }
 
         token = nextTokenOrThrow(lexer)
@@ -223,6 +252,8 @@ object JsonParser {
             "Invalid Json document (${lexer.documentPointer()}) - Expecting ',' or '}' while parsing object, " +
               "found '${String(token.chars)}'")
         }
+      } else {
+        token = JsonToken.ObjectEnd
       }
     } while (token != null && token != JsonToken.ObjectEnd)
 

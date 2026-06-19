@@ -1,5 +1,5 @@
 // Auto-generated — run './gradlew generateDoctests' to regenerate from README.md
-// Source: README.md block 5
+// Source: README.md block block05
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
@@ -8,15 +8,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static au.com.dius.pact.consumer.dsl.DslPart.regex;
-// TODO: add required imports
 
-@Disabled("Doctest stub — see README.md block 5")
+@Disabled("Doctest stub — see README.md block block05")
 class README_java_block05_Test {
 
     @Test
     void block() throws Exception {
         new PactDslJsonBody()
-        // @DOCTEST-BEGIN README.md:java:5
+        // @DOCTEST-BEGIN README.md:java:block05
         .arrayContaining("actions")
           .object()
             .stringValue("name", "update")

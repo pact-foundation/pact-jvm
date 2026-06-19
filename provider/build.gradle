@@ -33,9 +33,27 @@ dependencies {
   testImplementation 'javax.xml.bind:jaxb-api:2.3.1'
   testImplementation 'junit:junit'
   testImplementation 'io.dropwizard:dropwizard-testing:2.1.12'
+  testImplementation 'com.diffplug.selfie:selfie-runner-junit5:3.0.0'
 }
 
 compileTestGroovy {
   classpath = classpath.plus(files(compileTestKotlin.destinationDirectory))
   dependsOn compileTestKotlin
 }
+
+// Selfie's TestExecutionListener intercepts all JUnit5 events, including Spock tests,
+// causing IllegalStateException when mixed in the same JVM. Run snapshot tests separately.
+test {
+  exclude '**/reporters/*SelfieTest*'
+}
+
+tasks.register('testSnapshots', Test) {
+  description = 'Runs Selfie snapshot tests in an isolated JVM'
+  group = 'verification'
+  testClassesDirs = sourceSets.test.output.classesDirs
+  classpath = sourceSets.test.runtimeClasspath
+  include '**/reporters/*SelfieTest*'
+  useJUnitPlatform()
+}
+
+check.dependsOn testSnapshots

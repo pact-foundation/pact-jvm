@@ -115,6 +115,7 @@ data class InteractionMarkup(
   }
 
   companion object {
+    @JvmStatic
     fun fromJson(json: JsonValue): InteractionMarkup {
       return when (json) {
         is JsonValue.Object -> InteractionMarkup(Json.toString(json["markup"]), Json.toString(json["markupType"]))
@@ -173,6 +174,23 @@ sealed class V4Interaction(
    */
   fun setTestName(name: String) {
     comments["testname"] = JsonValue.StringValue(name)
+  }
+
+  /**
+   * Adds an external reference for the interaction. The reference will be stored in the Pact
+   * file comments under the group key. For instance, you could store the OpenAPI operation ID
+   * that the interaction corresponds to as an external reference.
+   */
+  fun addReference(group: String, name: String, value: Any) {
+    if (!comments.containsKey("references")) {
+      comments["references"] = JsonValue.Object()
+    }
+    val references = comments["references"] as JsonValue.Object
+    if (!references.has(group)) {
+      references[group] = JsonValue.Object()
+    }
+    val groupObj = references[group] as JsonValue.Object
+    groupObj[name] = value
   }
 
   /**
@@ -555,6 +573,7 @@ sealed class V4Interaction(
   }
 
   companion object {
+    @JvmStatic
     fun interactionFromJson(index: Int, json: JsonValue, source: PactSource): Result<V4Interaction, String> {
       return if (json.has("type")) {
         val type = Json.toString(json["type"])

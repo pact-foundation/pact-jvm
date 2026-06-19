@@ -1502,6 +1502,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     pactBrokerClient.config.insecureTLS == true
+    pactBrokerClient.options['insecureTLS'] == true
   }
 
   @Unroll

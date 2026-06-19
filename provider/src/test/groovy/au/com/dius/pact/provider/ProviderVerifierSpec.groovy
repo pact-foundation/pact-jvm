@@ -460,8 +460,8 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, tags, _) >>
       new Result.Ok(true)
-    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
-    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false, _) >> result1
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false, _) >> result2
 
     where:
 
@@ -509,8 +509,8 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     1 * verifier.verificationReporter.reportResults(_, finalResult, '0.0.0', pactBrokerClient, [], branch) >> new Result.Ok(true)
-    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
-    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false, _) >> result1
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false, _) >> result2
 
     where:
 
@@ -553,8 +553,8 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.verificationReporter.reportResults(_, _, '0.0.0', pactBrokerClient, [], _) >>
       new Result.Err(['failed'])
-    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> new VerificationResult.Ok()
-    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> new VerificationResult.Ok()
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false, _) >> new VerificationResult.Ok()
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false, _) >> new VerificationResult.Ok()
     result instanceof VerificationResult.Failed
     result.description == 'Failed to publish results to the Pact broker'
     result.failures == ['': [new VerificationFailureType.PublishResultsFailure(['failed'])]]

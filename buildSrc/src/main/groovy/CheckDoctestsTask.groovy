@@ -21,24 +21,29 @@ class CheckDoctestsTask extends DefaultTask {
         def blocks = DoctestUtils.extractCodeBlocks(readmeFile)
         def failures = []
 
-        blocks.eachWithIndex { Map block, int idx ->
-            def blockNum = idx + 1
-            def className = DoctestUtils.classNameFor(block.lang as String, blockNum)
+        blocks.each { Map block ->
+            def id = block.id as String
+            def className = DoctestUtils.classNameFor(block.lang as String, id)
             def ext = DoctestUtils.fileExtFor(block.lang as String)
-            def marker = "${readmeFile.name}:${block.lang}:${blockNum}"
+            def marker = "${readmeFile.name}:${block.lang}:${id}"
             def expected = (block.content as List<String>).join('\n')
 
             def testFile = doctestFiles.files.find { it.name == "${className}.${ext}" }
             if (!testFile) {
-                failures << "Block ${blockNum} (${block.lang}): no stub found — run './gradlew generateDoctests'"
+                failures << "Block ${id} (${block.lang}): no stub found — run './gradlew generateDoctests'"
                 return
             }
 
             def actual = DoctestUtils.extractMarkerContent(testFile, marker)
             if (actual == null) {
-                failures << "Block ${blockNum} (${block.lang}): @DOCTEST markers missing in ${testFile.name}"
+                // Also accept old positional marker format for backward compatibility
+                def oldMarker = "${readmeFile.name}:${block.lang}:${block.blockNum}"
+                actual = DoctestUtils.extractMarkerContent(testFile, oldMarker)
+            }
+            if (actual == null) {
+                failures << "Block ${id} (${block.lang}): @DOCTEST markers missing in ${testFile.name} — run './gradlew generateDoctests'"
             } else if (DoctestUtils.dedent(actual) != DoctestUtils.dedent(expected)) {
-                failures << "Block ${blockNum} (${block.lang}): ${testFile.name} is out of date — run './gradlew generateDoctests'"
+                failures << "Block ${id} (${block.lang}): ${testFile.name} is out of date — run './gradlew generateDoctests'"
             }
         }
 

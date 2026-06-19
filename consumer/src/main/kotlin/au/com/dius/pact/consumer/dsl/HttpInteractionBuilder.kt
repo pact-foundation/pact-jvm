@@ -109,4 +109,14 @@ open class HttpInteractionBuilder(
     interaction.addTextComment(comment)
     return this
   }
+
+  /**
+   * Adds an external reference for the interaction. The reference will be stored in the Pact
+   * file comments under the group key. For instance, you could store the OpenAPI operation ID
+   * that the interaction corresponds to as an external reference.
+   */
+  fun reference(group: String, name: String, value: Any): HttpInteractionBuilder {
+    interaction.addReference(group, name, value)
+    return this
+  }
 }

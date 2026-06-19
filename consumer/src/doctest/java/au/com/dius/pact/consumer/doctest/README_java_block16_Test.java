@@ -1,30 +1,24 @@
 // Auto-generated — run './gradlew generateDoctests' to regenerate from README.md
-// Source: README.md block 16
+// Source: README.md block block16
 // Remove @Disabled once the test compiles and passes
 package au.com.dius.pact.consumer.doctest;
 
+import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArray;
-// TODO: add required imports
-
-@Disabled("Doctest stub — see README.md block 16")
+@Disabled("Doctest stub — see README.md block block16")
 class README_java_block16_Test {
 
     @Test
     void block() throws Exception {
-      newJsonArray((array) -> {
-        // @DOCTEST-BEGIN README.md:java:16
-        array.object((o) -> {
-          o.stringValue("foo", "Foo");          // an attribute
-          o.stringValue("bar", "Bar");          // an attribute
-          o.object("tar", (tarObject) -> {      // an attribute with a nested object
-            tarObject.stringValue("a", "A");    // attribute of the nested object
-            tarObject.stringValue("b", "B");    // attribute of the nested object
-          });
-        });
+      ConsumerPactBuilder
+        .consumer("Some Consumer")
+        .hasPactWith("Some Provider")
+        .uponReceiving("a request")
+        // @DOCTEST-BEGIN README.md:java:block16
+            .pathFromProviderState("/api/users/${id}", "/api/users/100")
         // @DOCTEST-END
-      });
+      ;
     }
 }

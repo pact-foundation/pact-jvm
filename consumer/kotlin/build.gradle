@@ -5,6 +5,51 @@ plugins {
 description = 'Pact-JVM - Kotlin DSL for Pact JVM consumer tests'
 group = 'au.com.dius.pact.consumer'
 
+sourceSets {
+    doctest {
+        java.srcDirs = ['src/doctest/java']
+        kotlin.srcDirs = ['src/doctest/kotlin']
+        compileClasspath += sourceSets.main.output + configurations.testCompileClasspath
+        runtimeClasspath += output + configurations.testRuntimeClasspath
+    }
+}
+configurations.doctestImplementation.extendsFrom configurations.testImplementation
+configurations.doctestRuntimeOnly.extendsFrom configurations.testRuntimeOnly
+
+def doctestJavaDir = file('src/doctest/java/au/com/dius/pact/consumer/kotlin/doctest')
+def doctestKotlinDir = file('src/doctest/kotlin/au/com/dius/pact/consumer/kotlin/doctest')
+
+tasks.register('generateDoctests', GenerateDoctestsTask) {
+    description = 'Generates doctest stubs from README.md code blocks'
+    group = 'documentation'
+    readmeFile = file('README.md')
+    basePackage = 'au.com.dius.pact.consumer.kotlin'
+    javaOutputDir = doctestJavaDir
+    kotlinOutputDir = doctestKotlinDir
+}
+
+tasks.register('checkDoctests', CheckDoctestsTask) {
+    description = 'Checks that doctest stubs match README.md code blocks'
+    group = 'verification'
+    readmeFile = file('README.md')
+    doctestFiles = fileTree('src/doctest') { include '**/*_Test.java', '**/*_Test.kt' }
+    sentinelFile = file("${buildDir}/doctests/check.txt")
+}
+
+tasks.register('testDoctest', Test) {
+    description = 'Compiles and runs README doctest stubs'
+    group = 'verification'
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.doctest.output.classesDirs
+    classpath = sourceSets.main.output + sourceSets.doctest.runtimeClasspath
+    systemProperty 'pact_do_not_track', 'true'
+}
+
+check.dependsOn checkDoctests, testDoctest
+
 dependencies {
     api project(":consumer")
+
+    testImplementation 'ch.qos.logback:logback-classic'
+    testImplementation 'org.hamcrest:hamcrest'
 }

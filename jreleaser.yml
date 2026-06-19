@@ -1,6 +1,6 @@
 project:
   name: au.com.dius.pact
-  version: 4.7.1
+  version: 4.7.3
   description: Pact JVM
   longDescription: Pact JVM
   license: MIT
@@ -17,10 +17,16 @@ project:
       groupId: au.com.dius.pact
       version: 17
 
+release:
+  github:
+    skipTag: true
+    skipRelease: true
+
 signing:
   active: ALWAYS
-  armored: true
-  mode: FILE
+  pgp:
+    armored: true
+    mode: FILE
 
 deploy:
   maven:

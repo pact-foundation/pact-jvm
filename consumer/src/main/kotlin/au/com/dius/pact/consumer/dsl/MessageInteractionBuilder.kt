@@ -79,6 +79,16 @@ open class MessageInteractionBuilder(
   }
 
   /**
+   * Adds an external reference for the interaction. The reference will be stored in the Pact
+   * file comments under the group key. For instance, you could store the OpenAPI operation ID
+   * that the interaction corresponds to as an external reference.
+   */
+  fun reference(group: String, name: String, value: Any): MessageInteractionBuilder {
+    interaction.addReference(group, name, value)
+    return this
+  }
+
+  /**
    * Build the contents of the interaction using a contents builder
    */
   fun withContents(builderFn: (MessageContentsBuilder) -> MessageContentsBuilder?): MessageInteractionBuilder {

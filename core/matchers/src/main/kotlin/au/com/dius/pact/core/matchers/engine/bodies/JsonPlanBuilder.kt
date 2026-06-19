@@ -53,7 +53,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     }
   }
 
-  private fun processBodyNode(
+  internal fun processBodyNode(
     context: PlanMatchingContext,
     expectedJson: JsonValue,
     path: DocPath,
@@ -153,7 +153,7 @@ object JsonPlanBuilder: PlanBodyBuilder  {
       rootNode.add(
         buildMatchingRuleNode(
           ExecutionPlanNode.valueNode(expectedJson),
-          ExecutionPlanNode.resolveCurrentValue(path), matchers, true
+          ExecutionPlanNode.resolveCurrentValue(path), matchers, !matchers.cascaded
         )
       )
 
@@ -177,8 +177,8 @@ object JsonPlanBuilder: PlanBodyBuilder  {
                 ExecutionPlanNode.action("check:exists")
                   .add(ExecutionPlanNode.resolveCurrentValue(itemPath))
               )
-            if (context.matcherIsDefined(itemPath)) {
-              val matchers = context.selectBestMatcher(itemPath)
+            if (context.matcherIsDefined(itemPath.dropMarkers())) {
+              val matchers = context.selectBestMatcher(itemPath.dropMarkers())
               presenceCheck.add(ExecutionPlanNode.annotation(Into { "[*] ${matchers.generateDescription(false)}" }))
               presenceCheck.add(
                 buildMatchingRuleNode(

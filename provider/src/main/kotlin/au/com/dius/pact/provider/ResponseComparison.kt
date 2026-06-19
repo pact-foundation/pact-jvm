@@ -15,7 +15,9 @@ import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.IResponse
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.SynchronousRequestResponse
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
@@ -62,6 +64,13 @@ interface IResponseComparison {
 
   fun compareResponse(
     response: IResponse,
+    actualResponse: ProviderResponse,
+    pluginConfiguration: Map<String, PluginConfiguration>
+  ): ComparisonResult
+
+  fun compareResponse(
+    pact: Pact,
+    interaction: SynchronousRequestResponse,
     actualResponse: ProviderResponse,
     pluginConfiguration: Map<String, PluginConfiguration>
   ): ComparisonResult
@@ -203,6 +212,7 @@ class ResponseComparison(
       actualResponse: ProviderResponse
     ) = compareResponse(response, actualResponse, emptyMap())
 
+    @Deprecated("Use version that passes pact and interaction")
     override fun compareResponse(
       response: IResponse,
       actualResponse: ProviderResponse,
@@ -211,9 +221,36 @@ class ResponseComparison(
       val actualResponseContentType = actualResponse.contentType
       val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
         actualResponseContentType, actualResponse.body)
-      val mismatches = ResponseMatching.responseMismatches(response, Response(actualResponse.statusCode ?: 200,
+      val actual = Response(actualResponse.statusCode ?: 200,
         actualResponse.headers?.toMutableMap() ?: mutableMapOf(),
-        actualResponse.body.orEmptyBody()), pluginConfiguration)
+        actualResponse.body.orEmptyBody())
+      val statusContext = MatchingContext(response.matchingRules.rulesForCategory("status"), true, pluginConfiguration)
+      val bodyContext = MatchingContext(response.matchingRules.rulesForCategory("body"), true, pluginConfiguration)
+      val headerContext = MatchingContext(
+        response.matchingRules.rulesForCategory("header"), true, pluginConfiguration, true)
+      val bodyResults = Matching.matchBody(response.asHttpPart(), actual.asHttpPart(), bodyContext)
+      val typeResult = if (bodyResults.typeMismatch != null) listOf(bodyResults.typeMismatch!!) else emptyList()
+      val mismatches = (typeResult + Matching.matchStatus(response.status, actual.status, statusContext) +
+        Matching.matchHeaders(response.asHttpPart(), actual.asHttpPart(), headerContext).flatMap { it.result } +
+        bodyResults.bodyResults.flatMap { it.result }).filterNotNull()
+      return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
+        comparison.bodyResult(mismatches, SystemPropertyResolver))
+    }
+
+    override fun compareResponse(
+      pact: Pact,
+      interaction: SynchronousRequestResponse,
+      actualResponse: ProviderResponse,
+      pluginConfiguration: Map<String, PluginConfiguration>
+    ): ComparisonResult {
+      val response = interaction.response
+      val actualResponseContentType = actualResponse.contentType
+      val comparison = ResponseComparison(response.headers, response.body, response.asHttpPart().jsonBody(),
+        actualResponseContentType, actualResponse.body)
+      val actual = Response(actualResponse.statusCode ?: 200,
+        actualResponse.headers?.toMutableMap() ?: mutableMapOf(),
+        actualResponse.body.orEmptyBody())
+      val mismatches = ResponseMatching.responseMismatches(pact, interaction, actual, pluginConfiguration)
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches, SystemPropertyResolver))
     }

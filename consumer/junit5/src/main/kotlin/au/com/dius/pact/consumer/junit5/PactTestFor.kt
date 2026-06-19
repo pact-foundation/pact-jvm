@@ -57,7 +57,7 @@ annotation class PactTestFor(
         val pactMethods: Array<String> = [],
 
         /**
-         * If an external keystore should be provided to the mockServer. This allos to provide a path to
+         * If an external keystore should be provided to the mockServer. This allows to provide a path to
          * keystore file
          */
         @Deprecated("This has been replaced with the @MockServerConfig annotation")

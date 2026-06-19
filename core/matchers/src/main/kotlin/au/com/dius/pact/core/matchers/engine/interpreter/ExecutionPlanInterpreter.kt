@@ -7,6 +7,7 @@ import au.com.dius.pact.core.matchers.engine.NodeValue.Companion.escape
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
 import au.com.dius.pact.core.matchers.engine.PlanNodeType
 import au.com.dius.pact.core.matchers.engine.XmlValue
+import au.com.dius.pact.core.matchers.engine.bodies.parseFormUrlencoded
 import au.com.dius.pact.core.matchers.engine.orDefault
 import au.com.dius.pact.core.matchers.engine.resolvers.ValueResolver
 import au.com.dius.pact.core.model.DocPath
@@ -16,12 +17,16 @@ import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.XmlUtils.attributes
 import au.com.dius.pact.core.model.XmlUtils.childElements
 import au.com.dius.pact.core.model.XmlUtils.groupChildren
+import au.com.dius.pact.core.model.XmlUtils.groupChildrenNS
 import au.com.dius.pact.core.model.XmlUtils.parse
 import au.com.dius.pact.core.model.XmlUtils.renderXml
 import au.com.dius.pact.core.model.XmlUtils.resolveMatchingNode
 import au.com.dius.pact.core.model.XmlUtils.resolvePath
+import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
+import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.json.JsonParser
@@ -32,6 +37,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.io.ByteArrayInputStream
+import java.util.TreeMap
+import javax.mail.internet.ContentDisposition
+import javax.mail.internet.MimeMultipart
+import javax.mail.util.ByteArrayDataSource
 
 private val logger = KotlinLogging.logger {}
 
@@ -237,12 +246,16 @@ class ExecutionPlanInterpreter(
     val result = if (action.startsWith("match:")) {
       when (val matcher = action.removePrefix("match:")) {
         "" -> node.copy(result = NodeResult.ERROR("'$action' is not a valid action"))
+        "each-key" -> executeMatchEachKey(valueResolver, node, actionPath)
+        "each-value" -> executeMatchEachValue(valueResolver, node, actionPath)
+        "values" -> executeMatchValues(valueResolver, node, actionPath)
         else -> executeMatch(action, matcher, valueResolver, node, actionPath)
       }
     } else {
       when (action) {
         "upper-case" -> executeChangeCase(action, valueResolver, node, actionPath, true)
         "lower-case" -> executeChangeCase(action, valueResolver, node, actionPath, false)
+        "header:normalize-commas" -> executeNormalizeCommaWhitespace(action, valueResolver, node, actionPath)
         "to-string" -> executeToString(action, valueResolver, node, actionPath)
         "length" -> executeLength(action, valueResolver, node, actionPath)
         "expect:empty" -> executeExpectEmpty(action, valueResolver, node, actionPath)
@@ -253,6 +266,8 @@ class ExecutionPlanInterpreter(
         "tee" -> executeTee(valueResolver, node, actionPath)
         "apply" -> executeApply(node)
         "json:parse" -> executeJsonParse(action, valueResolver, node, actionPath)
+        "form:parse" -> executeFormParse(action, valueResolver, node, actionPath)
+        "multipart:parse" -> executeMultipartParse(action, valueResolver, node, actionPath)
         "xml:parse" -> executeXmlParse(action, valueResolver, node, actionPath)
         "xml:value" -> executeXmlValue(action, valueResolver, node, actionPath)
         "xml:attributes" -> executeXmlAttributes(action, valueResolver, node, actionPath)
@@ -315,7 +330,33 @@ class ExecutionPlanInterpreter(
     return node.copy(result = NodeResult.VALUE(result), children = children.toMutableList())
   }
 
-  @Suppress("ReturnCount")
+  @Suppress("UnusedParameter")
+  private fun executeNormalizeCommaWhitespace(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    val (children, values) = when (val result = evaluateChildren(valueResolver, node, actionPath)) {
+      is Result.Ok -> result.value
+      is Result.Err -> return result.error
+    }
+
+    val normalize = { s: String -> s.split(',').joinToString(",") { it.trim() } }
+
+    val results = values.map { v ->
+      when (val value = v.asValue().orDefault()) {
+        is NodeValue.STRING -> NodeValue.STRING(normalize(value.string))
+        is NodeValue.SLIST -> NodeValue.SLIST(value.items.map { normalize(it) })
+        else -> value
+      }
+    }
+
+    val result = if (results.size == 1) results[0] else NodeValue.LIST(results)
+    return node.copy(result = NodeResult.VALUE(result), children = children.toMutableList())
+  }
+
+  @Suppress("ReturnCount", "CyclomaticComplexMethod")
   private fun executeMatch(
     action: String,
     matcher: String,
@@ -355,12 +396,16 @@ class ExecutionPlanInterpreter(
             } else {
               val errorNode = optional.firstOrNull()
               if (errorNode != null) {
-                pushResult(NodeResult.ERROR(matchResult))
+                pushResult(NodeResult.VALUE(NodeValue.STRING(matchResult)))
 
                 val errorNodeResult = walkTree(actionPath, errorNode, valueResolver)
-                val message = errorNodeResult.value()?.asString()
+                val nodeResultValue = errorNodeResult.value()
+                val message = when (nodeResultValue) {
+                  is NodeResult.ERROR -> nodeResultValue.message
+                  else -> nodeResultValue?.asString() ?: ""
+                }
                 return if (message.isNotEmpty()) {
-                  node.copy(result = NodeResult.ERROR(message!!),
+                  node.copy(result = NodeResult.ERROR(message),
                     children = (listOf(firstNode, secondNode, thirdNode) + optional).toMutableList())
                 } else {
                   // There was an error generating the optional message, so just return the original error
@@ -377,6 +422,179 @@ class ExecutionPlanInterpreter(
         }
       }
       is Result.Err -> return node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  @Suppress("CyclomaticComplexMethod")
+  private fun executeMatchValues(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(3, 0, node, "match:values", valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, _) = result.value
+        val expectedNode = args[0]
+        val actualNode = args[1]
+        val children = args.toMutableList()
+
+        val expectedValue = expectedNode.value().orDefault().asValue()
+        val actualValue = actualNode.value().orDefault().asValue()
+
+        val ok = when {
+          expectedValue is NodeValue.JSON && actualValue is NodeValue.JSON &&
+            expectedValue.json is JsonValue.Object && actualValue.json is JsonValue.Object -> true
+          expectedValue is NodeValue.JSON && actualValue is NodeValue.JSON &&
+            expectedValue.json is JsonValue.Array && actualValue.json is JsonValue.Array -> true
+          expectedValue is NodeValue.MMAP && actualValue is NodeValue.MMAP -> true
+          expectedValue == NodeValue.NULL || actualValue == NodeValue.NULL -> true
+          else -> false
+        }
+
+        if (ok) {
+          node.copy(result = NodeResult.VALUE(NodeValue.BOOL(true)), children = children)
+        } else {
+          node.copy(
+            result = NodeResult.ERROR(
+              "Expected type ${expectedValue?.valueType()} but was ${actualValue?.valueType()}"
+            ),
+            children = children
+          )
+        }
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  @Suppress("CyclomaticComplexMethod")
+  private fun executeMatchEachKey(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(3, 1, node, "match:each-key", valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, optional) = result.value
+        val actualNode = args[1]
+        val matcherParamsNode = args[2]
+        val children = (args + optional).toMutableList()
+
+        val actualValue = when (val v = actualNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+        val matcherParams = when (val v = matcherParamsNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value.asJson().orNull()
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+
+        val matcher = when (val matchResult = handleWith<MatchingRule> {
+          MatchingRule.create("each-key", matcherParams ?: JsonValue.Object())
+        }) {
+          is Result.Ok -> matchResult.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(matchResult.error.message!!), children = children)
+        }
+
+        if (matcher !is EachKeyMatcher) {
+          return node.copy(result = NodeResult.ERROR("Matcher 'each-key' did not produce an EachKeyMatcher"),
+            children = children)
+        }
+
+        val actualObject = (actualValue as? NodeValue.JSON)?.json as? JsonValue.Object
+        if (actualObject == null) {
+          return node.copy(
+            result = NodeResult.ERROR("Was expecting a JSON Object but got a ${actualValue.valueType()}"),
+            children = children)
+        }
+
+        val innerRules = unwrapRules(matcher.definition.rules)
+        var hasError = false
+        for (key in actualObject.entries.keys) {
+          for (rule in innerRules) {
+            val mismatch = NodeValue.doMatch(NodeValue.STRING(""), NodeValue.STRING(key),
+              rule, false, actionPath, context)
+            if (mismatch != null) {
+              hasError = true
+              children.add(ExecutionPlanNode.action("each-key:$key").copy(result = NodeResult.ERROR(mismatch)))
+            }
+          }
+        }
+
+        node.copy(result = NodeResult.VALUE(NodeValue.BOOL(!hasError)), children = children)
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  @Suppress("CyclomaticComplexMethod")
+  private fun executeMatchEachValue(
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateArgs(3, 1, node, "match:each-value", valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (args, optional) = result.value
+        val expectedNode = args[0]
+        val actualNode = args[1]
+        val matcherParamsNode = args[2]
+        val children = (args + optional).toMutableList()
+
+        val expectedValue = when (val v = expectedNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+        val actualValue = when (val v = actualNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+        val matcherParams = when (val v = matcherParamsNode.value().orDefault().valueOrError()) {
+          is Result.Ok -> v.value.asJson().orNull()
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(v.error), children = children)
+        }
+
+        val matcher = when (val matchResult = handleWith<MatchingRule> {
+          MatchingRule.create("each-value", matcherParams ?: JsonValue.Object())
+        }) {
+          is Result.Ok -> matchResult.value
+          is Result.Err -> return node.copy(result = NodeResult.ERROR(matchResult.error.message!!), children = children)
+        }
+
+        if (matcher !is EachValueMatcher) {
+          return node.copy(result = NodeResult.ERROR("Matcher 'each-value' did not produce an EachValueMatcher"),
+            children = children)
+        }
+
+        val innerRules = unwrapRules(matcher.definition.rules)
+        val expectedItem = resolveEachValueTemplate(expectedValue)
+        val items = when (actualValue) {
+          is NodeValue.JSON -> when (val json = actualValue.json) {
+            is JsonValue.Array -> json.values.map { NodeValue.JSON(it) }
+            is JsonValue.Object -> json.entries.values.map { NodeValue.JSON(it) }
+            else -> return node.copy(
+              result = NodeResult.ERROR("Was expecting a JSON Array or Object but got a ${json.type()}"),
+              children = children)
+          }
+          is NodeValue.SLIST -> actualValue.items.map { NodeValue.STRING(it) }
+          else -> return node.copy(
+            result = NodeResult.ERROR("Was expecting a JSON value or String List but got a ${actualValue.valueType()}"),
+            children = children)
+        }
+
+        var hasError = false
+        items.forEachIndexed { index, item ->
+          for (rule in innerRules) {
+            val mismatch = NodeValue.doMatch(expectedItem, item, rule, false, actionPath, context)
+            if (mismatch != null) {
+              hasError = true
+              children.add(ExecutionPlanNode.action("each-value:$index").copy(result = NodeResult.ERROR(mismatch)))
+            }
+          }
+        }
+
+        node.copy(result = NodeResult.VALUE(NodeValue.BOOL(!hasError)), children = children)
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
     }
   }
 
@@ -440,6 +658,13 @@ class ExecutionPlanInterpreter(
                   Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
                 } else {
                   Result.Err("Expected ${argValue.items} to be empty")
+                }
+              }
+              is NodeValue.MAP -> {
+                if (argValue.entries.isEmpty()) {
+                  Result.Ok(NodeResult.VALUE(NodeValue.BOOL(true)))
+                } else {
+                  Result.Err("Expected ${argValue.entries} to be empty")
                 }
               }
               is NodeValue.MMAP -> {
@@ -669,7 +894,78 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  @Suppress("CyclomaticComplexMethod")
+  private fun executeFormParse(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val resultNode = validateOneArg(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val argValue = resultNode.value.value().orDefault().asValue()
+        val result = if (argValue != null) {
+          when (argValue) {
+            is NodeValue.BARRAY -> NodeResult.VALUE(NodeValue.MMAP(parseFormUrlencoded(argValue.bytes)))
+            NodeValue.NULL -> NodeResult.VALUE(NodeValue.NULL)
+            is NodeValue.STRING -> NodeResult.VALUE(NodeValue.MMAP(parseFormUrlencoded(argValue.string)))
+            else -> NodeResult.ERROR("form:parse can not be used with ${argValue.valueType()}")
+          }
+        } else {
+          NodeResult.VALUE(NodeValue.NULL)
+        }
+
+        node.copy(result = result, children = mutableListOf(resultNode.value))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(resultNode.error))
+    }
+  }
+
+  private fun executeMultipartParse(
+    action: String,
+    valueResolver: ValueResolver,
+    node: ExecutionPlanNode,
+    actionPath: List<String>
+  ): ExecutionPlanNode {
+    return when (val result = validateTwoArgs(node, action, valueResolver, actionPath)) {
+      is Result.Ok -> {
+        val (bodyNode, ctNode) = result.value
+        val bodyValue = bodyNode.value().orDefault().asValue().orDefault()
+        val ctValue = ctNode.value().orDefault().asValue().orDefault()
+        val parseResult = when {
+          bodyValue is NodeValue.BARRAY && ctValue is NodeValue.STRING -> {
+            try {
+              val multipart = MimeMultipart(ByteArrayDataSource(bodyValue.bytes, ctValue.string))
+              val map = TreeMap<String, NodeValue>()
+              for (i in 0 until multipart.count) {
+                val part = multipart.getBodyPart(i)
+                val cd = ContentDisposition(part.disposition ?: "form-data")
+                val name = cd.getParameter("name") ?: continue
+                val bytes = part.inputStream.readAllBytes()
+                // Try JSON first; fall back to raw bytes for binary parts
+                val value = try {
+                  NodeValue.JSON(JsonParser.parseStream(ByteArrayInputStream(bytes)))
+                } catch (_: Exception) {
+                  NodeValue.BARRAY(bytes)
+                }
+                map[name] = value
+              }
+              NodeResult.VALUE(NodeValue.MAP(map))
+            } catch (e: Exception) {
+              NodeResult.ERROR("multipart:parse error - ${e.message}")
+            }
+          }
+          else -> NodeResult.ERROR(
+            "multipart:parse requires BARRAY body and STRING content-type, got " +
+              "${bodyValue.valueType()} and ${ctValue.valueType()}"
+          )
+        }
+        node.copy(result = parseResult, children = mutableListOf(bodyNode, ctNode))
+      }
+      is Result.Err -> node.copy(result = NodeResult.ERROR(result.error))
+    }
+  }
+
+  @Suppress("CyclomaticComplexMethod", "LongMethod")
   private fun executeJsonExpectEmpty(
     action: String,
     valueResolver: ValueResolver,
@@ -924,13 +1220,14 @@ class ExecutionPlanInterpreter(
               else -> "'$action' can't be used with a $second node" to null
             }
           }
+          is NodeValue.MAP -> checkDiff(action, expectedKeys, second.entries.keys)
           is NodeValue.MMAP -> checkDiff(action, expectedKeys, second.entries.keys)
           is NodeValue.SLIST -> checkDiff(action, expectedKeys, second.items.toSet())
           is NodeValue.STRING -> checkDiff(action, expectedKeys, setOf(second.string))
           is NodeValue.XML -> {
             when (val xml = second.xml) {
               is XmlValue.Element -> {
-                val actualKeys = groupChildren(xml.element).keys
+                val actualKeys = groupChildrenNS(xml.element).keys
                 checkDiff(action, expectedKeys, actualKeys)
               }
               else -> "'$action' can't be used with a $second node" to null
@@ -1533,6 +1830,63 @@ class ExecutionPlanInterpreter(
           }
         }
 
+        is NodeValue.MMAP -> {
+          if (path.isRoot()) {
+            Result.Ok(result.value)
+          } else {
+            val field = path.firstField()
+            if (field != null) {
+              val values = result.value.entries[field]
+              when {
+                values == null -> Result.Ok(NodeValue.NULL)
+                values.size == 1 -> Result.Ok(NodeValue.STRING(values[0]))
+                else -> Result.Ok(NodeValue.SLIST(values))
+              }
+            } else {
+              Result.Err("Can not resolve '$path' from a map value")
+            }
+          }
+        }
+
+        is NodeValue.MAP -> {
+          if (path.isRoot()) {
+            Result.Ok(result.value)
+          } else {
+            val tokens = path.pathTokens
+            // tokens[0] is Root; tokens[1] is the part name
+            val partName = (tokens.getOrNull(1) as? PathToken.Field)?.name
+              ?: return Result.Err("Can not resolve '$path' from a MAP value")
+            val partValue = result.value.entries[partName]
+              ?: return Result.Ok(NodeValue.NULL)
+            if (tokens.size <= 2) {
+              Result.Ok(partValue)
+            } else {
+              // Navigate remaining path into the part value (typically JSON)
+              val subPath = DocPath(listOf(PathToken.Root) + tokens.drop(2))
+              when (partValue) {
+                is NodeValue.JSON -> {
+                  val jsonPaths = JsonUtils.resolvePath(partValue.json, subPath)
+                  if (jsonPaths.isEmpty()) {
+                    Result.Ok(NodeValue.NULL)
+                  } else if (jsonPaths.size == 1) {
+                    when (val value = partValue.json.pointer(jsonPaths[0])) {
+                      JsonValue.Null -> Result.Ok(NodeValue.NULL)
+                      else -> Result.Ok(NodeValue.JSON(value))
+                    }
+                  } else {
+                    Result.Ok(NodeValue.JSON(JsonValue.Array(jsonPaths
+                      .map { partValue.json.pointer(it) }
+                      .toMutableList()
+                    )))
+                  }
+                }
+                else -> Result.Err("Can not navigate '$subPath' in MAP part '$partName' " +
+                  "of type ${partValue.valueType()}")
+              }
+            }
+          }
+        }
+
         else -> Result.Err("Can not resolve '$path', current stack value does not contain a value that is " +
           "resolvable (${result.value})")
       }
@@ -1758,6 +2112,28 @@ class ExecutionPlanInterpreter(
           else -> listOf(it)
         }
       })
+    }
+  }
+
+  private fun unwrapRules(rules: List<Either<MatchingRule, *>>): List<MatchingRule> {
+    return rules.mapNotNull {
+      when (it) {
+        is Either.A -> it.value
+        else -> null
+      }
+    }
+  }
+
+  private fun resolveEachValueTemplate(expectedValue: NodeValue): NodeValue {
+    return when (expectedValue) {
+      is NodeValue.JSON -> when (val json = expectedValue.json) {
+        is JsonValue.Array -> json.values.firstOrNull()?.let { NodeValue.JSON(it) } ?: NodeValue.NULL
+        is JsonValue.Object -> json.entries.values.firstOrNull()?.let { NodeValue.JSON(it) } ?: NodeValue.NULL
+        else -> expectedValue
+      }
+      is NodeValue.LIST -> expectedValue.items.firstOrNull() ?: NodeValue.NULL
+      is NodeValue.SLIST -> expectedValue.items.firstOrNull()?.let { NodeValue.STRING(it) } ?: NodeValue.NULL
+      else -> expectedValue
     }
   }
 }
