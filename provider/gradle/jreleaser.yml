@@ -24,8 +24,9 @@ release:
 
 signing:
   active: ALWAYS
-  armored: true
-  mode: FILE
+  pgp:
+    armored: true
+    mode: FILE
 
 deploy:
   maven:

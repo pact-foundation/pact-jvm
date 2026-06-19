@@ -136,7 +136,7 @@ ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle"
   executeOnShell "sed -i -e \"s/version: ${releaseVer}/version: ${nextVer}/\" jreleaser.yml"
   executeOnShell "sed -i -e \"s/version: ${releaseVer}/version: ${nextVer}/\" provider/gradle/jreleaser.yml"
-  executeOnShell("git add jreleaser.yml provider/gradle/jreleaser.yml buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle")
+  executeOnShell("git add jreleaser.yml provider/gradle/jreleaser.yml buildSrc/src/main/groovy/au.com.dius.pact.kotlin-common-conventions.gradle jreleaser.yml provider/gradle/jreleaser.yml")
   executeOnShell("git diff --cached")
   ask("Commit and push this change?: [Y]") {
     executeOnShell("git commit -m 'bump version to $nextVer'")
