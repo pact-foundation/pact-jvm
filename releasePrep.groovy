@@ -115,14 +115,14 @@ ask('Tag and Push commits?: [Y]') {
 ask('Publish artifacts to maven central?: [Y]') {
   executeOnShell 'rm -rf build/staging-deploy'
   executeOnShell './gradlew clean publish -S -x :provider:gradle:publish'
-  executeOnShell 'JRELEASER_GITHUB_TOKEN=skip jreleaser publish --output-directory build'
+  executeOnShell 'JRELEASER_GITHUB_TOKEN=skip jreleaser deploy --output-directory build'
 }
 
 ask('Publish Gradle plugin?: [Y]') {
   executeOnShell 'rm -rf provider/gradle/build/staging-deploy/'
   executeOnShell './gradlew :provider:gradle:publish'
   executeOnShell 'rm -rf provider/gradle/build/staging-deploy/au/com/dius/pact/au.com.dius.pact.gradle.plugin/'
-  executeOnShell 'cd provider/gradle && JRELEASER_GITHUB_TOKEN=skip jreleaser publish --output-directory build'
+  executeOnShell 'cd provider/gradle && JRELEASER_GITHUB_TOKEN=skip jreleaser deploy --output-directory build'
   executeOnShell './gradlew :provider:gradle:publish'
   executeOnShell './gradlew :provider:gradle:publishPlugins'
 }
