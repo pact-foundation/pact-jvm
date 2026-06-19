@@ -1,6 +1,6 @@
 project:
   name: au.com.dius.pact
-  version: 4.5.14
+  version: 4.5.15
   description: Pact JVM
   longDescription: Pact JVM
   license: MIT
@@ -24,8 +24,9 @@ release:
 
 signing:
   active: ALWAYS
-  armored: true
-  mode: FILE
+  pgp:
+    armored: true
+    mode: FILE
 
 deploy:
   maven:
