@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.3 - V2 plugin logging improvements
+
+* 368cc3e1e - chore: Update io.pact.plugin.driver:core to 1.0.0-beta.5 (Ronald Holshausen, Wed Jun 24 13:47:49 2026 +1000)
+* ee21d6fd0 - feat(008): Set test run ID before plugin calls for log correlation (#1924) (Ronald Holshausen, Wed Jun 24 10:56:12 2026 +1000)
+* d1b377d5a - bump version to 4.7.3 (Ronald Holshausen, Fri Jun 19 15:51:45 2026 +1000)
+
 # 4.7.2 - Maintenance Release
 
 * 33a4e60f3 - chore: fix jreleaser config for Maven Central deployment (Ronald Holshausen, Fri Jun 19 13:31:02 2026 +1000)
