@@ -16,8 +16,10 @@ import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
 import io.pact.plugins.jvm.core.PluginManager
+import io.pact.plugins.jvm.core.TestContext
 import java.io.File
 import java.net.URL
+import java.util.UUID
 
 /**
  * Provider data when verifying via a plugin
@@ -96,6 +98,7 @@ class PluginTestTarget(private val config: MutableMap<String, Any?> = mutableMap
         if (context.containsKey("providerState")) {
           testContext["providerState"] = context["providerState"]
         }
+        TestContext.setTestRunId(UUID.randomUUID().toString())
         when (val result = pluginManager.prepareValidationForInteraction(transportEntry, v4pact.value,
           interaction.asV4Interaction(), testContext)) {
           is Ok -> RequestDataToBeVerified(result.value) to transportEntry
