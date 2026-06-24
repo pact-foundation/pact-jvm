@@ -39,6 +39,8 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryNotFoundException
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
+import io.pact.plugins.jvm.core.TestContext
+import java.util.UUID
 
 interface DslBuilder {
   fun addPluginConfiguration(matcher: ContentMatcher, pactConfiguration: Map<String, JsonValue>)
@@ -372,6 +374,7 @@ open class PactBuilder(
     part: IHttpPart,
     interaction: V4Interaction
   ) {
+    TestContext.setTestRunId(UUID.randomUUID().toString())
     when (val result = matcher.configureContent(contentType, bodyConfig)) {
       is Ok -> {
         if (result.value.size > 1) {
@@ -598,6 +601,7 @@ open class PactBuilder(
             }
           } else {
             logger.debug { "Plugin matcher, will get the plugin to provide the interaction contents" }
+            TestContext.setTestRunId(UUID.randomUUID().toString())
             when (val result = matcher.configureContent(contentType, bodyConfig)) {
               is Ok -> {
                 result.value.map {
