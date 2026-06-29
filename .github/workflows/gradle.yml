@@ -25,7 +25,7 @@ jobs:
         distribution: temurin
         java-version: 23
     - name: Cache Gradle packages
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
@@ -66,7 +66,7 @@ jobs:
           distribution: temurin
           java-version: ${{ matrix.jdk }}
       - name: Cache Gradle packages
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
