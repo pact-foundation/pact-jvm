@@ -52,7 +52,9 @@ import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import io.pact.plugins.jvm.core.PluginConfiguration
 import io.pact.plugins.jvm.core.PluginManager
+import io.pact.plugins.jvm.core.TestContext
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.util.UUID
 import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
@@ -1026,6 +1028,7 @@ open class ProviderVerifier @JvmOverloads constructor (
               config[k] = v
             }
 
+            TestContext.setTestRunId(UUID.randomUUID().toString())
             val request = when (val result = DefaultPluginManager.prepareValidationForInteraction(transportEntry,
               v4pact, v4Interaction, config)) {
               is Ok -> result.value
