@@ -8,8 +8,6 @@ import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generators.ArrayContainsJsonGenerator
 import au.com.dius.pact.core.matchers.generators.DefaultResponseGenerator
-import au.com.dius.pact.core.matchers.interactionCatalogueEntries
-import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
@@ -47,7 +45,6 @@ import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
-import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
 import io.pact.plugins.jvm.core.PluginConfiguration
@@ -1343,12 +1340,7 @@ open class ProviderVerifier @JvmOverloads constructor (
    */
   @SuppressWarnings("TooGenericExceptionThrown")
   fun initialisePlugins(pact: Pact) {
-    CatalogueManager.registerCoreEntries(
-      MatchingConfig.contentMatcherCatalogueEntries() +
-      matcherCatalogueEntries() +
-      interactionCatalogueEntries() +
-      MatchingConfig.contentHandlerCatalogueEntries()
-    )
+    MatchingConfig.registerCoreCapabilities()
     val v4pact = pact.asV4Pact().get()
     if (v4pact != null && v4pact.requiresPlugins()) {
       logger.info { "Pact file requires plugins, will load those now" }

@@ -1,8 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.consumer.interactionCatalogueEntries
 import au.com.dius.pact.core.matchers.MatchingConfig
-import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.IHttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -17,7 +15,6 @@ import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.core.support.Result
 import groovy.json.JsonBuilder
-import io.pact.plugins.jvm.core.CatalogueManager
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
@@ -30,10 +27,7 @@ open class BaseBuilder(
 ) : Matchers() {
 
   init {
-    CatalogueManager.registerCoreEntries(
-      MatchingConfig.contentMatcherCatalogueEntries() +
-      matcherCatalogueEntries() + interactionCatalogueEntries() + MatchingConfig.contentHandlerCatalogueEntries()
-    )
+    MatchingConfig.registerCoreCapabilities()
   }
 
   protected fun setupBody(data: Map<String, Any>, httpPart: IHttpPart): OptionalBody {

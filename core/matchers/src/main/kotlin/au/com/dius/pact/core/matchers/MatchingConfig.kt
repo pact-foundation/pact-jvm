@@ -5,6 +5,8 @@ import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
 import io.pact.plugins.jvm.core.CatalogueManager
+import io.pact.plugins.jvm.core.CoreCapabilityRegistry
+import io.pact.plugins.jvm.core.CoreContentGenerator
 import kotlin.reflect.full.createInstance
 
 object MatchingConfig {
@@ -16,6 +18,21 @@ object MatchingConfig {
     "text/plain" to "au.com.dius.pact.core.matchers.PlainTextContentMatcher",
     "multipart/.*" to "au.com.dius.pact.core.matchers.MultipartMessageContentMatcher",
     "application/x-www-form-urlencoded" to "au.com.dius.pact.core.matchers.FormPostContentMatcher"
+  )
+
+  // Keyed by catalogue entry key (see contentMatcherCatalogueEntries), not by content-type pattern like
+  // coreBodyMatchers above - this is what backs the core/content-matcher/<key> capability that plugins can
+  // call back into, rather than what pact-jvm's own internal matching dispatch uses.
+  private val coreContentMatchers: Map<String, ContentMatcher> = mapOf(
+    "xml" to XmlContentMatcher,
+    "json" to JsonContentMatcher,
+    "text" to PlainTextContentMatcher(),
+    "multipart-form-data" to MultipartMessageContentMatcher(),
+    "form-urlencoded" to FormPostContentMatcher()
+  )
+
+  private val coreContentGenerators: Map<String, CoreContentGenerator> = mapOf(
+    "json" to JsonCoreContentGenerator
   )
 
   @JvmStatic
@@ -98,5 +115,27 @@ object MatchingConfig {
         )
       )
     )
+  }
+
+  /**
+   * Registers the core catalogue entries and the host-provided ("core") capability handlers backing
+   * them, so plugins can delegate whole-content-type matching and generation back to this framework's own
+   * implementation instead of reproducing it (pact-plugins proposal 009). Safe to call more than once -
+   * registration just overwrites the previous entry/handler for a given key.
+   *
+   * This is the single place all three bootstrap points (the consumer DSLs and the provider verifier)
+   * should call, instead of composing and registering the catalogue entry lists themselves.
+   */
+  fun registerCoreCapabilities() {
+    CatalogueManager.registerCoreEntries(
+      contentMatcherCatalogueEntries() + matcherCatalogueEntries() + interactionCatalogueEntries() +
+        contentHandlerCatalogueEntries()
+    )
+    coreContentMatchers.forEach { (key, matcher) ->
+      CoreCapabilityRegistry.registerContentMatcher(key, CoreContentMatcherAdapter(matcher))
+    }
+    coreContentGenerators.forEach { (key, generator) ->
+      CoreCapabilityRegistry.registerContentGenerator(key, generator)
+    }
   }
 }

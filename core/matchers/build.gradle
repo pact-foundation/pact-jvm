@@ -32,6 +32,10 @@ dependencies {
   implementation('io.pact.plugin.driver:core') {
     exclude group: 'au.com.dius.pact.core'
   }
+  // The plugin driver's own generated Plugin.* protobuf classes (used by CoreContentMatcher/
+  // CoreContentGenerator, which we implement here) are only declared `implementation` by the driver, not
+  // `api`, so they don't come through transitively - needs to match the driver's protobuf-java version.
+  implementation 'com.google.protobuf:protobuf-java:4.26.1'
 
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.apache.groovy:groovy-xml'

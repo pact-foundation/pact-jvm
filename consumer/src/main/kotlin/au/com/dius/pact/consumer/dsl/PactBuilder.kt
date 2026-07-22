@@ -2,11 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.MessagePactBuilder
-import au.com.dius.pact.consumer.interactionCatalogueEntries
 import au.com.dius.pact.core.matchers.MatchingConfig
-import au.com.dius.pact.core.matchers.MatchingConfig.contentHandlerCatalogueEntries
-import au.com.dius.pact.core.matchers.MatchingConfig.contentMatcherCatalogueEntries
-import au.com.dius.pact.core.matchers.matcherCatalogueEntries
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ContentType
@@ -74,8 +70,7 @@ open class PactBuilder(
   private val comments: MutableList<JsonValue.StringValue> = mutableListOf()
 
   init {
-    CatalogueManager.registerCoreEntries(contentMatcherCatalogueEntries() +
-      matcherCatalogueEntries() + interactionCatalogueEntries() + contentHandlerCatalogueEntries())
+    MatchingConfig.registerCoreCapabilities()
   }
 
   /**
