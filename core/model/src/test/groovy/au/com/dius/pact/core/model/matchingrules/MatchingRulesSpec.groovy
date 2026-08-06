@@ -136,7 +136,7 @@ class MatchingRulesSpec extends Specification {
     map                                     | matcherClass                   | condition
     [:]                                     | EqualsMatcher                  | 'if the definition is empty'
     [other: 'value']                        | EqualsMatcher                  | 'if the definition is invalid'
-    [match: 'something']                    | EqualsMatcher                  | 'if the matcher type is unknown'
+    [match: 'something']                    | PluginMatcher                  | 'if the matcher type is not a core one, since a plugin may provide it'
     [match: 'equality']                     | EqualsMatcher                  | 'if the matcher type is equality'
     [match: 'regex', regex: '.*']           | RegexMatcher                   | 'if the matcher type is regex'
     [regex: '\\w+']                         | RegexMatcher                   | 'if the matcher definition contains a regex'

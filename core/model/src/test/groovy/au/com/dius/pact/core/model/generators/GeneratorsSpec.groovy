@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model.generators
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Issue
 import spock.lang.Specification
@@ -112,7 +113,13 @@ class GeneratorsSpec extends Specification {
     'empty map' | [:]  | new Generators()
     'invalid map key' | [other: [type: 'RandomInt', min: 1, max: 10]] | new Generators()
     'invalid map entry' | [method: [min: 1, max: 10]] | new Generators()
-    'invalid generator class' | [method: [type: 'RandomXXX', min: 1, max: 10]]  | new Generators()
+    // A type this module does not know may be provided by a plugin, so it is carried through to be
+    // resolved against the catalogue when the generator is applied rather than dropped here
+    'unknown generator class' | [method: [type: 'RandomXXX', min: 1, max: 10]]  | new Generators([
+      (Category.METHOD): ['': new PluginGenerator('RandomXXX', [
+        min: new JsonValue.Integer('1'.chars), max: new JsonValue.Integer('10'.chars)
+      ])]
+    ])
     'method'    | [method: [type: 'RandomInt', min: 1, max: 10]]  | new Generators().addGenerator(Category.METHOD, '', new RandomIntGenerator(1, 10))
     'path'      | [path: [type: 'RandomString', size: 10]]  | new Generators().addGenerator(Category.PATH, '', new RandomStringGenerator(10))
     'header'    | [header: [A: [type: 'RandomString', size: 10]]]  | new Generators().addGenerator(Category.HEADER, 'A', new RandomStringGenerator(10))

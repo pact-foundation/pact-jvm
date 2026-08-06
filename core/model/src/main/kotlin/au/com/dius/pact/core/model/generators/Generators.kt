@@ -62,6 +62,8 @@ object JsonContentTypeHandler : ContentTypeHandler {
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: MutableMap<String, Any>) {
     val pathExp = parsePath(key)
+    // So that a plugin-provided generator knows where the value it is generating lives
+    context[PluginGenerator.PATH_CONTEXT_KEY] = key
     queryObjectGraph(pathExp.iterator(), body as JsonQueryResult) { (_, valueKey, parent) ->
       when (parent) {
         is JsonValue.Object ->

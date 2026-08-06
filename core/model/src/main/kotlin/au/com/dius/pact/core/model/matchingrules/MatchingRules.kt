@@ -227,10 +227,28 @@ interface MatchingRule {
           )
           EachValueMatcher(definition)
         }
-        else -> {
-          logger.warn { "Unrecognised matcher ${values[MATCH]}, defaulting to equality matching" }
-          EqualsMatcher
-        }
+        // Not a standard matching rule. It is not necessarily an error - it may be provided by a
+        // plugin, which this module has no way of checking - so it is carried through to be
+        // resolved against the plugin catalogue when the rule is applied. A name no plugin
+        // provides then fails there, reported against the value being matched.
+        else -> PluginMatcher(type, pluginRuleValues(values))
+      }
+    }
+
+    /**
+     * Configuration values for a plugin-provided rule: every attribute except the ones that
+     * identify the rule itself, and (in the integration JSON form) the example value.
+     */
+    private fun pluginRuleValues(values: JsonValue): Map<String, JsonValue> {
+      if (values !is JsonValue.Object) {
+        return mapOf()
+      }
+      // In the `pact:matcher:type` form `value` carries the example value rather than rule
+      // configuration, which is not the case once the rule has been persisted with `match`
+      val integrationForm = !values.has(MATCH) && values.has("pact:matcher:type")
+      return values.entries.filterKeys {
+        it != MATCH && it != "pact:matcher:type" && it != "pact:generator:type" &&
+          !(integrationForm && it == "value")
       }
     }
 
@@ -827,6 +845,44 @@ data class StatusCodeMatcher(val statusType: HttpStatus, val values: List<Int> =
     get() = "status-code"
   override val attributes: Map<String, JsonValue>
     get() = mapOf("status" to Json.toJson(statusType.toJson(values)))
+}
+
+/**
+ * Matching rule provided by a plugin, carrying the rule name and its configuration values.
+ *
+ * Which plugin (if any) provides a name is a property of the running plugin catalogue, not of the
+ * Pact file, so this is what an otherwise unrecognised rule name is parsed into - and it is
+ * serialised back out as an ordinary matching rule whose name happens to come from a plugin, with
+ * no marker saying so.
+ *
+ * See proposal 006, Field-level matchers and generators.
+ */
+data class PluginMatcher(
+  /** Name of the rule, which is also the key it is resolved by in the plugin catalogue */
+  val ruleName: String,
+  /** Configuration values for the rule, stored alongside the name in the Pact file */
+  val values: Map<String, JsonValue> = mapOf()
+) : MatchingRule {
+  override fun toMap(spec: PactSpecVersion?): Map<String, Any?> =
+    mapOf("match" to ruleName) + values.mapValues { Json.fromJson(it.value) }
+
+  override fun canMatch(contentType: ContentType) = true
+
+  override fun validateForVersion(pactVersion: PactSpecVersion?): List<String> {
+    return if (pactVersion.atLeast(PactSpecVersion.V4)) {
+      listOf()
+    } else {
+      listOf("Plugin provided matching rules can only be used with Pact specification versions >= V4")
+    }
+  }
+
+  override fun generateDescription(forCollection: Boolean) =
+    "must match the '$ruleName' rule provided by a plugin"
+
+  override val name: String
+    get() = ruleName
+  override val attributes: Map<String, JsonValue>
+    get() = values
 }
 
 data class MatchingRuleGroup @JvmOverloads constructor(

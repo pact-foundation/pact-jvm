@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
+import au.com.dius.pact.core.model.plugins.PluginSupportRegistry
 import au.com.dius.pact.core.support.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.Random
@@ -41,10 +42,19 @@ fun lookupGenerator(generatorJson: JsonValue?): Generator? {
   var generator: Generator? = null
 
   if (generatorJson is JsonValue.Object) {
+    val type = Json.toString(generatorJson["type"])
     try {
-      generator = createGenerator(Json.toString(generatorJson["type"]), generatorJson)
+      generator = createGenerator(type, generatorJson)
     } catch (e: ClassNotFoundException) {
-      logger.warn(e) { "Could not find generator class for generator config '$generatorJson'" }
+      // Not a standard generator type. It is not necessarily an error - it may be provided by a
+      // plugin, which this module has no way of checking - so it is carried through to be resolved
+      // against the plugin catalogue when the generator is applied, rather than dropped here.
+      generator = if (type.isNotEmpty()) {
+        PluginGenerator(type, pluginGeneratorValues(generatorJson))
+      } else {
+        logger.warn(e) { "Ignoring a generator with an empty type: '$generatorJson'" }
+        null
+      }
     } catch (e: InvalidGeneratorException) {
       logger.warn(e) { e.message }
     }
@@ -54,6 +64,10 @@ fun lookupGenerator(generatorJson: JsonValue?): Generator? {
 
   return generator
 }
+
+/** Configuration values for a plugin-provided generator: everything except its type */
+private fun pluginGeneratorValues(json: JsonValue.Object) =
+  json.entries.filterKeys { it != "type" }
 
 fun createGenerator(type: String, generatorJson: JsonValue): Generator {
   val generatorClass = findGeneratorClass(type).kotlin
@@ -620,6 +634,57 @@ object NullGenerator : Generator {
     get() = "Null"
   override fun generate(context: MutableMap<String, Any>, exampleValue: Any?) = null
   override fun toMap(pactSpecVersion: PactSpecVersion?) = emptyMap<String, Any>()
+}
+
+/**
+ * Generator provided by a plugin, carrying the generator name and its configuration values.
+ *
+ * Which plugin (if any) provides a name is a property of the running plugin catalogue, not of the
+ * Pact file, so this is what an otherwise unrecognised generator type is parsed into. Applying it
+ * goes through the handler the host registered with [PluginSupportRegistry], since this module has
+ * no visibility of the catalogue.
+ *
+ * See proposal 006, Field-level matchers and generators.
+ */
+data class PluginGenerator(
+  /** Name of the generator, which is also the key it is resolved by in the plugin catalogue */
+  val generatorName: String,
+  /** Configuration values for the generator, stored alongside the name in the Pact file */
+  val values: Map<String, JsonValue> = mapOf()
+) : Generator {
+  override val type: String
+    get() = generatorName
+
+  override fun generate(context: MutableMap<String, Any>, exampleValue: Any?): Any? {
+    val support = PluginSupportRegistry.support()
+    if (support == null) {
+      logger.error {
+        "'$generatorName' is not a standard generator, and support for plugin-provided generators " +
+          "is not available. Load the plugin that provides '$generatorName' before running the test."
+      }
+      return exampleValue
+    }
+    // The generator application path does not carry the path of the value, so a plugin generator
+    // that cares where it is being applied gets it from the context if the caller supplied one
+    val path = context[PATH_CONTEXT_KEY]?.toString() ?: "$"
+    // Deliberately broad: a plugin can fail in any number of ways, and none of them should take
+    // the whole test run down - the example value from the Pact file is a usable fallback
+    @Suppress("TooGenericExceptionCaught")
+    return try {
+      support.generate(generatorName, values, exampleValue, path, context)
+    } catch (ex: Exception) {
+      logger.error(ex) { "Failed to apply the '$generatorName' generator provided by a plugin" }
+      exampleValue
+    }
+  }
+
+  override fun toMap(pactSpecVersion: PactSpecVersion?): Map<String, Any> =
+    mapOf("type" to generatorName) + values.mapValues { Json.fromJson(it.value) as Any }
+
+  companion object {
+    /** Context key a caller can set to tell a plugin generator where the value it is generating sits */
+    const val PATH_CONTEXT_KEY = "pact:generator:path"
+  }
 }
 
 data class ArrayContainsGenerator(

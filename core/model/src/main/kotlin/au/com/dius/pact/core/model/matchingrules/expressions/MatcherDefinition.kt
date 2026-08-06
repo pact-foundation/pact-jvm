@@ -16,14 +16,17 @@ import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.PluginMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.SemverMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.plugins.PluginSupportRegistry
 import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.support.parsers.StringLexer
 
 class MatcherDefinitionLexer(expression: String): StringLexer(expression) {
@@ -35,6 +38,9 @@ class MatcherDefinitionLexer(expression: String): StringLexer(expression) {
 
   fun matchBoolean() = matchRegex(BOOLEAN_LITERAL).isNotEmpty()
 
+  /** The name of a matching rule provided by a plugin */
+  fun matchIdentifier() = matchRegex(ID).isNotEmpty()
+
   fun highlightPosition(): String {
     return if (index > 0) "^".padStart(index + 1)
     else "^"
@@ -45,6 +51,7 @@ class MatcherDefinitionLexer(expression: String): StringLexer(expression) {
     val NUMBER_LITERAL = Regex("^\\d+")
     val DECIMAL_LITERAL = Regex("^-?\\d+\\.\\d+")
     val BOOLEAN_LITERAL = Regex("^(true|false)")
+    val ID = Regex("^[a-zA-Z]+")
   }
 }
 
@@ -330,6 +337,7 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
   //    | 'boolean' COMMA BOOLEAN_LITERAL { $rule = BooleanMatcher.INSTANCE; $value = $BOOLEAN_LITERAL.getText(); $type = ValueType.Boolean; }
   //    | 'semver' COMMA s=string { $rule = SemverMatcher.INSTANCE; $value = $s.contents; $type = ValueType.String; }
   //    | 'contentType' COMMA ct=string COMMA s=string { $rule = new ContentTypeMatcher($ct.contents); $value = $s.contents; $type = ValueType.Unknown; }
+  //    | name=ID COMMA ( config=primitiveValue COMMA )? example=primitiveValue { $rule = new PluginMatcher($name.getText(), config); }
   //    | DOLLAR ref=string { $reference = new MatchingReference($ref.contents); $type = ValueType.Unknown; }
   //    ;
   fun matchingRule(): Result<MatchingRuleResult, String> {
@@ -348,6 +356,10 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
       lexer.matchString("semver") -> matchSemver()
       lexer.matchString("contentType") -> matchContentType()
       lexer.peekNextChar() == '$' -> matchReference()
+      // Not a standard matching rule. It is not necessarily an error - the name may be provided by
+      // a plugin, which this module has no way of checking - so it becomes a PluginMatcher to be
+      // resolved against the plugin catalogue when the rule is applied.
+      lexer.matchIdentifier() -> matchPluginRule(lexer.lastMatch!!)
       else -> Result.Err("Was expecting a matching rule definition at index ${lexer.index}")
     }
   }
@@ -552,6 +564,51 @@ class MatcherDefinitionParser(private val lexer: MatcherDefinitionLexer) {
     }
   } else {
     Result.Err(parseError("Was expecting a ',' at index ${lexer.index}"))
+  }
+
+  // name=ID COMMA ( config=primitiveValue COMMA )? example=primitiveValue
+  //
+  // A rule name the core framework does not know, provided by a plugin. The optional configuration
+  // argument is stored under the key named by the `config-key` value on the rule's catalogue entry,
+  // defaulting to `value` - which is why this needs the plugin support handler.
+  private fun matchPluginRule(name: String): Result<MatchingRuleResult, String> {
+    if (!matchChar(',')) {
+      return Result.Err(parseError("Was expecting a ',' at index ${lexer.index}"))
+    }
+    return when (val firstResult = primitiveValue(false)) {
+      is Result.Err -> firstResult
+      is Result.Ok -> {
+        val first = firstResult.value
+        if (matchChar(',')) {
+          // The first value was the configuration argument, and this one is the example
+          when (val exampleResult = primitiveValue(false)) {
+            is Result.Err -> exampleResult
+            is Result.Ok -> {
+              val config = mapOf(
+                PluginSupportRegistry.configKeyFor(name) to configValue(first.first, first.second)
+              )
+              Result.Ok(MatchingRuleResult(exampleResult.value.first, exampleResult.value.second,
+                PluginMatcher(name, config), exampleResult.value.third))
+            }
+          }
+        } else {
+          Result.Ok(MatchingRuleResult(first.first, first.second, PluginMatcher(name), first.third))
+        }
+      }
+    }
+  }
+
+  /**
+   * A configuration argument as the JSON value it is stored as. The lexer hands back the source
+   * text, so the type it was written as is what decides whether `1` is stored as a number or a
+   * string.
+   */
+  private fun configValue(value: String?, type: ValueType): JsonValue = when {
+    value == null -> JsonValue.Null
+    type == ValueType.Integer -> JsonValue.Integer(value.toCharArray())
+    type == ValueType.Decimal || type == ValueType.Number -> JsonValue.Decimal(value.toCharArray())
+    type == ValueType.Boolean -> if (value.toBoolean()) JsonValue.True else JsonValue.False
+    else -> JsonValue.StringValue(value)
   }
 
   // 'include' COMMA s=string { $rule = new IncludeMatcher($s.contents); $value = $s.contents; $type = ValueType.String; }
