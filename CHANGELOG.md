@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.4 - Maintenance Release
+
+* c5a24aa07 - chore: Update dependencies (Ronald Holshausen, Thu Aug 6 10:42:09 2026 +1000)
+* 27748f4d9 - feat(models): Support matching rules and plugins provided by plugins (Ronald Holshausen, Thu Aug 6 10:14:32 2026 +1000)
+* acea9dca8 - chore: Update pact-plugin-driver to 1.2.0 (Ronald Holshausen, Wed Aug 5 15:58:56 2026 +1000)
+* f2b69666f - feat: register host-provided core content matcher/generator capabilities (Ronald Holshausen, Wed Jul 22 10:55:01 2026 +1000)
+* be145d74e - Merge branch 'master' into v4.7.x (Ronald Holshausen, Wed Jul 22 09:59:07 2026 +1000)
+* 9390503ad - chore: Upgrade Kotlin to 2.3.20 (Ronald Holshausen, Wed Jul 22 09:58:43 2026 +1000)
+* 348ed283e - chore: Update plugin driver to 1.1.0 (Ronald Holshausen, Wed Jul 22 09:51:22 2026 +1000)
+* e87ccfa78 - chore: remove beta flag from driver version (Ronald Holshausen, Fri Jul 17 10:53:54 2026 +1000)
+* 5ab030c5b - bump version to 4.7.4 (Ronald Holshausen, Wed Jun 24 14:50:29 2026 +1000)
+* 9efd82fba - Merge branch 'master' into v4.7.x (Ronald Holshausen, Fri Jun 19 15:55:09 2026 +1000)
+* 30629027b - chore: add pact-jvm user agent (JP-Ellis, Thu Jun 18 08:53:52 2026 +1000)
+
 # 4.7.3 - V2 plugin logging improvements
 
 * 368cc3e1e - chore: Update io.pact.plugin.driver:core to 1.0.0-beta.5 (Ronald Holshausen, Wed Jun 24 13:47:49 2026 +1000)
