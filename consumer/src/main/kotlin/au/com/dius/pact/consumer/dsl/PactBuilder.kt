@@ -17,7 +17,10 @@ import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.V4Interaction
 import au.com.dius.pact.core.model.V4Pact
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.PluginGenerator
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.PluginMatcher
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json.toJson
 import au.com.dius.pact.core.support.Result.Ok
@@ -34,8 +37,11 @@ import io.pact.plugins.jvm.core.ContentMatcher
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.PactPlugin
 import io.pact.plugins.jvm.core.PactPluginEntryNotFoundException
+import io.pact.plugins.jvm.core.PactPluginManifest
 import io.pact.plugins.jvm.core.PactPluginNotFoundException
 import io.pact.plugins.jvm.core.TestContext
+import io.pact.plugins.jvm.core.findFieldGenerator
+import io.pact.plugins.jvm.core.findFieldMatcher
 import java.util.UUID
 
 interface DslBuilder {
@@ -319,6 +325,13 @@ open class PactBuilder(
     }
   }
 
+  private fun setupContentsFromDsl(dslPart: DslPart, part: IHttpPart, contentType: String) {
+    dslPart.close()
+    part.body = OptionalBody.body(dslPart.toString().toByteArray(), ContentType(contentType))
+    part.matchingRules.addCategory(dslPart.matchers)
+    part.generators.addGenerators(dslPart.generators)
+  }
+
   @Suppress("NestedBlockDepth")
   private fun setupContents(contents: Any?, part: IHttpPart, interaction: V4Interaction.SynchronousHttp) {
     logger.debug { "Explicit contents, will look for a content matcher" }
@@ -326,6 +339,14 @@ open class PactBuilder(
       is Map<*, *> -> if (contents.containsKey("pact:content-type")) {
         val contentType = contents["pact:content-type"].toString()
         val bodyConfig = contents.filter { it.key != "pact:content-type" } as Map<String, Any?>
+        val dslBody = bodyConfig["body"]
+        if (dslBody is DslPart) {
+          // A body built with the standard DSL carries its own matching rules and generators, which
+          // would be lost if it were serialised into the config map. This is how a plugin-provided
+          // field rule reaches a core content type - see proposal 006.
+          setupContentsFromDsl(dslBody, part, contentType)
+          return
+        }
         val matcher = CatalogueManager.findContentMatcher(ContentType(contentType))
         logger.debug { "Found a matcher for '$contentType': $matcher" }
         if (matcher == null || matcher.isCore) {
@@ -431,12 +452,12 @@ open class PactBuilder(
       if (i.key.isNotEmpty()) i else i.withGeneratedKey()
     } as List<Interaction>
     return V4Pact(Consumer(consumer), Provider(provider), interactions.toMutableList(),
-      BasePact.metaData(null, PactSpecVersion.V4) + additionalMetadata + pluginMetadata(),
+      BasePact.metaData(null, PactSpecVersion.V4) + additionalMetadata + pluginMetadata(interactions),
       UnknownPactSource)
   }
 
-  private fun pluginMetadata(): Map<String, Any?> {
-    return mapOf("plugins" to plugins.map {
+  private fun pluginMetadata(interactions: List<Interaction>): Map<String, Any?> {
+    val declared = plugins.map {
       val map = mutableMapOf<String, Any?>(
         "name" to it.manifest.name,
         "version" to it.manifest.version
@@ -445,7 +466,80 @@ open class PactBuilder(
         map["configuration"] = pluginConfiguration[it.manifest.name]
       }
       map
-    })
+    }
+    val declaredNames = declared.mapNotNull { it["name"] }.toSet()
+    return mapOf("plugins" to declared + pluginsProvidingRules(interactions, declaredNames))
+  }
+
+  /**
+   * A plugin-provided matching rule or generator never goes through `configureInteraction`, which
+   * is where the `plugins` metadata entry is written for a plugin that owns a content type or a
+   * transport. Without that entry, provider verification has no way to know it has to load the
+   * plugin before it can interpret the file - so any plugin providing a rule in the Pact is
+   * recorded here as well. See proposal 006 section 4.
+   */
+  private fun pluginsProvidingRules(
+    interactions: List<Interaction>,
+    alreadyDeclared: Set<Any?>
+  ): List<Map<String, Any?>> {
+    val names = mutableSetOf<String>()
+
+    fun collect(rules: MatchingRules?, generators: Generators?) {
+      rules?.getCategories()?.forEach { category ->
+        rules.rulesForCategory(category).matchingRules.values.forEach { group ->
+          group.rules.filterIsInstance<PluginMatcher>().forEach { names.add(it.ruleName) }
+        }
+      }
+      generators?.categories?.values?.forEach { category ->
+        category.values.filterIsInstance<PluginGenerator>().forEach { names.add(it.generatorName) }
+      }
+    }
+
+    for (interaction in interactions) {
+      val http = interaction.asSynchronousRequestResponse()
+      val async = interaction.asAsynchronousMessage()
+      val sync = interaction.asSynchronousMessages()
+      when {
+        http != null -> {
+          collect(http.request.matchingRules, http.request.generators)
+          collect(http.response.matchingRules, http.response.generators)
+        }
+        async != null -> collect(async.contents.matchingRules, async.contents.generators)
+        sync != null -> {
+          collect(sync.request.matchingRules, sync.request.generators)
+          sync.response.forEach { collect(it.matchingRules, it.generators) }
+        }
+      }
+    }
+
+    return names.mapNotNull { name -> pluginProviding(name) }
+      .distinctBy { it.name }
+      .filterNot { alreadyDeclared.contains(it.name) }
+      .map { mapOf<String, Any?>("name" to it.name, "version" to it.version) }
+  }
+
+  /**
+   * The manifest of the plugin providing the rule or generator, if the catalogue knows one. A name
+   * that resolves to nothing is left alone rather than failing the build: it fails with a better
+   * message when the rule is applied, and a Pact that can not be verified is still more useful
+   * than no Pact at all.
+   */
+  // Deliberately broad: resolution failing for any reason just means no plugin provides the name,
+  // which is diagnosed properly when the rule is applied rather than here
+  @Suppress("TooGenericExceptionCaught", "SwallowedException")
+  private fun pluginProviding(name: String): PactPluginManifest? {
+    val pluginName = try {
+      findFieldMatcher(name).pluginName
+    } catch (ex: Exception) {
+      try {
+        findFieldGenerator(name).pluginName
+      } catch (ex2: Exception) {
+        logger.debug(ex2) { "No plugin in the catalogue provides '$name'" }
+        return null
+      }
+    }
+    // The plugin has to have been loaded for the rule to resolve at all, so it is one of ours
+    return plugins.find { it.manifest.name == pluginName }?.manifest
   }
 
   /**

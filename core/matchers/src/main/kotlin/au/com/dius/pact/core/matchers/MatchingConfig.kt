@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.plugins.PluginSupportRegistry
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
@@ -137,5 +138,9 @@ object MatchingConfig {
     coreContentGenerators.forEach { (key, generator) ->
       CoreCapabilityRegistry.registerContentGenerator(key, generator)
     }
+    // The other direction: core:model reaching out to a plugin to apply a field-level rule or
+    // generator. It lives here because this is the module that has both the plugin catalogue and
+    // the bootstrap that runs before any matching happens (proposal 006).
+    PluginSupportRegistry.register(DriverPluginSupport)
   }
 }

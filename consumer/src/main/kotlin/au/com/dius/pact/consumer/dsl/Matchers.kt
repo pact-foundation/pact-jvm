@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.DslPart.Companion.DATE_2000
 import au.com.dius.pact.core.model.generators.DateGenerator
 import au.com.dius.pact.core.model.generators.DateTimeGenerator
 import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.PluginGenerator
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.generators.RandomBooleanGenerator
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator
@@ -15,7 +16,9 @@ import au.com.dius.pact.core.model.generators.TimeGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.PluginMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.support.json.JsonValue
 import org.apache.commons.lang3.time.DateFormatUtils
 import org.apache.commons.lang3.time.DateUtils
 import java.text.ParseException
@@ -35,6 +38,29 @@ sealed class Matcher(
 
 data class RegexpMatcher(val regex: String, override val value: String?) :
   Matcher(value, RegexMatcher(regex, value), if (value == null) RegexGenerator(regex) else null)
+
+/**
+ * Matches a value with a matching rule provided by a plugin, optionally generating it with a
+ * plugin-provided generator of the same name.
+ *
+ * The rule name is resolved against the plugin catalogue when the rule is applied, so the plugin
+ * providing it has to be loaded (`usingPlugin`) for the test to work - and for the Pact file to
+ * record that it is needed. See proposal 006, Field-level matchers and generators.
+ */
+data class PluginRuleMatcher @JvmOverloads constructor(
+  /** Name of the rule, which is also the key it is resolved by in the plugin catalogue */
+  val ruleName: String,
+  /** The example value to use, which is what the provider's real value is compared against */
+  override val value: Any?,
+  /** Configuration values for the rule. The keys a rule accepts are the plugin's own. */
+  val values: Map<String, JsonValue> = mapOf(),
+  /** If the plugin's generator of the same name should replace the example value on each run */
+  val generate: Boolean = false
+) : Matcher(
+  value,
+  PluginMatcher(ruleName, values),
+  if (generate) PluginGenerator(ruleName, values) else null
+)
 
 data class HexadecimalMatcher(override val value: String?) :
   Matcher(value, RegexMatcher(Matchers.HEXADECIMAL.toString(), value),

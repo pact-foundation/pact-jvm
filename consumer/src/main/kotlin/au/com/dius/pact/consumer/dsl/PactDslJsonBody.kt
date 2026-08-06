@@ -2050,6 +2050,34 @@ open class PactDslJsonBody : DslPart {
   }
 
   /**
+   * Applies a matching rule provided by a plugin to an attribute, and its generator if the matcher
+   * was built with one.
+   *
+   * The rule name is resolved against the plugin catalogue when the rule is applied, so the plugin
+   * providing it has to be loaded (`usingPlugin`) for the test to work. See proposal 006,
+   * Field-level matchers and generators.
+   *
+   * @param name Attribute name
+   * @param matcher The plugin-provided rule and its example value
+   */
+  fun pluginValue(name: String, matcher: PluginRuleMatcher): PactDslJsonBody {
+    val path = constructValidPath(name, rootPath)
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, toJson(matcher.value))
+      is JsonValue.Array -> body.values.forEach { v -> v.asObject()!!.add(name, toJson(matcher.value)) }
+      else -> {}
+    }
+
+    matchers.addRule(path, matcher.matcher!!)
+    val generator = matcher.generator
+    if (generator != null) {
+      generators.addGenerator(Category.BODY, path, generator)
+    }
+
+    return this
+  }
+
+  /**
    * Matches a URL that is composed of a base path and a sequence of path expressions
    * @param name Attribute name
    * @param basePath The base path for the URL (like "http://localhost:8080/") which will be excluded from the matching

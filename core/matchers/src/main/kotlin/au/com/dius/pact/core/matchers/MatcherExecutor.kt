@@ -22,6 +22,7 @@ import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NotEmptyMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.PluginMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.SemverMatcher
@@ -172,6 +173,10 @@ fun <M : Mismatch> domatch(
     is BooleanMatcher -> matchBoolean(path, expected, actual, mismatchFn)
     is StatusCodeMatcher ->
       matchStatusCode(matcher.statusType, matcher.values, expected as Int, actual as Int) as List<M>
+    // A rule the core framework does not implement, resolved against the plugin catalogue by name
+    is PluginMatcher -> matchPluginRule(matcher, path, expected, actual, mismatchFn,
+      context?.matchers?.name ?: "body",
+      context?.pluginConfiguration?.values?.firstOrNull())
     else -> matchEquality(path, expected, actual, mismatchFn)
   }
 }
