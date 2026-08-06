@@ -113,8 +113,8 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-  executeOnShell 'rm -rf build/staging-deploy'
-  executeOnShell './gradlew clean publish -S -x :provider:gradle:publish'
+  executeOnShell 'rm -rf build/staging-deploy build/jreleaser/deploy'
+  executeOnShell './gradlew clean publish -S -x :provider:gradle:publish -x :pact-jvm-server:publish'
   executeOnShell 'JRELEASER_GITHUB_TOKEN=skip jreleaser deploy --output-directory build'
 }
 
