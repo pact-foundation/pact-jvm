@@ -230,6 +230,29 @@ class PactPluginSpec extends Specification {
     !consumer.stateChangeUsesBody
   }
 
+  def 'hasPactWith - configures a local pact file without a broker when pactVerify is requested'() {
+    given:
+    def pactFile = project.file('path/to/pact')
+    project.gradle.startParameter.setTaskNames(['pactVerify'])
+    project.pact {
+      serviceProviders {
+        ProviderA {
+          hasPactWith('ConsumerA') {
+            pactSource = pactFile
+          }
+        }
+      }
+    }
+
+    when:
+    project.evaluate()
+    def consumer = project.tasks.pactVerify_ProviderA.providerToVerify.consumers.first()
+
+    then:
+    consumer.name == 'ConsumerA'
+    consumer.pactSource == pactFile
+  }
+
   def 'hasPactWith - configures a group from a directory'() {
     given:
     def resource = getClass().classLoader.getResource('pacts/foo_pact.json')

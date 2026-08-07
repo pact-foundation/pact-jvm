@@ -127,25 +127,27 @@ class PactPlugin extends PactPluginBase {
   @SuppressWarnings('CatchRuntimeException')
   @CompileStatic
   private void setupPactConsumersFromBroker(GradleProviderInfo provider, Project project, PactPluginExtension ext) {
-    if (ext.broker && project.gradle.startParameter.taskNames.any {
+    Broker broker = ext.broker
+    if (broker == null || !project.gradle.startParameter.taskNames.any {
       it.toLowerCase().contains(PACT_VERIFY.toLowerCase()) }) {
-      Map<String, Object> options = [:]
-      if (ext.broker.pactBrokerUsername) {
-        options.authentication = ['basic', ext.broker.pactBrokerUsername, ext.broker.pactBrokerPassword]
-      } else if (ext.broker.pactBrokerToken) {
-        options.authentication = ['bearer', ext.broker.pactBrokerToken, ext.broker.pactBrokerAuthenticationHeader]
-      }
-      if (provider.brokerConfig.enablePending) {
-        options.enablePending = true
-        options.providerTags = provider.brokerConfig.providerTags
-      }
-      try {
-        provider.consumers = provider.hasPactsFromPactBrokerWithSelectorsV2(options, ext.broker.pactBrokerUrl,
-          provider.brokerConfig.selectors)
-      } catch (RuntimeException ex) {
-        throw new GradleScriptException("Failed to fetch pacts from pact broker ${ext.broker.pactBrokerUrl}",
-          ex)
-      }
+      return
+    }
+
+    Map<String, Object> options = [:]
+    if (broker.pactBrokerUsername) {
+      options.authentication = ['basic', broker.pactBrokerUsername, broker.pactBrokerPassword]
+    } else if (broker.pactBrokerToken) {
+      options.authentication = ['bearer', broker.pactBrokerToken, broker.pactBrokerAuthenticationHeader]
+    }
+    if (provider.brokerConfig.enablePending) {
+      options.enablePending = true
+      options.providerTags = provider.brokerConfig.providerTags
+    }
+    try {
+      provider.consumers = provider.hasPactsFromPactBrokerWithSelectorsV2(options, broker.pactBrokerUrl,
+        provider.brokerConfig.selectors)
+    } catch (RuntimeException ex) {
+      throw new GradleScriptException("Failed to fetch pacts from pact broker ${broker.pactBrokerUrl}", ex)
     }
   }
 }
