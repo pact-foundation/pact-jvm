@@ -813,32 +813,79 @@ fun <M : Mismatch> matchSemver(
   }
 }
 
-@Suppress("MaxLineLength")
+/**
+ * Matching rule entries to add to the plugin catalogue, one per rule this framework implements.
+ *
+ * Each is keyed by the name the rule carries in a request - the same string [MatchingRule.name]
+ * returns and the plugin driver puts in `MatchFieldRequest.rule.type` - so a plugin handed a rule
+ * can name it straight back when it calls into the host, and does not have to know which
+ * specification version introduced it. That version is a value on the entry (`spec-version`)
+ * rather than part of the key. Must stay in step with `MATCHER_CATALOGUE_ENTRIES` in
+ * pact_matching, which differs only by the rules the two implement.
+ */
 fun matcherCatalogueEntries(): List<CatalogueEntry> {
-  return listOf(
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v1-equality"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-regex"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-min-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-max-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v2-minmax-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-number-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-integer-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-decimal-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-date"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-time"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-datetime"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-includes"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-null"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v3-content-type"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-equals-ignore-order"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-min-equals-ignore-order"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-max-equals-ignore-order"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-minmax-equals-ignore-order"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-array-contains"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-notempty"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-semver"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-each-key"),
-    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", "v4-each-value")
-  )
+  return mapOf(
+    "equality" to "V1",
+    "regex" to "V2",
+    "type" to "V2",
+    "min-type" to "V2",
+    "max-type" to "V2",
+    "min-max-type" to "V2",
+    "include" to "V3",
+    "number" to "V3",
+    "integer" to "V3",
+    "decimal" to "V3",
+    "null" to "V3",
+    "date" to "V3",
+    "time" to "V3",
+    "datetime" to "V3",
+    "content-type" to "V3",
+    "values" to "V3",
+    "array-contains" to "V4",
+    "boolean" to "V4",
+    "status-code" to "V4",
+    "not-empty" to "V4",
+    "semver" to "V4",
+    "each-key" to "V4",
+    "each-value" to "V4",
+    "ignore-order" to "V4",
+    "min-ignore-order" to "V4",
+    "max-ignore-order" to "V4",
+    "min-max-ignore-order" to "V4"
+  ).map { (key, specVersion) ->
+    CatalogueEntry(CatalogueEntryType.MATCHER, CatalogueEntryProviderType.CORE, "core", key,
+      mapOf("spec-version" to specVersion))
+  }
+}
+
+/**
+ * Generator entries to add to the plugin catalogue, one per generator this framework implements.
+ *
+ * Keyed the same way [matcherCatalogueEntries] is - by the name the generator carries in a request,
+ * which for generators is `Generator.type`, the same value the Pact file uses and the plugin driver
+ * puts in `GenerateFieldRequest.generator.type`. That is `PascalCase` for generators (`RandomInt`,
+ * `DateTime`) where it is kebab-case for matching rules; the point is that it matches what a plugin
+ * was handed, not that it looks a particular way. Must stay in step with
+ * `GENERATOR_CATALOGUE_ENTRIES` in pact_matching.
+ */
+fun generatorCatalogueEntries(): List<CatalogueEntry> {
+  return mapOf(
+    "RandomInt" to "V3",
+    "RandomDecimal" to "V3",
+    "RandomHexadecimal" to "V3",
+    "RandomString" to "V3",
+    "RandomBoolean" to "V3",
+    "Regex" to "V3",
+    "Uuid" to "V3",
+    "Date" to "V3",
+    "Time" to "V3",
+    "DateTime" to "V3",
+    "ProviderState" to "V3",
+    "MockServerURL" to "V4",
+    "ArrayContains" to "V4",
+    "Null" to "V4"
+  ).map { (key, specVersion) ->
+    CatalogueEntry(CatalogueEntryType.GENERATOR, CatalogueEntryProviderType.CORE, "core", key,
+      mapOf("spec-version" to specVersion))
+  }
 }
