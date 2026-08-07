@@ -129,8 +129,8 @@ object MatchingConfig {
    */
   fun registerCoreCapabilities() {
     CatalogueManager.registerCoreEntries(
-      contentMatcherCatalogueEntries() + matcherCatalogueEntries() + interactionCatalogueEntries() +
-        contentHandlerCatalogueEntries()
+      contentMatcherCatalogueEntries() + matcherCatalogueEntries() + generatorCatalogueEntries() +
+        interactionCatalogueEntries() + contentHandlerCatalogueEntries()
     )
     coreContentMatchers.forEach { (key, matcher) ->
       CoreCapabilityRegistry.registerContentMatcher(key, CoreContentMatcherAdapter(matcher))
@@ -138,6 +138,13 @@ object MatchingConfig {
     coreContentGenerators.forEach { (key, generator) ->
       CoreCapabilityRegistry.registerContentGenerator(key, generator)
     }
+    // Field-level: the standard rules and generators applied to a single value, for a plugin that
+    // owns a content type but not the rules inside it (proposal 009). The collection-wide ones get
+    // a handler that says why they can not be applied one value at a time, rather than no handler.
+    FIELD_RULES.forEach { CoreCapabilityRegistry.registerFieldMatcher(it, CoreFieldRuleMatcher) }
+    COLLECTION_RULES.forEach { CoreCapabilityRegistry.registerFieldMatcher(it, CollectionRuleMatcher) }
+    FIELD_GENERATORS.forEach { CoreCapabilityRegistry.registerFieldGenerator(it, CoreFieldValueGenerator) }
+    COLLECTION_GENERATORS.forEach { CoreCapabilityRegistry.registerFieldGenerator(it, CollectionValueGenerator) }
     // The other direction: core:model reaching out to a plugin to apply a field-level rule or
     // generator. It lives here because this is the module that has both the plugin catalogue and
     // the bootstrap that runs before any matching happens (proposal 006).
