@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.PluginGenerator
 import au.com.dius.pact.core.model.matchingrules.PluginMatcher
 import au.com.dius.pact.core.model.plugins.PluginSupport
@@ -78,6 +79,7 @@ object DriverPluginSupport : PluginSupport {
     values: Map<String, JsonValue>,
     exampleValue: Any?,
     path: String,
+    mode: GeneratorTestMode?,
     context: Map<String, Any>
   ): Any? {
     if (TestContext.currentTestRunId() == null) {
@@ -85,19 +87,40 @@ object DriverPluginSupport : PluginSupport {
     }
 
     val generator = findFieldGenerator(name)
-    // The category only affects how a mismatch is reported, which generation has no equivalent of
-    val fieldContext = FieldContext(path = path, category = "body")
+    // The category only affects how a mismatch is reported, which generation has no equivalent of.
+    // The test context goes across because proposal 006 requires a generator to get everything it
+    // needs from the request rather than from hidden host state - `ProviderState` reads the
+    // provider state values from it, `MockServerURL` the mock server URL.
+    val fieldContext = FieldContext(
+      path = path,
+      category = "body",
+      testContext = toTestContext(context)
+    )
+    val testMode = when (mode) {
+      GeneratorTestMode.Consumer -> FieldTestMode.CONSUMER
+      GeneratorTestMode.Provider -> FieldTestMode.PROVIDER
+      null -> FieldTestMode.UNKNOWN
+    }
     logger.debug { "Applying the '$name' generator provided by ${generator.pluginName}" }
 
     val generated = generator.generateField(
       PluginGenerator(name, values),
       toFieldValue(exampleValue),
-      FieldTestMode.UNKNOWN,
+      testMode,
       fieldContext
     )
     return fromFieldValue(generated)
   }
 }
+
+/**
+ * The generator application context, as the plugin interface carries it. The keys the model uses to
+ * tell a plugin generator where and how it is being applied are dropped - they are parameters of
+ * the request in their own right, and a plugin has no use for the Kotlin values behind them.
+ */
+private fun toTestContext(context: Map<String, Any>): Map<String, JsonValue> = context
+  .filterKeys { it != PluginGenerator.PATH_CONTEXT_KEY && it != PluginGenerator.MODE_CONTEXT_KEY }
+  .mapValues { Json.toJson(it.value) }
 
 /**
  * Converts a value from the matching/generation path into the form the plugin interface carries.

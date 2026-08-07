@@ -1,6 +1,10 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
+import au.com.dius.pact.core.model.generators.PluginGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
+import au.com.dius.pact.core.model.plugins.PluginSupportRegistry
+import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import com.google.protobuf.Struct
 import com.google.protobuf.Value
@@ -253,6 +257,46 @@ class CoreFieldCapabilitiesSpec extends Specification {
     generator.core
     generated instanceof FieldValue.Text
     ((FieldValue.Text) generated).value.length() == 36
+  }
+
+  /**
+   * A generator gets everything it needs from the request - proposal 006 rules out hidden host
+   * state - so the context and the side of the test the model is applying generators on both have
+   * to survive the hop out to the plugin. `MockServerURL` reads the URL from the context and only
+   * applies on the consumer side, so it fails both ways if either is dropped.
+   */
+  def 'the generation context and test mode reach the generator'() {
+    given:
+    MatchingConfig.INSTANCE.registerCoreCapabilities()
+    def context = [
+      (PluginGenerator.PATH_CONTEXT_KEY): '$.url',
+      (PluginGenerator.MODE_CONTEXT_KEY): GeneratorTestMode.Consumer,
+      mockServer: [href: 'http://127.0.0.1:9876']
+    ]
+
+    when:
+    def generated = PluginSupportRegistry.support().generate('MockServerURL',
+      [example: new JsonValue.StringValue('http://localhost:1234/a'),
+       regex: new JsonValue.StringValue('.*(/a)')],
+      'http://localhost:1234/a', '$.url', GeneratorTestMode.Consumer, context)
+
+    then:
+    generated == 'http://127.0.0.1:9876/a'
+  }
+
+  /** The provider side of the same generator leaves the example value alone. */
+  def 'a generator for the other side of the test is not applied'() {
+    given:
+    MatchingConfig.INSTANCE.registerCoreCapabilities()
+
+    when:
+    def generated = PluginSupportRegistry.support().generate('MockServerURL',
+      [example: new JsonValue.StringValue('http://localhost:1234/a'),
+       regex: new JsonValue.StringValue('.*(/a)')],
+      'http://localhost:1234/a', '$.url', GeneratorTestMode.Provider, [:])
+
+    then:
+    generated == 'http://localhost:1234/a'
   }
 
   /**

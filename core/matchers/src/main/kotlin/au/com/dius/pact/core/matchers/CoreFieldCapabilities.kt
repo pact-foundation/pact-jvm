@@ -113,12 +113,15 @@ object CoreFieldValueGenerator : CoreFieldGenerator {
     }
 
     val example = FieldValue.fromProto(request.exampleValue)
-    val mode = if (request.testMode == PluginV2.GenerateContentRequest.TestMode.Consumer)
-      GeneratorTestMode.Consumer else GeneratorTestMode.Provider
-
     // A generator that does not apply on this side of the test leaves the example value alone, the
-    // same as it would when applied to a body
-    if (!generator.correspondsToMode(mode)) {
+    // same as it would when applied to a body. An unknown mode applies it rather than guessing a
+    // side: guessing wrong turns `MockServerURL` into a silent no-op in a consumer test.
+    val mode = when (request.testMode) {
+      PluginV2.GenerateContentRequest.TestMode.Consumer -> GeneratorTestMode.Consumer
+      PluginV2.GenerateContentRequest.TestMode.Provider -> GeneratorTestMode.Provider
+      else -> null
+    }
+    if (mode != null && !generator.correspondsToMode(mode)) {
       return PluginV2.GenerateFieldResponse.newBuilder().setValue(example.toProto()).build()
     }
 

@@ -145,6 +145,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
       mode: GeneratorTestMode
     ): OptionalBody {
       val handler = findContentTypeHandler(contentType)
+      // So that a plugin-provided generator knows which side of the test it is running on
+      context[PluginGenerator.MODE_CONTEXT_KEY] = mode
       return handler?.processBody(body) { bodyResult: QueryResult ->
         for ((key, generator) in generators) {
           if (generator.correspondsToMode(mode)) {

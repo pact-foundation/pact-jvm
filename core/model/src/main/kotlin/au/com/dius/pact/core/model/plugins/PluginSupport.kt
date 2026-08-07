@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.plugins
 
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.support.json.JsonValue
 
 /**
@@ -32,12 +33,21 @@ interface PluginSupport {
    *
    * @param path Path to the value being generated, as a Pact matching rule expression. The
    *   generator application path does not always know one, in which case this is the document root.
+   * @param mode Which side of the test the generator is running on, or null where the generator
+   *   application path does not know. A plugin generator that behaves differently per side (the
+   *   way `ProviderState` and `MockServerURL` do) needs this; passing null means "apply it
+   *   regardless" rather than guessing a side.
    */
+  // Every one of these is data the plugin interface's GenerateFieldRequest carries in its own
+  // right, so bundling them into a holder here would only move the parameter list one call further
+  // out
+  @Suppress("LongParameterList")
   fun generate(
     name: String,
     values: Map<String, JsonValue>,
     exampleValue: Any?,
     path: String,
+    mode: GeneratorTestMode?,
     context: Map<String, Any>
   ): Any?
 }

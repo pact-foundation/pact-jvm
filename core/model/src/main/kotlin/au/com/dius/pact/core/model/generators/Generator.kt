@@ -667,11 +667,12 @@ data class PluginGenerator(
     // The generator application path does not carry the path of the value, so a plugin generator
     // that cares where it is being applied gets it from the context if the caller supplied one
     val path = context[PATH_CONTEXT_KEY]?.toString() ?: "$"
+    val mode = context[MODE_CONTEXT_KEY] as? GeneratorTestMode
     // Deliberately broad: a plugin can fail in any number of ways, and none of them should take
     // the whole test run down - the example value from the Pact file is a usable fallback
     @Suppress("TooGenericExceptionCaught")
     return try {
-      support.generate(generatorName, values, exampleValue, path, context)
+      support.generate(generatorName, values, exampleValue, path, mode, context)
     } catch (ex: Exception) {
       logger.error(ex) { "Failed to apply the '$generatorName' generator provided by a plugin" }
       exampleValue
@@ -684,6 +685,12 @@ data class PluginGenerator(
   companion object {
     /** Context key a caller can set to tell a plugin generator where the value it is generating sits */
     const val PATH_CONTEXT_KEY = "pact:generator:path"
+
+    /**
+     * Context key a caller can set to tell a plugin generator which side of the test it is running
+     * on. Absent means the application path does not know, and the generator is applied regardless.
+     */
+    const val MODE_CONTEXT_KEY = "pact:generator:mode"
   }
 }
 
