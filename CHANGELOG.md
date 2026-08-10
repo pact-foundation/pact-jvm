@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.5 - Bugfix Release
+
+* 38b575f0d - fix: Allow Gradle pact file verification without a broker (Matt Van Horn, Fri Aug 7 10:53:35 2026 -0700)
+* 13234ea7a - chore: Update plugin driver to 1.2.2 (Ronald Holshausen, Mon Aug 10 15:34:30 2026 +1000)
+* db828e16c - feat(plugins): Pass the generation context and test mode to a plugin generator (Ronald Holshausen, Fri Aug 7 17:07:25 2026 +1000)
+* 4d26dd86c - feat(plugins): Register the standard matching rules and generators as core plugin capabilities (Ronald Holshausen, Fri Aug 7 16:10:42 2026 +1000)
+* 42a79e1e9 - chore(v2-plugins): Support matching rules and generators from plugins (Ronald Holshausen, Thu Aug 6 15:23:43 2026 +1000)
+* a9fd862fe - chore: Update JVM Plugin Driver to 1.2.1 (Ronald Holshausen, Thu Aug 6 15:22:41 2026 +1000)
+* ef30cd1ca - chore: skip publishing pact-jvm-server as it causes Maven Central to return 408 error response (Ronald Holshausen, Thu Aug 6 13:08:49 2026 +1000)
+* 2d0d363d3 - bump version to 4.7.5 (Ronald Holshausen, Thu Aug 6 13:06:21 2026 +1000)
+
 # 4.7.4 - Maintenance Release
 
 * c5a24aa07 - chore: Update dependencies (Ronald Holshausen, Thu Aug 6 10:42:09 2026 +1000)
