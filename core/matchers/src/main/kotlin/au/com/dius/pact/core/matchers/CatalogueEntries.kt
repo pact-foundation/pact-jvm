@@ -5,7 +5,11 @@ import io.pact.plugins.jvm.core.CatalogueEntryProviderType
 import io.pact.plugins.jvm.core.CatalogueEntryType
 
 /**
- * Configures all the core transport catalogue entries
+ * Configures all the core transport and interaction catalogue entries.
+ *
+ * There is one interaction entry per interaction type a Pact file can record, and the transport
+ * entries are a separate concern - it is only history that the request/response interaction is the
+ * original Pact one carried over HTTP.
  */
 fun interactionCatalogueEntries(): List<CatalogueEntry> {
   return listOf(
@@ -14,6 +18,8 @@ fun interactionCatalogueEntries(): List<CatalogueEntry> {
       "http", mapOf()),
     CatalogueEntry(CatalogueEntryType.TRANSPORT, CatalogueEntryProviderType.CORE, "core",
       "https", mapOf()),
+    CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
+      "request-response", mapOf()),
     CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
       "message", mapOf()),
     CatalogueEntry(CatalogueEntryType.INTERACTION, CatalogueEntryProviderType.CORE, "core",
