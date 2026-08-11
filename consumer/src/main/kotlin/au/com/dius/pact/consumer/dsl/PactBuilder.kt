@@ -234,7 +234,9 @@ open class PactBuilder(
   private fun forEntry(entry: CatalogueEntry, description: String, key: String?): V4Interaction {
     return when (entry.providerType) {
       CatalogueEntryProviderType.CORE -> when (entry.key) {
-        "http", "https" -> V4Interaction.SynchronousHttp(key.orEmpty(), description)
+        // 'http'/'https' are the transports the request/response interaction is carried over, and
+        // resolve to the same interaction type as 'request-response' names directly.
+        "http", "https", "request-response" -> V4Interaction.SynchronousHttp(key.orEmpty(), description)
         "message" -> V4Interaction.AsynchronousMessage(key.orEmpty(), description)
         "synchronous-message" -> V4Interaction.SynchronousMessages(key.orEmpty(), description)
         else -> TODO("Interactions of type '${entry.key}' are not currently supported")

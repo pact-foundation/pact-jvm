@@ -66,6 +66,27 @@ class PactBuilderSpec extends Specification {
     builder.currentInteraction instanceof V4Interaction.SynchronousHttp
   }
 
+  @Unroll
+  def 'expectsToReceive - resolves the core interaction type #interactionType'() {
+    given:
+    def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
+
+    when:
+    builder.expectsToReceive('test interaction', interactionType)
+
+    then:
+    interactionClass.isInstance(builder.currentInteraction)
+
+    where:
+
+    interactionType                        | interactionClass
+    'core/transport/http'                  | V4Interaction.SynchronousHttp
+    'core/transport/https'                 | V4Interaction.SynchronousHttp
+    'core/interaction/request-response'    | V4Interaction.SynchronousHttp
+    'core/interaction/message'             | V4Interaction.AsynchronousMessage
+    'core/interaction/synchronous-message' | V4Interaction.SynchronousMessages
+  }
+
   def 'supports configuring the HTTP interaction attributes'() {
     given:
     def builder = new PactBuilder('test', 'test', PactSpecVersion.V4)
