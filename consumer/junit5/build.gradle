@@ -67,6 +67,7 @@ dependencies {
     exclude group: 'org.apache.groovy'
   }
   testImplementation 'org.apache.commons:commons-collections4'
+  testImplementation 'com.squareup.okhttp3:okhttp:5.4.0'
 
   // JAX-B dependencies for JDK 9+
   testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
