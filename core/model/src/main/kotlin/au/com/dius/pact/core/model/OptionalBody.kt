@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
 import au.com.dius.pact.core.support.json.JsonParser
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.codec.binary.Hex
-import org.apache.tika.config.TikaConfig
+import org.apache.tika.Tika
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
 import java.util.Base64
@@ -130,11 +130,12 @@ data class OptionalBody @JvmOverloads constructor(
     this.isPresent() -> {
       if (tika != null) {
         val metadata = Metadata()
-        val mimetype = tika.detector.detect(TikaInputStream.get(value!!), metadata)
-        if (mimetype.baseType.type == "text") {
-          detectStandardTextContentType() ?: ContentType(mimetype)
+        val mimetype = tika.detect(TikaInputStream.get(value!!), metadata)
+        val detectedContentType = ContentType(mimetype)
+        if (detectedContentType.contentType?.baseType?.type == "text") {
+          detectStandardTextContentType() ?: detectedContentType
         } else {
-          ContentType(mimetype)
+          detectedContentType
         }
       } else {
         detectStandardTextContentType()
@@ -247,7 +248,7 @@ data class OptionalBody @JvmOverloads constructor(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    private val tika = try { TikaConfig() } catch (e: RuntimeException) {
+    private val tika = try { Tika() } catch (e: RuntimeException) {
       logger.warn(e) { "Could not initialise Tika, detecting content types will be disabled" }
       null
     }

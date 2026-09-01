@@ -40,7 +40,7 @@ import io.pact.plugins.jvm.core.CatalogueEntryType
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang3.time.DateUtils
-import org.apache.tika.config.TikaConfig
+import org.apache.tika.Tika
 import org.apache.tika.io.TikaInputStream
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.mime.MediaType
@@ -705,7 +705,7 @@ fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: 
   }
 }
 
-private val tika = TikaConfig()
+private val tika = Tika()
 
 fun <M : Mismatch> matchContentType(
   path: List<String>,
@@ -731,7 +731,7 @@ fun <M : Mismatch> matchContentType(
   val metadata = Metadata()
   val stream = TikaInputStream.get(binaryData)
   var detectedContentType = stream.use { stream ->
-    tika.detector.detect(stream, metadata)
+    MediaType.parse(tika.detect(stream, metadata))
   }
 
   if (detectedContentType == MediaType.TEXT_PLAIN) {

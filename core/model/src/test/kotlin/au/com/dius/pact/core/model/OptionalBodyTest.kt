@@ -113,5 +113,14 @@ class OptionalBodyTest : StringSpec() {
     "a present body or else returns the body" {
       presentBody.orElse("else".toByteArray()).toString(Charset.defaultCharset()) shouldBe "present"
     }
+
+    "detects XML content type via Tika for a present body with no content type set" {
+      OptionalBody.body("<?xml version=\"1.0\"?><a/>".toByteArray()).contentType.isXml() shouldBe true
+    }
+
+    "detects binary content type via Tika magic-byte detection for a present body with no content type set" {
+      val png = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+      OptionalBody.body(png).contentType.isBinaryType() shouldBe true
+    }
   }
 }
