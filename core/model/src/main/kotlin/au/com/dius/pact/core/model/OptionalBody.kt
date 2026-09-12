@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.ContentType.Companion.JSONREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.UNKNOWN
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP
 import au.com.dius.pact.core.model.ContentType.Companion.XMLREGEXP2
+import au.com.dius.pact.core.support.json.JsonException
 import au.com.dius.pact.core.support.json.JsonParser
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.codec.binary.Hex
@@ -172,18 +173,35 @@ data class OptionalBody @JvmOverloads constructor(
       State.PRESENT -> {
         if (value!!.isNotEmpty()) {
           if (contentType.isJson()) {
-            if (contentTypeHint == ContentTypeHint.BINARY) {
-              mapOf(
+            when (contentTypeHint) {
+              ContentTypeHint.BINARY -> mapOf(
                 "content" to valueAsString(),
                 "contentType" to contentType.toString(),
                 "encoded" to "JSON"
               )
-            } else {
-              mapOf(
-                "content" to JsonParser.parseString(valueAsString()),
+              ContentTypeHint.TEXT -> mapOf(
+                "content" to valueAsString(),
                 "contentType" to contentType.toString(),
-                "encoded" to false
+                "encoded" to false,
+                "contentTypeHint" to contentTypeHint.name
               )
+              ContentTypeHint.DEFAULT -> try {
+                mapOf(
+                  "content" to JsonParser.parseString(valueAsString()),
+                  "contentType" to contentType.toString(),
+                  "encoded" to false
+                )
+              } catch (e: JsonException) {
+                logger.warn(e) {
+                  "Body for content type $contentType is not valid JSON, encoding as base64"
+                }
+                mapOf(
+                  "content" to valueAsBase64(),
+                  "contentType" to contentType.toString(),
+                  "encoded" to "base64",
+                  "contentTypeHint" to contentTypeHint.name
+                )
+              }
             }
           } else if (contentTypeHint == ContentTypeHint.BINARY || contentType.isBinaryType()) {
             mapOf(
