@@ -687,10 +687,55 @@ open class V4Pact @JvmOverloads constructor(
     return V4Pact(consumer, provider, merge(interactions).toMutableList(), metadata, source)
   }
 
+  override fun mergeInteractions(other: Pact): Pact {
+    return V4Pact(consumer, provider, merge(other.interactions).toMutableList(),
+      mergeMetadata(metadata, other.metadata), source)
+  }
+
   private fun merge(interactions: List<Interaction>): List<Interaction> {
     val mergedResult = this.interactions.map { it.asV4Interaction().withGeneratedKey() }.associateBy { it.key } +
       interactions.map { it.asV4Interaction().withGeneratedKey() }.associateBy { it.key }
     return mergedResult.values.toList()
+  }
+
+  /**
+   * Merges [first] and [second] pact metadata, so a plugin's `configuration` entry recorded
+   * only in [second] (for instance a schema keyed by a hash [first] never saw) is not lost.
+   * Every other metadata key keeps [first]'s value, since both pacts describe the same
+   * consumer/provider pair.
+   */
+  private fun mergeMetadata(first: Map<String, Any?>, second: Map<String, Any?>): Map<String, Any?> {
+    return if (first["plugins"] == null && second["plugins"] == null) {
+      first
+    } else {
+      first + mapOf("plugins" to mergePluginEntries(asPluginList(first["plugins"]), asPluginList(second["plugins"])))
+    }
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun asPluginList(value: Any?): List<Map<String, Any?>> = value as? List<Map<String, Any?>> ?: emptyList()
+
+  private fun mergePluginEntries(
+    first: List<Map<String, Any?>>,
+    second: List<Map<String, Any?>>
+  ): List<Map<String, Any?>> {
+    val byName = first.associateBy { it["name"] }.toMutableMap()
+    second.forEach { entry ->
+      val existing = byName[entry["name"]]
+      byName[entry["name"]] = if (existing != null) mergePluginConfiguration(existing, entry) else entry
+    }
+    return byName.values.toList()
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun mergePluginConfiguration(first: Map<String, Any?>, second: Map<String, Any?>): Map<String, Any?> {
+    val firstConfig = first["configuration"] as? Map<String, JsonValue>
+    val secondConfig = second["configuration"] as? Map<String, JsonValue>
+    return when {
+      firstConfig == null -> second
+      secondConfig == null -> first
+      else -> first + mapOf("configuration" to firstConfig.toMutableMap().deepMerge(secondConfig))
+    }
   }
 
   override fun asRequestResponsePact(): Result<RequestResponsePact, String> {
