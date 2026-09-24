@@ -26,7 +26,7 @@ object PactMerge {
         val conflicts = cartesianProduct(existing.interactions, newPact.interactions)
           .filter { it.first.conflictsWith(it.second) }
         if (conflicts.isEmpty()) {
-          MergeResult(true, "", existing.mergeInteractions(newPact.interactions))
+          MergeResult(true, "", existing.mergeInteractions(newPact))
         } else {
           MergeResult(false, "Cannot merge pacts as there were ${conflicts.size} conflict(s) " +
             "between the interactions - ${conflicts.joinToString("\n")}")

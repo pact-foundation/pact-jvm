@@ -727,14 +727,21 @@ open class V4Pact @JvmOverloads constructor(
     return byName.values.toList()
   }
 
-  @Suppress("UNCHECKED_CAST")
+  /**
+   * A pact built in-memory by [au.com.dius.pact.consumer.dsl.PactBuilder] carries `configuration`
+   * as `Map<String, JsonValue>`, but the same field read off a pact file on disk (the
+   * [PactMerge] path) has already been unwrapped into plain Kotlin maps/strings by
+   * [au.com.dius.pact.core.support.Json.fromJson]. Normalising both through [Json.toJson] first
+   * means [deepMerge] always sees `JsonValue`, instead of an erased-generic cast that "succeeds"
+   * on the disk-loaded shape and then silently skips the structural merge.
+   */
   private fun mergePluginConfiguration(first: Map<String, Any?>, second: Map<String, Any?>): Map<String, Any?> {
-    val firstConfig = first["configuration"] as? Map<String, JsonValue>
-    val secondConfig = second["configuration"] as? Map<String, JsonValue>
+    val firstConfig = (first["configuration"] as? Map<*, *>)?.let { Json.toJson(it).asObject() }
+    val secondConfig = (second["configuration"] as? Map<*, *>)?.let { Json.toJson(it).asObject() }
     return when {
       firstConfig == null -> second
       secondConfig == null -> first
-      else -> first + mapOf("configuration" to firstConfig.toMutableMap().deepMerge(secondConfig))
+      else -> first + mapOf("configuration" to firstConfig.entries.toMutableMap().deepMerge(secondConfig.entries))
     }
   }
 
