@@ -28,6 +28,13 @@ abstract class BasePact @JvmOverloads constructor(
 
   open fun fileForPact(pactDir: String) = File(pactDir, "${consumer.name}-${provider.name}.json")
 
+  /**
+   * Merges the other pact into this one. The default just merges the interactions. [V4Pact]
+   * overrides this to also merge the plugin configuration stored under `metadata.plugins`, which
+   * [mergeInteractions] has no way to see, since it is only given the other pact's interactions.
+   */
+  open fun mergePact(other: Pact): Pact = mergeInteractions(other.interactions)
+
   override fun compatibleTo(other: Pact): Result<Boolean, String> {
     return if (provider != other.provider) {
       Result.Err("Provider names are different: '$provider' and '${other.provider}'")

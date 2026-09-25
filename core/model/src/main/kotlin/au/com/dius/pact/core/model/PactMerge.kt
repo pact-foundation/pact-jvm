@@ -19,19 +19,30 @@ object PactMerge {
       return MergeResult(false, "Cannot merge pacts as they are not compatible - ${compatibleTo.error}")
     }
 
+    // V4 pacts are always merged, as the metadata (plugin configuration) needs to be merged even when
+    // one of the pacts has no interactions
+    val bothV4 = existing is V4Pact && newPact is V4Pact
     return when {
-      existing.interactions.isEmpty() -> MergeResult(true, "", newPact)
-      newPact.interactions.isEmpty() -> MergeResult(true, "", existing)
+      existing.interactions.isEmpty() && !bothV4 -> MergeResult(true, "", newPact)
+      newPact.interactions.isEmpty() && !bothV4 -> MergeResult(true, "", existing)
       else -> {
         val conflicts = cartesianProduct(existing.interactions, newPact.interactions)
           .filter { it.first.conflictsWith(it.second) }
         if (conflicts.isEmpty()) {
-          MergeResult(true, "", existing.mergeInteractions(newPact))
+          MergeResult(true, "", mergePacts(existing, newPact))
         } else {
           MergeResult(false, "Cannot merge pacts as there were ${conflicts.size} conflict(s) " +
             "between the interactions - ${conflicts.joinToString("\n")}")
         }
       }
+    }
+  }
+
+  private fun mergePacts(existing: Pact, newPact: Pact): Pact {
+    return if (existing is BasePact) {
+      existing.mergePact(newPact)
+    } else {
+      existing.mergeInteractions(newPact.interactions)
     }
   }
 

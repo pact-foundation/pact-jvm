@@ -201,14 +201,6 @@ interface Pact {
    */
   fun mergeInteractions(interactions: List<Interaction>): Pact
 
-  /**
-   * Merges the other pact into this one. The default just merges interactions, same as
-   * [mergeInteractions] (List). [V4Pact] overrides this to also merge metadata a plugin stored
-   * under `metadata.plugins`, which [mergeInteractions] (List) alone has no way to see, since
-   * it is only given the other pact's interactions.
-   */
-  fun mergeInteractions(other: Pact): Pact = mergeInteractions(other.interactions)
-
   /** Validates if this Pact can be used with the provided Pact specification version */
   fun validateForVersion(pactVersion: PactSpecVersion): List<String>
 

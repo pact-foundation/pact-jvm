@@ -687,7 +687,7 @@ open class V4Pact @JvmOverloads constructor(
     return V4Pact(consumer, provider, merge(interactions).toMutableList(), metadata, source)
   }
 
-  override fun mergeInteractions(other: Pact): Pact {
+  override fun mergePact(other: Pact): Pact {
     return V4Pact(consumer, provider, merge(other.interactions).toMutableList(),
       mergeMetadata(metadata, other.metadata), source)
   }
@@ -699,50 +699,77 @@ open class V4Pact @JvmOverloads constructor(
   }
 
   /**
-   * Merges [first] and [second] pact metadata, so a plugin's `configuration` entry recorded
+   * Merges the `plugins` entry of [second] into [first], so a plugin's `configuration` entry recorded
    * only in [second] (for instance a schema keyed by a hash [first] never saw) is not lost.
    * Every other metadata key keeps [first]'s value, since both pacts describe the same
    * consumer/provider pair.
    */
   private fun mergeMetadata(first: Map<String, Any?>, second: Map<String, Any?>): Map<String, Any?> {
-    return if (first["plugins"] == null && second["plugins"] == null) {
+    val secondPlugins = pluginEntries(second["plugins"])
+    return if (secondPlugins.isEmpty()) {
       first
     } else {
-      first + mapOf("plugins" to mergePluginEntries(asPluginList(first["plugins"]), asPluginList(second["plugins"])))
+      first + ("plugins" to mergePluginEntries(pluginEntries(first["plugins"]), secondPlugins))
     }
   }
 
-  @Suppress("UNCHECKED_CAST")
-  private fun asPluginList(value: Any?): List<Map<String, Any?>> = value as? List<Map<String, Any?>> ?: emptyList()
-
-  private fun mergePluginEntries(
-    first: List<Map<String, Any?>>,
-    second: List<Map<String, Any?>>
-  ): List<Map<String, Any?>> {
-    val byName = first.associateBy { it["name"] }.toMutableMap()
-    second.forEach { entry ->
-      val existing = byName[entry["name"]]
-      byName[entry["name"]] = if (existing != null) mergePluginConfiguration(existing, entry) else entry
-    }
-    return byName.values.toList()
+  private fun pluginEntries(value: Any?): List<Any?> = when (value) {
+    is JsonValue.Array -> value.values.map { Json.fromJson(it) }
+    is List<*> -> value
+    else -> emptyList()
   }
 
   /**
-   * A pact built in-memory by [au.com.dius.pact.consumer.dsl.PactBuilder] carries `configuration`
-   * as `Map<String, JsonValue>`, but the same field read off a pact file on disk (the
-   * [PactMerge] path) has already been unwrapped into plain Kotlin maps/strings by
-   * [au.com.dius.pact.core.support.Json.fromJson]. Normalising both through [Json.toJson] first
-   * means [deepMerge] always sees `JsonValue`, instead of an erased-generic cast that "succeeds"
-   * on the disk-loaded shape and then silently skips the structural merge.
+   * Entries are matched by plugin name. Entries without a name (or that are not maps) are kept as is.
    */
-  private fun mergePluginConfiguration(first: Map<String, Any?>, second: Map<String, Any?>): Map<String, Any?> {
-    val firstConfig = (first["configuration"] as? Map<*, *>)?.let { Json.toJson(it).asObject() }
-    val secondConfig = (second["configuration"] as? Map<*, *>)?.let { Json.toJson(it).asObject() }
-    return when {
-      firstConfig == null -> second
-      secondConfig == null -> first
-      else -> first + mapOf("configuration" to firstConfig.entries.toMutableMap().deepMerge(secondConfig.entries))
+  private fun mergePluginEntries(first: List<Any?>, second: List<Any?>): List<Any?> {
+    val result = first.toMutableList()
+    second.forEach { entry ->
+      val name = (entry as? Map<*, *>)?.get("name")
+      val index = if (name != null) result.indexOfFirst { it is Map<*, *> && it["name"] == name } else -1
+      if (index >= 0) {
+        result[index] = mergePluginEntry(result[index] as Map<*, *>, entry as Map<*, *>)
+      } else if (entry !in result) {
+        result.add(entry)
+      }
     }
+    return result
+  }
+
+  /**
+   * Values from [second] (the newer pact) replace the ones in [first], apart from `configuration`,
+   * which is merged key by key. A pact built in-memory by [au.com.dius.pact.consumer.dsl.PactBuilder]
+   * carries `configuration` as `Map<String, JsonValue>`, but a pact file read from disk (the [PactMerge]
+   * path) has plain Kotlin maps and strings, so both are normalised to JSON values before merging.
+   */
+  private fun mergePluginEntry(first: Map<*, *>, second: Map<*, *>): Map<*, *> {
+    val firstConfig = Json.toJson(first["configuration"])
+    val secondConfig = Json.toJson(second["configuration"])
+    return if (firstConfig is JsonValue.Object && secondConfig is JsonValue.Object) {
+      first + second + ("configuration" to mergeConfiguration(firstConfig.entries, secondConfig.entries))
+    } else {
+      first + second
+    }
+  }
+
+  /**
+   * Objects are merged recursively. Any other value (including arrays) from [second] replaces the
+   * value in [first], so merging the same configuration more than once gives the same result.
+   */
+  private fun mergeConfiguration(
+    first: Map<String, JsonValue>,
+    second: Map<String, JsonValue>
+  ): Map<String, JsonValue> {
+    val result = first.toMutableMap()
+    second.forEach { (key, value) ->
+      val existing = result[key]
+      result[key] = if (existing is JsonValue.Object && value is JsonValue.Object) {
+        JsonValue.Object(mergeConfiguration(existing.entries, value.entries).toMutableMap())
+      } else {
+        value
+      }
+    }
+    return result
   }
 
   override fun asRequestResponsePact(): Result<RequestResponsePact, String> {

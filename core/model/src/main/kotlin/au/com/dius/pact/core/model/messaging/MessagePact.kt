@@ -94,7 +94,7 @@ class MessagePact @JvmOverloads constructor (
     return this
   }
 
-  fun mergePact(other: Pact): MessagePact {
+  override fun mergePact(other: Pact): MessagePact {
     if (other !is MessagePact) {
       throw InvalidPactException("Unable to merge pact $other as it is not a MessagePact")
     }

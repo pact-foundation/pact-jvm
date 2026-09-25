@@ -265,7 +265,7 @@ class PactConsumerSpockExt : IAnnotationDrivenExtension<PactConsumerSpockTest> {
       Pair(updatedPact, version)
     ) { (currentPact, currentVersion), _ ->
       Pair(
-        currentPact.mergeInteractions(updatedPact) as BasePact,
+        currentPact.mergePact(updatedPact) as BasePact,
         maxOf(version, currentVersion)
       )
     }

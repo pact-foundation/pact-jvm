@@ -132,7 +132,7 @@ public class BaseProviderRule extends ExternalResource {
         if (pact[0] == null) {
           pact[0] = pactFromMethod;
         } else {
-          pact[0].mergeInteractions(pactFromMethod.getInteractions());
+          pact[0] = (BasePact) pact[0].mergePact(pactFromMethod);
         }
       } catch (Exception e) {
         throw new RuntimeException("Failed to invoke pact method", e);
