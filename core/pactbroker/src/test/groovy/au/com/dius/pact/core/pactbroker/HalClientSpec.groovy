@@ -139,6 +139,39 @@ class HalClientSpec extends Specification {
     thrown(InvalidHalResponse)
   }
 
+  def 'throws an exception if the response has no content type'() {
+    given:
+    client.httpClient = mockClient
+    def mockRootResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 200
+      getEntity() >> new StringEntity('{}', (ContentType) null)
+    }
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockRootResponse) }
+    thrown(InvalidHalResponse)
+  }
+
+  def 'reports the HTTP status of an error response that has no content type'() {
+    given:
+    client.httpClient = mockClient
+    def mockRootResponse = Mock(ClassicHttpResponse) {
+      getCode() >> 503
+      getEntity() >> new StringEntity('Service Unavailable', (ContentType) null)
+    }
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    1 * mockClient.execute({ it.uri.path == '/' }, _, _) >> { r, c, handler -> handler.handleResponse(mockRootResponse) }
+    def ex = thrown(RequestFailedException)
+    ex.status == 503
+  }
+
   def 'throws an exception if the _links is not found'() {
     given:
     client.httpClient = mockClient
