@@ -50,6 +50,6 @@ object HttpClientUtils {
     }
   }
 
-  fun isJsonResponse(contentType: ContentType) = contentType.mimeType == "application/json" ||
-    contentType.mimeType == "application/hal+json"
+  fun isJsonResponse(contentType: ContentType?) = contentType?.mimeType == "application/json" ||
+    contentType?.mimeType == "application/hal+json"
 }
