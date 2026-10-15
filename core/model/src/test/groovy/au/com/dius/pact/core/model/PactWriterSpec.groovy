@@ -194,6 +194,31 @@ class PactWriterSpec extends Specification {
     pactFile.delete()
   }
 
+  @Issue('#1893')
+  def 'when merging pact files, custom header values containing commas must not be altered'() {
+    given:
+    def authHeader = 'Bearer service=abschsdjan.dummy-service,customer=kjhskfhskh.dummy-cust'
+    def request = new Request(headers: [Authorization: [authHeader]])
+    def response = new Response()
+    def interaction = new RequestResponseInteraction('test interaction', [], request, response)
+    def interaction2 = new RequestResponseInteraction('test interaction two', [], request, response)
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [interaction])
+    def file = File.createTempFile('PactWriterSpec', '.json')
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
+    pact.interactions = [interaction2]
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
+    def json = file.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
+
+    then:
+    json.interactions*.request*.headers*.Authorization == [authHeader, authHeader]
+
+    cleanup:
+    file.delete()
+  }
+
   @Issue('#1006')
   def 'when writing message pact files, the metadata values should be stored as JSON'() {
     given:

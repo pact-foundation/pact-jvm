@@ -36,13 +36,18 @@ class HeaderWithParameters(
 
 object HeaderParser {
   fun fromJson(key: String, value: JsonValue): List<String> {
+    val name = key.lowercase(Locale.getDefault())
     return when {
       value is JsonValue.Array -> value.values.map { Json.toString(it).trim() }
-      SINGLE_VALUE_HEADERS.contains(key.lowercase(Locale.getDefault())) -> listOf(Json.toString(value).trim())
-      else -> {
+      SINGLE_VALUE_HEADERS.contains(name) -> listOf(Json.toString(value).trim())
+      MULTI_VALUE_HEADERS.contains(name) || PARAMETERISED_HEADERS.contains(name) -> {
         val sval = Json.toString(value).trim()
         parseHeaderValue(sval).map { hvToString(it) }
       }
+      // Any other header is kept as a single opaque value. Splitting it on commas corrupts custom
+      // headers (bearer tokens, JSON, etc.) when an existing pact file is read back and merged,
+      // because the parts get re-joined with ", " on write. See #1893.
+      else -> listOf(Json.toString(value).trim())
     }
   }
 
