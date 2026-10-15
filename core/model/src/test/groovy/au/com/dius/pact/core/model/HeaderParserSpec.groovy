@@ -25,6 +25,8 @@ class HeaderParserSpec extends Specification {
     'header with multiple values' | 'access-control-allow-methods' | 'POST, GET, PUT, HEAD, DELETE, OPTIONS, PATCH' | ['POST', 'GET', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH']
     'header with multiple values with parameters' | 'Accept' | ACCEPT | ['application/prs.hal-forms+json; q=1.0', 'application/hal+json; q=0.9', 'application/vnd.api+json; q=0.8', 'application/vnd.siren+json; q=0.8', 'application/vnd.collection+json; q=0.8', 'application/json; q=0.7', 'text/html; q=0.6', 'application/vnd.pactbrokerextended.v1+json; q=1.0']
     'header with quoted values' | 'Content-Type' | 'multipart/related; type="application/json"; boundary=myBoundary' | ['multipart/related; type="application/json"; boundary=myBoundary']
+    'custom header containing a comma' | 'Authorization' | 'Bearer service=abc.svc,customer=def.cust' | ['Bearer service=abc.svc,customer=def.cust']
+    'custom header containing a comma and a space' | 'X-Custom' | 'a, b' | ['a, b']
   }
 
   @Issue('#1538')
@@ -33,5 +35,13 @@ class HeaderParserSpec extends Specification {
     HeaderParser.INSTANCE.fromJson('Accept', new JsonValue.StringValue(
       'application/hal+json;profile="https://api.example.de/examples+v1"')) ==
       ['application/hal+json; profile="https://api.example.de/examples+v1"']
+  }
+
+  @Issue('#1893')
+  def 'does not split custom header values on commas'() {
+    expect:
+    HeaderParser.INSTANCE.fromJson('Authorization', new JsonValue.StringValue(
+      'Bearer service=abschsdjan.dummy-service,customer=kjhskfhskh.dummy-cust')) ==
+      ['Bearer service=abschsdjan.dummy-service,customer=kjhskfhskh.dummy-cust']
   }
 }

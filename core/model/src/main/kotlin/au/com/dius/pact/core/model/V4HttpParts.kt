@@ -19,8 +19,12 @@ private fun headersFromJson(json: JsonValue): Map<String, List<String>> {
     json["headers"].asObject()!!.entries.entries.associate { (key, value) ->
       if (value is JsonValue.Array) {
         key to value.values.map { Json.toString(it) }
-      } else {
+      } else if (MULTI_VALUE_HEADERS.contains(key.lowercase(Locale.getDefault()))) {
         key to Json.toString(value).split(",").map { it.trim() }
+      } else {
+        // Only well-known list headers are safe to split on commas; anything else is kept as a
+        // single value so it survives a read/merge/write round trip unchanged. See #1893.
+        key to listOf(Json.toString(value).trim())
       }
     }
   } else {
