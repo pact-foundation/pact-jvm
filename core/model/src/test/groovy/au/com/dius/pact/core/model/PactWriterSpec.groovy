@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.model.v4.MessageContents
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Result
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import spock.lang.Issue
@@ -122,6 +123,78 @@ class PactWriterSpec extends Specification {
 
     cleanup:
     file.delete()
+  }
+
+  def 'in merge mode, create the pact file and any parent directories if they do not exist'() {
+    given:
+    def dir = File.createTempDir('PactWriterSpec', '')
+    def file = new File(dir, 'nested/pacts/pact.json')
+    def interaction = new RequestResponseInteraction('test interaction', [], new Request(), new Response())
+    def interaction2 = new RequestResponseInteraction('test interaction two', [], new Request(), new Response())
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [interaction])
+
+    when:
+    def result = DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
+    def json = file.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
+
+    then:
+    result instanceof Result.Ok
+    file.exists()
+    json.interactions*.description == ['test interaction']
+
+    when:
+    pact.interactions = [interaction2]
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
+    json = file.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
+
+    then:
+    json.interactions*.description == ['test interaction', 'test interaction two']
+
+    cleanup:
+    dir.deleteDir()
+  }
+
+  def 'writing a pact file that has no parent directory'() {
+    given:
+    def file = new File("PactWriterSpec-${UUID.randomUUID()}.json")
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [new RequestResponseInteraction('test interaction')])
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
+
+    then:
+    noExceptionThrown()
+    file.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }.interactions*.description ==
+      ['test interaction']
+
+    cleanup:
+    file.delete()
+  }
+
+  def 'concurrent writes in merge mode do not corrupt the pact file'() {
+    given:
+    def dir = File.createTempDir('PactWriterSpec', '')
+    def file = new File(dir, 'pact.json')
+    def count = 10
+    def pacts = (1..count).collect {
+      new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+        new Consumer('PactWriterSpecConsumer'), [new RequestResponseInteraction("interaction $it")])
+    }
+
+    when:
+    def threads = pacts.collect { pact ->
+      Thread.start { DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3) }
+    }
+    threads*.join()
+    def json = file.withReader { Json.INSTANCE.toMap(JsonParser.INSTANCE.parseReader(it)) }
+
+    then:
+    json.interactions*.description.sort() == (1..count).collect { "interaction $it".toString() }.sort()
+
+    cleanup:
+    dir.deleteDir()
   }
 
   @RestoreSystemProperties
