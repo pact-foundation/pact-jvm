@@ -67,6 +67,28 @@ object Matchers {
   }
 
   /**
+   * Builds the context to match the values of a collection with an EachValue matcher. The matcher's rules apply to
+   * each value (at `path.*`), together with any rules defined below the path, such as the ones written for the
+   * matchers nested in the values.
+   */
+  private fun eachValueContext(
+    path: List<String>,
+    rules: List<MatchingRule>,
+    context: MatchingContext
+  ): MatchingContext {
+    val matcherPath = constructPath(path) + ".*"
+    val nested = context.matchers.matchingRules
+      .filter { (rulePath, _) ->
+        val tokens = parsePath(rulePath)
+        tokens.size > path.size && matchesPath(tokens.take(path.size), path) > 0
+      }
+      .mapValues { (_, group) -> group.copy(rules = group.rules.toMutableList()) }
+      .toMutableMap()
+    nested[matcherPath] = MatchingRuleGroup((rules + nested[matcherPath]?.rules.orEmpty()).distinct().toMutableList())
+    return context.copy(matchers = MatchingRuleCategory("body", nested))
+  }
+
+  /**
    * Compares the expected and actual maps using the provided matching rule
    */
   @Suppress("LongParameterList")
@@ -102,14 +124,7 @@ object Matchers {
             }
           }
         }
-        val matcherPath = constructPath(path) + ".*"
-        MatchingContext(
-          MatchingRuleCategory("body", mutableMapOf(
-            matcherPath to MatchingRuleGroup(associatedRules.toMutableList())
-          )),
-          context.allowUnexpectedKeys,
-          context.pluginConfiguration
-        )
+        eachValueContext(path, associatedRules, context)
       } else {
         context
       }
@@ -224,14 +239,7 @@ object Matchers {
               }
             }
           }
-          val matcherPath = constructPath(path) + ".*"
-          val newContext = MatchingContext(
-            MatchingRuleCategory("body", mutableMapOf(
-              matcherPath to MatchingRuleGroup(associatedRules.toMutableList())
-            )),
-            context.allowUnexpectedKeys,
-            context.pluginConfiguration
-          )
+          val newContext = eachValueContext(path, associatedRules, context)
           result.addAll(compareListContent(expectedList.padTo(actualList.size, expectedList.first()),
             actualList, path, newContext, generateDiff, callback))
         }
