@@ -98,6 +98,11 @@ testing {
 test {
     // Mark sure Pact-JVM builds don't skew the metrics
     systemProperty 'pact_do_not_track', 'true'
+
+    // Spock's @Timeout uses virtual threads if the JVM has them, but on JDK 19 and 20 they are a preview feature
+    if (JavaVersion.current() in [JavaVersion.VERSION_19, JavaVersion.VERSION_20]) {
+        jvmArgs '--enable-preview'
+    }
 }
 
 tasks.withType(CodeNarc).configureEach { codeNarcTask ->
