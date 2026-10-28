@@ -227,12 +227,15 @@ data class DocPath(
   }
 
   /**
-   * Removes marker fields (name*), replacing them with basic fields (name) and a zero index
+   * Removes marker fields (name*), replacing them with basic fields (name) and a zero index. The root marker ($*) is
+   * replaced with just a zero index.
    */
   fun dropMarkers() = DocPath(pathTokens
     .flatMap {
       when (it) {
-        is PathToken.Field -> if (it.name.endsWith('*')) {
+        is PathToken.Field -> if (it.name == "$*") {
+          listOf(PathToken.Index(0))
+        } else if (it.name.endsWith('*')) {
           listOf(PathToken.Field(it.name.dropLast(1)), PathToken.Index(0))
         } else listOf(it)
         else -> listOf(it)

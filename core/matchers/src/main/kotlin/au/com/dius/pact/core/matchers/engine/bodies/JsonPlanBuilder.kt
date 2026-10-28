@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers.engine.bodies
 
+import au.com.dius.pact.core.matchers.Matchers
 import au.com.dius.pact.core.matchers.engine.ExecutionPlanNode
 import au.com.dius.pact.core.matchers.engine.NodeValue
 import au.com.dius.pact.core.matchers.engine.PlanMatchingContext
@@ -7,10 +8,14 @@ import au.com.dius.pact.core.matchers.engine.buildMatchingRuleNode
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DocPath
 import au.com.dius.pact.core.model.Into
+import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.EachKeyMatcher
 import au.com.dius.pact.core.model.matchingrules.EachValueMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleCategory
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
+import au.com.dius.pact.core.support.Either
 import au.com.dius.pact.core.support.json.JsonParser
 import au.com.dius.pact.core.support.json.JsonValue
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -91,7 +96,12 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     expectedJson: JsonValue.Object
   ) {
     val filteredPath = path.dropMarkers()
-    val matchers = context.selectBestMatcher(filteredPath)
+    val matchers = context.selectBestMatcher(filteredPath).let { group ->
+      // An EachValue matcher from a parent path applies to the values of that collection, not to the values of
+      // this object
+      if (group.cascaded) group.copy(rules = group.rules.filter { it !is EachValueMatcher }.toMutableList())
+      else group
+    }
     if (matchers.rules.isNotEmpty() && shouldApplyToMapEntries(matchers)) {
       rootNode.add(ExecutionPlanNode.annotation(Into { matchers.generateDescription(true) }))
       rootNode.add(
@@ -100,6 +110,11 @@ object JsonPlanBuilder: PlanBodyBuilder  {
           ExecutionPlanNode.resolveCurrentValue(path), matchers, true
         )
       )
+      val template = expectedJson.entries.values.firstOrNull()
+      if (matchers.rules.any { it is EachValueMatcher } &&
+        (template is JsonValue.Object || template is JsonValue.Array)) {
+        rootNode.add(buildForEachValueNode(eachValueContext(context, path, matchers), path, template))
+      }
     } else if (expectedJson.entries.isEmpty()) {
       rootNode.add(
         ExecutionPlanNode.action("json:expect:empty")
@@ -137,6 +152,63 @@ object JsonPlanBuilder: PlanBodyBuilder  {
     }
   }
 
+  /**
+   * Returns the context to use for the values of a collection with an EachValue matcher. The matcher's rules are
+   * added for the values (at `path.*`), so that they apply to the values below them that have no rules of their own.
+   * If there are already rules for the values (at `path.*` or `path[*]`), the matcher's rules are merged into them.
+   * A group with OR logic is replaced with the matcher's rules instead, as merging them would make the matcher's
+   * rules optional.
+   */
+  private fun eachValueContext(
+    context: PlanMatchingContext,
+    path: DocPath,
+    matchers: MatchingRuleGroup
+  ): PlanMatchingContext {
+    val rules = matchers.rules.filterIsInstance<EachValueMatcher>()
+      .flatMap { matcher -> matcher.definition.rules.mapNotNull { (it as? Either.A)?.value } }
+    val collectionPath = path.dropMarkers()
+    val category = context.matchingContext.matchers
+    val matchingRules = category.matchingRules.toMutableMap()
+    val valuePaths = matchingRules.keys.filter { rulePath ->
+      val tokens = DocPath(rulePath).tokens()
+      tokens.size == collectionPath.len() + 1 &&
+        (tokens.last() is PathToken.Star || tokens.last() is PathToken.StarIndex) &&
+        Matchers.calculatePathWeight(tokens.dropLast(1), collectionPath.asList()) > 0
+    }
+    valuePaths.ifEmpty { listOf(collectionPath.pushStar().toString()) }.forEach { valuePath ->
+      val group = matchingRules[valuePath]
+      matchingRules[valuePath] = if (group != null && group.ruleLogic == RuleLogic.AND) {
+        group.copy(rules = (rules + group.rules).distinct().toMutableList())
+      } else {
+        MatchingRuleGroup(rules.toMutableList())
+      }
+    }
+    val matchingContext = context.matchingContext.copy(
+      matchers = MatchingRuleCategory(category.name, matchingRules)
+    )
+    return PlanMatchingContext(context.pact, context.interaction, context.config, matchingContext)
+  }
+
+  /**
+   * Builds the node to match each value of a map with an EachValue matcher against the first expected value, so that
+   * the rules defined below the values (like `$.chips.*.amount`) are applied
+   */
+  private fun buildForEachValueNode(
+    context: PlanMatchingContext,
+    path: DocPath,
+    template: JsonValue
+  ): ExecutionPlanNode {
+    val forEachNode = ExecutionPlanNode.action("for-each")
+    val marker = if (path.isRoot()) "$*" else (path.lastField() ?: path.toString()) + "*"
+    forEachNode.add(ExecutionPlanNode.valueNode(marker))
+    forEachNode.add(ExecutionPlanNode.resolveCurrentValue(path))
+    val itemPath = (path.parent() ?: path).join(marker)
+    val itemNode = ExecutionPlanNode.container(itemPath.toString())
+    processBodyNode(context, template, itemPath, itemNode)
+    forEachNode.add(itemNode)
+    return forEachNode
+  }
+
   @Suppress("LongMethod")
   private fun processArray(
     context: PlanMatchingContext,
@@ -167,9 +239,14 @@ object JsonPlanBuilder: PlanBodyBuilder  {
         val itemPath = (path.parent() ?: path).join(marker)
         forEachNode.add(ExecutionPlanNode.resolveCurrentValue(path))
         val itemNode = ExecutionPlanNode.container(itemPath.toString())
+        val itemContext = if (!matchers.cascaded && matchers.rules.any { it is EachValueMatcher }) {
+          eachValueContext(context, path, matchers)
+        } else {
+          context
+        }
         when (template) {
-          is JsonValue.Array -> processBodyNode(context, template, itemPath, itemNode)
-          is JsonValue.Object -> processBodyNode(context, template, itemPath, itemNode)
+          is JsonValue.Array -> processBodyNode(itemContext, template, itemPath, itemNode)
+          is JsonValue.Object -> processBodyNode(itemContext, template, itemPath, itemNode)
           else -> {
             val presenceCheck = ExecutionPlanNode.action("if")
             presenceCheck
