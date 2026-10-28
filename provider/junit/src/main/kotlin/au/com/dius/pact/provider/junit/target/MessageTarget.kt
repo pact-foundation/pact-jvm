@@ -67,6 +67,7 @@ open class MessageTarget @JvmOverloads constructor(
     pactSource: PactSource?
   ): IProviderVerifier {
     val verifier = ProviderVerifier()
+    verifier.providerMethodClasses = Supplier { providerMethodClasses() }
     verifier.projectClassLoader = Supplier { this.classLoader }
     verifier.projectClasspath = Supplier {
       logger.debug { "Classloader = ${this.classLoader}" }
@@ -77,7 +78,7 @@ open class MessageTarget @JvmOverloads constructor(
     }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
     verifier.providerMethodInstance = Function { m ->
-      if (m.declaringClass == testTarget.javaClass) {
+      if (m.declaringClass.isAssignableFrom(testTarget.javaClass)) {
         testTarget
       } else {
         defaultProviderMethodInstance.apply(m)
@@ -97,6 +98,11 @@ open class MessageTarget @JvmOverloads constructor(
 
     return verifier
   }
+
+  /**
+   * Classes to search for methods annotated with @PactVerifyProvider before scanning the classpath
+   */
+  protected open fun providerMethodClasses(): List<Class<*>> = listOf(testTarget.javaClass)
 
   override fun getProviderInfo(source: PactSource): ProviderInfo {
     val provider = ProviderUtils.findAnnotation(testClass.javaClass, Provider::class.java)!!

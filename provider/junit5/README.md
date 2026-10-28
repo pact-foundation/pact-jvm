@@ -8,7 +8,6 @@
   - [HttpTestTarget](#httptesttarget)
   - [HttpsTestTarget](#httpstesttarget)
   - [MessageTestTarget](#messagetesttarget)
-- [Important note for Maven users](#-important-note-for-maven-users-)
 - [JVM system properties and Gradle/Maven](#important-note-jvm-system-properties-needs-to-be-set-on-the-test-jvm-if-your-build-is-running-with-gradle-or-maven)
   - [For Message Tests and Spring and Maven](#for-message-tests-and-spring-and-maven)
 - [Selecting the Pacts to verify with Consumer Version Selectors [4.3.12+]](#selecting-the-pacts-to-verify-with-consumer-version-selectors-4312)
@@ -116,25 +115,8 @@ For example:
 
 | Option | Type | Default | Description |
 | ------ | ---- | ------- | ----------- |
-| packagesToScan | List&lt;String&gt; | empty List | The Java packages to scan to find classes with annotated methods. If your methods are on your test class, you don't need to supply a value for this. | 
+| packagesToScan | List&lt;String&gt; | empty List | The Java packages to scan to find classes with annotated methods. The test class (and its superclasses and interfaces) is always checked first. If no packages are given, the whole test classpath is only scanned when no annotated method for the interaction is found on the test class. |
 | classLoader | ClassLoader? | null | Class loader to use to load the classes with annotated methods | 
-
-## !! Important note for Maven users !! 
-If you use Maven to run your tests, you will have to make sure that the Maven Surefire plugin is at least version 
-2.22.1 and configured to use an isolated classpath.
-
-For example, configure it by adding the following to your POM: 
-
-```xml
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <version>2.22.1</version>
-    <configuration>
-        <useSystemClassLoader>false</useSystemClassLoader>
-    </configuration>
-</plugin>
-```
 
 ## IMPORTANT NOTE!!!: JVM system properties needs to be set on the test JVM if your build is running with Gradle or Maven.
 

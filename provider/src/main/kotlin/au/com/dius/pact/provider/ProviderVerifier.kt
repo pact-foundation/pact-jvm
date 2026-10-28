@@ -43,7 +43,6 @@ import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.Closure
-import io.github.classgraph.ClassGraph
 import io.pact.plugins.jvm.core.CatalogueEntry
 import io.pact.plugins.jvm.core.DefaultPluginManager
 import io.pact.plugins.jvm.core.InteractionVerificationDetails
@@ -52,6 +51,7 @@ import io.pact.plugins.jvm.core.PluginManager
 import io.pact.plugins.jvm.core.TestContext
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
@@ -173,6 +173,13 @@ interface IProviderVerifier {
    * Callback to return the project classpath to use for looking up methods
    */
   var projectClasspath: Supplier<List<URL>>
+
+  /**
+   * Callback to return the classes to search for methods annotated with @PactVerifyProvider (normally the test
+   * class). Their superclasses and interfaces are searched as well. The classpath is only scanned if packages to scan
+   * are configured, or no methods were found on these classes.
+   */
+  var providerMethodClasses: Supplier<List<Class<*>>>
 
   /**
    * Callback to display a pact load error
@@ -438,6 +445,10 @@ open class ProviderVerifier @JvmOverloads constructor (
   var stateChangeHandler: StateChange = DefaultStateChange
   var pactReader: PactReader = DefaultPactReader
   override var verificationSource: String? = null
+  override var providerMethodClasses: Supplier<List<Class<*>>> = Supplier { emptyList() }
+
+  // Classes found by scanning the classpath, keyed by the classpath and packages that were scanned
+  private val classpathScanResults = ConcurrentHashMap<Pair<List<URL>, List<String>>, List<String>>()
   var pluginManager: PluginManager = DefaultPluginManager
   var responseComparer: IResponseComparison = ResponseComparison.Companion
 
@@ -479,22 +490,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     currentInteraction = interaction
     val interactionId = interaction.interactionId
     try {
-      val classGraph = setupClassGraph(providerInfo, consumer)
-
-      val methodsAnnotatedWith = classGraph.scan().use { scanResult ->
-        scanResult.getClassesWithMethodAnnotation(PactVerifyProvider::class.qualifiedName)
-          .flatMap { classInfo ->
-            logger.debug { "found class $classInfo" }
-            val methodInfo = classInfo.methodInfo.filter {
-              it.annotationInfo.any { info ->
-                info.name == PactVerifyProvider::class.qualifiedName &&
-                  info.parameterValues["value"].value == interaction.description
-              }
-            }
-            logger.debug { "found method $methodInfo" }
-            methodInfo.map { it.loadClassAndGetMethod() }
-          }
-      }
+      val methodsAnnotatedWith = findProviderMethods(providerInfo, consumer, interaction.description)
 
       logger.debug { "Found methods = $methodsAnnotatedWith" }
       if (methodsAnnotatedWith.isEmpty()) {
@@ -731,29 +727,48 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  private fun setupClassGraph(providerInfo: IProviderInfo, consumer: IConsumerInfo): ClassGraph {
-    val classGraph = ClassGraph().enableAllInfo()
-    if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
-      classGraph.verbose()
-    }
-
-    val classLoader = projectClassLoader?.get()
-    if (classLoader == null) {
-      val urls = projectClasspath.get()
-      logger.debug { "projectClasspath = $urls" }
-      if (urls.isNotEmpty()) {
-        classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
-      }
+  private fun findProviderMethods(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    description: String
+  ): List<Method> {
+    val searchClasses = providerMethodClasses.get()
+    val packages = ProviderUtils.packagesToScan(providerInfo, consumer)
+    val methods = ProviderMethodFinder.findOnClasses(searchClasses, description)
+    return if (packages.isEmpty() && methods.isNotEmpty()) {
+      methods
     } else {
-      classGraph.overrideClassLoaders(classLoader)
+      (methods + scanForProviderMethods(searchClasses, packages, description)).distinct()
+    }
+  }
+
+  private fun scanForProviderMethods(
+    searchClasses: List<Class<*>>,
+    packages: List<String>,
+    description: String
+  ): List<Method> {
+    val classLoader = projectClassLoader?.get()
+    val urls = projectClasspath.get()
+    logger.debug { "projectClasspath = $urls" }
+    val classpath = ProviderMethodFinder.classpathFor(classLoader, urls)
+    val classNames = classpathScanResults.computeIfAbsent(classpath to packages) {
+      if (packages.isEmpty() && searchClasses.isNotEmpty()) {
+        logger.warn {
+          "No method annotated with @PactVerifyProvider(\"$description\") was found on " +
+            "${searchClasses.joinToString { it.name }}, so the whole classpath will be scanned. " +
+            "Set packagesToScan to limit the classes that are scanned."
+        }
+      }
+      ProviderMethodFinder.scanClasspath(classpath, packages)
+    }
+    if (classNames.isEmpty()) {
+      return emptyList()
     }
 
-    val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
-    if (scan.isNotEmpty()) {
-      @Suppress("SpreadOperator")
-      classGraph.whitelistPackages(*scan.toTypedArray())
-    }
-    return classGraph
+    val loader = classLoader
+      ?: if (urls.isNotEmpty()) URLClassLoader(urls.toTypedArray())
+      else Thread.currentThread().contextClassLoader ?: javaClass.classLoader
+    return ProviderMethodFinder.findOnClassNames(classNames, loader, description)
   }
 
   private fun emitEvent(event: Event) {

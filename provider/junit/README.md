@@ -559,21 +559,10 @@ You can also specify the protocol, defaults to "http".
 `au.com.dius.pact.provider.junit.target.MessageTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target`
 that will play pacts as an message and assert response from service by matching rules from pact.
 
-**Note for Maven users:** If you use Maven to run your tests, you will have to make sure that the Maven Surefire plugin is at least
-  version 2.22.1 uses an isolated classpath.
-
-For example, configure it by adding the following to your POM: 
-
-```xml
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <version>2.22.1</version>
-    <configuration>
-        <useSystemClassLoader>false</useSystemClassLoader>
-    </configuration>
-</plugin>
-```
+The test class (and its superclasses and interfaces) is checked first for methods annotated with `@PactVerifyProvider`.
+If you pass a list of packages to the `MessageTarget` constructor, the classes in those packages are also checked. If no
+packages are given, the whole test classpath is only scanned when no annotated method for the interaction is found on
+the test class.
 
 #### Modifying the requests before they are sent
 

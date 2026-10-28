@@ -8,17 +8,27 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.junit.target.MessageTarget
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
+import org.springframework.beans.factory.ListableBeanFactory
 import java.util.function.Function
 
 /**
- * Target for message verification that supports a spring application context. For each annotated method, the owning
- * bean will be looked up from the application context
+ * Target for message verification that supports a spring application context. The test class and the beans in the
+ * application context are searched for annotated methods, and for each annotated method, the owning bean will be looked
+ * up from the application context
  */
 open class SpringAwareMessageTarget : MessageTarget(), BeanFactoryAware {
   private lateinit var beanFactory: BeanFactory
 
   override fun setBeanFactory(beanFactory: BeanFactory) {
     this.beanFactory = beanFactory
+  }
+
+  override fun providerMethodClasses(): List<Class<*>> {
+    val beanTypes = when (val factory = beanFactory) {
+      is ListableBeanFactory -> factory.beanDefinitionNames.mapNotNull { factory.getType(it, false) }
+      else -> emptyList()
+    }
+    return (super.providerMethodClasses() + beanTypes).distinct()
   }
 
   override fun setupVerifier(

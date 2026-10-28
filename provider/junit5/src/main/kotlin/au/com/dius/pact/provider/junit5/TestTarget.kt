@@ -207,6 +207,7 @@ open class MessageTestTarget @JvmOverloads constructor(
   }
 
   override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any, pact: Pact) {
+    verifier.providerMethodClasses = Supplier { listOf(testInstance.javaClass) }
     verifier.projectClassLoader = Supplier { classLoader }
     verifier.projectClasspath = Supplier {
       when (val classLoader = classLoader ?: testInstance.javaClass.classLoader) {
