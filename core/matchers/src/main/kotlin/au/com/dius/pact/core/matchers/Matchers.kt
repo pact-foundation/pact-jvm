@@ -18,6 +18,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MaxEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinEqualsIgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MinMaxEqualsIgnoreOrderMatcher
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import au.com.dius.pact.core.model.parsePath
 import au.com.dius.pact.core.support.Either
@@ -70,13 +71,16 @@ object Matchers {
    * Builds the context to match the values of a collection with an EachValue matcher. The matcher's rules apply to
    * each value (at `path.*`), together with any rules defined below the path, such as the ones written for the
    * matchers nested in the values.
+   *
+   * If there are already rules for the values (at `path.*` or `path[*]`), the matcher's rules are merged into them.
+   * Adding a separate group would not work, as only one of the groups would be selected. A group with OR logic is
+   * replaced with the matcher's rules instead, as merging them would make the matcher's rules optional.
    */
   private fun eachValueContext(
     path: List<String>,
     rules: List<MatchingRule>,
     context: MatchingContext
   ): MatchingContext {
-    val matcherPath = constructPath(path) + ".*"
     val nested = context.matchers.matchingRules
       .filter { (rulePath, _) ->
         val tokens = parsePath(rulePath)
@@ -84,7 +88,18 @@ object Matchers {
       }
       .mapValues { (_, group) -> group.copy(rules = group.rules.toMutableList()) }
       .toMutableMap()
-    nested[matcherPath] = MatchingRuleGroup((rules + nested[matcherPath]?.rules.orEmpty()).distinct().toMutableList())
+    val valuePaths = nested.keys.filter { rulePath ->
+      val tokens = parsePath(rulePath)
+      tokens.size == path.size + 1 && (tokens.last() is PathToken.Star || tokens.last() is PathToken.StarIndex)
+    }
+    valuePaths.ifEmpty { listOf(constructPath(path) + ".*") }.forEach { valuePath ->
+      val group = nested[valuePath]
+      nested[valuePath] = if (group != null && group.ruleLogic == RuleLogic.AND) {
+        group.copy(rules = (rules + group.rules).distinct().toMutableList())
+      } else {
+        MatchingRuleGroup(rules.toMutableList())
+      }
+    }
     return context.copy(matchers = MatchingRuleCategory("body", nested))
   }
 
