@@ -1,5 +1,33 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.6 - Bugfix Release
+
+* c0d2181fc - fix(v2 engine): apply the rules defined below an eachValue matcher to its values (Ronald Holshausen, Wed Oct 28 16:50:49 2026 +1100)
+* 56003751e - fix: merge the eachValue rules into any existing rules for the values (Ronald Holshausen, Wed Oct 28 16:30:42 2026 +1100)
+* e8bccc32d - fix: apply the rules defined below an eachValue matcher to its values (Dmitrijs Munda, Wed Oct 21 14:41:56 2026 +0300)
+* 085feb17d - ci: test on the LTS JDKs and the latest JDK (Ronald Holshausen, Wed Oct 28 16:17:06 2026 +1100)
+* d0c7f887a - chore: enable preview features for tests on JDK 19 and 20 (Ronald Holshausen, Wed Oct 28 15:47:45 2026 +1100)
+* b0fb1a82b - feat: replace ClassGraph with reflection to find @PactVerifyProvider methods #1943 (Ronald Holshausen, Wed Oct 28 15:26:04 2026 +1100)
+* affb82448 - chore: upgrade dependencies to the latest safe versions #1943 (Ronald Holshausen, Wed Oct 28 14:57:49 2026 +1100)
+* 8d307dac3 - fix: report the HTTP status when a broker response has no Content-Type (fedossayenko, Tue Oct 13 17:49:34 2026 +0300)
+* e41914823 - fix(model): close pact file if locking fails and handle files without a parent directory (Ronald Holshausen, Fri Oct 16 11:37:30 2026 +1100)
+* 6419b03ff - fix: do not split custom header values on commas when reading pact files #1893 (Obrams, Thu Oct 15 14:01:40 2026 +0300)
+* 678fec411 - fix(model): make plugin metadata merge idempotent and cover all merge paths (Ronald Holshausen, Fri Sep 25 10:21:31 2026 +1000)
+* b32d6ef55 - fix(model): merge the PactMerge/PactWriter path too, and merge configuration safely across in-memory and disk-loaded pacts (austek, Thu Sep 24 11:11:11 2026 +0100)
+* 75c66156e - fix(model): merge plugin metadata when combining pacts from multiple @Pact methods (austek, Thu Sep 24 10:13:39 2026 +0100)
+* 3178b8d54 - chore(ci): remove stale internal workflow (JP-Ellis, Wed Sep 23 12:05:11 2026 +1000)
+* 28a554be9 - Initial attempt to fix issue 1935 (nick-m-b, Fri Sep 18 15:07:44 2026 +0100)
+* 01e56a487 - fix(model): degrade gracefully when +json body is not JSON (arimu1, Sun Sep 13 06:17:52 2026 +0700)
+* 1a959fb00 - Fix compatibility with tika-core 4.x by using the Tika facade instead of TikaConfig (Joost van Wollingen, Tue Sep 1 10:00:08 2026 +0200)
+* 35ba06192 - fix: ensure thread-safe provider verification result accumulation (Stephen Arnold, Fri Aug 21 14:29:52 2026 -0400)
+* 718d55078 - fix(provider/spring): support default value resolution in Spring7EnvironmentResolver (#1930) (yyyyyph, Wed Sep 2 13:15:20 2026 +0800)
+* 92b105808 - chore: Add test using OkHttp (Ronald Holshausen, Wed Aug 12 10:24:21 2026 +1000)
+* a70a7cf8f - chore: Update plugin driver to 1.2.3 (Ronald Holshausen, Wed Aug 12 09:55:48 2026 +1000)
+* 67deeacfc - Merge branch 'feat/interaction-type-capabilities' (Ronald Holshausen, Wed Aug 12 09:41:57 2026 +1000)
+* 8206761a0 - feat: Advertise interaction/request-response as a core catalogue entry (Ronald Holshausen, Tue Aug 11 16:51:25 2026 +1000)
+* 97abd7bfc - ci: remove unused triage board workflow (JP-Ellis, Tue Aug 11 09:15:50 2026 +1000)
+* 86112e670 - bump version to 4.7.6 (Ronald Holshausen, Mon Aug 10 16:09:48 2026 +1000)
+
 # 4.7.5 - Bugfix Release
 
 * 38b575f0d - fix: Allow Gradle pact file verification without a broker (Matt Van Horn, Fri Aug 7 10:53:35 2026 -0700)
