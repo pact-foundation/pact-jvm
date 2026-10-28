@@ -22,6 +22,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Run a single test method
 ./gradlew :core:model:test --tests "au.com.dius.pact.core.model.SomeSpec.some test name"
 
+# Run the tests with a different JDK to the one running Gradle (e.g. one newer than Gradle supports)
+./gradlew test -PtestJavaHome=/path/to/jdk
+
 # Publish to local Maven repo (required when testing changes against dependent modules)
 ./gradlew publishToMavenLocal
 ```

@@ -16,6 +16,11 @@ Before you build, install java 17, `Gradle` and `Maven` (Maven is required to bu
 
     $ ./gradlew clean build
 
+To run the tests with a different JDK to the one running Gradle (for instance, a JDK that is newer than the version
+of Gradle supports), set the `testJavaHome` property:
+
+    $ ./gradlew test -PtestJavaHome=/path/to/jdk
+
 You can publish pact-jvm to your local maven repo using:
 
     $ ./gradlew publishToMavenLocal

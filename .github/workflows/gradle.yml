@@ -10,6 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
+# Gradle always runs on JDK 17, and the tests run on the JDK being tested (using the testJavaHome property).
+# This lets us test on JDKs that are newer than the version of Gradle supports.
+env:
+  LATEST_JDK: 27
+
 jobs:
   latest_jdk:
     runs-on: ${{ matrix.operating-system }}
@@ -19,11 +24,17 @@ jobs:
         module: [ core, 'consumer -x :consumer:junit:clojureTest', provider, pact-specification-test, pact-jvm-server ]
     steps:
     - uses: actions/checkout@v6
-    - name: Set up JDK 23
+    - name: Set up JDK ${{ env.LATEST_JDK }} for the tests
+      id: test-jdk
       uses: actions/setup-java@v5
       with:
         distribution: temurin
-        java-version: 23
+        java-version: ${{ env.LATEST_JDK }}
+    - name: Set up JDK 17 for Gradle
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: 17
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
@@ -33,6 +44,8 @@ jobs:
     - run: ./gradlew -v
     - name: Build with Gradle
       run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} check
+      env:
+        ORG_GRADLE_PROJECT_testJavaHome: ${{ steps.test-jdk.outputs.path }}
 
   v2_engine:
     runs-on: ubuntu-latest
@@ -41,14 +54,21 @@ jobs:
         module: [ core, consumer, provider, pact-specification-test ]
     steps:
       - uses: actions/checkout@v6
-      - name: Set up JDK 23
+      - name: Set up JDK ${{ env.LATEST_JDK }} for the tests
+        id: test-jdk
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 23
+          java-version: ${{ env.LATEST_JDK }}
+      - name: Set up JDK 17 for Gradle
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
       - name: Build with Gradle
         run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} check
         env:
+          ORG_GRADLE_PROJECT_testJavaHome: ${{ steps.test-jdk.outputs.path }}
           PACT_MATCHING_ENGINE: v2
           PACT_V2_MATCHING_LOG_EXECUTED_PLAN: 1
 
@@ -57,14 +77,21 @@ jobs:
     strategy:
       matrix:
         module: [ core, consumer, provider, pact-specification-test ]
-        jdk: [ 17, 18, 19, 21, 22 ]
+        # The LTS releases. The latest release is tested by the latest_jdk job.
+        jdk: [ 17, 21, 25 ]
     steps:
       - uses: actions/checkout@v6
-      - name: Set up JDK ${{ matrix.jdk }}
+      - name: Set up JDK ${{ matrix.jdk }} for the tests
+        id: test-jdk
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ matrix.jdk }}
+      - name: Set up JDK 17 for Gradle
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -74,3 +101,5 @@ jobs:
       - run: ./gradlew -v
       - name: Build with Gradle
         run: ./gradlew -s --no-daemon -i -p ${{ matrix.module }} check
+        env:
+          ORG_GRADLE_PROJECT_testJavaHome: ${{ steps.test-jdk.outputs.path }}

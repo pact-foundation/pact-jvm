@@ -98,10 +98,19 @@ testing {
 test {
     // Mark sure Pact-JVM builds don't skew the metrics
     systemProperty 'pact_do_not_track', 'true'
+}
 
-    // Spock's @Timeout uses virtual threads if the JVM has them, but on JDK 19 and 20 they are a preview feature
-    if (JavaVersion.current() in [JavaVersion.VERSION_19, JavaVersion.VERSION_20]) {
-        jvmArgs '--enable-preview'
+// Run the tests with a different JDK to the one running Gradle, e.g. -PtestJavaHome=/path/to/jdk-27
+// This lets us test on JDKs that are newer than the Gradle version supports.
+def testJavaHome = providers.gradleProperty('testJavaHome')
+if (testJavaHome.present) {
+    def javaExecutable = new File(testJavaHome.get(),
+        System.getProperty('os.name').toLowerCase().contains('windows') ? 'bin/java.exe' : 'bin/java')
+    tasks.withType(Test).configureEach {
+        executable = javaExecutable.path
+        doFirst {
+            logger.lifecycle("Running tests with $javaExecutable")
+        }
     }
 }
 
