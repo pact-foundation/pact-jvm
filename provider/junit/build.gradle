@@ -32,7 +32,7 @@ dependencies {
 
     testImplementation 'org.apache.groovy:groovy'
     testRuntimeOnly 'net.bytebuddy:byte-buddy'
-    testRuntimeOnly 'org.objenesis:objenesis:3.4'
+    testRuntimeOnly 'org.objenesis:objenesis:3.6'
 }
 
 test {

@@ -21,5 +21,5 @@ dependencies {
   testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure:2.7.18'
   testImplementation 'org.springframework:spring-webmvc:5.3.39'
   testImplementation 'org.apache.groovy:groovy'
-  testImplementation 'org.yaml:snakeyaml:2.4'
+  testImplementation 'org.yaml:snakeyaml:2.7'
 }

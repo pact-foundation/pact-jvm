@@ -12,10 +12,10 @@ application {
 dependencies {
   implementation project(':consumer')
   implementation project(':core:pactbroker')
-  implementation 'ch.qos.logback:logback-core:1.5.20'
-  implementation 'ch.qos.logback:logback-classic:1.5.20'
+  implementation 'ch.qos.logback:logback-core:1.5.38'
+  implementation 'ch.qos.logback:logback-classic:1.5.38'
   implementation 'io.github.oshai:kotlin-logging-jvm'
-  implementation 'commons-io:commons-io:2.21.0'
+  implementation 'commons-io:commons-io:2.22.0'
   implementation 'org.apache.commons:commons-lang3'
   implementation 'org.apache.commons:commons-text'
   implementation 'org.apache.tika:tika-core'
@@ -25,11 +25,11 @@ dependencies {
   implementation 'io.ktor:ktor-server-netty'
   implementation 'io.ktor:ktor-network-tls-certificates'
   implementation 'io.ktor:ktor-server-call-logging'
-  implementation 'com.github.ajalt.clikt:clikt:5.0.1'
+  implementation 'com.github.ajalt.clikt:clikt:5.1.0'
 
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.apache.groovy:groovy-json'
-  testImplementation platform("org.spockframework:spock-bom:2.3-groovy-4.0")
+  testImplementation platform("org.spockframework:spock-bom:2.4-groovy-4.0")
   testImplementation 'org.spockframework:spock-core'
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
 }

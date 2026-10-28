@@ -7,7 +7,7 @@ group = 'au.com.dius.pact.consumer'
 
 dependencies {
   api project(':consumer')
-  api 'org.spockframework:spock-core:2.3-groovy-4.0'
+  api 'org.spockframework:spock-core:2.4-groovy-4.0'
 
   implementation 'org.apache.groovy:groovy'
   implementation 'org.slf4j:slf4j-api'
@@ -17,5 +17,5 @@ dependencies {
   testImplementation 'org.apache.groovy:groovy-json'
   testImplementation 'org.apache.httpcomponents.client5:httpclient5'
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
-  testRuntimeOnly 'org.objenesis:objenesis:3.4'
+  testRuntimeOnly 'org.objenesis:objenesis:3.6'
 }

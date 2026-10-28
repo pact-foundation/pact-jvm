@@ -67,8 +67,8 @@ dependencies {
     exclude group: 'au.com.dius.pact.core'
   }
   implementation 'org.apache.commons:commons-lang3'
-  implementation 'commons-io:commons-io:2.21.0'
-  implementation 'org.apache.commons:commons-text:1.14.0'
+  implementation 'commons-io:commons-io:2.22.0'
+  implementation 'org.apache.commons:commons-text:1.15.0'
   implementation 'org.apache.tika:tika-core'
 
   testImplementation 'org.hamcrest:hamcrest'
@@ -81,8 +81,8 @@ dependencies {
   testImplementation 'org.apache.groovy:groovy-xml'
   testImplementation 'org.apache.groovy:groovy-dateutil'
   testRuntimeOnly 'net.bytebuddy:byte-buddy'
-  testRuntimeOnly 'org.objenesis:objenesis:3.4'
-  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.20.1'
-  testImplementation 'io.grpc:grpc-protobuf:1.76.0'
+  testRuntimeOnly 'org.objenesis:objenesis:3.6'
+  testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.20.2'
+  testImplementation 'io.grpc:grpc-protobuf:1.85.1'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }

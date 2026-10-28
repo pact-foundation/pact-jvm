@@ -46,7 +46,7 @@ class PactConsumerSpockExt : IAnnotationDrivenExtension<PactConsumerSpockTest> {
       val methodAnnotation = feature.featureMethod.reflection.getAnnotation(PactSpecFor::class.java)
       val pactTestFor = methodAnnotation ?: classLevelAnnotation
       if (pactTestFor != null) {
-        feature.addInterceptor { invocation ->
+        feature.addIterationInterceptor { invocation ->
           runPactTest(pactTestFor, spec, invocation, executedFragments, pactsToWrite)
         }
       }

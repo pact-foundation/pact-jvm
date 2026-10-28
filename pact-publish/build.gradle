@@ -23,7 +23,7 @@ dependencies {
   testImplementation('io.pact.plugin.driver:core') {
     exclude group: 'au.com.dius.pact.core'
   }
-  testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+  testImplementation 'org.spockframework:spock-core:2.4-groovy-4.0'
   testRuntimeOnly 'ch.qos.logback:logback-classic'
 }
 

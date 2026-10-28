@@ -49,7 +49,7 @@ check.dependsOn checkDoctests, testDoctest
 
 dependencies {
   api project(":consumer")
-  api 'org.junit.jupiter:junit-jupiter-api:5.12.2'
+  api 'org.junit.jupiter:junit-jupiter-api:5.14.4'
 
   implementation 'org.slf4j:slf4j-api'
 
@@ -59,15 +59,15 @@ dependencies {
   testImplementation 'org.apache.groovy:groovy'
   testImplementation 'org.apache.groovy:groovy-json'
   testImplementation 'org.apache.groovy:groovy-xml'
-  testImplementation 'commons-io:commons-io:2.21.0'
-  testImplementation 'org.mockito:mockito-core:5.18.0'
+  testImplementation 'commons-io:commons-io:2.22.0'
+  testImplementation 'org.mockito:mockito-core:5.24.0'
   testImplementation 'org.hamcrest:hamcrest'
   testImplementation 'org.apache.httpcomponents.client5:httpclient5'
-  testImplementation('io.rest-assured:rest-assured:5.5.2') {
+  testImplementation('io.rest-assured:rest-assured:5.5.7') {
     exclude group: 'org.apache.groovy'
   }
   testImplementation 'org.apache.commons:commons-collections4'
-  testImplementation 'com.squareup.okhttp3:okhttp:5.4.0'
+  testImplementation 'com.squareup.okhttp3:okhttp:5.5.1'
 
   // JAX-B dependencies for JDK 9+
   testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'

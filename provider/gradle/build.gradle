@@ -18,10 +18,10 @@ dependencies {
   implementation 'io.github.oshai:kotlin-logging-jvm'
 
   testImplementation 'junit:junit'
-  testImplementation 'org.mockito:mockito-core:5.18.0'
+  testImplementation 'org.mockito:mockito-core:5.24.0'
 
   // This needs to match the version of Groovy provided by Gradle
-  testImplementation('org.spockframework:spock-core:2.3-groovy-3.0') {
+  testImplementation('org.spockframework:spock-core:2.4-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }
 }
