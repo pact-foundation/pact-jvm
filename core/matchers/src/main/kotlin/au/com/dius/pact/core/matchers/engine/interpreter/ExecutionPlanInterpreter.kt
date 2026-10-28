@@ -1680,13 +1680,17 @@ class ExecutionPlanInterpreter(
             var result: NodeResult = NodeResult.OK
             val childResults = mutableListOf(markerResult, loopItems)
 
-            val loopItems = loopItems.result
+            val loopValue = loopItems.result
               .orDefault()
               .asValue()
               .orDefault()
-              .toList()
-            for (index in 0..<loopItems.size) {
-              val updatedChild = injectIndex(argResult.value.second[0], marker, index)
+            // A JSON object is looped over by its keys (for the values of a map), anything else by index
+            val loopTokens = when (val json = loopValue.asJson()) {
+              is JsonValue.Object -> json.entries.keys.map { PathToken.Field(it) }
+              else -> loopValue.toList().indices.map { PathToken.Index(it) }
+            }
+            for (token in loopTokens) {
+              val updatedChild = injectToken(argResult.value.second[0], marker, token)
               val childResult = walkTree(actionPath, updatedChild, valueResolver)
               result = result.and(childResult.result)
               childResults.add(childResult)
@@ -2057,48 +2061,52 @@ class ExecutionPlanInterpreter(
     }
   }
 
-  private fun injectIndex(
+  private fun injectToken(
     node: ExecutionPlanNode,
     marker: String,
-    index: Int
+    token: PathToken
   ): ExecutionPlanNode {
     return when (node.nodeType) {
       is PlanNodeType.ACTION -> node.copy(children = node.children
-        .map { injectIndex(it, marker, index) }
+        .map { injectToken(it, marker, token) }
         .toMutableList())
       is PlanNodeType.CONTAINER -> {
         when (val pathResult = handleWith<DocPath> { DocPath(node.nodeType.label) }) {
           is Result.Ok -> node.copy(
-            nodeType = PlanNodeType.CONTAINER(injectIndexInPath(pathResult.value, marker, index).toString()),
+            nodeType = PlanNodeType.CONTAINER(injectTokenInPath(pathResult.value, marker, token).toString()),
             children = node.children
-              .map { injectIndex(it, marker, index) }
+              .map { injectToken(it, marker, token) }
               .toMutableList())
           is Result.Err -> node.copy(children = node.children
-            .map { injectIndex(it, marker, index) }
+            .map { injectToken(it, marker, token) }
             .toMutableList())
         }
       }
       is PlanNodeType.RESOLVE_CURRENT -> node.copy(nodeType = PlanNodeType.RESOLVE_CURRENT(
-        injectIndexInPath(node.nodeType.path, marker, index)
+        injectTokenInPath(node.nodeType.path, marker, token)
       ))
       PlanNodeType.SPLAT, PlanNodeType.PIPELINE -> node.copy(children = node.children
-        .map { injectIndex(it, marker, index) }
+        .map { injectToken(it, marker, token) }
         .toMutableList())
       else -> node
     }
   }
 
-  private fun injectIndexInPath(
+  /**
+   * Replaces the for-each marker in the path with the token for the current item (an index for a list item, or a
+   * field for the value of a map entry)
+   */
+  private fun injectTokenInPath(
     path: DocPath,
     marker: String,
-    index: Int
+    token: PathToken
   ): DocPath {
     return if (path.expr.startsWith("$['$*']")) {
       // Special case where for-each is applied at the root
-      DocPath(listOf(PathToken.Root, PathToken.Index(index)) + path.tokens().drop(2).flatMap {
+      DocPath(listOf(PathToken.Root, token) + path.tokens().drop(2).flatMap {
         when (it) {
           is PathToken.Field -> if (it.name == marker) {
-            listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
+            listOf(PathToken.Field(marker.dropLast(1)), token)
           } else listOf(it)
           else -> listOf(it)
         }
@@ -2107,7 +2115,7 @@ class ExecutionPlanInterpreter(
       DocPath(path.tokens().flatMap {
         when (it) {
           is PathToken.Field -> if (it.name == marker) {
-            listOf(PathToken.Field(marker.dropLast(1)), PathToken.Index(index))
+            listOf(PathToken.Field(marker.dropLast(1)), token)
           } else listOf(it)
           else -> listOf(it)
         }
