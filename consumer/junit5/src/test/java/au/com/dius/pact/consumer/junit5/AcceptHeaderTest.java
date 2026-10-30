@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
+import static au.com.dius.pact.consumer.dsl.Matchers.regexp;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -61,6 +62,31 @@ public class AcceptHeaderTest {
   @PactTestFor(pactMethod = "newDsl")
   void runNewDslTest(MockServer mockServer) throws IOException {
     ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/new_dsl")
+      .addHeader("accept", "application/json, application/*+json")
+      .execute()
+      .returnResponse();
+    assertThat(httpResponse.getCode(), is(200));
+  }
+
+  // Issue: 4.6.17 is breaking our headers setup #1862
+  @Pact(consumer="regex_dsl")
+  public V4Pact regexDsl(PactBuilder builder) {
+    return builder.expectsToReceiveHttpInteraction("get", httpBuilder -> {
+      return httpBuilder.withRequest(httpRequestBuilder -> {
+        return httpRequestBuilder
+          .path("/regex_dsl")
+          .method("GET")
+          .header("accept", regexp("application/json.*", "application/json, application/*+json"));
+      })
+      .willRespondWith(httpResponseBuilder -> httpResponseBuilder.status(200));
+    })
+    .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "regexDsl")
+  void runRegexDslTest(MockServer mockServer) throws IOException {
+    ClassicHttpResponse httpResponse = (ClassicHttpResponse) Request.get(mockServer.getUrl() + "/regex_dsl")
       .addHeader("accept", "application/json, application/*+json")
       .execute()
       .returnResponse();
