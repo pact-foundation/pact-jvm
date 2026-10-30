@@ -205,15 +205,41 @@ object Matching {
     return e.entries.fold(listOf()) { list, values ->
       if (a.containsKey(values.key)) {
         val actual = a[values.key].orEmpty()
-        list + HeaderMatchResult(values.key, values.value.padTo(actual.size).mapIndexed { index, headerValue ->
-          HeaderMatcher.compareHeader(values.key, headerValue, actual.getOrElse(index) { "" }, context)
-        }.filterNotNull())
+        list + HeaderMatchResult(values.key, compareHeaderValues(values.key, values.value, actual, context))
       } else {
         list + HeaderMatchResult(values.key,
           listOf(HeaderMismatch(values.key, values.value.joinToString(separator = ", "), "",
           "Expected a header '${values.key}' but was missing")))
       }
     }
+  }
+
+  private fun compareHeaderValues(
+    key: String,
+    expected: List<String>,
+    actual: List<String>,
+    context: MatchingContext
+  ): List<HeaderMismatch> {
+    val mismatches = expected.padTo(actual.size).mapIndexed { index, headerValue ->
+      HeaderMatcher.compareHeader(key, headerValue, actual.getOrElse(index) { "" }, context)
+    }.filterNotNull()
+    return if (mismatches.isNotEmpty() && matchesWholeValue(key, expected, actual, context)) emptyList()
+    else mismatches
+  }
+
+  /**
+   * A matcher written against the whole value of a multi-value header (i.e. a regex for "a, b")
+   * must still match after the actual value has been split into its values. See #1862.
+   */
+  private fun matchesWholeValue(
+    key: String,
+    expected: List<String>,
+    actual: List<String>,
+    context: MatchingContext
+  ): Boolean {
+    return expected.size == 1 && actual.size > 1 &&
+      context.matcherDefined(listOf(key), lowerCaseComparator) &&
+      HeaderMatcher.compareHeader(key, expected[0], actual.joinToString(", "), context) == null
   }
 
   @Suppress("UnusedPrivateMember")
