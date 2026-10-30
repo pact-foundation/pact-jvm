@@ -71,15 +71,12 @@ class ContentType(val contentType: MediaType?) {
   fun asString() = contentType?.toString()
 
   fun asCharset(): Charset {
-    return if (contentType != null && contentType.hasParameters()) {
-      val cs = contentType.parameters["charset"]
-      if (cs.isNotEmpty()) {
-        Charset.forName(cs)
-      } else {
-        Charset.defaultCharset()
-      }
-    } else {
-      Charset.defaultCharset()
+    val cs = if (contentType != null && contentType.hasParameters()) contentType.parameters["charset"] else null
+    return when {
+      cs.isNotEmpty() -> Charset.forName(cs)
+      // RFC 8259: JSON exchanged between systems must be UTF-8, and application/json has no charset parameter
+      isJson() -> Charsets.UTF_8
+      else -> Charset.defaultCharset()
     }
   }
 

@@ -22,7 +22,6 @@ import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.json.JSONObject
 import org.w3c.dom.Document
 import java.io.IOException
-import java.nio.charset.Charset
 import java.util.function.Supplier
 import javax.xml.transform.TransformerException
 
@@ -137,7 +136,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
    * @param body Request body in string form
    */
   fun body(body: String, contentType: ContentType): PactDslRequestWithoutPath {
-    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
+    val charset = BuilderUtils.charset(contentType.toString())
     requestBody = body(body.toByteArray(charset), au.com.dius.pact.core.model.ContentType(contentType.toString()))
     requestHeaders[CONTENT_TYPE] = listOf(contentType.toString())
     return this
@@ -168,7 +167,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
    * @param body Request body in Java Functional Interface Supplier that must return a string
    */
   fun body(body: Supplier<String>, contentType: ContentType): PactDslRequestWithoutPath {
-    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
+    val charset = BuilderUtils.charset(contentType.toString())
     requestBody = body(body.get().toByteArray(charset), au.com.dius.pact.core.model.ContentType(contentType.toString()))
     requestHeaders[CONTENT_TYPE] = listOf(contentType.toString())
     return this
@@ -216,7 +215,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       requestBody = body(body.toString().toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
@@ -240,7 +239,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       requestBody = body(parent.toString().toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
@@ -260,7 +259,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       requestBody = body(ConsumerPactBuilder.xmlToString(body).toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
@@ -281,7 +280,7 @@ open class PactDslRequestWithoutPath @JvmOverloads constructor(
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       requestBody = body(xmlBuilder.asBytes(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
