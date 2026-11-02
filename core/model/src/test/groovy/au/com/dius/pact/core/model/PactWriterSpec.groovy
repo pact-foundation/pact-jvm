@@ -82,8 +82,9 @@ class PactWriterSpec extends Specification {
 
   def 'handle non-ascii characters correctly'() {
     given:
-    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.getBytes('UTF-8')))
-    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.getBytes('UTF-8')))
+    def body = '"This is a string with letters ä, ü, ö and ß"'.getBytes('UTF-8')
+    def request = new Request(body: OptionalBody.body(body))
+    def response = new Response(body: OptionalBody.body(body))
     def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
       [], request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
