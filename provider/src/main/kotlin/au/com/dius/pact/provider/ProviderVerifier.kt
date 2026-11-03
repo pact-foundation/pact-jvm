@@ -1407,9 +1407,10 @@ open class ProviderVerifier @JvmOverloads constructor (
     context: Map<String, Any>
   ): VerificationResult {
     currentInteraction = interaction
+    val isPending = consumer.pending || interaction.pending
     val userConfig = context["userConfig"] as Map<String, Any?>? ?: emptyMap()
     logger.debug { "Verifying interaction => $request" }
-    return when (val result = DefaultPluginManager.verifyInteraction(
+    return when (val result = pluginManager.verifyInteraction(
       client as CatalogueEntry,
       (request as RequestDataToBeVerified).asInteractionVerificationData(),
       userConfig,
@@ -1428,11 +1429,11 @@ open class ProviderVerifier @JvmOverloads constructor (
                   BodyMismatch(it.expected, it.actual, it.mismatch, it.path), interaction
                 )
               }
-            }), output = result.value.output
+            }), pending = isPending, output = result.value.output
         )
       }
       is Result.Err -> VerificationResult.Failed("Verification via plugin failed",
-        "Verification Failed - ${result.error}")
+        "Verification Failed - ${result.error}", pending = isPending)
     }
   }
 

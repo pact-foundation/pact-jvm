@@ -39,6 +39,8 @@ import au.com.dius.pact.core.support.json.JsonValue
 import au.com.dius.pact.provider.reporters.Event
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.json.JsonOutput
+import io.pact.plugins.jvm.core.CatalogueEntry
+import io.pact.plugins.jvm.core.InteractionVerificationResult
 import io.pact.plugins.jvm.core.PluginConfiguration
 import io.pact.plugins.jvm.core.PluginManager
 import spock.lang.Specification
@@ -995,5 +997,32 @@ class ProviderVerifierSpec extends Specification {
     'method2'  | V4Interaction.AsynchronousMessage | new V4Interaction.AsynchronousMessage('test') | 'method2'
     'method3'  | V4Interaction.SynchronousMessages | new V4Interaction.SynchronousMessages('test') | 'method3'
     'method4'  | MessageContents                   | new V4Interaction.SynchronousMessages('test') | 'method4'
+  }
+  @Unroll
+  def 'verifying via a plugin sets the pending flag on failures (consumer pending: #consumerPending, interaction pending: #interactionPending)'() {
+    given:
+    def provider = new ProviderInfo('Test Provider')
+    def consumer = Stub(IConsumerInfo) { getPending() >> consumerPending }
+    def interaction = new V4Interaction.SynchronousMessages('test')
+    interaction.pending = interactionPending
+    def v4pact = Stub(V4Pact)
+    def request = new RequestDataToBeVerified(OptionalBody.empty(), [:])
+    verifier.pluginManager = Mock(PluginManager)
+
+    when:
+    def result = verifier.verifyInteractionViaPlugin(provider, consumer, v4pact, interaction, Stub(CatalogueEntry),
+      request, [:])
+
+    then:
+    1 * verifier.pluginManager.verifyInteraction(*_) >> pluginResult
+    result instanceof VerificationResult.Failed
+    result.pending == expected
+
+    where:
+    consumerPending | interactionPending | pluginResult                                                  | expected
+    false           | false              | new Result.Ok(new InteractionVerificationResult(false, [], []))  | false
+    true            | false              | new Result.Ok(new InteractionVerificationResult(false, [], []))  | true
+    false           | true               | new Result.Ok(new InteractionVerificationResult(false, [], []))  | true
+    false           | true               | new Result.Err('failed')                                      | true
   }
 }
