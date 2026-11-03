@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.7.7 - Bugfix Release
+
+* d75f391ee - fix: pass the pending flag through when verifying an interaction via a plugin #1949 (Ronald Holshausen, Wed Nov 4 09:56:01 2026 +1100)
+* a9275b9ef - fix: apply a header matcher to the whole value when a multi-value header was split #1862 (#1948) (Vinícius Ribeiro, Tue Nov 3 19:43:31 2026 -0300)
+* 535d959df - fix: read and write JSON bodies without a charset as UTF-8 #1783 (#1947) (Vinícius Ribeiro, Tue Nov 3 19:31:09 2026 -0300)
+* af4adc2ed - fix: minArrayLike and minMaxArrayLike with an example object generate the minimum number of examples #1800 (Vinicius Ribeiro, Fri Oct 30 16:26:42 2026 -0300)
+* 88477ee11 - bump version to 4.7.7 (Ronald Holshausen, Thu Oct 29 10:12:46 2026 +1100)
+
 # 4.7.6 - Bugfix Release
 
 * c0d2181fc - fix(v2 engine): apply the rules defined below an eachValue matcher to its values (Ronald Holshausen, Wed Oct 28 16:50:49 2026 +1100)
