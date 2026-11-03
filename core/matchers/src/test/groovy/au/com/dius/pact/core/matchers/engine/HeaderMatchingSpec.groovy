@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import com.github.difflib.DiffUtils
+import spock.lang.Issue
 import spock.lang.Specification
 
 import static com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff
@@ -735,6 +736,49 @@ class HeaderMatchingSpec extends Specification {
 
     then:
     diff == ''
+  }
+
+  @Issue('#1862')
+  def 'match headers with matching rule - applies the matcher to the whole value when the actual value was split'() {
+    given:
+    def matchingRulesForHeaders = new MatchingRuleCategory('header', [
+      'Accept': new MatchingRuleGroup([new RegexMatcher(regex) ])
+    ])
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory(matchingRulesForHeaders)
+    def expectedRequest = new HttpRequest(
+      'get',
+      '/',
+      [:],
+      ['Accept': expected],
+      OptionalBody.missing(),
+      matchingRules,
+      new Generators()
+    )
+
+    def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
+    def interaction = new V4Interaction.SynchronousHttp(null, 'test interaction', [], expectedRequest)
+    def config = new MatchingConfiguration(true, false, true, false)
+    def context = new PlanMatchingContext(pact, interaction, config)
+
+    def request = new HttpRequest()
+    request.headers = ['Accept': ['application/json', 'application/*+json']]
+
+    when:
+    def plan = new ExecutionPlan('header-test')
+    plan.add(V2MatchingEngine.INSTANCE.setupHeaderPlan(expectedRequest, context.forHeaders()))
+    def executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
+
+    then:
+    executedPlan.planRoot.result.truthy == matches
+
+    where:
+    expected                                        | regex                           | matches
+    ['application/json, application/*+json']       | 'application/json.*'            | true
+    ['application/json, application/*+json']       | 'application/(json|\\*\\+json)' | true
+    ['application/json, application/*+json']       | 'text/.*'                       | false
+    ['application/json', 'application/*+json']     | 'application/json.*'            | true
+    ['application/json', 'application/*+json']     | 'text/.*'                       | false
   }
 
   def 'match headers with values having different lengths'() {

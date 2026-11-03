@@ -408,7 +408,8 @@ sealed class NodeValue: Into<NodeValue> {
             val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
             listOf(BodyItemMatchResult(constructPath(p), result))
           }.flatMap { it.result }
-          if (result.isNotEmpty()) {
+          if (result.isNotEmpty() && !(actual is SLIST && matchesWholeHeaderValue(expected.items.joinToString(", "),
+              actual.items, matcher, cascaded, actionPath, context))) {
             result.joinToString(", ") { it.mismatch }
           } else {
             null
@@ -430,7 +431,8 @@ sealed class NodeValue: Into<NodeValue> {
                   val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
                   listOf(BodyItemMatchResult(constructPath(p), result))
             }.flatMap { it.result }
-            if (result.isNotEmpty()) {
+            if (result.isNotEmpty() && !matchesWholeHeaderValue(expected.string, actual.items, matcher, cascaded,
+                actionPath, context)) {
               result.joinToString(", ") { it.mismatch }
             } else {
               null
@@ -449,6 +451,24 @@ sealed class NodeValue: Into<NodeValue> {
           }
         }
       }
+    }
+
+    /**
+     * A matcher written against the whole value of a multi-value header (i.e. a regex for "a, b")
+     * must still match after the actual value has been split into its values. See #1862.
+     */
+    @Suppress("LongParameterList")
+    private fun matchesWholeHeaderValue(
+      expected: String,
+      actual: List<String>,
+      matcher: MatchingRule,
+      cascaded: Boolean,
+      actionPath: List<String>,
+      context: PlanMatchingContext
+    ): Boolean {
+      return actionPath.getOrNull(1) == "headers" && actual.size > 1 &&
+        domatch(matcher, actionPath, expected, actual.joinToString(", "),
+          BodyMismatchFactory, cascaded, context.matchingContext).isEmpty()
     }
   }
 }

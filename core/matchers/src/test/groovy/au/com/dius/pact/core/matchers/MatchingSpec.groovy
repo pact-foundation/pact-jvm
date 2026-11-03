@@ -72,6 +72,25 @@ class MatchingSpec extends Specification {
     mismatch = new HeaderMismatch('A', 'B', 'C', "Expected header 'A' to have value 'B' but was 'C'")
   }
 
+  @Issue('#1862')
+  def 'Header Matching - applies a matcher to the whole value when the actual value was split'() {
+    given:
+    def category = new MatchingRuleCategory('header')
+    category.addRule('Accept', new RegexMatcher(regex))
+    def context = new MatchingContext(category, true)
+    def expected = new Request('', '', [:], [Accept: ['application/json, application/*+json']])
+    def actual = new Request('', '', [:], [Accept: ['application/json', 'application/*+json']])
+
+    expect:
+    Matching.matchHeaders(expected, actual, context)[0].result.empty == matches
+
+    where:
+    regex                         | matches
+    'application/json.*'          | true
+    'application/(json|\\*\\+json)' | true
+    'text/.*'                     | false
+  }
+
   def 'Metadata Matching - match empty'() {
     expect:
     Matching.compareMessageMetadata([:], [:], metadataContext).empty
