@@ -750,7 +750,7 @@ class HeaderMatchingSpec extends Specification {
       'get',
       '/',
       [:],
-      ['Accept': ['application/json, application/*+json']],
+      ['Accept': expected],
       OptionalBody.missing(),
       matchingRules,
       new Generators()
@@ -773,10 +773,12 @@ class HeaderMatchingSpec extends Specification {
     executedPlan.planRoot.result.truthy == matches
 
     where:
-    regex                           | matches
-    'application/json.*'            | true
-    'application/(json|\\*\\+json)' | true
-    'text/.*'                       | false
+    expected                                        | regex                           | matches
+    ['application/json, application/*+json']       | 'application/json.*'            | true
+    ['application/json, application/*+json']       | 'application/(json|\\*\\+json)' | true
+    ['application/json, application/*+json']       | 'text/.*'                       | false
+    ['application/json', 'application/*+json']     | 'application/json.*'            | true
+    ['application/json', 'application/*+json']     | 'text/.*'                       | false
   }
 
   def 'match headers with values having different lengths'() {

@@ -408,7 +408,8 @@ sealed class NodeValue: Into<NodeValue> {
             val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
             listOf(BodyItemMatchResult(constructPath(p), result))
           }.flatMap { it.result }
-          if (result.isNotEmpty()) {
+          if (result.isNotEmpty() && !(actual is SLIST && matchesWholeHeaderValue(expected.items.joinToString(", "),
+              actual.items, matcher, cascaded, actionPath, context))) {
             result.joinToString(", ") { it.mismatch }
           } else {
             null
@@ -430,8 +431,8 @@ sealed class NodeValue: Into<NodeValue> {
                   val result = domatch(matcher, p, expected, actual, BodyMismatchFactory, cascaded, context)
                   listOf(BodyItemMatchResult(constructPath(p), result))
             }.flatMap { it.result }
-            if (result.isNotEmpty() && !matchesWholeHeaderValue(expected, actual, matcher, cascaded, actionPath,
-                context)) {
+            if (result.isNotEmpty() && !matchesWholeHeaderValue(expected.string, actual.items, matcher, cascaded,
+                actionPath, context)) {
               result.joinToString(", ") { it.mismatch }
             } else {
               null
@@ -458,15 +459,15 @@ sealed class NodeValue: Into<NodeValue> {
      */
     @Suppress("LongParameterList")
     private fun matchesWholeHeaderValue(
-      expected: STRING,
-      actual: SLIST,
+      expected: String,
+      actual: List<String>,
       matcher: MatchingRule,
       cascaded: Boolean,
       actionPath: List<String>,
       context: PlanMatchingContext
     ): Boolean {
-      return context.matchingContext.matchers.name == "header" && actual.items.size > 1 &&
-        domatch(matcher, actionPath, expected.string, actual.items.joinToString(", "),
+      return context.matchingContext.matchers.name == "header" && actual.size > 1 &&
+        domatch(matcher, actionPath, expected, actual.joinToString(", "),
           BodyMismatchFactory, cascaded, context.matchingContext).isEmpty()
     }
   }
