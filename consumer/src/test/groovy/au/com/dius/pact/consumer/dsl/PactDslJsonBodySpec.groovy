@@ -45,6 +45,8 @@ class PactDslJsonBodySpec extends Specification {
       new PactDslJsonBody().minArrayLike('test', 2).id(),
       new PactDslJsonBody().minArrayLike('test', 2, PactDslJsonRootValue.id()),
       new PactDslJsonBody().minMaxArrayLike('test', 2, 3).id(),
+      new PactDslJsonBody().minArrayLike('test', 2, new PactDslJsonBody().id()),
+      new PactDslJsonBody().minMaxArrayLike('test', 2, 3, new PactDslJsonBody().id()),
     ]
   }
 

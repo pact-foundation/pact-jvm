@@ -1480,6 +1480,7 @@ open class PactDslJsonBody : DslPart {
     val base = constructValidPath(name, rootPath, false)
     matchers.addRule(base, matchMin(size))
     val parent = PactDslJsonArray(base, name, this, true)
+    parent.numberExamples = size
     if (obj is PactDslJsonBody) {
       parent.putObjectPrivate(obj)
     } else if (obj is PactDslJsonArray) {
@@ -2135,6 +2136,7 @@ open class PactDslJsonBody : DslPart {
     val base = constructValidPath(name, rootPath, false)
     matchers.addRule(base, matchMinMax(minSize, maxSize))
     val parent = PactDslJsonArray(base, name, this, true)
+    parent.numberExamples = minSize
     if (obj is PactDslJsonBody) {
       parent.putObjectPrivate(obj)
     } else if (obj is PactDslJsonArray) {
