@@ -759,14 +759,14 @@ class HeaderMatchingSpec extends Specification {
     def pact = new V4Pact(new Consumer('test-consumer'), new Provider('test-provider'))
     def interaction = new V4Interaction.SynchronousHttp(null, 'test interaction', [], expectedRequest)
     def config = new MatchingConfiguration(true, false, true, false)
-    def context = new PlanMatchingContext(pact, interaction, config).forHeaders()
+    def context = new PlanMatchingContext(pact, interaction, config)
 
     def request = new HttpRequest()
     request.headers = ['Accept': ['application/json', 'application/*+json']]
 
     when:
     def plan = new ExecutionPlan('header-test')
-    plan.add(V2MatchingEngine.INSTANCE.setupHeaderPlan(expectedRequest, context))
+    plan.add(V2MatchingEngine.INSTANCE.setupHeaderPlan(expectedRequest, context.forHeaders()))
     def executedPlan = V2MatchingEngine.INSTANCE.executeRequestPlan(plan, request, context)
 
     then:

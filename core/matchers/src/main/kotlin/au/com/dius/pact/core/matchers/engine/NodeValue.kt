@@ -466,7 +466,7 @@ sealed class NodeValue: Into<NodeValue> {
       actionPath: List<String>,
       context: PlanMatchingContext
     ): Boolean {
-      return context.matchingContext.matchers.name == "header" && actual.size > 1 &&
+      return actionPath.getOrNull(1) == "headers" && actual.size > 1 &&
         domatch(matcher, actionPath, expected, actual.joinToString(", "),
           BodyMismatchFactory, cascaded, context.matchingContext).isEmpty()
     }
