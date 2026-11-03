@@ -180,8 +180,9 @@ class PactSerialiserSpec extends Specification {
     given:
     def file = File.createTempFile('non-ascii-pact', '.json')
     def fw = new FileWriter(file)
-    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
-    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
+    def body = '"This is a string with letters ä, ü, ö and ß"'.getBytes('UTF-8')
+    def request = new Request(body: OptionalBody.body(body))
+    def response = new Response(body: OptionalBody.body(body))
     def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
       [], request, response, null)
     def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),

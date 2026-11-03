@@ -29,7 +29,6 @@ import org.apache.hc.core5.http.ContentType
 import org.json.JSONObject
 import org.w3c.dom.Document
 import java.io.IOException
-import java.nio.charset.Charset
 import java.util.function.Supplier
 import javax.xml.transform.TransformerException
 
@@ -215,7 +214,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    * @param body Request body in string form
    */
   fun body(body: String, contentType: ContentType): PactDslRequestWithPath {
-    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
+    val charset = BuilderUtils.charset(contentType.toString())
     requestBody = body(body.toByteArray(charset), au.com.dius.pact.core.model.ContentType(contentType.toString()))
     requestHeaders[CONTENT_TYPE] = listOf(contentType.toString())
     return this
@@ -246,7 +245,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
    * @param body Request body in Java Functional Interface Supplier that must return a string
    */
   fun body(body: Supplier<String>, contentType: ContentType): PactDslRequestWithPath {
-    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
+    val charset = BuilderUtils.charset(contentType.toString())
     requestBody = body(body.get().toByteArray(charset), au.com.dius.pact.core.model.ContentType(contentType.toString()))
     requestHeaders[CONTENT_TYPE] = listOf(contentType.toString())
     return this
@@ -294,7 +293,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
       requestBody = body(body.toString().toByteArray())
     } else {
       val contentType = ContentType.parse(contentTypeHeader)
-      val charset = if (contentType.charset != null) contentType.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(contentType.toString())
       requestBody = body(body.toString().toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType.toString()))
     }
@@ -310,16 +309,13 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     val parent = body.close()!!
     requestMatchers.addCategory(parent.matchers)
     requestGenerators.addGenerators(parent.generators)
-    var charset = Charset.defaultCharset()
     var contentType = ContentType.APPLICATION_JSON.toString()
     if (isContentTypeHeaderNotSet) {
       requestHeaders[CONTENT_TYPE] = listOf(contentType)
     } else {
       contentType = contentTypeHeader
-      val ct = ContentType.parse(contentType)
-      charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
     }
-    requestBody = body(parent.toString().toByteArray(charset),
+    requestBody = body(parent.toString().toByteArray(BuilderUtils.charset(contentType)),
       au.com.dius.pact.core.model.ContentType(contentType))
     return this
   }
@@ -339,7 +335,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       requestBody = body(ConsumerPactBuilder.xmlToString(body).toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
@@ -360,7 +356,7 @@ open class PactDslRequestWithPath : PactDslRequestBase {
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       requestBody = body(xmlBuilder.asBytes(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }

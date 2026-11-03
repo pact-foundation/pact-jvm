@@ -5,6 +5,7 @@ import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 @SuppressWarnings('UnnecessaryBooleanExpression')
 @RestoreSystemProperties
@@ -119,6 +120,9 @@ class ContentTypeSpec extends Specification {
     'text/plain'                       || Charset.defaultCharset()
     'application/pdf;a=b'              || Charset.defaultCharset()
     'application/xml ; charset=UTF-16' || Charset.forName('UTF-16')
+    'application/json'                 || StandardCharsets.UTF_8
+    'application/vnd.api+json'         || StandardCharsets.UTF_8
+    'application/json;charset=UTF-16'  || Charset.forName('UTF-16')
 
     contentType = new ContentType(value)
   }

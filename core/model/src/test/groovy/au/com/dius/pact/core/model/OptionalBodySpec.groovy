@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 @SuppressWarnings('LineLength')
 class OptionalBodySpec extends Specification {
@@ -133,8 +134,8 @@ class OptionalBodySpec extends Specification {
 
     where:
     body                                                                               | charset
-    OptionalBody.body('{}'.bytes)                                                      | Charset.defaultCharset()
-    OptionalBody.body('{}'.bytes, ContentType.UNKNOWN)                                 | Charset.defaultCharset()
+    OptionalBody.body('{}'.bytes)                                                      | StandardCharsets.UTF_8
+    OptionalBody.body('{}'.bytes, ContentType.UNKNOWN)                                 | StandardCharsets.UTF_8
     OptionalBody.body('{}'.bytes, ContentType.HTML)                                    | Charset.defaultCharset()
     OptionalBody.body('{}'.bytes, new ContentType('application/json; charset=UTF-16')) | Charset.forName('UTF-16')
   }

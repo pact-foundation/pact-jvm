@@ -39,7 +39,6 @@ import io.ktor.http.parseHeaderValue
 import org.apache.hc.core5.http.ContentType
 import org.json.JSONObject
 import org.w3c.dom.Document
-import java.nio.charset.Charset
 import java.util.function.Supplier
 import java.util.regex.Pattern
 import javax.xml.transform.TransformerException
@@ -129,7 +128,7 @@ open class PactDslResponse @JvmOverloads constructor(
    * @param contentType the Content-Type response header value
    */
   fun body(body: String, contentType: ContentType): PactDslResponse {
-    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
+    val charset = BuilderUtils.charset(contentType.toString())
     responseBody = body(body.toByteArray(charset), au.com.dius.pact.core.model.ContentType(contentType.toString()))
     responseHeaders[CONTENT_TYPE] = listOf(contentType.toString())
     return this
@@ -162,7 +161,7 @@ open class PactDslResponse @JvmOverloads constructor(
    * @param contentType the Content-Type response header value
    */
   fun body(body: Supplier<String>, contentType: ContentType): PactDslResponse {
-    val charset = if (contentType.charset == null) Charset.defaultCharset() else contentType.charset
+    val charset = BuilderUtils.charset(contentType.toString())
     responseBody = body(body.get().toByteArray(charset),
       au.com.dius.pact.core.model.ContentType(contentType.toString()))
     responseHeaders[CONTENT_TYPE] = listOf(contentType.toString())
@@ -213,7 +212,7 @@ open class PactDslResponse @JvmOverloads constructor(
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       body(body.toString().toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
@@ -231,17 +230,14 @@ open class PactDslResponse @JvmOverloads constructor(
     responseMatchers.addCategory(parent.matchers)
     responseGenerators.addGenerators(parent.generators)
 
-    var charset = Charset.defaultCharset()
     var contentType = ContentType.APPLICATION_JSON.toString()
     if (isContentTypeHeaderNotSet) {
       matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, contentType)
     } else {
       contentType = contentTypeHeader
-      val ct = ContentType.parse(contentType)
-      charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
     }
 
-    responseBody = body(parent.toString().toByteArray(charset),
+    responseBody = body(parent.toString().toByteArray(BuilderUtils.charset(contentType)),
       au.com.dius.pact.core.model.ContentType(contentType))
 
     return this
@@ -260,7 +256,7 @@ open class PactDslResponse @JvmOverloads constructor(
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       responseBody = body(ConsumerPactBuilder.xmlToString(body).toByteArray(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
@@ -441,7 +437,7 @@ open class PactDslResponse @JvmOverloads constructor(
     } else {
       val contentType = contentTypeHeader
       val ct = ContentType.parse(contentType)
-      val charset = if (ct.charset != null) ct.charset else Charset.defaultCharset()
+      val charset = BuilderUtils.charset(ct.toString())
       responseBody = body(xmlBuilder.asBytes(charset),
         au.com.dius.pact.core.model.ContentType(contentType))
     }
