@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.json.JsonValue
+import au.com.dius.pact.core.model.v4.MessageContents
 import spock.lang.Specification
 
 class V4PactMergeSpec extends Specification {
@@ -140,5 +141,26 @@ class V4PactMergeSpec extends Specification {
     result.ok
     result.result.interactions.size() == 1
     configuration.keySet() == ['hash-1', 'hash-2'] as Set
+  }
+
+  def 'merge keeps #type interactions that differ only in provider state parameter values'() {
+    given:
+    def create = interaction('a change', new ProviderState('a change', [operationType: 'CREATE']))
+    def update = interaction('a change', new ProviderState('a change', [operationType: 'UPDATE']))
+    def pact = new V4Pact(new Consumer('consumer'), new Provider('provider'), [create, update])
+
+    when: 'the pact is merged with itself, as happens when a consumer test run writes to an existing pact file'
+    def merged = pact.mergePact(pact)
+
+    then:
+    merged.interactions.size() == 2
+    merged.interactions*.providerStates*.first()*.params*.operationType as Set == ['CREATE', 'UPDATE'] as Set
+
+    where:
+    type                    | interaction
+    'SynchronousHttp'       | { String d, ProviderState s -> new V4Interaction.SynchronousHttp(null, d, [s]) }
+    'AsynchronousMessage'   | { String d, ProviderState s ->
+                                new V4Interaction.AsynchronousMessage(null, d, new MessageContents(), null, [s]) }
+    'SynchronousMessages'   | { String d, ProviderState s -> new V4Interaction.SynchronousMessages(null, d, null, [s]) }
   }
 }

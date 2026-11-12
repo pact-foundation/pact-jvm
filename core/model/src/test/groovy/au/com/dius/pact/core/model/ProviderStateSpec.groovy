@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -30,17 +31,29 @@ class ProviderStateSpec extends Specification {
     new ProviderState('test', [a: new Pojo()])         | [name: 'test', params: [a: [v: 1, s: 'one', b: false, vals: [1, 2, 'three']]]]
   }
 
-  def 'uniqueKey should only include parameter keys'() {
+  def 'uniqueKey should include parameter keys and values'() {
     given:
     def state1 = new ProviderState('test', [a: 'B', b: 1, c: '2020-03-04'])
     def state2 = new ProviderState('test', [a: 'B', b: 1, c: '2020-03-03'])
     def state3 = new ProviderState('test', [a: 'B', b: 1])
     def state4 = new ProviderState('test', [a: 'B', b: 1, d: '2020-03-04'])
+    def state5 = new ProviderState('test', [a: 'B', b: 1, c: '2020-03-04'])
 
     expect:
-    state1.uniqueKey() == state2.uniqueKey()
+    state1.uniqueKey() != state2.uniqueKey()
     state1.uniqueKey() != state3.uniqueKey()
     state1.uniqueKey() != state4.uniqueKey()
+    state1.uniqueKey() == state5.uniqueKey()
+  }
+
+  def 'uniqueKey should be the same after the state is written to and read from JSON'() {
+    given:
+    def state = new ProviderState('test', [a: 'B', b: 1, c: 1.5, d: true, e: null, f: [g: ['h', 2]],
+      i: new Pojo()])
+    def roundTripped = ProviderState.fromJson(Json.INSTANCE.toJson(state.toMap()))
+
+    expect:
+    state.uniqueKey() == roundTripped.uniqueKey()
   }
 
   @Issue('#1717')
