@@ -40,6 +40,7 @@ import org.apache.commons.lang3.time.FastDateFormat
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -1135,6 +1136,42 @@ open class PactDslJsonBody : DslPart {
 
     val formatter = DateTimeFormatter.ofPattern(format)
     matchers.addRule(constructValidPath(name, rootPath, false), matchDate(format))
+
+    when (val body = body) {
+      is JsonValue.Object -> body.add(name, JsonValue.StringValue(formatter.format(examples[0]).toCharArray()))
+      is JsonValue.Array -> {
+        examples.padTo(body.size()).forEachIndexed { i, value ->
+          body[i].asObject()!!.add(name, JsonValue.StringValue(formatter.format(value).toCharArray()))
+        }
+      }
+      else -> {}
+    }
+
+    return this
+  }
+
+  /**
+   * Attribute that must match the given datetime format
+   * @param name attribute name
+   * @param format datetime format. It must not use zone or offset pattern letters, as a local datetime has no zone
+   * @param examples example local dates and times to use for generated bodies
+   */
+  fun localDateTime(name: String, format: String, vararg examples: LocalDateTime): PactDslJsonBody {
+    require(examples.isNotEmpty()) {
+      "At least one example value is required"
+    }
+    if (body is JsonValue.Object) {
+      require(examples.size == 1) {
+        "You provided multiple example values (${examples.size}) but only one was expected"
+      }
+    } else if (body is JsonValue.Array) {
+      require(body.size() >= examples.size) {
+        "You provided ${examples.size} example values but ${body.size()} was expected"
+      }
+    }
+
+    val formatter = DateTimeFormatter.ofPattern(format)
+    matchers.addRule(constructValidPath(name, rootPath, false), matchTimestamp(format))
 
     when (val body = body) {
       is JsonValue.Object -> body.add(name, JsonValue.StringValue(formatter.format(examples[0]).toCharArray()))
