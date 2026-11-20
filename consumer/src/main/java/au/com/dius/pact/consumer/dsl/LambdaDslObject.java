@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.TimeZone;
@@ -523,6 +524,18 @@ public class LambdaDslObject {
      */
     public LambdaDslObject datetime(String name, String format, ZonedDateTime example) {
         object.datetime(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     *
+     * @param name    attribute name
+     * @param format  datetime format. It must not use zone or offset pattern letters, as a local datetime has no zone
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslObject datetime(String name, String format, LocalDateTime example) {
+        object.localDateTime(name, format, example);
         return this;
     }
 

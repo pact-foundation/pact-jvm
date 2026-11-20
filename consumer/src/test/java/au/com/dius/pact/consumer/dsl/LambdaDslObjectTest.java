@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.matchingrules.NullMatcher;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import org.junit.jupiter.api.Test;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -23,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LambdaDslObjectTest {
 
@@ -212,6 +214,27 @@ public class LambdaDslObjectTest {
 
         String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is("{\"date\":\"2016-10-16\",\"time\":\"02:12:45-0700\",\"timestamp\":\"2016-10-16T02:12:45-0700\"}"));
+    }
+
+    @Test
+    public void testLocalDateTimeExampleValue() {
+        final PactDslJsonBody actualPactDsl = new PactDslJsonBody("", "", null);
+        final LambdaDslObject object = new LambdaDslObject(actualPactDsl);
+        object.datetime("timestamp", "yyyy-MM-dd'T'HH:mm:ss", LocalDateTime.of(2016, 10, 16, 2, 12, 45));
+        actualPactDsl.close();
+
+        assertThat(actualPactDsl.getBody().toString(), is("{\"timestamp\":\"2016-10-16T02:12:45\"}"));
+        Map matcher = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
+        assertThat(matcher.get("match"), is("timestamp"));
+        assertThat(matcher.get("format"), is("yyyy-MM-dd'T'HH:mm:ss"));
+    }
+
+    @Test
+    public void testLocalDateTimeWithZonePatternIsRejected() {
+        final PactDslJsonBody actualPactDsl = new PactDslJsonBody("", "", null);
+        final LambdaDslObject object = new LambdaDslObject(actualPactDsl);
+        assertThrows(DateTimeException.class, () ->
+            object.datetime("timestamp", "yyyy-MM-dd'T'HH:mm:ssXXX", LocalDateTime.of(2016, 10, 16, 2, 12, 45)));
     }
 
 
